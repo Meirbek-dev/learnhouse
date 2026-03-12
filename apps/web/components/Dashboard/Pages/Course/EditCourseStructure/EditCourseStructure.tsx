@@ -148,20 +148,15 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
             )}
             <AlertTitle>
               {structureStatus === 'saving'
-                ? t('savingOrder', { default: 'Applying curriculum changes' })
+                ? t('savingOrder')
                 : structureStatus === 'error'
                   ? t('saveOrderError')
-                  : t('curriculumChangesApplyImmediately', { default: 'Curriculum changes apply immediately' })}
+                  : t('curriculumChangesApplyImmediately')}
             </AlertTitle>
             <AlertDescription>
               {structureStatus === 'error'
-                ? t('refreshAfterError', {
-                    default: 'The latest structure change could not be saved. Review the current curriculum and try again.',
-                  })
-                : t('curriculumInlineFeedback', {
-                    default:
-                      'Drag, reorder, and chapter creation actions save as you work. This inline status row is the source of truth for curriculum persistence.',
-                  })}
+                ? t('refreshAfterError')
+                : t('curriculumInlineFeedback')}
             </AlertDescription>
           </Alert>
         </CardHeader>

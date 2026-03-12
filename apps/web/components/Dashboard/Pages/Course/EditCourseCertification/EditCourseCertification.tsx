@@ -325,8 +325,8 @@ const EditCourseCertification = (props: EditCourseCertificationProps) => {
   }
 
   return (
-    <div className="space-y-6 py-6">
-      <div className="mx-4 sm:mx-10">
+    <div className="space-y-6">
+      <div>
         <Card>
           <CardHeader className="space-y-1">
             <SectionHeader

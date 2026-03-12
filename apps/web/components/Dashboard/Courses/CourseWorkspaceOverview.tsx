@@ -45,14 +45,6 @@ export default function CourseWorkspaceOverview({
             </div>
             <CourseStatusBadge status={readiness.readyToPublish ? 'ready' : 'needs-review'} />
           </div>
-          {!readiness.readyToPublish ? (
-            <Alert className="mt-4 border-border bg-muted/40">
-              <AlertTriangle className="size-4" />
-              <AlertDescription>
-                {t('notReadyDescription')}
-              </AlertDescription>
-            </Alert>
-          ) : null}
           <div className="mt-6 flex flex-wrap gap-3">
             {capabilities.canEditCurriculum ? (
               <Button
@@ -105,13 +97,14 @@ export default function CourseWorkspaceOverview({
               <AppLink
                 key={item.id}
                 href={buildCourseWorkspacePath(orgslug, courseuuid, (item.href as any) || 'overview')}
-                className="flex items-start gap-3 rounded-lg border px-4 py-3 transition-colors hover:bg-muted/50"
+                className="flex items-center gap-3 rounded-lg border px-4 py-3 transition-colors hover:bg-muted/50"
               >
                 <CourseStatusBadge status={item.complete ? 'ready' : 'needs-review'} />
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                   <div className="font-medium text-foreground">{tReadiness(`checklist.${item.id}.title`)}</div>
                   <div className="text-sm text-muted-foreground">{tReadiness(`checklist.${item.id}.description`)}</div>
                 </div>
+                <ArrowRight className="ml-auto size-4 shrink-0 text-muted-foreground" />
               </AppLink>
             ))}
           </div>

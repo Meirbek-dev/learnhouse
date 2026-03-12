@@ -3,11 +3,10 @@
 import { buildCourseWorkspacePath, getCourseReadinessSummary } from '@/lib/course-management';
 import { CourseStatusBadge, courseWorkflowMutedPanelClass, courseWorkflowSummaryCardClass } from './courseWorkflowUi';
 import type { CourseWorkspaceCapabilities } from '@/lib/course-management-server';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { updateCourseAccess } from '@services/courses/courses';
-import { AlertTriangle, ExternalLink, Loader2 } from 'lucide-react';
+import { ExternalLink, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTranslations } from 'next-intl';
 import { useState, useTransition } from 'react';
@@ -32,10 +31,16 @@ export default function CourseReviewPublish({
   const [isPending, startTransition] = useTransition();
   const [isRefreshing, setIsRefreshing] = useState(false);
 
+  const criticalReady = readiness.checklist
+    .filter((item) => ['details', 'curriculum'].includes(item.id))
+    .every((item) => item.complete);
+
   const toggleVisibility = () => {
     if (!(capabilities.canManageAccess && accessToken)) {
       return;
     }
+
+    const wasPublic = course.courseStructure.public;
 
     startTransition(() => {
       void (async () => {
@@ -43,7 +48,7 @@ export default function CourseReviewPublish({
           setIsRefreshing(true);
           const response = await updateCourseAccess(
             course.courseStructure.course_uuid,
-            { public: !course.courseStructure.public },
+            { public: !wasPublic },
             accessToken,
             {
               lastKnownUpdateDate: course.courseStructure.update_date,
@@ -56,7 +61,7 @@ export default function CourseReviewPublish({
           }
 
           await course.refreshCourseMeta();
-          toast.success(course.courseStructure.public ? t('toasts.movedPrivate') : t('toasts.published'));
+          toast.success(wasPublic ? t('toasts.movedPrivate') : t('toasts.published'));
         } catch (error: any) {
           toast.error(error?.message || t('errors.visibilityUpdate'));
         } finally {
@@ -78,15 +83,6 @@ export default function CourseReviewPublish({
             <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
               {t('description')}
             </p>
-            {!readiness.readyToPublish ? (
-              <Alert className="mt-4 border-border bg-muted/40">
-                <AlertTriangle className="size-4" />
-                <AlertTitle>{t('notReadyTitle')}</AlertTitle>
-                <AlertDescription>
-                  {t('description')}
-                </AlertDescription>
-              </Alert>
-            ) : null}
           </div>
 
           <div className="flex flex-wrap gap-3">
@@ -101,7 +97,7 @@ export default function CourseReviewPublish({
             {capabilities.canManageAccess ? (
               <Button
                 onClick={toggleVisibility}
-                disabled={isPending || isRefreshing || !readiness.readyToPublish}
+                disabled={isPending || isRefreshing || !criticalReady}
               >
                 {isPending || isRefreshing ? <Loader2 className="size-4 animate-spin" /> : null}
                 {course.courseStructure.public ? t('movePrivate') : t('publishCourse')}

@@ -40,11 +40,11 @@ import { useCourse } from '@components/Contexts/CourseContext';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
-import { useState, useTransition } from 'react';
+import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Draggable } from '@hello-pangea/dnd';
 import { useTranslations } from 'next-intl';
-import Link from '@components/ui/AppLink';
+import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { mutate } from 'swr';
 import useSWR from 'swr';
@@ -138,13 +138,25 @@ const ActivityElement = ({ orgslug, activity, activityIndex, course_uuid }: Acti
   const course = useCourse() as Course;
   const isMobile = useIsMobile();
   const t = useTranslations('CourseEdit.ActivityElement');
-  const [isPending, startTransition] = useTransition();
 
   // State
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState(activity?.name ?? '');
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isUpdatingPublish, setIsUpdatingPublish] = useState(false);
+  const [isSavingEdit, setIsSavingEdit] = useState(false);
+  const [isDeletingActivity, setIsDeletingActivity] = useState(false);
+
+  // Fetch assignment UUID at this level so it is shared with ActivityEditButton (Fix 4.1)
+  const { data: assignmentUUID, isLoading: isAssignmentLoading } = useSWR(
+    activity.activity_type === 'TYPE_ASSIGNMENT' && access_token
+      ? [`assignment-${activity.activity_uuid}`, access_token]
+      : null,
+    async () => {
+      const result = await getAssignmentFromActivityUUID(activity.activity_uuid, access_token!);
+      return result?.data?.assignment_uuid?.replace('assignment_', '') ?? null;
+    },
+  );
 
   // Permission checks from backend metadata
   const canUpdate = activity.can_update ?? false;
@@ -179,20 +191,21 @@ const ActivityElement = ({ orgslug, activity, activityIndex, course_uuid }: Acti
       return;
     }
 
-    startTransition(async () => {
-      try {
-        await updateActivity({ ...activity, name: trimmedName }, activity.activity_uuid, access_token, {
-          courseUuid: course_uuid,
-        });
-        await mutate(courseMetaUrl);
-        toast.success(t('activityNameUpdatedSuccess'));
-        setIsEditing(false);
-      } catch (error) {
-        console.error('Failed to update activity name:', error);
-        toast.error(t('failedToUpdateActivityName'));
-        setEditedName(activity.name);
-      }
-    });
+    setIsSavingEdit(true);
+    try {
+      await updateActivity({ ...activity, name: trimmedName }, activity.activity_uuid, access_token, {
+        courseUuid: course_uuid,
+      });
+      await mutate(courseMetaUrl);
+      toast.success(t('activityNameUpdatedSuccess'));
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Failed to update activity name:', error);
+      toast.error(t('failedToUpdateActivityName'));
+      setEditedName(activity.name);
+    } finally {
+      setIsSavingEdit(false);
+    }
   };
 
   const handleTogglePublish = async () => {
@@ -225,26 +238,26 @@ const ActivityElement = ({ orgslug, activity, activityIndex, course_uuid }: Acti
       return;
     }
 
-    startTransition(async () => {
-      const toastId = toast.loading(t('deletingActivity'));
+    setIsDeletingActivity(true);
+    const toastId = toast.loading(t('deletingActivity'));
 
-      try {
-        // Delete assignment if it's an assignment activity
-        if (activity.activity_type === 'TYPE_ASSIGNMENT') {
-          await deleteAssignmentUsingActivityUUID(activity.activity_uuid, access_token);
-        }
-
-        await deleteActivity(activity.activity_uuid, access_token, { courseUuid: course_uuid });
-        await mutate(courseMetaUrl);
-        toast.success(t('activityDeletedSuccess'));
-        setIsDeleteDialogOpen(false);
-      } catch (error) {
-        console.error('Failed to delete activity:', error);
-        toast.error(t('deleteFailed', { default: 'Failed to delete activity' }));
-      } finally {
-        toast.dismiss(toastId);
+    try {
+      // Delete assignment if it's an assignment activity
+      if (activity.activity_type === 'TYPE_ASSIGNMENT') {
+        await deleteAssignmentUsingActivityUUID(activity.activity_uuid, access_token);
       }
-    });
+
+      await deleteActivity(activity.activity_uuid, access_token, { courseUuid: course_uuid });
+      await mutate(courseMetaUrl);
+      toast.success(t('activityDeletedSuccess'));
+      setIsDeleteDialogOpen(false);
+    } catch (error) {
+      console.error('Failed to delete activity:', error);
+      toast.error(t('deleteFailed', { default: 'Failed to delete activity' }));
+    } finally {
+      toast.dismiss(toastId);
+      setIsDeletingActivity(false);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -272,20 +285,15 @@ const ActivityElement = ({ orgslug, activity, activityIndex, course_uuid }: Acti
         <div
           ref={provided.innerRef}
           {...provided.draggableProps}
-          className={`
-            mb-2 flex items-center gap-3 rounded-lg border border-neutral-200 bg-white p-3
-            transition-all duration-200
-            ${
-              snapshot.isDragging
-                ? 'scale-[1.02] rotate-1 shadow-xl ring-2 ring-ring/30'
-                : 'shadow-sm hover:shadow-md'
-            }
-          `}
+          className={cn(
+            'mb-2 flex items-center gap-3 rounded-lg border bg-card p-3 transition-all duration-200',
+            snapshot.isDragging ? 'shadow-xl ring-2 ring-ring/30' : 'shadow-sm hover:shadow-md',
+          )}
         >
           {/* Drag Handle */}
           <div
             {...provided.dragHandleProps}
-            className="cursor-grab text-neutral-400 hover:text-neutral-600 active:cursor-grabbing"
+            className="cursor-grab text-muted-foreground hover:text-foreground active:cursor-grabbing"
           >
             <GripVertical className="h-5 w-5" />
           </div>
@@ -304,22 +312,22 @@ const ActivityElement = ({ orgslug, activity, activityIndex, course_uuid }: Acti
                   onKeyDown={handleKeyDown}
                   placeholder={t('activityNamePlaceholder')}
                   className="h-8 text-sm"
-                  disabled={isPending}
+                  disabled={isSavingEdit}
                 />
                 <Button
                   size="sm"
                   variant="ghost"
                   onClick={handleSaveEdit}
-                  disabled={isPending || !editedName.trim()}
+                  disabled={isSavingEdit || !editedName.trim()}
                   className="h-8 w-8 p-0 hover:bg-muted"
                 >
-                  {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                  {isSavingEdit ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                 </Button>
                 <Button
                   size="sm"
                   variant="ghost"
                   onClick={handleCancelEdit}
-                  disabled={isPending}
+                  disabled={isSavingEdit}
                   className="h-8 w-8 p-0 hover:bg-muted"
                 >
                   <X className="h-4 w-4" />
@@ -327,7 +335,7 @@ const ActivityElement = ({ orgslug, activity, activityIndex, course_uuid }: Acti
               </div>
             ) : (
               <div className="group flex items-center gap-2">
-                <p className="truncate text-sm font-medium text-neutral-900">{activity.name}</p>
+                <p className="truncate text-sm font-medium text-foreground">{activity.name}</p>
                 {canUpdate && (
                   <Button
                     size="sm"
@@ -354,6 +362,8 @@ const ActivityElement = ({ orgslug, activity, activityIndex, course_uuid }: Acti
               activity={activity}
               orgslug={orgslug}
               course_uuid={course_uuid}
+              assignmentUUID={assignmentUUID ?? null}
+              isAssignmentLoading={isAssignmentLoading}
             />
 
             {/* Publish/Unpublish Toggle */}
@@ -396,17 +406,16 @@ const ActivityElement = ({ orgslug, activity, activityIndex, course_uuid }: Acti
               <Button
                 size="sm"
                 variant="outline"
+                nativeButton={false}
+                render={
+                  <a
+                    href={`${getUriWithOrg(orgslug, '')}/course/${course_uuid.replace('course_', '')}/activity/${activity.activity_uuid.replace('activity_', '')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  />
+                }
               >
-                <Link
-                  href={`${getUriWithOrg(orgslug, '')}/course/${course_uuid.replace(
-                    'course_',
-                    '',
-                  )}/activity/${activity.activity_uuid.replace('activity_', '')}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <Eye className="h-4 w-4" />
-                </Link>
+                <Eye className="h-4 w-4" />
               </Button>
             </ToolTip>
 
@@ -437,13 +446,13 @@ const ActivityElement = ({ orgslug, activity, activityIndex, course_uuid }: Acti
                     <AlertDialogDescription>{t('deleteConfirmation')}</AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
-                    <AlertDialogCancel disabled={isPending} />
+                    <AlertDialogCancel disabled={isDeletingActivity} />
                     <AlertDialogAction
                       variant="destructive"
                       onClick={handleDeleteActivity}
-                      disabled={isPending}
+                      disabled={isDeletingActivity}
                     >
-                      {isPending ? (
+                      {isDeletingActivity ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                           {t('deleting')}
@@ -487,28 +496,19 @@ const ActivityEditButton = ({
   activity,
   orgslug,
   course_uuid,
+  assignmentUUID,
+  isAssignmentLoading,
 }: {
   activity: Activity;
   orgslug: string;
   course_uuid: string;
+  assignmentUUID: string | null;
+  isAssignmentLoading: boolean;
 }) => {
   const t = useTranslations('CourseEdit.ActivityElement');
   const org = useOrg() as Organization;
   const course = useCourse() as Course;
-  const session = usePlatformSession() as PlatformSession;
-  const access_token = session?.data?.tokens?.access_token;
   const isMobile = useIsMobile();
-
-  // Fetch assignment UUID for assignment activities
-  const { data: assignmentUUID, isLoading } = useSWR(
-    activity.activity_type === 'TYPE_ASSIGNMENT' && access_token
-      ? [`assignment-${activity.activity_uuid}`, access_token]
-      : null,
-    async () => {
-      const result = await getAssignmentFromActivityUUID(activity.activity_uuid, access_token!);
-      return result?.data?.assignment_uuid?.replace('assignment_', '') ?? null;
-    },
-  );
 
   // Dynamic page edit button
   if (activity.activity_type === 'TYPE_DYNAMIC') {
@@ -521,23 +521,18 @@ const ActivityEditButton = ({
       <Button
         size="sm"
         variant="outline"
+        nativeButton={false}
+        render={<a href={editUrl} target="_blank" rel="noopener noreferrer" />}
       >
-        <Link
-          href={editUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center"
-        >
-          <FilePenLine className="h-3.5 w-3.5" />
-          {!isMobile && <span className="ml-1.5 text-xs">{t('editPageButton')}</span>}
-        </Link>
+        <FilePenLine className="h-3.5 w-3.5" />
+        {!isMobile && <span className="ml-1.5 text-xs">{t('editPageButton')}</span>}
       </Button>
     );
   }
 
   // Assignment edit button
   if (activity.activity_type === 'TYPE_ASSIGNMENT') {
-    if (isLoading) {
+    if (isAssignmentLoading) {
       return (
         <Button
           size="sm"
@@ -559,16 +554,11 @@ const ActivityEditButton = ({
       <Button
         size="sm"
         variant="outline"
+        nativeButton={false}
+        render={<a href={editUrl} target="_blank" rel="noopener noreferrer" />}
       >
-        <Link
-          href={editUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center"
-        >
-          <FilePenLine className="h-3.5 w-3.5" />
-          {!isMobile && <span className="ml-1.5 text-xs">{t('editAssignmentButton')}</span>}
-        </Link>
+        <FilePenLine className="h-3.5 w-3.5" />
+        {!isMobile && <span className="ml-1.5 text-xs">{t('editAssignmentButton')}</span>}
       </Button>
     );
   }
@@ -584,16 +574,11 @@ const ActivityEditButton = ({
       <Button
         size="sm"
         variant="outline"
+        nativeButton={false}
+        render={<a href={editUrl} target="_blank" rel="noopener noreferrer" />}
       >
-        <Link
-          href={editUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center"
-        >
-          <FilePenLine className="h-3.5 w-3.5" />
-          {!isMobile && <span className="ml-1.5 text-xs">{t('configureButton')}</span>}
-        </Link>
+        <FilePenLine className="h-3.5 w-3.5" />
+        {!isMobile && <span className="ml-1.5 text-xs">{t('configureButton')}</span>}
       </Button>
     );
   }

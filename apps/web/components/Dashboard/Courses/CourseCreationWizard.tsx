@@ -160,6 +160,14 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
           }
 
           toast.success(t('toasts.created'));
+          // Clear URL params before navigating so the back button doesn't re-enter the wizard
+          await setName('');
+          await setDescription('');
+          await setVisibility('private');
+          await setTemplate('blank');
+          await setSourceCourseUuid('');
+          await setLaunchDestination('curriculum');
+          await setStep('0');
           router.push(
             buildCourseWorkspacePath(orgslug, result.data.course_uuid, launchDestination as LaunchDestination),
           );

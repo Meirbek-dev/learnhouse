@@ -105,18 +105,26 @@ const CoursesHome = ({
     router.push(nextQuery ? `${pathname}?${nextQuery}` : pathname, { scroll: false });
   };
 
+  const courseReadinessMap = useMemo(() => {
+    const map = new Map<string, boolean>();
+    for (const course of courses) {
+      map.set(course.course_uuid, getCourseReadinessSummary(course, null).readyToPublish);
+    }
+    return map;
+  }, [courses]);
+
   const summaryCards = useMemo(() => {
-    const ready = courses.filter((course) => getCourseReadinessSummary(course, null).readyToPublish).length;
+    const ready = courses.filter((course) => courseReadinessMap.get(course.course_uuid)).length;
     const privateCount = courses.filter((course) => !course.public).length;
     const attention = courses.filter((course) => courseNeedsAttention(course)).length;
 
     return [
-      { label: t('summary.visible.label'), value: courses.length, detail: t('summary.visible.detail') },
+      { label: t('summary.total.label'), value: totalCourses, detail: t('summary.total.detail') },
       { label: t('summary.ready.label'), value: ready, detail: t('summary.ready.detail') },
       { label: t('summary.private.label'), value: privateCount, detail: t('summary.private.detail') },
       { label: t('summary.attention.label'), value: attention, detail: t('summary.attention.detail') },
     ];
-  }, [courses, t]);
+  }, [courses, courseReadinessMap, t, totalCourses]);
 
   const canManageCourse = useCallback(
     (course: ManageableCourse) =>
@@ -399,7 +407,7 @@ const CoursesHome = ({
         meta: { label: t('table.status') },
         cell: ({ row }) => {
           const course = row.original;
-          const ready = getCourseReadinessSummary(course, null).readyToPublish;
+          const ready = courseReadinessMap.get(course.course_uuid) ?? false;
 
           return (
             <div className="flex flex-wrap gap-2">
@@ -434,7 +442,7 @@ const CoursesHome = ({
         ),
       },
     ],
-    [allVisibleSelected, canDeleteCourse, canManageCourse, orgslug, selectedCourseUuids, t, toggleAllVisibleCourses],
+    [allVisibleSelected, canDeleteCourse, canManageCourse, courseReadinessMap, orgslug, selectedCourseUuids, t, toggleAllVisibleCourses],
   );
 
   const presets = [

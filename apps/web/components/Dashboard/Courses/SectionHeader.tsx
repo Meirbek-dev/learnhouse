@@ -44,7 +44,7 @@ export function SectionHeader({
           disabled={!isDirty || isSaving}
           onClick={onDiscard}
         >
-          {/* i18n:TODO */}Discard
+          {tCommon('discard')}
         </Button>
         <Button
           type="button"

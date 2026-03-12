@@ -901,6 +901,7 @@
     "save": "Save",
     "saved": "Saved",
     "saving": "Saving...",
+    "discard": "Discard",
     "unsavedChanges": "Unsaved changes"
   },
   "Components": {
@@ -2185,7 +2186,11 @@
       "chapterCreateFailed": "Failed to create chapter",
       "chapterCreatedSuccess": "Chapted created successfully",
       "creatingChapter": "Creating...",
-      "saveOrderError": "Failed to save the new content order"
+      "saveOrderError": "Failed to save the new content order",
+      "savingOrder": "Applying curriculum changes",
+      "curriculumChangesApplyImmediately": "Curriculum changes apply immediately",
+      "curriculumInlineFeedback": "Drag, reorder, and chapter creation actions save as you work.",
+      "refreshAfterError": "The latest structure change could not be saved. Review the current curriculum and try again."
     },
     "Conflict": {
       "title": "This course changed in another editor",
@@ -3286,6 +3291,10 @@
           "visible": {
             "detail": "Courses on this page",
             "label": "Visible now"
+          },
+          "total": {
+            "detail": "All courses in workspace",
+            "label": "Total courses"
           }
         },
         "table": {

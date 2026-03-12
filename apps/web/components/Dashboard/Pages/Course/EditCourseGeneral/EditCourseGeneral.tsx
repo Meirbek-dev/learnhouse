@@ -284,7 +284,7 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
 
   return (
     <div
-      className="mx-auto space-y-8 p-6"
+      className="space-y-6"
       role="main"
       aria-labelledby="course-edit-title"
     >
@@ -354,9 +354,10 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
                     <FormItem>
                       <FormLabel className="text-base font-semibold">{t('description.label')}</FormLabel>
                       <FormControl>
-                        <Input
+                        <Textarea
                           {...field}
                           placeholder={t('description.placeholder')}
+                          className="min-h-[100px] resize-y"
                           maxLength={1000}
                         />
                       </FormControl>

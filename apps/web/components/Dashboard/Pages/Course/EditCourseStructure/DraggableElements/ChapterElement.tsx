@@ -10,14 +10,15 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { AlertTriangle, GripVertical, Hexagon, Loader2, MoreHorizontal, Pencil, Save, Trash2, X } from 'lucide-react';
+import { AlertTriangle, GripVertical, Hexagon, Loader2, Pencil, Save, Trash2, X } from 'lucide-react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { deleteChapter, updateChapter } from '@services/courses/chapters';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { Draggable, Droppable } from '@hello-pangea/dnd';
 import { Button } from '@/components/ui/button';
-import { useState, useTransition } from 'react';
+import { useState } from 'react';
 import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
@@ -76,12 +77,13 @@ const ChapterElement = ({ chapter, chapterIndex, orgslug, course_uuid }: Chapter
   const access_token = session?.data?.tokens?.access_token;
   const course = useCourse();
   const t = useTranslations('CourseEdit');
-  const [isPending, startTransition] = useTransition();
 
   // State
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState(chapter?.name ?? '');
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isSavingEdit, setIsSavingEdit] = useState(false);
+  const [isDeletingChapter, setIsDeletingChapter] = useState(false);
 
   // Derived values
   const activities = chapter.activities ?? [];
@@ -109,17 +111,17 @@ const ChapterElement = ({ chapter, chapterIndex, orgslug, course_uuid }: Chapter
       return;
     }
 
-    startTransition(async () => {
-      try {
-        await updateChapter(chapter.id, { name: trimmedName }, access_token, { courseUuid: course_uuid });
-        await course.refreshCourseMeta();
-        setIsEditing(false);
-      } catch (error: any) {
-        toast.error(error?.message || t('chapterUpdateFailed'));
-        // Reset to original name on error
-        setEditedName(chapter.name);
-      }
-    });
+    setIsSavingEdit(true);
+    try {
+      await updateChapter(chapter.id, { name: trimmedName }, access_token, { courseUuid: course_uuid });
+      await course.refreshCourseMeta();
+      setIsEditing(false);
+    } catch (error: any) {
+      toast.error(error?.message || t('chapterUpdateFailed'));
+      setEditedName(chapter.name);
+    } finally {
+      setIsSavingEdit(false);
+    }
   };
 
   const handleDeleteChapter = async () => {
@@ -128,16 +130,17 @@ const ChapterElement = ({ chapter, chapterIndex, orgslug, course_uuid }: Chapter
       return;
     }
 
-    startTransition(async () => {
-      try {
-        await deleteChapter(chapter.id, access_token, { courseUuid: course_uuid });
-        await course.refreshCourseMeta();
-        setIsDeleteDialogOpen(false);
-      } catch (error: any) {
-        toast.error(error?.message || t('chapterDeleteFailed'));
-        setIsDeleteDialogOpen(false);
-      }
-    });
+    setIsDeletingChapter(true);
+    try {
+      await deleteChapter(chapter.id, access_token, { courseUuid: course_uuid });
+      await course.refreshCourseMeta();
+      setIsDeleteDialogOpen(false);
+    } catch (error: any) {
+      toast.error(error?.message || t('chapterDeleteFailed'));
+      setIsDeleteDialogOpen(false);
+    } finally {
+      setIsDeletingChapter(false);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -164,21 +167,19 @@ const ChapterElement = ({ chapter, chapterIndex, orgslug, course_uuid }: Chapter
         <div
           ref={provided.innerRef}
           {...provided.draggableProps}
-          className={`
-            bg-background mx-2 mb-4 rounded-xl shadow-sm
-            transition-all duration-200
-            sm:mx-4 md:mx-6 lg:mx-10
-            ${snapshot.isDragging ? 'scale-105 rotate-1 shadow-2xl ring-2 ring-ring/30' : 'hover:shadow-md'}
-          `}
+          className={cn(
+            'mb-4 rounded-xl border bg-card shadow-sm transition-all duration-200',
+            snapshot.isDragging ? 'shadow-2xl ring-2 ring-ring/30' : 'hover:shadow-md',
+          )}
         >
           {/* Chapter Header */}
-          <div className="flex items-center justify-between gap-3 border-b border-neutral-100 px-4 py-4 sm:px-6">
+            <div className="flex items-center justify-between gap-3 border-b px-4 py-4 sm:px-6">
             {/* Left Section: Drag Handle + Icon + Name */}
             <div className="flex min-w-0 flex-1 items-center gap-3">
               {/* Drag Handle */}
               <div
                 {...provided.dragHandleProps}
-                className="cursor-grab text-neutral-400 hover:text-neutral-600 active:cursor-grabbing"
+                className="cursor-grab text-muted-foreground hover:text-foreground active:cursor-grabbing"
               >
                 <GripVertical className="h-5 w-5" />
               </div>
@@ -202,22 +203,22 @@ const ChapterElement = ({ chapter, chapterIndex, orgslug, course_uuid }: Chapter
                       onKeyDown={handleKeyDown}
                       placeholder={t('chapterNamePlaceholder')}
                       className="h-8 text-sm"
-                      disabled={isPending}
+                      disabled={isSavingEdit}
                     />
                     <Button
                       size="sm"
                       variant="ghost"
                       onClick={handleSaveEdit}
-                      disabled={isPending || !editedName.trim()}
+                      disabled={isSavingEdit || !editedName.trim()}
                       className="h-8 w-8 p-0"
                     >
-                      {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                      {isSavingEdit ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                     </Button>
                     <Button
                       size="sm"
                       variant="ghost"
                       onClick={handleCancelEdit}
-                      disabled={isPending}
+                      disabled={isSavingEdit}
                       className="h-8 w-8 p-0"
                     >
                       <X className="h-4 w-4" />
@@ -225,14 +226,14 @@ const ChapterElement = ({ chapter, chapterIndex, orgslug, course_uuid }: Chapter
                   </div>
                 ) : (
                   <div className="group flex items-center gap-2">
-                    <h3 className="truncate text-sm font-medium text-neutral-900 sm:text-base">{chapter.name}</h3>
+                    <h3 className="truncate text-sm font-medium text-foreground sm:text-base">{chapter.name}</h3>
                     <Button
                       size="sm"
                       variant="ghost"
                       onClick={handleStartEdit}
                       className="h-7 w-7 p-0 opacity-0 transition-opacity group-hover:opacity-100"
                     >
-                      <Pencil className="h-3.5 w-3.5 text-neutral-500" />
+                      <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
                     </Button>
                   </div>
                 )}
@@ -263,13 +264,13 @@ const ChapterElement = ({ chapter, chapterIndex, orgslug, course_uuid }: Chapter
                     <AlertDialogDescription>{t('deleteChapterConfirmation')}</AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
-                    <AlertDialogCancel disabled={isPending} />
+                    <AlertDialogCancel disabled={isDeletingChapter} />
                     <AlertDialogAction
                       variant="destructive"
                       onClick={handleDeleteChapter}
-                      disabled={isPending}
+                      disabled={isDeletingChapter}
                     >
-                      {isPending ? (
+                      {isDeletingChapter ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                           {t('deleting')}
@@ -309,7 +310,7 @@ const ChapterElement = ({ chapter, chapterIndex, orgslug, course_uuid }: Chapter
                     />
                   ))
                 ) : (
-                  <div className="flex min-h-[60px] items-center justify-center text-sm text-neutral-400">
+                  <div className="flex min-h-[60px] items-center justify-center text-sm text-muted-foreground">
                     {t('noActivities', { default: 'No activities yet' })}
                   </div>
                 )}
@@ -324,11 +325,6 @@ const ChapterElement = ({ chapter, chapterIndex, orgslug, course_uuid }: Chapter
               orgslug={orgslug}
               chapterId={chapter.id}
             />
-          </div>
-
-          {/* Bottom Separator */}
-          <div className="flex h-8 items-center justify-center border-t border-neutral-100">
-            <MoreHorizontal className="h-5 w-5 text-neutral-300" />
           </div>
         </div>
       )}

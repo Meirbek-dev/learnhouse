@@ -14,7 +14,7 @@ const courseWorkflowBadgeToneClass: Record<CourseWorkflowBadgeTone, string> = {
   default: 'border-border bg-background text-foreground',
   info: 'border-border bg-muted/70 text-muted-foreground',
   success: 'border-border bg-muted text-foreground',
-  warning: 'border-border bg-accent/60 text-accent-foreground',
+  warning: 'border-amber-200/60 bg-amber-50/70 text-amber-900 dark:border-amber-800/40 dark:bg-amber-950/30 dark:text-amber-300',
   danger: 'border-destructive/20 bg-destructive/5 text-destructive',
 };
 

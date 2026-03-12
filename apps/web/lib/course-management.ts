@@ -73,6 +73,7 @@ export function getCourseReadinessChecklist(
   const stats = getCourseContentStats(course);
   const contributors = editorData?.contributors?.data ?? course?.authors ?? [];
   const certifications = editorData?.certifications?.data ?? [];
+  const linkedUserGroups = editorData?.linkedUserGroups?.data ?? [];
 
   return [
     {
@@ -97,12 +98,12 @@ export function getCourseReadinessChecklist(
     },
     {
       id: 'access',
-      complete: typeof course?.public === 'boolean',
+      complete: course?.public === true || (course?.public === false && linkedUserGroups.length > 0),
       href: 'access',
     },
     {
       id: 'certificate',
-      complete: Array.isArray(certifications),
+      complete: certifications.length > 0,
       href: 'certificate',
     },
   ];

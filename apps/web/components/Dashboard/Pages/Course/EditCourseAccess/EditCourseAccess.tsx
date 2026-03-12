@@ -95,7 +95,7 @@ const EditCourseAccess = (props: EditCourseAccessProps) => {
   if (!courseStructure) return null;
 
   return (
-    <div className="mx-auto space-y-6 p-6">
+    <div className="space-y-6">
       <SectionHeader
         title={t('accessToTheCourse')}
         description={t('accessDescription')}
