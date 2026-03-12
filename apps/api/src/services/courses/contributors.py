@@ -13,6 +13,19 @@ from src.db.users import AnonymousUser, PublicUser, User, UserRead
 from src.security.rbac import PermissionChecker
 
 
+def _require_contributor_management(
+    checker: PermissionChecker,
+    current_user_id: int,
+    course: Course,
+):
+    checker.require(
+        current_user_id,
+        "course:update",
+        course.org_id,
+        resource_owner_id=course.creator_id,
+    )
+
+
 async def apply_course_contributor(
     request: Request,
     course_uuid: str,
@@ -114,14 +127,10 @@ async def update_course_contributor(
             detail="Course not found",
         )
 
-    # SECURITY: Require course ownership or admin role for updating contributors
+    # SECURITY: Require the same contributor-management capability exposed by
+    # the workspace rights endpoint.
     checker = PermissionChecker(db_session)
-    checker.require(
-        current_user.id,
-        "course:manage",
-        course.org_id,
-        resource_owner_id=course.creator_id,
-    )
+    _require_contributor_management(checker, current_user.id, course)
 
     # Check if the contributor exists for this course
     existing_authorship = db_session.exec(
@@ -238,14 +247,10 @@ async def add_bulk_course_contributors(
             detail="Course not found",
         )
 
-    # SECURITY: Require course ownership or admin role for adding contributors
+    # SECURITY: Require the same contributor-management capability exposed by
+    # the workspace rights endpoint.
     checker = PermissionChecker(db_session)
-    checker.require(
-        current_user.id,
-        "course:manage",
-        course.org_id,
-        resource_owner_id=course.creator_id,
-    )
+    _require_contributor_management(checker, current_user.id, course)
 
     # Process results
     results = {"successful": [], "failed": []}
@@ -345,14 +350,10 @@ async def remove_bulk_course_contributors(
             detail="Course not found",
         )
 
-    # SECURITY: Require course ownership or admin role for removing contributors
+    # SECURITY: Require the same contributor-management capability exposed by
+    # the workspace rights endpoint.
     checker = PermissionChecker(db_session)
-    checker.require(
-        current_user.id,
-        "course:manage",
-        course.org_id,
-        resource_owner_id=course.creator_id,
-    )
+    _require_contributor_management(checker, current_user.id, course)
 
     # Process results
     results = {"successful": [], "failed": []}

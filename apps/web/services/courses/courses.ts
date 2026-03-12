@@ -173,8 +173,9 @@ export async function searchOrgCourses(
  */
 async function fetchCourseMetadata(course_uuid: string, access_token?: string, withUnpublishedActivities = false) {
   'use cache';
+  const normalizedCourseUuid = course_uuid.startsWith('course_') ? course_uuid : `course_${course_uuid}`;
   cacheTag(tags.courses);
-  cacheTag(courseTag.detail(`course_${course_uuid}`));
+  cacheTag(courseTag.detail(normalizedCourseUuid));
   cacheLife(CacheProfiles.courses);
 
   const headers: HeadersInit = { 'Content-Type': 'application/json' };
@@ -183,7 +184,7 @@ async function fetchCourseMetadata(course_uuid: string, access_token?: string, w
   }
 
   const result = await fetch(
-    `${getAPIUrl()}courses/course_${course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`,
+    `${getAPIUrl()}courses/${normalizedCourseUuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`,
     {
       method: 'GET',
       headers,

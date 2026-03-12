@@ -1,7 +1,6 @@
 'use client';
 
 import type { CourseSectionKey } from '@components/Contexts/CourseContext';
-import { useUnsavedChangesGuard } from '@/hooks/useUnsavedChangesGuard';
 import { useCourseDispatch } from '@components/Contexts/CourseContext';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
@@ -16,8 +15,6 @@ export function useDirtySection(sectionKey: CourseSectionKey) {
   const [isDirty, setIsDirty] = useState(false);
   const isDirtyRef = useRef(false);
   const dispatchCourse = useCourseDispatch();
-
-  useUnsavedChangesGuard(isDirty);
 
   // Sync dirty state to the global CourseContext so the shell can show the
   // "Unsaved changes" badge and guard intercept navigation.

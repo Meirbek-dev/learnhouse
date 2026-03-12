@@ -94,7 +94,7 @@ const EditCourseCertification = (props: EditCourseCertificationProps) => {
         v.object({
           enable_certification: v.boolean(),
           certification_name: v.pipe(v.string(), v.maxLength(100, t('maxCharacters100'))),
-          certification_description: v.pipe(v.string(), v.maxLength(500, t('maxCharacters500'))),
+          certification_description: v.pipe(v.string(), v.maxLength(700, t('maxCharacters500'))),
           certification_type: v.picklist([
             'completion',
             'achievement',

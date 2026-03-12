@@ -55,7 +55,7 @@ const EditCourseAccess = (props: EditCourseAccessProps) => {
   const initialRef = useRef<boolean | undefined>(courseStructure?.public);
 
   const { isDirty, isDirtyRef, markDirty, markClean } = useDirtySection('access');
-  const { isSaving, saveWithEditorRefresh } = useSaveSection({ onSuccess: markClean });
+  const { isSaving, save } = useSaveSection({ onSuccess: markClean });
 
   // Sync external updates to draft when not dirty
   useEffect(() => {
@@ -79,7 +79,7 @@ const EditCourseAccess = (props: EditCourseAccessProps) => {
 
   const handleAccessSave = async () => {
     if (!(access_token && draftPublic !== undefined) || !isDirty) return;
-    await saveWithEditorRefresh(async () => {
+    await save(async () => {
       const response = await updateCourseAccess(courseStructure.course_uuid, { public: draftPublic }, access_token, {
         lastKnownUpdateDate: courseStructure.update_date,
         orgSlug: props.orgslug,
@@ -130,6 +130,7 @@ const EditCourseAccess = (props: EditCourseAccessProps) => {
               description={t('publicDescription')}
               icon={Globe}
               disabled={isSaving}
+              onSelect={(value) => setDraftPublic(value === 'public')}
             />
 
             <CourseChoiceCard
@@ -140,6 +141,7 @@ const EditCourseAccess = (props: EditCourseAccessProps) => {
               description={t('usersOnlyDescription')}
               icon={Users}
               disabled={isSaving}
+              onSelect={(value) => setDraftPublic(value === 'public')}
             />
           </RadioGroup>
         </CardContent>

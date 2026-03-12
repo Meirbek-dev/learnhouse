@@ -194,7 +194,7 @@ const EditCourseContributors = (props: EditCourseContributorsProps) => {
   const initialRef = useRef<boolean | undefined>(courseStructure?.open_to_contributors);
 
   const { isDirty, isDirtyRef, markDirty, markClean } = useDirtySection('contributors');
-  const { isSaving, saveWithEditorRefresh } = useSaveSection({ onSuccess: markClean });
+  const { isSaving, save } = useSaveSection({ onSuccess: markClean });
 
   // Sync external updates when not dirty
   useEffect(() => {
@@ -383,7 +383,7 @@ const EditCourseContributors = (props: EditCourseContributorsProps) => {
 
   const handleContributorAccessSave = async () => {
     if (!(access_token && isOpenToContributors !== undefined) || !isDirty) return;
-    await saveWithEditorRefresh(async () => {
+    await save(async () => {
       const response = await updateCourseAccess(
         courseStructure.course_uuid,
         { open_to_contributors: isOpenToContributors },
@@ -436,6 +436,7 @@ const EditCourseContributors = (props: EditCourseContributorsProps) => {
               description={t('openToContributorsDescription')}
               icon={UserPen}
               disabled={isSaving}
+              onSelect={(value) => setIsOpenToContributors(value === 'open')}
             />
 
             <CourseChoiceCard
@@ -446,6 +447,7 @@ const EditCourseContributors = (props: EditCourseContributorsProps) => {
               description={t('closeToContributorsDescription')}
               icon={Users}
               disabled={isSaving}
+              onSelect={(value) => setIsOpenToContributors(value === 'open')}
             />
           </RadioGroup>
         </CardContent>

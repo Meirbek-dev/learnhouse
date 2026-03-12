@@ -121,11 +121,15 @@ export const CourseProvider = ({
     error,
     isLoading: isSWRLoading,
     mutate: mutateCourseMeta,
-  } = useSWR<CourseStructure>(courseMetaUrl, (url: string) => swrFetcher(url, access_token), {
-    fallbackData: initialCourse || undefined,
-    revalidateOnMount: !initialCourse,
-    revalidateIfStale: !initialCourse,
-  });
+  } = useSWR<CourseStructure>(
+    [courseMetaUrl, access_token ?? 'anonymous'],
+    ([url, token]: [string, string]) => swrFetcher(url, token === 'anonymous' ? undefined : token),
+    {
+      fallbackData: initialCourse || undefined,
+      revalidateOnMount: !initialCourse,
+      revalidateIfStale: !initialCourse,
+    },
+  );
 
   const {
     data: editorBundleData,

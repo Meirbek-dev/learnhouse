@@ -92,6 +92,7 @@ export function CourseChoiceCard({
   description,
   icon: Icon,
   disabled = false,
+  onSelect,
 }: {
   id: string;
   value: string;
@@ -100,16 +101,22 @@ export function CourseChoiceCard({
   description: string;
   icon: LucideIcon;
   disabled?: boolean;
+  onSelect?: (value: string) => void;
 }) {
   return (
     <Label
       htmlFor={id}
+      onClick={() => {
+        if (!disabled) {
+          onSelect?.(value);
+        }
+      }}
       className={cn(
-        'flex cursor-pointer flex-col gap-3 rounded-xl border p-5 transition-colors',
+        'flex cursor-pointer items-start gap-4 rounded-xl border p-5 transition-all duration-150',
         'focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-1',
         checked
-          ? 'border-primary bg-accent/40 text-accent-foreground shadow-sm ring-1 ring-ring/20'
-          : 'border-border bg-card text-card-foreground hover:bg-muted/50',
+          ? 'border-primary bg-primary/5 text-accent-foreground shadow-sm'
+          : 'border-border bg-card text-card-foreground hover:border-muted-foreground/30 hover:bg-muted/40',
         disabled && 'cursor-not-allowed opacity-60',
       )}
     >
@@ -121,15 +128,20 @@ export function CourseChoiceCard({
       />
       <div
         className={cn(
-          'flex size-10 items-center justify-center rounded-lg border',
-          checked ? 'border-primary/20 bg-background text-foreground' : 'border-border bg-muted text-muted-foreground',
+          'mt-0.5 flex size-11 shrink-0 items-center justify-center rounded-lg border',
+          checked
+            ? 'border-primary/30 bg-primary/10 text-primary'
+            : 'border-border bg-muted text-muted-foreground',
         )}
       >
         <Icon className="size-5" />
       </div>
-      <div className="space-y-1">
-        <div className="text-base font-semibold text-foreground">{title}</div>
-        <div className="text-sm leading-6 text-muted-foreground">{description}</div>
+      <div className="min-w-0 flex-1 space-y-1">
+        <div className="text-sm font-semibold leading-5 text-foreground">{title}</div>
+        <div className="text-sm leading-5 text-muted-foreground">{description}</div>
+      </div>
+      <div className={cn('mt-0.5 shrink-0 transition-opacity', checked ? 'opacity-100' : 'opacity-0')}>
+        <CheckCircle2 className="size-5 text-primary" />
       </div>
     </Label>
   );

@@ -50,7 +50,7 @@ export function buildCourseWorkspacePath(
 }
 
 export function buildCourseCreationPath(orgslug: string, sourceCourseUuid?: string): string {
-  const query = sourceCourseUuid ? `?template=outline&source=${cleanCourseUuid(sourceCourseUuid)}` : '';
+  const query = sourceCourseUuid ? `?tpl=outline&src=${cleanCourseUuid(sourceCourseUuid)}` : '';
   return `/orgs/${orgslug}/dash/courses/new${query}`;
 }
 

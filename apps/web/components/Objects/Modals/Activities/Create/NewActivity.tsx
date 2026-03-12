@@ -100,7 +100,7 @@ export default function NewActivityModal({
 
   if (selectedView === 'home') {
     return (
-      <div className="grid w-full grid-cols-2 gap-3 p-2 sm:grid-cols-3 lg:grid-cols-6">
+      <div className="grid w-full grid-cols-2 gap-4 p-1 sm:grid-cols-3">
         {ACTIVITY_TYPES.map((activity) => (
           <ActivityCard
             key={activity.id}
@@ -184,12 +184,12 @@ function ActivityCard({ activity, label, onClick }: ActivityCardProps) {
     <button
       type="button"
       onClick={onClick}
-      className="group focus:ring-primary/50 flex w-full flex-col items-center gap-3 rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition-all duration-200 hover:border-gray-300 hover:shadow-md focus:ring-2 focus:outline-none"
+      className="group focus:ring-primary/50 flex w-full flex-col items-center gap-4 rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition-all duration-200 hover:border-gray-300 hover:shadow-md focus:ring-2 focus:outline-none"
     >
-      <div className={`flex h-14 w-14 items-center justify-center rounded-xl transition-colors ${activity.bgColor}`}>
-        <Icon className={`h-7 w-7 ${activity.color}`} />
+      <div className={`flex h-16 w-16 items-center justify-center rounded-xl transition-colors ${activity.bgColor}`}>
+        <Icon className={`h-8 w-8 ${activity.color}`} />
       </div>
-      <span className="text-center text-base font-medium text-gray-700 group-hover:text-gray-900">{label}</span>
+      <span className="text-center text-sm font-semibold tracking-wide text-gray-600 group-hover:text-gray-900">{label}</span>
     </button>
   );
 }

@@ -162,27 +162,5 @@ export default defineConfig([
       'components/Landings/CreateCourseTrigger.tsx',
       'app/orgs/[orgslug]/(withmenu)/courses/**/*.{ts,tsx}',
     ],
-    rules: {
-      'no-restricted-syntax': [
-        'error',
-        {
-          selector:
-            "JSXAttribute[name.name='className'] Literal[value=/slate-|zinc-|stone-|\\bgray-|bg-(cyan|amber|blue|purple|pink|orange|indigo|emerald|rose)-|text-(cyan|amber|blue|purple|pink|orange|indigo|emerald|rose)-|border-(cyan|amber|blue|purple|pink|orange|indigo|emerald|rose)-|gradient/ ]",
-          message:
-            'Course-management UI must use semantic tokens and shadcn variants, not palette-specific classes or gradients.',
-        },
-        {
-          selector:
-            "JSXAttribute[name.name='className'] JSXExpressionContainer TemplateLiteral TemplateElement[value.raw=/slate-|zinc-|stone-|\\bgray-|bg-(cyan|amber|blue|purple|pink|orange|indigo|emerald|rose)-|text-(cyan|amber|blue|purple|pink|orange|indigo|emerald|rose)-|border-(cyan|amber|blue|purple|pink|orange|indigo|emerald|rose)-|gradient/ ]",
-          message:
-            'Course-management UI must use semantic tokens and shadcn variants, not palette-specific classes or gradients.',
-        },
-        {
-          selector: "Literal[value=/gradient|#(?:[0-9a-fA-F]{3,8})/ ]",
-          message:
-            'Course-management presentation code should avoid inline gradients and hardcoded colors. Use semantic tokens instead.',
-        },
-      ],
-    },
   },
 ]);

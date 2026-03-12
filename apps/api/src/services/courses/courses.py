@@ -346,7 +346,7 @@ async def get_course_meta(
     with_unpublished_activities: bool,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
-    checker: PermissionChecker,
+    checker: PermissionChecker | None,
 ) -> FullCourseRead:
     # Avoid circular import
     from src.services.courses.chapters import get_course_chapters
@@ -373,6 +373,9 @@ async def get_course_meta(
         (ra, u) for _, ra, u in results if ra is not None and u is not None
     ]
 
+    if checker is None:
+        checker = PermissionChecker(db_session)
+
     # RBAC check — skip for public courses
     if not course.public:
         checker.require(
@@ -382,11 +385,29 @@ async def get_course_meta(
             resource_owner_id=course.creator_id,
         )
 
+    can_view_unpublished = False
+    if with_unpublished_activities:
+        can_view_unpublished = checker.check(
+            current_user.id,
+            "course:update",
+            course.org_id,
+            resource_owner_id=course.creator_id,
+        ) or checker.check(
+            current_user.id,
+            "course:update_content",
+            course.org_id,
+            resource_owner_id=course.creator_id,
+        )
+
     # Get course chapters
     chapters = []
     if course.id is not None:
         chapters = await get_course_chapters(
-            request, course.id, db_session, current_user, with_unpublished_activities
+            request,
+            course.id,
+            db_session,
+            current_user,
+            with_unpublished_activities and can_view_unpublished,
         )
 
     # Convert to AuthorWithRole objects
@@ -446,8 +467,9 @@ async def count_courses_orgslug(
             .where(
                 or_(
                     Course.public,
-                    UserGroupResource.resource_uuid
-                    is None,  # Courses not in any UserGroup
+                    UserGroupResource.resource_uuid.is_(
+                        None
+                    ),  # Courses not in any UserGroup
                     UserGroupUser.user_id
                     == current_user.id,  # Courses in UserGroups where user is a member
                     ResourceAuthor.user_id
@@ -516,7 +538,7 @@ async def get_courses_orgslug(
             .where(
                 or_(
                     Course.public,
-                    UserGroupResource.resource_uuid is None,
+                    UserGroupResource.resource_uuid.is_(None),
                     UserGroupUser.user_id == current_user.id,
                     ResourceAuthor.user_id == current_user.id,
                 )
@@ -1102,17 +1124,26 @@ async def update_course_access(
     if checker is None:
         checker = PermissionChecker(db_session)
 
-    checker.require(
-        current_user.id,
-        "course:manage",
-        course.org_id,
-        resource_owner_id=course.creator_id,
-    )
-
     _ensure_course_is_current(course, access_object.last_known_update_date)
 
     update_data = access_object.model_dump(exclude_unset=True)
     update_data.pop("last_known_update_date", None)
+
+    if "public" in update_data:
+        checker.require(
+            current_user.id,
+            "course:manage",
+            course.org_id,
+            resource_owner_id=course.creator_id,
+        )
+
+    if "open_to_contributors" in update_data:
+        checker.require(
+            current_user.id,
+            "course:update",
+            course.org_id,
+            resource_owner_id=course.creator_id,
+        )
 
     for field, value in update_data.items():
         setattr(course, field, value)

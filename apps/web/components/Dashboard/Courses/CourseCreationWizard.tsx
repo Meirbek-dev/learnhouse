@@ -6,15 +6,15 @@ import { createNewCourse, getCourseMetadata } from '@services/courses/courses';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { RadioGroup } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { buildCourseWorkspacePath } from '@/lib/course-management';
+import { buildCourseWorkspacePath, cleanCourseUuid, prefixedCourseUuid } from '@/lib/course-management';
 import { CourseChoiceCard, courseWorkflowSummaryCardClass } from './courseWorkflowUi';
 import { createChapter } from '@services/courses/chapters';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { useMemo, useTransition } from 'react';
+import { useEffect, useMemo, useTransition } from 'react';
 import { Input } from '@/components/ui/input';
 import { useTranslations } from 'next-intl';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useQueryState, useQueryStates, parseAsString } from 'nuqs';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -33,6 +33,7 @@ const STEPS = ['Basics', 'Template', 'Launch'] as const;
 export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: CourseCreationWizardProps) {
   const t = useTranslations('DashPage.CourseManagement.Wizard');
   const router = useRouter();
+  const searchParams = useSearchParams();
   const session = usePlatformSession() as any;
   const accessToken = session?.data?.tokens?.access_token;
 
@@ -62,6 +63,24 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
     { shallow: true },
   );
   const [isPending, startTransition] = useTransition();
+
+  useEffect(() => {
+    const hasCanonicalTemplate = searchParams.has('tpl');
+    const hasCanonicalSource = searchParams.has('src');
+    const legacyTemplate = searchParams.get('template');
+    const legacySource = searchParams.get('source');
+
+    if (!hasCanonicalTemplate && legacyTemplate === 'outline' && template !== 'outline') {
+      void setTemplate('outline');
+    }
+
+    if (!hasCanonicalSource && legacySource) {
+      const normalizedSource = cleanCourseUuid(legacySource);
+      if (normalizedSource && sourceCourseUuid !== normalizedSource) {
+        void setSourceCourseUuid(normalizedSource);
+      }
+    }
+  }, [searchParams, setSourceCourseUuid, setTemplate, sourceCourseUuid, template]);
 
   const sourceOptions = useMemo(
     () => sourceCourses.map((course) => ({ ...course, cleanUuid: course.course_uuid.replace(/^course_/, '') })),
@@ -116,7 +135,7 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
   const createOutlineFromSource = async (createdCourse: any) => {
     if (!sourceCourseUuid) return;
 
-    const sourceMetadata = await getCourseMetadata(sourceCourseUuid, null, accessToken, true);
+    const sourceMetadata = await getCourseMetadata(prefixedCourseUuid(sourceCourseUuid), null, accessToken, true);
     const chapters = Array.isArray(sourceMetadata?.chapters) ? sourceMetadata.chapters : [];
 
     // Parallel chapter creation — much faster for large source courses.
@@ -366,6 +385,9 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
                         title={option.title}
                         description={option.description}
                         icon={option.value === 'public' ? CheckCircle2 : ArrowLeft}
+                        onSelect={(value) => {
+                          void setVisibility(value);
+                        }}
                       />
                     ))}
                   </RadioGroup>
@@ -415,6 +437,9 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
                       title={option.title}
                       description={option.description}
                       icon={option.value === 'outline' ? ChevronDown : option.value === 'starter' ? Sparkles : CheckCircle2}
+                      onSelect={(value) => {
+                        void setTemplate(value as TemplateType);
+                      }}
                     />
                   ))}
                 </RadioGroup>
@@ -493,6 +518,9 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
                       title={option.title}
                       description={option.description}
                       icon={option.value === 'curriculum' ? ArrowRight : CheckCircle2}
+                      onSelect={(value) => {
+                        void setLaunchDestination(value as LaunchDestination);
+                      }}
                     />
                   ))}
                 </RadioGroup>

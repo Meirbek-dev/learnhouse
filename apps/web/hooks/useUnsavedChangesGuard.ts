@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { flushSync } from 'react-dom';
 
 interface UnsavedChangesGuardOptions {
   message?: string;
@@ -64,7 +65,11 @@ export function useUnsavedChangesGuard(isDirty: boolean, options?: UnsavedChange
       return;
     }
 
-    setPendingNavigation(null);
+    // Clear ref immediately so any re-entrant call returns early.
+    pendingNavigationRef.current = null;
+    // Flush the dialog closed synchronously before navigating so there is no
+    // window in which a spurious popstate/click can reopen it.
+    flushSync(() => setPendingNavigation(null));
 
     if (currentPending.kind === 'history-back') {
       ignoreNextPopRef.current = true;
@@ -161,6 +166,10 @@ export function useUnsavedChangesGuard(isDirty: boolean, options?: UnsavedChange
     const handlePopState = () => {
       if (ignoreNextPopRef.current) {
         ignoreNextPopRef.current = false;
+        return;
+      }
+
+      if (allowNavigationRef.current) {
         return;
       }
 
