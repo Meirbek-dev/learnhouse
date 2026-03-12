@@ -53,7 +53,7 @@ const PaymentsUsersTable = ({ data }: { data: PaymentUserData[] }) => {
           />
           <div className="flex flex-col">
             <span className="font-medium">{row.original.user.first_name || row.original.user.username}</span>
-            <span className="text-sm text-gray-500">{row.original.user.email}</span>
+            <span className="text-sm text-muted-foreground">{row.original.user.email}</span>
           </div>
         </div>
       ),
@@ -157,9 +157,9 @@ const PaymentsCustomersPage = () => {
 
   return (
     <div className="soft-shadow mx-auto mr-10 ml-10 rounded-xl bg-white px-4 py-4">
-      <div className="mb-3 flex flex-col -space-y-1 rounded-md bg-gray-50 px-5 py-3">
-        <h1 className="text-xl font-bold text-gray-800">{t('title')}</h1>
-        <h2 className="text-base text-gray-500">{t('description')}</h2>
+      <div className="mb-3 flex flex-col -space-y-1 rounded-md bg-muted px-5 py-3">
+        <h1 className="text-xl font-bold text-foreground">{t('title')}</h1>
+        <h2 className="text-base text-muted-foreground">{t('description')}</h2>
       </div>
 
       <PaymentsUsersTable data={customers} />

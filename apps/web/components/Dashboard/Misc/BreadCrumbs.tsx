@@ -24,7 +24,7 @@ const BreadCrumbs = (props: BreadCrumbsProps) => {
       case 'courses': {
         return (
           <Book
-            className="text-gray"
+            className="text-muted-foreground"
             size={14}
           />
         );
@@ -32,7 +32,7 @@ const BreadCrumbs = (props: BreadCrumbsProps) => {
       case 'assignments': {
         return (
           <Backpack
-            className="text-gray"
+            className="text-muted-foreground"
             size={14}
           />
         );
@@ -40,7 +40,7 @@ const BreadCrumbs = (props: BreadCrumbsProps) => {
       case 'user': {
         return (
           <User
-            className="text-gray"
+            className="text-muted-foreground"
             size={14}
           />
         );
@@ -48,7 +48,7 @@ const BreadCrumbs = (props: BreadCrumbsProps) => {
       case 'orgusers': {
         return (
           <Users
-            className="text-gray"
+            className="text-muted-foreground"
             size={14}
           />
         );
@@ -56,7 +56,7 @@ const BreadCrumbs = (props: BreadCrumbsProps) => {
       case 'org': {
         return (
           <School
-            className="text-gray"
+            className="text-muted-foreground"
             size={14}
           />
         );
@@ -64,7 +64,7 @@ const BreadCrumbs = (props: BreadCrumbsProps) => {
       case 'payments': {
         return (
           <CreditCard
-            className="text-gray"
+            className="text-muted-foreground"
             size={14}
           />
         );

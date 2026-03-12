@@ -2128,7 +2128,8 @@
         "video": "Video"
       },
       "about": {
-        "label": "About"
+        "label": "About",
+        "placeholder": "Tell learners what this course is about..."
       },
       "both": "Both",
       "description": {
@@ -2165,6 +2166,9 @@
       "thumbnail": {
         "chooseFromGalleryButton": "Choose from gallery",
         "label": "Course Thumbnail",
+        "mediaActionsDescription": "Thumbnail uploads update the live course record right away. Title, description, learnings, tags, and other general settings above stay local until you save this section.",
+        "mediaActionsTitle": "Media actions apply immediately",
+        "mediaUpdatesIsolated": "Media updates are intentionally isolated from the draft fields above.",
         "uploadImageButton": "Upload Image",
         "uploading": "Uploading..."
       },
@@ -2214,6 +2218,7 @@
     "deleteChapter": "Delete Chapter",
     "deleteChapterButton": "Delete Chapter",
     "deleteChapterConfirmation": "Are you sure you want to delete this chapter?",
+    "deleteChapterConfirmationWithCount": "This will permanently delete the chapter and its {count, plural, =0 {0 activities} one {# activity} other {# activities}}.",
     "deleteChapterTitle": "Delete {name}?",
     "deleting": "Deleting...",
     "editButton": "Edit",
@@ -3491,8 +3496,8 @@
           },
           "description": "Choose how much structure you want the new course to start with.",
           "outline": {
-            "description": "Reuse chapter structure from another editable course.",
-            "title": "Use existing course as outline"
+            "description": "Copy chapter titles from another course. Activities are not included.",
+            "title": "Borrow chapter structure"
           },
           "selectCourse": "Select a course",
           "sourceCourse": "Source course",

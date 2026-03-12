@@ -13,8 +13,8 @@ type CourseWorkflowBadgeTone = 'default' | 'info' | 'success' | 'warning' | 'dan
 const courseWorkflowBadgeToneClass: Record<CourseWorkflowBadgeTone, string> = {
   default: 'border-border bg-background text-foreground',
   info: 'border-border bg-muted/70 text-muted-foreground',
-  success: 'border-border bg-muted text-foreground',
-  warning: 'border-border bg-accent/50 text-accent-foreground',
+  success: 'border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300',
+  warning: 'border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 text-amber-800 dark:text-amber-200',
   danger: 'border-destructive/20 bg-destructive/10 text-destructive',
 };
 
@@ -106,6 +106,7 @@ export function CourseChoiceCard({
       htmlFor={id}
       className={cn(
         'flex cursor-pointer flex-col gap-3 rounded-xl border p-5 transition-colors',
+        'focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-1',
         checked
           ? 'border-primary bg-accent/40 text-accent-foreground shadow-sm ring-1 ring-ring/20'
           : 'border-border bg-card text-card-foreground hover:bg-muted/50',

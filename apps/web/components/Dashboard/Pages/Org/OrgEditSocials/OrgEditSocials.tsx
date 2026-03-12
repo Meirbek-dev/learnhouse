@@ -143,16 +143,16 @@ export default function OrgEditSocials() {
           )}
         >
           <div className="flex flex-col gap-0">
-            <div className="mx-3 my-3 flex flex-col -space-y-1 rounded-md bg-gray-50 px-5 py-3">
-              <h1 className="text-xl font-bold text-gray-800">{t('title')}</h1>
-              <h2 className="text-base text-gray-500">{t('description')}</h2>
+            <div className="mx-3 my-3 flex flex-col -space-y-1 rounded-md bg-muted px-5 py-3">
+              <h1 className="text-xl font-bold text-foreground">{t('title')}</h1>
+              <h2 className="text-base text-muted-foreground">{t('description')}</h2>
             </div>
 
             <div className="mx-5 my-5 mt-0 flex flex-col lg:flex-row lg:space-x-8">
               <div className="w-full space-y-6">
                 <div>
                   <FormLabel className="text-lg font-semibold">{t('socialLinksTitle')}</FormLabel>
-                  <div className="soft-shadow mt-2 space-y-3 rounded-lg bg-gray-50/50 p-4">
+                  <div className="soft-shadow mt-2 space-y-3 rounded-lg bg-muted/50 p-4">
                     <div className="grid gap-3">
                       {socialFields.map((field) => (
                         <FormField
@@ -186,13 +186,13 @@ export default function OrgEditSocials() {
               <div className="w-full space-y-6">
                 <div>
                   <FormLabel className="text-lg font-semibold">{t('customLinksTitle')}</FormLabel>
-                  <div className="soft-shadow mt-2 space-y-3 rounded-lg bg-gray-50/50 p-4">
+                  <div className="soft-shadow mt-2 space-y-3 rounded-lg bg-muted/50 p-4">
                     {linksEntries.map(([linkKey, linkValue], index) => (
                       <div
                         key={index}
                         className="flex items-center gap-3"
                       >
-                        <div className="flex h-8 w-8 items-center justify-center rounded-md bg-gray-200/50 text-xs font-medium text-gray-600">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-md bg-muted text-xs font-medium text-muted-foreground">
                           {index + 1}
                         </div>
                         <div className="flex flex-1 gap-2">
@@ -239,7 +239,7 @@ export default function OrgEditSocials() {
                       </Button>
                     )}
 
-                    <p className="mt-2 text-xs text-gray-500">{t('Form.customLinkInfo', { count: 3 })}</p>
+                    <p className="mt-2 text-xs text-muted-foreground">{t('Form.customLinkInfo', { count: 3 })}</p>
                   </div>
                 </div>
               </div>

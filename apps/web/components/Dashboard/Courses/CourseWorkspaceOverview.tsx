@@ -1,6 +1,6 @@
 'use client';
 
-import { buildCourseWorkspacePath, getCourseContentStats, getCourseReadinessSummary } from '@/lib/course-management';
+import { buildCourseWorkspacePath, getCourseContentStats } from '@/lib/course-management';
 import { CourseStatusBadge, courseWorkflowCardClass, courseWorkflowMutedPanelClass, courseWorkflowSummaryCardClass } from './courseWorkflowUi';
 import { AlertTriangle, ArrowRight, CheckCircle2, FileStack, Globe, Users } from 'lucide-react';
 import type { CourseWorkspaceCapabilities } from '@/lib/course-management-server';
@@ -23,7 +23,7 @@ export default function CourseWorkspaceOverview({
   const tReadiness = useTranslations('DashPage.CourseManagement.Readiness');
   const course = useCourse();
   const stats = getCourseContentStats(course.courseStructure);
-  const readiness = getCourseReadinessSummary(course.courseStructure, course.editorData);
+  const readiness = course.readiness;
   const contributors = course.editorData.contributors.data ?? [];
   const certifications = course.editorData.certifications.data ?? [];
   const linkedUserGroups = course.editorData.linkedUserGroups.data ?? [];

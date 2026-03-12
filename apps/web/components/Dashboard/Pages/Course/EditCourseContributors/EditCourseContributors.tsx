@@ -188,6 +188,7 @@ const EditCourseContributors = (props: EditCourseContributorsProps) => {
   const [searchResults, setSearchResults] = useState<SearchUser[]>([]);
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [isAdding, setIsAdding] = useState(false);
   const debouncedSearch = useDebouncedValue(searchQuery, 300);
   const [selectedContributors, setSelectedContributors] = useState<number[]>([]);
   const initialRef = useRef<boolean | undefined>(courseStructure?.open_to_contributors);
@@ -255,7 +256,8 @@ const EditCourseContributors = (props: EditCourseContributorsProps) => {
   };
 
   const handleAddContributors = async () => {
-    if (selectedUsers.length === 0) return;
+    if (selectedUsers.length === 0 || isAdding) return;
+    setIsAdding(true);
     try {
       const response = await bulkAddContributors(courseStructure.course_uuid, selectedUsers, access_token, {
         orgSlug: org.slug,
@@ -280,6 +282,8 @@ const EditCourseContributors = (props: EditCourseContributorsProps) => {
     } catch (error) {
       console.error(t('errorAddingContributors'), error);
       toast.error(t('failedToAddContributorsGeneral'));
+    } finally {
+      setIsAdding(false);
     }
   };
 
@@ -396,7 +400,7 @@ const EditCourseContributors = (props: EditCourseContributorsProps) => {
   if (!courseStructure) return null;
 
   return (
-    <div className="mx-auto space-y-6 p-6">
+    <div className="space-y-6">
       <SectionHeader
         title={t('courseContributorsTitle')}
         description={t('courseContributorsSubtitle')}
@@ -548,6 +552,7 @@ const EditCourseContributors = (props: EditCourseContributorsProps) => {
               <Button
                 onClick={handleAddContributors}
                 size="sm"
+                disabled={isAdding}
               >
                 {t('addSelectedButton')}
               </Button>

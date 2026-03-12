@@ -15,7 +15,7 @@ import { useMemo, useTransition } from 'react';
 import { Input } from '@/components/ui/input';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
-import { useQueryState } from 'nuqs';
+import { useQueryState, useQueryStates } from 'nuqs';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
@@ -36,7 +36,6 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
   const session = usePlatformSession() as any;
   const accessToken = session?.data?.tokens?.access_token;
 
-  // URL-based step state — browser back button works, page refresh restores position.
   const [step, setStep] = useQueryState('step', { defaultValue: '0', shallow: true });
   const currentStep = Math.min(2, Math.max(0, Number(step)));
 
@@ -50,6 +49,18 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
     defaultValue: 'curriculum',
     shallow: true,
   });
+  const [, setAllWizardParams] = useQueryStates(
+    {
+      step: { defaultValue: '0' },
+      name: { defaultValue: '' },
+      desc: { defaultValue: '' },
+      vis: { defaultValue: 'private' },
+      tpl: { defaultValue: 'blank' },
+      src: { defaultValue: '' },
+      dest: { defaultValue: 'curriculum' },
+    },
+    { shallow: true },
+  );
   const [isPending, startTransition] = useTransition();
 
   const sourceOptions = useMemo(
@@ -160,15 +171,18 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
           }
 
           toast.success(t('toasts.created'));
-          // Clear URL params before navigating so the back button doesn't re-enter the wizard
-          await setName('');
-          await setDescription('');
-          await setVisibility('private');
-          await setTemplate('blank');
-          await setSourceCourseUuid('');
-          await setLaunchDestination('curriculum');
-          await setStep('0');
-          router.push(
+          // Clear all wizard params in a single history entry so the back button
+          // does not re-enter the wizard, then replace (not push) to the workspace.
+          await setAllWizardParams({
+            step: '0',
+            name: '',
+            desc: '',
+            vis: 'private',
+            tpl: 'blank',
+            src: '',
+            dest: 'curriculum',
+          });
+          router.replace(
             buildCourseWorkspacePath(orgslug, result.data.course_uuid, launchDestination as LaunchDestination),
           );
           router.refresh();

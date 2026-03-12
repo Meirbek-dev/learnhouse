@@ -149,7 +149,7 @@ export function HeroSection({ profile, userRank, className }: HeroSectionProps) 
                       className={cn(
                         'gap-1 px-2 py-1',
                         userRank === 1 && 'bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 border-yellow-500/50',
-                        userRank === 2 && 'bg-gray-400/20 text-gray-600 dark:text-gray-300 border-gray-400/50',
+                        userRank === 2 && 'bg-muted/50 text-muted-foreground border-border',
                         userRank === 3 && 'bg-orange-600/20 text-orange-600 dark:text-orange-400 border-orange-600/50',
                       )}
                     >

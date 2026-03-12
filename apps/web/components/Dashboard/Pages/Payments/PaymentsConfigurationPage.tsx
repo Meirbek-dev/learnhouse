@@ -181,7 +181,7 @@ const PaymentsConfigurationPage: FC = () => {
   if (isLoading) {
     return (
       <div className="flex h-64 items-center justify-center">
-        <div className="flex animate-pulse items-center rounded-md bg-slate-100 px-4 py-2 text-sm font-medium text-gray-600">
+        <div className="flex animate-pulse items-center rounded-md bg-muted px-4 py-2 text-sm font-medium text-muted-foreground">
           <Loader2
             size={16}
             className="mr-2 animate-spin"
@@ -199,9 +199,9 @@ const PaymentsConfigurationPage: FC = () => {
   return (
     <div>
       <div className="soft-shadow mx-auto mr-10 ml-10 rounded-xl bg-white px-4 py-4">
-        <div className="mb-3 flex flex-col -space-y-1 rounded-md bg-gray-50 px-5 py-3">
-          <h1 className="text-xl font-bold text-gray-800">{t('pageTitle')}</h1>
-          <h2 className="text-base text-gray-500">{t('pageDescription')}</h2>
+        <div className="mb-3 flex flex-col -space-y-1 rounded-md bg-muted px-5 py-3">
+          <h1 className="text-xl font-bold text-foreground">{t('pageTitle')}</h1>
+          <h2 className="text-base text-muted-foreground">{t('pageDescription')}</h2>
         </div>
 
         <Alert className="mb-3 border-2 border-blue-100 bg-blue-50/50 p-6">
@@ -211,7 +211,7 @@ const PaymentsConfigurationPage: FC = () => {
           </AlertTitle>
           <AlertDescription className="space-y-5">
             <div className="pl-2">
-              <ul className="list-inside list-disc space-y-1 pl-2 text-gray-600">
+              <ul className="list-inside list-disc space-y-1 pl-2 text-muted-foreground">
                 <li className="flex items-center space-x-2">
                   <CreditCard className="h-4 w-4" />
                   <span>{t('aboutStripe.acceptPayments')}</span>

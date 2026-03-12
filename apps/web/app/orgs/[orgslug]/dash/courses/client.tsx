@@ -163,6 +163,12 @@ const CoursesHome = ({
     selectableVisibleCourses.length > 0 &&
     selectableVisibleCourses.every((course) => selectedCourseUuids.includes(course.course_uuid));
 
+  const someVisibleSelected =
+    !allVisibleSelected &&
+    selectableVisibleCourses.some((course) => selectedCourseUuids.includes(course.course_uuid));
+
+  const headerCheckboxState = allVisibleSelected ? true : someVisibleSelected ? ('indeterminate' as const) : false;
+
   const toggleCourseSelection = (courseUuid: string, checked: boolean) => {
     setSelectedCourseUuids((current) => {
       if (checked) {
@@ -357,7 +363,7 @@ const CoursesHome = ({
         id: 'select',
         header: () => (
           <Checkbox
-            checked={allVisibleSelected}
+            checked={headerCheckboxState}
             onCheckedChange={(checked) => toggleAllVisibleCourses(checked)}
             aria-label={t('table.selectVisibleAria')}
           />
@@ -445,7 +451,7 @@ const CoursesHome = ({
         ),
       },
     ],
-    [allVisibleSelected, canDeleteCourse, canManageCourse, courseReadinessMap, orgslug, selectedCourseUuids, t, toggleAllVisibleCourses],
+    [headerCheckboxState, canDeleteCourse, canManageCourse, courseReadinessMap, orgslug, selectedCourseUuids, t, toggleAllVisibleCourses],
   );
 
   const presets = [
@@ -606,7 +612,7 @@ const CoursesHome = ({
           {courses.map((course) => (
             <div
               key={course.course_uuid}
-              className="mx-auto w-full max-w-[320px]"
+              className="w-full"
             >
               <CourseThumbnail
                 customLink={buildCourseWorkspacePath(orgslug, removeCoursePrefix(course.course_uuid))}

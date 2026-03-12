@@ -50,8 +50,8 @@ const CoursePreview = ({ course, orgslug, onLink, isLinked }: CoursePreviewProps
 
       {/* Content */}
       <div className="grow space-y-1">
-        <h3 className="line-clamp-1 font-medium text-gray-900">{course.name}</h3>
-        <p className="line-clamp-2 text-sm text-gray-500">{course.description}</p>
+        <h3 className="line-clamp-1 font-medium text-foreground">{course.name}</h3>
+        <p className="line-clamp-2 text-sm text-muted-foreground">{course.description}</p>
       </div>
 
       {/* Action Button */}
@@ -61,7 +61,7 @@ const CoursePreview = ({ course, orgslug, onLink, isLinked }: CoursePreviewProps
             variant="outline"
             size="sm"
             disabled
-            className="text-gray-500"
+            className="text-muted-foreground"
           >
             {t('alreadyLinked')}
           </Button>
@@ -146,7 +146,7 @@ export default function LinkCourseModal({ productId, onSuccess }: LinkCourseModa
           className="w-full pl-10"
         />
         <Search
-          className="absolute top-1/2 left-6 -translate-y-1/2 text-gray-400"
+          className="absolute top-1/2 left-6 -translate-y-1/2 text-muted-foreground"
           size={20}
         />
       </div>
@@ -162,7 +162,7 @@ export default function LinkCourseModal({ productId, onSuccess }: LinkCourseModa
           />
         ))}
 
-        {filteredCourses.length === 0 && <div className="py-6 text-center text-gray-500">{t('noCoursesFound')}</div>}
+        {filteredCourses.length === 0 && <div className="py-6 text-center text-muted-foreground">{t('noCoursesFound')}</div>}
       </div>
     </div>
   );

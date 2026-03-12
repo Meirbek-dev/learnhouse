@@ -104,9 +104,9 @@ const UserEditPassword = () => {
   return (
     <div className="soft-shadow mx-0 rounded-xl bg-white sm:mx-10">
       <div className="flex flex-col">
-        <div className="mx-3 my-3 flex flex-col -space-y-1 rounded-md bg-gray-50 px-5 py-3">
-          <h1 className="text-xl font-bold text-gray-800">{tPassword('title')}</h1>
-          <h2 className="text-base text-gray-500">{tPassword('description')}</h2>
+        <div className="mx-3 my-3 flex flex-col -space-y-1 rounded-md bg-muted px-5 py-3">
+          <h1 className="text-xl font-bold text-foreground">{tPassword('title')}</h1>
+          <h2 className="text-base text-muted-foreground">{tPassword('description')}</h2>
         </div>
 
         <div className="px-8 py-6">

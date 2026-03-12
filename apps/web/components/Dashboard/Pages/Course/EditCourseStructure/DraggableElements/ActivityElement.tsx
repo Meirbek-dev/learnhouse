@@ -107,32 +107,32 @@ const ACTIVITY_CONFIG = {
   TYPE_VIDEO: {
     Icon: Video,
     translationKey: 'video',
-    colorClass: 'border-border bg-muted/60 text-foreground',
+    colorClass: 'border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300',
   },
   TYPE_DOCUMENT: {
     Icon: File,
     translationKey: 'document',
-    colorClass: 'border-border bg-muted/40 text-foreground',
+    colorClass: 'border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300',
   },
   TYPE_ASSIGNMENT: {
     Icon: Backpack,
     translationKey: 'assignment',
-    colorClass: 'border-border bg-muted/70 text-foreground',
+    colorClass: 'border-violet-200 dark:border-violet-800 bg-violet-50 dark:bg-violet-950/30 text-violet-700 dark:text-violet-300',
   },
   TYPE_DYNAMIC: {
     Icon: Sparkles,
     translationKey: 'dynamic',
-    colorClass: 'border-border bg-muted/70 text-foreground',
+    colorClass: 'border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300',
   },
   TYPE_EXAM: {
     Icon: ClipboardList,
     translationKey: 'exam',
-    colorClass: 'border-border bg-muted/70 text-muted-foreground',
+    colorClass: 'border-rose-200 dark:border-rose-800 bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-300',
   },
   TYPE_CODE_CHALLENGE: {
     Icon: Code2,
     translationKey: 'codeChallenge',
-    colorClass: 'border-border bg-muted/70 text-foreground',
+    colorClass: 'border-cyan-200 dark:border-cyan-800 bg-cyan-50 dark:bg-cyan-950/30 text-cyan-700 dark:text-cyan-300',
   },
 } as const;
 
@@ -152,10 +152,13 @@ const ActivityElement = ({ orgslug, activity, activityIndex, course_uuid }: Acti
   const [isUpdatingPublish, setIsUpdatingPublish] = useState(false);
   const [isSavingEdit, setIsSavingEdit] = useState(false);
   const [isDeletingActivity, setIsDeletingActivity] = useState(false);
+  // Lazy: only fetch assignment UUID when the user first interacts with the edit button
+  const [fetchAssignment, setFetchAssignment] = useState(false);
 
-  // Fetch assignment UUID at this level so it is shared with ActivityEditButton (Fix 4.1)
+  // Fetch assignment UUID lazily — only after the user explicitly requests it
+  // (hover / click on the edit button), instead of eagerly on every mount.
   const { data: assignmentUUID, isLoading: isAssignmentLoading } = useSWR(
-    activity.activity_type === 'TYPE_ASSIGNMENT' && access_token
+    activity.activity_type === 'TYPE_ASSIGNMENT' && access_token && fetchAssignment
       ? [`assignment-${activity.activity_uuid}`, access_token]
       : null,
     async () => {
@@ -248,8 +251,10 @@ const ActivityElement = ({ orgslug, activity, activityIndex, course_uuid }: Acti
       await mutate(courseMetaUrl);
       toast.success(t('activityUpdateSuccess'));
     } catch (error: any) {
+      toast.dismiss(toastId);
       if (error?.status === 409) {
         courseContext.showConflict(error?.detail || error?.message);
+        setIsUpdatingPublish(false);
         return;
       }
       console.error('Failed to toggle publish status:', error);
@@ -404,6 +409,7 @@ const ActivityElement = ({ orgslug, activity, activityIndex, course_uuid }: Acti
               course_uuid={course_uuid}
               assignmentUUID={assignmentUUID ?? null}
               isAssignmentLoading={isAssignmentLoading}
+              onRequestAssignment={() => setFetchAssignment(true)}
             />
             <DropdownMenu>
               <DropdownMenuTrigger
@@ -511,12 +517,14 @@ const ActivityEditButton = ({
   course_uuid,
   assignmentUUID,
   isAssignmentLoading,
+  onRequestAssignment,
 }: {
   activity: Activity;
   orgslug: string;
   course_uuid: string;
   assignmentUUID: string | null;
   isAssignmentLoading: boolean;
+  onRequestAssignment: () => void;
 }) => {
   const t = useTranslations('CourseEdit.ActivityElement');
   const org = useOrg() as Organization;
@@ -558,7 +566,17 @@ const ActivityEditButton = ({
     }
 
     if (!assignmentUUID) {
-      return null;
+      return (
+        <Button
+          size="sm"
+          variant="outline"
+          onMouseEnter={onRequestAssignment}
+          onClick={onRequestAssignment}
+        >
+          <FilePenLine className="h-3.5 w-3.5" />
+          {!isMobile && <span className="ml-1.5 text-xs">{t('editAssignmentButton')}</span>}
+        </Button>
+      );
     }
 
     const editUrl = `${getUriWithOrg(org?.slug ?? '', '')}/dash/assignments/${assignmentUUID}`;

@@ -50,7 +50,7 @@ const EmptyState = ({
 }) => (
   <div className={cn('col-span-full flex items-center justify-center py-16', className)}>
     <div className="max-w-md space-y-4 text-center">
-      <div className="from-muted to-muted/50 mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br shadow-sm">
+      <div className="bg-muted mx-auto flex h-20 w-20 items-center justify-center rounded-full shadow-sm">
         <Icon className="text-muted-foreground h-10 w-10" />
       </div>
       <div className="space-y-2">

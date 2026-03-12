@@ -193,7 +193,7 @@ const ChapterElement = ({ chapter, chapterIndex, orgslug, course_uuid }: Chapter
           )}
         >
           {/* Chapter Header */}
-            <div className="flex items-center justify-between gap-3 border-b px-4 py-4 sm:px-6">
+          <div className="flex items-center justify-between gap-3 border-b px-4 py-4 sm:px-6">
             {/* Left Section: Drag Handle + Icon + Name */}
             <div className="flex min-w-0 flex-1 items-center gap-3">
               {/* Drag Handle */}
@@ -292,7 +292,11 @@ const ChapterElement = ({ chapter, chapterIndex, orgslug, course_uuid }: Chapter
                       <AlertTriangle className="size-8" />
                     </AlertDialogMedia>
                     <AlertDialogTitle>{t('deleteChapterTitle', { name: chapter.name })}</AlertDialogTitle>
-                    <AlertDialogDescription>{t('deleteChapterConfirmation')}</AlertDialogDescription>
+                    <AlertDialogDescription>
+                      {activities.length > 0
+                        ? t('deleteChapterConfirmationWithCount', { count: activities.length })
+                        : t('deleteChapterConfirmation')}
+                    </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogCancel disabled={isDeletingChapter} />

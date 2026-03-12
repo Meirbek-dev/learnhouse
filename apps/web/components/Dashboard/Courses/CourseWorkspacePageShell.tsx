@@ -25,7 +25,7 @@ import {
   Sparkles,
   Users,
 } from 'lucide-react';
-import { getCourseReadinessSummary, buildCourseWorkspacePath } from '@/lib/course-management';
+import { buildCourseWorkspacePath } from '@/lib/course-management';
 import CourseConflictDialog from '@components/Dashboard/Pages/Course/CourseConflictDialog';
 import { CourseStatusBadge } from './courseWorkflowUi';
 import type { CourseWorkspaceCapabilities } from '@/lib/course-management-server';
@@ -58,7 +58,7 @@ function CourseWorkspaceChrome({
   const t = useTranslations('DashPage.CourseManagement.Workspace');
   const course = useCourse();
   const hasDirtySections = Object.values(course.dirtySections).some(Boolean);
-  const readiness = getCourseReadinessSummary(course.courseStructure, course.editorData);
+  const readiness = course.readiness;
   const unsavedChangesGuard = useUnsavedChangesGuard(hasDirtySections, {
     interceptInAppNavigation: true,
     message: t('unsavedChangesWarning'),
@@ -97,7 +97,7 @@ function CourseWorkspaceChrome({
             <AlertDialogCancel onClick={unsavedChangesGuard.cancelNavigation}>
               {t('unsavedDialogStay')}
             </AlertDialogCancel>
-            <AlertDialogAction onClick={unsavedChangesGuard.confirmNavigation}>
+            <AlertDialogAction variant="destructive" onClick={unsavedChangesGuard.confirmNavigation}>
               {t('unsavedDialogLeave')}
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -137,15 +137,17 @@ function CourseWorkspaceChrome({
           </div>
 
           <div className="flex shrink-0 items-center gap-2">
-            <Button
-              size="sm"
-              nativeButton={false}
-              variant="ghost"
-              render={<AppLink href={buildCourseWorkspacePath(orgslug, courseuuid, 'review')} />}
-            >
-              <ShieldCheck className="size-4" />
-              <span className="hidden sm:inline">{t('reviewButton')}</span>
-            </Button>
+            {activeStage !== 'review' ? (
+              <Button
+                size="sm"
+                nativeButton={false}
+                variant="ghost"
+                render={<AppLink href={buildCourseWorkspacePath(orgslug, courseuuid, 'review')} />}
+              >
+                <ShieldCheck className="size-4" />
+                <span className="hidden sm:inline">{t('reviewButton')}</span>
+              </Button>
+            ) : null}
             <Button
               size="sm"
               nativeButton={false}

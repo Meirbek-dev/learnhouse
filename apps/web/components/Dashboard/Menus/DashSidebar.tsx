@@ -294,7 +294,7 @@ const DashSidebar = ({ className }: SidebarProps) => {
             }`}
             aria-label={t('ariaLabels.goToHomepage')}
           >
-            <div className="bg-sidebar-accent flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-sidebar-border p-1.5 shadow-sm">
+            <div className="bg-primary/80 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-linear-to-br p-1.5 shadow-sm">
               <Image
                 alt={t('ariaLabels.platformLogo')}
                 width={24}

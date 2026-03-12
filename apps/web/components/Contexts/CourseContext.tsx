@@ -1,10 +1,11 @@
 'use client';
 
+import { getCourseReadinessSummary } from '@/lib/course-management';
 import { createEmptyCourseEditorBundle, getCourseEditorBundle, getCourseEditorBundleKey, getCourseMetadataKey } from '@services/courses/editor';
 import type { CourseEditorBundle } from '@services/courses/editor';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
-import { createContext, use, useEffect, useReducer } from 'react';
+import { createContext, use, useEffect, useMemo, useReducer } from 'react';
 import ErrorUI from '@/components/Objects/Elements/Error/Error';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { useTranslations } from 'next-intl';
@@ -82,6 +83,7 @@ interface CourseState {
 interface CourseContextValue extends CourseState {
   courseMetaUrl: string;
   isEditorDataLoading: boolean;
+  readiness: ReturnType<typeof getCourseReadinessSummary>;
   refreshCourseMeta: () => Promise<CourseStructure | undefined>;
   refreshEditorData: () => Promise<CourseEditorBundle | undefined>;
   refreshCourseEditor: () => Promise<void>;
@@ -179,6 +181,11 @@ export const CourseProvider = ({
   };
   const dismissConflict = () => dispatch({ type: 'clearConflict' });
 
+  const readiness = useMemo(
+    () => getCourseReadinessSummary(state.courseStructure, state.editorData),
+    [state.courseStructure, state.editorData],
+  );
+
   if (error) return <ErrorUI message={t('loadError')} />;
   if (isLoading) return <PageLoading />;
 
@@ -187,6 +194,7 @@ export const CourseProvider = ({
       ...state,
       courseMetaUrl,
       isEditorDataLoading,
+      readiness,
       refreshCourseMeta,
       refreshEditorData,
       refreshCourseEditor,

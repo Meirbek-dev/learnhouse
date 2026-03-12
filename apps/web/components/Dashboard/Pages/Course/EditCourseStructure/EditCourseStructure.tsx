@@ -19,7 +19,7 @@ import { DragDropContext, Droppable } from '@hello-pangea/dnd';
 import { Button } from '@/components/ui/button';
 import { useTranslations } from 'next-intl';
 import { AlertTriangle, CheckCircle2, Hexagon, Loader2 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 import ChapterElement from './DraggableElements/ChapterElement';
@@ -53,6 +53,13 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
   // New Chapter creation
   const [newChapterModal, setNewChapterModal] = useState(false);
   const [structureStatus, setStructureStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+
+  // Auto-dismiss the 'saved' banner after 3 seconds
+  useEffect(() => {
+    if (structureStatus !== 'saved') return;
+    const timer = setTimeout(() => setStructureStatus('idle'), 3000);
+    return () => clearTimeout(timer);
+  }, [structureStatus]);
 
   const closeNewChapterModal = async () => {
     setNewChapterModal(false);
@@ -145,27 +152,29 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
       <Card>
         <CardHeader>
           <CardTitle>{t('title')}</CardTitle>
-          <Alert className="border-border bg-muted/40">
-            {structureStatus === 'saving' ? (
-              <Loader2 className="size-4 animate-spin" />
-            ) : structureStatus === 'error' ? (
-              <AlertTriangle className="size-4" />
-            ) : (
-              <CheckCircle2 className="size-4" />
-            )}
-            <AlertTitle>
-              {structureStatus === 'saving'
-                ? t('savingOrder')
-                : structureStatus === 'error'
-                  ? t('saveOrderError')
-                  : t('curriculumChangesApplyImmediately')}
-            </AlertTitle>
-            <AlertDescription>
-              {structureStatus === 'error'
-                ? t('refreshAfterError')
-                : t('curriculumInlineFeedback')}
-            </AlertDescription>
-          </Alert>
+          {structureStatus !== 'idle' && (
+            <Alert className="border-border bg-muted/40">
+              {structureStatus === 'saving' ? (
+                <Loader2 className="size-4 animate-spin" />
+              ) : structureStatus === 'error' ? (
+                <AlertTriangle className="size-4" />
+              ) : (
+                <CheckCircle2 className="size-4" />
+              )}
+              <AlertTitle>
+                {structureStatus === 'saving'
+                  ? t('savingOrder')
+                  : structureStatus === 'error'
+                    ? t('saveOrderError')
+                    : t('curriculumChangesApplyImmediately')}
+              </AlertTitle>
+              <AlertDescription>
+                {structureStatus === 'error'
+                  ? t('refreshAfterError')
+                  : t('curriculumInlineFeedback')}
+              </AlertDescription>
+            </Alert>
+          )}
         </CardHeader>
       </Card>
 
