@@ -1,6 +1,6 @@
 import { ArrowBigUpDash, Image as ImageIcon, UploadCloud, Video } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs';
 import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { Alert, AlertDescription, AlertTitle } from '@components/ui/alert';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';

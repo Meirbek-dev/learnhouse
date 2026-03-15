@@ -6,8 +6,8 @@ import EditorWrapper from '@components/Objects/Editor/EditorWrapper';
 import { getCourseMetadata } from '@services/courses/courses';
 import { getTranslations } from 'next-intl/server';
 import { jetBrainsMono } from '@/lib/fonts';
-import type { Metadata } from 'next';
 import { connection } from 'next/server';
+import type { Metadata } from 'next';
 import { auth } from '@/auth';
 
 interface MetadataProps {

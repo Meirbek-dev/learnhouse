@@ -25,38 +25,48 @@ type CertificateLayout = 'classic' | 'double' | 'minimal' | 'split';
 function getCertificateLayout(pattern: string): CertificateLayout {
   switch (pattern) {
     case 'royal':
-    case 'academic':
+    case 'academic': {
       return 'double';
+    }
     case 'tech':
-    case 'modern':
+    case 'modern': {
       return 'split';
+    }
     case 'minimal':
-    case 'professional':
+    case 'professional': {
       return 'minimal';
-    default:
+    }
+    default: {
       return 'classic';
+    }
   }
 }
 
 function getCertificateShellClass(layout: CertificateLayout) {
   switch (layout) {
-    case 'double':
+    case 'double': {
       return 'border-2 border-border p-5 shadow-sm';
-    case 'minimal':
+    }
+    case 'minimal': {
       return 'border border-border p-6';
-    case 'split':
+    }
+    case 'split': {
       return 'overflow-hidden border border-border p-0';
-    default:
+    }
+    default: {
       return 'border border-border p-5 shadow-sm';
+    }
   }
 }
 
 function getCertificateBodyClass(layout: CertificateLayout) {
   switch (layout) {
-    case 'split':
+    case 'split': {
       return 'grid gap-0 md:grid-cols-[1fr_14rem]';
-    default:
+    }
+    default: {
       return 'flex h-full flex-col';
+    }
   }
 }
 
@@ -97,8 +107,15 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
 
   return (
     <div className="rounded-xl border bg-card p-4">
-      <div className={cn('relative min-h-[32rem] rounded-lg bg-background text-foreground', getCertificateShellClass(layout))}>
-        {layout === 'double' ? <div className="pointer-events-none absolute inset-3 rounded-md border border-border" /> : null}
+      <div
+        className={cn(
+          'relative min-h-[32rem] rounded-lg bg-background text-foreground',
+          getCertificateShellClass(layout),
+        )}
+      >
+        {layout === 'double' ? (
+          <div className="pointer-events-none absolute inset-3 rounded-md border border-border" />
+        ) : null}
         {layout === 'classic' ? <div className="pointer-events-none absolute inset-x-10 top-6 h-px bg-border" /> : null}
 
         <div className={getCertificateBodyClass(layout)}>
@@ -115,7 +132,11 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
               {layout !== 'split' ? (
                 <div className="flex h-16 w-16 items-center justify-center rounded-md border bg-card p-1 sm:h-24 sm:w-24">
                   {qrCodeUrl ? (
-                    <img src={qrCodeUrl} alt={t('certificateQRAlt')} className="h-full w-full object-contain" />
+                    <img
+                      src={qrCodeUrl}
+                      alt={t('certificateQRAlt')}
+                      className="h-full w-full object-contain"
+                    />
                   ) : (
                     <QrCode className="text-muted-foreground h-10 w-10" />
                   )}
@@ -149,7 +170,9 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
                   <User className="size-3.5" />
                   <span>{t('instructor')}</span>
                 </div>
-                <div className="text-sm font-medium text-foreground">{certificateInstructor || t('instructorName')}</div>
+                <div className="text-sm font-medium text-foreground">
+                  {certificateInstructor || t('instructorName')}
+                </div>
               </div>
 
               <div className="space-y-2 text-center">
@@ -183,17 +206,25 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
             <aside className="border-t bg-muted/50 p-6 md:border-t-0 md:border-l">
               <div className="space-y-4">
                 <div>
-                  <div className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">{t('template')}</div>
+                  <div className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                    {t('template')}
+                  </div>
                   <div className="mt-2 text-sm font-medium text-foreground">
                     {t(`certificatePatterns.${certificatePattern}`, { defaultValue: t('certificate') })}
                   </div>
                 </div>
 
                 <div className="rounded-lg border bg-background p-3">
-                  <div className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">{t('qrLabel')}</div>
+                  <div className="text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                    {t('qrLabel')}
+                  </div>
                   <div className="mt-3 flex items-center justify-center">
                     {qrCodeUrl ? (
-                      <img src={qrCodeUrl} alt={t('certificateQRAlt')} className="h-28 w-28 object-contain" />
+                      <img
+                        src={qrCodeUrl}
+                        alt={t('certificateQRAlt')}
+                        className="h-28 w-28 object-contain"
+                      />
                     ) : (
                       <QrCode className="text-muted-foreground h-14 w-14" />
                     )}

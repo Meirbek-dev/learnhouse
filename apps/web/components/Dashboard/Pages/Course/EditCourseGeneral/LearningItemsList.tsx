@@ -274,7 +274,9 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
   return (
     <div className="space-y-2">
       {items.length === 0 && (
-        <div className="rounded-lg border bg-muted/50 py-3 text-center text-sm text-muted-foreground">{t('noItems')}</div>
+        <div className="rounded-lg border bg-muted/50 py-3 text-center text-sm text-muted-foreground">
+          {t('noItems')}
+        </div>
       )}
 
       <div

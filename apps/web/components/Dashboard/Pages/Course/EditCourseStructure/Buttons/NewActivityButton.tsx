@@ -71,14 +71,22 @@ const NewActivityButton = (props: NewActivityButtonProps) => {
     const toast_loading = toast.loading(tNotify('uploadingAndCreating'));
 
     try {
-      await createFileActivity(file, type, activity, chapterId, access_token, {
-        courseUuid: course.courseStructure.course_uuid,
-        lastKnownUpdateDate: course.courseStructure.update_date,
-      }, (progress) => {
-        toast.loading(`${tNotify('uploadingAndCreating')} ${progress.percentage}%`, {
-          id: toast_loading,
-        });
-      });
+      await createFileActivity(
+        file,
+        type,
+        activity,
+        chapterId,
+        access_token,
+        {
+          courseUuid: course.courseStructure.course_uuid,
+          lastKnownUpdateDate: course.courseStructure.update_date,
+        },
+        (progress) => {
+          toast.loading(`${tNotify('uploadingAndCreating')} ${progress.percentage}%`, {
+            id: toast_loading,
+          });
+        },
+      );
 
       await refreshCourseMeta();
       setNewActivityModal(false);

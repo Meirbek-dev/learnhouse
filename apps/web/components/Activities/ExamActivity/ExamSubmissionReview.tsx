@@ -181,7 +181,7 @@ export default function ExamSubmissionReview({
                 <Checkbox
                   id="confirm-submission"
                   checked={confirmChecked}
-                  onCheckedChange={(checked) => setConfirmChecked(checked === true)}
+                  onCheckedChange={(checked) => setConfirmChecked(checked)}
                   className="mt-1"
                 />
                 <Label

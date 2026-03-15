@@ -1,7 +1,7 @@
 'use client';
 
-import { buildCourseCreationPath } from '@/lib/course-management';
 import { Actions, PermissionGuard, Resources, Scopes } from '@/components/Security';
+import { buildCourseCreationPath } from '@/lib/course-management';
 import { Button } from '@/components/ui/button';
 import AppLink from '@/components/ui/AppLink';
 import { useTranslations } from 'next-intl';

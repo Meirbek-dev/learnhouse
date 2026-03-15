@@ -2,9 +2,9 @@
 
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertTriangle, Image as ImageIcon, Loader2, Tag, Video } from 'lucide-react';
 import { SectionHeader } from '@components/Dashboard/Courses/SectionHeader';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { Card, CardContent, CardHeader } from '@components/ui/card';
 import { updateCourseMetadata } from '@services/courses/courses';
@@ -228,16 +228,20 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
 
     setError('');
 
-    await save(async () => updateCourseMetadata(course.courseStructure.course_uuid, values, accessToken, {
-        lastKnownUpdateDate: course.courseStructure.update_date,
-        orgSlug: props.orgslug,
-      }), {
-      onSuccess: () => {
-        initialRef.current = values;
-        markClean();
-        setError('');
+    await save(
+      async () =>
+        updateCourseMetadata(course.courseStructure.course_uuid, values, accessToken, {
+          lastKnownUpdateDate: course.courseStructure.update_date,
+          orgSlug: props.orgslug,
+        }),
+      {
+        onSuccess: () => {
+          initialRef.current = values;
+          markClean();
+          setError('');
+        },
       },
-    });
+    );
   };
 
   const handleDiscard = () => {
@@ -418,18 +422,14 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
             <CardHeader>
               <div className="space-y-1">
                 <h2 className="text-2xl font-bold tracking-tight text-foreground">{t('thumbnail.label')}</h2>
-                <p className="text-sm text-muted-foreground">
-                  {t('thumbnail.mediaUpdatesIsolated')}
-                </p>
+                <p className="text-sm text-muted-foreground">{t('thumbnail.mediaUpdatesIsolated')}</p>
               </div>
             </CardHeader>
             <CardContent className="space-y-6">
               <Alert className="border-border bg-muted/40">
                 <ImageIcon className="size-4" />
                 <AlertTitle>{t('thumbnail.mediaActionsTitle')}</AlertTitle>
-                <AlertDescription>
-                  {t('thumbnail.mediaActionsDescription')}
-                </AlertDescription>
+                <AlertDescription>{t('thumbnail.mediaActionsDescription')}</AlertDescription>
               </Alert>
 
               <FormField

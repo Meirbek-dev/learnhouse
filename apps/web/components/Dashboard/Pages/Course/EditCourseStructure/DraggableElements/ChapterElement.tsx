@@ -21,10 +21,10 @@ import { deleteChapter, updateChapter } from '@services/courses/chapters';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { Draggable, Droppable } from '@hello-pangea/dnd';
 import { Button } from '@/components/ui/button';
-import { useState } from 'react';
 import { Input } from '@/components/ui/input';
-import { cn } from '@/lib/utils';
 import { useTranslations } from 'next-intl';
+import { cn } from '@/lib/utils';
+import { useState } from 'react';
 import { toast } from 'sonner';
 
 import NewActivityButton from '../Buttons/NewActivityButton';
@@ -264,7 +264,13 @@ const ChapterElement = ({ chapter, chapterIndex, orgslug, course_uuid }: Chapter
             <div className="flex-shrink-0">
               <DropdownMenu>
                 <DropdownMenuTrigger
-                  render={<Button size="sm" variant="ghost" className="h-8 w-8 p-0" />}
+                  render={
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-8 w-8 p-0"
+                    />
+                  }
                 >
                   <MoreHorizontal className="h-4 w-4" />
                 </DropdownMenuTrigger>

@@ -1,7 +1,8 @@
+import type { CourseWorkspaceStage } from '@/lib/course-management';
 import { Actions, Resources, Scopes } from '@/types/permissions';
-import { cleanCourseUuid, type CourseWorkspaceStage } from '@/lib/course-management';
 import { getCourseUserRights } from '@services/courses/courses';
 import { requireAuth, sessionCan } from '@/lib/server-auth';
+import { cleanCourseUuid } from '@/lib/course-management';
 import { redirect } from 'next/navigation';
 
 export interface CourseWorkspaceCapabilities {
@@ -64,7 +65,10 @@ export async function getCourseWorkspaceCapabilitiesForCourse(
     redirect(`/orgs/${orgslug}/unauthorized`);
   }
 
-  const rights = (await getCourseUserRights(`course_${cleanCourseUuid(courseuuid)}`, accessToken)) as CourseRightsResponse;
+  const rights = (await getCourseUserRights(
+    `course_${cleanCourseUuid(courseuuid)}`,
+    accessToken,
+  )) as CourseRightsResponse;
   const capabilities = mapCourseRightsToCapabilities(session, rights);
 
   if (!capabilities.canViewWorkspace) {

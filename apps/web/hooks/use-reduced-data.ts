@@ -72,7 +72,7 @@ export function useReducedData(): boolean {
     const handleNetworkChange = () => {
       const saveData = connection?.saveData === true;
       const slowConnection = connection?.effectiveType === 'slow-2g' || connection?.effectiveType === '2g';
-      setPrefersReducedData((saveData || slowConnection || mediaQuery.matches));
+      setPrefersReducedData(saveData || slowConnection || mediaQuery.matches);
     };
 
     if (connection) {

@@ -82,7 +82,11 @@ export function useSaveSection(options?: SaveSectionOptions) {
           showConflict(error?.detail || error?.message);
           return;
         }
-        const message = error?.message || invocationOptions?.errorMessage || options?.errorMessage || 'Failed to save. Please try again.';
+        const message =
+          error?.message ||
+          invocationOptions?.errorMessage ||
+          options?.errorMessage ||
+          'Failed to save. Please try again.';
         options?.onError?.(message);
         toast.error(message);
       } finally {

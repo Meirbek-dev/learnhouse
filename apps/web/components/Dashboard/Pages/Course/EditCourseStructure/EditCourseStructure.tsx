@@ -10,15 +10,15 @@ import {
 } from '@/components/ui/dialog';
 import { createChapter, updateCourseOrderStructure } from '@services/courses/chapters';
 import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import NewChapterModal from '@components/Objects/Modals/Chapters/NewChapter';
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import NewChapterModal from '@components/Objects/Modals/Chapters/NewChapter';
+import { AlertTriangle, CheckCircle2, Hexagon, Loader2 } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { DragDropContext, Droppable } from '@hello-pangea/dnd';
 import { Button } from '@/components/ui/button';
 import { useTranslations } from 'next-intl';
-import { AlertTriangle, CheckCircle2, Hexagon, Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -169,9 +169,7 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
                     : t('curriculumChangesApplyImmediately')}
               </AlertTitle>
               <AlertDescription>
-                {structureStatus === 'error'
-                  ? t('refreshAfterError')
-                  : t('curriculumInlineFeedback')}
+                {structureStatus === 'error' ? t('refreshAfterError') : t('curriculumInlineFeedback')}
               </AlertDescription>
             </Alert>
           )}

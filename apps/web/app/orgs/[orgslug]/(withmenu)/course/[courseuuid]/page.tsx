@@ -1,8 +1,8 @@
 import { getOrganizationContextInfo } from '@services/organizations/orgs';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
+import { getOptionalSession } from '@/lib/get-optional-session';
 import { getCourseMetadata } from '@services/courses/courses';
 import type { Metadata } from 'next';
-import { getOptionalSession } from '@/lib/get-optional-session';
 
 import CourseClient from './course';
 

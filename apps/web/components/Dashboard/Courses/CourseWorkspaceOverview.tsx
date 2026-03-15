@@ -1,14 +1,19 @@
 'use client';
 
-import { buildCourseWorkspacePath, getCourseContentStats } from '@/lib/course-management';
-import { CourseStatusBadge, courseWorkflowCardClass, courseWorkflowMutedPanelClass, courseWorkflowSummaryCardClass } from './courseWorkflowUi';
+import {
+  CourseStatusBadge,
+  courseWorkflowCardClass,
+  courseWorkflowMutedPanelClass,
+  courseWorkflowSummaryCardClass,
+} from './courseWorkflowUi';
 import { AlertTriangle, ArrowRight, CheckCircle2, FileStack, Globe, Users } from 'lucide-react';
+import { buildCourseWorkspacePath, getCourseContentStats } from '@/lib/course-management';
 import type { CourseWorkspaceCapabilities } from '@/lib/course-management-server';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { Button } from '@/components/ui/button';
-import { useTranslations } from 'next-intl';
 import AppLink from '@/components/ui/AppLink';
+import { useTranslations } from 'next-intl';
 
 export default function CourseWorkspaceOverview({
   orgslug,
@@ -23,7 +28,7 @@ export default function CourseWorkspaceOverview({
   const tReadiness = useTranslations('DashPage.CourseManagement.Readiness');
   const course = useCourse();
   const stats = getCourseContentStats(course.courseStructure);
-  const readiness = course.readiness;
+  const { readiness } = course;
   const contributors = course.editorData.contributors.data ?? [];
   const certifications = course.editorData.certifications.data ?? [];
   const linkedUserGroups = course.editorData.linkedUserGroups.data ?? [];
@@ -35,7 +40,9 @@ export default function CourseWorkspaceOverview({
         <div className={`${courseWorkflowCardClass} p-6`}>
           <div className="flex items-start justify-between gap-4">
             <div>
-              <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('readyLabel')}</div>
+              <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                {t('readyLabel')}
+              </div>
               <h2 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">
                 {readiness.readyToPublish ? t('readyTitle') : t('notReadyTitle')}
               </h2>
@@ -68,7 +75,9 @@ export default function CourseWorkspaceOverview({
         </div>
 
         <div className={courseWorkflowSummaryCardClass}>
-          <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('workspacePulse')}</div>
+          <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            {t('workspacePulse')}
+          </div>
           <div className="mt-4 grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
             <div className={courseWorkflowMutedPanelClass}>
               <div className="text-muted-foreground">{t('chapters')}</div>
@@ -173,9 +182,7 @@ export default function CourseWorkspaceOverview({
             <div className={courseWorkflowMutedPanelClass}>
               <div className="font-medium text-foreground">{t('sections.certificate')}</div>
               <div className="mt-1">
-                {certifications.length > 0
-                  ? t('certificate.configured')
-                  : t('certificate.notConfigured')}
+                {certifications.length > 0 ? t('certificate.configured') : t('certificate.notConfigured')}
               </div>
             </div>
           </div>

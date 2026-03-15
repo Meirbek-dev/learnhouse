@@ -1,11 +1,16 @@
 'use client';
 
-import { getCourseReadinessSummary } from '@/lib/course-management';
-import { createEmptyCourseEditorBundle, getCourseEditorBundle, getCourseEditorBundleKey, getCourseMetadataKey } from '@services/courses/editor';
-import type { CourseEditorBundle } from '@services/courses/editor';
+import {
+  createEmptyCourseEditorBundle,
+  getCourseEditorBundle,
+  getCourseEditorBundleKey,
+  getCourseMetadataKey,
+} from '@services/courses/editor';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { createContext, use, useEffect, useMemo, useReducer } from 'react';
+import { getCourseReadinessSummary } from '@/lib/course-management';
+import type { CourseEditorBundle } from '@services/courses/editor';
+import PageLoading from '@components/Objects/Loaders/PageLoading';
 import ErrorUI from '@/components/Objects/Elements/Error/Error';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { useTranslations } from 'next-intl';

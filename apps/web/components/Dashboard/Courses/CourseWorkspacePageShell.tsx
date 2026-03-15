@@ -58,7 +58,7 @@ function CourseWorkspaceChrome({
   const t = useTranslations('DashPage.CourseManagement.Workspace');
   const course = useCourse();
   const hasDirtySections = Object.values(course.dirtySections).some(Boolean);
-  const readiness = course.readiness;
+  const { readiness } = course;
   const unsavedChangesGuard = useUnsavedChangesGuard(hasDirtySections, {
     interceptInAppNavigation: true,
     message: t('unsavedChangesWarning'),
@@ -92,9 +92,7 @@ function CourseWorkspaceChrome({
             <AlertDialogDescription>{unsavedChangesGuard.promptMessage}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>
-              {t('unsavedDialogStay')}
-            </AlertDialogCancel>
+            <AlertDialogCancel>{t('unsavedDialogStay')}</AlertDialogCancel>
             <AlertDialogAction
               variant="destructive"
               onClick={unsavedChangesGuard.confirmNavigation}

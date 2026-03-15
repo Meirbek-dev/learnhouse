@@ -3,6 +3,7 @@ import os
 from pydantic import BaseModel, ConfigDict
 from sqlmodel import SQLModel
 
+
 # Determine development mode from environment to avoid importing config at module import
 # time (which would create a circular import with config.config).
 def _parse_env_bool(value: str | None) -> bool:

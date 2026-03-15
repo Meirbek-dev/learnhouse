@@ -67,7 +67,7 @@ function parseSort(value: string | string[] | undefined): 'updated' | 'name' {
 function parsePreset(value: string | string[] | undefined): string {
   const raw = Array.isArray(value) ? value[0] : value;
   const valid = ['all', 'drafts', 'published', 'private', 'recent', 'attention'];
-  return valid.includes(raw ?? '') ? (raw!) : 'all';
+  return valid.includes(raw ?? '') ? raw! : 'all';
 }
 
 async function CoursesPage(props: {

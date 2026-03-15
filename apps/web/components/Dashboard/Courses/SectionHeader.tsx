@@ -1,7 +1,7 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
 import { CourseStatusBadge } from './courseWorkflowUi';
+import { Button } from '@/components/ui/button';
 import { useTranslations } from 'next-intl';
 
 interface SectionHeaderProps {

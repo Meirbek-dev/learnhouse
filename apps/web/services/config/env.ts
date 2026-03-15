@@ -91,7 +91,7 @@ const deriveCookieDomain = (inputUrl: string, explicitCookieDomain?: string) => 
   const manualDomain = getOptionalEnvValue(explicitCookieDomain);
   if (manualDomain) return manualDomain;
 
-  const hostname = new URL(inputUrl).hostname;
+  const { hostname } = new URL(inputUrl);
   return isUnsupportedCookieDomain(hostname) ? undefined : hostname;
 };
 
@@ -101,7 +101,7 @@ const mapIssues = (scope: 'public' | 'server', issues: unknown): ConfigIssue[] =
   }
 
   return issues.map((issue) => {
-    const typedIssue = issue as { message?: string; path?: Array<{ key?: string | number }> };
+    const typedIssue = issue as { message?: string; path?: { key?: string | number }[] };
     const key = typedIssue.path?.find((segment) => typeof segment.key === 'string')?.key;
     return {
       scope,

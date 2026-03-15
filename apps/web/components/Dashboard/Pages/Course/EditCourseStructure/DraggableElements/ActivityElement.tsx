@@ -10,12 +10,6 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import {
   AlertTriangle,
   Backpack,
   ClipboardList,
@@ -35,8 +29,14 @@ import {
   Video,
   X,
 } from 'lucide-react';
-import { CourseWorkflowBadge } from '@components/Dashboard/Courses/courseWorkflowUi';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { deleteAssignmentUsingActivityUUID, getAssignmentFromActivityUUID } from '@services/courses/assignments';
+import { CourseWorkflowBadge } from '@components/Dashboard/Courses/courseWorkflowUi';
 import { deleteActivity, updateActivity } from '@services/courses/activities';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import ToolTip from '@/components/Objects/Elements/Tooltip/Tooltip';
@@ -45,11 +45,11 @@ import { useCourse } from '@components/Contexts/CourseContext';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
-import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Draggable } from '@hello-pangea/dnd';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
+import { useState } from 'react';
 import { toast } from 'sonner';
 import { mutate } from 'swr';
 import useSWR from 'swr';
@@ -112,17 +112,20 @@ const ACTIVITY_CONFIG = {
   TYPE_DOCUMENT: {
     Icon: File,
     translationKey: 'document',
-    colorClass: 'border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300',
+    colorClass:
+      'border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-300',
   },
   TYPE_ASSIGNMENT: {
     Icon: Backpack,
     translationKey: 'assignment',
-    colorClass: 'border-violet-200 dark:border-violet-800 bg-violet-50 dark:bg-violet-950/30 text-violet-700 dark:text-violet-300',
+    colorClass:
+      'border-violet-200 dark:border-violet-800 bg-violet-50 dark:bg-violet-950/30 text-violet-700 dark:text-violet-300',
   },
   TYPE_DYNAMIC: {
     Icon: Sparkles,
     translationKey: 'dynamic',
-    colorClass: 'border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300',
+    colorClass:
+      'border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300',
   },
   TYPE_EXAM: {
     Icon: ClipboardList,
@@ -238,10 +241,15 @@ const ActivityElement = ({ orgslug, activity, activityIndex, course_uuid }: Acti
     const toastId = toast.loading(t('updating'));
 
     try {
-      const response = await updateActivity({ ...activity, published: !activity.published }, activity.activity_uuid, access_token, {
-        courseUuid: course_uuid,
-        lastKnownUpdateDate: courseContext.courseStructure.update_date,
-      });
+      const response = await updateActivity(
+        { ...activity, published: !activity.published },
+        activity.activity_uuid,
+        access_token,
+        {
+          courseUuid: course_uuid,
+          lastKnownUpdateDate: courseContext.courseStructure.update_date,
+        },
+      );
       if (!response.success) {
         throw Object.assign(new Error(response.data?.detail || t('updateFailed')), {
           status: response.status,
@@ -413,7 +421,13 @@ const ActivityElement = ({ orgslug, activity, activityIndex, course_uuid }: Acti
             />
             <DropdownMenu>
               <DropdownMenuTrigger
-                render={<Button size="sm" variant="ghost" className="h-8 w-8 p-0" />}
+                render={
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-8 w-8 p-0"
+                  />
+                }
               >
                 <MoreHorizontal className="h-4 w-4" />
               </DropdownMenuTrigger>
@@ -437,7 +451,10 @@ const ActivityElement = ({ orgslug, activity, activityIndex, course_uuid }: Acti
                   {t('previewTooltip')}
                 </DropdownMenuItem>
                 {canUpdate ? (
-                  <DropdownMenuItem onSelect={handleTogglePublish} disabled={isUpdatingPublish}>
+                  <DropdownMenuItem
+                    onSelect={handleTogglePublish}
+                    disabled={isUpdatingPublish}
+                  >
                     {activity.published ? <Lock className="mr-2 h-4 w-4" /> : <Globe className="mr-2 h-4 w-4" />}
                     {activity.published ? t('unpublish') : t('publish')}
                   </DropdownMenuItem>
@@ -543,7 +560,13 @@ const ActivityEditButton = ({
         size="sm"
         variant="outline"
         nativeButton={false}
-        render={<a href={editUrl} target="_blank" rel="noopener noreferrer" />}
+        render={
+          <a
+            href={editUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+          />
+        }
       >
         <FilePenLine className="h-3.5 w-3.5" />
         {!isMobile && <span className="ml-1.5 text-xs">{t('editPageButton')}</span>}
@@ -586,7 +609,13 @@ const ActivityEditButton = ({
         size="sm"
         variant="outline"
         nativeButton={false}
-        render={<a href={editUrl} target="_blank" rel="noopener noreferrer" />}
+        render={
+          <a
+            href={editUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+          />
+        }
       >
         <FilePenLine className="h-3.5 w-3.5" />
         {!isMobile && <span className="ml-1.5 text-xs">{t('editAssignmentButton')}</span>}
@@ -606,7 +635,13 @@ const ActivityEditButton = ({
         size="sm"
         variant="outline"
         nativeButton={false}
-        render={<a href={editUrl} target="_blank" rel="noopener noreferrer" />}
+        render={
+          <a
+            href={editUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+          />
+        }
       >
         <FilePenLine className="h-3.5 w-3.5" />
         {!isMobile && <span className="ml-1.5 text-xs">{t('configureButton')}</span>}

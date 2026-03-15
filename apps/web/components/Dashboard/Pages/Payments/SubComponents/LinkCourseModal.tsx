@@ -162,7 +162,9 @@ export default function LinkCourseModal({ productId, onSuccess }: LinkCourseModa
           />
         ))}
 
-        {filteredCourses.length === 0 && <div className="py-6 text-center text-muted-foreground">{t('noCoursesFound')}</div>}
+        {filteredCourses.length === 0 && (
+          <div className="py-6 text-center text-muted-foreground">{t('noCoursesFound')}</div>
+        )}
       </div>
     </div>
   );

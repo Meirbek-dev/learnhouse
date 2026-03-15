@@ -63,7 +63,7 @@ export default async function GamificationDashboard({ orgId }: GamificationDashb
               <div>
                 <Leaderboard
                   entries={leaderboardData.entries}
-                  currentUserId={userId ? userId : undefined}
+                  currentUserId={userId || undefined}
                   userRank={dashboardData.user_rank}
                 />
               </div>

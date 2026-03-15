@@ -77,8 +77,12 @@ def install(
 
         # Create Organization User
         print("Creating Ashyq Bilim user...")
-        print(f"Using email from PLATFORM_INITIAL_ADMIN_EMAIL environment variable: {admin_email}")
-        print("Using password from PLATFORM_INITIAL_ADMIN_PASSWORD environment variable")
+        print(
+            f"Using email from PLATFORM_INITIAL_ADMIN_EMAIL environment variable: {admin_email}"
+        )
+        print(
+            "Using password from PLATFORM_INITIAL_ADMIN_PASSWORD environment variable"
+        )
         user = UserCreate(username="Admin", email=admin_email, password=admin_password)
         asyncio.run(install_create_organization_user(user, "openu", db_session))
         print("Ashyq Bilim user created ✅")

@@ -8,11 +8,11 @@ import { getOrgThumbnailMediaDirectory } from '@services/media/media';
 import ProtectedText from '@components/Objects/ContentPlaceHolder';
 import { getOrgCollections } from '@services/courses/collections';
 import { Actions, Resources, Scopes } from '@/types/permissions';
+import { getOptionalSession } from '@/lib/get-optional-session';
 import { getAbsoluteUrl } from '@services/config/config';
 import { getTranslations } from 'next-intl/server';
 import Link from '@components/ui/AppLink';
 import type { Metadata } from 'next';
-import { getOptionalSession } from '@/lib/get-optional-session';
 
 interface MetadataProps {
   params: Promise<{ orgslug: string; courseid: number }>;

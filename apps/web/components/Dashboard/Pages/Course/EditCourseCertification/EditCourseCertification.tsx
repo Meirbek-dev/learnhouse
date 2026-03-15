@@ -10,11 +10,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { AlertTriangle, Award, FileText, Sparkles } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useSaveSection } from '@/hooks/useSaveSection';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { useDirtySection } from '@/hooks/useDirtySection';
+import { useSaveSection } from '@/hooks/useSaveSection';
 import { Separator } from '@/components/ui/separator';
+import CertificatePreview from './CertificatePreview';
 import { Textarea } from '@/components/ui/textarea';
 import { useForm, useWatch } from 'react-hook-form';
 import { Spinner } from '@components/ui/spinner';
@@ -25,7 +26,6 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { useTranslations } from 'next-intl';
 import * as v from 'valibot';
-import CertificatePreview from './CertificatePreview';
 
 interface EditCourseCertificationProps {
   orgslug: string;
@@ -258,44 +258,47 @@ const EditCourseCertification = (props: EditCourseCertificationProps) => {
 
     setError('');
 
-    await saveWithEditorRefresh(async () => {
-      if (values.enable_certification) {
-        if (existingCertification) {
-          return updateCertification(existingCertification.certification_uuid, config, access_token, {
+    await saveWithEditorRefresh(
+      async () => {
+        if (values.enable_certification) {
+          if (existingCertification) {
+            return updateCertification(existingCertification.certification_uuid, config, access_token, {
+              courseUuid: courseStructure.course_uuid,
+              orgSlug: props.orgslug,
+              lastKnownUpdateDate: courseStructure.update_date,
+            });
+          }
+
+          return createCertification(courseStructure.id, config, access_token, {
             courseUuid: courseStructure.course_uuid,
             orgSlug: props.orgslug,
             lastKnownUpdateDate: courseStructure.update_date,
           });
         }
 
-        return createCertification(courseStructure.id, config, access_token, {
+        if (existingCertification) {
+          return deleteCertification(existingCertification.certification_uuid, access_token, {
             courseUuid: courseStructure.course_uuid,
             orgSlug: props.orgslug,
             lastKnownUpdateDate: courseStructure.update_date,
           });
-      }
+        }
 
-      if (existingCertification) {
-        return deleteCertification(existingCertification.certification_uuid, access_token, {
-          courseUuid: courseStructure.course_uuid,
-          orgSlug: props.orgslug,
-          lastKnownUpdateDate: courseStructure.update_date,
-        });
-      }
-
-      return { success: true };
-    }, {
-      successMessage: values.enable_certification
-        ? hasExistingCertification
-          ? tCommon('saved')
-          : t('certificationCreated')
-        : t('certificationRemoved'),
-      onSuccess: () => {
-        initialValuesRef.current = values;
-        markClean();
-        setError('');
+        return { success: true };
       },
-    });
+      {
+        successMessage: values.enable_certification
+          ? hasExistingCertification
+            ? tCommon('saved')
+            : t('certificationCreated')
+          : t('certificationRemoved'),
+        onSuccess: () => {
+          initialValuesRef.current = values;
+          markClean();
+          setError('');
+        },
+      },
+    );
   });
 
   if (isLoading || !courseStructure || (course.isEditorDataLoading && editorData.certifications.data === null)) {

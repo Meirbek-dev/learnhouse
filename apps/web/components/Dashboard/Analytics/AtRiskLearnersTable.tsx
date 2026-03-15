@@ -48,7 +48,9 @@ export default function AtRiskLearnersTable({
         return (
           <div>
             <div className="font-medium text-foreground">{row.original.user_display_name}</div>
-            <div className="text-xs text-muted-foreground">{t('atRisk.userNumber', { userId: row.original.user_id })}</div>
+            <div className="text-xs text-muted-foreground">
+              {t('atRisk.userNumber', { userId: row.original.user_id })}
+            </div>
             {courseHref && (
               <Link
                 href={courseHref}

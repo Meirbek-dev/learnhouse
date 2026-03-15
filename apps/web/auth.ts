@@ -5,10 +5,10 @@ import {
   loginWithOAuthToken,
 } from '@/services/auth/auth';
 import { SESSION_CACHE_MAX_SIZE, SESSION_CACHE_TTL_MS, TOKEN_REFRESH_BUFFER_MS } from '@/lib/constants';
-import { getAbsoluteUrl } from '@/services/config/config';
 import type { NextAuthConfig, NextAuthResult, Session } from 'next-auth';
 import { getResponseMetadata } from '@/services/utils/ts/requests';
 import Credentials from 'next-auth/providers/credentials';
+import { getAbsoluteUrl } from '@/services/config/config';
 import { getServerConfig } from '@/services/config/env';
 import Google from 'next-auth/providers/google';
 import type { JWT } from 'next-auth/jwt';
@@ -409,11 +409,9 @@ export const handlers: AuthHandlers = {
   },
 };
 
-export const signIn = ((...args: Parameters<SignInFunction>) =>
-  getNextAuthResult().signIn(...args)) as SignInFunction;
+export const signIn = ((...args: Parameters<SignInFunction>) => getNextAuthResult().signIn(...args)) as SignInFunction;
 
 export const signOut = ((...args: Parameters<SignOutFunction>) =>
   getNextAuthResult().signOut(...args)) as SignOutFunction;
 
-export const auth = ((...args: Parameters<AuthFunction>) =>
-  getNextAuthResult().auth(...args)) as AuthFunction;
+export const auth = ((...args: Parameters<AuthFunction>) => getNextAuthResult().auth(...args)) as AuthFunction;

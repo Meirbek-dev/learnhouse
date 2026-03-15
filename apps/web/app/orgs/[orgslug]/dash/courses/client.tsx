@@ -25,24 +25,24 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { AlertTriangle, LayoutGrid, List, MoreHorizontal, Search, Sparkles, Trash2, Workflow, X } from 'lucide-react';
+import { CourseStatusBadge, courseWorkflowSummaryCardClass } from '@components/Dashboard/Courses/courseWorkflowUi';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import CourseThumbnail, { removeCoursePrefix } from '@components/Objects/Thumbnails/CourseThumbnail';
-import type { Course } from '@components/Objects/Thumbnails/CourseThumbnail';
 import { deleteCourseFromBackend, updateCourseAccess } from '@services/courses/courses';
 import { Actions, Resources, Scopes, usePermissions } from '@/components/Security';
-import { CourseStatusBadge, courseWorkflowSummaryCardClass } from '@components/Dashboard/Courses/courseWorkflowUi';
 import { useCallback, useEffect, useMemo, useState, useTransition } from 'react';
+import type { Course } from '@components/Objects/Thumbnails/CourseThumbnail';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
 import type { ColumnDef } from '@tanstack/react-table';
-import { useTranslations } from 'next-intl';
 import { Checkbox } from '@/components/ui/checkbox';
 import DataTable from '@/components/ui/data-table';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AppLink from '@/components/ui/AppLink';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
 interface ManageableCourse extends Course {
@@ -164,8 +164,7 @@ const CoursesHome = ({
     selectableVisibleCourses.every((course) => selectedCourseUuids.includes(course.course_uuid));
 
   const someVisibleSelected =
-    !allVisibleSelected &&
-    selectableVisibleCourses.some((course) => selectedCourseUuids.includes(course.course_uuid));
+    !allVisibleSelected && selectableVisibleCourses.some((course) => selectedCourseUuids.includes(course.course_uuid));
 
   const headerCheckboxState = allVisibleSelected ? true : someVisibleSelected ? ('indeterminate' as const) : false;
 
@@ -217,13 +216,16 @@ const CoursesHome = ({
         );
 
         const successCount = results.filter(
-          (result): result is PromiseFulfilledResult<any> =>
-            result.status === 'fulfilled' && result.value?.success,
+          (result): result is PromiseFulfilledResult<any> => result.status === 'fulfilled' && result.value?.success,
         ).length;
         const failedCount = targetCourses.length - successCount;
 
         if (successCount > 0) {
-          toast.success(nextPublic ? t('toasts.published', { count: successCount }) : t('toasts.movedPrivate', { count: successCount }));
+          toast.success(
+            nextPublic
+              ? t('toasts.published', { count: successCount })
+              : t('toasts.movedPrivate', { count: successCount }),
+          );
           setSelectedCourseUuids([]);
           router.refresh();
         }
@@ -435,7 +437,9 @@ const CoursesHome = ({
         meta: { label: t('table.updated') },
         cell: ({ row }) => (
           <div className="text-sm text-muted-foreground">
-            {row.original.update_date ? new Date(row.original.update_date).toLocaleDateString() : t('table.unknownDate')}
+            {row.original.update_date
+              ? new Date(row.original.update_date).toLocaleDateString()
+              : t('table.unknownDate')}
           </div>
         ),
       },
@@ -452,7 +456,16 @@ const CoursesHome = ({
         ),
       },
     ],
-    [headerCheckboxState, canDeleteCourse, canManageCourse, courseReadinessMap, orgslug, selectedCourseUuids, t, toggleAllVisibleCourses],
+    [
+      headerCheckboxState,
+      canDeleteCourse,
+      canManageCourse,
+      courseReadinessMap,
+      orgslug,
+      selectedCourseUuids,
+      t,
+      toggleAllVisibleCourses,
+    ],
   );
 
   const presets = [
@@ -472,11 +485,11 @@ const CoursesHome = ({
         <div className="mt-4 rounded-xl border bg-card p-6 shadow-sm">
           <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
             <div className="max-w-3xl">
-              <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('header.label')}</div>
+              <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                {t('header.label')}
+              </div>
               <h1 className="mt-2 text-4xl font-semibold tracking-tight text-foreground">{t('header.title')}</h1>
-              <p className="mt-3 text-sm leading-6 text-muted-foreground">
-                {t('header.description')}
-              </p>
+              <p className="mt-3 text-sm leading-6 text-muted-foreground">{t('header.description')}</p>
             </div>
 
             <div className="flex flex-wrap gap-3">
@@ -505,7 +518,9 @@ const CoursesHome = ({
                 key={card.label}
                 className={courseWorkflowSummaryCardClass}
               >
-                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">{card.label}</div>
+                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                  {card.label}
+                </div>
                 <div className="mt-2 text-3xl font-semibold text-foreground">{card.value}</div>
                 <div className="mt-1 text-sm text-muted-foreground">{card.detail}</div>
               </div>

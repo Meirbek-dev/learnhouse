@@ -9,20 +9,9 @@ export type CourseWorkspaceStage =
   | 'certificate'
   | 'review';
 
-export type CourseReadinessItemId =
-  | 'details'
-  | 'media'
-  | 'curriculum'
-  | 'collaboration'
-  | 'access'
-  | 'certificate';
+export type CourseReadinessItemId = 'details' | 'media' | 'curriculum' | 'collaboration' | 'access' | 'certificate';
 
-export type CourseManagementBadgeId =
-  | 'public'
-  | 'private'
-  | 'readyToPublish'
-  | 'needsAttention'
-  | 'noActivitiesYet';
+export type CourseManagementBadgeId = 'public' | 'private' | 'readyToPublish' | 'needsAttention' | 'noActivitiesYet';
 
 export interface CourseChecklistItem {
   id: CourseReadinessItemId;

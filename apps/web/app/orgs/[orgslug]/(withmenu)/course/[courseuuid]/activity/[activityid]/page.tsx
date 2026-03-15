@@ -1,9 +1,9 @@
 import { getActivityWithAuthHeader } from '@services/courses/activities';
+import { getOptionalSession } from '@/lib/get-optional-session';
 import { getCourseMetadata } from '@services/courses/courses';
 import { getTranslations } from 'next-intl/server';
 import { jetBrainsMono } from '@/lib/fonts';
 import type { Metadata } from 'next';
-import { getOptionalSession } from '@/lib/get-optional-session';
 
 import ActivityClient from './activity';
 

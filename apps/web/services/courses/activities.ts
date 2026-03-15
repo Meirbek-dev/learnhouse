@@ -105,7 +105,7 @@ async function uploadFormData(
       try {
         const errorData = await result.json();
         if (typeof errorData?.detail === 'string') {
-          detail = errorData.detail;
+          ({ detail } = errorData);
         }
       } catch {
         // Ignore JSON parse failures and preserve the generic message.
@@ -151,7 +151,7 @@ async function uploadFormData(
         try {
           const errorData = JSON.parse(xhr.responseText || '{}');
           if (typeof errorData?.detail === 'string') {
-            detail = errorData.detail;
+            ({ detail } = errorData);
           }
         } catch {
           // Ignore parse failures and preserve the generic message.
@@ -241,7 +241,7 @@ async function createVideoActivityChunked(
     try {
       const errorData = await result.json();
       if (typeof errorData?.detail === 'string') {
-        detail = errorData.detail;
+        ({ detail } = errorData);
       }
     } catch {
       // Ignore JSON parse failures and preserve the generic message.

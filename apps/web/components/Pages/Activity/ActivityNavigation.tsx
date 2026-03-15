@@ -1,6 +1,6 @@
 'use client';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { getAbsoluteUrl } from '@services/config/config';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';

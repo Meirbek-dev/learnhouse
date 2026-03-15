@@ -21,19 +21,19 @@ import {
 } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@components/ui/table';
 import LinkToUserGroup from '@components/Objects/Modals/Dash/EditCourseAccess/LinkToUserGroup';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { AlertTriangle, Globe, Loader2, SquareUserRound, Users, X } from 'lucide-react';
-import { unLinkResourcesToUserGroup } from '@services/usergroups/usergroups';
 import { CourseChoiceCard } from '@components/Dashboard/Courses/courseWorkflowUi';
-import { SectionHeader } from '@components/Dashboard/Courses/SectionHeader';
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { RadioGroup } from '@/components/ui/radio-group';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { unLinkResourcesToUserGroup } from '@services/usergroups/usergroups';
+import { SectionHeader } from '@components/Dashboard/Courses/SectionHeader';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { useEffect, useRef, useState, useTransition } from 'react';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { updateCourseAccess } from '@services/courses/courses';
 import { useDirtySection } from '@/hooks/useDirtySection';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { RadioGroup } from '@/components/ui/radio-group';
 import { useSaveSection } from '@/hooks/useSaveSection';
 import { Button } from '@/components/ui/button';
 import { useTranslations } from 'next-intl';
@@ -110,9 +110,7 @@ const EditCourseAccess = (props: EditCourseAccessProps) => {
           <Alert className="border-border bg-muted/40">
             <Globe className="size-4" />
             <AlertTitle>{t('accessPolicyStagedTitle')}</AlertTitle>
-            <AlertDescription>
-              {t('accessPolicyStagedDescription')}
-            </AlertDescription>
+            <AlertDescription>{t('accessPolicyStagedDescription')}</AlertDescription>
           </Alert>
         </CardHeader>
         <CardContent>
@@ -181,9 +179,7 @@ const UserGroupsSection = ({
         <Alert className="border-border bg-muted/40">
           <Users className="size-4" />
           <AlertTitle>{t('userGroupLinksImmediateTitle')}</AlertTitle>
-          <AlertDescription>
-            {t('userGroupLinksImmediateDescription')}
-          </AlertDescription>
+          <AlertDescription>{t('userGroupLinksImmediateDescription')}</AlertDescription>
         </Alert>
       </CardHeader>
       <CardContent className="space-y-4">

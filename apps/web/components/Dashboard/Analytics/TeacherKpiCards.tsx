@@ -97,7 +97,9 @@ export default function TeacherKpiCards({ cards }: TeacherKpiCardsProps) {
           >
             <CardHeader className="flex-row items-start justify-between gap-4">
               <div className="min-w-0 flex-1">
-                <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{metric.label}</div>
+                <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                  {metric.label}
+                </div>
                 <CardTitle className="mt-3 text-3xl font-semibold text-foreground">{displayValue}</CardTitle>
                 {/* Benchmark baseline (issue 15) */}
                 {metric.benchmark !== null && metric.benchmark !== undefined && (

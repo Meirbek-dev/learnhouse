@@ -1,9 +1,9 @@
 import { getServerGamificationDashboard, getServerOrganizationLeaderboard } from '@/services/gamification/server';
 import { GamificationProvider } from '@/components/Contexts/GamificationContext';
 import { getOrganizationContextInfo } from '@services/organizations/orgs';
+import { getOptionalSession } from '@/lib/get-optional-session';
 import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
-import { getOptionalSession } from '@/lib/get-optional-session';
 
 import Trail from './trail';
 

@@ -1,11 +1,11 @@
 'use client';
 
-import type { LucideIcon } from 'lucide-react';
 import { AlertTriangle, CheckCircle2, CircleDot, Globe, Lock, Sparkles } from 'lucide-react';
-import { useTranslations } from 'next-intl';
 import { RadioGroupItem } from '@/components/ui/radio-group';
-import { Badge } from '@/components/ui/badge';
+import type { LucideIcon } from 'lucide-react';
 import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 
 type CourseWorkflowBadgeTone = 'default' | 'info' | 'success' | 'warning' | 'danger';
@@ -13,7 +13,8 @@ type CourseWorkflowBadgeTone = 'default' | 'info' | 'success' | 'warning' | 'dan
 const courseWorkflowBadgeToneClass: Record<CourseWorkflowBadgeTone, string> = {
   default: 'border-border bg-background text-foreground',
   info: 'border-border bg-muted/70 text-muted-foreground',
-  success: 'border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300',
+  success:
+    'border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300',
   warning: 'border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30 text-amber-800 dark:text-amber-200',
   danger: 'border-destructive/20 bg-destructive/10 text-destructive',
 };
@@ -50,27 +51,19 @@ export function CourseStatusBadge({
   status,
   className,
 }: {
-  status:
-    | 'public'
-    | 'private'
-    | 'ready'
-    | 'needs-review'
-    | 'attention'
-    | 'unsaved'
-    | 'live'
-    | 'draft';
+  status: 'public' | 'private' | 'ready' | 'needs-review' | 'attention' | 'unsaved' | 'live' | 'draft';
   className?: string;
 }) {
   const t = useTranslations('DashPage.CourseManagement.Workflow.status');
   const config = {
-    public: { label: t('public'), tone: 'success' as const, icon: Globe },
-    private: { label: t('private'), tone: 'info' as const, icon: Lock },
-    ready: { label: t('ready'), tone: 'success' as const, icon: CheckCircle2 },
+    'public': { label: t('public'), tone: 'success' as const, icon: Globe },
+    'private': { label: t('private'), tone: 'info' as const, icon: Lock },
+    'ready': { label: t('ready'), tone: 'success' as const, icon: CheckCircle2 },
     'needs-review': { label: t('needsReview'), tone: 'warning' as const, icon: AlertTriangle },
-    attention: { label: t('attention'), tone: 'warning' as const, icon: Sparkles },
-    unsaved: { label: t('unsavedChanges'), tone: 'warning' as const, icon: CircleDot },
-    live: { label: t('live'), tone: 'success' as const, icon: Globe },
-    draft: { label: t('draft'), tone: 'info' as const, icon: CircleDot },
+    'attention': { label: t('attention'), tone: 'warning' as const, icon: Sparkles },
+    'unsaved': { label: t('unsavedChanges'), tone: 'warning' as const, icon: CircleDot },
+    'live': { label: t('live'), tone: 'success' as const, icon: Globe },
+    'draft': { label: t('draft'), tone: 'info' as const, icon: CircleDot },
   }[status];
 
   return (
@@ -129,9 +122,7 @@ export function CourseChoiceCard({
       <div
         className={cn(
           'mt-0.5 flex size-11 shrink-0 items-center justify-center rounded-lg border',
-          checked
-            ? 'border-primary/30 bg-primary/10 text-primary'
-            : 'border-border bg-muted text-muted-foreground',
+          checked ? 'border-primary/30 bg-primary/10 text-primary' : 'border-border bg-muted text-muted-foreground',
         )}
       >
         <Icon className="size-5" />

@@ -153,7 +153,9 @@ export default function TeacherOverview({
             <h1 className="mt-3 max-w-3xl text-3xl font-semibold tracking-tight text-foreground md:text-4xl">
               {t('overview.heading')}
             </h1>
-            <p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground md:text-base">{t('overview.description')}</p>
+            <p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground md:text-base">
+              {t('overview.description')}
+            </p>
           </div>
           <div className="flex flex-wrap gap-2">
             <AnalyticsExportButton
@@ -218,14 +220,20 @@ export default function TeacherOverview({
           </CardHeader>
           <CardContent className="grid gap-3 sm:grid-cols-2">
             <div className="rounded-lg border bg-muted p-4">
-              <div className="text-xs uppercase tracking-wider text-muted-foreground">{t('overview.labelGenerated')}</div>
+              <div className="text-xs uppercase tracking-wider text-muted-foreground">
+                {t('overview.labelGenerated')}
+              </div>
               <div className="mt-2 text-lg font-semibold text-foreground">
                 {new Date(data.generated_at).toLocaleString(locale)}
               </div>
             </div>
             <div className="rounded-lg border bg-muted p-4">
-              <div className="text-xs uppercase tracking-wider text-muted-foreground">{t('overview.labelFreshness')}</div>
-              <div className="mt-2 text-lg font-semibold text-foreground">{formatFreshness(data.freshness_seconds)}</div>
+              <div className="text-xs uppercase tracking-wider text-muted-foreground">
+                {t('overview.labelFreshness')}
+              </div>
+              <div className="mt-2 text-lg font-semibold text-foreground">
+                {formatFreshness(data.freshness_seconds)}
+              </div>
             </div>
             <div className="rounded-lg border bg-muted p-4">
               <div className="text-xs uppercase tracking-wider text-muted-foreground">
@@ -291,7 +299,9 @@ export default function TeacherOverview({
             >
               {t('overview.previewLabel')}
             </Badge>
-            <span className="text-xs text-muted-foreground">{t('overview.showingCourses', { total: data.course_total })}</span>
+            <span className="text-xs text-muted-foreground">
+              {t('overview.showingCourses', { total: data.course_total })}
+            </span>
           </div>
           <Suspense fallback={<SectionFallback height="h-[320px]" />}>
             <CourseHealthTable

@@ -32,9 +32,9 @@ import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 // Import the new discussions component
 import CourseDiscussions from '@/components/discussions';
+import { getAbsoluteUrl } from '@services/config/config';
 // Import UI components
 import { Card, CardContent } from '@/components/ui/card';
-import { getAbsoluteUrl } from '@services/config/config';
 import { getTrailSwrKey } from '@services/courses/keys';
 import { Separator } from '@/components/ui/separator';
 import { useEffect, useMemo, useState } from 'react';

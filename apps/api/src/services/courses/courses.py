@@ -78,8 +78,7 @@ def _build_editable_course_insights(
             select(ResourceAuthor.resource_uuid, func.count(ResourceAuthor.id))
             .where(
                 ResourceAuthor.resource_uuid.in_(course_uuids),
-                ResourceAuthor.authorship_status
-                == ResourceAuthorshipStatusEnum.ACTIVE,
+                ResourceAuthor.authorship_status == ResourceAuthorshipStatusEnum.ACTIVE,
             )
             .group_by(ResourceAuthor.resource_uuid)
         ).all()
@@ -87,7 +86,9 @@ def _build_editable_course_insights(
     chapter_counts = {
         course_id: count
         for course_id, count in db_session.exec(
-            select(CourseChapter.course_id, func.count(CourseChapter.chapter_id.distinct()))
+            select(
+                CourseChapter.course_id, func.count(CourseChapter.chapter_id.distinct())
+            )
             .where(CourseChapter.course_id.in_(course_ids))
             .group_by(CourseChapter.course_id)
         ).all()
@@ -95,7 +96,10 @@ def _build_editable_course_insights(
     activity_counts = {
         course_id: count
         for course_id, count in db_session.exec(
-            select(ChapterActivity.course_id, func.count(ChapterActivity.activity_id.distinct()))
+            select(
+                ChapterActivity.course_id,
+                func.count(ChapterActivity.activity_id.distinct()),
+            )
             .where(ChapterActivity.course_id.in_(course_ids))
             .group_by(ChapterActivity.course_id)
         ).all()
@@ -103,7 +107,10 @@ def _build_editable_course_insights(
     linked_usergroup_counts = {
         resource_uuid: count
         for resource_uuid, count in db_session.exec(
-            select(UserGroupResource.resource_uuid, func.count(UserGroupResource.id.distinct()))
+            select(
+                UserGroupResource.resource_uuid,
+                func.count(UserGroupResource.id.distinct()),
+            )
             .where(UserGroupResource.resource_uuid.in_(course_uuids))
             .group_by(UserGroupResource.resource_uuid)
         ).all()
@@ -135,7 +142,11 @@ def _build_editable_course_insights(
             and (bool(course.public) or linked_usergroups > 0)
             and certifications > 0
         )
-        attention = not bool(course.thumbnail_image) or not has_description or activity_count == 0
+        attention = (
+            not bool(course.thumbnail_image)
+            or not has_description
+            or activity_count == 0
+        )
         insights[course.course_uuid] = {
             "ready": ready,
             "attention": attention,
@@ -190,15 +201,25 @@ async def list_editable_courses_orgslug(
     insights = _build_editable_course_insights(all_courses, db_session)
     summary = {
         "total": len(all_courses),
-        "ready": sum(1 for course in all_courses if insights.get(course.course_uuid, {}).get("ready")),
+        "ready": sum(
+            1
+            for course in all_courses
+            if insights.get(course.course_uuid, {}).get("ready")
+        ),
         "private": sum(1 for course in all_courses if not bool(course.public)),
-        "attention": sum(1 for course in all_courses if insights.get(course.course_uuid, {}).get("attention")),
+        "attention": sum(
+            1
+            for course in all_courses
+            if insights.get(course.course_uuid, {}).get("attention")
+        ),
     }
 
     filtered_courses = [
         course
         for course in all_courses
-        if _matches_editable_course_preset(course, insights.get(course.course_uuid, {}), preset)
+        if _matches_editable_course_preset(
+            course, insights.get(course.course_uuid, {}), preset
+        )
     ]
     offset = max(page - 1, 0) * limit
     return filtered_courses[offset : offset + limit], len(filtered_courses), summary
@@ -1316,7 +1337,9 @@ async def get_editable_courses_orgslug(
     offset = (page - 1) * limit
 
     if has_broad_update:
-        id_query = select(Course.id).join(Organization).where(Organization.slug == org_slug)
+        id_query = (
+            select(Course.id).join(Organization).where(Organization.slug == org_slug)
+        )
         if search_filter is not None:
             id_query = id_query.where(search_filter)
         id_query = _apply_course_sort(id_query, sort_by)
@@ -1330,8 +1353,7 @@ async def get_editable_courses_orgslug(
             .where(
                 ResourceAuthor.resource_uuid == Course.course_uuid,
                 ResourceAuthor.user_id == current_user.id,
-                ResourceAuthor.authorship_status
-                == ResourceAuthorshipStatusEnum.ACTIVE,
+                ResourceAuthor.authorship_status == ResourceAuthorshipStatusEnum.ACTIVE,
             )
             .exists()
         )

@@ -146,9 +146,7 @@ const LandingClassic = async ({
               <SectionHeader
                 title={t('Courses.title')}
                 type="cou"
-                action={
-                  <CreateCourseTrigger orgslug={orgslug} />
-                }
+                action={<CreateCourseTrigger orgslug={orgslug} />}
               />
 
               <div className="min-h-[200px]">

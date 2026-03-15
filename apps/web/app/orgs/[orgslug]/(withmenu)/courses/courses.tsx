@@ -1,9 +1,9 @@
 'use client';
 
-import { Actions, PermissionGuard, Resources, Scopes, usePermissions } from '@/components/Security';
-import CreateCourseTrigger from '@/components/Landings/CreateCourseTrigger';
 import TypeOfContentTitle from '@/components/Objects/Elements/Titles/TypeOfContentTitle';
 import GeneralWrapper from '@/components/Objects/Elements/Wrappers/GeneralWrapper';
+import { Actions, Resources, Scopes, usePermissions } from '@/components/Security';
+import CreateCourseTrigger from '@/components/Landings/CreateCourseTrigger';
 import CourseGridClient from '@components/Landings/CourseGridClient';
 
 import { useTranslations } from 'next-intl';

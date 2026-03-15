@@ -1,21 +1,21 @@
 'use client';
 
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { buildCourseWorkspacePath, cleanCourseUuid, prefixedCourseUuid } from '@/lib/course-management';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeft, ArrowRight, CheckCircle2, ChevronDown, Loader2, Sparkles } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { CourseChoiceCard, courseWorkflowSummaryCardClass } from './courseWorkflowUi';
 import { createNewCourse, getCourseMetadata } from '@services/courses/courses';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { RadioGroup } from '@/components/ui/radio-group';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { buildCourseWorkspacePath, cleanCourseUuid, prefixedCourseUuid } from '@/lib/course-management';
-import { CourseChoiceCard, courseWorkflowSummaryCardClass } from './courseWorkflowUi';
+import { useQueryState, useQueryStates, parseAsString } from 'nuqs';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { createChapter } from '@services/courses/chapters';
+import { useEffect, useMemo, useTransition } from 'react';
+import { RadioGroup } from '@/components/ui/radio-group';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { useEffect, useMemo, useTransition } from 'react';
 import { Input } from '@/components/ui/input';
 import { useTranslations } from 'next-intl';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useQueryState, useQueryStates, parseAsString } from 'nuqs';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
@@ -220,7 +220,9 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
       </div>
       <div>
         <div className="text-muted-foreground">{t('summary.visibility')}</div>
-        <div className="mt-1">{visibility === 'public' ? t('visibility.public.summary') : t('visibility.private.summary')}</div>
+        <div className="mt-1">
+          {visibility === 'public' ? t('visibility.public.summary') : t('visibility.private.summary')}
+        </div>
       </div>
       <div>
         <div className="text-muted-foreground">{t('summary.template')}</div>
@@ -254,11 +256,11 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
       <div className="mx-auto max-w-5xl space-y-6">
         {/* Header + step indicator */}
         <div className="rounded-xl border bg-card p-6 shadow-sm">
-          <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('header.label')}</div>
+          <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            {t('header.label')}
+          </div>
           <h1 className="mt-2 text-4xl font-semibold tracking-tight text-foreground">{t('header.title')}</h1>
-          <p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground">
-            {t('header.description')}
-          </p>
+          <p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground">{t('header.description')}</p>
 
           {/* Linear step indicator */}
           <div className="mt-5 flex items-center">
@@ -322,9 +324,7 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
               <div className="space-y-5">
                 <div>
                   <div className="text-sm font-semibold text-foreground">{t('steps.basics')}</div>
-                  <div className="mt-1 text-sm text-muted-foreground">
-                    {t('basics.description')}
-                  </div>
+                  <div className="mt-1 text-sm text-muted-foreground">{t('basics.description')}</div>
                 </div>
                 <div className="space-y-2">
                   <label
@@ -400,9 +400,7 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
               <div className="space-y-5">
                 <div>
                   <div className="text-sm font-semibold text-foreground">{t('steps.template')}</div>
-                  <div className="mt-1 text-sm text-muted-foreground">
-                    {t('template.description')}
-                  </div>
+                  <div className="mt-1 text-sm text-muted-foreground">{t('template.description')}</div>
                 </div>
 
                 <RadioGroup
@@ -415,18 +413,18 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
                   {[
                     {
                       value: 'blank',
-                        title: t('template.blank.title'),
-                        description: t('template.blank.description'),
+                      title: t('template.blank.title'),
+                      description: t('template.blank.description'),
                     },
                     {
                       value: 'starter',
-                        title: t('template.starter.title'),
-                        description: t('template.starter.description'),
+                      title: t('template.starter.title'),
+                      description: t('template.starter.description'),
                     },
                     {
                       value: 'outline',
-                        title: t('template.outline.title'),
-                        description: t('template.outline.description'),
+                      title: t('template.outline.title'),
+                      description: t('template.outline.description'),
                     },
                   ].map((option) => (
                     <CourseChoiceCard
@@ -436,7 +434,9 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
                       checked={template === option.value}
                       title={option.title}
                       description={option.description}
-                      icon={option.value === 'outline' ? ChevronDown : option.value === 'starter' ? Sparkles : CheckCircle2}
+                      icon={
+                        option.value === 'outline' ? ChevronDown : option.value === 'starter' ? Sparkles : CheckCircle2
+                      }
                       onSelect={(value) => {
                         void setTemplate(value as TemplateType);
                       }}
@@ -473,9 +473,7 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
                         ))}
                       </SelectContent>
                     </Select>
-                    <div className="text-sm text-muted-foreground">
-                      {t('template.sourceCourseHelp')}
-                    </div>
+                    <div className="text-sm text-muted-foreground">{t('template.sourceCourseHelp')}</div>
                   </div>
                 ) : null}
               </div>
@@ -486,9 +484,7 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
               <div className="space-y-5">
                 <div>
                   <div className="text-sm font-semibold text-foreground">{t('steps.launch')}</div>
-                  <div className="mt-1 text-sm text-muted-foreground">
-                    {t('launch.description')}
-                  </div>
+                  <div className="mt-1 text-sm text-muted-foreground">{t('launch.description')}</div>
                 </div>
 
                 <RadioGroup
@@ -501,13 +497,13 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
                   {[
                     {
                       value: 'overview',
-                        title: t('launch.overview.title'),
-                        description: t('launch.overview.description'),
+                      title: t('launch.overview.title'),
+                      description: t('launch.overview.description'),
                     },
                     {
                       value: 'curriculum',
-                        title: t('launch.curriculum.title'),
-                        description: t('launch.curriculum.description'),
+                      title: t('launch.curriculum.title'),
+                      description: t('launch.curriculum.description'),
                     },
                   ].map((option) => (
                     <CourseChoiceCard
@@ -563,7 +559,9 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
           {/* Desktop summary sidebar */}
           <div className="hidden xl:block">
             <div className={cn('sticky top-6', courseWorkflowSummaryCardClass)}>
-              <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t('summary.heading')}</div>
+              <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                {t('summary.heading')}
+              </div>
               <div className="mt-4">{summaryContent}</div>
             </div>
           </div>

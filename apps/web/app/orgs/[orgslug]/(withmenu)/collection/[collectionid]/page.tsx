@@ -2,11 +2,11 @@ import GeneralWrapper from '@/components/Objects/Elements/Wrappers/GeneralWrappe
 import { getOrganizationContextInfo } from '@services/organizations/orgs';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { getCollectionById } from '@services/courses/collections';
+import { getOptionalSession } from '@/lib/get-optional-session';
 import { getAbsoluteUrl } from '@services/config/config';
 import { getTranslations } from 'next-intl/server';
 import Link from '@/components/ui/ServerLink';
 import type { Metadata } from 'next';
-import { getOptionalSession } from '@/lib/get-optional-session';
 
 interface MetadataProps {
   params: Promise<{ orgslug: string; courseid: number; collectionid: string }>;

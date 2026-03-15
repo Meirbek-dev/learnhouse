@@ -20,7 +20,7 @@ const globalPromptState: {
 };
 
 function createGuardHistoryState() {
-  return { ...window.history.state, __unsavedChangesGuard: true };
+  return { ...globalThis.history.state, __unsavedChangesGuard: true };
 }
 
 export function useUnsavedChangesGuard(isDirty: boolean, options?: UnsavedChangesGuardOptions) {
@@ -153,10 +153,7 @@ export function useUnsavedChangesGuard(isDirty: boolean, options?: UnsavedChange
     }
 
     const handleDocumentClick = (event: MouseEvent) => {
-      if (
-        globalPromptState.ownerId !== null &&
-        globalPromptState.ownerId !== guardInstanceIdRef.current
-      ) {
+      if (globalPromptState.ownerId !== null && globalPromptState.ownerId !== guardInstanceIdRef.current) {
         return;
       }
 
@@ -172,7 +169,7 @@ export function useUnsavedChangesGuard(isDirty: boolean, options?: UnsavedChange
         return;
       }
 
-      const {target} = event;
+      const { target } = event;
       if (!(target instanceof Element)) {
         return;
       }
@@ -206,7 +203,7 @@ export function useUnsavedChangesGuard(isDirty: boolean, options?: UnsavedChange
       openPendingNavigation({ kind: 'link', href: nextUrl.toString() });
     };
 
-    if (window.history.state?.__unsavedChangesGuard !== true) {
+    if (globalThis.history.state?.__unsavedChangesGuard !== true) {
       globalThis.history.pushState(createGuardHistoryState(), '', globalThis.location.href);
     }
 
@@ -216,10 +213,7 @@ export function useUnsavedChangesGuard(isDirty: boolean, options?: UnsavedChange
         return;
       }
 
-      if (
-        globalPromptState.ownerId !== null &&
-        globalPromptState.ownerId !== guardInstanceIdRef.current
-      ) {
+      if (globalPromptState.ownerId !== null && globalPromptState.ownerId !== guardInstanceIdRef.current) {
         return;
       }
 
