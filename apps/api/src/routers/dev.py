@@ -1,11 +1,11 @@
 from fastapi import APIRouter
 
-from config.config import get_platform_config
+from config.config import get_settings
 
 router = APIRouter()
 
 
 @router.get("/config")
 async def config():
-    config = get_platform_config()
-    return config.model_dump()
+    settings = get_settings()
+    return settings.model_dump(exclude={"internal", "bootstrap", "integrations"})

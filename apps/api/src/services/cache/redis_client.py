@@ -59,9 +59,9 @@ def get_redis_client() -> redis.Redis | None:
     # Delay importing platform config so tests can import this module without
     # triggering heavier application imports (which may require optional deps).
     try:
-        from config.config import get_platform_config
+        from config.config import get_settings
 
-        cfg = get_platform_config()
+        cfg = get_settings()
         url = getattr(cfg.redis_config, "redis_connection_string", None)
         if not url:
             _logger.debug("no redis connection string configured")

@@ -1,14 +1,14 @@
 from sqlalchemy import create_engine, text
 from sqlmodel import Session
 
-from config.config import get_platform_config
+from config.config import get_settings
 
 
 def check_migration_health() -> None:
     """Fail startup when migrations are not applied."""
-    platform_config = get_platform_config()
+    settings = get_settings()
     engine = create_engine(
-        platform_config.database_config.sql_connection_string,
+        settings.database_config.sql_connection_string,
         echo=False,
         pool_pre_ping=True,
     )

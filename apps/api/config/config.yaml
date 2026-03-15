@@ -1,8 +1,8 @@
-contact_email: contact@cs-mooc.tou.edu.kz
+# Deprecated reference file.
+# Runtime settings are loaded from environment variables only.
+# Keep this file as human-readable documentation for old local defaults, not as an active source.
 
-# Local-development defaults only.
-# In non-development environments, set PLATFORM_DEVELOPMENT_MODE=false and provide
-# required values via environment variables instead of relying on this file.
+contact_email: contact@cs-mooc.tou.edu.kz
 
 general:
   development_mode: true
@@ -20,7 +20,7 @@ hosting_config:
   allowed_origins:
     - http://localhost:3000
     - http://localhost:3001
-  cookies_config:
+  cookie_config:
     domain: '.localhost'
   allowed_regexp: '\b((?:https?://)[^\s/$.?#].[^\s]*)\b'
   self_hosted: true

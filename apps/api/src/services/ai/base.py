@@ -42,7 +42,7 @@ except Exception as _e:
         _e,
     )
 
-from config.config import get_platform_config
+from config.config import get_settings
 from src.services.ai.cache_manager import get_ai_cache_manager
 from src.services.ai.chromadb_pool import get_chromadb_pool
 from src.services.ai.exceptions import (
@@ -177,7 +177,7 @@ class FastAIService:
 
     def __init__(self) -> None:
         self.text_splitter = OptimizedTextSplitter()
-        self.config = get_platform_config()
+        self.config = get_settings()
         self.cache_manager = get_ai_cache_manager()
 
     def _generate_content_hash(self, documents: list[str]) -> str:
@@ -592,7 +592,7 @@ def get_chat_session_history(
                 if user_id is not None
                 else f"aichat_{ULID()}"
             )
-        config = get_platform_config()
+        config = get_settings()
         redis_conn_string = config.redis_config.redis_connection_string
 
         chat_config = getattr(config.ai_config, "chat", None)

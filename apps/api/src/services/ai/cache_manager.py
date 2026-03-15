@@ -11,7 +11,7 @@ from typing import Any, TypeVar
 
 from cachetools import TTLCache
 
-from config.config import get_platform_config
+from config.config import get_settings
 
 logger = logging.getLogger(__name__)
 
@@ -182,8 +182,8 @@ class AICacheManager:
     def __init__(self) -> None:
         """Initialize cache manager with separate caches for different data types."""
 
-        platform_config = get_platform_config()
-        vector_config = getattr(platform_config.ai_config, "vector_store", None)
+        settings = get_settings()
+        vector_config = getattr(settings.ai_config, "vector_store", None)
 
         vector_ttl = getattr(vector_config, "collection_retention", 86400)
         vector_maxsize = max(100, getattr(vector_config, "chromadb_pool_size", 10) * 10)

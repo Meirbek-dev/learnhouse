@@ -3,7 +3,7 @@ from functools import lru_cache
 
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 
-from config.config import get_platform_config
+from config.config import get_settings
 
 logger = logging.getLogger(__name__)
 
@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 def get_embedding_function(model_name: str) -> OpenAIEmbeddings | None:
     """Get cached embedding function with optimized batch processing."""
     try:
-        config = get_platform_config()
+        config = get_settings()
         api_key = getattr(config.ai_config, "openai_api_key", None)
 
         if not api_key:
@@ -56,7 +56,7 @@ def get_llm(
 ) -> ChatOpenAI | None:
     """Get cached LLM instance with OpenAI configuration."""
     try:
-        config = get_platform_config()
+        config = get_settings()
         api_key = getattr(config.ai_config, "openai_api_key", None)
 
         if not api_key:

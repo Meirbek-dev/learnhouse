@@ -4,8 +4,6 @@ from datetime import UTC, datetime
 from fastapi import HTTPException
 from sqlmodel import Session, select
 from ulid import ULID
-
-from config.config import get_platform_config
 from src.db.organizations import Organization, OrganizationCreate
 from src.db.permission_enums import RoleSlug
 from src.db.users import User, UserCreate, UserRead

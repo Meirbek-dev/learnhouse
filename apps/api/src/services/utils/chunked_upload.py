@@ -12,8 +12,6 @@ from typing import Literal
 from fastapi import HTTPException, UploadFile
 from ulid import ULID
 
-from config.config import get_platform_config
-
 
 class ChunkedUploadSession:
     """Manages a chunked upload session."""

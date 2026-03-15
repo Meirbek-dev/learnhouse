@@ -1,11 +1,11 @@
 import pytest
 import sqlalchemy as sa
 
-from config.config import get_platform_config
+from config.config import get_settings
 
 
 def test_course_creation_update_columns_are_timestamptz() -> None:
-    cfg = get_platform_config()
+    cfg = get_settings()
     try:
         engine = sa.create_engine(
             cfg.database_config.sql_connection_string, future=True

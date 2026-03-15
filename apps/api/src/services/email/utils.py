@@ -2,7 +2,7 @@ import resend
 from pydantic import EmailStr
 from resend import Emails
 
-from config.config import get_platform_config
+from config.config import get_settings
 
 
 def send_email(to: EmailStr, subject: str, body: str) -> None:
@@ -10,17 +10,17 @@ def send_email(to: EmailStr, subject: str, body: str) -> None:
 
 
 def future_send_email(to: EmailStr, subject: str, body: str) -> Emails.SendResponse:
-    platform_config = get_platform_config()
+    settings = get_settings()
 
     params = {
         "from": "Ashyq Bilim <"
-        + platform_config.mailing_config.system_email_address
+        + settings.mailing_config.system_email_address
         + ">",
         "to": [to],
         "subject": subject,
         "html": body,
     }
 
-    resend.api_key = platform_config.mailing_config.resend_api_key
+    resend.api_key = settings.mailing_config.resend_api_key
 
     return resend.Emails.send(params)

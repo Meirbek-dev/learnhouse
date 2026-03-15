@@ -7,7 +7,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import ConfigDict, EmailStr
 from sqlmodel import Session
 
-from config.config import get_platform_config
+from config.config import get_settings
 from src.core.events.database import get_db_session
 from src.db.strict_base_model import PydanticStrictBaseModel
 from src.db.users import AnonymousUser, PublicUser, UserRead
@@ -53,9 +53,9 @@ def _set_access_cookie(response: Response, value: str) -> None:
     - secure=True: HTTPS only (when SSL is enabled)
     - samesite='lax': CSRF protection while allowing normal navigation
     """
-    platform_config = get_platform_config()
-    cookie_domain = platform_config.hosting_config.cookie_config.domain
-    is_ssl_enabled = platform_config.hosting_config.ssl
+    settings = get_settings()
+    cookie_domain = settings.hosting_config.cookie_config.domain
+    is_ssl_enabled = settings.hosting_config.ssl
 
     cookie_kwargs: dict[str, object] = {
         "httponly": True,  # ✅ Prevent XSS attacks
@@ -75,9 +75,9 @@ def _set_access_cookie(response: Response, value: str) -> None:
 
 
 def _set_refresh_cookie(response: Response, value: str) -> None:
-    platform_config = get_platform_config()
-    cookie_domain = platform_config.hosting_config.cookie_config.domain
-    is_ssl_enabled = platform_config.hosting_config.ssl
+    settings = get_settings()
+    cookie_domain = settings.hosting_config.cookie_config.domain
+    is_ssl_enabled = settings.hosting_config.ssl
 
     cookie_kwargs: dict[str, object] = {
         "httponly": True,
@@ -97,8 +97,8 @@ def _set_refresh_cookie(response: Response, value: str) -> None:
 
 
 def _clear_auth_cookies(response: Response) -> None:
-    platform_config = get_platform_config()
-    cookie_domain = platform_config.hosting_config.cookie_config.domain
+    settings = get_settings()
+    cookie_domain = settings.hosting_config.cookie_config.domain
 
     delete_kwargs: dict[str, object] = {}
     if cookie_domain:

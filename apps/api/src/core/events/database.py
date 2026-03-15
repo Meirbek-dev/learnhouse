@@ -10,7 +10,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.pool import QueuePool
 from sqlmodel import Session, SQLModel, create_engine
 
-from config.config import get_platform_config
+from config.config import get_settings
 
 # Configure logging
 logging.basicConfig(
@@ -138,8 +138,8 @@ def get_database_engine() -> Engine:
                 connect_args={"check_same_thread": False},
             )
         else:
-            platform_config = get_platform_config()
-            connection_string = platform_config.database_config.sql_connection_string
+            settings = get_settings()
+            connection_string = settings.database_config.sql_connection_string
 
             # Determine database type for optimization
             is_postgres = connection_string.startswith(
@@ -209,7 +209,7 @@ async def connect_to_db(app: FastAPI) -> None:
         logger.exception(f"Database initialization failed: {e}")
         # Log additional context for debugging
         logger.exception(
-            f"Connection string type: {type(get_platform_config().database_config.sql_connection_string)}"
+            f"Connection string type: {type(get_settings().database_config.sql_connection_string)}"
         )
         msg = f"Database connection failed: {e}"
         raise RuntimeError(msg) from e

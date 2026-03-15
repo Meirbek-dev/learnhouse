@@ -13,7 +13,7 @@ if TYPE_CHECKING:
     import chromadb
     from chromadb.config import Settings
 
-from config.config import get_platform_config
+from config.config import get_settings
 
 logger = logging.getLogger(__name__)
 
@@ -62,8 +62,8 @@ class ChromaDBPool:
 
     def _is_remote_mode(self) -> bool:
         """Return True when an external ChromaDB server is configured."""
-        config = get_platform_config()
-        chromadb_config = getattr(config.ai_config, "chromadb_config", None)
+        settings = get_settings()
+        chromadb_config = getattr(settings.ai_config, "chromadb_config", None)
         return bool(
             chromadb_config
             and isinstance(chromadb_config.db_host, str)
@@ -75,8 +75,8 @@ class ChromaDBPool:
         """Create a new HTTP client to the remote ChromaDB server."""
         import chromadb
 
-        config = get_platform_config()
-        chromadb_config = config.ai_config.chromadb_config
+        settings = get_settings()
+        chromadb_config = settings.ai_config.chromadb_config
         port = getattr(chromadb_config, "db_port", 8001)
         logger.info(
             "Creating ChromaDB HttpClient for %s:%d", chromadb_config.db_host, port
@@ -109,8 +109,8 @@ class ChromaDBPool:
                 import chromadb
                 from chromadb.config import Settings
 
-                config = get_platform_config()
-                persist_path = config.ai_config.chromadb_config.persist_path
+                settings = get_settings()
+                persist_path = settings.ai_config.chromadb_config.persist_path
                 settings = Settings(
                     anonymized_telemetry=False,
                     allow_reset=True,
@@ -211,9 +211,9 @@ def get_chromadb_pool() -> ChromaDBPool:
     if _chromadb_pool is None:
         with _chromadb_pool_lock:
             if _chromadb_pool is None:
-                config = get_platform_config()
+                settings = get_settings()
                 pool_size = getattr(
-                    getattr(config.ai_config, "vector_store", None),
+                    getattr(settings.ai_config, "vector_store", None),
                     "chromadb_pool_size",
                     10,
                 )

@@ -6,7 +6,7 @@ from pydantic import EmailStr
 from sqlmodel import Session, select
 from ulid import ULID
 
-from config.config import get_platform_config
+from config.config import get_settings
 from src.db.organizations import Organization, OrganizationRead
 from src.db.users import AnonymousUser, PublicUser, User, UserRead
 from src.security.security import generate_secure_code, security_hash_password
@@ -42,8 +42,8 @@ async def send_reset_password_code(
         )
 
     # Redis init
-    PLATFORM_CONFIG = get_platform_config()
-    redis_conn_string = PLATFORM_CONFIG.redis_config.redis_connection_string
+    settings = get_settings()
+    redis_conn_string = settings.redis_config.redis_connection_string
 
     if not redis_conn_string:
         raise HTTPException(
@@ -132,8 +132,8 @@ async def change_password_with_reset_code(
         )
 
     # Redis init
-    PLATFORM_CONFIG = get_platform_config()
-    redis_conn_string = PLATFORM_CONFIG.redis_config.redis_connection_string
+    settings = get_settings()
+    redis_conn_string = settings.redis_config.redis_connection_string
 
     if not redis_conn_string:
         raise HTTPException(

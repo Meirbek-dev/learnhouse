@@ -7,7 +7,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.engine.base import Engine
 from sqlmodel import Session, SQLModel, select
 
-from config.config import get_bootstrap_config, get_platform_config
+from config.config import get_settings
 from src.db.organizations import Organization, OrganizationCreate
 from src.db.users import User, UserCreate
 from src.services.analytics.rollups import refresh_teacher_analytics_rollups
@@ -25,9 +25,9 @@ def install(
     short: Annotated[bool, typer.Option(help="Install with predefined values")] = False,
 ) -> None:
     # Get the database session
-    platform_config = get_platform_config()
+    settings = get_settings()
     engine: Engine = create_engine(
-        platform_config.database_config.sql_connection_string,
+        settings.database_config.sql_connection_string,
         echo=False,
         pool_pre_ping=True,
     )
@@ -41,7 +41,7 @@ def install(
     print("Default elements installed ✅")
 
     if short:
-        bootstrap_config = get_bootstrap_config()
+        bootstrap_config = settings.bootstrap
         admin_email = bootstrap_config.initial_admin_email
         admin_password = bootstrap_config.initial_admin_password
 
@@ -67,7 +67,7 @@ def install(
             description="Ashyq Bilim",
             about="Ashyq Bilim - Образовательная платформа для онлайн-обучения",
             slug="openu",
-            email=platform_config.contact_email,
+            email=settings.contact_email,
             logo_image="",
             thumbnail_image="",
             label="Ashyq Bilim",
@@ -147,9 +147,9 @@ def refresh_analytics(
         str | None, typer.Option(help="Optional snapshot date in YYYY-MM-DD format")
     ] = None,
 ) -> None:
-    platform_config = get_platform_config()
+    settings = get_settings()
     engine: Engine = create_engine(
-        platform_config.database_config.sql_connection_string,
+        settings.database_config.sql_connection_string,
         echo=False,
         pool_pre_ping=True,
     )
@@ -168,9 +168,9 @@ def migrate_users_to_default_org() -> None:
     from src.db.permissions import Role, UserRole
 
     # Get the database session
-    platform_config = get_platform_config()
+    settings = get_settings()
     engine: Engine = create_engine(
-        platform_config.database_config.sql_connection_string,
+        settings.database_config.sql_connection_string,
         echo=False,
         pool_pre_ping=True,
     )

@@ -5,8 +5,6 @@ from datetime import UTC, datetime, timedelta
 import orjson
 from fastapi import HTTPException, Request
 from sqlmodel import Session, or_, select
-
-from config.config import get_platform_config
 from src.db.organizations import (
     Organization,
     OrganizationRead,

@@ -1,11 +1,9 @@
 import ipaddress
 import json
 from functools import lru_cache
-from pathlib import Path
-from typing import Annotated, ClassVar
+from typing import Annotated
 
 from pydantic import (
-    AliasChoices,
     EmailStr,
     Field,
     PostgresDsn,
@@ -14,18 +12,9 @@ from pydantic import (
     field_validator,
     model_validator,
 )
-from pydantic_settings import (
-    BaseSettings,
-    NoDecode,
-    PydanticBaseSettingsSource,
-    SettingsConfigDict,
-)
+from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 from src.db.strict_base_model import PydanticStrictBaseModel
-
-CONFIG_DIR = Path(__file__).resolve().parent
-API_DIR = CONFIG_DIR.parent
-ENV_FILE = API_DIR / ".env"
 
 _POSTGRES_DSN = TypeAdapter(PostgresDsn)
 _REDIS_DSN = TypeAdapter(RedisDsn)
@@ -69,32 +58,12 @@ def _strip_optional_string(value: str | None) -> str | None:
 
 
 class PlatformSectionSettings(BaseSettings):
-    yaml_section: ClassVar[str | None] = None
-
     model_config = SettingsConfigDict(
         case_sensitive=True,
-        env_file=str(ENV_FILE),
-        env_file_encoding="utf-8",
         env_ignore_empty=True,
         extra="ignore",
         populate_by_name=True,
     )
-
-    @classmethod
-    def settings_customise_sources(
-        cls,
-        settings_cls: type[BaseSettings],
-        init_settings: PydanticBaseSettingsSource,
-        env_settings: PydanticBaseSettingsSource,
-        dotenv_settings: PydanticBaseSettingsSource,
-        file_secret_settings: PydanticBaseSettingsSource,
-    ) -> tuple[PydanticBaseSettingsSource, ...]:
-        return (
-            init_settings,
-            env_settings,
-            dotenv_settings,
-            file_secret_settings,
-        )
 
 
 class CookieConfig(PydanticStrictBaseModel):
@@ -107,8 +76,6 @@ class CookieConfig(PydanticStrictBaseModel):
 
 
 class GeneralConfig(PlatformSectionSettings):
-    yaml_section = "general"
-
     development_mode: bool = Field(
         default=False,
         validation_alias="PLATFORM_DEVELOPMENT_MODE",
@@ -130,8 +97,6 @@ class GeneralConfig(PlatformSectionSettings):
 
 
 class SecurityConfig(PlatformSectionSettings):
-    yaml_section = "security"
-
     auth_jwt_secret_key: str = Field(
         min_length=1,
         validation_alias="PLATFORM_AUTH_JWT_SECRET_KEY",
@@ -153,8 +118,6 @@ class SecurityConfig(PlatformSectionSettings):
 class RBACConfig(PlatformSectionSettings):
     """RBAC configuration."""
 
-    yaml_section = "rbac"
-
     audit_logging_enabled: bool = Field(
         default=True,
         validation_alias="PLATFORM_RBAC_AUDIT_LOGGING_ENABLED",
@@ -170,8 +133,6 @@ class RBACConfig(PlatformSectionSettings):
 
 
 class ChromaDBConfig(PlatformSectionSettings):
-    yaml_section = "ai_config.chromadb_config"
-
     separate_db_enabled: bool = Field(
         default=False,
         validation_alias="PLATFORM_CHROMADB_SEPARATE",
@@ -180,10 +141,7 @@ class ChromaDBConfig(PlatformSectionSettings):
     db_port: int = Field(default=8000, validation_alias="PLATFORM_CHROMADB_PORT")
     persist_path: str = Field(
         default="./chromadb_data",
-        validation_alias=AliasChoices(
-            "PLATFORM_CHROMADB_PERSIST_PATH",
-            "CHROMADB_PERSIST_PATH",
-        ),
+        validation_alias="PLATFORM_CHROMADB_PERSIST_PATH",
     )
 
     @field_validator("db_host", mode="before")
@@ -205,8 +163,6 @@ class ChromaDBConfig(PlatformSectionSettings):
 
 
 class AIPerformanceConfig(PlatformSectionSettings):
-    yaml_section = "ai_config.performance"
-
     streaming_enabled: bool = True
     cache_enabled: bool = True
     max_concurrent_requests: int = 50
@@ -214,8 +170,6 @@ class AIPerformanceConfig(PlatformSectionSettings):
 
 
 class AICacheConfig(PlatformSectionSettings):
-    yaml_section = "ai_config.cache"
-
     vector_store_ttl: int = 3600
     response_cache_ttl: int = 1800
     embedding_cache_ttl: int = 7200
@@ -223,24 +177,18 @@ class AICacheConfig(PlatformSectionSettings):
 
 
 class AIVectorStoreConfig(PlatformSectionSettings):
-    yaml_section = "ai_config.vector_store"
-
     chromadb_pool_size: int = 10
     collection_retention: int = 86400
     embedding_batch_size: int = 8191
 
 
 class AIChatConfig(PlatformSectionSettings):
-    yaml_section = "ai_config.chat"
-
     history_window_size: int = 10
     max_history_length: int = 100
     message_retention: int = 86400
 
 
 class AIRootConfig(PlatformSectionSettings):
-    yaml_section = "ai_config"
-
     openai_api_key: str | None = Field(
         default=None,
         validation_alias="PLATFORM_OPENAI_API_KEY",
@@ -262,8 +210,6 @@ class AIConfig(PydanticStrictBaseModel):
 
 
 class HostingConfig(PlatformSectionSettings):
-    yaml_section = "hosting_config"
-
     domain: str = Field(validation_alias="PLATFORM_DOMAIN")
     ssl: bool = Field(default=False, validation_alias="PLATFORM_SSL")
     port: int = Field(default=8000, validation_alias="PLATFORM_PORT")
@@ -339,8 +285,6 @@ class HostingConfig(PlatformSectionSettings):
 
 
 class MailingConfig(PlatformSectionSettings):
-    yaml_section = "mailing_config"
-
     resend_api_key: str | None = Field(
         default=None,
         validation_alias="PLATFORM_RESEND_API_KEY",
@@ -357,8 +301,6 @@ class MailingConfig(PlatformSectionSettings):
 
 
 class DatabaseConfig(PlatformSectionSettings):
-    yaml_section = "database_config"
-
     sql_connection_string: str = Field(validation_alias="PLATFORM_SQL_CONNECTION_STRING")
 
     @field_validator("sql_connection_string", mode="before")
@@ -376,8 +318,6 @@ class DatabaseConfig(PlatformSectionSettings):
 
 
 class RedisConfig(PlatformSectionSettings):
-    yaml_section = "redis_config"
-
     redis_connection_string: str = Field(
         validation_alias="PLATFORM_REDIS_CONNECTION_STRING"
     )
@@ -397,8 +337,6 @@ class RedisConfig(PlatformSectionSettings):
 
 
 class InternalStripeConfig(PlatformSectionSettings):
-    yaml_section = "payments_config.stripe"
-
     stripe_secret_key: str | None = Field(
         default=None,
         validation_alias="PLATFORM_STRIPE_SECRET_KEY",
@@ -550,22 +488,6 @@ def get_settings() -> AppSettings:
         bootstrap=BootstrapConfig(),
         integrations=IntegrationsConfig(judge0=Judge0Config()),
     )
-
-
-def get_platform_config() -> PlatformConfig:
-    return get_settings()
-
-
-def get_internal_config() -> InternalConfig:
-    return get_settings().internal
-
-
-def get_bootstrap_config() -> BootstrapConfig:
-    return get_settings().bootstrap
-
-
-def get_judge0_config() -> Judge0Config:
-    return get_settings().integrations.judge0
 
 
 def reload_platform_config_cache() -> None:

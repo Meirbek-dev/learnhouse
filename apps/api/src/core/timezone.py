@@ -2,14 +2,14 @@
 Timezone utilities
 
 Provides a centralized way to get timezone-aware datetime objects
-based on the configured timezone in config.yaml
+based on the configured backend settings
 """
 
 from datetime import UTC, datetime, timezone
 
 from zoneinfo import ZoneInfo
 
-from config.config import get_platform_config
+from config.config import get_settings
 
 _CACHED_TIMEZONE: ZoneInfo | None = None
 
@@ -26,14 +26,14 @@ def get_timezone() -> ZoneInfo:
     if _CACHED_TIMEZONE is not None:
         return _CACHED_TIMEZONE
 
-    config = get_platform_config()
-    tz_name = config.general_config.timezone
+    settings = get_settings()
+    tz_name = settings.general_config.timezone
 
     try:
         _CACHED_TIMEZONE = ZoneInfo(tz_name)
     except Exception:
         # Fallback to UTC if timezone is invalid
-        _CACHED_TIMEZONE = ZoneInfo("UTC")
+        _CACHED_TIMEZONE = ZoneInfo("Asia/Almaty")
 
     return _CACHED_TIMEZONE
 
