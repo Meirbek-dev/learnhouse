@@ -5,7 +5,7 @@ import {
   loginWithOAuthToken,
 } from '@/services/auth/auth';
 import { SESSION_CACHE_MAX_SIZE, SESSION_CACHE_TTL_MS, TOKEN_REFRESH_BUFFER_MS } from '@/lib/constants';
-import { getTopLevelCookieDomain, getUriWithOrg } from '@/services/config/config';
+import { getAbsoluteUriWithOrg, getTopLevelCookieDomain } from '@/services/config/config';
 import type { NextAuthConfig, NextAuthResult, Session } from 'next-auth';
 import { getResponseMetadata } from '@/services/utils/ts/requests';
 import Credentials from 'next-auth/providers/credentials';
@@ -164,15 +164,15 @@ const createAuthConfig = (): NextAuthConfig => {
         clientId: serverEnv.PLATFORM_GOOGLE_CLIENT_ID,
         clientSecret: serverEnv.PLATFORM_GOOGLE_CLIENT_SECRET,
         authorization: {
-          params: { prompt: 'consent', access_type: 'offline', response_type: 'code' },
+          params: { scope: 'openid email profile' },
         },
       }),
     ],
 
     pages: {
-      signIn: getUriWithOrg('auth', '/'),
-      verifyRequest: getUriWithOrg('auth', '/'),
-      error: getUriWithOrg('auth', '/'),
+      signIn: getAbsoluteUriWithOrg('auth', '/'),
+      verifyRequest: getAbsoluteUriWithOrg('auth', '/'),
+      error: getAbsoluteUriWithOrg('auth', '/'),
     },
 
     cookies: {
