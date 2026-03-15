@@ -1,9 +1,10 @@
-import { NextResponse } from 'next/server';
+import { connection, NextResponse } from 'next/server';
 
 import { getServerEnv, publicEnv } from '@/services/config/env';
 
 export async function GET() {
-  const serverEnv = getServerEnv();
+  await connection();
+
   const diagnostics = {
     timestamp: new Date().toISOString(),
     nodeEnv: process.env.NODE_ENV,
@@ -11,20 +12,31 @@ export async function GET() {
   };
 
   try {
+    let serverEnv: ReturnType<typeof getServerEnv> | null = null;
+    let serverEnvError: string | null = null;
+
+    try {
+      serverEnv = getServerEnv();
+    } catch (error: any) {
+      serverEnvError = error.message;
+    }
+
     // Check environment variables
     diagnostics.checks.envVars = {
       status: 'checking',
       NEXT_PUBLIC_PLATFORM_API_URL: Boolean(publicEnv.NEXT_PUBLIC_PLATFORM_API_URL),
       NEXT_PUBLIC_PLATFORM_BACKEND_URL: Boolean(publicEnv.NEXT_PUBLIC_PLATFORM_BACKEND_URL),
       NEXT_PUBLIC_PLATFORM_DOMAIN: Boolean(publicEnv.NEXT_PUBLIC_PLATFORM_DOMAIN),
-      PLATFORM_INTERNAL_API_URL: Boolean(serverEnv.PLATFORM_INTERNAL_API_URL),
-      NEXTAUTH_SECRET: Boolean(serverEnv.NEXTAUTH_SECRET),
-      NEXTAUTH_URL: Boolean(serverEnv.NEXTAUTH_URL),
+      PLATFORM_INTERNAL_API_URL: Boolean(serverEnv?.PLATFORM_INTERNAL_API_URL),
+      NEXTAUTH_SECRET: Boolean(serverEnv?.NEXTAUTH_SECRET),
+      NEXTAUTH_URL: Boolean(serverEnv?.NEXTAUTH_URL),
+      serverEnvValid: serverEnvError === null,
+      serverEnvError,
     };
 
     // Check backend connectivity
     try {
-      const backendUrl = serverEnv.PLATFORM_INTERNAL_API_URL || publicEnv.NEXT_PUBLIC_PLATFORM_API_URL;
+      const backendUrl = serverEnv?.PLATFORM_INTERNAL_API_URL || publicEnv.NEXT_PUBLIC_PLATFORM_API_URL;
       const response = await fetch(`${backendUrl}health`, {
         signal: AbortSignal.timeout(5000),
       });
