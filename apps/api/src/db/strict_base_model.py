@@ -1,7 +1,12 @@
 import os
+from pathlib import Path
 
+from dotenv import load_dotenv
 from pydantic import BaseModel, ConfigDict
 from sqlmodel import SQLModel
+
+
+load_dotenv(Path(__file__).resolve().parents[2] / ".env")
 
 
 # Determine development mode from environment to avoid importing config at module import

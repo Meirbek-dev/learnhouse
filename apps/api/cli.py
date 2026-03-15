@@ -1,5 +1,4 @@
 import asyncio
-import os
 from datetime import date
 from typing import Annotated
 
@@ -8,7 +7,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.engine.base import Engine
 from sqlmodel import Session, SQLModel, select
 
-from config.config import get_platform_config
+from config.config import get_bootstrap_config, get_platform_config
 from src.db.organizations import Organization, OrganizationCreate
 from src.db.users import User, UserCreate
 from src.services.analytics.rollups import refresh_teacher_analytics_rollups
@@ -42,8 +41,9 @@ def install(
     print("Default elements installed ✅")
 
     if short:
-        admin_email = os.environ.get("PLATFORM_INITIAL_ADMIN_EMAIL")
-        admin_password: str | None = os.environ.get("PLATFORM_INITIAL_ADMIN_PASSWORD")
+        bootstrap_config = get_bootstrap_config()
+        admin_email = bootstrap_config.initial_admin_email
+        admin_password = bootstrap_config.initial_admin_password
 
         if not admin_email:
             print(
@@ -83,7 +83,11 @@ def install(
         print(
             "Using password from PLATFORM_INITIAL_ADMIN_PASSWORD environment variable"
         )
-        user = UserCreate(username="Admin", email=admin_email, password=admin_password)
+        user = UserCreate(
+            username="Admin",
+            email=str(admin_email),
+            password=admin_password,
+        )
         asyncio.run(install_create_organization_user(user, "openu", db_session))
         print("Ashyq Bilim user created ✅")
 
@@ -91,7 +95,7 @@ def install(
         print("Installation completed ✅")
         print()
         print("Login with the following credentials:")
-        print("email: " + admin_email)
+        print("email: " + str(admin_email))
         print("password: (the password you set in PLATFORM_INITIAL_ADMIN_PASSWORD)")
         print("⚠️ Remember to change the password after logging in ⚠️")
 

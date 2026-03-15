@@ -1,10 +1,13 @@
 contact_email: contact@cs-mooc.tou.edu.kz
 
-# This config is optimized for local development. You can change the values according to your needs.
+# Local-development defaults only.
+# In non-development environments, set PLATFORM_DEVELOPMENT_MODE=false and provide
+# required values via environment variables instead of relying on this file.
 
 general:
   development_mode: true
   logfire_enabled: false
+  timezone: UTC
 
 security:
   auth_jwt_secret_key: secret
@@ -13,12 +16,19 @@ hosting_config:
   domain: cs-mooc.tou.edu.kz
   ssl: true
   port: 1338
+  use_default_org: true
   allowed_origins:
     - http://localhost:3000
     - http://localhost:3001
   cookies_config:
     domain: '.localhost'
   allowed_regexp: '\b((?:https?://)[^\s/$.?#].[^\s]*)\b'
+  self_hosted: true
+
+rbac:
+  audit_logging_enabled: true
+  cache_enabled: true
+  cache_ttl_seconds: 300
 
 mailing_config:
   resend_api_key: ""
@@ -35,11 +45,13 @@ payments_config:
     stripe_secret_key: ''
     stripe_publishable_key: ''
     stripe_webhook_standard_secret: ''
+    stripe_webhook_connect_secret: ''
     stripe_client_id: ''
 
 ai_config:
   openai_api_key: ""
   chromadb_config:
-    isSeparateDatabaseEnabled: true
+    separate_db_enabled: true
     db_host: "localhost"
     db_port: 8001
+    persist_path: "./chromadb_data"

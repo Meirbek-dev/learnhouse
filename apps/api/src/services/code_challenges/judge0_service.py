@@ -8,11 +8,11 @@ import asyncio
 import base64
 import hashlib
 import logging
-import os
 from typing import Any
 
 import httpx
 
+from config.config import get_judge0_config
 from src.db.courses.code_challenges import (
     CustomTestResponse,
     Judge0Language,
@@ -24,7 +24,6 @@ from src.db.courses.code_challenges import (
 logger = logging.getLogger(__name__)
 
 # Configuration
-JUDGE0_BASE_URL = os.getenv("JUDGE0_URL", "http://judge0_server:2358")
 JUDGE0_TIMEOUT = 30.0
 JUDGE0_MAX_RETRIES = 4
 JUDGE0_POLL_INTERVAL = 0.5  # seconds
@@ -43,7 +42,7 @@ class Judge0Service:
     """Service for interacting with Judge0 API"""
 
     def __init__(self, base_url: str | None = None) -> None:
-        self.base_url = base_url or JUDGE0_BASE_URL
+        self.base_url = base_url or get_judge0_config().base_url
 
     async def health_check(self) -> bool:
         """Check if Judge0 is available"""

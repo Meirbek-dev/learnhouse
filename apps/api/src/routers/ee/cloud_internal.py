@@ -1,11 +1,12 @@
-import os
+import hmac
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, Request
 from sqlmodel import Session
-from src.db.organization_config import OrganizationConfigBase
 
+from config.config import get_internal_config
 from src.core.events.database import get_db_session
+from src.db.organization_config import OrganizationConfigBase
 from src.security.rbac import InternalAuthFailed
 from src.services.orgs.orgs import update_org_with_config_no_auth
 
@@ -14,7 +15,10 @@ router = APIRouter()
 
 # Utils
 def check_internal_cloud_key(request: Request) -> None:
-    if request.headers.get("CloudInternalKey") != os.environ.get("CLOUD_INTERNAL_KEY"):
+    expected = get_internal_config().cloud_internal_key
+    provided = request.headers.get("CloudInternalKey", "")
+
+    if not expected or not hmac.compare_digest(provided, expected):
         raise InternalAuthFailed(reason="Invalid internal cloud key")
 
 

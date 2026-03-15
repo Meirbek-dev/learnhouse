@@ -68,7 +68,7 @@ class ChromaDBPool:
             chromadb_config
             and isinstance(chromadb_config.db_host, str)
             and chromadb_config.db_host
-            and getattr(chromadb_config, "isSeparateDatabaseEnabled", False)
+            and getattr(chromadb_config, "separate_db_enabled", False)
         )
 
     def _create_http_client(self) -> "chromadb.Client":
@@ -100,21 +100,17 @@ class ChromaDBPool:
     def _get_or_create_persistent_singleton(self) -> "chromadb.Client":
         """Return the single shared PersistentClient, creating it on first call.
 
-        Uses a configurable path (CHROMADB_PERSIST_PATH env var, defaulting to
-        ``./chromadb_data``) so data survives process restarts.
+        Uses the configured persistent path so data survives process restarts.
         """
         if self._persistent_singleton is not None:
             return self._persistent_singleton
         with self._persistent_lock:
             if self._persistent_singleton is None:
-                import os
-
                 import chromadb
                 from chromadb.config import Settings
 
-                persist_path = os.environ.get(
-                    "CHROMADB_PERSIST_PATH", "./chromadb_data"
-                )
+                config = get_platform_config()
+                persist_path = config.ai_config.chromadb_config.persist_path
                 settings = Settings(
                     anonymized_telemetry=False,
                     allow_reset=True,
