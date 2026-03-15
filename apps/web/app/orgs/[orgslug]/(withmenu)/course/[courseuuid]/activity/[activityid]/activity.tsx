@@ -52,7 +52,7 @@ import { useFormatter, useLocale, useTranslations } from 'next-intl';
 import ToolTip from '@/components/Objects/Elements/Tooltip/Tooltip';
 import { CourseProvider } from '@components/Contexts/CourseContext';
 import { useContributorStatus } from '@/hooks/useContributorStatus';
-import { getAPIUrl, getUriWithOrg } from '@services/config/config';
+import { getAPIUrl, getAbsoluteUrl } from '@services/config/config';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import UserAvatar from '@components/Objects/UserAvatar';
@@ -476,7 +476,7 @@ const ActivityClient = (props: ActivityClientProps) => {
     if (!activityToNavigate) return;
 
     const cleanCourseUuid = course.course_uuid?.replace('course_', '');
-    router.push(`${getUriWithOrg(orgslug, '')}/course/${cleanCourseUuid}/activity/${activityToNavigate.cleanUuid}`);
+    router.push(`${getAbsoluteUrl(orgslug, '')}/course/${cleanCourseUuid}/activity/${activityToNavigate.cleanUuid}`);
   };
 
   // Save focus mode to localStorage when it changes
@@ -650,7 +650,7 @@ const ActivityClient = (props: ActivityClientProps) => {
                         <div className="flex">
                           <Link
                             prefetch={false}
-                            href={`${getUriWithOrg(orgslug, '')}/course/${courseuuid}`}
+                            href={`${getAbsoluteUrl(orgslug, '')}/course/${courseuuid}`}
                           >
                             <img
                               className="h-[34px] w-[60px] rounded-md drop-shadow-md"
@@ -841,7 +841,7 @@ const ActivityClient = (props: ActivityClientProps) => {
                           <div className="flex">
                             <Link
                               prefetch={false}
-                              href={`${getUriWithOrg(orgslug, '')}/course/${courseuuid}`}
+                              href={`${getAbsoluteUrl(orgslug, '')}/course/${courseuuid}`}
                             >
                               <img
                                 className="h-[57px] w-[100px] rounded-md drop-shadow-md"
@@ -1016,7 +1016,7 @@ const ActivityClient = (props: ActivityClientProps) => {
                                   {contributorStatus === 'ACTIVE' && activity.activity_type === 'TYPE_DYNAMIC' && (
                                     <Link
                                       prefetch={false}
-                                      href={`${getUriWithOrg(orgslug, '')}/course/${courseuuid}/activity/${activityid}/edit`}
+                                      href={`${getAbsoluteUrl(orgslug, '')}/course/${courseuuid}/activity/${activityid}/edit`}
                                       className="flex items-center space-x-2 rounded-full bg-emerald-600 p-2.5 px-5 text-white drop-shadow-md transition delay-150 duration-300 ease-in-out hover:cursor-pointer"
                                     >
                                       <Edit2 size={17} />
@@ -1198,7 +1198,7 @@ export const MarkStatus = (props: {
 
       if (willCompleteAll) {
         const cleanCourseUuid = props.course.course_uuid.replace('course_', '');
-        router.push(`${getUriWithOrg(props.orgslug, '')}/course/${cleanCourseUuid}/activity/end`);
+        router.push(`${getAbsoluteUrl(props.orgslug, '')}/course/${cleanCourseUuid}/activity/end`);
       }
     } catch (error) {
       console.error('Error marking activity as complete:', error);
@@ -1352,7 +1352,7 @@ const NextActivityButton = ({
   function navigateToActivity() {
     if (!nextActivity) return;
     const cleanCourseUuid = course.course_uuid?.replace('course_', '');
-    router.push(`${getUriWithOrg(orgslug, '')}/course/${cleanCourseUuid}/activity/${nextActivity.cleanUuid}`);
+    router.push(`${getAbsoluteUrl(orgslug, '')}/course/${cleanCourseUuid}/activity/${nextActivity.cleanUuid}`);
   }
 
   if (!nextActivity) return null;
@@ -1411,7 +1411,7 @@ const PreviousActivityButton = ({
   function navigateToActivityPrevious() {
     if (!previousActivity) return;
     const cleanCourseUuid = course.course_uuid?.replace('course_', '');
-    router.push(`${getUriWithOrg(orgslug, '')}/course/${cleanCourseUuid}/activity/${previousActivity.cleanUuid}`);
+    router.push(`${getAbsoluteUrl(orgslug, '')}/course/${cleanCourseUuid}/activity/${previousActivity.cleanUuid}`);
   }
 
   if (!previousActivity) return null;

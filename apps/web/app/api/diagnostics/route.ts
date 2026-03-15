@@ -1,6 +1,6 @@
 import { connection, NextResponse } from 'next/server';
 
-import { getServerEnv, publicEnv } from '@/services/config/env';
+import { getAppConfigResult, getPublicConfigResult, getServerConfigResult } from '@/services/config/env';
 
 export async function GET() {
   await connection();
@@ -12,31 +12,39 @@ export async function GET() {
   };
 
   try {
-    let serverEnv: ReturnType<typeof getServerEnv> | null = null;
-    let serverEnvError: string | null = null;
-
-    try {
-      serverEnv = getServerEnv();
-    } catch (error: any) {
-      serverEnvError = error.message;
-    }
+    const publicConfig = getPublicConfigResult();
+    const serverConfig = getServerConfigResult();
+    const appConfig = getAppConfigResult();
 
     // Check environment variables
     diagnostics.checks.envVars = {
       status: 'checking',
-      NEXT_PUBLIC_PLATFORM_API_URL: Boolean(publicEnv.NEXT_PUBLIC_PLATFORM_API_URL),
-      NEXT_PUBLIC_PLATFORM_BACKEND_URL: Boolean(publicEnv.NEXT_PUBLIC_PLATFORM_BACKEND_URL),
-      NEXT_PUBLIC_PLATFORM_DOMAIN: Boolean(publicEnv.NEXT_PUBLIC_PLATFORM_DOMAIN),
-      PLATFORM_INTERNAL_API_URL: Boolean(serverEnv?.PLATFORM_INTERNAL_API_URL),
-      NEXTAUTH_SECRET: Boolean(serverEnv?.NEXTAUTH_SECRET),
-      NEXTAUTH_URL: Boolean(serverEnv?.NEXTAUTH_URL),
-      serverEnvValid: serverEnvError === null,
-      serverEnvError,
+      publicConfigValid: publicConfig.success,
+      serverConfigValid: serverConfig.success,
+      issues: appConfig.success ? [] : appConfig.errors,
+      resolved: {
+        siteUrl: publicConfig.success ? publicConfig.config.siteUrl : null,
+        apiUrl: publicConfig.success ? publicConfig.config.apiUrl : null,
+        mediaUrl: publicConfig.success ? publicConfig.config.mediaUrl : null,
+        internalApiUrl: serverConfig.success ? (serverConfig.config.internalApiUrl ?? null) : null,
+        nextAuthUrl: serverConfig.success ? serverConfig.config.nextAuthUrl : null,
+        cookieDomain: serverConfig.success ? (serverConfig.config.cookieDomain ?? null) : null,
+        cookieSecure: serverConfig.success ? serverConfig.config.cookieSecure : null,
+      },
     };
 
     // Check backend connectivity
     try {
-      const backendUrl = serverEnv?.PLATFORM_INTERNAL_API_URL || publicEnv.NEXT_PUBLIC_PLATFORM_API_URL;
+      const backendUrl = serverConfig.success
+        ? (serverConfig.config.internalApiUrl ?? (publicConfig.success ? publicConfig.config.apiUrl : null))
+        : publicConfig.success
+          ? publicConfig.config.apiUrl
+          : null;
+
+      if (!backendUrl) {
+        throw new Error('Backend URL unavailable because configuration is invalid');
+      }
+
       const response = await fetch(`${backendUrl}health`, {
         signal: AbortSignal.timeout(5000),
       });

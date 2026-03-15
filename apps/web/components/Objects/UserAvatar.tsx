@@ -4,7 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@components/ui/avatar';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
 import { getUserByUsername } from '@services/users/users';
-import { getUriWithOrg } from '@services/config/config';
+import { getAbsoluteUrl } from '@services/config/config';
 import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
@@ -95,7 +95,7 @@ const UserAvatar = (props: UserAvatarProps) => {
     // If predefined avatar is specified
     if (predefined_avatar) {
       const avatarType = predefined_avatar === 'ai' ? 'platform_logo.svg' : 'empty_avatar.webp';
-      return getUriWithOrg(params.orgslug as string, `/${avatarType}`);
+      return getAbsoluteUrl(params.orgslug as string, `/${avatarType}`);
     }
 
     // If avatar_url prop is provided
@@ -127,7 +127,7 @@ const UserAvatar = (props: UserAvatarProps) => {
     // If username was provided but no user data found, don't fall back to session
     // This prevents showing the wrong user's avatar for usernames that don't exist
     if (username) {
-      return getUriWithOrg(params.orgslug as string, '/empty_avatar.webp');
+      return getAbsoluteUrl(params.orgslug as string, '/empty_avatar.webp');
     }
 
     // If user has an avatar in session (only if session exists and no username was provided)
@@ -142,7 +142,7 @@ const UserAvatar = (props: UserAvatarProps) => {
     }
 
     // Fallback to empty avatar
-    return getUriWithOrg(params.orgslug as string, '/empty_avatar.webp');
+    return getAbsoluteUrl(params.orgslug as string, '/empty_avatar.webp');
   };
 
   const getFallbackText = (): string => {

@@ -6,7 +6,7 @@ import type { CourseWorkspaceCapabilities } from '@/lib/course-management-server
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { updateCourseAccess } from '@services/courses/courses';
-import { getUriWithOrg } from '@services/config/config';
+import { getAbsoluteUrl } from '@services/config/config';
 import { ExternalLink, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTranslations } from 'next-intl';
@@ -97,7 +97,7 @@ export default function CourseReviewPublish({
             <Button
               variant="outline"
               nativeButton={false}
-              render={<a href={getUriWithOrg(orgslug, `/course/${courseuuid}`)} target="_blank" rel="noopener noreferrer" />}
+              render={<a href={getAbsoluteUrl(orgslug, `/course/${courseuuid}`)} target="_blank" rel="noopener noreferrer" />}
             >
               <ExternalLink className="size-4" />
               {t('previewPublicPage')}

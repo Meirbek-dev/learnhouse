@@ -7,7 +7,7 @@ import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { getUserCertificates } from '@services/courses/certifications';
 import SimpleAlertDialog from '@/components/ui/alert-dialog-simple';
 import { useOrg } from '@components/Contexts/OrgContext';
-import { getUriWithOrg } from '@services/config/config';
+import { getAbsoluteUrl } from '@services/config/config';
 import { useLocale, useTranslations } from 'next-intl';
 import { useWindowSize } from '@/hooks/useWindowSize';
 import { useEffect, useRef, useState } from 'react';
@@ -45,7 +45,7 @@ const CourseEndView: FC<CourseEndViewProps> = ({
   const t = useTranslations('Certificates.CourseEndView');
   const [dialogAlertOpen, setDialogAlertOpen] = useState(false);
   const [dialogAlertMessage, setDialogAlertMessage] = useState('');
-  const qrCodeLink = getUriWithOrg(
+  const qrCodeLink = getAbsoluteUrl(
     orgslug,
     `/certificates/${userCertificate?.certificate_user.user_certification_uuid}/verify`,
   );
@@ -924,7 +924,7 @@ const CourseEndView: FC<CourseEndViewProps> = ({
                 </button>
                 <Link
                   prefetch={false}
-                  href={getUriWithOrg(
+                  href={getAbsoluteUrl(
                     orgslug,
                     `/certificates/${userCertificate.certificate_user.user_certification_uuid}/verify`,
                   )}
@@ -946,7 +946,7 @@ const CourseEndView: FC<CourseEndViewProps> = ({
           <div className="pt-6">
             <Link
               prefetch={false}
-              href={getUriWithOrg(orgslug, `/course/${courseUuid.replace('course_', '')}`)}
+              href={getAbsoluteUrl(orgslug, `/course/${courseUuid.replace('course_', '')}`)}
               className="inline-flex items-center space-x-2 rounded-full bg-gray-800 px-6 py-3 text-white transition duration-200 hover:bg-gray-700"
             >
               <ArrowLeft className="h-5 w-5" />
@@ -1018,7 +1018,7 @@ const CourseEndView: FC<CourseEndViewProps> = ({
 
         <div className="pt-6">
           <Link
-            href={getUriWithOrg(orgslug, `/course/${courseUuid.replace('course_', '')}`)}
+            href={getAbsoluteUrl(orgslug, `/course/${courseUuid.replace('course_', '')}`)}
             className="inline-flex items-center space-x-2 rounded-full bg-blue-600 px-6 py-3 text-white transition duration-200 hover:bg-blue-700"
           >
             <ArrowLeft className="h-5 w-5" />

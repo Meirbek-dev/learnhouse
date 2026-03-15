@@ -11,7 +11,7 @@ import { revalidateTags } from '@services/utils/ts/requests';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useMemo, useState, useTransition } from 'react';
-import { getUriWithOrg } from '@services/config/config';
+import { getAbsoluteUrl } from '@services/config/config';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
@@ -97,7 +97,7 @@ const NewCollection = ({ params }: { params: { orgslug: string } }) => {
       await createCollection(collection, session.data?.tokens?.access_token);
       await revalidateTags(['collections'], org.slug);
       toast.success(t('toast.success'));
-      startTransition(() => router.push(getUriWithOrg(orgslug, '/collections')));
+      startTransition(() => router.push(getAbsoluteUrl(orgslug, '/collections')));
     } catch {
       toast.error(t('toast.failure'));
     } finally {

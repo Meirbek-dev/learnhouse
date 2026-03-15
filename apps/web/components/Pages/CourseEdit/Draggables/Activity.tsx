@@ -13,7 +13,7 @@ import {
 import { AlertTriangle, Eye, File, Loader2, MoreVertical, Pencil, Save, Sparkles, Video, X } from 'lucide-react';
 import { deleteActivity, updateActivity } from '@services/courses/activities';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { getAPIUrl, getUriWithOrg } from '@services/config/config';
+import { getAPIUrl, getAbsoluteUrl } from '@services/config/config';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { revalidateTags } from '@services/utils/ts/requests';
 import { useState, useTransition } from 'react';
@@ -151,7 +151,7 @@ const Activity = (props: any) => {
           <div className="flex flex-row space-x-2">
             {props.activity.type === 'TYPE_DYNAMIC' && (
               <Link
-                href={`${getUriWithOrg(props.orgslug, '')}/course/${
+                href={`${getAbsoluteUrl(props.orgslug, '')}/course/${
                   props.courseid
                 }/activity/${props.activity.uuid.replace('activity_', '')}/edit`}
                 className="items-center rounded-md bg-sky-700 p-1 px-3 hover:cursor-pointer"
@@ -161,7 +161,7 @@ const Activity = (props: any) => {
               </Link>
             )}
             <Link
-              href={`${getUriWithOrg(props.orgslug, '')}/course/${
+              href={`${getAbsoluteUrl(props.orgslug, '')}/course/${
                 props.courseid
               }/activity/${props.activity.uuid.replace('activity_', '')}`}
               className="rounded-md bg-gray-200 p-1 px-3 hover:cursor-pointer"

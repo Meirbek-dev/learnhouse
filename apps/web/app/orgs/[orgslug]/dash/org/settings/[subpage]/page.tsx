@@ -7,7 +7,7 @@ import OrgEditImages from '@components/Dashboard/Pages/Org/OrgEditImages/OrgEdit
 import { ImageIcon, LayoutDashboardIcon, Share2Icon, TextIcon } from 'lucide-react';
 import SettingsHeader from '@components/Dashboard/Misc/SettingsHeader';
 import SettingsTabs from '@components/Dashboard/Misc/SettingsTabs';
-import { getUriWithOrg } from '@services/config/config';
+import { getAbsoluteUrl } from '@services/config/config';
 import { AnimatePresence, motion } from 'motion/react';
 import { Separator } from '@/components/ui/separator';
 import type { LucideIcon } from 'lucide-react';
@@ -120,7 +120,7 @@ const OrgPage = (props: { params: Promise<OrgParams> }) => {
         <SettingsTabs
           value={params.subpage}
           tabs={SETTING_TABS.map((t) => ({ id: t.id, labelKey: t.label, icon: t.icon }))}
-          getHref={(tab) => `${getUriWithOrg(params.orgslug, '')}/dash/org/settings/${tab.id}`}
+          getHref={(tab) => `${getAbsoluteUrl(params.orgslug, '')}/dash/org/settings/${tab.id}`}
           translationNamespace="DashPage.OrgSettings"
         />
       </SettingsHeader>

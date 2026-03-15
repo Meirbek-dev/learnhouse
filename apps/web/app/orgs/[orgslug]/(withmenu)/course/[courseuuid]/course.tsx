@@ -34,7 +34,7 @@ import { swrFetcher } from '@services/utils/ts/requests';
 import CourseDiscussions from '@/components/discussions';
 // Import UI components
 import { Card, CardContent } from '@/components/ui/card';
-import { getUriWithOrg } from '@services/config/config';
+import { getAbsoluteUrl } from '@services/config/config';
 import { getTrailSwrKey } from '@services/courses/keys';
 import { Separator } from '@/components/ui/separator';
 import { useEffect, useMemo, useState } from 'react';
@@ -505,7 +505,7 @@ const CourseClient = (props: any) => {
                             return (
                               <Link
                                 key={activity.activity_uuid}
-                                href={`${getUriWithOrg(orgslug, '')}/course/${courseuuid}/activity/${activity.activity_uuid.replace('activity_', '')}`}
+                                href={`${getAbsoluteUrl(orgslug, '')}/course/${courseuuid}/activity/${activity.activity_uuid.replace('activity_', '')}`}
                                 rel="noopener noreferrer"
                                 prefetch={false}
                                 className="activity-container group block px-4 py-4 transition-all duration-200 hover:bg-gray-50"

@@ -6,7 +6,7 @@ import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { getCertificateByUuid } from '@services/courses/certifications';
 import { useEffect, useEffectEvent, useState } from 'react';
 import { useOrg } from '@components/Contexts/OrgContext';
-import { getUriWithOrg } from '@services/config/config';
+import { getAbsoluteUrl } from '@services/config/config';
 import { useLocale, useTranslations } from 'next-intl';
 import { Label } from '@/components/ui/label';
 import Link from '@components/ui/AppLink';
@@ -167,7 +167,7 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
     return null;
   }
 
-  const qrCodeLink = getUriWithOrg(
+  const qrCodeLink = getAbsoluteUrl(
     org?.org_slug || '',
     `/certificates/${certificateData.certificate_user.user_certification_uuid}/verify`,
   );
@@ -315,7 +315,7 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
                 {/* View Course Link */}
                 <div className="shrink-0">
                   <Link
-                    href={getUriWithOrg(
+                    href={getAbsoluteUrl(
                       org?.org_slug || '',
                       `/course/${certificateData.course.course_uuid.replace('course_', '')}`,
                     )}

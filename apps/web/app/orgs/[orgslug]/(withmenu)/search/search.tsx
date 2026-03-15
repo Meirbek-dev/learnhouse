@@ -8,7 +8,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { searchOrgContent } from '@services/search/search';
 import { useOrg } from '@components/Contexts/OrgContext';
 import UserAvatar from '@components/Objects/UserAvatar';
-import { getUriWithOrg } from '@services/config/config';
+import { getAbsoluteUrl } from '@services/config/config';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
@@ -400,7 +400,7 @@ const SearchPage = () => {
                       <Link
                         prefetch={false}
                         key={course.course_uuid}
-                        href={getUriWithOrg(org?.slug, `/course/${removeCoursePrefix(course.course_uuid)}`)}
+                        href={getAbsoluteUrl(org?.slug, `/course/${removeCoursePrefix(course.course_uuid)}`)}
                         className="soft-shadow group overflow-hidden rounded-xl bg-white transition-all hover:shadow-md"
                       >
                         <div className="aspect-video w-full overflow-hidden">
@@ -470,7 +470,7 @@ const SearchPage = () => {
                       <Link
                         prefetch={false}
                         key={collection.collection_uuid}
-                        href={getUriWithOrg(
+                        href={getAbsoluteUrl(
                           org?.slug,
                           `/collection/${collection.collection_uuid.replace('collection_', '')}`,
                         )}
@@ -510,7 +510,7 @@ const SearchPage = () => {
                       <Link
                         prefetch={false}
                         key={user.user_uuid}
-                        href={getUriWithOrg(org?.slug, `/user/${user.username}`)}
+                        href={getAbsoluteUrl(org?.slug, `/user/${user.username}`)}
                         className="soft-shadow flex items-center gap-4 rounded-xl bg-white p-4 transition-all hover:shadow-md"
                       >
                         <UserAvatar

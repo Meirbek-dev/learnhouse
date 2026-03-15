@@ -1,7 +1,7 @@
 import { getOrganizationContextInfo } from '@services/organizations/orgs';
 import { getOrgCollections } from '@services/courses/collections';
 import { getOrgCourses } from '@services/courses/courses';
-import { getUriWithOrg } from '@services/config/config';
+import { getAbsoluteUrl } from '@services/config/config';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Missing host header' }, { status: 400 });
   }
 
-  const baseUrl = getUriWithOrg(orgSlug, '/');
+  const baseUrl = getAbsoluteUrl(orgSlug, '/');
 
   const sitemapUrls: SitemapUrl[] = [
     { loc: baseUrl, priority: 1, changefreq: 'daily' },

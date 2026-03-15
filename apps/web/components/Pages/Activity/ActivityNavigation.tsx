@@ -1,6 +1,6 @@
 'use client';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { getUriWithOrg } from '@services/config/config';
+import { getAbsoluteUrl } from '@services/config/config';
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -180,7 +180,7 @@ export default function ActivityNavigation(props: ActivityNavigationProps): Reac
     if (!activity) return;
 
     const cleanCourseUuid = props.course.course_uuid?.replace('course_', '');
-    router.push(`${getUriWithOrg(props.orgslug, '')}/course/${cleanCourseUuid}/activity/${activity.cleanUuid}`);
+    router.push(`${getAbsoluteUrl(props.orgslug, '')}/course/${cleanCourseUuid}/activity/${activity.cleanUuid}`);
   };
 
   // Set up intersection observer to detect when bottom nav is out of viewport

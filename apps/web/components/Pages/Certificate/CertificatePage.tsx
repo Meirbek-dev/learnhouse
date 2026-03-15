@@ -5,7 +5,7 @@ import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getUserCertificates } from '@services/courses/certifications';
 import SimpleAlertDialog from '@/components/ui/alert-dialog-simple';
 import { ArrowLeft, Download, Loader2 } from 'lucide-react';
-import { getUriWithOrg } from '@services/config/config';
+import { getAbsoluteUrl } from '@services/config/config';
 import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 import Link from '@components/ui/AppLink';
@@ -680,7 +680,7 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
             <h2 className="mb-3 text-2xl font-bold text-gray-900">{t('errorNonAvailable')}</h2>
             <p className="mb-6 text-base text-gray-600">{error}</p>
             <Link
-              href={`${getUriWithOrg(orgslug, '')}/course/${courseid}`}
+              href={`${getAbsoluteUrl(orgslug, '')}/course/${courseid}`}
               className="inline-flex items-center space-x-2 rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-3.5 font-medium text-white shadow-lg shadow-blue-200 transition-all duration-200 hover:scale-105 hover:shadow-xl"
             >
               <ArrowLeft className="h-5 w-5" />
@@ -715,7 +715,7 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
             <h2 className="mb-3 text-2xl font-bold text-gray-900">{t('noCertificate')}</h2>
             <p className="mb-6 text-base text-gray-600">{t('noCertificate')}</p>
             <Link
-              href={`${getUriWithOrg(orgslug, '')}/course/${courseid}`}
+              href={`${getAbsoluteUrl(orgslug, '')}/course/${courseid}`}
               className="inline-flex items-center space-x-2 rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-3.5 font-medium text-white shadow-lg shadow-blue-200 transition-all duration-200 hover:scale-105 hover:shadow-xl"
             >
               <ArrowLeft className="h-5 w-5" />
@@ -738,7 +738,7 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ orgslug, courseid, qr
         {/* Header */}
         <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <Link
-            href={`${getUriWithOrg(orgslug, '')}/course/${courseid}`}
+            href={`${getAbsoluteUrl(orgslug, '')}/course/${courseid}`}
             className="group inline-flex items-center space-x-2 rounded-lg px-4 py-2 text-gray-600 transition-all duration-200 hover:bg-white hover:text-gray-900 hover:shadow-md"
           >
             <ArrowLeft className="h-5 w-5 transition-transform group-hover:-translate-x-1" />

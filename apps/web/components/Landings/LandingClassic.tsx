@@ -8,7 +8,7 @@ import { HeroSection } from '@/components/Dashboard/Gamification/hero-section';
 import PermissionGuard from '@components/Security/PermissionGuard';
 import { Actions, Resources, Scopes } from '@/types/permissions';
 import type { DashboardData } from '@/types/gamification';
-import { getUriWithOrg } from '@services/config/config';
+import { getAbsoluteUrl } from '@services/config/config';
 import CreateCourseTrigger from './CreateCourseTrigger';
 import { BookOpen, FolderKanban } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
@@ -177,7 +177,7 @@ const LandingClassic = async ({
                   >
                     <Link
                       prefetch={false}
-                      href={getUriWithOrg(orgslug, '/collections/new')}
+                      href={getAbsoluteUrl(orgslug, '/collections/new')}
                       className="focus:ring-primary inline-block rounded transition-transform duration-200 hover:scale-105 focus:scale-105 focus:ring-2 focus:ring-offset-2 focus:outline-none"
                     >
                       <NewCollectionButton />

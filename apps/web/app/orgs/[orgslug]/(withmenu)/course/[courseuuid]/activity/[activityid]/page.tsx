@@ -3,7 +3,7 @@ import { getCourseMetadata } from '@services/courses/courses';
 import { getTranslations } from 'next-intl/server';
 import { jetBrainsMono } from '@/lib/fonts';
 import type { Metadata } from 'next';
-import { auth } from '@/auth';
+import { getOptionalSession } from '@/lib/get-optional-session';
 
 import ActivityClient from './activity';
 
@@ -19,7 +19,7 @@ async function fetchCourseMetadata(courseuuid: string, access_token: string | nu
 
 export async function generateMetadata(props: MetadataProps): Promise<Metadata> {
   const { orgslug, courseuuid, activityid } = await props.params;
-  const session = await auth();
+  const session = await getOptionalSession();
   const access_token = session?.tokens?.access_token || null;
   const t = await getTranslations('General');
 
@@ -61,7 +61,7 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
 const ActivityPage = async (params: any) => {
   // Destructure params directly
   const { orgslug, courseuuid, activityid } = await params.params;
-  const session = await auth();
+  const session = await getOptionalSession();
   const access_token = session?.tokens?.access_token || null;
 
   // Don't fetch activity if it's the end page

@@ -5,11 +5,11 @@ import {
   loginWithOAuthToken,
 } from '@/services/auth/auth';
 import { SESSION_CACHE_MAX_SIZE, SESSION_CACHE_TTL_MS, TOKEN_REFRESH_BUFFER_MS } from '@/lib/constants';
-import { getUriWithOrg, getTopLevelCookieDomain } from '@/services/config/config';
+import { getAbsoluteUrl } from '@/services/config/config';
 import type { NextAuthConfig, NextAuthResult, Session } from 'next-auth';
 import { getResponseMetadata } from '@/services/utils/ts/requests';
 import Credentials from 'next-auth/providers/credentials';
-import { getServerEnv } from '@/services/config/env';
+import { getServerConfig } from '@/services/config/env';
 import Google from 'next-auth/providers/google';
 import type { JWT } from 'next-auth/jwt';
 import { createHash } from 'node:crypto';
@@ -82,27 +82,15 @@ const isTokenExpiringSoon = (expiry: number, bufferMs = TOKEN_REFRESH_BUFFER_MS)
   return expiring;
 };
 
-// ─── Cookie / Secure Config ───────────────────────────────────────────────────
-const normalizeBoolean = (value?: string | null): boolean | undefined => {
-  if (!value) return undefined;
-  const v = value.trim().toLowerCase();
-  if (['true', '1', 'yes', 'on'].includes(v)) return true;
-  if (['false', '0', 'no', 'off'].includes(v)) return false;
-  return undefined;
-};
-
 type AuthFunction = NextAuthResult['auth'];
 type SignInFunction = NextAuthResult['signIn'];
 type SignOutFunction = NextAuthResult['signOut'];
 type AuthHandlers = NextAuthResult['handlers'];
 
 const createAuthConfig = (): NextAuthConfig => {
-  const serverEnv = getServerEnv();
-  const cookieDomain = !isDevEnv ? getTopLevelCookieDomain() : undefined;
-  const sslFlag = normalizeBoolean(serverEnv.PLATFORM_SSL);
-  const nextAuthUrl = serverEnv.NEXTAUTH_URL;
-  const isHttpsUrl = typeof nextAuthUrl === 'string' && nextAuthUrl.startsWith('https://');
-  const cookieSecure = !isDevEnv && (isHttpsUrl || sslFlag);
+  const serverConfig = getServerConfig();
+  const cookieDomain = !isDevEnv ? serverConfig.cookieDomain : undefined;
+  const cookieSecure = !isDevEnv && serverConfig.cookieSecure;
   const cookieNamePrefix = cookieSecure ? '__Secure-' : '';
 
   return {
@@ -161,8 +149,8 @@ const createAuthConfig = (): NextAuthConfig => {
       }),
 
       Google({
-        clientId: serverEnv.PLATFORM_GOOGLE_CLIENT_ID,
-        clientSecret: serverEnv.PLATFORM_GOOGLE_CLIENT_SECRET,
+        clientId: serverConfig.googleClientId,
+        clientSecret: serverConfig.googleClientSecret,
         authorization: {
           params: { scope: 'openid email profile' },
         },
@@ -170,9 +158,9 @@ const createAuthConfig = (): NextAuthConfig => {
     ],
 
     pages: {
-      signIn: getUriWithOrg('auth', '/'),
-      verifyRequest: getUriWithOrg('auth', '/'),
-      error: getUriWithOrg('auth', '/'),
+      signIn: getAbsoluteUrl('/'),
+      verifyRequest: getAbsoluteUrl('/'),
+      error: getAbsoluteUrl('/'),
     },
 
     cookies: {

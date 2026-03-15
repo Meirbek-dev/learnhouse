@@ -4,7 +4,7 @@ import { getOrgCollections } from '@services/courses/collections';
 import LandingClassic from '@components/Landings/LandingClassic';
 import LandingCustom from '@components/Landings/LandingCustom';
 import { getOrgCourses } from '@services/courses/courses';
-import { auth } from '@/auth';
+import { getOptionalSession } from '@/lib/get-optional-session';
 
 interface LandingContentProps {
   orgslug: string;
@@ -12,7 +12,7 @@ interface LandingContentProps {
 
 export async function LandingContent({ orgslug }: LandingContentProps) {
   try {
-    const session = await auth();
+    const session = await getOptionalSession();
     const access_token = session?.tokens?.access_token;
 
     // Fetch organization info with detailed error handling

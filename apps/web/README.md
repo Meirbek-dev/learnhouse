@@ -41,9 +41,9 @@ docker compose up -d --build app
 
 ## Environment variables (important)
 
-- The web container uses several `NEXT_PUBLIC_*` environment variables (e.g.,
-  `NEXT_PUBLIC_PLATFORM_API_URL`). These are baked into the build. If you need runtime configs,
-  review the Dockerfile and the app’s environment usage.
+- The web container uses a small set of `NEXT_PUBLIC_*` environment variables and they are baked into the build.
+- The authoritative contract is documented in `/docs/FRONTEND_ENV.md`.
+- When using root `docker compose`, pass build-time public env via shell env or `--env-file extra/.env` because `env_file` does not populate Docker build args.
 
 ## Troubleshooting
 

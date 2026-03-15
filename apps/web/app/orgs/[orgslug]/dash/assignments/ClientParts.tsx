@@ -5,7 +5,7 @@ import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { buildCourseWorkspacePath } from '@/lib/course-management';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { getUriWithOrg } from '@services/config/config';
+import { getAbsoluteUrl } from '@services/config/config';
 import { buttonVariants } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
@@ -116,7 +116,7 @@ export const AssignmentRow = ({ assignment, org }: any) => {
         <Link
           prefetch={false}
           href={{
-            pathname: getUriWithOrg(org.slug, `/dash/assignments/${assignmentId}`),
+            pathname: getAbsoluteUrl(org.slug, `/dash/assignments/${assignmentId}`),
             query: { subpage: 'editor' },
           }}
           className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'inline-flex items-center justify-center')}
@@ -128,7 +128,7 @@ export const AssignmentRow = ({ assignment, org }: any) => {
         <Link
           prefetch={false}
           href={{
-            pathname: getUriWithOrg(org.slug, `/dash/assignments/${assignmentId}`),
+            pathname: getAbsoluteUrl(org.slug, `/dash/assignments/${assignmentId}`),
             query: { subpage: 'submissions' },
           }}
           className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'inline-flex items-center justify-center')}
@@ -150,7 +150,7 @@ export const CourseThumbnail = ({ course, org, courseId }: any) => {
   return (
     <Link
       prefetch={false}
-      href={getUriWithOrg(org.slug, `/course/${courseId}`)}
+      href={getAbsoluteUrl(org.slug, `/course/${courseId}`)}
       className="group relative shrink-0"
       aria-label={t('viewCourseAria', { courseName: course.name })}
     >

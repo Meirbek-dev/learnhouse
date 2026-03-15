@@ -17,7 +17,7 @@ import { ToolbarButtons } from './Toolbar/ToolbarButtons';
 import Scenarios from './Extensions/Scenarios/Scenarios';
 import TableHeader from '@tiptap/extension-table-header';
 import { EditorContent, useEditor } from '@tiptap/react';
-import { getUriWithOrg } from '@services/config/config';
+import { getAbsoluteUrl } from '@services/config/config';
 import ts from 'highlight.js/lib/languages/typescript';
 import js from 'highlight.js/lib/languages/javascript';
 import python from 'highlight.js/lib/languages/python';
@@ -212,7 +212,7 @@ const Editor = (props: EditorProps) => {
                             props.course.course_uuid,
                             props.course.thumbnail_image,
                           )
-                        : getUriWithOrg(props.org?.slug, '/empty_thumbnail.webp')
+                        : getAbsoluteUrl(props.org?.slug, '/empty_thumbnail.webp')
                     }`}
                     alt={`${props.course.name} Thumbnail`}
                   />

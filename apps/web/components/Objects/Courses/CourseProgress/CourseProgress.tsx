@@ -1,7 +1,7 @@
 import { ArrowRight, BookOpenCheck, Check, ChevronDown, Circle, FileText, Layers, Trophy, Video } from 'lucide-react';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { getUriWithOrg } from '@services/config/config';
+import { getAbsoluteUrl } from '@services/config/config';
 import AppLink from '@/components/ui/AppLink';
 import { Badge } from '@/components/ui/badge';
 import { useTranslations } from 'next-intl';
@@ -260,7 +260,7 @@ const CourseProgress: FC<CourseProgressProps> = ({ course, orgslug, isOpen, onCl
                       return (
                         <AppLink
                           key={activity.activity_uuid}
-                          href={`${getUriWithOrg(orgslug, '')}/course/${courseId}/activity/${activityId}`}
+                          href={`${getAbsoluteUrl(orgslug, '')}/course/${courseId}/activity/${activityId}`}
                           onClick={onClose}
                         >
                           <div

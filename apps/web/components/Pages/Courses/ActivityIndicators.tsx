@@ -13,7 +13,7 @@ import {
   Video,
 } from 'lucide-react';
 import ToolTip from '@/components/Objects/Elements/Tooltip/Tooltip';
-import { getUriWithOrg } from '@services/config/config';
+import { getAbsoluteUrl } from '@services/config/config';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
@@ -315,7 +315,7 @@ const CertificationBadge = ({
       }
     >
       <Link
-        href={`${getUriWithOrg(orgslug, '')}/course/${courseid}/activity/end`}
+        href={`${getAbsoluteUrl(orgslug, '')}/course/${courseid}/activity/end`}
         prefetch={false}
         className={`ml-3 flex items-center transition-all duration-200 focus:outline-none ${
           isCompleted ? 'opacity-100' : 'pointer-events-none opacity-40'
@@ -387,7 +387,7 @@ const ActivityIndicators = (props: Props) => {
     if (currentActivityIndex > 0) {
       const prevActivity = allActivities[currentActivityIndex - 1];
       const activityId = prevActivity.activity_uuid.replace('activity_', '');
-      router.push(`${getUriWithOrg(orgslug, '')}/course/${courseid}/activity/${activityId}`);
+      router.push(`${getAbsoluteUrl(orgslug, '')}/course/${courseid}/activity/${activityId}`);
     }
   }
 
@@ -395,7 +395,7 @@ const ActivityIndicators = (props: Props) => {
     if (currentActivityIndex < allActivities.length - 1) {
       const nextActivity = allActivities[currentActivityIndex + 1];
       const activityId = nextActivity.activity_uuid.replace('activity_', '');
-      router.push(`${getUriWithOrg(orgslug, '')}/course/${courseid}/activity/${activityId}`);
+      router.push(`${getAbsoluteUrl(orgslug, '')}/course/${courseid}/activity/${activityId}`);
     }
   }
 
@@ -432,7 +432,7 @@ const ActivityIndicators = (props: Props) => {
           const firstActivity = chapter.activities[0];
           const firstActivityId = firstActivity?.activity_uuid?.replace('activity_', '');
           const chapterLinkHref = firstActivityId
-            ? `${getUriWithOrg(orgslug, '')}/course/${courseid}/activity/${firstActivityId}`
+            ? `${getAbsoluteUrl(orgslug, '')}/course/${courseid}/activity/${firstActivityId}`
             : undefined;
 
           return (
@@ -507,7 +507,7 @@ const ActivityIndicators = (props: Props) => {
                     >
                       <Link
                         prefetch={false}
-                        href={`${getUriWithOrg(orgslug, '')}/course/${courseid}/activity/${activity.activity_uuid.replace(
+                        href={`${getAbsoluteUrl(orgslug, '')}/course/${courseid}/activity/${activity.activity_uuid.replace(
                           'activity_',
                           '',
                         )}`}

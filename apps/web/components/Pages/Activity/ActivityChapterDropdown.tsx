@@ -1,7 +1,7 @@
 'use client';
 import { ArrowRight, Backpack, Check, ClipboardList, FileText, ListTree, StickyNote, Video, X } from 'lucide-react';
 import { useEffect, useEffectEvent, useRef, useState } from 'react';
-import { getUriWithOrg } from '@services/config/config';
+import { getAbsoluteUrl } from '@services/config/config';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
@@ -151,7 +151,7 @@ export default function ActivityChapterDropdown(props: ActivityChapterDropdownPr
                     return (
                       <Link
                         key={activity.id}
-                        href={`${getUriWithOrg(props.orgslug, '')}/course/${cleanCourseUuid}/activity/${cleanActivityUuid}`}
+                        href={`${getAbsoluteUrl(props.orgslug, '')}/course/${cleanCourseUuid}/activity/${cleanActivityUuid}`}
                         prefetch={false}
                         onClick={() => {
                           setIsOpen(false);

@@ -2,7 +2,7 @@
 
 import { Award, Building, Calendar, ExternalLink, Hash } from 'lucide-react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { getAPIUrl, getUriWithOrg } from '@services/config/config';
+import { getAPIUrl, getAbsoluteUrl } from '@services/config/config';
 import { useFormatter, useTranslations } from 'next-intl';
 import { swrFetcher } from '@services/utils/ts/requests';
 import Link from '@components/ui/AppLink';
@@ -89,7 +89,7 @@ const UserCertificates: React.FC<UserCertificatesProps> = ({ orgslug }) => {
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         {certificatesData.map((certificate: any) => {
-          const verificationLink = getUriWithOrg(
+          const verificationLink = getAbsoluteUrl(
             orgslug,
             `/certificates/${certificate.certificate_user.user_certification_uuid}/verify`,
           );

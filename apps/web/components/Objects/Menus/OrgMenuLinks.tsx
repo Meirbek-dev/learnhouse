@@ -1,5 +1,5 @@
 import { BookCopy, Signpost, SquareLibrary } from 'lucide-react';
-import { getUriWithOrg } from '@services/config/config';
+import { getAbsoluteUrl } from '@services/config/config';
 import { getTranslations } from 'next-intl/server';
 import Link from '@components/ui/AppLink';
 import { auth } from '@/auth';
@@ -39,7 +39,7 @@ const LinkItem = async (props: any) => {
   return (
     <Link
       prefetch={false}
-      href={getUriWithOrg(orgslug, link)}
+      href={getAbsoluteUrl(orgslug, link)}
     >
       <li className="flex items-center space-x-2 font-medium text-[#909192]">
         {props.type === 'courses' && (

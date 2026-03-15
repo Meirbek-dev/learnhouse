@@ -1,10 +1,6 @@
-import { getServerEnv, publicEnv } from './env';
+import { getPublicConfig, getServerConfig } from './env';
 
-export const PLATFORM_HTTP_PROTOCOL = publicEnv.NEXT_PUBLIC_PLATFORM_HTTPS === 'true' ? 'https://' : 'http://';
-const PLATFORM_API_URL = publicEnv.NEXT_PUBLIC_PLATFORM_API_URL;
-export const PLATFORM_BACKEND_URL = publicEnv.NEXT_PUBLIC_PLATFORM_BACKEND_URL;
-export const PLATFORM_DOMAIN = publicEnv.NEXT_PUBLIC_PLATFORM_DOMAIN;
-export const PLATFORM_TOP_DOMAIN = publicEnv.NEXT_PUBLIC_PLATFORM_TOP_DOMAIN;
+const toAbsoluteUrl = (path: string, baseUrl: string) => new URL(path, baseUrl).toString();
 
 const isLikelyIPv4 = (host: string) => {
   if (!host) return false;
@@ -12,8 +8,8 @@ const isLikelyIPv4 = (host: string) => {
   if (parts.length !== 4) return false;
   return parts.every((segment) => {
     if (!/^(\d{1,3})$/.test(segment)) return false;
-    const value = Number(segment);
-    return value >= 0 && value <= 255;
+    const numericValue = Number(segment);
+    return numericValue >= 0 && numericValue <= 255;
   });
 };
 
@@ -26,9 +22,6 @@ const isUnsupportedCookieDomain = (host?: string | null) => {
   return false;
 };
 
-export const getTopLevelCookieDomain = () =>
-  isUnsupportedCookieDomain(PLATFORM_TOP_DOMAIN) ? undefined : PLATFORM_TOP_DOMAIN;
-
 /**
  * Resolves the API base URL (always ending with a slash).
  * This is resolved lazily and cached by getAPIUrl().
@@ -38,13 +31,13 @@ export const getTopLevelCookieDomain = () =>
  */
 const resolveAPIUrl = () => {
   if (typeof globalThis.window === 'undefined') {
-    const { PLATFORM_INTERNAL_API_URL: internalUrl } = getServerEnv();
+    const { internalApiUrl: internalUrl } = getServerConfig();
     if (internalUrl) {
       return internalUrl;
     }
   }
 
-  return PLATFORM_API_URL;
+  return getPublicConfig().apiUrl;
 };
 
 let apiUrlCache: string | null = null;
@@ -56,19 +49,38 @@ export const getAPIUrl = () => {
   return apiUrlCache;
 };
 
-export const getBackendUrl = () => PLATFORM_BACKEND_URL;
+export const getSiteUrl = () => getPublicConfig().siteUrl;
 
-export const getUriWithOrg = (orgslug: string, path: string) => {
-  return `${PLATFORM_HTTP_PROTOCOL}${PLATFORM_DOMAIN}${path}`;
+export const getBackendUrl = () => getSiteUrl();
+
+export const getAbsoluteUrl = (pathOrOrgslug: string, path?: string) => {
+  const resolvedPath = path === undefined ? pathOrOrgslug : path;
+  return toAbsoluteUrl(resolvedPath, getSiteUrl());
 };
 
-export const getUriWithoutOrg = (path: string) => `${PLATFORM_HTTP_PROTOCOL}${PLATFORM_DOMAIN}${path}`;
+export const getTopLevelCookieDomain = () => {
+  const override = process.env.COOKIE_DOMAIN?.trim();
+  if (override) return override;
+
+  const cookieSourceUrl = process.env.NEXTAUTH_URL?.trim() || getSiteUrl();
+  const hostname = new URL(cookieSourceUrl).hostname;
+  return isUnsupportedCookieDomain(hostname) ? undefined : hostname;
+};
+
+export const getUriWithOrg = (_orgslug: string, path: string) => getAbsoluteUrl(path);
+
+export const getUriWithoutOrg = (path: string) => getAbsoluteUrl(path);
 
 export const getOrgFromUri = (): string | undefined => {
   if (typeof globalThis.window !== 'undefined') {
     const { hostname } = globalThis.location;
+    const { siteHostname } = getPublicConfig();
 
-    return hostname.replace(`.${PLATFORM_DOMAIN}`, '');
+    if (!hostname.endsWith(`.${siteHostname}`)) {
+      return undefined;
+    }
+
+    return hostname.replace(`.${siteHostname}`, '');
   }
 
   // Explicitly return undefined when running on the server or if window

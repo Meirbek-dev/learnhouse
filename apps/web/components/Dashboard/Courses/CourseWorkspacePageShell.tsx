@@ -31,7 +31,7 @@ import { CourseProvider, useCourse } from '@components/Contexts/CourseContext';
 import { useUnsavedChangesGuard } from '@/hooks/useUnsavedChangesGuard';
 import type { CourseWorkspaceStage } from '@/lib/course-management';
 import { buildCourseWorkspacePath } from '@/lib/course-management';
-import { getUriWithOrg } from '@services/config/config';
+import { getAbsoluteUrl } from '@services/config/config';
 import { CourseStatusBadge } from './courseWorkflowUi';
 import { Button } from '@/components/ui/button';
 import AppLink from '@/components/ui/AppLink';
@@ -146,7 +146,7 @@ function CourseWorkspaceChrome({
               size="sm"
               nativeButton={false}
               variant="outline"
-              render={<a href={getUriWithOrg(orgslug, `/course/${courseuuid}`)} />}
+              render={<a href={getAbsoluteUrl(orgslug, `/course/${courseuuid}`)} />}
               className="gap-2"
             >
               <Eye className="size-4" />

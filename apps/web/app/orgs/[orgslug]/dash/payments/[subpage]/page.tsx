@@ -6,7 +6,7 @@ import PaymentsProductPage from '@components/Dashboard/Pages/Payments/PaymentsPr
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
 import { useOrg } from '@components/Contexts/OrgContext';
-import { getUriWithOrg } from '@services/config/config';
+import { getAbsoluteUrl } from '@services/config/config';
 import { Gem, Settings, Users } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
@@ -69,19 +69,19 @@ const PaymentsPage = (props: { params: Promise<PaymentsParams> }) => {
         </div>
         <div className="flex space-x-0.5 text-sm font-bold">
           <TabLink
-            href={getUriWithOrg(params.orgslug, '/dash/payments/customers')}
+            href={getAbsoluteUrl(params.orgslug, '/dash/payments/customers')}
             icon={<Users size={16} />}
             label={t('customers')}
             isActive={subpage === 'customers'}
           />
           <TabLink
-            href={getUriWithOrg(params.orgslug, '/dash/payments/paid-products')}
+            href={getAbsoluteUrl(params.orgslug, '/dash/payments/paid-products')}
             icon={<Gem size={16} />}
             label={t('productsSubscriptions')}
             isActive={subpage === 'paid-products'}
           />
           <TabLink
-            href={getUriWithOrg(params.orgslug, '/dash/payments/configuration')}
+            href={getAbsoluteUrl(params.orgslug, '/dash/payments/configuration')}
             icon={<Settings size={16} />}
             label={t('configuration')}
             isActive={subpage === 'configuration'}

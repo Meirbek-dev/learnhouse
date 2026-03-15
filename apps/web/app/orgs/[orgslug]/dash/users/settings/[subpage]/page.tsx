@@ -6,7 +6,7 @@ import OrgUsers from '@components/Dashboard/Pages/Users/OrgUsers/OrgUsers';
 import DesktopOnlyGuard from '@components/Dashboard/Misc/DesktopOnlyGuard';
 import SettingsHeader from '@components/Dashboard/Misc/SettingsHeader';
 import SettingsTabs from '@components/Dashboard/Misc/SettingsTabs';
-import { getUriWithOrg } from '@services/config/config';
+import { getAbsoluteUrl } from '@services/config/config';
 import { SquareUserRound, Users } from 'lucide-react';
 import { use, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
@@ -58,7 +58,7 @@ const UsersSettingsPage = (props: { params: Promise<SettingsParams> }) => {
 
   useEffect(() => {
     if (params.subpage !== 'roles') return;
-    router.replace(`${getUriWithOrg(params.orgslug, '')}/dash/admin/roles`);
+    router.replace(`${getAbsoluteUrl(params.orgslug, '')}/dash/admin/roles`);
   }, [params.orgslug, params.subpage, router]);
 
   const tabs = useMemo(() => {
@@ -95,7 +95,7 @@ const UsersSettingsPage = (props: { params: Promise<SettingsParams> }) => {
           <SettingsTabs
             value={params.subpage}
             tabs={tabs}
-            getHref={(tab) => `${getUriWithOrg(params.orgslug, '')}/dash/users/settings/${tab.id}`}
+            getHref={(tab) => `${getAbsoluteUrl(params.orgslug, '')}/dash/users/settings/${tab.id}`}
             translationNamespace="DashPage.UserSettings"
           />
         </SettingsHeader>

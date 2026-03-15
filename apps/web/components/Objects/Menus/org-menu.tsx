@@ -8,7 +8,7 @@ import { LocaleSwitcher } from '@/components/Utils/LocaleSwitcher';
 import { SearchBar } from '@/components/Objects/Search/SearchBar';
 import { useEffect, useState, useSyncExternalStore } from 'react';
 import platformLogoFull from '@public/platform_logo_full.svg';
-import { getUriWithOrg } from '@/services/config/config';
+import { getAbsoluteUrl } from '@/services/config/config';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { usePathname } from 'next/navigation';
@@ -44,7 +44,7 @@ const NavigationLinkItem = ({ href, type, orgslug }: NavigationLinkProps) => {
     <NavigationMenuItem>
       <Link
         prefetch={false}
-        href={getUriWithOrg(orgslug, href)}
+        href={getAbsoluteUrl(orgslug, href)}
         className={`hover:text-primary flex max-h-[36px] items-center gap-3 rounded-md px-4 py-2 font-medium transition-colors ${
           isActive ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:bg-accent/60 hover:text-foreground'
         }`}
@@ -199,7 +199,7 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
           <div className="flex items-center gap-8 md:gap-10">
             {/* Logo */}
             <Link
-              href={getUriWithOrg(orgslug, '/')}
+              href={getAbsoluteUrl(orgslug, '/')}
               className="hover:bg-accent/60 flex items-center justify-center rounded-md p-2 transition-colors"
             >
               <Image

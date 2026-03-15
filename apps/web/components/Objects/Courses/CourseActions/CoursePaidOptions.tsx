@@ -4,7 +4,7 @@ import { getProductsByCourse, getStripeProductCheckoutSession } from '@services/
 import { ChevronDown, ChevronUp, Loader2, RefreshCcw, SquareCheck } from 'lucide-react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { useOrg } from '@components/Contexts/OrgContext';
-import { getUriWithOrg } from '@services/config/config';
+import { getAbsoluteUrl } from '@services/config/config';
 import { useState, useTransition } from 'react';
 import { Button } from '@components/ui/button';
 import { Badge } from '@components/ui/badge';
@@ -46,7 +46,7 @@ const CoursePaidOptions = ({ course }: CoursePaidOptionsProps) => {
 
     try {
       startTransition(() => setIsProcessing((prev) => ({ ...prev, [productId]: true })));
-      const redirect_uri = getUriWithOrg(org.slug, '/courses');
+      const redirect_uri = getAbsoluteUrl(org.slug, '/courses');
       const response = await getStripeProductCheckoutSession(
         course.org_id,
         productId,

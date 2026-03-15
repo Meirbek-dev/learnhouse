@@ -19,7 +19,7 @@ import { deleteCollection } from '@services/courses/collections';
 import { AlertTriangle, Crown, Loader2, X } from 'lucide-react';
 import { revalidateTags } from '@services/utils/ts/requests';
 import { useOrg } from '@components/Contexts/OrgContext';
-import { getUriWithOrg } from '@services/config/config';
+import { getAbsoluteUrl } from '@services/config/config';
 import { useState, useTransition } from 'react';
 import { Badge } from '@components/ui/badge';
 import { useRouter } from 'next/navigation';
@@ -80,7 +80,7 @@ const CollectionThumbnail = (props: PropsType) => {
           <div className="flex flex-col">
             <Link
               prefetch={false}
-              href={getUriWithOrg(
+              href={getAbsoluteUrl(
                 props.orgslug,
                 `/collection/${removeCollectionPrefix(props.collection.collection_uuid)}`,
               )}

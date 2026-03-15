@@ -2,7 +2,7 @@
 
 import { AlertCircle, BookOpen, Loader2, LogIn, ShoppingCart } from 'lucide-react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { getUriWithOrg, getUriWithoutOrg } from '@services/config/config';
+import { getAbsoluteUrl, getUriWithoutOrg } from '@services/config/config';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
 import { useEffect, useRef, useState, useTransition } from 'react';
 import { getProductsByCourse } from '@services/payments/products';
@@ -240,7 +240,7 @@ const CourseActionsMobile = ({ courseuuid, orgslug, course, trailData }: CourseA
 
       if (targetActivity) {
         router.push(
-          `${getUriWithOrg(orgslug, '')}/course/${courseuuid}/activity/${targetActivity.activity_uuid.replace('activity_', '')}`,
+          `${getAbsoluteUrl(orgslug, '')}/course/${courseuuid}/activity/${targetActivity.activity_uuid.replace('activity_', '')}`,
         );
       }
       return;
@@ -259,7 +259,7 @@ const CourseActionsMobile = ({ courseuuid, orgslug, course, trailData }: CourseA
         // Redirect to the first activity
         await revalidateTags(['activities'], orgslug);
         router.push(
-          `${getUriWithOrg(orgslug, '')}/course/${courseuuid}/activity/${firstActivity.activity_uuid.replace('activity_', '')}`,
+          `${getAbsoluteUrl(orgslug, '')}/course/${courseuuid}/activity/${firstActivity.activity_uuid.replace('activity_', '')}`,
         );
       } else {
         router.refresh();

@@ -3,7 +3,7 @@ import { getOrgThumbnailMediaDirectory } from '@services/media/media';
 import { getOrgCourses } from '@services/courses/courses';
 import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
-import { auth } from '@/auth';
+import { getOptionalSession } from '@/lib/get-optional-session';
 
 import Courses from './courses';
 
@@ -52,7 +52,7 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
 const CoursesPage = async (params: any) => {
   const { orgslug } = await params.params;
   const org = await getOrganizationContextInfo(orgslug);
-  const session = await auth();
+  const session = await getOptionalSession();
   const access_token = session?.tokens?.access_token;
 
   const { courses, total } = await getOrgCourses(orgslug, undefined, access_token || null);

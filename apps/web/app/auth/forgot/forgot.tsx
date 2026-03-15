@@ -4,7 +4,7 @@ import { Field, FieldContent, FieldError, FieldLabel } from '@components/ui/fiel
 import { AlertTriangle, ArrowLeft, Info, Loader2 } from 'lucide-react';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { useOrg } from '@components/Contexts/OrgContext';
-import { getUriWithOrg } from '@services/config/config';
+import { getAbsoluteUrl } from '@services/config/config';
 import { sendResetLink } from '@services/auth/auth';
 import { useState, useTransition } from 'react';
 import { Button } from '@components/ui/button';
@@ -57,7 +57,7 @@ const ForgotPasswordClient = () => {
     <AuthCard>
       <Link
         prefetch={false}
-        href={getUriWithOrg(org?.slug, '/')}
+        href={getAbsoluteUrl(org?.slug, '/')}
       >
         <AuthLogo />
       </Link>

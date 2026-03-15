@@ -3,7 +3,7 @@
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { getUriWithOrg } from '@services/config/config';
+import { getAbsoluteUrl } from '@services/config/config';
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -162,7 +162,7 @@ export default function FixedActivitySecondaryBar(props: FixedActivitySecondaryB
     if (!activity) return;
 
     const cleanCourseUuid = props.course.course_uuid?.replace('course_', '');
-    router.push(`${getUriWithOrg(props.orgslug, '')}/course/${cleanCourseUuid}/activity/${activity.cleanUuid}`);
+    router.push(`${getAbsoluteUrl(props.orgslug, '')}/course/${cleanCourseUuid}/activity/${activity.cleanUuid}`);
   };
 
   useEffect(() => {

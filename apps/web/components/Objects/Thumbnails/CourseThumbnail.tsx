@@ -43,7 +43,7 @@ import Link from '@components/ui/AppLink';
 
 import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media';
 import { deleteCourseFromBackend } from '@services/courses/courses';
-import { getUriWithOrg } from '@services/config/config';
+import { getAbsoluteUrl } from '@services/config/config';
 
 // ============================================================================
 // Types
@@ -560,7 +560,7 @@ const CourseThumbnail: FC<CourseThumbnailProps> = ({
   }, [course.thumbnail_image, course.course_uuid, org?.org_uuid]);
 
   const courseUrl = useMemo(
-    () => customLink || getUriWithOrg(orgslug, `/course/${cleanCourseUuid}`),
+    () => customLink || getAbsoluteUrl(orgslug, `/course/${cleanCourseUuid}`),
     [customLink, orgslug, cleanCourseUuid],
   );
 

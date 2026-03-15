@@ -8,11 +8,11 @@ import { getOrgThumbnailMediaDirectory } from '@services/media/media';
 import ProtectedText from '@components/Objects/ContentPlaceHolder';
 import { getOrgCollections } from '@services/courses/collections';
 import { Actions, Resources, Scopes } from '@/types/permissions';
-import { getUriWithOrg } from '@services/config/config';
+import { getAbsoluteUrl } from '@services/config/config';
 import { getTranslations } from 'next-intl/server';
 import Link from '@components/ui/AppLink';
 import type { Metadata } from 'next';
-import { auth } from '@/auth';
+import { getOptionalSession } from '@/lib/get-optional-session';
 
 interface MetadataProps {
   params: Promise<{ orgslug: string; courseid: number }>;
@@ -56,7 +56,7 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
 
 const CollectionsPage = async (params: any) => {
   const t = await getTranslations('HomePage.Collections');
-  const session = await auth();
+  const session = await getOptionalSession();
   const access_token = session?.tokens?.access_token;
   const { orgslug } = await params.params;
   const org = await getOrganizationContextInfo(orgslug);
@@ -77,7 +77,7 @@ const CollectionsPage = async (params: any) => {
             scope={Scopes.ORG}
             fallback={null}
           >
-            <Link href={getUriWithOrg(orgslug, '/collections/new')}>
+            <Link href={getAbsoluteUrl(orgslug, '/collections/new')}>
               <NewCollectionButton />
             </Link>
           </PermissionGuard>
@@ -114,7 +114,7 @@ const CollectionsPage = async (params: any) => {
                     scope={Scopes.ORG}
                     fallback={null}
                   >
-                    <Link href={getUriWithOrg(orgslug, '/collections/new')}>
+                    <Link href={getAbsoluteUrl(orgslug, '/collections/new')}>
                       <NewCollectionButton />
                     </Link>
                   </PermissionGuard>

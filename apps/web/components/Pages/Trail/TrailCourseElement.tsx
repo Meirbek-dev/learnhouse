@@ -6,7 +6,7 @@ import { revalidateTags } from '@services/utils/ts/requests';
 import { Award, ExternalLink, Loader2 } from 'lucide-react';
 import { removeCourse } from '@services/courses/activity';
 import { useOrg } from '@components/Contexts/OrgContext';
-import { getUriWithOrg } from '@services/config/config';
+import { getAbsoluteUrl } from '@services/config/config';
 import { getTrailSwrKey } from '@services/courses/keys';
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -78,7 +78,7 @@ const TrailCourseElement = ({ course, run, orgslug }: TrailCourseElementProps) =
     >
       <Link
         prefetch={false}
-        href={getUriWithOrg(orgslug, `/course/${courseid}`)}
+        href={getAbsoluteUrl(orgslug, `/course/${courseid}`)}
       >
         <div
           className="course_tumbnail relative inset-0 h-[50px] w-[72px] rounded-lg bg-cover bg-center ring-1 ring-black/10 ring-inset"
@@ -136,7 +136,7 @@ const TrailCourseElement = ({ course, run, orgslug }: TrailCourseElementProps) =
                 </div>
                 <Link
                   prefetch={false}
-                  href={getUriWithOrg(
+                  href={getAbsoluteUrl(
                     orgslug,
                     `/certificates/${courseCertificate.certificate_user.user_certification_uuid}/verify`,
                   )}

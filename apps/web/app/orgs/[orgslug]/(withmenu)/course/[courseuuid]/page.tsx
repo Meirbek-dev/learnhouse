@@ -2,7 +2,7 @@ import { getOrganizationContextInfo } from '@services/organizations/orgs';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { getCourseMetadata } from '@services/courses/courses';
 import type { Metadata } from 'next';
-import { auth } from '@/auth';
+import { getOptionalSession } from '@/lib/get-optional-session';
 
 import CourseClient from './course';
 
@@ -13,7 +13,7 @@ interface MetadataProps {
 
 export async function generateMetadata(props: MetadataProps): Promise<Metadata> {
   const params = await props.params;
-  const session = await auth();
+  const session = await getOptionalSession();
   const access_token = session?.tokens?.access_token;
 
   // Get Org context information
@@ -54,7 +54,7 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
 }
 
 const CoursePage = async (params: any) => {
-  const session = await auth();
+  const session = await getOptionalSession();
   const access_token = session?.tokens?.access_token;
 
   // Await params before using them

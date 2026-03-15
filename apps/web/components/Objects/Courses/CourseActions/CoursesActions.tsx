@@ -12,7 +12,7 @@ import {
   UserPen,
 } from 'lucide-react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { getUriWithOrg, getUriWithoutOrg } from '@services/config/config';
+import { getAbsoluteUrl, getUriWithoutOrg } from '@services/config/config';
 import { useContributorStatus } from '@/hooks/useContributorStatus';
 import { getProductsByCourse } from '@services/payments/products';
 import { applyForContributor } from '@services/courses/courses';
@@ -175,7 +175,7 @@ const CoursesActions = ({ courseuuid, orgslug, course, trailData }: CourseAction
 
       if (targetActivity) {
         router.push(
-          `${getUriWithOrg(orgslug, '')}/course/${courseuuid}/activity/${targetActivity.activity_uuid.replace('activity_', '')}`,
+          `${getAbsoluteUrl(orgslug, '')}/course/${courseuuid}/activity/${targetActivity.activity_uuid.replace('activity_', '')}`,
         );
       }
       return;
@@ -196,7 +196,7 @@ const CoursesActions = ({ courseuuid, orgslug, course, trailData }: CourseAction
       if (firstActivity) {
         // Redirect to the first activity
         router.push(
-          `${getUriWithOrg(orgslug, '')}/course/${courseuuid}/activity/${firstActivity.activity_uuid.replace('activity_', '')}`,
+          `${getAbsoluteUrl(orgslug, '')}/course/${courseuuid}/activity/${firstActivity.activity_uuid.replace('activity_', '')}`,
         );
       } else {
         mutate([getTrailSwrKey(org?.id), session.data?.tokens?.access_token]);

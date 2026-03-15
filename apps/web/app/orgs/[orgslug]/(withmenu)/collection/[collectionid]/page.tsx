@@ -2,11 +2,11 @@ import GeneralWrapper from '@/components/Objects/Elements/Wrappers/GeneralWrappe
 import { getOrganizationContextInfo } from '@services/organizations/orgs';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { getCollectionById } from '@services/courses/collections';
-import { getUriWithOrg } from '@services/config/config';
+import { getAbsoluteUrl } from '@services/config/config';
 import { getTranslations } from 'next-intl/server';
 import Link from '@/components/ui/ServerLink';
 import type { Metadata } from 'next';
-import { auth } from '@/auth';
+import { getOptionalSession } from '@/lib/get-optional-session';
 
 interface MetadataProps {
   params: Promise<{ orgslug: string; courseid: number; collectionid: string }>;
@@ -15,7 +15,7 @@ interface MetadataProps {
 
 export async function generateMetadata(props: MetadataProps): Promise<Metadata> {
   const params = await props.params;
-  const session = await auth();
+  const session = await getOptionalSession();
   const access_token = session?.tokens?.access_token || null;
   const t = await getTranslations('General');
 
@@ -46,7 +46,7 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
 
 const CollectionPage = async (params: any) => {
   const t = await getTranslations('General');
-  const session = await auth();
+  const session = await getOptionalSession();
   const access_token = session?.tokens?.access_token;
   const resolvedParams = await params.params;
   const org = await getOrganizationContextInfo(resolvedParams.orgslug);
@@ -70,7 +70,7 @@ const CollectionPage = async (params: any) => {
           >
             <Link
               prefetch={false}
-              href={getUriWithOrg(orgslug, `/course/${removeCoursePrefix(course.course_uuid)}`)}
+              href={getAbsoluteUrl(orgslug, `/course/${removeCoursePrefix(course.course_uuid)}`)}
             >
               <div
                 className="relative inset-0 h-[131px] w-[249px] rounded-lg bg-cover shadow-xl ring-1 ring-black/10 ring-inset"

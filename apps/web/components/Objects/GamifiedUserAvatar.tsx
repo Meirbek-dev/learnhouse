@@ -2,7 +2,7 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from '@components/ui/avatar';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { getBackendUrl, getUriWithOrg } from '@services/config/config';
+import { getBackendUrl, getAbsoluteUrl } from '@services/config/config';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
 import type { UserGamificationProfile } from '@/types/gamification';
 import { AVATAR_UNLOCKS } from '@/lib/gamification/levels';
@@ -128,7 +128,7 @@ const GamifiedUserAvatar = (props: GamifiedUserAvatarProps) => {
 
   const getAvatarUrl = (): string => {
     if (predefined_avatar) {
-      return getUriWithOrg(params.orgslug as string, '/empty_avatar.webp');
+      return getAbsoluteUrl(params.orgslug as string, '/empty_avatar.webp');
     }
 
     // Priority 1: Explicitly passed avatar_url prop (e.g., from leaderboard with pre-constructed URLs)
@@ -158,7 +158,7 @@ const GamifiedUserAvatar = (props: GamifiedUserAvatarProps) => {
 
     // Priority 3: Empty avatar for username without data
     if (username) {
-      return getUriWithOrg(params.orgslug as string, '/empty_avatar.webp');
+      return getAbsoluteUrl(params.orgslug as string, '/empty_avatar.webp');
     }
 
     // Priority 4: Session user data
@@ -171,7 +171,7 @@ const GamifiedUserAvatar = (props: GamifiedUserAvatarProps) => {
     }
 
     // Fallback: Empty avatar
-    return getUriWithOrg(params.orgslug as string, '/empty_avatar.webp');
+    return getAbsoluteUrl(params.orgslug as string, '/empty_avatar.webp');
   };
 
   const getFallbackText = (): string => {

@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation';
+import { connection } from 'next/server';
 
 import CodeChallengeConfigEditor from '@components/features/courses/code-challenges/CodeChallengeConfigEditor';
 import { auth } from '@/auth';
@@ -27,6 +28,7 @@ interface PageProps {
 }
 
 export default async function CodeChallengeEditorPage({ params }: PageProps) {
+  await connection();
   const session = await auth();
   const { courseuuid, activityid } = await params;
 

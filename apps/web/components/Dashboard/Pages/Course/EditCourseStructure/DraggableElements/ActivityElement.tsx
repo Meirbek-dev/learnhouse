@@ -40,7 +40,7 @@ import { deleteAssignmentUsingActivityUUID, getAssignmentFromActivityUUID } from
 import { deleteActivity, updateActivity } from '@services/courses/activities';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import ToolTip from '@/components/Objects/Elements/Tooltip/Tooltip';
-import { getAPIUrl, getUriWithOrg } from '@services/config/config';
+import { getAPIUrl, getAbsoluteUrl } from '@services/config/config';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -427,7 +427,7 @@ const ActivityElement = ({ orgslug, activity, activityIndex, course_uuid }: Acti
                 <DropdownMenuItem
                   onSelect={() => {
                     window.open(
-                      `${getUriWithOrg(orgslug, '')}/course/${course_uuid.replace('course_', '')}/activity/${activity.activity_uuid.replace('activity_', '')}`,
+                      `${getAbsoluteUrl(orgslug, '')}/course/${course_uuid.replace('course_', '')}/activity/${activity.activity_uuid.replace('activity_', '')}`,
                       '_blank',
                       'noopener,noreferrer',
                     );
@@ -533,7 +533,7 @@ const ActivityEditButton = ({
 
   // Dynamic page edit button
   if (activity.activity_type === 'TYPE_DYNAMIC') {
-    const editUrl = `${getUriWithOrg(orgslug, '')}/course/${course?.courseStructure?.course_uuid?.replace(
+    const editUrl = `${getAbsoluteUrl(orgslug, '')}/course/${course?.courseStructure?.course_uuid?.replace(
       'course_',
       '',
     )}/activity/${activity.activity_uuid.replace('activity_', '')}/edit`;
@@ -579,7 +579,7 @@ const ActivityEditButton = ({
       );
     }
 
-    const editUrl = `${getUriWithOrg(org?.slug ?? '', '')}/dash/assignments/${assignmentUUID}`;
+    const editUrl = `${getAbsoluteUrl(org?.slug ?? '', '')}/dash/assignments/${assignmentUUID}`;
 
     return (
       <Button
@@ -596,7 +596,7 @@ const ActivityEditButton = ({
 
   // Code challenge edit button
   if (activity.activity_type === 'TYPE_CODE_CHALLENGE') {
-    const editUrl = `${getUriWithOrg(orgslug, '')}/course/${course?.courseStructure?.course_uuid?.replace(
+    const editUrl = `${getAbsoluteUrl(orgslug, '')}/course/${course?.courseStructure?.course_uuid?.replace(
       'course_',
       '',
     )}/activity/${activity.activity_uuid.replace('activity_', '')}/editor`;

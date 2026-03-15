@@ -3,7 +3,7 @@ import { GamificationProvider } from '@/components/Contexts/GamificationContext'
 import { getOrganizationContextInfo } from '@services/organizations/orgs';
 import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
-import { auth } from '@/auth';
+import { getOptionalSession } from '@/lib/get-optional-session';
 
 import Trail from './trail';
 
@@ -23,7 +23,7 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
 
 const TrailPage = async (params: any) => {
   const { orgslug } = await params.params;
-  const session = await auth();
+  const session = await getOptionalSession();
   const accessToken = session?.tokens?.access_token;
 
   const org = await getOrganizationContextInfo(orgslug, undefined, accessToken);

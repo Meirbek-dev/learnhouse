@@ -24,7 +24,7 @@ import OnBoardMore from '@public/onboarding/OnBoardMore.png';
 import OnBoardUGs from '@public/onboarding/OnBoardUGs.png';
 import OnBoardAI from '@public/onboarding/OnBoardAI.png';
 import { useOrg } from '@components/Contexts/OrgContext';
-import { getUriWithOrg } from '@services/config/config';
+import { getAbsoluteUrl } from '@services/config/config';
 import { usePermissions } from '@/components/Security';
 import type { StaticImageData } from 'next/image';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -115,7 +115,7 @@ const Onboarding: FC = () => {
         {
           label: t('step2Button'),
           action: () => {
-            router.push(getUriWithOrg(org?.slug, '/courses?new=true'));
+            router.push(getAbsoluteUrl(org?.slug, '/courses?new=true'));
           },
           icon: <Book size={16} />,
         },
@@ -165,7 +165,7 @@ const Onboarding: FC = () => {
         {
           label: t('step6Button'),
           action: () => {
-            router.push(getUriWithOrg(org?.slug, '/dash/users/settings/usergroups'));
+            router.push(getAbsoluteUrl(org?.slug, '/dash/users/settings/usergroups'));
           },
           icon: <SquareUser size={16} />,
         },
@@ -185,7 +185,7 @@ const Onboarding: FC = () => {
         {
           label: t('step8Button'),
           action: () => {
-            router.push(getUriWithOrg(org?.slug, '/dash/assignments?new=true'));
+            router.push(getAbsoluteUrl(org?.slug, '/dash/assignments?new=true'));
           },
           icon: <Book size={16} />,
         },
@@ -199,7 +199,7 @@ const Onboarding: FC = () => {
         {
           label: t('step9Button'),
           action: () => {
-            router.push(getUriWithOrg(org?.slug, '/dash/payments/customers'));
+            router.push(getAbsoluteUrl(org?.slug, '/dash/payments/customers'));
           },
           icon: <CreditCard size={16} />,
         },

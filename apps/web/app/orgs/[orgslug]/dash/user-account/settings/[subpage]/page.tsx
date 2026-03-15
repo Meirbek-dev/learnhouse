@@ -7,7 +7,7 @@ import UserProfile from '@components/Dashboard/Pages/UserAccount/UserProfile/Use
 import SettingsHeader from '@components/Dashboard/Misc/SettingsHeader';
 import { Info, Lock, Trophy, User as UserIcon } from 'lucide-react';
 import SettingsTabs from '@components/Dashboard/Misc/SettingsTabs';
-import { getUriWithOrg } from '@services/config/config';
+import { getAbsoluteUrl } from '@services/config/config';
 import type { LucideIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import type { ComponentType } from 'react';
@@ -80,7 +80,7 @@ const SettingsPage = ({ params }: { params: Promise<SettingsParams> }) => {
         <SettingsTabs
           value={subpage}
           tabs={tabs}
-          getHref={(tab) => `${getUriWithOrg(orgslug, '')}/dash/user-account/settings/${tab.id}`}
+          getHref={(tab) => `${getAbsoluteUrl(orgslug, '')}/dash/user-account/settings/${tab.id}`}
           translationNamespace="DashPage.UserAccountSettings"
         />
       </SettingsHeader>

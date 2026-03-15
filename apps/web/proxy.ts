@@ -1,4 +1,4 @@
-import { defaultOrg, getTopLevelCookieDomain, getUriWithOrg } from './services/config/config';
+import { defaultOrg, getTopLevelCookieDomain, getAbsoluteUrl } from './services/config/config';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
@@ -64,7 +64,7 @@ export default async function proxy(req: NextRequest) {
       const { searchParams } = req.nextUrl;
       const queryString = searchParams.toString();
       const redirectPathname = '/';
-      const redirectUrl = new URL(getUriWithOrg(cookie_orgslug, redirectPathname), req.url);
+      const redirectUrl = new URL(getAbsoluteUrl(cookie_orgslug, redirectPathname), req.url);
 
       if (queryString) {
         redirectUrl.search = queryString;

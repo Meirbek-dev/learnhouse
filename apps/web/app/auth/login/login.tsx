@@ -1,7 +1,7 @@
 'use client';
 
 import { Field, FieldContent, FieldError, FieldLabel } from '@components/ui/field';
-import { getUriWithOrg, getUriWithoutOrg } from '@services/config/config';
+import { getAbsoluteUrl, getUriWithoutOrg } from '@services/config/config';
 import PasswordInput from '@components/ui/custom/password-input';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { SiGoogle } from '@icons-pack/react-simple-icons';
@@ -85,7 +85,7 @@ const LoginClient = (props: LoginClientProps) => {
     <AuthCard>
       <Link
         prefetch={false}
-        href={getUriWithOrg(props.org.slug, '/')}
+        href={getAbsoluteUrl(props.org.slug, '/')}
       >
         <AuthLogo />
       </Link>

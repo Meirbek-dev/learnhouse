@@ -8,7 +8,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import { getUriWithOrg } from '@services/config/config';
+import { getAbsoluteUrl } from '@services/config/config';
 import Link from '@components/ui/ServerLink';
 import { useTranslations } from 'next-intl';
 import { Book } from 'lucide-react';
@@ -26,7 +26,7 @@ export default function CourseBreadcrumbs({ course, orgslug }: CourseBreadcrumbs
         <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink
-              render={<Link href={`${getUriWithOrg(orgslug, '')}/courses`} />}
+              render={<Link href={`${getAbsoluteUrl(orgslug, '')}/courses`} />}
               className="flex items-center space-x-2"
             >
               <Book

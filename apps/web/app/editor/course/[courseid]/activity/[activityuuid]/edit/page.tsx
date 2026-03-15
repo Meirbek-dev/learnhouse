@@ -7,6 +7,7 @@ import { getCourseMetadata } from '@services/courses/courses';
 import { getTranslations } from 'next-intl/server';
 import { jetBrainsMono } from '@/lib/fonts';
 import type { Metadata } from 'next';
+import { connection } from 'next/server';
 import { auth } from '@/auth';
 
 interface MetadataProps {
@@ -15,6 +16,7 @@ interface MetadataProps {
 }
 
 export async function generateMetadata(props: MetadataProps): Promise<Metadata> {
+  await connection();
   const params = await props.params;
   const session = await auth();
   const access_token = session?.tokens?.access_token;
@@ -29,6 +31,7 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
 }
 
 const EditActivity = async (props: { params: Promise<{ courseid: string; activityuuid: string }> }) => {
+  await connection();
   const params = await props.params;
   const session = await auth();
   const access_token = session?.tokens?.access_token ?? null;

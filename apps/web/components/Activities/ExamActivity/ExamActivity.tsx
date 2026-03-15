@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { useContributorStatus } from '@/hooks/useContributorStatus';
-import { getAPIUrl, getUriWithOrg } from '@/services/config/config';
+import { getAPIUrl, getAbsoluteUrl } from '@/services/config/config';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import type { AttemptData } from './state/examFlowReducer';
 import { swrFetcher } from '@/services/utils/ts/requests';
@@ -188,7 +188,7 @@ export default function ExamActivity({ activity, course, orgslug }: ExamActivity
       }
 
       const cleanCourseUuid = course.course_uuid?.replace('course_', '');
-      router.push(`${getUriWithOrg(orgslug, '')}/course/${cleanCourseUuid}/activity/${nextActivity.cleanUuid}`);
+      router.push(`${getAbsoluteUrl(orgslug, '')}/course/${cleanCourseUuid}/activity/${nextActivity.cleanUuid}`);
     } catch (error) {
       console.error('Failed to navigate to next activity', error);
       toast.error(t('navigationError') || 'Navigation failed');

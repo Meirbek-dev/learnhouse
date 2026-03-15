@@ -3,7 +3,7 @@
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { linkResourcesToUserGroup } from '@services/usergroups/usergroups';
-import { getAPIUrl, getUriWithOrg } from '@services/config/config';
+import { getAPIUrl, getAbsoluteUrl } from '@services/config/config';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
@@ -109,7 +109,7 @@ const LinkToUserGroup = (props: LinkToUserGroupProps) => {
             <Link
               className="mx-1 rounded-full bg-blue-100 px-3 py-1 font-semibold text-blue-700"
               target="_blank"
-              href={getUriWithOrg(org.slug, '/dash/users/settings/usergroups')}
+              href={getAbsoluteUrl(org.slug, '/dash/users/settings/usergroups')}
             >
               {t('createUserGroupLink')}
             </Link>

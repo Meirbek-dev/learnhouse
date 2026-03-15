@@ -2,7 +2,7 @@
 
 import { Field, FieldContent, FieldError, FieldLabel } from '@components/ui/field';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { getUriWithOrg, getUriWithoutOrg } from '@services/config/config';
+import { getAbsoluteUrl, getUriWithoutOrg } from '@services/config/config';
 import PasswordInput from '@components/ui/custom/password-input';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { useEffect, useState, useTransition } from 'react';
@@ -69,7 +69,7 @@ const SignUpClient = (props: SignUpClientProps) => {
 
   useEffect(() => {
     if (session?.status === 'authenticated' && org?.slug) {
-      router.push(getUriWithOrg(org.slug, '/'));
+      router.push(getAbsoluteUrl(org.slug, '/'));
     }
   }, [session?.status, org?.slug, router]);
 
@@ -136,7 +136,7 @@ const SignUpClient = (props: SignUpClientProps) => {
     <AuthCard className="max-w-md">
       <Link
         prefetch={false}
-        href={getUriWithOrg(props.org.slug, '/')}
+        href={getAbsoluteUrl(props.org.slug, '/')}
       >
         <AuthLogo />
       </Link>
