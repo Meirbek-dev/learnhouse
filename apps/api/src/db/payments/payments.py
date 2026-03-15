@@ -53,6 +53,18 @@ class PaymentsConfigRead(PaymentsConfigBase):
     creation_date: datetime
     update_date: datetime
 
+    @field_validator("creation_date", "update_date", mode="before")
+    @classmethod
+    def validate_datetimes(cls, value):
+        if isinstance(value, datetime):
+            return value
+        if isinstance(value, str):
+            normalized = value.strip()
+            if normalized.endswith("Z"):
+                normalized = f"{normalized[:-1]}+00:00"
+            return datetime.fromisoformat(normalized)
+        return value
+
 
 class PaymentsConfigDelete(SQLModelStrictBaseModel):
     id: int
