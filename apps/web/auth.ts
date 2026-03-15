@@ -5,7 +5,7 @@ import {
   loginWithOAuthToken,
 } from '@/services/auth/auth';
 import { SESSION_CACHE_MAX_SIZE, SESSION_CACHE_TTL_MS, TOKEN_REFRESH_BUFFER_MS } from '@/lib/constants';
-import { getAbsoluteUriWithOrg, getTopLevelCookieDomain } from '@/services/config/config';
+import { getUriWithOrg, getTopLevelCookieDomain } from '@/services/config/config';
 import type { NextAuthConfig, NextAuthResult, Session } from 'next-auth';
 import { getResponseMetadata } from '@/services/utils/ts/requests';
 import Credentials from 'next-auth/providers/credentials';
@@ -170,9 +170,9 @@ const createAuthConfig = (): NextAuthConfig => {
     ],
 
     pages: {
-      signIn: getAbsoluteUriWithOrg('auth', '/'),
-      verifyRequest: getAbsoluteUriWithOrg('auth', '/'),
-      error: getAbsoluteUriWithOrg('auth', '/'),
+      signIn: getUriWithOrg('auth', '/'),
+      verifyRequest: getUriWithOrg('auth', '/'),
+      error: getUriWithOrg('auth', '/'),
     },
 
     cookies: {
