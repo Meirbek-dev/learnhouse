@@ -17,10 +17,10 @@ docker build -f apps/api/Dockerfile -t learnhouse-api:local apps/api
 
 ## Run the API image (detached)
 
-Run the built image and map port 8000 (or your `PORT` env variable):
+Run the built image from the repository root and provide the backend env contract explicitly:
 
 ```powershell
-docker run -d --name learnhouse-api -p 8000:8000 learnhouse-api:local
+docker run -d --name learnhouse-api --env-file extra/.env -p 8000:8000 learnhouse-api:local
 ```
 
 ## Stop and remove the container
@@ -41,6 +41,9 @@ docker compose up -d --build app
 
 ## Environment and notes
 
+- The backend runtime configuration is environment-only. It does not auto-load `apps/api/.env` and it does not read `apps/api/config/config.yaml` at runtime.
+- Use `extra/.env` for Docker deployments and treat `extra/example-conf.env` as the canonical template.
+- Use `apps/api/.env.example` only as a local backend example when you want a file to copy from during development.
 - If you modify dependencies, rebuild the image.
 - If you need to inspect logs:
 

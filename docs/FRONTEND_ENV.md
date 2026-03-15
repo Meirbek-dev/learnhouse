@@ -33,5 +33,10 @@ These values are used only by the Node.js server runtime.
 - `docker compose` must receive the public `NEXT_PUBLIC_*` values at build time via shell env or
   `--env-file extra/.env`. `env_file` inside the service definition does not populate Docker build
   args.
+- For full-stack deployments, copy `extra/example-conf.env` to `extra/.env` and keep both frontend
+  and backend runtime variables there.
+- Backend runtime settings are environment-only. The API does not read `apps/api/config/config.yaml`
+  or auto-load `apps/api/.env` in containers.
 - `apps/web/.env.example` is the local development example.
+- `apps/api/.env.example` is the local backend example.
 - `extra/example-conf.env` is the full-stack deployment example.

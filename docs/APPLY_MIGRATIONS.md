@@ -5,6 +5,10 @@ checks `alembic_version` and will fail if migrations have not been applied, so r
 starting or restarting the API container. In production, the container starts in `/app`, while the
 API project lives in `/app/api`, so migration commands must set the working directory explicitly.
 
+The migration container gets its backend settings from the `app` service environment, which in this
+repository is normally `extra/.env` via `docker-compose.yml`. There is no runtime fallback to
+`apps/api/config/config.yaml` or `apps/api/.env`.
+
 ## When To Use Which Command
 
 - Use `docker compose exec app ...` when the `app` container is already running.
