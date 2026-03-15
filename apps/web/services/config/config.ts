@@ -31,7 +31,7 @@ export const getTopLevelCookieDomain = () =>
 
 /**
  * Resolves the API base URL (always ending with a slash).
- * This should run once at module init.
+ * This is resolved lazily and cached by getAPIUrl().
  *
  * For server-side requests in Docker, use internal container network.
  * For client-side requests, use the public-facing URL.
@@ -47,9 +47,14 @@ const resolveAPIUrl = () => {
   return PLATFORM_API_URL;
 };
 
-const API_URL = resolveAPIUrl();
+let apiUrlCache: string | null = null;
 
-export const getAPIUrl = () => API_URL;
+export const getAPIUrl = () => {
+  if (apiUrlCache) return apiUrlCache;
+
+  apiUrlCache = resolveAPIUrl();
+  return apiUrlCache;
+};
 
 export const getBackendUrl = () => PLATFORM_BACKEND_URL;
 
