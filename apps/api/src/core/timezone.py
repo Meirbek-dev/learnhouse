@@ -33,7 +33,7 @@ def get_timezone() -> ZoneInfo:
         _CACHED_TIMEZONE = ZoneInfo(tz_name)
     except Exception:
         # Fallback to UTC if timezone is invalid
-        _CACHED_TIMEZONE = ZoneInfo("Asia/Almaty")
+        _CACHED_TIMEZONE = ZoneInfo("UTC")
 
     return _CACHED_TIMEZONE
 

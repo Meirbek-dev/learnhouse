@@ -15,6 +15,7 @@ ALGORITHM = "HS256"
 def get_secret_key() -> str:
     return get_settings().security_config.auth_jwt_secret_key
 
+
 ### 🔒 JWT ##############################################################
 
 

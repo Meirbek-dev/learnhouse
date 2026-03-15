@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from unittest.mock import Mock
 
 import pytest
@@ -46,8 +47,8 @@ def _public_course() -> Course:
         open_to_contributors=False,
         course_uuid="course_public",
         creator_id=77,
-        creation_date="2026-01-01T00:00:00Z",
-        update_date="2026-01-01T00:00:00Z",
+        creation_date=datetime(2026, 1, 1, tzinfo=UTC),
+        update_date=datetime(2026, 1, 1, tzinfo=UTC),
     )
 
 

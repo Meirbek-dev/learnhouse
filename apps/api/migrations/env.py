@@ -12,8 +12,9 @@ from config.config import get_settings
 # access to the values within the .ini file in use.
 config = context.config
 
-database_url = get_settings().database_config.sql_connection_string or config.get_main_option(
-    "sqlalchemy.url"
+database_url = (
+    get_settings().database_config.sql_connection_string
+    or config.get_main_option("sqlalchemy.url")
 )
 if database_url:
     config.set_main_option("sqlalchemy.url", database_url)

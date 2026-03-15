@@ -12,16 +12,16 @@ os.environ.setdefault("PLATFORM_CONTACT_EMAIL", "tests@example.com")
 os.environ.setdefault("PLATFORM_DOMAIN", "example.test")
 os.environ.setdefault("PLATFORM_ALLOWED_REGEXP", r"^https?://example\.test(:\d+)?$")
 os.environ.setdefault(
-	"PLATFORM_SQL_CONNECTION_STRING",
-	"postgresql+psycopg://openu:openu@localhost:5432/openu_test",
+    "PLATFORM_SQL_CONNECTION_STRING",
+    "postgresql+psycopg://openu:openu@localhost:5432/openu_test",
 )
 os.environ.setdefault(
-	"PLATFORM_REDIS_CONNECTION_STRING",
-	"redis://localhost:6379/0",
+    "PLATFORM_REDIS_CONNECTION_STRING",
+    "redis://localhost:6379/0",
 )
 os.environ.setdefault(
-	"PLATFORM_AUTH_JWT_SECRET_KEY",
-	"test-secret-key-with-sufficient-length-123456",
+    "PLATFORM_AUTH_JWT_SECRET_KEY",
+    "test-secret-key-with-sufficient-length-123456",
 )
 
 # Suppress logfire warnings in tests

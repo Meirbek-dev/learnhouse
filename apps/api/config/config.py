@@ -59,6 +59,8 @@ def _strip_optional_string(value: str | None) -> str | None:
 
 class PlatformSectionSettings(BaseSettings):
     model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
         case_sensitive=True,
         env_ignore_empty=True,
         extra="ignore",
@@ -301,7 +303,9 @@ class MailingConfig(PlatformSectionSettings):
 
 
 class DatabaseConfig(PlatformSectionSettings):
-    sql_connection_string: str = Field(validation_alias="PLATFORM_SQL_CONNECTION_STRING")
+    sql_connection_string: str = Field(
+        validation_alias="PLATFORM_SQL_CONNECTION_STRING"
+    )
 
     @field_validator("sql_connection_string", mode="before")
     @classmethod

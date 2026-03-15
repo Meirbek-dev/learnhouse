@@ -6,19 +6,18 @@ from config.config import get_settings
 
 def test_course_creation_update_columns_are_timestamptz() -> None:
     cfg = get_settings()
+    engine = None
     try:
         engine = sa.create_engine(
             cfg.database_config.sql_connection_string, future=True
         )
-    except Exception as e:
-        pytest.skip(f"Cannot create DB engine: {e}")
-
-    inspector = sa.inspect(engine)
-
-    try:
+        inspector = sa.inspect(engine)
         cols = inspector.get_columns("course")
     except Exception as exc:
         pytest.skip(f"Cannot inspect table course: {exc}")
+    finally:
+        if engine is not None:
+            engine.dispose()
 
     c = next((c for c in cols if c.get("name") == "creation_date"), None)
     u = next((c for c in cols if c.get("name") == "update_date"), None)

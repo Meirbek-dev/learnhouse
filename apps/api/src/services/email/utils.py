@@ -13,9 +13,7 @@ def future_send_email(to: EmailStr, subject: str, body: str) -> Emails.SendRespo
     settings = get_settings()
 
     params = {
-        "from": "Ashyq Bilim <"
-        + settings.mailing_config.system_email_address
-        + ">",
+        "from": "Ashyq Bilim <" + settings.mailing_config.system_email_address + ">",
         "to": [to],
         "subject": subject,
         "html": body,
