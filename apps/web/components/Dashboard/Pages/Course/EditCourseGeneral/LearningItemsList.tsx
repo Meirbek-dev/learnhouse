@@ -54,26 +54,10 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
     ];
   };
 
+  const initialSyncRafRef = useRef<number | null>(null);
+
   // Use lazy initialization to parse and standardize items once
-  const [items, setItems] = useState<LearningItem[]>(() => {
-    const standardized = standardizeItems(value);
-    // Sync back to parent if needed (e.g., generated IDs)
-    const needsSync =
-      !value ||
-      (() => {
-        try {
-          const parsed = JSON.parse(value);
-          return !Array.isArray(parsed) || standardized.some((item, idx) => item.id !== parsed[idx]?.id);
-        } catch {
-          return true;
-        }
-      })();
-    if (needsSync) {
-      // Schedule sync after mount on next animation frame
-      initialSyncRafRef.current = requestAnimationFrame(() => onChange(JSON.stringify(standardized)));
-    }
-    return standardized;
-  });
+  const [items, setItems] = useState<LearningItem[]>(() => standardizeItems(value));
 
   const [showEmojiPicker, setShowEmojiPicker] = useState<string | null>(null);
   const [showLinkInput, setShowLinkInput] = useState<string | null>(null);
@@ -83,15 +67,34 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
   const inputRefs = useRef<Record<string, HTMLInputElement | null>>({});
   const linkInputFieldRefs = useRef<Record<string, HTMLInputElement | null>>({});
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const initialSyncRafRef = useRef<number | null>(null);
   const focusRafRef = useRef<number | null>(null);
   const emojiFocusRafRef = useRef<number | null>(null);
   const t = useTranslations('CourseEdit.General.LearningItems');
 
+  // Sync back to parent on mount if IDs were generated or value was missing/invalid
+  useEffect(() => {
+    const needsSync =
+      !value ||
+      (() => {
+        try {
+          const parsed = JSON.parse(value);
+          return !Array.isArray(parsed) || items.some((item, idx) => item.id !== parsed[idx]?.id);
+        } catch {
+          return true;
+        }
+      })();
+    if (needsSync) {
+      initialSyncRafRef.current = requestAnimationFrame(() => onChange(JSON.stringify(items)));
+    }
+    return () => {
+      if (initialSyncRafRef.current) cancelAnimationFrame(initialSyncRafRef.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Cleanup on unmount - cancel any scheduled animation frames
   useEffect(() => {
     return () => {
-      if (initialSyncRafRef.current) cancelAnimationFrame(initialSyncRafRef.current);
       if (focusRafRef.current) cancelAnimationFrame(focusRafRef.current);
       if (emojiFocusRafRef.current) cancelAnimationFrame(emojiFocusRafRef.current);
     };

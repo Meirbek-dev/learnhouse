@@ -13,15 +13,47 @@ interface PendingNavigation {
   href?: string;
 }
 
+const globalPromptState: {
+  ownerId: symbol | null;
+} = {
+  ownerId: null,
+};
+
+function createGuardHistoryState() {
+  return { ...window.history.state, __unsavedChangesGuard: true };
+}
+
 export function useUnsavedChangesGuard(isDirty: boolean, options?: UnsavedChangesGuardOptions) {
   const message = options?.message ?? '';
   const interceptInAppNavigation = options?.interceptInAppNavigation ?? false;
   const messageRef = useRef(message);
   const ignoreNextPopRef = useRef(false);
   const allowNavigationRef = useRef(false);
+  const guardInstanceIdRef = useRef(Symbol('unsaved-changes-guard'));
   const pendingLinkRef = useRef<HTMLAnchorElement | null>(null);
   const pendingNavigationRef = useRef<PendingNavigation | null>(null);
   const [pendingNavigation, setPendingNavigation] = useState<PendingNavigation | null>(null);
+
+  const releasePromptOwnership = useCallback(() => {
+    if (globalPromptState.ownerId === guardInstanceIdRef.current) {
+      globalPromptState.ownerId = null;
+    }
+  }, []);
+
+  const openPendingNavigation = useCallback((nextPendingNavigation: PendingNavigation) => {
+    const currentOwnerId = globalPromptState.ownerId;
+    if (currentOwnerId !== null && currentOwnerId !== guardInstanceIdRef.current) {
+      return;
+    }
+
+    if (pendingNavigationRef.current !== null) {
+      return;
+    }
+
+    globalPromptState.ownerId = guardInstanceIdRef.current;
+    pendingNavigationRef.current = nextPendingNavigation;
+    setPendingNavigation(nextPendingNavigation);
+  }, []);
 
   useEffect(() => {
     messageRef.current = message;
@@ -36,27 +68,37 @@ export function useUnsavedChangesGuard(isDirty: boolean, options?: UnsavedChange
       return;
     }
 
+    releasePromptOwnership();
     allowNavigationRef.current = false;
     ignoreNextPopRef.current = false;
     pendingLinkRef.current = null;
+    pendingNavigationRef.current = null;
     setPendingNavigation(null);
-  }, [isDirty]);
+  }, [isDirty, releasePromptOwnership]);
+
+  useEffect(() => {
+    return () => {
+      releasePromptOwnership();
+    };
+  }, [releasePromptOwnership]);
 
   const cancelNavigation = useCallback(() => {
     const currentPending = pendingNavigationRef.current;
+    if (!currentPending) {
+      return;
+    }
+    // Clear ref synchronously so re-entrant calls are no-ops.
+    pendingNavigationRef.current = null;
 
-    if (currentPending?.kind === 'history-back') {
-      globalThis.history.pushState(
-        { ...window.history.state, __unsavedChangesGuard: true },
-        '',
-        globalThis.location.href,
-      );
+    if (currentPending.kind === 'history-back') {
+      globalThis.history.pushState(createGuardHistoryState(), '', globalThis.location.href);
     }
 
+    releasePromptOwnership();
     pendingLinkRef.current = null;
     allowNavigationRef.current = false;
     setPendingNavigation(null);
-  }, []);
+  }, [releasePromptOwnership]);
 
   const confirmNavigation = useCallback(() => {
     const currentPending = pendingNavigationRef.current;
@@ -111,7 +153,14 @@ export function useUnsavedChangesGuard(isDirty: boolean, options?: UnsavedChange
     }
 
     const handleDocumentClick = (event: MouseEvent) => {
-      if (allowNavigationRef.current) {
+      if (
+        globalPromptState.ownerId !== null &&
+        globalPromptState.ownerId !== guardInstanceIdRef.current
+      ) {
+        return;
+      }
+
+      if (allowNavigationRef.current || pendingNavigationRef.current !== null) {
         return;
       }
 
@@ -154,14 +203,12 @@ export function useUnsavedChangesGuard(isDirty: boolean, options?: UnsavedChange
       event.preventDefault();
       event.stopPropagation();
       pendingLinkRef.current = link;
-      setPendingNavigation({ kind: 'link', href: nextUrl.toString() });
+      openPendingNavigation({ kind: 'link', href: nextUrl.toString() });
     };
 
-    globalThis.history.pushState(
-      { ...window.history.state, __unsavedChangesGuard: true },
-      '',
-      globalThis.location.href,
-    );
+    if (window.history.state?.__unsavedChangesGuard !== true) {
+      globalThis.history.pushState(createGuardHistoryState(), '', globalThis.location.href);
+    }
 
     const handlePopState = () => {
       if (ignoreNextPopRef.current) {
@@ -169,12 +216,19 @@ export function useUnsavedChangesGuard(isDirty: boolean, options?: UnsavedChange
         return;
       }
 
-      if (allowNavigationRef.current) {
+      if (
+        globalPromptState.ownerId !== null &&
+        globalPromptState.ownerId !== guardInstanceIdRef.current
+      ) {
+        return;
+      }
+
+      if (allowNavigationRef.current || pendingNavigationRef.current !== null) {
         return;
       }
 
       pendingLinkRef.current = null;
-      setPendingNavigation({ kind: 'history-back' });
+      openPendingNavigation({ kind: 'history-back' });
     };
 
     document.addEventListener('click', handleDocumentClick, true);
@@ -184,7 +238,7 @@ export function useUnsavedChangesGuard(isDirty: boolean, options?: UnsavedChange
       document.removeEventListener('click', handleDocumentClick, true);
       globalThis.removeEventListener('popstate', handlePopState);
     };
-  }, [interceptInAppNavigation, isDirty]);
+  }, [interceptInAppNavigation, isDirty, openPendingNavigation]);
 
   return {
     cancelNavigation,

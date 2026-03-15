@@ -77,7 +77,12 @@ function CourseWorkspaceChrome({
   return (
     <div className="flex min-h-screen min-w-0 flex-1 flex-col bg-background">
       <CourseConflictDialog />
-      <AlertDialog open={unsavedChangesGuard.isPromptOpen}>
+      <AlertDialog
+        open={unsavedChangesGuard.isPromptOpen}
+        onOpenChange={(open) => {
+          if (!open) unsavedChangesGuard.cancelNavigation();
+        }}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogMedia className="rounded-lg bg-muted/80 p-3 text-foreground dark:bg-muted/60">
@@ -87,7 +92,7 @@ function CourseWorkspaceChrome({
             <AlertDialogDescription>{unsavedChangesGuard.promptMessage}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={unsavedChangesGuard.cancelNavigation}>
+            <AlertDialogCancel>
               {t('unsavedDialogStay')}
             </AlertDialogCancel>
             <AlertDialogAction
