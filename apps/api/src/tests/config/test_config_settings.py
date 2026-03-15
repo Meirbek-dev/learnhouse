@@ -28,11 +28,13 @@ def test_chromadb_false_string_stays_false(monkeypatch: pytest.MonkeyPatch) -> N
 def test_hosting_config_parses_comma_separated_origins(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    monkeypatch.setenv("PLATFORM_DOMAIN", "example.com")
     monkeypatch.setenv(
         "PLATFORM_ALLOWED_ORIGINS",
         " https://one.example , https://two.example ",
     )
     monkeypatch.setenv("PLATFORM_COOKIE_DOMAIN", ".example.com")
+    monkeypatch.setenv("PLATFORM_ALLOWED_REGEXP", r"^https?://example\.com$")
 
     cfg = HostingConfig(_env_file=None)
 

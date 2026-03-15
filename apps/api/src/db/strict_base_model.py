@@ -1,16 +1,12 @@
 import os
-from pathlib import Path
 
-from dotenv import load_dotenv
 from pydantic import BaseModel, ConfigDict
 from sqlmodel import SQLModel
 
 
-load_dotenv(Path(__file__).resolve().parents[2] / ".env")
-
-
 # Determine development mode from environment to avoid importing config at module import
-# time (which would create a circular import with config.config).
+# time (which would create a circular import with config.config). This follows
+# the real process environment only; settings file loading happens elsewhere.
 def _parse_env_bool(value: str | None) -> bool:
     if value is None:
         return False

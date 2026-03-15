@@ -1,11 +1,9 @@
 import ipaddress
 import json
-import os
 from functools import lru_cache
 from pathlib import Path
 from typing import Annotated, ClassVar
 
-from dotenv import load_dotenv
 from pydantic import (
     AliasChoices,
     EmailStr,
@@ -21,7 +19,6 @@ from pydantic_settings import (
     NoDecode,
     PydanticBaseSettingsSource,
     SettingsConfigDict,
-    YamlConfigSettingsSource,
 )
 
 from src.db.strict_base_model import PydanticStrictBaseModel
@@ -29,9 +26,6 @@ from src.db.strict_base_model import PydanticStrictBaseModel
 CONFIG_DIR = Path(__file__).resolve().parent
 API_DIR = CONFIG_DIR.parent
 ENV_FILE = API_DIR / ".env"
-YAML_FILE = CONFIG_DIR / "config.yaml"
-
-load_dotenv(ENV_FILE)
 
 _POSTGRES_DSN = TypeAdapter(PostgresDsn)
 _REDIS_DSN = TypeAdapter(RedisDsn)
@@ -74,22 +68,6 @@ def _strip_optional_string(value: str | None) -> str | None:
     return stripped or None
 
 
-def _parse_env_bool(value: str | None) -> bool:
-    if value is None:
-        return False
-
-    normalized = value.strip().lower()
-    return normalized in {"1", "true", "yes", "on"}
-
-
-def _should_load_yaml_defaults() -> bool:
-    raw_development_mode = os.environ.get("PLATFORM_DEVELOPMENT_MODE")
-    if raw_development_mode is None:
-        return True
-
-    return _parse_env_bool(raw_development_mode)
-
-
 class PlatformSectionSettings(BaseSettings):
     yaml_section: ClassVar[str | None] = None
 
@@ -111,23 +89,12 @@ class PlatformSectionSettings(BaseSettings):
         dotenv_settings: PydanticBaseSettingsSource,
         file_secret_settings: PydanticBaseSettingsSource,
     ) -> tuple[PydanticBaseSettingsSource, ...]:
-        sources: list[PydanticBaseSettingsSource] = [
+        return (
             init_settings,
             env_settings,
             dotenv_settings,
             file_secret_settings,
-        ]
-        if _should_load_yaml_defaults():
-            sources.append(
-                YamlConfigSettingsSource(
-                    settings_cls,
-                    yaml_file=str(YAML_FILE),
-                    yaml_file_encoding="utf-8",
-                    yaml_config_section=settings_cls.yaml_section,
-                )
-            )
-
-        return tuple(sources)
+        )
 
 
 class CookieConfig(PydanticStrictBaseModel):
@@ -207,16 +174,16 @@ class ChromaDBConfig(PlatformSectionSettings):
 
     separate_db_enabled: bool = Field(
         default=False,
-        validation_alias=AliasChoices(
-            "PLATFORM_CHROMADB_SEPARATE",
-            "separate_db_enabled",
-        ),
+        validation_alias="PLATFORM_CHROMADB_SEPARATE",
     )
     db_host: str | None = Field(default=None, validation_alias="PLATFORM_CHROMADB_HOST")
     db_port: int = Field(default=8000, validation_alias="PLATFORM_CHROMADB_PORT")
     persist_path: str = Field(
         default="./chromadb_data",
-        validation_alias="CHROMADB_PERSIST_PATH",
+        validation_alias=AliasChoices(
+            "PLATFORM_CHROMADB_PERSIST_PATH",
+            "CHROMADB_PERSIST_PATH",
+        ),
     )
 
     @field_validator("db_host", mode="before")
@@ -232,7 +199,7 @@ class ChromaDBConfig(PlatformSectionSettings):
 
         stripped = value.strip()
         if not stripped:
-            raise ValueError("CHROMADB_PERSIST_PATH must not be empty")
+            raise ValueError("PLATFORM_CHROMADB_PERSIST_PATH must not be empty")
 
         return stripped
 
@@ -312,7 +279,7 @@ class HostingConfig(PlatformSectionSettings):
     self_hosted: bool = Field(default=False, validation_alias="PLATFORM_SELF_HOSTED")
     cookie_config: CookieConfig = Field(
         default_factory=CookieConfig,
-        validation_alias=AliasChoices("cookie_config", "cookies_config"),
+        validation_alias="cookie_config",
     )
     cookie_domain: str | None = Field(
         default=None,
@@ -548,10 +515,20 @@ class PlatformConfig(PydanticStrictBaseModel):
         return self
 
 
+class IntegrationsConfig(PydanticStrictBaseModel):
+    judge0: Judge0Config = Field(default_factory=Judge0Config)
+
+
+class AppSettings(PlatformConfig):
+    internal: InternalConfig = Field(default_factory=InternalConfig)
+    bootstrap: BootstrapConfig = Field(default_factory=BootstrapConfig)
+    integrations: IntegrationsConfig = Field(default_factory=IntegrationsConfig)
+
+
 @lru_cache(maxsize=1)
-def get_platform_config() -> PlatformConfig:
+def get_settings() -> AppSettings:
     metadata = PlatformMetadataConfig()
-    return PlatformConfig(
+    return AppSettings(
         contact_email=str(metadata.contact_email),
         general_config=GeneralConfig(),
         hosting_config=HostingConfig(),
@@ -569,27 +546,28 @@ def get_platform_config() -> PlatformConfig:
         ),
         mailing_config=MailingConfig(),
         payments_config=InternalPaymentsConfig(stripe=InternalStripeConfig()),
+        internal=InternalConfig(),
+        bootstrap=BootstrapConfig(),
+        integrations=IntegrationsConfig(judge0=Judge0Config()),
     )
 
 
-@lru_cache(maxsize=1)
+def get_platform_config() -> PlatformConfig:
+    return get_settings()
+
+
 def get_internal_config() -> InternalConfig:
-    return InternalConfig()
+    return get_settings().internal
 
 
-@lru_cache(maxsize=1)
 def get_bootstrap_config() -> BootstrapConfig:
-    return BootstrapConfig()
+    return get_settings().bootstrap
 
 
-@lru_cache(maxsize=1)
 def get_judge0_config() -> Judge0Config:
-    return Judge0Config()
+    return get_settings().integrations.judge0
 
 
 def reload_platform_config_cache() -> None:
     """Clear cached platform configuration (mainly for tests or reloads)."""
-    get_platform_config.cache_clear()
-    get_internal_config.cache_clear()
-    get_bootstrap_config.cache_clear()
-    get_judge0_config.cache_clear()
+    get_settings.cache_clear()

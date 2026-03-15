@@ -6,19 +6,14 @@ from alembic import context
 from sqlalchemy import engine_from_config, pool
 from sqlmodel import SQLModel
 
-from config.config import get_platform_config
-
-# Ashyq Bilim config
-
-platform_config = get_platform_config()
+from config.config import get_settings
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
 
-database_url = (
-    platform_config.database_config.sql_connection_string
-    or config.get_main_option("sqlalchemy.url")
+database_url = get_settings().database_config.sql_connection_string or config.get_main_option(
+    "sqlalchemy.url"
 )
 if database_url:
     config.set_main_option("sqlalchemy.url", database_url)

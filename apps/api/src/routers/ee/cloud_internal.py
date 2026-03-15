@@ -4,7 +4,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Request
 from sqlmodel import Session
 
-from config.config import get_internal_config
+from config.config import get_settings
 from src.core.events.database import get_db_session
 from src.db.organization_config import OrganizationConfigBase
 from src.security.rbac import InternalAuthFailed
@@ -15,7 +15,7 @@ router = APIRouter()
 
 # Utils
 def check_internal_cloud_key(request: Request) -> None:
-    expected = get_internal_config().cloud_internal_key
+    expected = get_settings().internal.cloud_internal_key
     provided = request.headers.get("CloudInternalKey", "")
 
     if not expected or not hmac.compare_digest(provided, expected):

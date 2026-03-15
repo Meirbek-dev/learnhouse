@@ -4,13 +4,16 @@ import string
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
 
-from config.config import get_platform_config
+from config.config import get_settings
 
 ### 🔒 JWT ##############################################################
 
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
-SECRET_KEY = get_platform_config().security_config.auth_jwt_secret_key
 ALGORITHM = "HS256"
+
+
+def get_secret_key() -> str:
+    return get_settings().security_config.auth_jwt_secret_key
 
 ### 🔒 JWT ##############################################################
 

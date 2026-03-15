@@ -22,14 +22,16 @@ class TestSecurityComprehensive:
         from src.security.security import (
             ACCESS_TOKEN_EXPIRE_MINUTES,
             ALGORITHM,
-            SECRET_KEY,
+            get_secret_key,
         )
+
+        secret_key = get_secret_key()
 
         assert ACCESS_TOKEN_EXPIRE_MINUTES == 30
         assert ALGORITHM == "HS256"
-        assert SECRET_KEY is not None
-        assert isinstance(SECRET_KEY, str)
-        assert len(SECRET_KEY) > 0
+        assert secret_key is not None
+        assert isinstance(secret_key, str)
+        assert len(secret_key) > 0
 
     def test_feature_set_definition(self) -> None:
         """Test that FeatureSet includes all expected features"""

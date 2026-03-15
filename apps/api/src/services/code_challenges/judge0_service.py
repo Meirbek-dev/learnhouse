@@ -12,7 +12,7 @@ from typing import Any
 
 import httpx
 
-from config.config import get_judge0_config
+from config.config import get_settings
 from src.db.courses.code_challenges import (
     CustomTestResponse,
     Judge0Language,
@@ -42,7 +42,7 @@ class Judge0Service:
     """Service for interacting with Judge0 API"""
 
     def __init__(self, base_url: str | None = None) -> None:
-        self.base_url = base_url or get_judge0_config().base_url
+        self.base_url = base_url or get_settings().integrations.judge0.base_url
 
     async def health_check(self) -> bool:
         """Check if Judge0 is available"""

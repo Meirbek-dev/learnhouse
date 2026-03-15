@@ -20,7 +20,7 @@ from src.security.auth import (
     get_current_user_optional,
     non_public_endpoint,
 )
-from src.security.security import ALGORITHM, SECRET_KEY
+from src.security.security import ALGORITHM, get_secret_key
 
 
 class TestAuth:
@@ -138,13 +138,14 @@ class TestAuth:
         """Test access token creation with default expiry"""
         data = {"sub": "test@example.com"}
         token = create_access_token(data)
+        secret_key = get_secret_key()
 
         # Verify token is created
         assert isinstance(token, str)
         assert len(token) > 0
 
         # Decode and verify token
-        decoded = decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        decoded = decode(token, secret_key, algorithms=[ALGORITHM])
         assert decoded["sub"] == "test@example.com"
         assert "exp" in decoded
         assert decoded["type"] == "access"
@@ -154,9 +155,10 @@ class TestAuth:
         data = {"sub": "test@example.com"}
         expires_delta = timedelta(hours=2)
         token = create_access_token(data, expires_delta)
+        secret_key = get_secret_key()
 
         # Decode and verify token
-        decoded = decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        decoded = decode(token, secret_key, algorithms=[ALGORITHM])
         assert decoded["sub"] == "test@example.com"
 
         # Check that expiry time exists and is in the future
@@ -171,8 +173,9 @@ class TestAuth:
         """Test refresh token creation with default expiry"""
         data = {"sub": "test@example.com"}
         token = create_refresh_token(data)
+        secret_key = get_secret_key()
 
-        decoded = decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        decoded = decode(token, secret_key, algorithms=[ALGORITHM])
         assert decoded["sub"] == "test@example.com"
         assert decoded["type"] == "refresh"
         assert "exp" in decoded
@@ -200,12 +203,14 @@ class TestAuth:
         assert exc_info.value.status_code == 401
 
     def test_decode_access_token_missing_sub(self) -> None:
+        secret_key = get_secret_key()
+
         token = encode(
             {
                 "type": "access",
                 "exp": datetime.now(UTC) + timedelta(hours=1),
             },
-            SECRET_KEY,
+            secret_key,
             algorithm=ALGORITHM,
         )
         with pytest.raises(HTTPException) as exc_info:

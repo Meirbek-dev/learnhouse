@@ -10,7 +10,7 @@ from src.core.events.database import get_db_session
 from src.db.strict_base_model import PydanticStrictBaseModel
 from src.db.users import AnonymousUser, PublicUser, User, UserRead
 from src.security.rbac import AuthenticationRequired
-from src.security.security import ALGORITHM, SECRET_KEY
+from src.security.security import ALGORITHM, get_secret_key
 from src.services.users.users import security_get_user, security_verify_password
 
 logger = logging.getLogger(__name__)
@@ -43,7 +43,7 @@ def _credentials_exception() -> HTTPException:
 
 def _decode_token(token: str, expected_type: str) -> TokenData:
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, get_secret_key(), algorithms=[ALGORITHM])
     except jwt.PyJWTError as exc:
         raise _credentials_exception() from exc
 
@@ -74,14 +74,14 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None) -> s
     to_encode = data.copy()
     expire = datetime.now(UTC) + (expires_delta or ACCESS_TOKEN_EXPIRE)
     to_encode.update({"exp": expire, "type": "access"})
-    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return jwt.encode(to_encode, get_secret_key(), algorithm=ALGORITHM)
 
 
 def create_refresh_token(data: dict, expires_delta: timedelta | None = None) -> str:
     to_encode = data.copy()
     expire = datetime.now(UTC) + (expires_delta or REFRESH_TOKEN_EXPIRE)
     to_encode.update({"exp": expire, "type": "refresh"})
-    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return jwt.encode(to_encode, get_secret_key(), algorithm=ALGORITHM)
 
 
 def decode_access_token(token: str) -> TokenData:

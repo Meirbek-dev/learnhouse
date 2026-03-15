@@ -124,6 +124,8 @@ apps/api/temp-restore/
 # Extra configs (mounted at runtime, not baked in)
 extra/.env
 extra/backup.env
+apps/api/.env
+apps/api/.env.*
 
 # Test output
 junit.xml

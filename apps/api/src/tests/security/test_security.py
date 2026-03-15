@@ -1,7 +1,7 @@
 from src.security.security import (
     ACCESS_TOKEN_EXPIRE_MINUTES,
     ALGORITHM,
-    SECRET_KEY,
+    get_secret_key,
     security_hash_password,
     security_verify_password,
 )
@@ -57,12 +57,14 @@ class TestSecurity:
 
     def test_jwt_constants(self) -> None:
         """Test JWT constants are properly set"""
+        secret_key = get_secret_key()
+
         # Verify constants are set
         assert ACCESS_TOKEN_EXPIRE_MINUTES == 30
         assert ALGORITHM == "HS256"
-        assert SECRET_KEY is not None
-        assert isinstance(SECRET_KEY, str)
-        assert len(SECRET_KEY) > 0
+        assert secret_key is not None
+        assert isinstance(secret_key, str)
+        assert len(secret_key) > 0
 
     def test_password_hashing_consistency(self) -> None:
         """Test that password hashing produces consistent results"""

@@ -1,5 +1,3 @@
-import re
-
 import logfire
 import uvicorn
 from fastapi import FastAPI, HTTPException, Request
@@ -10,12 +8,9 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.types import Receive, Scope, Send
 
-from config.config import PlatformConfig, get_platform_config
+from config.config import get_settings
 from src.core.events.events import shutdown_app, startup_app
 from src.router import v1_router
-
-# Get Platform Config
-platform_config: PlatformConfig = get_platform_config()
 
 
 # ── Cached static files ────────────────────────────────────────────────────────
@@ -38,42 +33,43 @@ class CachedStaticFiles(StaticFiles):
         await super().__call__(scope, receive, send_with_cache)
 
 
-# Global Config
-app = FastAPI(
-    title="Ashyq Bilim",
-    description="Образовательная платформа Ashyq Bilim",
-    docs_url="/docs" if platform_config.general_config.development_mode else None,
-    redoc_url="/redoc" if platform_config.general_config.development_mode else None,
-    version="0.1.0",
-)
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origin_regex=platform_config.hosting_config.allowed_regexp,
-    allow_methods=["*"],
-    allow_credentials=True,
-    allow_headers=["*"],
-)
-
-# Only enable logfire if explicitly configured
-if platform_config.general_config.logfire_enabled:
-    logfire.configure(
-        console=False,
-        service_name="Ashyq Bilim",
+def create_app() -> FastAPI:
+    settings = get_settings()
+    app = FastAPI(
+        title="Ashyq Bilim",
+        description="Образовательная платформа Ashyq Bilim",
+        docs_url="/docs" if settings.general_config.development_mode else None,
+        redoc_url="/redoc" if settings.general_config.development_mode else None,
+        version="0.1.0",
     )
-    logfire.instrument_fastapi(app)
-    # Instrument database after logfire is configured
-    from src.core.events.database import engine
 
-    logfire.instrument_sqlalchemy(engine=engine)
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origin_regex=settings.hosting_config.allowed_regexp,
+        allow_methods=["*"],
+        allow_credentials=True,
+        allow_headers=["*"],
+    )
 
-# Gzip Middleware (will add brotli later)
-app.add_middleware(GZipMiddleware, minimum_size=1000)
+    if settings.general_config.logfire_enabled:
+        logfire.configure(
+            console=False,
+            service_name="Ashyq Bilim",
+        )
+        logfire.instrument_fastapi(app)
+        from src.core.events.database import engine
+
+        logfire.instrument_sqlalchemy(engine=engine)
+
+    app.add_middleware(GZipMiddleware, minimum_size=1000)
+    app.add_event_handler("startup", startup_app(app))
+    app.add_event_handler("shutdown", shutdown_app(app))
+    app.mount("/content", CachedStaticFiles(directory="content"), name="content")
+    app.include_router(v1_router)
+    return app
 
 
-# Events
-app.add_event_handler("startup", startup_app(app))
-app.add_event_handler("shutdown", shutdown_app(app))
+app = create_app()
 
 
 @app.exception_handler(HTTPException)
@@ -113,19 +109,13 @@ def request_validation_exception_handler(
     )
 
 
-# Static Files (served with long-lived cache headers; paths are UUID-based and immutable)
-app.mount("/content", CachedStaticFiles(directory="content"), name="content")
-
-# Global Routes
-app.include_router(v1_router)
-
-
 if __name__ == "__main__":
-    is_dev_mode = platform_config.general_config.development_mode
+    settings = get_settings()
+    is_dev_mode = settings.general_config.development_mode
 
     uvicorn_kwargs = {
         "host": "0.0.0.0",
-        "port": platform_config.hosting_config.port,
+        "port": settings.hosting_config.port,
         "reload": is_dev_mode,
         "access_log": is_dev_mode,
     }
