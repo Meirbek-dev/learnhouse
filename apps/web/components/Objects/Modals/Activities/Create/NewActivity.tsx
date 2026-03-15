@@ -17,9 +17,10 @@ type ViewType = 'home' | 'dynamic' | 'video' | 'documentpdf' | 'assignments' | '
 interface ActivityType {
   id: ViewType;
   labelKey: string;
+  descriptionKey: string;
   icon: LucideIcon;
-  color: string;
-  bgColor: string;
+  iconColor: string;
+  iconBg: string;
 }
 
 interface NewActivityModalProps {
@@ -36,44 +37,50 @@ const ACTIVITY_TYPES: ActivityType[] = [
   {
     id: 'dynamic',
     labelKey: 'dynamicPage',
+    descriptionKey: 'dynamicPageDesc',
     icon: Sparkles,
-    color: 'text-purple-600',
-    bgColor: 'bg-purple-50 group-hover:bg-purple-100',
+    iconColor: 'text-purple-700',
+    iconBg: 'bg-purple-50',
   },
   {
     id: 'video',
     labelKey: 'video',
+    descriptionKey: 'videoDesc',
     icon: Video,
-    color: 'text-red-600',
-    bgColor: 'bg-red-50 group-hover:bg-red-100',
+    iconColor: 'text-red-700',
+    iconBg: 'bg-red-50',
   },
   {
     id: 'documentpdf',
     labelKey: 'document',
+    descriptionKey: 'documentDesc',
     icon: FileText,
-    color: 'text-blue-600',
-    bgColor: 'bg-blue-50 group-hover:bg-blue-100',
+    iconColor: 'text-blue-700',
+    iconBg: 'bg-blue-50',
   },
   {
     id: 'assignments',
     labelKey: 'assignments',
+    descriptionKey: 'assignmentsDesc',
     icon: ClipboardList,
-    color: 'text-amber-600',
-    bgColor: 'bg-amber-50 group-hover:bg-amber-100',
+    iconColor: 'text-amber-700',
+    iconBg: 'bg-amber-50',
   },
   {
     id: 'exams',
     labelKey: 'exams',
+    descriptionKey: 'examsDesc',
     icon: GraduationCap,
-    color: 'text-green-600',
-    bgColor: 'bg-green-50 group-hover:bg-green-100',
+    iconColor: 'text-green-700',
+    iconBg: 'bg-green-50',
   },
   {
     id: 'codechallenge',
     labelKey: 'codeChallenge',
+    descriptionKey: 'codeChallengeDesc',
     icon: Code2,
-    color: 'text-cyan-600',
-    bgColor: 'bg-cyan-50 group-hover:bg-cyan-100',
+    iconColor: 'text-teal-700',
+    iconBg: 'bg-teal-50',
   },
 ];
 
@@ -91,35 +98,37 @@ export default function NewActivityModal({
 
   const handleBack = useCallback(() => setSelectedView('home'), []);
 
-  const sharedProps = {
-    chapterId,
-    course,
-    closeModal,
-    orgslug,
-  };
+  const sharedProps = { chapterId, course, closeModal, orgslug };
 
   if (selectedView === 'home') {
     return (
-      <div className="grid w-full grid-cols-2 gap-4 p-1 sm:grid-cols-3">
-        {ACTIVITY_TYPES.map((activity) => (
-          <ActivityCard
-            key={activity.id}
-            activity={activity}
-            label={t(activity.labelKey)}
-            onClick={() => setSelectedView(activity.id)}
-          />
-        ))}
+      <div className="w-full space-y-4">
+        <div>
+          <p className="text-xs font-medium uppercase tracking-widest text-gray-400">{t('chooseType')}</p>
+        </div>
+
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+          {ACTIVITY_TYPES.map((activity) => (
+            <ActivityCard
+              key={activity.id}
+              activity={activity}
+              label={t(activity.labelKey)}
+              description={t(activity.descriptionKey)}
+              onClick={() => setSelectedView(activity.id)}
+            />
+          ))}
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="w-full">
+    <div className="w-full space-y-5">
       <button
         onClick={handleBack}
-        className="mb-4 flex items-center gap-2 text-sm font-medium text-gray-500 transition-colors hover:text-gray-700"
+        className="flex items-center gap-1.5 text-sm font-medium text-gray-400 transition-colors hover:text-gray-600"
       >
-        <ArrowLeft className="h-4 w-4" />
+        <ArrowLeft className="h-3.5 w-3.5" />
         {t('backToActivities')}
       </button>
 
@@ -129,7 +138,6 @@ export default function NewActivityModal({
           {...sharedProps}
         />
       )}
-
       {selectedView === 'video' && (
         <VideoModal
           submitFileActivity={submitFileActivity}
@@ -138,7 +146,6 @@ export default function NewActivityModal({
           course={course}
         />
       )}
-
       {selectedView === 'documentpdf' && (
         <DocumentPdfModal
           submitFileActivity={submitFileActivity}
@@ -146,21 +153,18 @@ export default function NewActivityModal({
           course={course}
         />
       )}
-
       {selectedView === 'assignments' && (
         <Assignment
           submitActivity={submitActivity}
           {...sharedProps}
         />
       )}
-
       {selectedView === 'exams' && (
         <Exam
           submitActivity={submitActivity}
           {...sharedProps}
         />
       )}
-
       {selectedView === 'codechallenge' && (
         <CodeChallenge
           submitActivity={submitActivity}
@@ -174,22 +178,27 @@ export default function NewActivityModal({
 interface ActivityCardProps {
   activity: ActivityType;
   label: string;
+  description: string;
   onClick: () => void;
 }
 
-function ActivityCard({ activity, label, onClick }: ActivityCardProps) {
+function ActivityCard({ activity, label, description, onClick }: ActivityCardProps) {
   const Icon = activity.icon;
 
   return (
     <button
       type="button"
       onClick={onClick}
-      className="group focus:ring-primary/50 flex w-full flex-col items-center gap-4 rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition-all duration-200 hover:border-gray-300 hover:shadow-md focus:ring-2 focus:outline-none"
+      className="group flex w-full items-start gap-3.5 rounded-lg border border-gray-200 bg-white px-4 py-4 text-left transition-all duration-150 hover:border-gray-300 hover:bg-gray-50 focus:ring-2 focus:ring-gray-200 focus:outline-none"
     >
-      <div className={`flex h-16 w-16 items-center justify-center rounded-xl transition-colors ${activity.bgColor}`}>
-        <Icon className={`h-8 w-8 ${activity.color}`} />
+      <div className={`mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg ${activity.iconBg}`}>
+        <Icon className={`h-[17px] w-[17px] ${activity.iconColor}`} />
       </div>
-      <span className="text-center text-sm font-semibold tracking-wide text-gray-600 group-hover:text-gray-900">{label}</span>
+
+      <div className="flex flex-col gap-1">
+        <span className="text-sm font-medium text-gray-800 group-hover:text-gray-900">{label}</span>
+        <span className="text-xs leading-relaxed text-gray-400 group-hover:text-gray-500">{description}</span>
+      </div>
     </button>
   );
 }

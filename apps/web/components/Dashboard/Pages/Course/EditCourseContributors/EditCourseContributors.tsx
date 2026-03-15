@@ -470,7 +470,7 @@ const EditCourseContributors = (props: EditCourseContributorsProps) => {
           open={searchOpen}
           onOpenChange={setSearchOpen}
         >
-          <PopoverTrigger render={<div className="relative w-full" />}>
+          <PopoverTrigger render={<div className="relative w-full" />} nativeButton={false}>
             <Search className="text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4" />
               <Input
                 className="pl-8"

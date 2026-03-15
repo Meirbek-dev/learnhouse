@@ -1259,12 +1259,19 @@
         "typeGeneralHint": "Students can submit multiple times without ranking"
       },
       "assignments": "Assignments",
+      "assignmentsDesc": "Create a task with written or file-based submissions",
       "backToActivities": "Back to Activities",
+      "chooseType": "Choose activity type",
       "codeChallenge": "Code Challenge",
+      "codeChallengeDesc": "Create a programming exercise with automated testing",
       "document": "Document",
+      "documentDesc": "Upload a PDF or document for students to read",
       "dynamicPage": "Dynamic Page",
+      "dynamicPageDesc": "Rich interactive content with text, media, and exercises",
       "exams": "Exams",
-      "video": "Video"
+      "examsDesc": "Build a quiz or exam with automated grading",
+      "video": "Video",
+      "videoDesc": "Upload or embed a video for students to watch"
     },
     "NewAssignmentModal": {
       "alphabet": "Alphabetical",
