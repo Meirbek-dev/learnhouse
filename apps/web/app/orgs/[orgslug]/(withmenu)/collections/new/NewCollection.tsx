@@ -95,7 +95,7 @@ const NewCollection = ({ params }: { params: { orgslug: string } }) => {
         org_id: org.id,
       };
       await createCollection(collection, session.data?.tokens?.access_token);
-      await revalidateTags(['collections'], org.slug);
+      await revalidateTags(['collections']);
       toast.success(t('toast.success'));
       startTransition(() => router.push(getAbsoluteUrl('/collections')));
     } catch {

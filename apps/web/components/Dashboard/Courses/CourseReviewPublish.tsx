@@ -148,7 +148,7 @@ export default function CourseReviewPublish({
                       variant="outline"
                       size="sm"
                       nativeButton={false}
-                      render={<AppLink href={buildCourseWorkspacePath(orgslug, courseuuid, item.href as any)} />}
+                      render={<AppLink href={buildCourseWorkspacePath(courseuuid, item.href as any)} />}
                     >
                       {t('openAction')}
                     </Button>

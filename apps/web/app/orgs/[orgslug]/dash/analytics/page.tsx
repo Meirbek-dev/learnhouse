@@ -1,7 +1,7 @@
 import { getTeacherOverview, normalizeAnalyticsQuery } from '@services/analytics/teacher';
 import AnalyticsEmptyState from '@components/Dashboard/Analytics/AnalyticsEmptyState';
 import TeacherOverview from '@components/Dashboard/Analytics/TeacherOverview';
-import { getOrganizationContextInfo } from '@services/organizations/orgs';
+import { getPlatformOrganizationContextInfo } from '@services/organizations/orgs';
 import { getTranslations } from 'next-intl/server';
 import { auth } from '@/auth';
 
@@ -10,7 +10,7 @@ export default async function AnalyticsOverviewPage(props: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { orgslug } = await props.params;
-  const org = await getOrganizationContextInfo(orgslug);
+  const org = await getPlatformOrganizationContextInfo();
   const session = await auth();
   const accessToken = session?.tokens?.access_token;
   const query = normalizeAnalyticsQuery(await props.searchParams);
@@ -27,7 +27,7 @@ export default async function AnalyticsOverviewPage(props: {
   }
 
   try {
-    const overview = await getTeacherOverview(org.id ?? org.org_id, accessToken, query);
+    const overview = await getTeacherOverview(accessToken, query);
 
     return (
       <TeacherOverview

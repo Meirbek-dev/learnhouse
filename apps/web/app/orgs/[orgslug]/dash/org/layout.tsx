@@ -22,7 +22,7 @@ async function OrgLayout({ children, params }: OrgLayoutProps) {
       { action: Actions.UPDATE, resource: Resources.ORGANIZATION, scope: Scopes.ORG },
       { action: Actions.MANAGE, resource: Resources.ORGANIZATION, scope: Scopes.ORG },
     ],
-    `/orgs/${orgslug}/dash`,
+    '/dash',
   );
 
   return <>{children}</>;

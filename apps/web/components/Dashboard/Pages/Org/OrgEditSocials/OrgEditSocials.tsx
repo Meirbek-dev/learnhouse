@@ -50,7 +50,7 @@ export default function OrgEditSocials() {
     const loadingToast = toast.loading(t('updatingOrg'));
     try {
       await updateOrganization(org.id, values, access_token);
-      await revalidateTags(['organizations'], org.slug);
+      await revalidateTags(['organizations']);
       mutate(`${getAPIUrl()}orgs/slug/${org.slug}`);
       toast.success(t('orgUpdatedSuccess'), { id: loadingToast });
     } catch {

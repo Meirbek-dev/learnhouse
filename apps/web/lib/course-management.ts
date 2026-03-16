@@ -27,20 +27,14 @@ export function prefixedCourseUuid(courseUuid: string): string {
   return courseUuid.startsWith('course_') ? courseUuid : `course_${courseUuid}`;
 }
 
-export function buildCourseWorkspacePath(
-  orgslug: string,
-  courseUuid: string,
-  stage: CourseWorkspaceStage = 'overview',
-): string {
+export function buildCourseWorkspacePath(courseUuid: string, stage: CourseWorkspaceStage = 'overview'): string {
   const cleanUuid = cleanCourseUuid(courseUuid);
-  return stage === 'overview'
-    ? `/orgs/${orgslug}/dash/courses/${cleanUuid}`
-    : `/orgs/${orgslug}/dash/courses/${cleanUuid}/${stage}`;
+  return stage === 'overview' ? `/dash/courses/${cleanUuid}` : `/dash/courses/${cleanUuid}/${stage}`;
 }
 
-export function buildCourseCreationPath(orgslug: string, sourceCourseUuid?: string): string {
+export function buildCourseCreationPath(sourceCourseUuid?: string): string {
   const query = sourceCourseUuid ? `?tpl=outline&src=${cleanCourseUuid(sourceCourseUuid)}` : '';
-  return `/orgs/${orgslug}/dash/courses/new${query}`;
+  return `/dash/courses/new${query}`;
 }
 
 export function getCourseContentStats(course: any): { chapters: number; activities: number } {

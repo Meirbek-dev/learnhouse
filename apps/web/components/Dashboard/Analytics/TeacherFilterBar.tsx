@@ -55,7 +55,7 @@ export default function TeacherFilterBar({
   const router = useRouter();
   const pathname = usePathname();
   const [isPending, startTransition] = useTransition();
-  const basePath = path || pathname || `/orgs/${orgslug}/dash/analytics`;
+  const basePath = path || pathname || '/dash/analytics';
   const [formState, setFormState] = useState({
     window: query.window || '28d',
     compare: query.compare || 'previous_period',

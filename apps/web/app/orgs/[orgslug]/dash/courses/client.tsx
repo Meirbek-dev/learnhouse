@@ -398,7 +398,7 @@ const CoursesHome = ({
           return (
             <div className="space-y-1">
               <AppLink
-                href={buildCourseWorkspacePath(orgslug, removeCoursePrefix(course.course_uuid))}
+                href={buildCourseWorkspacePath(removeCoursePrefix(course.course_uuid))}
                 className="font-semibold text-foreground hover:text-foreground/70"
               >
                 {course.name}
@@ -503,7 +503,7 @@ const CoursesHome = ({
               {canCreateCourse ? (
                 <Button
                   nativeButton={false}
-                  render={<AppLink href={buildCourseCreationPath(orgslug)} />}
+                  render={<AppLink href={buildCourseCreationPath()} />}
                 >
                   <Sparkles className="size-4" />
                   {t('guidedSetup')}
@@ -613,7 +613,7 @@ const CoursesHome = ({
                 <div className="mt-6 flex justify-center">
                   <Button
                     nativeButton={false}
-                    render={<AppLink href={buildCourseCreationPath(orgslug)} />}
+                    render={<AppLink href={buildCourseCreationPath()} />}
                   >
                     <Sparkles className="size-4" />
                     {t('empty.createAction')}
@@ -631,7 +631,7 @@ const CoursesHome = ({
               className="w-full"
             >
               <CourseThumbnail
-                customLink={buildCourseWorkspacePath(orgslug, removeCoursePrefix(course.course_uuid))}
+                customLink={buildCourseWorkspacePath(removeCoursePrefix(course.course_uuid))}
                 course={course}
                 orgslug={orgslug}
               />
@@ -778,28 +778,24 @@ function CourseRowActions({ course, orgslug }: { course: ManageableCourse; orgsl
       />
       <DropdownMenuContent align="end">
         <DropdownMenuItem
-          onClick={() => router.push(buildCourseWorkspacePath(orgslug, removeCoursePrefix(course.course_uuid)))}
+          onClick={() => router.push(buildCourseWorkspacePath(removeCoursePrefix(course.course_uuid)))}
         >
           <List className="size-4" />
           {t('rowActions.openWorkspace')}
         </DropdownMenuItem>
         <DropdownMenuItem
-          onClick={() =>
-            router.push(buildCourseWorkspacePath(orgslug, removeCoursePrefix(course.course_uuid), 'curriculum'))
-          }
+          onClick={() => router.push(buildCourseWorkspacePath(removeCoursePrefix(course.course_uuid), 'curriculum'))}
         >
           <Workflow className="size-4" />
           {t('rowActions.openCurriculum')}
         </DropdownMenuItem>
         <DropdownMenuItem
-          onClick={() =>
-            router.push(buildCourseWorkspacePath(orgslug, removeCoursePrefix(course.course_uuid), 'review'))
-          }
+          onClick={() => router.push(buildCourseWorkspacePath(removeCoursePrefix(course.course_uuid), 'review'))}
         >
           <Sparkles className="size-4" />
           {t('rowActions.reviewPublish')}
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => router.push(buildCourseCreationPath(orgslug, course.course_uuid))}>
+        <DropdownMenuItem onClick={() => router.push(buildCourseCreationPath(course.course_uuid))}>
           <LayoutGrid className="size-4" />
           {t('rowActions.useAsTemplate')}
         </DropdownMenuItem>

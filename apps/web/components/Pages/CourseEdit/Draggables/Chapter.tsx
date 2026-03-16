@@ -56,7 +56,7 @@ const Chapter = (props: any) => {
       await mutate(
         `${getAPIUrl()}chapters/course/${props.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`,
       );
-      await revalidateTags(['courses'], props.orgslug);
+      await revalidateTags(['courses']);
       router.refresh();
     }
     setSelectedChapter(undefined);

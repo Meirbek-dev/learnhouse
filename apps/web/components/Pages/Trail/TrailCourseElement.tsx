@@ -39,7 +39,7 @@ const TrailCourseElement = ({ course, run, orgslug }: TrailCourseElementProps) =
     // Close activity
     await removeCourse(course_uuid, orgslug, access_token);
     // Mutate course
-    await revalidateTags(['courses'], orgslug);
+    await revalidateTags(['courses']);
     router.refresh();
 
     // Mutate

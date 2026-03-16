@@ -121,7 +121,7 @@ const NewAssignment = ({ submitActivity, chapterId, course, closeModal, orgslug 
             }
 
             if (orgslug) {
-              await revalidateTags(['courses'], orgslug);
+              await revalidateTags(['courses']);
             }
 
             closeModal();

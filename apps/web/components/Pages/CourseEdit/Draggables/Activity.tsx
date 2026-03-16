@@ -45,7 +45,7 @@ const Activity = (props: any) => {
       mutate(
         `${getAPIUrl()}chapters/meta/course_${props.courseid}?with_unpublished_activities=${withUnpublishedActivities}`,
       );
-      await revalidateTags(['courses'], props.orgslug);
+      await revalidateTags(['courses']);
       setIsDeleteDialogOpen(false);
       router.refresh();
     });
@@ -62,7 +62,7 @@ const Activity = (props: any) => {
       await mutate(
         `${getAPIUrl()}chapters/meta/course_${props.courseid}?with_unpublished_activities=${withUnpublishedActivities}`,
       );
-      await revalidateTags(['courses'], props.orgslug);
+      await revalidateTags(['courses']);
       router.refresh();
     }
     setSelectedActivity(undefined);

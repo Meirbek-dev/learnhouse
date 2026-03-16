@@ -30,7 +30,7 @@ export default function AssessmentOutliersTable({
       cell: ({ row }) => (
         <div>
           <Link
-            href={`/orgs/${orgslug}/dash/analytics/assessments/${row.original.assessment_type}/${row.original.assessment_id}`}
+            href={`/dash/analytics/assessments/${row.original.assessment_type}/${row.original.assessment_id}`}
             className="font-medium text-foreground hover:text-emerald-700"
           >
             {row.original.title}

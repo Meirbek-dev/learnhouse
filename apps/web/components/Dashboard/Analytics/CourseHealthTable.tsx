@@ -23,7 +23,7 @@ export default function CourseHealthTable({ orgslug, rows, storageKey, serverPag
       header: t('courseHealth.colCourse'),
       cell: ({ row }) => (
         <Link
-          href={`/orgs/${orgslug}/dash/analytics/courses/${row.original.course_uuid}`}
+          href={`/dash/analytics/courses/${row.original.course_uuid}`}
           className="font-medium text-foreground hover:text-emerald-700"
         >
           {row.original.course_name}

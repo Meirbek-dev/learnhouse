@@ -22,6 +22,7 @@ from src.security.rbac import (
     PermissionDenied,
     ResourceAccessDenied,
 )
+from src.services.platform import get_platform_org_id
 from src.services.courses.courses import get_user_courses
 from src.services.users.password_reset import (
     change_password_with_reset_code,
@@ -76,7 +77,12 @@ async def api_get_current_user_session(
 
     Pass `org_id` to scope permissions to a specific organization.
     """
-    return await get_user_session(request, db_session, current_user, org_id=org_id)
+    return await get_user_session(
+        request,
+        db_session,
+        current_user,
+        org_id=org_id or get_platform_org_id(db_session),
+    )
 
 
 @router.post("", tags=["users"])
@@ -254,14 +260,20 @@ async def api_change_password_with_reset_code(
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     new_password: str,
     email: EmailStr,
-    org_id: int,
+    org_id: int | None = None,
     reset_code: str,
 ):
     """
     Change password with reset code
     """
     return await change_password_with_reset_code(
-        request, db_session, current_user, new_password, org_id, email, reset_code
+        request,
+        db_session,
+        current_user,
+        new_password,
+        org_id or get_platform_org_id(db_session),
+        email,
+        reset_code,
     )
 
 
@@ -272,13 +284,17 @@ async def api_send_password_reset_email(
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     email: EmailStr,
-    org_id: int,
+    org_id: int | None = None,
 ):
     """
     Send password reset email
     """
     return await send_reset_password_code(
-        request, db_session, current_user, org_id, email
+        request,
+        db_session,
+        current_user,
+        org_id or get_platform_org_id(db_session),
+        email,
     )
 
 

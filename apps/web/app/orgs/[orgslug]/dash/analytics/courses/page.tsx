@@ -3,7 +3,6 @@ import AnalyticsEmptyState from '@components/Dashboard/Analytics/AnalyticsEmptyS
 import CourseHealthTable from '@components/Dashboard/Analytics/CourseHealthTable';
 import TeacherFilterBar from '@components/Dashboard/Analytics/TeacherFilterBar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { getOrganizationContextInfo } from '@services/organizations/orgs';
 import { getTranslations } from 'next-intl/server';
 import { Button } from '@/components/ui/button';
 import { auth } from '@/auth';
@@ -14,7 +13,6 @@ export default async function AnalyticsCoursesPage(props: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { orgslug } = await props.params;
-  const org = await getOrganizationContextInfo(orgslug);
   const session = await auth();
   const accessToken = session?.tokens?.access_token;
   const query = normalizeAnalyticsQuery(await props.searchParams);
@@ -30,7 +28,7 @@ export default async function AnalyticsCoursesPage(props: {
   }
 
   try {
-    const courseList = await getTeacherCourseList(org.id ?? org.org_id, accessToken, query);
+    const courseList = await getTeacherCourseList(accessToken, query);
     const totalPages = Math.max(1, Math.ceil(courseList.total / courseList.page_size));
     const params = new URLSearchParams();
     if (query.window) params.set('window', query.window);
@@ -51,7 +49,7 @@ export default async function AnalyticsCoursesPage(props: {
         </Card>
         <TeacherFilterBar
           orgslug={orgslug}
-          path={`/orgs/${orgslug}/dash/analytics/courses`}
+          path="/dash/analytics/courses"
           query={query}
           courseCount={courseList.total}
           courseOptions={courseList.course_options}
@@ -81,7 +79,7 @@ export default async function AnalyticsCoursesPage(props: {
               disabled={courseList.page <= 1}
               render={
                 <Link
-                  href={`/orgs/${orgslug}/dash/analytics/courses?${new URLSearchParams({ ...Object.fromEntries(params.entries()), page: String(Math.max(1, courseList.page - 1)), page_size: String(courseList.page_size) }).toString()}`}
+                  href={`/dash/analytics/courses?${new URLSearchParams({ ...Object.fromEntries(params.entries()), page: String(Math.max(1, courseList.page - 1)), page_size: String(courseList.page_size) }).toString()}`}
                 />
               }
             >
@@ -96,7 +94,7 @@ export default async function AnalyticsCoursesPage(props: {
               disabled={courseList.page >= totalPages}
               render={
                 <Link
-                  href={`/orgs/${orgslug}/dash/analytics/courses?${new URLSearchParams({ ...Object.fromEntries(params.entries()), page: String(Math.min(totalPages, courseList.page + 1)), page_size: String(courseList.page_size) }).toString()}`}
+                  href={`/dash/analytics/courses?${new URLSearchParams({ ...Object.fromEntries(params.entries()), page: String(Math.min(totalPages, courseList.page + 1)), page_size: String(courseList.page_size) }).toString()}`}
                 />
               }
             >

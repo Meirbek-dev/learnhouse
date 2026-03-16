@@ -260,7 +260,7 @@ export const getResponseMetadata = async (response: Response): Promise<CustomRes
   };
 };
 
-export const revalidateTags = async (tags: string[], orgslug: string) => {
+export const revalidateTags = async (tags: string[]) => {
   const uniqueTags = [...new Set(tags)]
     .filter((tag): tag is string => typeof tag === 'string' && tag.trim().length > 0)
     .map((tag) => tag.trim());
@@ -279,7 +279,7 @@ export const revalidateTags = async (tags: string[], orgslug: string) => {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ tags: uniqueTags, orgslug }),
+      body: JSON.stringify({ tags: uniqueTags }),
     });
 
     if (!response.ok) {
@@ -288,7 +288,6 @@ export const revalidateTags = async (tags: string[], orgslug: string) => {
   } catch (error) {
     console.warn('Failed to revalidate tags via POST, falling back to per-tag requests', {
       tags: uniqueTags,
-      orgslug,
       error,
     });
     await Promise.all(

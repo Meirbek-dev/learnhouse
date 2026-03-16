@@ -62,7 +62,7 @@ export async function getCourseWorkspaceCapabilitiesForCourse(
   const session = await requireAuth(orgslug);
   const accessToken = session?.tokens?.access_token;
   if (!accessToken) {
-    redirect(`/orgs/${orgslug}/unauthorized`);
+    redirect('/unauthorized');
   }
 
   const rights = (await getCourseUserRights(
@@ -72,7 +72,7 @@ export async function getCourseWorkspaceCapabilitiesForCourse(
   const capabilities = mapCourseRightsToCapabilities(session, rights);
 
   if (!capabilities.canViewWorkspace) {
-    redirect(`/orgs/${orgslug}/unauthorized`);
+    redirect('/unauthorized');
   }
 
   return capabilities;
@@ -96,7 +96,7 @@ export async function requireCourseWorkspaceStageAccess(
   };
 
   if (!allowedByStage[stage]) {
-    redirect(`/orgs/${orgslug}/unauthorized`);
+    redirect('/unauthorized');
   }
 
   return capabilities;

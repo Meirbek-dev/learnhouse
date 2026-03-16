@@ -201,9 +201,7 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
             src: '',
             dest: 'curriculum',
           });
-          router.replace(
-            buildCourseWorkspacePath(orgslug, result.data.course_uuid, launchDestination as LaunchDestination),
-          );
+          router.replace(buildCourseWorkspacePath(result.data.course_uuid, launchDestination as LaunchDestination));
           router.refresh();
         } catch (error: any) {
           toast.error(error?.message || t('errors.createWorkspace'));

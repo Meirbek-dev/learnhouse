@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, Form, Request, Response, UploadFile
 from sqlmodel import Session
 
 from src.core.events.database import get_db_session
+from src.core.platform import PLATFORM_ORG_SLUG
 from src.db.courses.course_updates import (
     CourseUpdateCreate,
     CourseUpdateRead,
@@ -56,6 +57,7 @@ from src.services.courses.updates import (
     get_updates_by_course_uuid,
     update_update,
 )
+from src.services.platform import get_platform_org_id
 
 router = APIRouter()
 
@@ -68,7 +70,6 @@ router = APIRouter()
 @router.post("")
 async def api_create_course(
     request: Request,
-    org_id: int,
     name: Annotated[str, Form()],
     description: Annotated[str, Form()],
     public: Annotated[bool, Form()],
@@ -77,6 +78,7 @@ async def api_create_course(
     about: Annotated[str | None, Form()] = None,
     thumbnail_type: Annotated[ThumbnailType, Form()] = ThumbnailType.IMAGE,
     thumbnail: UploadFile | None = None,
+    org_id: int | None = None,
     current_user: Annotated[PublicUser, Depends(get_current_user)] = None,
     checker: PermissionCheckerDep = None,
     db_session=Depends(get_db_session),
@@ -86,7 +88,8 @@ async def api_create_course(
 
     **Required Permission**: `course:create:org`
     """
-    checker.require(current_user.id, "course:create", org_id)
+    resolved_org_id = org_id or get_platform_org_id(db_session)
+    checker.require(current_user.id, "course:create", resolved_org_id)
 
     course = CourseCreate(
         name=name,
@@ -99,7 +102,7 @@ async def api_create_course(
     )
     return await create_course(
         request,
-        org_id,
+        resolved_org_id,
         course,
         current_user,
         db_session,
@@ -263,6 +266,28 @@ async def api_get_course_by_orgslug(
     return courses
 
 
+@router.get("/page/{page}/limit/{limit}")
+async def api_get_platform_courses(
+    request: Request,
+    response: Response,
+    page: int,
+    limit: int,
+    current_user: Annotated[
+        PublicUser | AnonymousUser, Depends(get_current_user_optional)
+    ] = None,
+    db_session=Depends(get_db_session),
+) -> list[CourseReadWithPermissions]:
+    return await api_get_course_by_orgslug(
+        request=request,
+        response=response,
+        page=page,
+        limit=limit,
+        org_slug=PLATFORM_ORG_SLUG,
+        current_user=current_user,
+        db_session=db_session,
+    )
+
+
 @router.get("/org_slug/{org_slug}/editable/page/{page}/limit/{limit}")
 async def api_get_editable_courses_by_orgslug(
     request: Request,
@@ -297,6 +322,32 @@ async def api_get_editable_courses_by_orgslug(
     return courses
 
 
+@router.get("/editable/page/{page}/limit/{limit}")
+async def api_get_platform_editable_courses(
+    request: Request,
+    response: Response,
+    page: int,
+    limit: int,
+    query: str | None = None,
+    sort_by: str | None = "updated",
+    preset: str | None = "all",
+    current_user: Annotated[PublicUser, Depends(get_current_user)] = None,
+    db_session=Depends(get_db_session),
+) -> list[CourseReadWithPermissions]:
+    return await api_get_editable_courses_by_orgslug(
+        request=request,
+        response=response,
+        page=page,
+        limit=limit,
+        org_slug=PLATFORM_ORG_SLUG,
+        query=query,
+        sort_by=sort_by,
+        preset=preset,
+        current_user=current_user,
+        db_session=db_session,
+    )
+
+
 @router.get("/org_slug/{org_slug}/search")
 async def api_search_courses(
     request: Request,
@@ -312,6 +363,20 @@ async def api_search_courses(
     """
     return await search_courses(
         request, current_user, org_slug, query, db_session, page, limit
+    )
+
+
+@router.get("/search")
+async def api_search_platform_courses(
+    request: Request,
+    query: str,
+    page: int = 1,
+    limit: int = 20,
+    current_user: Annotated[PublicUser, Depends(get_current_user)] = None,
+    db_session=Depends(get_db_session),
+) -> list[CourseRead]:
+    return await search_courses(
+        request, current_user, PLATFORM_ORG_SLUG, query, db_session, page, limit
     )
 
 

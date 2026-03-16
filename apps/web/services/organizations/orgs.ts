@@ -65,12 +65,29 @@ async function fetchOrganizationBySlug(org_slug: string, access_token?: string) 
   return await errorHandling(result);
 }
 
+async function fetchPlatformOrganization(access_token?: string) {
+  'use cache';
+  cacheTag(tags.organizations);
+  cacheLife(CacheProfiles.organization);
+
+  const headers: HeadersInit = { 'Content-Type': 'application/json' };
+  if (access_token) {
+    headers.Authorization = `Bearer ${access_token}`;
+  }
+
+  const result = await fetch(`${getAPIUrl()}orgs/platform`, {
+    method: 'GET',
+    headers,
+  });
+  return await errorHandling(result);
+}
+
 export async function getOrganizationContextInfo(org_slug: string, _next?: unknown, access_token?: string) {
   return fetchOrganizationBySlug(org_slug, access_token);
 }
 
 export async function getPlatformOrganizationContextInfo(access_token?: string) {
-  return fetchOrganizationBySlug(PLATFORM_ORG_SLUG, access_token);
+  return fetchPlatformOrganization(access_token);
 }
 
 /**
@@ -99,6 +116,9 @@ export async function getOrganizationContextInfoWithId(org_id: number, _next?: u
 }
 
 export async function getOrganizationContextInfoWithoutCredentials(org_slug: string, _next?: unknown) {
+  if (org_slug === PLATFORM_ORG_SLUG) {
+    return await fetchPlatformOrganization();
+  }
   return await fetchOrganizationBySlug(org_slug);
 }
 

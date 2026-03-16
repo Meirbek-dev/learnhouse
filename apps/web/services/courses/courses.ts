@@ -27,7 +27,7 @@ async function fetchOrgCourses(
 ): Promise<{ courses: any[]; total: number }> {
   'use cache';
   cacheTag(tags.courses);
-  cacheTag(courseTag.publicList(org_slug));
+  cacheTag(courseTag.publicList());
   cacheLife(CacheProfiles.courses);
 
   const headers: HeadersInit = { 'Content-Type': 'application/json' };
@@ -35,7 +35,7 @@ async function fetchOrgCourses(
     headers.Authorization = `Bearer ${access_token}`;
   }
 
-  const result = await fetch(`${getAPIUrl()}courses/org_slug/${org_slug}/page/${page}/limit/${limit}`, {
+  const result = await fetch(`${getAPIUrl()}courses/page/${page}/limit/${limit}`, {
     method: 'GET',
     headers,
   });
@@ -74,7 +74,7 @@ async function fetchEditableOrgCourses(
 }> {
   'use cache';
   cacheTag(tags.editableCourses);
-  cacheTag(courseTag.editableList(org_slug));
+  cacheTag(courseTag.editableList());
   cacheLife(CacheProfiles.courses);
 
   if (!access_token) {
@@ -97,7 +97,7 @@ async function fetchEditableOrgCourses(
   }
 
   const result = await fetch(
-    `${getAPIUrl()}courses/org_slug/${org_slug}/editable/page/${page}/limit/${limit}${queryParams.size > 0 ? `?${queryParams.toString()}` : ''}`,
+    `${getAPIUrl()}courses/editable/page/${page}/limit/${limit}${queryParams.size > 0 ? `?${queryParams.toString()}` : ''}`,
     {
       method: 'GET',
       headers: {
@@ -162,7 +162,7 @@ export async function searchOrgCourses(
   access_token?: any,
 ) {
   const result: any = await fetch(
-    `${getAPIUrl()}courses/org_slug/${org_slug}/search?query=${encodeURIComponent(query)}&page=${page}&limit=${limit}`,
+    `${getAPIUrl()}courses/search?query=${encodeURIComponent(query)}&page=${page}&limit=${limit}`,
     RequestBodyWithAuthHeader('GET', null, next, access_token),
   );
   return await errorHandling(result);

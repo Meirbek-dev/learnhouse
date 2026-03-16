@@ -86,7 +86,7 @@ const Trail = (params: any) => {
         ),
       );
 
-      await revalidateTags(['courses'], orgslug);
+      await revalidateTags(['courses']);
       router.refresh();
       await mutate();
       setIsQuitDialogOpen(false);

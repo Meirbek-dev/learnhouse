@@ -43,7 +43,7 @@ export default function AtRiskLearnersTable({
       cell: ({ row }) => {
         const courseHref =
           orgslug && row.original.course_uuid
-            ? `/orgs/${orgslug}/dash/analytics/courses/${row.original.course_uuid}`
+            ? `/dash/analytics/courses/${row.original.course_uuid}`
             : undefined;
         return (
           <div>
@@ -118,9 +118,9 @@ export default function AtRiskLearnersTable({
         const hasGradingBlock = row.original.open_grading_blocks > 0;
         const gradingHref =
           orgslug && row.original.course_uuid
-            ? `/orgs/${orgslug}/dash/analytics/courses/${row.original.course_uuid}`
+            ? `/dash/analytics/courses/${row.original.course_uuid}`
             : orgslug
-              ? `/orgs/${orgslug}/dash/assignments`
+              ? '/dash/assignments'
               : undefined;
         return (
           <div className="max-w-[280px] space-y-1 whitespace-normal text-sm text-muted-foreground">

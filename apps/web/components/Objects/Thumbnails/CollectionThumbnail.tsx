@@ -115,7 +115,7 @@ const CollectionAdminEditsArea = (props: any) => {
   async function deleteCollectionUI() {
     startTransition(async () => {
       await deleteCollection(props.collection_uuid, session.data?.tokens?.access_token);
-      await revalidateTags(['collections'], props.orgslug);
+      await revalidateTags(['collections']);
       setIsOpen(false);
       router.refresh();
     });

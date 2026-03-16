@@ -4,7 +4,6 @@ import { getTeacherAssessmentDetail, normalizeAnalyticsQuery } from '@services/a
 import QuestionDifficultyRadar from '@components/Dashboard/Analytics/QuestionDifficultyRadar';
 import AnalyticsEmptyState from '@components/Dashboard/Analytics/AnalyticsEmptyState';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { getOrganizationContextInfo } from '@services/organizations/orgs';
 import { getAnalyticsAssessmentTypeLabel } from '@/lib/analytics/labels';
 import { getLocale, getTranslations } from 'next-intl/server';
 import type { AssessmentType } from '@/types/analytics';
@@ -16,7 +15,6 @@ export default async function AnalyticsAssessmentDetailPage(props: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { orgslug, assessmentType, assessmentId } = await props.params;
-  const org = await getOrganizationContextInfo(orgslug);
   const session = await auth();
   const accessToken = session?.tokens?.access_token;
   const query = normalizeAnalyticsQuery(await props.searchParams);
@@ -34,7 +32,6 @@ export default async function AnalyticsAssessmentDetailPage(props: {
 
   try {
     const detail = await getTeacherAssessmentDetail(
-      org.id ?? org.org_id,
       assessmentType,
       Number(assessmentId),
       accessToken,

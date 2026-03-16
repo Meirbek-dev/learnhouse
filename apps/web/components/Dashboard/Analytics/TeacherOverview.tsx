@@ -130,9 +130,9 @@ export default function TeacherOverview({
     const isSubmissionDominant = row && row.submissions + row.grading_completed >= row.active_learners;
     if (isSubmissionDominant) {
       params.set('sort_by', 'signals');
-      router.push(`/orgs/${orgslug}/dash/analytics/assessments?${params.toString()}`);
+      router.push(`/dash/analytics/assessments?${params.toString()}`);
     } else {
-      router.push(`/orgs/${orgslug}/dash/analytics/courses?${params.toString()}`);
+      router.push(`/dash/analytics/courses?${params.toString()}`);
     }
   };
 
@@ -159,11 +159,11 @@ export default function TeacherOverview({
           </div>
           <div className="flex flex-wrap gap-2">
             <AnalyticsExportButton
-              href={getAnalyticsExportUrl(orgId, 'at-risk', query)}
+              href={getAnalyticsExportUrl('at-risk', query)}
               label={t('overview.exportAtRisk')}
             />
             <AnalyticsExportButton
-              href={getAnalyticsExportUrl(orgId, 'grading-backlog', query)}
+              href={getAnalyticsExportUrl('grading-backlog', query)}
               label={t('overview.exportGradingBacklog')}
             />
           </div>
@@ -312,7 +312,7 @@ export default function TeacherOverview({
           </Suspense>
           <p className="mt-2 text-sm text-muted-foreground">
             <Link
-              href={`/orgs/${orgslug}/dash/analytics/courses`}
+              href="/dash/analytics/courses"
               className="text-blue-600 hover:underline"
             >
               {t('overview.viewAllCourses')}
@@ -340,7 +340,7 @@ export default function TeacherOverview({
           </Suspense>
           <p className="mt-2 text-sm text-muted-foreground">
             <Link
-              href={`/orgs/${orgslug}/dash/analytics/assessments`}
+              href="/dash/analytics/assessments"
               className="text-blue-600 hover:underline"
             >
               {t('overview.viewAllAssessments')}
@@ -374,7 +374,7 @@ export default function TeacherOverview({
         {data.at_risk_total > 0 && (
           <p className="mt-2 text-sm text-muted-foreground">
             <Link
-              href={`/orgs/${orgslug}/dash/analytics/learners/at-risk`}
+              href="/dash/analytics/learners/at-risk"
               className="text-blue-600 hover:underline"
             >
               {t('overview.viewAllAtRisk')}

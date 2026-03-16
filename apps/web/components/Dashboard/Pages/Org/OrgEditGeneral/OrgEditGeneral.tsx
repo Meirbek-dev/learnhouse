@@ -51,7 +51,7 @@ const OrgEditGeneral: FC = () => {
       startTransition(() => {
         void updateOrganization(org.id, values, access_token)
           .then(async () => {
-            await revalidateTags(['organizations'], org.slug);
+            await revalidateTags(['organizations']);
             mutate(`${getAPIUrl()}orgs/slug/${org.slug}`);
             toast.success(t('orgUpdatedSuccess'), { id: loadingToast });
           })

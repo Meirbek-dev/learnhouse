@@ -21,8 +21,13 @@ export const config = {
 export default async function proxy(req: NextRequest) {
   const { pathname, search } = req.nextUrl;
 
-  // If path already starts with /orgs/, allow it to pass through
   if (pathname.startsWith('/orgs/')) {
+    const platformPrefix = `/orgs/${PLATFORM_ORG_SLUG}`;
+    if (pathname === platformPrefix || pathname.startsWith(`${platformPrefix}/`)) {
+      const flattenedPath = pathname.slice(platformPrefix.length) || '/';
+      return NextResponse.redirect(new URL(`${flattenedPath}${search}`, req.url), 308);
+    }
+
     return NextResponse.next();
   }
 
@@ -72,6 +77,5 @@ export default async function proxy(req: NextRequest) {
     return response;
   }
 
-  // Single Organization Mode
-  return NextResponse.rewrite(new URL(`/orgs/${PLATFORM_ORG_SLUG}${pathname}`, req.url));
+  return NextResponse.next();
 }

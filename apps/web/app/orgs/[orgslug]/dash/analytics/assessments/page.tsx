@@ -2,7 +2,6 @@ import { getTeacherAssessmentList, normalizeAnalyticsQuery } from '@services/ana
 import AssessmentOutliersTable from '@components/Dashboard/Analytics/AssessmentOutliersTable';
 import AnalyticsEmptyState from '@components/Dashboard/Analytics/AnalyticsEmptyState';
 import TeacherFilterBar from '@components/Dashboard/Analytics/TeacherFilterBar';
-import { getOrganizationContextInfo } from '@services/organizations/orgs';
 import { getTranslations } from 'next-intl/server';
 import { Button } from '@/components/ui/button';
 import { auth } from '@/auth';
@@ -13,7 +12,6 @@ export default async function AnalyticsAssessmentsPage(props: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { orgslug } = await props.params;
-  const org = await getOrganizationContextInfo(orgslug);
   const session = await auth();
   const accessToken = session?.tokens?.access_token;
   const query = normalizeAnalyticsQuery(await props.searchParams);
@@ -29,7 +27,7 @@ export default async function AnalyticsAssessmentsPage(props: {
   }
 
   try {
-    const assessments = await getTeacherAssessmentList(org.id ?? org.org_id, accessToken, query);
+    const assessments = await getTeacherAssessmentList(accessToken, query);
     const totalPages = Math.max(1, Math.ceil(assessments.total / assessments.page_size));
     const params = new URLSearchParams();
     if (query.window) params.set('window', query.window);
@@ -45,7 +43,7 @@ export default async function AnalyticsAssessmentsPage(props: {
       <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-6 px-4 py-6 md:px-6 xl:px-8">
         <TeacherFilterBar
           orgslug={orgslug}
-          path={`/orgs/${orgslug}/dash/analytics/assessments`}
+          path="/dash/analytics/assessments"
           query={query}
           courseCount={assessments.course_options.length}
           courseOptions={assessments.course_options}
@@ -74,7 +72,7 @@ export default async function AnalyticsAssessmentsPage(props: {
               disabled={assessments.page <= 1}
               render={
                 <Link
-                  href={`/orgs/${orgslug}/dash/analytics/assessments?${new URLSearchParams({ ...Object.fromEntries(params.entries()), page: String(Math.max(1, assessments.page - 1)), page_size: String(assessments.page_size) }).toString()}`}
+                  href={`/dash/analytics/assessments?${new URLSearchParams({ ...Object.fromEntries(params.entries()), page: String(Math.max(1, assessments.page - 1)), page_size: String(assessments.page_size) }).toString()}`}
                 />
               }
             >
@@ -89,7 +87,7 @@ export default async function AnalyticsAssessmentsPage(props: {
               disabled={assessments.page >= totalPages}
               render={
                 <Link
-                  href={`/orgs/${orgslug}/dash/analytics/assessments?${new URLSearchParams({ ...Object.fromEntries(params.entries()), page: String(Math.min(totalPages, assessments.page + 1)), page_size: String(assessments.page_size) }).toString()}`}
+                  href={`/dash/analytics/assessments?${new URLSearchParams({ ...Object.fromEntries(params.entries()), page: String(Math.min(totalPages, assessments.page + 1)), page_size: String(assessments.page_size) }).toString()}`}
                 />
               }
             >

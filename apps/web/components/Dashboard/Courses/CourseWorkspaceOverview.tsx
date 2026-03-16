@@ -56,7 +56,7 @@ export default function CourseWorkspaceOverview({
             {capabilities.canEditCurriculum ? (
               <Button
                 nativeButton={false}
-                render={<AppLink href={buildCourseWorkspacePath(orgslug, courseuuid, 'curriculum')} />}
+                render={<AppLink href={buildCourseWorkspacePath(courseuuid, 'curriculum')} />}
               >
                 {t('openCurriculum')}
               </Button>
@@ -65,7 +65,7 @@ export default function CourseWorkspaceOverview({
           {capabilities.canReviewCourse ? (
             <div className="mt-4 text-sm text-muted-foreground">
               <AppLink
-                href={buildCourseWorkspacePath(orgslug, courseuuid, 'review')}
+                href={buildCourseWorkspacePath(courseuuid, 'review')}
                 className="font-medium text-foreground underline underline-offset-4"
               >
                 {t('reviewReadiness')}
@@ -105,7 +105,7 @@ export default function CourseWorkspaceOverview({
             {readiness.checklist.map((item) => (
               <AppLink
                 key={item.id}
-                href={buildCourseWorkspacePath(orgslug, courseuuid, (item.href as any) || 'overview')}
+                href={buildCourseWorkspacePath(courseuuid, (item.href as any) || 'overview')}
                 className="flex items-center gap-3 rounded-lg border px-4 py-3 transition-colors hover:bg-muted/50"
               >
                 <CourseStatusBadge status={item.complete ? 'ready' : 'needs-review'} />
@@ -138,7 +138,7 @@ export default function CourseWorkspaceOverview({
             variant="outline"
             nativeButton={false}
             className="mt-4 w-full justify-between"
-            render={<AppLink href={buildCourseWorkspacePath(orgslug, courseuuid, 'curriculum')} />}
+            render={<AppLink href={buildCourseWorkspacePath(courseuuid, 'curriculum')} />}
           >
             {t('openCurriculum')}
             <ArrowRight className="size-4" />
@@ -164,7 +164,7 @@ export default function CourseWorkspaceOverview({
                     {t.rich('access.privateNoGroupsWarning', {
                       link: (chunks) => (
                         <AppLink
-                          href={buildCourseWorkspacePath(orgslug, courseuuid, 'access')}
+                          href={buildCourseWorkspacePath(courseuuid, 'access')}
                           className="font-semibold underline underline-offset-2"
                         >
                           {chunks}

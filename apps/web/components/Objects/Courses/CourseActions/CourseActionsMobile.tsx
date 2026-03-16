@@ -249,7 +249,7 @@ const CourseActionsMobile = ({ courseuuid, orgslug, course, trailData }: CourseA
     startTransition(() => setIsActionLoading(true));
     try {
       await startCourse(`course_${courseuuid}`, orgslug, session.data?.tokens?.access_token);
-      await revalidateTags(['courses'], orgslug);
+      await revalidateTags(['courses']);
 
       // Get the first activity from the first chapter
       const firstChapter = course.chapters?.[0];
@@ -257,7 +257,7 @@ const CourseActionsMobile = ({ courseuuid, orgslug, course, trailData }: CourseA
 
       if (firstActivity) {
         // Redirect to the first activity
-        await revalidateTags(['activities'], orgslug);
+        await revalidateTags(['activities']);
         router.push(
           `${getAbsoluteUrl('')}/course/${courseuuid}/activity/${firstActivity.activity_uuid.replace('activity_', '')}`,
         );
@@ -268,7 +268,7 @@ const CourseActionsMobile = ({ courseuuid, orgslug, course, trailData }: CourseA
       console.error('Failed to perform course action:', error);
     } finally {
       startTransition(() => setIsActionLoading(false));
-      await revalidateTags(['courses'], orgslug);
+      await revalidateTags(['courses']);
     }
   };
 

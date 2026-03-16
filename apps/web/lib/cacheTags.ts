@@ -31,8 +31,8 @@ export const courseTag = {
   access: (courseUuid: string) => `course:${courseUuid}:access`,
   contributors: (courseUuid: string) => `course:${courseUuid}:contributors`,
   certifications: (courseUuid: string) => `course:${courseUuid}:certifications`,
-  editableList: (orgSlug: string) => `courses:${orgSlug}:editable`,
-  publicList: (orgSlug: string) => `courses:${orgSlug}:public`,
+  editableList: () => 'courses:platform:editable',
+  publicList: () => 'courses:platform:public',
 } as const;
 
 interface CourseListTagOptions {
@@ -45,11 +45,11 @@ export function getCourseListTags(orgSlug: string, options: CourseListTagOptions
   const scopedTags: string[] = [];
 
   if (includeEditable) {
-    scopedTags.push(courseTag.editableList(orgSlug));
+    scopedTags.push(courseTag.editableList());
   }
 
   if (includePublic) {
-    scopedTags.push(courseTag.publicList(orgSlug));
+    scopedTags.push(courseTag.publicList());
   }
 
   return scopedTags;

@@ -54,7 +54,7 @@ export const CourseCard = ({ course, assignments, org }: any) => {
 
           <Link
             prefetch={false}
-            href={buildCourseWorkspacePath(org.slug, courseId, 'curriculum')}
+            href={buildCourseWorkspacePath(courseId, 'curriculum')}
             className={cn(
               buttonVariants({ variant: 'default', size: 'sm' }),
               'w-full sm:w-auto inline-flex items-center justify-center',

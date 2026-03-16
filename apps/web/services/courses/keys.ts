@@ -9,8 +9,7 @@ export function getTrailSwrKey(orgId: number | null | undefined) {
 }
 
 export function getCoursesSwrKey(orgSlug: string, page = 1, limit = 20) {
-  if (!orgSlug) return '';
-  return `${getAPIUrl()}courses/org_slug/${orgSlug}/page/${page}/limit/${limit}`;
+  return `${getAPIUrl()}courses/page/${page}/limit/${limit}`;
 }
 
 export function getCourseUpdatesSwrKey(course_uuid: string | null | undefined) {

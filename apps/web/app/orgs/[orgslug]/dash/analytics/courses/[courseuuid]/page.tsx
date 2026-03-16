@@ -6,7 +6,6 @@ import EngagementAreaChart from '@components/Dashboard/Analytics/EngagementAreaC
 import AtRiskLearnersTable from '@components/Dashboard/Analytics/AtRiskLearnersTable';
 import AnalyticsEmptyState from '@components/Dashboard/Analytics/AnalyticsEmptyState';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { getOrganizationContextInfo } from '@services/organizations/orgs';
 import { getTranslations } from 'next-intl/server';
 import { Badge } from '@/components/ui/badge';
 import { auth } from '@/auth';
@@ -16,7 +15,6 @@ export default async function AnalyticsCourseDetailPage(props: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { orgslug, courseuuid } = await props.params;
-  const org = await getOrganizationContextInfo(orgslug);
   const session = await auth();
   const accessToken = session?.tokens?.access_token;
   const query = normalizeAnalyticsQuery(await props.searchParams);
@@ -32,7 +30,7 @@ export default async function AnalyticsCourseDetailPage(props: {
   }
 
   try {
-    const detail = await getTeacherCourseDetailByUuid(org.id ?? org.org_id, courseuuid, accessToken, query);
+    const detail = await getTeacherCourseDetailByUuid(courseuuid, accessToken, query);
     return (
       <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-6 px-4 py-6 md:px-6 xl:px-8">
         <Card className="border-slate-200 bg-white/90 shadow-sm">

@@ -12,6 +12,7 @@ interface CreateCourseTriggerProps {
 
 export default function CreateCourseTrigger({ orgslug }: CreateCourseTriggerProps) {
   const t = useTranslations('Components.Button');
+  void orgslug;
 
   return (
     <PermissionGuard
@@ -22,7 +23,7 @@ export default function CreateCourseTrigger({ orgslug }: CreateCourseTriggerProp
     >
       <Button
         nativeButton={false}
-        render={<AppLink href={buildCourseCreationPath(orgslug)} />}
+        render={<AppLink href={buildCourseCreationPath()} />}
         className="my-auto gap-2 rounded-lg px-4 py-2 font-semibold"
       >
         <span>{t('newCourse')}</span>

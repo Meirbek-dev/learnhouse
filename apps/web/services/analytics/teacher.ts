@@ -61,57 +61,50 @@ export function normalizeAnalyticsQuery(searchParams: Record<string, string | st
   };
 }
 
-export function getTeacherOverview(orgId: number, accessToken: string, query?: AnalyticsQuery) {
-  return analyticsRequest<TeacherOverviewResponse>(`orgs/${orgId}/teacher/overview`, accessToken, query);
+export function getTeacherOverview(accessToken: string, query?: AnalyticsQuery) {
+  return analyticsRequest<TeacherOverviewResponse>('teacher/overview', accessToken, query);
 }
 
-export function getTeacherCourseList(orgId: number, accessToken: string, query?: AnalyticsQuery) {
-  return analyticsRequest<TeacherCourseListResponse>(`orgs/${orgId}/teacher/courses`, accessToken, query);
+export function getTeacherCourseList(accessToken: string, query?: AnalyticsQuery) {
+  return analyticsRequest<TeacherCourseListResponse>('teacher/courses', accessToken, query);
 }
 
 export function getTeacherCourseDetailByUuid(
-  orgId: number,
   courseUuid: string,
   accessToken: string,
   query?: AnalyticsQuery,
 ) {
-  return analyticsRequest<TeacherCourseDetailResponse>(
-    `orgs/${orgId}/teacher/courses/by-uuid/${courseUuid}`,
-    accessToken,
-    query,
-  );
+  return analyticsRequest<TeacherCourseDetailResponse>(`teacher/courses/by-uuid/${courseUuid}`, accessToken, query);
 }
 
-export function getTeacherCourseDetail(orgId: number, courseId: number, accessToken: string, query?: AnalyticsQuery) {
-  return analyticsRequest<TeacherCourseDetailResponse>(`orgs/${orgId}/teacher/courses/${courseId}`, accessToken, query);
+export function getTeacherCourseDetail(courseId: number, accessToken: string, query?: AnalyticsQuery) {
+  return analyticsRequest<TeacherCourseDetailResponse>(`teacher/courses/${courseId}`, accessToken, query);
 }
 
-export function getTeacherAssessmentList(orgId: number, accessToken: string, query?: AnalyticsQuery) {
-  return analyticsRequest<TeacherAssessmentListResponse>(`orgs/${orgId}/teacher/assessments`, accessToken, query);
+export function getTeacherAssessmentList(accessToken: string, query?: AnalyticsQuery) {
+  return analyticsRequest<TeacherAssessmentListResponse>('teacher/assessments', accessToken, query);
 }
 
 export function getTeacherAssessmentDetail(
-  orgId: number,
   assessmentType: AssessmentType,
   assessmentId: number,
   accessToken: string,
   query?: AnalyticsQuery,
 ) {
   return analyticsRequest<TeacherAssessmentDetailResponse>(
-    `orgs/${orgId}/teacher/assessments/${assessmentType}/${assessmentId}`,
+    `teacher/assessments/${assessmentType}/${assessmentId}`,
     accessToken,
     query,
   );
 }
 
-export function getAtRiskLearners(orgId: number, accessToken: string, query?: AnalyticsQuery) {
-  return analyticsRequest<AtRiskLearnersResponse>(`orgs/${orgId}/teacher/learners/at-risk`, accessToken, query);
+export function getAtRiskLearners(accessToken: string, query?: AnalyticsQuery) {
+  return analyticsRequest<AtRiskLearnersResponse>('teacher/learners/at-risk', accessToken, query);
 }
 
 export function getAnalyticsExportUrl(
-  orgId: number,
   exportName: 'at-risk' | 'grading-backlog' | 'course-progress' | 'assessment-outcomes',
   query?: AnalyticsQuery,
 ) {
-  return `${getAPIUrl()}analytics/orgs/${orgId}/teacher/exports/${exportName}.csv${buildQueryString(query)}`;
+  return `${getAPIUrl()}analytics/teacher/exports/${exportName}.csv${buildQueryString(query)}`;
 }

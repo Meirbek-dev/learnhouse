@@ -10,7 +10,7 @@ export async function searchOrgContent(
   access_token?: any,
 ) {
   const result: any = await fetch(
-    `${getAPIUrl()}search/org_slug/${org_slug}?query=${encodeURIComponent(query)}&page=${page}&limit=${limit}`,
+    `${getAPIUrl()}search?query=${encodeURIComponent(query)}&page=${page}&limit=${limit}`,
     RequestBodyWithAuthHeader('GET', null, next, access_token),
   );
   return await getResponseMetadata(result);

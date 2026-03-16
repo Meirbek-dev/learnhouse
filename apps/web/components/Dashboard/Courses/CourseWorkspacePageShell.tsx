@@ -108,7 +108,7 @@ function CourseWorkspaceChrome({
         <div className="flex h-16 items-center gap-4 px-4 lg:px-8">
           {/* Breadcrumb */}
           <AppLink
-            href={`/orgs/${orgslug}/dash/courses`}
+            href="/dash/courses"
             className="flex shrink-0 items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground dark:text-muted-foreground dark:hover:text-foreground"
           >
             <BookCopy className="size-4 shrink-0" />
@@ -133,7 +133,7 @@ function CourseWorkspaceChrome({
                 size="sm"
                 nativeButton={false}
                 variant="ghost"
-                render={<AppLink href={buildCourseWorkspacePath(orgslug, courseuuid, 'review')} />}
+                render={<AppLink href={buildCourseWorkspacePath(courseuuid, 'review')} />}
                 className="gap-2"
               >
                 <ShieldCheck className="size-4" />
@@ -161,7 +161,7 @@ function CourseWorkspaceChrome({
             return (
               <AppLink
                 key={stage.key}
-                href={buildCourseWorkspacePath(orgslug, courseuuid, stage.key)}
+                href={buildCourseWorkspacePath(courseuuid, stage.key)}
                 aria-current={isActive ? 'page' : undefined}
                 className={cn(
                   'relative flex h-full shrink-0 items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition-all duration-200',

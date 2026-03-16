@@ -30,8 +30,13 @@ from src.services.analytics.scope import (
     ensure_course_in_scope,
     resolve_teacher_scope,
 )
+from src.services.platform import get_platform_org_id
 
 router = APIRouter()
+
+
+def _platform_org_id(db_session: Session) -> int:
+    return get_platform_org_id(db_session)
 
 
 def _csv_response(stream, filename: str) -> StreamingResponse:
@@ -92,6 +97,18 @@ async def teacher_overview(
     return get_teacher_overview(db_session, scope, filters)
 
 
+@router.get("/teacher/overview")
+async def teacher_overview_platform(
+    filters: Annotated[AnalyticsFilters, Depends(get_analytics_filters)],
+    current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
+    db_session: Annotated[Session, Depends(get_db_session)],
+):
+    scope = _scope_for(
+        db_session, current_user, _platform_org_id(db_session), filters, action="read"
+    )
+    return get_teacher_overview(db_session, scope, filters)
+
+
 @router.get("/orgs/{org_id}/teacher/courses")
 async def teacher_courses(
     org_id: int,
@@ -103,6 +120,18 @@ async def teacher_courses(
     return get_teacher_course_list(db_session, scope, filters)
 
 
+@router.get("/teacher/courses")
+async def teacher_courses_platform(
+    filters: Annotated[AnalyticsFilters, Depends(get_analytics_filters)],
+    current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
+    db_session: Annotated[Session, Depends(get_db_session)],
+):
+    scope = _scope_for(
+        db_session, current_user, _platform_org_id(db_session), filters, action="read"
+    )
+    return get_teacher_course_list(db_session, scope, filters)
+
+
 @router.get("/orgs/{org_id}/teacher/courses/by-uuid/{course_uuid}")
 async def teacher_course_detail_by_uuid(
     org_id: int,
@@ -111,6 +140,28 @@ async def teacher_course_detail_by_uuid(
     current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
+    scope = _scope_for(db_session, current_user, org_id, filters, action="read")
+    course = db_session.exec(
+        sa_select(Course).where(
+            Course.course_uuid == course_uuid, Course.id.in_(scope.course_ids)
+        )
+    ).first()
+    if course is None:
+        raise HTTPException(status_code=404, detail="Course not found in scope")
+    try:
+        return get_teacher_course_detail(db_session, scope, course.id, filters)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
+@router.get("/teacher/courses/by-uuid/{course_uuid}")
+async def teacher_course_detail_by_uuid_platform(
+    course_uuid: str,
+    filters: Annotated[AnalyticsFilters, Depends(get_analytics_filters)],
+    current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
+    db_session: Annotated[Session, Depends(get_db_session)],
+):
+    org_id = _platform_org_id(db_session)
     scope = _scope_for(db_session, current_user, org_id, filters, action="read")
     course = db_session.exec(
         sa_select(Course).where(
@@ -140,6 +191,22 @@ async def teacher_course_detail(
         raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
+@router.get("/teacher/courses/{course_id}")
+async def teacher_course_detail_platform(
+    course_id: int,
+    filters: Annotated[AnalyticsFilters, Depends(get_analytics_filters)],
+    current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
+    db_session: Annotated[Session, Depends(get_db_session)],
+):
+    scope = _course_scope_for(
+        db_session, current_user, _platform_org_id(db_session), course_id, filters
+    )
+    try:
+        return get_teacher_course_detail(db_session, scope, course_id, filters)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
 @router.get("/orgs/{org_id}/teacher/assessments")
 async def teacher_assessments(
     org_id: int,
@@ -148,6 +215,18 @@ async def teacher_assessments(
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
     scope = _scope_for(db_session, current_user, org_id, filters, action="read")
+    return get_teacher_assessment_list(db_session, scope, filters)
+
+
+@router.get("/teacher/assessments")
+async def teacher_assessments_platform(
+    filters: Annotated[AnalyticsFilters, Depends(get_analytics_filters)],
+    current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
+    db_session: Annotated[Session, Depends(get_db_session)],
+):
+    scope = _scope_for(
+        db_session, current_user, _platform_org_id(db_session), filters, action="read"
+    )
     return get_teacher_assessment_list(db_session, scope, filters)
 
 
@@ -171,6 +250,30 @@ async def teacher_assessment_detail(
         raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
+@router.get("/teacher/assessments/{assessment_type}/{assessment_id}")
+async def teacher_assessment_detail_platform(
+    assessment_type: str,
+    assessment_id: int,
+    filters: Annotated[AnalyticsFilters, Depends(get_analytics_filters)],
+    current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
+    db_session: Annotated[Session, Depends(get_db_session)],
+):
+    scope = _assessment_scope_for(
+        db_session,
+        current_user,
+        _platform_org_id(db_session),
+        assessment_type,
+        assessment_id,
+        filters,
+    )
+    try:
+        return get_teacher_assessment_detail(
+            db_session, scope, assessment_type, assessment_id, filters
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
 @router.get("/orgs/{org_id}/teacher/learners/at-risk")
 async def teacher_at_risk_learners(
     org_id: int,
@@ -179,6 +282,18 @@ async def teacher_at_risk_learners(
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
     scope = _scope_for(db_session, current_user, org_id, filters, action="read")
+    return get_at_risk_learners(db_session, scope, filters)
+
+
+@router.get("/teacher/learners/at-risk")
+async def teacher_at_risk_learners_platform(
+    filters: Annotated[AnalyticsFilters, Depends(get_analytics_filters)],
+    current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
+    db_session: Annotated[Session, Depends(get_db_session)],
+):
+    scope = _scope_for(
+        db_session, current_user, _platform_org_id(db_session), filters, action="read"
+    )
     return get_at_risk_learners(db_session, scope, filters)
 
 
@@ -195,6 +310,20 @@ async def teacher_at_risk_export(
     )
 
 
+@router.get("/teacher/exports/at-risk.csv")
+async def teacher_at_risk_export_platform(
+    filters: Annotated[AnalyticsFilters, Depends(get_analytics_filters)],
+    current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
+    db_session: Annotated[Session, Depends(get_db_session)],
+):
+    scope = _scope_for(
+        db_session, current_user, _platform_org_id(db_session), filters, action="export"
+    )
+    return _csv_response(
+        export_at_risk_csv(db_session, scope, filters), "teacher-at-risk.csv"
+    )
+
+
 @router.get("/orgs/{org_id}/teacher/exports/grading-backlog.csv")
 async def teacher_grading_backlog_export(
     org_id: int,
@@ -203,6 +332,21 @@ async def teacher_grading_backlog_export(
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
     scope = _scope_for(db_session, current_user, org_id, filters, action="export")
+    return _csv_response(
+        export_grading_backlog_csv(db_session, scope, filters),
+        "teacher-grading-backlog.csv",
+    )
+
+
+@router.get("/teacher/exports/grading-backlog.csv")
+async def teacher_grading_backlog_export_platform(
+    filters: Annotated[AnalyticsFilters, Depends(get_analytics_filters)],
+    current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
+    db_session: Annotated[Session, Depends(get_db_session)],
+):
+    scope = _scope_for(
+        db_session, current_user, _platform_org_id(db_session), filters, action="export"
+    )
     return _csv_response(
         export_grading_backlog_csv(db_session, scope, filters),
         "teacher-grading-backlog.csv",
@@ -223,6 +367,21 @@ async def teacher_course_progress_export(
     )
 
 
+@router.get("/teacher/exports/course-progress.csv")
+async def teacher_course_progress_export_platform(
+    filters: Annotated[AnalyticsFilters, Depends(get_analytics_filters)],
+    current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
+    db_session: Annotated[Session, Depends(get_db_session)],
+):
+    scope = _scope_for(
+        db_session, current_user, _platform_org_id(db_session), filters, action="export"
+    )
+    return _csv_response(
+        export_course_progress_csv(db_session, scope, filters),
+        "teacher-course-progress.csv",
+    )
+
+
 @router.get("/orgs/{org_id}/teacher/exports/assessment-outcomes.csv")
 async def teacher_assessment_outcomes_export(
     org_id: int,
@@ -231,6 +390,21 @@ async def teacher_assessment_outcomes_export(
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
     scope = _scope_for(db_session, current_user, org_id, filters, action="export")
+    return _csv_response(
+        export_assessment_outcomes_csv(db_session, scope, filters),
+        "teacher-assessment-outcomes.csv",
+    )
+
+
+@router.get("/teacher/exports/assessment-outcomes.csv")
+async def teacher_assessment_outcomes_export_platform(
+    filters: Annotated[AnalyticsFilters, Depends(get_analytics_filters)],
+    current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
+    db_session: Annotated[Session, Depends(get_db_session)],
+):
+    scope = _scope_for(
+        db_session, current_user, _platform_org_id(db_session), filters, action="export"
+    )
     return _csv_response(
         export_assessment_outcomes_csv(db_session, scope, filters),
         "teacher-assessment-outcomes.csv",

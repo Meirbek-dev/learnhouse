@@ -17,7 +17,7 @@ export async function requireAuth(orgslug: string) {
   assertPlatformRoute(orgslug);
   const session = await auth();
   if (!session?.user) {
-    redirect(`/orgs/${orgslug}/auth`);
+    redirect('/auth');
   }
   return session;
 }
@@ -49,12 +49,12 @@ export async function requirePermission(
 ) {
   const session = await requireAuth(orgslug);
   if (!session.permissions_org_id) {
-    redirect(redirectTo ?? `/orgs/${orgslug}/unauthorized`);
+    redirect(redirectTo ?? '/unauthorized');
   }
 
   const perms = new Set(session.permissions);
   if (!sessionCan(session, resource, action, scope, perms)) {
-    redirect(redirectTo ?? `/orgs/${orgslug}/unauthorized`);
+    redirect(redirectTo ?? '/unauthorized');
   }
   return session;
 }
@@ -70,13 +70,13 @@ export async function requireAnyPermission(
 ) {
   const session = await requireAuth(orgslug);
   if (!session.permissions_org_id) {
-    redirect(redirectTo ?? `/orgs/${orgslug}/unauthorized`);
+    redirect(redirectTo ?? '/unauthorized');
   }
 
   const perms = new Set(session.permissions);
   const hasAny = checks.some((c) => sessionCan(session, c.resource, c.action, c.scope, perms));
   if (!hasAny) {
-    redirect(redirectTo ?? `/orgs/${orgslug}/unauthorized`);
+    redirect(redirectTo ?? '/unauthorized');
   }
   return session;
 }

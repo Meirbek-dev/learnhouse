@@ -14,6 +14,7 @@ from src.db.organizations import (
 from src.db.users import AnonymousUser, PublicUser
 from src.security.auth import get_current_user, get_current_user_optional
 from src.security.rbac import PermissionCheckerDep
+from src.services.platform import get_platform_organization
 from src.services.orgs.orgs import (
     create_org,
     delete_org,
@@ -35,6 +36,21 @@ from src.services.orgs.users import (
 )
 
 router = APIRouter()
+
+
+@router.get("/platform")
+async def api_get_platform_org(
+    request: Request,
+    current_user: Annotated[
+        PublicUser | AnonymousUser, Depends(get_current_user_optional)
+    ],
+    db_session: Annotated[Session, Depends(get_db_session)],
+) -> OrganizationRead:
+    """
+    Get the single platform organization.
+    """
+    platform_org = get_platform_organization(db_session)
+    return await get_organization(request, platform_org.id, db_session, current_user)
 
 
 @router.post("")

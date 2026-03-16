@@ -426,14 +426,14 @@ const AdminMenu: FC<AdminMenuProps> = ({ course, orgSlug, onDelete }) => {
       id: 'edit-content',
       label: t('editContent'),
       icon: FilePenLine,
-      onClick: () => router.push(buildCourseWorkspacePath(orgSlug, courseIdClean, 'curriculum')),
+      onClick: () => router.push(buildCourseWorkspacePath(courseIdClean, 'curriculum')),
       requiresAction: 'update',
     },
     {
       id: 'settings',
       label: t('settings'),
       icon: Settings2,
-      onClick: () => router.push(buildCourseWorkspacePath(orgSlug, courseIdClean, 'details')),
+      onClick: () => router.push(buildCourseWorkspacePath(courseIdClean, 'details')),
       requiresAction: 'update',
     },
     {

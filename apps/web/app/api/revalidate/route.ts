@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { tags, orgslug } = await request.json();
+    const { tags } = await request.json();
 
     if (!Array.isArray(tags) || tags.length === 0) {
       return NextResponse.json({ error: 'Tags array is required' }, { status: 400, headers: corsHeaders });
@@ -65,7 +65,6 @@ export async function POST(request: NextRequest) {
         revalidated: true,
         now: Date.now(),
         tags: uniqueTags,
-        orgslug: typeof orgslug === 'string' ? orgslug : undefined,
       },
       { status: 200, headers: corsHeaders },
     );
