@@ -215,16 +215,11 @@ class HostingConfig(PlatformSectionSettings):
     domain: str = Field(validation_alias="PLATFORM_DOMAIN")
     ssl: bool = Field(default=False, validation_alias="PLATFORM_SSL")
     port: int = Field(default=8000, validation_alias="PLATFORM_PORT")
-    use_default_org: bool = Field(
-        default=False,
-        validation_alias="PLATFORM_USE_DEFAULT_ORG",
-    )
     allowed_origins: Annotated[list[str], NoDecode] = Field(
         default_factory=list,
         validation_alias="PLATFORM_ALLOWED_ORIGINS",
     )
     allowed_regexp: str = Field(default="", validation_alias="PLATFORM_ALLOWED_REGEXP")
-    self_hosted: bool = Field(default=False, validation_alias="PLATFORM_SELF_HOSTED")
     cookie_config: CookieConfig = Field(
         default_factory=CookieConfig,
         validation_alias="cookie_config",
