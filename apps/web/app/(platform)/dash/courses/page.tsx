@@ -88,9 +88,7 @@ async function PlatformDashCoursesPageInner(props: {
 
   return (
     <CoursesHome
-      orgslug={PLATFORM_ORG_SLUG}
       courses={courses}
-      org_id={org.id}
       totalCourses={total}
       currentPage={currentPage}
       searchQuery={query}

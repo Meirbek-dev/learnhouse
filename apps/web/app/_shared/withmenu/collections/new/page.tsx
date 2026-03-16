@@ -1,12 +1,11 @@
-import { getOrganizationContextInfo } from '@services/organizations/orgs';
+import { getPlatformOrganizationContextInfo } from '@services/organizations/orgs';
 import { getTranslations } from 'next-intl/server';
 import NewCollection from './NewCollection';
 import type { Metadata } from 'next';
 
-export async function generateMetadata({ params }: { params: Promise<{ orgslug: string }> }): Promise<Metadata> {
-  const { orgslug } = await params;
+export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('NewCollectionPage');
-  const org = await getOrganizationContextInfo(orgslug);
+  const org = await getPlatformOrganizationContextInfo();
 
   return {
     title: `${t('metaTitle')} - Ashyq Bilim`,
@@ -40,6 +39,6 @@ export async function generateMetadata({ params }: { params: Promise<{ orgslug: 
 }
 
 export default async function Page(props: any) {
-  const params = await props.params;
-  return <NewCollection params={params} />;
+  void props;
+  return <NewCollection />;
 }

@@ -5,7 +5,7 @@ import { valibotResolver } from '@hookform/resolvers/valibot';
 import { revalidateTags } from '@services/utils/ts/requests';
 import { updateOrganization } from '@services/settings/org';
 import { useOrg } from '@components/Contexts/OrgContext';
-import { getAPIUrl, PLATFORM_ORG_SLUG } from '@services/config/config';
+import { getAPIUrl } from '@services/config/config';
 import { Textarea } from '@components/ui/textarea';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
@@ -52,9 +52,7 @@ const OrgEditGeneral: FC = () => {
         void updateOrganization(org.id, values, access_token)
           .then(async () => {
             await revalidateTags(['organizations']);
-            const orgContextKey =
-              org?.slug === PLATFORM_ORG_SLUG ? `${getAPIUrl()}orgs/platform` : `${getAPIUrl()}orgs/slug/${org.slug}`;
-            mutate(orgContextKey);
+            mutate(`${getAPIUrl()}orgs/platform`);
             toast.success(t('orgUpdatedSuccess'), { id: loadingToast });
           })
           .catch(() => {

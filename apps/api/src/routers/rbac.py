@@ -23,6 +23,7 @@ from src.db.users import AnonymousUser, PublicUser
 from src.db.users import User as UserModel
 from src.security.auth import get_current_user
 from src.security.rbac import PermissionCheckerDep
+from src.services.platform import get_platform_org_id
 
 audit_log = logging.getLogger("rbac.audit")
 
@@ -191,16 +192,14 @@ async def get_my_permissions(
 # ============================================================================
 
 
-@router.get(
-    "/orgs/{org_id}/user-roles", response_model=list[UserRoleAssignmentResponse]
-)
+@router.get("/user-roles", response_model=list[UserRoleAssignmentResponse])
 async def list_org_user_roles(
-    org_id: int,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)] = None,
     checker: PermissionCheckerDep = None,
 ):
     """List user↔role assignments for a given organization."""
+    org_id = get_platform_org_id(db_session)
     checker.require(current_user.id, "role:read", org_id)
 
     rows = db_session.exec(

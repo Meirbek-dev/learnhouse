@@ -5,8 +5,9 @@ import { courseTag, getCourseListTags, tags } from '@/lib/cacheTags';
 import { getAPIUrl } from '@services/config/config';
 
 export async function getUserGroups(org_id: number, access_token: string) {
+  void org_id;
   const result: any = await fetch(
-    `${getAPIUrl()}usergroups/org/${org_id}`,
+    `${getAPIUrl()}usergroups`,
     RequestBodyWithAuthHeader('GET', null, null, access_token),
   );
   return await getResponseMetadata(result);

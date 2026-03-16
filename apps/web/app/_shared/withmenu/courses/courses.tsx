@@ -5,11 +5,11 @@ import GeneralWrapper from '@/components/Objects/Elements/Wrappers/GeneralWrappe
 import { Actions, Resources, Scopes, usePermissions } from '@/components/Security';
 import CreateCourseTrigger from '@/components/Landings/CreateCourseTrigger';
 import CourseGridClient from '@components/Landings/CourseGridClient';
+import { PLATFORM_ORG_SLUG } from '@services/config/config';
 
 import { useTranslations } from 'next-intl';
 
 interface CourseProps {
-  orgslug: string;
   courses: any[];
   totalCourses: number;
 }
@@ -43,11 +43,11 @@ const EmptyStateMessage = ({ canManageOrg, t, createCourseTrigger }: any) => (
 
 const Courses = (props: CourseProps) => {
   const t = useTranslations('CoursesPage');
-  const { orgslug, courses, totalCourses } = props;
+  const { courses, totalCourses } = props;
   const { can } = usePermissions();
   const canManageOrg = can(Actions.MANAGE, Resources.ORGANIZATION, Scopes.OWN);
 
-  const createCourseTrigger = <CreateCourseTrigger orgslug={orgslug} />;
+  const createCourseTrigger = <CreateCourseTrigger />;
 
   const hasCourses = courses.length > 0 || totalCourses > 0;
 
@@ -73,7 +73,7 @@ const Courses = (props: CourseProps) => {
             <CourseGridClient
               initialCourses={courses}
               initialTotal={totalCourses}
-              orgslug={orgslug}
+              orgslug={PLATFORM_ORG_SLUG}
             />
           )}
         </div>

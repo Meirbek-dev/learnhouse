@@ -15,8 +15,6 @@ interface AtRiskLearnersTableProps {
   rows: AtRiskLearnerRow[];
   storageKey?: string;
   serverPaginated?: boolean;
-  /** Organisation slug used to build deep-links from risk rows. */
-  orgslug?: string;
 }
 
 const riskVariant = (level: AtRiskLearnerRow['risk_level']) => {
@@ -31,7 +29,6 @@ export default function AtRiskLearnersTable({
   rows,
   storageKey,
   serverPaginated,
-  orgslug,
 }: AtRiskLearnersTableProps) {
   const t = useTranslations('TeacherAnalytics');
   const resolvedTitle = title ?? t('atRisk.defaultTitle');
@@ -41,10 +38,7 @@ export default function AtRiskLearnersTable({
       accessorKey: 'user_display_name',
       header: t('atRisk.colLearner'),
       cell: ({ row }) => {
-        const courseHref =
-          orgslug && row.original.course_uuid
-            ? `/dash/analytics/courses/${row.original.course_uuid}`
-            : undefined;
+        const courseHref = row.original.course_uuid ? `/dash/analytics/courses/${row.original.course_uuid}` : undefined;
         return (
           <div>
             <div className="font-medium text-foreground">{row.original.user_display_name}</div>
@@ -116,12 +110,7 @@ export default function AtRiskLearnersTable({
       header: t('atRisk.colAction'),
       cell: ({ row }) => {
         const hasGradingBlock = row.original.open_grading_blocks > 0;
-        const gradingHref =
-          orgslug && row.original.course_uuid
-            ? `/dash/analytics/courses/${row.original.course_uuid}`
-            : orgslug
-              ? '/dash/assignments'
-              : undefined;
+        const gradingHref = row.original.course_uuid ? `/dash/analytics/courses/${row.original.course_uuid}` : '/dash/assignments';
         return (
           <div className="max-w-[280px] space-y-1 whitespace-normal text-sm text-muted-foreground">
             <span>{row.original.recommended_action}</span>

@@ -6,13 +6,8 @@ import { Button } from '@/components/ui/button';
 import AppLink from '@/components/ui/AppLink';
 import { useTranslations } from 'next-intl';
 
-interface CreateCourseTriggerProps {
-  orgslug: string;
-}
-
-export default function CreateCourseTrigger({ orgslug }: CreateCourseTriggerProps) {
+export default function CreateCourseTrigger() {
   const t = useTranslations('Components.Button');
-  void orgslug;
 
   return (
     <PermissionGuard

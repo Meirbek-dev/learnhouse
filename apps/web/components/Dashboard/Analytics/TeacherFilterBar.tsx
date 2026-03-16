@@ -30,7 +30,6 @@ const COMMON_TIMEZONES = [
 ] as const;
 
 interface TeacherFilterBarProps {
-  orgslug: string;
   path?: string;
   query: AnalyticsQuery;
   courseCount: number;
@@ -44,7 +43,6 @@ const compareOptions: NonNullable<AnalyticsQuery['compare']>[] = ['previous_peri
 const bucketOptions: NonNullable<AnalyticsQuery['bucket']>[] = ['day', 'week'];
 
 export default function TeacherFilterBar({
-  orgslug,
   path,
   query,
   courseCount,

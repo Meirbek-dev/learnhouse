@@ -72,13 +72,14 @@ async function fetchOrgCollections(org_id: number, access_token?: string) {
   'use cache';
   cacheTag(tags.collections);
   cacheLife(CacheProfiles.courses);
+  void org_id;
 
   const headers: HeadersInit = { 'Content-Type': 'application/json' };
   if (access_token) {
     headers.Authorization = `Bearer ${access_token}`;
   }
 
-  const result = await fetch(`${getAPIUrl()}collections/org/${org_id}/page/1/limit/10`, {
+  const result = await fetch(`${getAPIUrl()}collections/page/1/limit/10`, {
     method: 'GET',
     headers,
   });

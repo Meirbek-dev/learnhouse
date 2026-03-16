@@ -105,14 +105,14 @@ const OrgUserGroups = () => {
     data: usergroups,
     error,
     isLoading,
-  } = useSWR(org ? `${getAPIUrl()}usergroups/org/${org.id}` : null, (url) => swrFetcher(url, access_token));
+  } = useSWR(org ? `${getAPIUrl()}usergroups` : null, (url) => swrFetcher(url, access_token));
 
   const deleteUserGroupUI = async (usergroup_id: number) => {
     const toastId = toast.loading(t('deletingUserGroup'));
     try {
       const res = await deleteUserGroup(usergroup_id, access_token);
       if (res.status === 200) {
-        mutate(`${getAPIUrl()}usergroups/org/${org.id}`);
+        mutate(`${getAPIUrl()}usergroups`);
         toast.success(t('userGroupDeletedSuccess'), { id: toastId });
       } else {
         toast.error(t('errors.deleteUserGroupFailed'), { id: toastId });

@@ -8,7 +8,6 @@ export default async function PlatformCourseReviewPage(props: { params: Promise<
   const capabilities = await requireCourseWorkspaceStageAccess(PLATFORM_ORG_SLUG, courseuuid, 'review');
 
   return renderCourseWorkspacePage({
-    orgslug: PLATFORM_ORG_SLUG,
     courseuuid,
     activeStage: 'review',
     capabilities,

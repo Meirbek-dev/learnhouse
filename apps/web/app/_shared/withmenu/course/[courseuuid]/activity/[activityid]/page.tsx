@@ -1,6 +1,7 @@
 import { getActivityWithAuthHeader } from '@services/courses/activities';
 import { getOptionalSession } from '@/lib/get-optional-session';
 import { getCourseMetadata } from '@services/courses/courses';
+import { PLATFORM_ORG_SLUG } from '@/services/config/config';
 import { getTranslations } from 'next-intl/server';
 import { jetBrainsMono } from '@/lib/fonts';
 import type { Metadata } from 'next';
@@ -8,7 +9,7 @@ import type { Metadata } from 'next';
 import ActivityClient from './activity';
 
 interface MetadataProps {
-  params: Promise<{ orgslug: string; courseuuid: string; activityid: string }>;
+  params: Promise<{ courseuuid: string; activityid: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
@@ -18,10 +19,11 @@ async function fetchCourseMetadata(courseuuid: string, access_token: string | nu
 }
 
 export async function generateMetadata(props: MetadataProps): Promise<Metadata> {
-  const { orgslug, courseuuid, activityid } = await props.params;
+  const { courseuuid, activityid } = await props.params;
   const session = await getOptionalSession();
   const access_token = session?.tokens?.access_token || null;
   const t = await getTranslations('General');
+  void courseuuid;
 
   const course_meta = await fetchCourseMetadata(courseuuid, access_token);
 
@@ -59,8 +61,7 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
 }
 
 const ActivityPage = async (params: any) => {
-  // Destructure params directly
-  const { orgslug, courseuuid, activityid } = await params.params;
+  const { courseuuid, activityid } = await params.params;
   const session = await getOptionalSession();
   const access_token = session?.tokens?.access_token || null;
 
@@ -77,7 +78,7 @@ const ActivityPage = async (params: any) => {
       <ActivityClient
         activityid={activityid}
         courseuuid={courseuuid}
-        orgslug={orgslug}
+        orgslug={PLATFORM_ORG_SLUG}
         activity={activity}
         course={course_meta}
       />

@@ -54,7 +54,6 @@ export default async function PlatformCoursesPage() {
   return (
     <div>
       <Courses
-        orgslug={PLATFORM_ORG_SLUG}
         courses={courses}
         totalCourses={total}
       />

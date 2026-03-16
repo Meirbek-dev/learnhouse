@@ -2,7 +2,6 @@ import { getServerGamificationDashboard, getServerOrganizationLeaderboard } from
 import { GamificationProvider } from '@/components/Contexts/GamificationContext';
 import { getPlatformOrganizationContextInfo } from '@services/organizations/orgs';
 import { getOptionalSession } from '@/lib/get-optional-session';
-import { PLATFORM_ORG_SLUG } from '@/services/config/config';
 import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
 
@@ -24,7 +23,7 @@ export default async function PlatformTrailPage() {
   const orgId = Number(org?.org_id ?? org?.id ?? 0);
   const content = (
     <div>
-      <Trail orgslug={PLATFORM_ORG_SLUG} />
+      <Trail />
     </div>
   );
 

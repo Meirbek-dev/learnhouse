@@ -29,10 +29,12 @@ import { CourseStatusBadge, courseWorkflowSummaryCardClass } from '@components/D
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import CourseThumbnail, { removeCoursePrefix } from '@components/Objects/Thumbnails/CourseThumbnail';
 import { deleteCourseFromBackend, updateCourseAccess } from '@services/courses/courses';
+import { useOrg } from '@components/Contexts/OrgContext';
 import { Actions, Resources, Scopes, usePermissions } from '@/components/Security';
 import { useCallback, useEffect, useMemo, useState, useTransition } from 'react';
 import type { Course } from '@components/Objects/Thumbnails/CourseThumbnail';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { PLATFORM_ORG_SLUG } from '@services/config/config';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
 import type { ColumnDef } from '@tanstack/react-table';
@@ -50,9 +52,7 @@ interface ManageableCourse extends Course {
 }
 
 interface CourseProps {
-  orgslug: string;
   courses: ManageableCourse[];
-  org_id?: number;
   totalCourses: number;
   currentPage: number;
   searchQuery: string;
@@ -70,7 +70,6 @@ interface CourseProps {
 type BulkActionKind = 'publish' | 'private' | 'delete';
 
 const CoursesHome = ({
-  orgslug,
   courses,
   totalCourses,
   currentPage,
@@ -88,7 +87,9 @@ const CoursesHome = ({
   const viewMode = searchParams.get('view') === 'cards' ? 'cards' : 'table';
   const { can } = usePermissions();
   const session = usePlatformSession() as any;
+  const org = useOrg() as { slug?: string } | null;
   const accessToken = session?.data?.tokens?.access_token;
+  const orgslug = org?.slug || PLATFORM_ORG_SLUG;
   const canCreateCourse = can(Actions.CREATE, Resources.COURSE, Scopes.ORG);
   const [selectedCourseUuids, setSelectedCourseUuids] = useState<string[]>([]);
   const [isBulkPending, startBulkTransition] = useTransition();

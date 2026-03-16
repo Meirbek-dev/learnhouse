@@ -10,7 +10,7 @@ import { useCourseListByOrg } from '@/hooks/useCourseListByOrg';
 import { revalidateTags } from '@services/utils/ts/requests';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { getAbsoluteUrl } from '@services/config/config';
+import { getAbsoluteUrl, PLATFORM_ORG_SLUG } from '@services/config/config';
 import { useMemo, useState, useTransition } from 'react';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -31,11 +31,10 @@ interface CourseListItem {
   thumbnail_image?: string | null;
 }
 
-const NewCollection = ({ params }: { params: { orgslug: string } }) => {
+const NewCollection = () => {
   const t = useTranslations('NewCollectionPage');
   const org = useOrg() as any;
   const session = usePlatformSession() as any;
-  const { orgslug } = params;
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [selectedCourses, setSelectedCourses] = useState<number[]>([]);
@@ -43,7 +42,7 @@ const NewCollection = ({ params }: { params: { orgslug: string } }) => {
   const [isPending, startTransition] = useTransition();
   const [searchQuery, setSearchQuery] = useState('');
   const router = useRouter();
-  const { data: courses, error, isLoading } = useCourseListByOrg(orgslug);
+  const { data: courses, error, isLoading } = useCourseListByOrg(PLATFORM_ORG_SLUG);
   const [isPublic, setIsPublic] = useState(true);
 
   const filteredCourses = useMemo(() => {

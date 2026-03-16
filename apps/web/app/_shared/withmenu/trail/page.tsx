@@ -1,6 +1,6 @@
 import { getServerGamificationDashboard, getServerOrganizationLeaderboard } from '@/services/gamification/server';
 import { GamificationProvider } from '@/components/Contexts/GamificationContext';
-import { getOrganizationContextInfo } from '@services/organizations/orgs';
+import { getPlatformOrganizationContextInfo } from '@services/organizations/orgs';
 import { getOptionalSession } from '@/lib/get-optional-session';
 import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
@@ -8,7 +8,6 @@ import type { Metadata } from 'next';
 import Trail from './trail';
 
 interface MetadataProps {
-  params: Promise<{ orgslug: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
@@ -21,17 +20,16 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
   };
 }
 
-const TrailPage = async (params: any) => {
-  const { orgslug } = await params.params;
+const TrailPage = async () => {
   const session = await getOptionalSession();
   const accessToken = session?.tokens?.access_token;
 
-  const org = await getOrganizationContextInfo(orgslug, undefined, accessToken);
+  const org = await getPlatformOrganizationContextInfo(accessToken || undefined);
 
   const orgId = Number(org?.org_id ?? org?.id ?? 0);
   const content = (
     <div>
-      <Trail orgslug={orgslug} />
+      <Trail />
     </div>
   );
 

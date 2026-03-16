@@ -32,7 +32,7 @@ const LinkToUserGroup = (props: LinkToUserGroupProps) => {
   const access_token = session?.data?.tokens?.access_token;
   const { courseStructure } = course;
 
-  const { data: usergroups } = useSWR(courseStructure && org ? `${getAPIUrl()}usergroups/org/${org.id}` : null, (url) =>
+  const { data: usergroups } = useSWR(courseStructure && org ? `${getAPIUrl()}usergroups` : null, (url) =>
     swrFetcher(url, access_token),
   );
   const [selectedUserGroup, setSelectedUserGroup] = useState<number | null>(null);

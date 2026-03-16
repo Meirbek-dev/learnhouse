@@ -2,7 +2,6 @@ import { getAtRiskLearners, normalizeAnalyticsQuery } from '@services/analytics/
 import AtRiskLearnersTable from '@components/Dashboard/Analytics/AtRiskLearnersTable';
 import AnalyticsEmptyState from '@components/Dashboard/Analytics/AnalyticsEmptyState';
 import TeacherFilterBar from '@components/Dashboard/Analytics/TeacherFilterBar';
-import { PLATFORM_ORG_SLUG } from '@/services/config/config';
 import { getTranslations } from 'next-intl/server';
 import { Button } from '@/components/ui/button';
 import { auth } from '@/auth';
@@ -39,11 +38,11 @@ async function PlatformAnalyticsAtRiskPageInner(props: { searchParams: Promise<R
 
     return (
       <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-6 px-4 py-6 md:px-6 xl:px-8">
-        <TeacherFilterBar path="/dash/analytics/learners/at-risk" query={query} courseCount={risk.course_options.length} courseOptions={risk.course_options} cohortOptions={risk.cohort_options} orgslug={PLATFORM_ORG_SLUG} />
+        <TeacherFilterBar path="/dash/analytics/learners/at-risk" query={query} courseCount={risk.course_options.length} courseOptions={risk.course_options} cohortOptions={risk.cohort_options} />
         <div className="flex items-center justify-between text-sm text-slate-500">
           <span>{t('table.showingRows', { from: (risk.page - 1) * risk.page_size + 1, to: Math.min(risk.page * risk.page_size, risk.total), total: risk.total })}</span>
         </div>
-        <AtRiskLearnersTable orgslug={PLATFORM_ORG_SLUG} rows={risk.items} title={t('pages.atRiskPageTitle')} description={t('pages.atRiskPageDescription', { total: risk.total })} storageKey="at-risk-page" serverPaginated />
+        <AtRiskLearnersTable rows={risk.items} title={t('pages.atRiskPageTitle')} description={t('pages.atRiskPageDescription', { total: risk.total })} storageKey="at-risk-page" serverPaginated />
         {totalPages > 1 ? (
           <div className="flex items-center justify-end gap-2">
             <Button variant="outline" size="sm" disabled={risk.page <= 1} render={<Link href={`/dash/analytics/learners/at-risk?${new URLSearchParams({ ...Object.fromEntries(params.entries()), page: String(Math.max(1, risk.page - 1)), page_size: String(risk.page_size) }).toString()}`} />}>

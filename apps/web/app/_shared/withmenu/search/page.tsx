@@ -1,4 +1,4 @@
-import { getOrganizationContextInfo } from '@services/organizations/orgs';
+import { getPlatformOrganizationContextInfo } from '@services/organizations/orgs';
 import { getOrgThumbnailMediaDirectory } from '@services/media/media';
 import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
@@ -6,16 +6,14 @@ import type { Metadata } from 'next';
 import SearchPage from './search';
 
 interface MetadataProps {
-  params: Promise<{ orgslug: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
 export async function generateMetadata(props: MetadataProps): Promise<Metadata> {
-  const params = await props.params;
   const searchParams = await props.searchParams;
   const t = await getTranslations('General');
 
-  const org = await getOrganizationContextInfo(params.orgslug);
+  const org = await getPlatformOrganizationContextInfo();
 
   const searchQuery = Array.isArray(searchParams.q) ? searchParams.q[0] : searchParams.q || '';
   const searchType = Array.isArray(searchParams.type) ? searchParams.type[0] : searchParams.type || 'all';
@@ -93,13 +91,13 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
     },
     alternates: {
       canonical: searchQuery
-        ? `/orgs/${params.orgslug}/search?q=${encodeURIComponent(searchQuery)}`
-        : `/orgs/${params.orgslug}/search`,
+        ? `/search?q=${encodeURIComponent(searchQuery)}`
+        : `/search`,
     },
   };
 }
 
-const SearchPageWrapper = async (_params: any) => {
+const SearchPageWrapper = async () => {
   return (
     <div>
       <SearchPage />

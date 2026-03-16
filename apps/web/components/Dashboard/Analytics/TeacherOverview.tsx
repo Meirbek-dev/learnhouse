@@ -23,8 +23,6 @@ const TeacherKpiCharts = lazy(() => import('./TeacherKpiCharts'));
 const TeacherKpiCards = lazy(() => import('./TeacherKpiCards'));
 
 interface TeacherOverviewProps {
-  orgslug: string;
-  orgId: number;
   query: AnalyticsQuery;
   data: TeacherOverviewResponse;
   courseOptions?: AnalyticsFilterOption[];
@@ -32,8 +30,6 @@ interface TeacherOverviewProps {
 }
 
 export default function TeacherOverview({
-  orgslug,
-  orgId,
   query,
   data,
   courseOptions = [],
@@ -171,7 +167,6 @@ export default function TeacherOverview({
       </section>
 
       <TeacherFilterBar
-        orgslug={orgslug}
         query={query}
         courseCount={data.scope.course_ids.length}
         courseOptions={courseOptions.length ? courseOptions : data.course_options}
@@ -305,7 +300,6 @@ export default function TeacherOverview({
           </div>
           <Suspense fallback={<SectionFallback height="h-[320px]" />}>
             <CourseHealthTable
-              orgslug={orgslug}
               rows={data.course_preview}
               storageKey="overview-courses"
             />
@@ -333,7 +327,6 @@ export default function TeacherOverview({
           </div>
           <Suspense fallback={<SectionFallback height="h-[320px]" />}>
             <AssessmentOutliersTable
-              orgslug={orgslug}
               rows={data.assessment_preview}
               storageKey="overview-assessments"
             />
@@ -349,7 +342,7 @@ export default function TeacherOverview({
         </div>
       </div>
 
-      {/* At-risk section with preview badge + CTA (issue 4) and orgslug for workflow links (issue 13) */}
+      {/* At-risk section with preview badge + CTA (issue 4). */}
       <div>
         <div className="mb-2 flex items-center gap-2">
           <Badge
@@ -364,7 +357,6 @@ export default function TeacherOverview({
         </div>
         <Suspense fallback={<SectionFallback height="h-[320px]" />}>
           <AtRiskLearnersTable
-            orgslug={orgslug}
             rows={data.at_risk_preview}
             title={t('overview.watchlistTitle')}
             description={t('overview.watchlistDescription')}

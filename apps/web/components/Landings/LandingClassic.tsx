@@ -1,4 +1,4 @@
-import { LoginBonusHandler } from '@/app/orgs/[orgslug]/(withmenu)/_components/LoginBonusHandler';
+import { LoginBonusHandler } from '@/app/_shared/withmenu/_components/LoginBonusHandler';
 import NewCollectionButton from '@/components/Objects/Elements/Buttons/NewCollectionButton';
 import TypeOfContentTitle from '@/components/Objects/Elements/Titles/TypeOfContentTitle';
 import CollectionThumbnail from '@components/Objects/Thumbnails/CollectionThumbnail';
@@ -8,7 +8,7 @@ import { HeroSection } from '@/components/Dashboard/Gamification/hero-section';
 import PermissionGuard from '@components/Security/PermissionGuard';
 import { Actions, Resources, Scopes } from '@/types/permissions';
 import type { DashboardData } from '@/types/gamification';
-import { getAbsoluteUrl } from '@services/config/config';
+import { getAbsoluteUrl, PLATFORM_ORG_SLUG } from '@services/config/config';
 import CreateCourseTrigger from './CreateCourseTrigger';
 import { BookOpen, FolderKanban } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
@@ -21,7 +21,6 @@ interface LandingClassicProps {
   courses: any[];
   totalCourses: number;
   collections: any[];
-  orgslug: string;
   org_id: number;
   gamificationData?: DashboardData | null;
 }
@@ -32,7 +31,6 @@ interface EmptyStateProps {
 
 interface GridProps {
   collections: any[];
-  orgslug: string;
   org_id: number;
 }
 
@@ -78,7 +76,7 @@ const EmptyCoursesState = ({ t }: EmptyStateProps) => (
 );
 
 // Collection Grid Component
-const CollectionGrid = ({ collections, orgslug, org_id }: GridProps) => (
+const CollectionGrid = ({ collections, org_id }: GridProps) => (
   <div className="grid w-full grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
     {collections.map((collection: any) => (
       <div
@@ -87,7 +85,7 @@ const CollectionGrid = ({ collections, orgslug, org_id }: GridProps) => (
       >
         <CollectionThumbnail
           collection={collection}
-          orgslug={orgslug}
+          orgslug={PLATFORM_ORG_SLUG}
           org_id={org_id}
         />
       </div>
@@ -111,7 +109,6 @@ const LandingClassic = async ({
   courses,
   totalCourses,
   collections,
-  orgslug,
   org_id,
   gamificationData,
 }: LandingClassicProps) => {
@@ -146,7 +143,7 @@ const LandingClassic = async ({
               <SectionHeader
                 title={t('Courses.title')}
                 type="cou"
-                action={<CreateCourseTrigger orgslug={orgslug} />}
+                action={<CreateCourseTrigger />}
               />
 
               <div className="min-h-[200px]">
@@ -154,7 +151,7 @@ const LandingClassic = async ({
                   <CourseGridClient
                     initialCourses={courses}
                     initialTotal={totalCourses}
-                    orgslug={orgslug}
+                    orgslug={PLATFORM_ORG_SLUG}
                   />
                 ) : (
                   <EmptyCoursesState t={t} />
@@ -188,7 +185,6 @@ const LandingClassic = async ({
                 {hasCollections ? (
                   <CollectionGrid
                     collections={collections}
-                    orgslug={orgslug}
                     org_id={org_id}
                   />
                 ) : (

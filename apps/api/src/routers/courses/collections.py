@@ -18,6 +18,7 @@ from src.services.courses.collections import (
     get_collections,
     update_collection,
 )
+from src.services.platform import get_platform_org_id
 from src.services.users.users import PublicUser
 
 router = APIRouter()
@@ -51,12 +52,11 @@ async def api_get_collection(
     return await get_collection(request, collection_uuid, current_user, db_session)
 
 
-@router.get("/org/{org_id}/page/{page}/limit/{limit}")
-async def api_get_collections_by(
+@router.get("/page/{page}/limit/{limit}")
+async def api_get_platform_collections(
     request: Request,
     page: int,
     limit: int,
-    org_id: int,
     current_user: Annotated[
         PublicUser | AnonymousUser, Depends(get_current_user_optional)
     ],
@@ -65,7 +65,14 @@ async def api_get_collections_by(
     """
     Get collections by page and limit with permission metadata
     """
-    return await get_collections(request, org_id, current_user, db_session, page, limit)
+    return await get_collections(
+        request,
+        get_platform_org_id(db_session),
+        current_user,
+        db_session,
+        page,
+        limit,
+    )
 
 
 @router.put("/{collection_uuid}")

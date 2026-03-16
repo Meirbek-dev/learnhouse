@@ -2,7 +2,6 @@ import { getTeacherOverview, normalizeAnalyticsQuery } from '@services/analytics
 import AnalyticsEmptyState from '@components/Dashboard/Analytics/AnalyticsEmptyState';
 import TeacherOverview from '@components/Dashboard/Analytics/TeacherOverview';
 import { getPlatformOrganizationContextInfo } from '@services/organizations/orgs';
-import { PLATFORM_ORG_SLUG } from '@/services/config/config';
 import { getTranslations } from 'next-intl/server';
 import { auth } from '@/auth';
 
@@ -29,7 +28,7 @@ async function PlatformAnalyticsPageInner(props: {
   try {
     const overview = await getTeacherOverview(accessToken, query);
 
-    return <TeacherOverview orgslug={PLATFORM_ORG_SLUG} orgId={org.id ?? org.org_id} query={query} data={overview} />;
+    return <TeacherOverview query={query} data={overview} />;
   } catch (error) {
     return (
       <AnalyticsEmptyState

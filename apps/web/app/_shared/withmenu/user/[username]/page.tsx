@@ -6,7 +6,6 @@ import UserProfileClient from './UserProfileClient';
 
 interface UserPageParams {
   username: string;
-  orgslug: string;
 }
 
 interface UserPageProps {

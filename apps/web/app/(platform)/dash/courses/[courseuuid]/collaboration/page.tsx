@@ -6,7 +6,6 @@ export default async function PlatformCourseCollaborationPage(props: { params: P
   const { courseuuid } = await props.params;
 
   return renderCourseWorkspacePage({
-    orgslug: PLATFORM_ORG_SLUG,
     courseuuid,
     activeStage: 'collaboration',
     children: <EditCourseContributors orgslug={PLATFORM_ORG_SLUG} />,

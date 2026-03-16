@@ -1,16 +1,13 @@
 import { getServerGamificationDashboard } from '@/services/gamification/server';
-import { getOrganizationContextInfo } from '@services/organizations/orgs';
+import { getPlatformOrganizationContextInfo } from '@services/organizations/orgs';
 import { getOrgCollections } from '@services/courses/collections';
 import LandingClassic from '@components/Landings/LandingClassic';
 import { getOptionalSession } from '@/lib/get-optional-session';
 import LandingCustom from '@components/Landings/LandingCustom';
 import { getOrgCourses } from '@services/courses/courses';
+import { PLATFORM_ORG_SLUG } from '@services/config/config';
 
-interface LandingContentProps {
-  orgslug: string;
-}
-
-export async function LandingContent({ orgslug }: LandingContentProps) {
+export async function LandingContent() {
   try {
     const session = await getOptionalSession();
     const access_token = session?.tokens?.access_token;
@@ -18,14 +15,13 @@ export async function LandingContent({ orgslug }: LandingContentProps) {
     // Fetch organization info with detailed error handling
     let org;
     try {
-      org = await getOrganizationContextInfo(orgslug);
+      org = await getPlatformOrganizationContextInfo(access_token || undefined);
     } catch (error) {
       console.error('[LandingContent] Failed to fetch organization info:', {
         message: error instanceof Error ? error.message : 'Unknown error',
         cause: error instanceof Error ? error.cause : undefined,
-        orgslug,
       });
-      throw new Error(`Unable to load organization "${orgslug}". Please check your network connection and try again.`, {
+      throw new Error('Unable to load the platform organization. Please check your network connection and try again.', {
         cause: error,
       });
     }
@@ -42,10 +38,10 @@ export async function LandingContent({ orgslug }: LandingContentProps) {
       : Promise.resolve(null);
 
     const [coursesData, collections, gamificationData] = await Promise.all([
-      getOrgCourses(orgslug, undefined, access_token || null).catch((error: unknown) => {
+      getOrgCourses(PLATFORM_ORG_SLUG, undefined, access_token || null).catch((error: unknown) => {
         console.error('[LandingContent] Courses fetch failed:', {
           message: error instanceof Error ? error.message : 'Unknown error',
-          orgslug,
+          org_id: org.id,
         });
         return { courses: [], total: 0 };
       }),
@@ -68,7 +64,6 @@ export async function LandingContent({ orgslug }: LandingContentProps) {
     return hasCustomLanding ? (
       <LandingCustom
         landing={org.config.config.landing}
-        orgslug={orgslug}
         org_id={org.id}
         gamificationData={gamificationData}
       />
@@ -77,7 +72,6 @@ export async function LandingContent({ orgslug }: LandingContentProps) {
         courses={courses}
         totalCourses={totalCourses}
         collections={collections}
-        orgslug={orgslug}
         org_id={org.id}
         gamificationData={gamificationData}
       />
@@ -87,7 +81,6 @@ export async function LandingContent({ orgslug }: LandingContentProps) {
       message: error instanceof Error ? error.message : 'Unknown error',
       stack: error instanceof Error ? error.stack : undefined,
       cause: error instanceof Error ? error.cause : undefined,
-      orgslug,
     });
     throw error; // Re-throw to be caught by error boundary
   }

@@ -1,10 +1,11 @@
 'use client';
 
 import type { LandingSection } from '@components/Dashboard/Pages/Org/OrgEditLanding/landing_types';
-import { LoginBonusHandler } from '@/app/orgs/[orgslug]/(withmenu)/_components/LoginBonusHandler';
+import { LoginBonusHandler } from '@/app/_shared/withmenu/_components/LoginBonusHandler';
 import { GamificationProvider } from '@/components/Contexts/GamificationContext';
 import CourseThumbnail from '@components/Objects/Thumbnails/CourseThumbnail';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { PLATFORM_ORG_SLUG } from '@services/config/config';
 import { getOrgCourses } from '@services/courses/courses';
 import type { DashboardData } from '@/types/gamification';
 import UserAvatar from '@components/Objects/UserAvatar';
@@ -16,18 +17,17 @@ interface LandingCustomProps {
     sections: LandingSection[];
     enabled: boolean;
   };
-  orgslug: string;
   org_id: number;
   gamificationData?: DashboardData | null;
 }
 
-const LandingCustom = ({ landing, orgslug, org_id, gamificationData }: LandingCustomProps) => {
+const LandingCustom = ({ landing, org_id, gamificationData }: LandingCustomProps) => {
   const session = usePlatformSession();
   const access_token = session?.data?.tokens?.access_token;
   const t = useTranslations('LandingCustom');
 
   // Fetch all courses for the organization
-  const { data: coursesData } = useSWR(orgslug ? [orgslug, access_token] : null, ([slug, token]) =>
+  const { data: coursesData } = useSWR([PLATFORM_ORG_SLUG, access_token] as const, ([slug, token]) =>
     getOrgCourses(slug, null, token),
   );
   const allCourses = coursesData?.courses;
@@ -275,7 +275,7 @@ const LandingCustom = ({ landing, orgslug, org_id, gamificationData }: LandingCu
                 >
                   <CourseThumbnail
                     course={course}
-                    orgslug={orgslug}
+                    orgslug={PLATFORM_ORG_SLUG}
                   />
                 </div>
               ))}

@@ -40,7 +40,6 @@ import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 
 interface CourseWorkspacePageShellProps {
-  orgslug: string;
   courseuuid: string;
   activeStage: CourseWorkspaceStage;
   initialCourse: any;
@@ -49,7 +48,6 @@ interface CourseWorkspacePageShellProps {
 }
 
 function CourseWorkspaceChrome({
-  orgslug,
   courseuuid,
   activeStage,
   capabilities,
@@ -189,7 +187,6 @@ function CourseWorkspaceChrome({
 }
 
 export default function CourseWorkspacePageShell({
-  orgslug,
   courseuuid,
   activeStage,
   initialCourse,
@@ -203,7 +200,6 @@ export default function CourseWorkspacePageShell({
       initialCourse={initialCourse}
     >
       <CourseWorkspaceChrome
-        orgslug={orgslug}
         courseuuid={courseuuid}
         activeStage={activeStage}
         capabilities={capabilities}

@@ -6,7 +6,6 @@ export default async function PlatformCourseCertificatePage(props: { params: Pro
   const { courseuuid } = await props.params;
 
   return renderCourseWorkspacePage({
-    orgslug: PLATFORM_ORG_SLUG,
     courseuuid,
     activeStage: 'certificate',
     children: <EditCourseCertification orgslug={PLATFORM_ORG_SLUG} />,

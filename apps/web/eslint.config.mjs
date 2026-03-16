@@ -156,11 +156,11 @@ export default defineConfig([
   {
     name: 'course-management-design-guard',
     files: [
-      'app/orgs/[orgslug]/dash/courses/**/*.{ts,tsx}',
+      'app/(platform)/dash/courses/**/*.{ts,tsx}',
       'components/Dashboard/Courses/**/*.{ts,tsx}',
       'components/Dashboard/Pages/Course/**/*.{ts,tsx}',
       'components/Landings/CreateCourseTrigger.tsx',
-      'app/orgs/[orgslug]/(withmenu)/courses/**/*.{ts,tsx}',
+      'app/(platform)/(withmenu)/courses/**/*.{ts,tsx}',
     ],
   },
 ]);

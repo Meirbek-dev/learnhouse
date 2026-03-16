@@ -6,7 +6,6 @@ import EngagementAreaChart from '@components/Dashboard/Analytics/EngagementAreaC
 import AtRiskLearnersTable from '@components/Dashboard/Analytics/AtRiskLearnersTable';
 import AnalyticsEmptyState from '@components/Dashboard/Analytics/AnalyticsEmptyState';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { PLATFORM_ORG_SLUG } from '@/services/config/config';
 import { getTranslations } from 'next-intl/server';
 import { Badge } from '@/components/ui/badge';
 import { auth } from '@/auth';
@@ -82,7 +81,7 @@ async function PlatformAnalyticsCourseDetailPageInner(props: {
           </CardContent>
         </Card>
 
-        <AssessmentOutliersTable orgslug={PLATFORM_ORG_SLUG} rows={detail.assessment_outliers} />
+        <AssessmentOutliersTable rows={detail.assessment_outliers} />
         <AtRiskLearnersTable
           rows={detail.at_risk_learners}
           title={t('pages.courseAtRiskTitle')}

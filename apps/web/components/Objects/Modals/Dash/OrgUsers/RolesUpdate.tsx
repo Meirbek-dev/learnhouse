@@ -80,7 +80,7 @@ const RolesUpdate: FC<Props> = (props) => {
         }
         await assignRoleToUser(access_token, userId, newRoleId, org.id);
 
-        await mutate(`${getAPIUrl()}orgs/${org.id}/users`);
+        await mutate(`${getAPIUrl()}orgs/users`);
         props.setRolesModal(false);
         toast.success(t('toastSuccess'), { id: toastId });
       } catch (error: any) {

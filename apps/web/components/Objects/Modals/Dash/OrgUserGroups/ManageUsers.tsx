@@ -31,7 +31,7 @@ const ManageUsers = (props: ManageUsersProps) => {
   const org = useOrg() as any;
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
-  const { data: OrgUsers } = useSWR(org ? `${getAPIUrl()}orgs/${org.id}/users` : null, (url) =>
+  const { data: OrgUsers } = useSWR(org ? `${getAPIUrl()}orgs/users` : null, (url) =>
     swrFetcher(url, access_token),
   );
   const { data: UGusers } = useSWR(org ? `${getAPIUrl()}usergroups/${props.usergroup_id}/users` : null, (url) =>

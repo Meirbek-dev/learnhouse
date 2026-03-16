@@ -148,7 +148,7 @@ const OrgUsers = () => {
     data: orgUsersData,
     error,
     isLoading,
-  } = useSWR(org ? `${getAPIUrl()}orgs/${org?.id}/users?page=${currentPage}&per_page=${USERS_PER_PAGE}` : null, (url) =>
+  } = useSWR(org ? `${getAPIUrl()}orgs/users?page=${currentPage}&per_page=${USERS_PER_PAGE}` : null, (url) =>
     swrFetcher(url, access_token),
   );
 
@@ -174,7 +174,7 @@ const OrgUsers = () => {
       const res = await removeUserFromOrg(org.id, user_id, access_token);
       if (res.status === 200) {
         // Revalidate the current page data
-        await mutate(`${getAPIUrl()}orgs/${org.id}/users?page=${currentPage}&per_page=${USERS_PER_PAGE}`);
+        await mutate(`${getAPIUrl()}orgs/users?page=${currentPage}&per_page=${USERS_PER_PAGE}`);
         toast.success(t('userRemovedSuccess'), { id: toastId });
       } else {
         toast.error(t('errors.removeUserFailed'), { id: toastId });

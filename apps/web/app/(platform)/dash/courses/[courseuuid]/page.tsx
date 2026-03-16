@@ -12,7 +12,6 @@ async function PlatformCourseWorkspacePageInner(props: { params: Promise<{ cours
   const capabilities = await requireCourseWorkspaceStageAccess(PLATFORM_ORG_SLUG, courseuuid, 'overview');
 
   return renderCourseWorkspacePage({
-    orgslug: PLATFORM_ORG_SLUG,
     courseuuid,
     activeStage: 'overview',
     capabilities,

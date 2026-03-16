@@ -131,7 +131,8 @@ export function removePermissionFromRole(token: string, roleId: number, permissi
 // ============================================================================
 
 export function listUserRoles(token: string, orgId: number): Promise<UserRoleAssignment[]> {
-  return request<UserRoleAssignment[]>(api(`rbac/orgs/${orgId}/user-roles`), token);
+  void orgId;
+  return request<UserRoleAssignment[]>(api('rbac/user-roles'), token);
 }
 
 export function assignRoleToUser(token: string, userId: number, roleId: number, orgId: number): Promise<void> {
@@ -153,8 +154,9 @@ export function removeRoleFromUser(token: string, userId: number, roleId: number
 // ============================================================================
 
 export function listOrgUsers(token: string, orgId: number, limit = 100): Promise<OrgUserBasic[]> {
+  void orgId;
   // The endpoint may return { users: [...] } or a flat array.
-  return request<OrgUserBasic[] | { users: OrgUserBasic[] }>(api(`orgs/${orgId}/users?limit=${limit}`), token).then(
+  return request<OrgUserBasic[] | { users: OrgUserBasic[] }>(api(`orgs/users?limit=${limit}`), token).then(
     (data) => (Array.isArray(data) ? data : data.users),
   );
 }

@@ -10,14 +10,12 @@ import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 
 interface AssessmentOutliersTableProps {
-  orgslug: string;
   rows: AssessmentOutlierRow[];
   storageKey?: string;
   serverPaginated?: boolean;
 }
 
 export default function AssessmentOutliersTable({
-  orgslug,
   rows,
   storageKey,
   serverPaginated,

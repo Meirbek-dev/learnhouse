@@ -14,12 +14,11 @@ from src.db.organizations import (
 from src.db.users import AnonymousUser, PublicUser
 from src.security.auth import get_current_user, get_current_user_optional
 from src.security.rbac import PermissionCheckerDep
-from src.services.platform import get_platform_organization
+from src.services.platform import get_platform_org_id, get_platform_organization
 from src.services.orgs.orgs import (
     create_org,
     delete_org,
     get_organization,
-    get_organization_by_slug,
     get_orgs_by_user,
     get_orgs_by_user_admin,
     update_org,
@@ -79,10 +78,9 @@ async def api_get_org(
     return await get_organization(request, org_id, db_session, current_user)
 
 
-@router.get("/{org_id}/users")
-async def api_get_org_users(
+@router.get("/users")
+async def api_get_platform_org_users(
     request: Request,
-    org_id: int,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session: Annotated[Session, Depends(get_db_session)],
     checker: PermissionCheckerDep,
@@ -93,14 +91,19 @@ async def api_get_org_users(
     Get organization users with pagination
     """
     return await get_organization_users(
-        request, org_id, db_session, current_user, checker, page, per_page
+        request,
+        get_platform_org_id(db_session),
+        db_session,
+        current_user,
+        checker,
+        page,
+        per_page,
     )
 
 
-@router.put("/{org_id}/users/{user_id}/role/{role_id}")
-async def api_update_user_role(
+@router.put("/users/{user_id}/role/{role_id}")
+async def api_update_platform_user_role(
     request: Request,
-    org_id: int,
     user_id: int,
     role_id: int,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
@@ -115,14 +118,19 @@ async def api_update_user_role(
     **Required Permission**: `organization:update`
     """
     return await update_user_role(
-        request, org_id, user_id, role_id, db_session, current_user, checker
+        request,
+        get_platform_org_id(db_session),
+        user_id,
+        role_id,
+        db_session,
+        current_user,
+        checker,
     )
 
 
-@router.delete("/{org_id}/users/{user_id}")
-async def api_remove_user_from_org(
+@router.delete("/users/{user_id}")
+async def api_remove_user_from_platform_org(
     request: Request,
-    org_id: int,
     user_id: int,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session: Annotated[Session, Depends(get_db_session)],
@@ -132,23 +140,13 @@ async def api_remove_user_from_org(
     Remove user from org
     """
     return await remove_user_from_org(
-        request, org_id, user_id, db_session, current_user, checker
+        request,
+        get_platform_org_id(db_session),
+        user_id,
+        db_session,
+        current_user,
+        checker,
     )
-
-
-@router.get("/slug/{org_slug}")
-async def api_get_org_by_slug(
-    request: Request,
-    org_slug: str,
-    current_user: Annotated[
-        PublicUser | AnonymousUser, Depends(get_current_user_optional)
-    ],
-    db_session: Annotated[Session, Depends(get_db_session)],
-) -> OrganizationRead:
-    """
-    Get single Org by Slug
-    """
-    return await get_organization_by_slug(request, org_slug, db_session, current_user)
 
 
 @router.put("/{org_id}/logo")

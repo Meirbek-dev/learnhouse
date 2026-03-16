@@ -9,13 +9,12 @@ import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 
 interface CourseHealthTableProps {
-  orgslug: string;
   rows: TeacherCourseRow[];
   storageKey?: string;
   serverPaginated?: boolean;
 }
 
-export default function CourseHealthTable({ orgslug, rows, storageKey, serverPaginated }: CourseHealthTableProps) {
+export default function CourseHealthTable({ rows, storageKey, serverPaginated }: CourseHealthTableProps) {
   const t = useTranslations('TeacherAnalytics');
   const columns: ColumnDef<TeacherCourseRow>[] = [
     {

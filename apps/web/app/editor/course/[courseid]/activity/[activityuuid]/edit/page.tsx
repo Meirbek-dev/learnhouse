@@ -11,7 +11,7 @@ import type { Metadata } from 'next';
 import { auth } from '@/auth';
 
 interface MetadataProps {
-  params: Promise<{ orgslug: string; courseid: string; activityid: string }>;
+  params: Promise<{ courseid: string; activityid: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 

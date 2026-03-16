@@ -1,7 +1,6 @@
 import { getPlatformOrganizationContextInfo } from '@services/organizations/orgs';
 import { getOrgThumbnailMediaDirectory } from '@services/media/media';
 import { PageSuspense } from '@components/Utils/PageSuspense';
-import { PLATFORM_ORG_SLUG } from '@/services/config/config';
 import { getTranslations } from 'next-intl/server';
 import { LandingContent } from '@/app/_shared/withmenu/LandingContent';
 import type { Metadata } from 'next';
@@ -84,7 +83,7 @@ export default async function PlatformHomePage() {
   return (
     <div className="w-full">
       <PageSuspense fallback={<CourseGridSkeleton />}>
-        <LandingContent orgslug={PLATFORM_ORG_SLUG} />
+        <LandingContent />
       </PageSuspense>
     </div>
   );

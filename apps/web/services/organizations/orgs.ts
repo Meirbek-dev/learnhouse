@@ -6,7 +6,7 @@ import {
   errorHandling,
   getResponseMetadata,
 } from '@services/utils/ts/requests';
-import { getAPIUrl, PLATFORM_ORG_SLUG } from '@services/config/config';
+import { getAPIUrl } from '@services/config/config';
 import { CacheProfiles, cacheLife, cacheTag } from '@/lib/cache';
 import { tags } from '@/lib/cacheTags';
 
@@ -44,27 +44,6 @@ export async function deleteOrganizationFromBackend(org_id: number, access_token
   return data;
 }
 
-/**
- * Cached fetch for organization context info by slug
- * Uses `use cache` directive for cacheComponents
- */
-async function fetchOrganizationBySlug(org_slug: string, access_token?: string) {
-  'use cache';
-  cacheTag(tags.organizations);
-  cacheLife(CacheProfiles.organization);
-
-  const headers: HeadersInit = { 'Content-Type': 'application/json' };
-  if (access_token) {
-    headers.Authorization = `Bearer ${access_token}`;
-  }
-
-  const result = await fetch(`${getAPIUrl()}orgs/slug/${org_slug}`, {
-    method: 'GET',
-    headers,
-  });
-  return await errorHandling(result);
-}
-
 async function fetchPlatformOrganization(access_token?: string) {
   'use cache';
   cacheTag(tags.organizations);
@@ -83,10 +62,8 @@ async function fetchPlatformOrganization(access_token?: string) {
 }
 
 export async function getOrganizationContextInfo(org_slug: string, _next?: unknown, access_token?: string) {
-  if (org_slug === PLATFORM_ORG_SLUG) {
-    return fetchPlatformOrganization(access_token);
-  }
-  return fetchOrganizationBySlug(org_slug, access_token);
+  void org_slug;
+  return fetchPlatformOrganization(access_token);
 }
 
 export async function getPlatformOrganizationContextInfo(access_token?: string) {
@@ -119,17 +96,13 @@ export async function getOrganizationContextInfoWithId(org_id: number, _next?: u
 }
 
 export async function getOrganizationContextInfoWithoutCredentials(org_slug: string, _next?: unknown) {
-  if (org_slug === PLATFORM_ORG_SLUG) {
-    return await fetchPlatformOrganization();
-  }
-  return await fetchOrganizationBySlug(org_slug);
+  void org_slug;
+  return await fetchPlatformOrganization();
 }
 
 export async function getOrganizationContextInfoNoAsync(org_slug: string, next: unknown, access_token: string) {
-  if (org_slug === PLATFORM_ORG_SLUG) {
-    return await fetch(`${getAPIUrl()}orgs/platform`, RequestBodyWithAuthHeader('GET', null, next, access_token));
-  }
-  return await fetch(`${getAPIUrl()}orgs/slug/${org_slug}`, RequestBodyWithAuthHeader('GET', null, next, access_token));
+  void org_slug;
+  return await fetch(`${getAPIUrl()}orgs/platform`, RequestBodyWithAuthHeader('GET', null, next, access_token));
 }
 
 export async function updateOrgLanding(org_id: number, landing_object: any, access_token: string) {
@@ -160,8 +133,9 @@ export async function uploadLandingContent(org_uuid: string, content_file: File,
 }
 
 export async function removeUserFromOrg(org_id: number, user_id: number, access_token: string) {
+  void org_id;
   const result = await fetch(
-    `${getAPIUrl()}orgs/${org_id}/users/${user_id}`,
+    `${getAPIUrl()}orgs/users/${user_id}`,
     RequestBodyWithAuthHeader('DELETE', null, null, access_token),
   );
   const metadata = await getResponseMetadata(result);

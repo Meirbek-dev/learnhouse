@@ -52,7 +52,7 @@ const AddUserGroup = (props: AddUserGroupProps) => {
       void (async () => {
         const res = await createUserGroup(values, access_token);
         if (res.status === 200) {
-          mutate(`${getAPIUrl()}usergroups/org/${org.id}`);
+          mutate(`${getAPIUrl()}usergroups`);
           props.setCreateUserGroupModal(false);
           toast.success(t('toastSuccess'), { id: toastID });
         } else {

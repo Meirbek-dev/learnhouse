@@ -3,9 +3,7 @@
 import PaymentsConfigurationPage from '@components/Dashboard/Pages/Payments/PaymentsConfigurationPage';
 import PaymentsCustomersPage from '@components/Dashboard/Pages/Payments/PaymentsCustomersPage';
 import PaymentsProductPage from '@components/Dashboard/Pages/Payments/PaymentsProductPage';
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
-import { useOrg } from '@components/Contexts/OrgContext';
 import { getAbsoluteUrl } from '@services/config/config';
 import { Gem, Settings, Users } from 'lucide-react';
 import { useTranslations } from 'next-intl';
@@ -21,8 +19,6 @@ export interface PaymentsParams {
 export default function PlatformPaymentsPage(props: { params: Promise<{ subpage: string }> }) {
   const params = use(props.params);
   const t = useTranslations('DashPage.Payments');
-  const _session = usePlatformSession();
-  const _org = useOrg();
   const subpage = params.subpage || 'customers';
 
   const getPageTitle = () => {

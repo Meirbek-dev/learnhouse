@@ -1,5 +1,4 @@
 import { getPlatformOrganizationContextInfo } from '@services/organizations/orgs';
-import { PLATFORM_ORG_SLUG } from '@/services/config/config';
 import { getTranslations } from 'next-intl/server';
 import NewCollection from '@/app/_shared/withmenu/collections/new/NewCollection';
 import type { Metadata } from 'next';
@@ -40,5 +39,5 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function PlatformNewCollectionPage() {
-  return <NewCollection params={{ orgslug: PLATFORM_ORG_SLUG }} />;
+  return <NewCollection />;
 }

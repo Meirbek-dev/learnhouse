@@ -55,7 +55,7 @@ const EditUserGroup = (props: EditUserGroupProps) => {
 
         if (res.status === 200) {
           toast.success(t('toastSuccess'));
-          mutate(`${getAPIUrl()}usergroups/org/${org.id}`);
+          mutate(`${getAPIUrl()}usergroups`);
         } else {
           toast.error(t('toastError'));
         }

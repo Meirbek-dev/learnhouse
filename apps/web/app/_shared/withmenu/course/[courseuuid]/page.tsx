@@ -1,13 +1,14 @@
-import { getOrganizationContextInfo } from '@services/organizations/orgs';
+import { getPlatformOrganizationContextInfo } from '@services/organizations/orgs';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { getOptionalSession } from '@/lib/get-optional-session';
 import { getCourseMetadata } from '@services/courses/courses';
+import { PLATFORM_ORG_SLUG } from '@/services/config/config';
 import type { Metadata } from 'next';
 
 import CourseClient from './course';
 
 interface MetadataProps {
-  params: Promise<{ orgslug: string; courseuuid: string }>;
+  params: Promise<{ courseuuid: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
@@ -17,7 +18,7 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
   const access_token = session?.tokens?.access_token;
 
   // Get Org context information
-  const org = await getOrganizationContextInfo(params.orgslug);
+  const org = await getPlatformOrganizationContextInfo();
   const course_meta = await getCourseMetadata(params.courseuuid, undefined, access_token || null);
 
   // SEO
@@ -57,8 +58,7 @@ const CoursePage = async (params: any) => {
   const session = await getOptionalSession();
   const access_token = session?.tokens?.access_token;
 
-  // Await params before using them
-  const { courseuuid, orgslug } = await params.params;
+  const { courseuuid } = await params.params;
 
   // Fetch course metadata once
   const course_meta = await getCourseMetadata(courseuuid, undefined, access_token || null);
@@ -66,7 +66,7 @@ const CoursePage = async (params: any) => {
   return (
     <CourseClient
       courseuuid={courseuuid}
-      orgslug={orgslug}
+      orgslug={PLATFORM_ORG_SLUG}
       course={course_meta}
       access_token={access_token}
     />

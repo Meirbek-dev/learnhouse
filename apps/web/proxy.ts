@@ -66,15 +66,7 @@ export default async function proxy(req: NextRequest) {
   }
 
   if (pathname.startsWith('/sitemap.xml')) {
-    const sitemapUrl = new URL('/api/sitemap', req.url);
-
-    // Create a response object
-    const response = NextResponse.rewrite(sitemapUrl);
-
-    // Set the orgslug in a header
-    response.headers.set('X-Sitemap-Orgslug', PLATFORM_ORG_SLUG);
-
-    return response;
+    return NextResponse.rewrite(new URL('/api/sitemap', req.url));
   }
 
   return NextResponse.next();

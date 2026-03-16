@@ -25,14 +25,13 @@ import { AlertTriangle, BookOpen, Loader2 } from 'lucide-react';
 import { removeCourse } from '@services/courses/activity';
 import { useOrg } from '@components/Contexts/OrgContext';
 import { getTrailSwrKey } from '@services/courses/keys';
-import { getAPIUrl } from '@services/config/config';
+import { getAPIUrl, PLATFORM_ORG_SLUG } from '@services/config/config';
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import useSWR from 'swr';
 
-const Trail = (params: any) => {
-  const { orgslug } = params;
+const Trail = () => {
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const org = useOrg() as any;
@@ -79,7 +78,7 @@ const Trail = (params: any) => {
       let completed = 0;
       await Promise.all(
         trail.runs.map((run: any) =>
-          removeCourse(run.course.course_uuid, orgslug, access_token).then(() => {
+          removeCourse(run.course.course_uuid, org?.slug || PLATFORM_ORG_SLUG, access_token).then(() => {
             completed += 1;
             setQuittingProgress(Math.round((completed / totalCourses) * 100));
           }),
@@ -184,7 +183,7 @@ const Trail = (params: any) => {
                   key={run.course.course_uuid}
                   run={run}
                   course={run.course}
-                  orgslug={orgslug}
+                  orgslug={org?.slug || PLATFORM_ORG_SLUG}
                 />
               ))}
             </div>

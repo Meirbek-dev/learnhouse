@@ -3,7 +3,6 @@ import AnalyticsEmptyState from '@components/Dashboard/Analytics/AnalyticsEmptyS
 import CourseHealthTable from '@components/Dashboard/Analytics/CourseHealthTable';
 import TeacherFilterBar from '@components/Dashboard/Analytics/TeacherFilterBar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { PLATFORM_ORG_SLUG } from '@/services/config/config';
 import { getTranslations } from 'next-intl/server';
 import { Button } from '@/components/ui/button';
 import { auth } from '@/auth';
@@ -48,11 +47,11 @@ async function PlatformAnalyticsCoursesPageInner(props: {
           </CardHeader>
           <CardContent className="text-sm text-slate-600">{t('pages.courseRankingDescription')}</CardContent>
         </Card>
-        <TeacherFilterBar path="/dash/analytics/courses" query={query} courseCount={courseList.total} courseOptions={courseList.course_options} cohortOptions={courseList.cohort_options} orgslug={PLATFORM_ORG_SLUG} />
+        <TeacherFilterBar path="/dash/analytics/courses" query={query} courseCount={courseList.total} courseOptions={courseList.course_options} cohortOptions={courseList.cohort_options} />
         <div className="flex items-center justify-between text-sm text-slate-500">
           <span>{t('table.showingRows', { from: (courseList.page - 1) * courseList.page_size + 1, to: Math.min(courseList.page * courseList.page_size, courseList.total), total: courseList.total })}</span>
         </div>
-        <CourseHealthTable orgslug={PLATFORM_ORG_SLUG} rows={courseList.items} storageKey="courses-page" serverPaginated />
+        <CourseHealthTable rows={courseList.items} storageKey="courses-page" serverPaginated />
         {totalPages > 1 ? (
           <div className="flex items-center justify-end gap-2">
             <Button variant="outline" size="sm" disabled={courseList.page <= 1} render={<Link href={`/dash/analytics/courses?${new URLSearchParams({ ...Object.fromEntries(params.entries()), page: String(Math.max(1, courseList.page - 1)), page_size: String(courseList.page_size) }).toString()}`} />}>

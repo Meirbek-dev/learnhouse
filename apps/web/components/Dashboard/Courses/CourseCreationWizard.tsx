@@ -7,6 +7,8 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { CourseChoiceCard, courseWorkflowSummaryCardClass } from './courseWorkflowUi';
 import { createNewCourse, getCourseMetadata } from '@services/courses/courses';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { useOrg } from '@components/Contexts/OrgContext';
+import { PLATFORM_ORG_SLUG } from '@services/config/config';
 import { useQueryState, useQueryStates, parseAsString } from 'nuqs';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createChapter } from '@services/courses/chapters';
@@ -23,19 +25,20 @@ type TemplateType = 'blank' | 'starter' | 'outline';
 type LaunchDestination = 'overview' | 'curriculum';
 
 interface CourseCreationWizardProps {
-  orgslug: string;
-  orgId: number;
   sourceCourses: { course_uuid: string; name: string; description?: string }[];
 }
 
 const STEPS = ['Basics', 'Template', 'Launch'] as const;
 
-export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: CourseCreationWizardProps) {
+export default function CourseCreationWizard({ sourceCourses }: CourseCreationWizardProps) {
   const t = useTranslations('DashPage.CourseManagement.Wizard');
   const router = useRouter();
   const searchParams = useSearchParams();
   const session = usePlatformSession() as any;
+  const org = useOrg() as { id?: number; slug?: string } | null;
   const accessToken = session?.data?.tokens?.access_token;
+  const orgId = org?.id;
+  const orgSlug = org?.slug || PLATFORM_ORG_SLUG;
 
   const [step, setStep] = useQueryState('step', { defaultValue: '0', shallow: true });
   const currentStep = Math.min(2, Math.max(0, Number(step)));
@@ -162,6 +165,11 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
       return;
     }
 
+    if (!orgId) {
+      toast.error(t('errors.createWorkspace'));
+      return;
+    }
+
     startTransition(() => {
       void (async () => {
         try {
@@ -176,7 +184,7 @@ export default function CourseCreationWizard({ orgslug, orgId, sourceCourses }: 
             },
             null,
             accessToken,
-            { orgSlug: orgslug },
+            { orgSlug: orgSlug },
           );
 
           if (!result.success) {

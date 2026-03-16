@@ -8,6 +8,7 @@ from src.db.usergroups import UserGroup, UserGroupCreate, UserGroupRead, UserGro
 from src.db.users import PublicUser, UserRead
 from src.security.auth import get_current_user
 from src.security.rbac import PermissionCheckerDep, PermissionDenied
+from src.services.platform import get_platform_org_id
 from src.services.users.usergroups import (
     add_resources_to_usergroup,
     add_users_to_usergroup,
@@ -74,18 +75,22 @@ async def api_get_users_linked_to_usergroup(
     )
 
 
-@router.get("/org/{org_id}", tags=["usergroups"])
+@router.get("", tags=["usergroups"])
 async def api_get_usergroups(
     *,
     request: Request,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
-    org_id: int,
 ) -> list[UserGroupRead]:
     """
     Get UserGroups by Org
     """
-    return await read_usergroups_by_org_id(request, db_session, current_user, org_id)
+    return await read_usergroups_by_org_id(
+        request,
+        db_session,
+        current_user,
+        get_platform_org_id(db_session),
+    )
 
 
 @router.get("/resource/{resource_uuid}", tags=["usergroups"])

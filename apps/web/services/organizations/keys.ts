@@ -2,7 +2,7 @@ import { getAPIUrl } from '@services/config/config';
 
 export function getOrgUsersSwrKey(orgId: number | null | undefined) {
   if (!orgId) return '';
-  return `${getAPIUrl()}orgs/${orgId}/users`;
+  return `${getAPIUrl()}orgs/users`;
 }
 
 export function getOrgInvitesSwrKey(orgId: number | null | undefined) {
@@ -12,7 +12,7 @@ export function getOrgInvitesSwrKey(orgId: number | null | undefined) {
 
 export function getUsergroupsSwrKey(orgId: number | null | undefined) {
   if (!orgId) return '';
-  return `${getAPIUrl()}usergroups/org/${orgId}`;
+  return `${getAPIUrl()}usergroups`;
 }
 
 export function getUsergroupUsersSwrKey(usergroupId: number | null | undefined) {

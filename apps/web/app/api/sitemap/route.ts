@@ -1,18 +1,12 @@
-import { getOrganizationContextInfo } from '@services/organizations/orgs';
+import { getPlatformOrganizationContextInfo } from '@services/organizations/orgs';
 import { getOrgCollections } from '@services/courses/collections';
 import { getOrgCourses } from '@services/courses/courses';
-import { getAbsoluteUrl } from '@services/config/config';
+import { getAbsoluteUrl, PLATFORM_ORG_SLUG } from '@services/config/config';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
-  const orgSlug = request.headers.get('X-Sitemap-Orgslug');
-
-  if (!orgSlug) {
-    return NextResponse.json({ error: 'Missing X-Sitemap-Orgslug header' }, { status: 400 });
-  }
-
-  const orgInfo = await getOrganizationContextInfo(orgSlug, null);
+  const orgInfo = await getPlatformOrganizationContextInfo();
 
   // Fetch all courses with pagination (20 per page)
   const COURSES_PER_PAGE = 20;
@@ -21,18 +15,13 @@ export async function GET(request: NextRequest) {
   let hasMore = true;
 
   while (hasMore) {
-    const { courses: pageCourses, total } = await getOrgCourses(orgSlug, null, null, page, COURSES_PER_PAGE);
+    const { courses: pageCourses, total } = await getOrgCourses(PLATFORM_ORG_SLUG, null, null, page, COURSES_PER_PAGE);
     allCourses.push(...pageCourses);
     hasMore = page * COURSES_PER_PAGE < total;
     page += 1;
   }
 
   const collections = await getOrgCollections(orgInfo.id);
-
-  const host = request.headers.get('host');
-  if (!host) {
-    return NextResponse.json({ error: 'Missing host header' }, { status: 400 });
-  }
 
   const baseUrl = getAbsoluteUrl('/');
 
