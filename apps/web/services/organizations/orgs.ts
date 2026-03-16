@@ -6,8 +6,8 @@ import {
   errorHandling,
   getResponseMetadata,
 } from '@services/utils/ts/requests';
+import { getAPIUrl, PLATFORM_ORG_SLUG } from '@services/config/config';
 import { CacheProfiles, cacheLife, cacheTag } from '@/lib/cache';
-import { getAPIUrl } from '@services/config/config';
 import { tags } from '@/lib/cacheTags';
 
 /*
@@ -65,8 +65,12 @@ async function fetchOrganizationBySlug(org_slug: string, access_token?: string) 
   return await errorHandling(result);
 }
 
-export async function getOrganizationContextInfo(org_slug: any, _next?: any, access_token?: string) {
+export async function getOrganizationContextInfo(org_slug: string, _next?: unknown, access_token?: string) {
   return fetchOrganizationBySlug(org_slug, access_token);
+}
+
+export async function getPlatformOrganizationContextInfo(access_token?: string) {
+  return fetchOrganizationBySlug(PLATFORM_ORG_SLUG, access_token);
 }
 
 /**
@@ -87,18 +91,18 @@ async function fetchOrganizationById(org_id: number, access_token: string) {
   return await errorHandling(result);
 }
 
-export async function getOrganizationContextInfoWithId(org_id: number, _next?: any, access_token?: string) {
+export async function getOrganizationContextInfoWithId(org_id: number, _next?: unknown, access_token?: string) {
   if (!access_token) {
     throw new Error('Access token required');
   }
   return await fetchOrganizationById(org_id, access_token);
 }
 
-export async function getOrganizationContextInfoWithoutCredentials(org_slug: any, _next?: any) {
+export async function getOrganizationContextInfoWithoutCredentials(org_slug: string, _next?: unknown) {
   return await fetchOrganizationBySlug(org_slug);
 }
 
-export async function getOrganizationContextInfoNoAsync(org_slug: any, next: any, access_token: string) {
+export async function getOrganizationContextInfoNoAsync(org_slug: string, next: unknown, access_token: string) {
   return await fetch(`${getAPIUrl()}orgs/slug/${org_slug}`, RequestBodyWithAuthHeader('GET', null, next, access_token));
 }
 

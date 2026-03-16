@@ -10,7 +10,6 @@ import type { ReactNode } from 'react';
 interface ActivityChapterDropdownProps {
   course: any;
   currentActivityId: string;
-  orgslug: string;
   trailData?: any;
 }
 
@@ -151,7 +150,7 @@ export default function ActivityChapterDropdown(props: ActivityChapterDropdownPr
                     return (
                       <Link
                         key={activity.id}
-                        href={`${getAbsoluteUrl(props.orgslug, '')}/course/${cleanCourseUuid}/activity/${cleanActivityUuid}`}
+                        href={`${getAbsoluteUrl('')}/course/${cleanCourseUuid}/activity/${cleanActivityUuid}`}
                         prefetch={false}
                         onClick={() => {
                           setIsOpen(false);

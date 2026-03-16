@@ -263,7 +263,7 @@ export const SearchBar: FC<SearchBarProps> = ({ className = '', isMobile = false
           <Link
             prefetch={false}
             key={`${term}-${type}`}
-            href={getAbsoluteUrl(orgslug, `/search?q=${encodeURIComponent(term)}`)}
+            href={getAbsoluteUrl(`/search?q=${encodeURIComponent(term)}`)}
             className="group flex items-center rounded-lg px-3 py-2 transition-colors hover:bg-black/2"
           >
             <div className="flex flex-1 items-center gap-2">
@@ -304,7 +304,7 @@ export const SearchBar: FC<SearchBarProps> = ({ className = '', isMobile = false
               <Link
                 prefetch={false}
                 key={course.course_uuid}
-                href={getAbsoluteUrl(orgslug, `/course/${removeCoursePrefix(course.course_uuid)}`)}
+                href={getAbsoluteUrl(`/course/${removeCoursePrefix(course.course_uuid)}`)}
                 className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-black/2"
               >
                 <div className="relative">
@@ -354,7 +354,7 @@ export const SearchBar: FC<SearchBarProps> = ({ className = '', isMobile = false
               <Link
                 prefetch={false}
                 key={collection.collection_uuid}
-                href={getAbsoluteUrl(orgslug, `/collection/${collection.collection_uuid}`)}
+                href={getAbsoluteUrl(`/collection/${collection.collection_uuid}`)}
                 className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-black/2"
               >
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-black/5">
@@ -388,7 +388,7 @@ export const SearchBar: FC<SearchBarProps> = ({ className = '', isMobile = false
               <Link
                 prefetch={false}
                 key={user.user_uuid}
-                href={getAbsoluteUrl(orgslug, `/user/${user.username}`)}
+                href={getAbsoluteUrl(`/user/${user.username}`)}
                 className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-black/2"
               >
                 <UserAvatar
@@ -425,7 +425,7 @@ export const SearchBar: FC<SearchBarProps> = ({ className = '', isMobile = false
   // handler for Enter key press
   function handleKeyDown(e: KeyboardEvent<HTMLInputElement>) {
     if (e.key === 'Enter' && searchQuery.trim().length > 0) {
-      globalThis.location.href = getAbsoluteUrl(orgslug, `/search?q=${encodeURIComponent(searchQuery)}`);
+      globalThis.location.href = getAbsoluteUrl(`/search?q=${encodeURIComponent(searchQuery)}`);
     }
   }
 
@@ -474,7 +474,7 @@ export const SearchBar: FC<SearchBarProps> = ({ className = '', isMobile = false
                     searchQuery.trim()) && (
                     <Link
                       prefetch={false}
-                      href={getAbsoluteUrl(orgslug, `/search?q=${encodeURIComponent(searchQuery)}`)}
+                      href={getAbsoluteUrl(`/search?q=${encodeURIComponent(searchQuery)}`)}
                       className="flex items-center justify-between px-4 py-2.5 text-xs text-black/50 transition-colors hover:bg-black/2 hover:text-black/70"
                     >
                       <span>{t('viewAllResults')}</span>

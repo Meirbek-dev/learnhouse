@@ -210,10 +210,7 @@ const CourseClient = (props: any) => {
       ) : (
         <>
           <GeneralWrapper>
-            <CourseBreadcrumbs
-              course={course}
-              orgslug={orgslug}
-            />
+            <CourseBreadcrumbs course={course} />
             <div className="flex flex-col items-start justify-between pt-3 pb-2 md:flex-row md:items-center">
               <div>
                 <h1 className="text-3xl font-bold md:text-3xl">{course.name}</h1>
@@ -370,7 +367,6 @@ const CourseClient = (props: any) => {
                 })() && (
                   <ActivityIndicators
                     course_uuid={props.course.course_uuid}
-                    orgslug={orgslug}
                     course={course}
                     trailData={trailData}
                   />
@@ -505,7 +501,7 @@ const CourseClient = (props: any) => {
                             return (
                               <Link
                                 key={activity.activity_uuid}
-                                href={`${getAbsoluteUrl(orgslug, '')}/course/${courseuuid}/activity/${activity.activity_uuid.replace('activity_', '')}`}
+                                href={`${getAbsoluteUrl('')}/course/${courseuuid}/activity/${activity.activity_uuid.replace('activity_', '')}`}
                                 rel="noopener noreferrer"
                                 prefetch={false}
                                 className="activity-container group block px-4 py-4 transition-all duration-200 hover:bg-gray-50"

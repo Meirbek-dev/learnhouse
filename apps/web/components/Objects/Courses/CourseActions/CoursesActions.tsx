@@ -143,7 +143,7 @@ const CoursesActions = ({ courseuuid, orgslug, course, trailData }: CourseAction
 
   const handleCourseAction = async () => {
     if (!session.data?.user) {
-      router.push(getUriWithoutOrg(`/signup?orgslug=${orgslug}`));
+      router.push(getUriWithoutOrg('/signup'));
       return;
     }
 
@@ -175,7 +175,7 @@ const CoursesActions = ({ courseuuid, orgslug, course, trailData }: CourseAction
 
       if (targetActivity) {
         router.push(
-          `${getAbsoluteUrl(orgslug, '')}/course/${courseuuid}/activity/${targetActivity.activity_uuid.replace('activity_', '')}`,
+          `${getAbsoluteUrl('')}/course/${courseuuid}/activity/${targetActivity.activity_uuid.replace('activity_', '')}`,
         );
       }
       return;
@@ -196,7 +196,7 @@ const CoursesActions = ({ courseuuid, orgslug, course, trailData }: CourseAction
       if (firstActivity) {
         // Redirect to the first activity
         router.push(
-          `${getAbsoluteUrl(orgslug, '')}/course/${courseuuid}/activity/${firstActivity.activity_uuid.replace('activity_', '')}`,
+          `${getAbsoluteUrl('')}/course/${courseuuid}/activity/${firstActivity.activity_uuid.replace('activity_', '')}`,
         );
       } else {
         mutate([getTrailSwrKey(org?.id), session.data?.tokens?.access_token]);
@@ -214,7 +214,7 @@ const CoursesActions = ({ courseuuid, orgslug, course, trailData }: CourseAction
 
   const handleApplyToContribute = async () => {
     if (!session.data?.user) {
-      router.push(getUriWithoutOrg(`/signup?orgslug=${orgslug}`));
+      router.push(getUriWithoutOrg('/signup'));
       return;
     }
 
@@ -273,7 +273,7 @@ const CoursesActions = ({ courseuuid, orgslug, course, trailData }: CourseAction
       return (
         <Button
           variant="outline"
-          onClick={() => router.push(getUriWithoutOrg(`/signup?orgslug=${orgslug}`))}
+          onClick={() => router.push(getUriWithoutOrg('/signup'))}
           aria-label={t('aria.signupToApply')}
           className="w-full gap-2"
         >

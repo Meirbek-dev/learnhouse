@@ -192,7 +192,7 @@ const Trail = (params: any) => {
         </div>
 
         {/* Certificates Section */}
-        <UserCertificates orgslug={orgslug} />
+        <UserCertificates />
 
         {/* Gamification Section - Recent Activity and Leaderboard */}
         <div className="grid gap-6 lg:grid-cols-2">

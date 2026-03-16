@@ -58,7 +58,7 @@ const UsersSettingsPage = (props: { params: Promise<SettingsParams> }) => {
 
   useEffect(() => {
     if (params.subpage !== 'roles') return;
-    router.replace(`${getAbsoluteUrl(params.orgslug, '')}/dash/admin/roles`);
+    router.replace(`${getAbsoluteUrl('')}/dash/admin/roles`);
   }, [params.orgslug, params.subpage, router]);
 
   const tabs = useMemo(() => {
@@ -95,7 +95,7 @@ const UsersSettingsPage = (props: { params: Promise<SettingsParams> }) => {
           <SettingsTabs
             value={params.subpage}
             tabs={tabs}
-            getHref={(tab) => `${getAbsoluteUrl(params.orgslug, '')}/dash/users/settings/${tab.id}`}
+            getHref={(tab) => `${getAbsoluteUrl('')}/dash/users/settings/${tab.id}`}
             translationNamespace="DashPage.UserSettings"
           />
         </SettingsHeader>

@@ -53,10 +53,9 @@ export const getSiteUrl = () => getPublicConfig().siteUrl;
 
 export const getBackendUrl = () => getSiteUrl();
 
-export const getAbsoluteUrl = (pathOrOrgslug: string, path?: string) => {
-  const resolvedPath = path === undefined ? pathOrOrgslug : path;
-  return toAbsoluteUrl(resolvedPath, getSiteUrl());
-};
+export const PLATFORM_ORG_SLUG = 'openu';
+
+export const getAbsoluteUrl = (path: string) => toAbsoluteUrl(path, getSiteUrl());
 
 export const getTopLevelCookieDomain = () => {
   const override = process.env.COOKIE_DOMAIN?.trim();
@@ -67,25 +66,6 @@ export const getTopLevelCookieDomain = () => {
   return isUnsupportedCookieDomain(hostname) ? undefined : hostname;
 };
 
-export const getUriWithOrg = (_orgslug: string, path: string) => getAbsoluteUrl(path);
-
 export const getUriWithoutOrg = (path: string) => getAbsoluteUrl(path);
 
-export const getOrgFromUri = (): string | undefined => {
-  if (typeof globalThis.window !== 'undefined') {
-    const { hostname } = globalThis.location;
-    const { siteHostname } = getPublicConfig();
-
-    if (!hostname.endsWith(`.${siteHostname}`)) {
-      return undefined;
-    }
-
-    return hostname.replace(`.${siteHostname}`, '');
-  }
-
-  // Explicitly return undefined when running on the server or if window
-  // isn't available.
-  return undefined;
-};
-
-export const defaultOrg = 'openu';
+export const getOrgFromUri = (): string => PLATFORM_ORG_SLUG;

@@ -441,7 +441,7 @@ const ActivityElement = ({ orgslug, activity, activityIndex, course_uuid }: Acti
                 <DropdownMenuItem
                   onSelect={() => {
                     window.open(
-                      `${getAbsoluteUrl(orgslug, '')}/course/${course_uuid.replace('course_', '')}/activity/${activity.activity_uuid.replace('activity_', '')}`,
+                      `${getAbsoluteUrl('')}/course/${course_uuid.replace('course_', '')}/activity/${activity.activity_uuid.replace('activity_', '')}`,
                       '_blank',
                       'noopener,noreferrer',
                     );
@@ -550,7 +550,7 @@ const ActivityEditButton = ({
 
   // Dynamic page edit button
   if (activity.activity_type === 'TYPE_DYNAMIC') {
-    const editUrl = `${getAbsoluteUrl(orgslug, '')}/course/${course?.courseStructure?.course_uuid?.replace(
+    const editUrl = `${getAbsoluteUrl('')}/course/${course?.courseStructure?.course_uuid?.replace(
       'course_',
       '',
     )}/activity/${activity.activity_uuid.replace('activity_', '')}/edit`;
@@ -602,7 +602,7 @@ const ActivityEditButton = ({
       );
     }
 
-    const editUrl = `${getAbsoluteUrl(org?.slug ?? '', '')}/dash/assignments/${assignmentUUID}`;
+    const editUrl = `${getAbsoluteUrl('')}/dash/assignments/${assignmentUUID}`;
 
     return (
       <Button
@@ -625,7 +625,7 @@ const ActivityEditButton = ({
 
   // Code challenge edit button
   if (activity.activity_type === 'TYPE_CODE_CHALLENGE') {
-    const editUrl = `${getAbsoluteUrl(orgslug, '')}/course/${course?.courseStructure?.course_uuid?.replace(
+    const editUrl = `${getAbsoluteUrl('')}/course/${course?.courseStructure?.course_uuid?.replace(
       'course_',
       '',
     )}/activity/${activity.activity_uuid.replace('activity_', '')}/editor`;

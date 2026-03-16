@@ -70,7 +70,7 @@ const CollectionPage = async (params: any) => {
           >
             <Link
               prefetch={false}
-              href={getAbsoluteUrl(orgslug, `/course/${removeCoursePrefix(course.course_uuid)}`)}
+              href={getAbsoluteUrl(`/course/${removeCoursePrefix(course.course_uuid)}`)}
             >
               <div
                 className="relative inset-0 h-[131px] w-[249px] rounded-lg bg-cover shadow-xl ring-1 ring-black/10 ring-inset"

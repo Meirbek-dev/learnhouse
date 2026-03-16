@@ -78,7 +78,7 @@ const TrailCourseElement = ({ course, run, orgslug }: TrailCourseElementProps) =
     >
       <Link
         prefetch={false}
-        href={getAbsoluteUrl(orgslug, `/course/${courseid}`)}
+        href={getAbsoluteUrl(`/course/${courseid}`)}
       >
         <div
           className="course_tumbnail relative inset-0 h-[50px] w-[72px] rounded-lg bg-cover bg-center ring-1 ring-black/10 ring-inset"
@@ -137,7 +137,6 @@ const TrailCourseElement = ({ course, run, orgslug }: TrailCourseElementProps) =
                 <Link
                   prefetch={false}
                   href={getAbsoluteUrl(
-                    orgslug,
                     `/certificates/${courseCertificate.certificate_user.user_certification_uuid}/verify`,
                   )}
                   target="_blank"

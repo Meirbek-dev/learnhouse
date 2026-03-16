@@ -23,10 +23,6 @@ import { useForm } from 'react-hook-form';
 import { signIn } from 'next-auth/react';
 import * as v from 'valibot';
 
-interface SignUpClientProps {
-  org: any;
-}
-
 const buildFormSchema = (t: (key: string) => string) =>
   v.pipe(
     v.object({
@@ -48,7 +44,7 @@ const buildFormSchema = (t: (key: string) => string) =>
 
 type SignUpFormData = v.InferOutput<ReturnType<typeof buildFormSchema>>;
 
-const SignUpClient = (props: SignUpClientProps) => {
+const SignUpClient = () => {
   const session = usePlatformSession();
   const router = useRouter();
   const org = useOrg();
@@ -68,10 +64,10 @@ const SignUpClient = (props: SignUpClientProps) => {
   });
 
   useEffect(() => {
-    if (session?.status === 'authenticated' && org?.slug) {
-      router.push(getAbsoluteUrl(org.slug, '/'));
+    if (session?.status === 'authenticated') {
+      router.push(getAbsoluteUrl('/'));
     }
-  }, [session?.status, org?.slug, router]);
+  }, [session?.status, router]);
 
   const onSubmit = (data: SignUpFormData) => {
     setError('');
@@ -82,8 +78,6 @@ const SignUpClient = (props: SignUpClientProps) => {
           username,
           email: data.email,
           password: data.password,
-          org_slug: props.org?.slug || '',
-          org_id: props.org?.id || 0,
           first_name: data.firstName,
           last_name: data.lastName,
         });
@@ -97,7 +91,7 @@ const SignUpClient = (props: SignUpClientProps) => {
           if (signInRes?.ok) {
             globalThis.location.href = '/redirect_from_auth';
           } else {
-            router.push(getUriWithoutOrg(`/login?orgslug=${props.org?.slug || ''}`));
+            router.push(getUriWithoutOrg('/login'));
           }
         } else {
           const body = await res.json().catch(() => ({}));
@@ -114,11 +108,8 @@ const SignUpClient = (props: SignUpClientProps) => {
 
   const handleGoogleSignIn = () => {
     startTransition(() => {
-      if (props.org?.id) {
-        document.cookie = `oauth_org_id=${props.org.id}; path=/; max-age=600; samesite=lax`;
-      }
       signIn('google', {
-        callbackUrl: `/redirect_from_auth?org_id=${props.org?.id || ''}&org_slug=${props.org?.slug || ''}`,
+        callbackUrl: '/redirect_from_auth',
       });
     });
   };
@@ -136,7 +127,7 @@ const SignUpClient = (props: SignUpClientProps) => {
     <AuthCard className="max-w-md">
       <Link
         prefetch={false}
-        href={getAbsoluteUrl(props.org.slug, '/')}
+        href={getAbsoluteUrl('/')}
       >
         <AuthLogo />
       </Link>
@@ -260,10 +251,7 @@ const SignUpClient = (props: SignUpClientProps) => {
         {t('alreadyHaveAccount')}
         <Link
           prefetch={false}
-          href={{
-            pathname: getUriWithoutOrg('/login'),
-            query: props.org.slug ? { orgslug: props.org.slug } : undefined,
-          }}
+          href={getUriWithoutOrg('/login')}
           className="text-muted-foreground ml-1 underline"
         >
           {t('signIn')}

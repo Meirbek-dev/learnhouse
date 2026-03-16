@@ -116,7 +116,7 @@ export const AssignmentRow = ({ assignment, org }: any) => {
         <Link
           prefetch={false}
           href={{
-            pathname: getAbsoluteUrl(org.slug, `/dash/assignments/${assignmentId}`),
+            pathname: getAbsoluteUrl(`/dash/assignments/${assignmentId}`),
             query: { subpage: 'editor' },
           }}
           className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'inline-flex items-center justify-center')}
@@ -128,7 +128,7 @@ export const AssignmentRow = ({ assignment, org }: any) => {
         <Link
           prefetch={false}
           href={{
-            pathname: getAbsoluteUrl(org.slug, `/dash/assignments/${assignmentId}`),
+            pathname: getAbsoluteUrl(`/dash/assignments/${assignmentId}`),
             query: { subpage: 'submissions' },
           }}
           className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), 'inline-flex items-center justify-center')}
@@ -150,7 +150,7 @@ export const CourseThumbnail = ({ course, org, courseId }: any) => {
   return (
     <Link
       prefetch={false}
-      href={getAbsoluteUrl(org.slug, `/course/${courseId}`)}
+      href={getAbsoluteUrl(`/course/${courseId}`)}
       className="group relative shrink-0"
       aria-label={t('viewCourseAria', { courseName: course.name })}
     >

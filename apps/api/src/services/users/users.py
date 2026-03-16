@@ -8,6 +8,7 @@ from pydantic import ValidationError
 from sqlmodel import Session, select
 from ulid import ULID
 
+from src.core.platform import PLATFORM_ORG_SLUG
 from src.db.organizations import (
     Organization,
     OrganizationRead,
@@ -99,9 +100,9 @@ async def create_user_without_org(
     # Create and validate user
     user = await _create_and_validate_user(db_session, user_object)
 
-    # Automatically join the default 'openu' organization
-    default_org = await _get_default_organization(db_session)
-    await _link_user_to_organization(db_session, user.id, default_org.id)
+    # Automatically join the platform organization in single-org mode.
+    platform_org = await _get_platform_organization(db_session)
+    await _link_user_to_organization(db_session, user.id, platform_org.id)
     db_session.commit()
 
     user_read = UserRead.model_validate(user)
@@ -622,24 +623,27 @@ async def _get_user_by_field(
     return user
 
 
-async def _get_default_organization(db_session: Session) -> Organization:
-    """Get the default 'openu' organization."""
-    statement = select(Organization).where(Organization.slug == "openu")
+async def _get_platform_organization(db_session: Session) -> Organization:
+    """Get the platform organization used by single-org deployments."""
+    statement = select(Organization).where(Organization.slug == PLATFORM_ORG_SLUG)
     org = db_session.exec(statement).first()
 
     if not org:
         raise HTTPException(
             status_code=500,
-            detail="Default organization 'openu' not found. Please contact system administrator.",
+            detail=(
+                f"Platform organization '{PLATFORM_ORG_SLUG}' not found. "
+                "Please contact system administrator."
+            ),
         )
 
     return org
 
 
-async def ensure_user_in_default_org(db_session: Session, user_id: int) -> None:
-    """Ensure a user is a member of the default 'openu' organization (idempotent)."""
-    default_org = await _get_default_organization(db_session)
-    await _link_user_to_organization(db_session, user_id, default_org.id)
+async def ensure_user_in_platform_org(db_session: Session, user_id: int) -> None:
+    """Ensure a user is a member of the platform organization (idempotent)."""
+    platform_org = await _get_platform_organization(db_session)
+    await _link_user_to_organization(db_session, user_id, platform_org.id)
     db_session.commit()
 
 

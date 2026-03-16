@@ -15,10 +15,9 @@ import { Book } from 'lucide-react';
 
 interface CourseBreadcrumbsProps {
   course: any;
-  orgslug: string;
 }
 
-export default function CourseBreadcrumbs({ course, orgslug }: CourseBreadcrumbsProps) {
+export default function CourseBreadcrumbs({ course }: CourseBreadcrumbsProps) {
   const t = useTranslations('CourseBreadcrumbs');
   return (
     <div className="pt-2">
@@ -26,7 +25,7 @@ export default function CourseBreadcrumbs({ course, orgslug }: CourseBreadcrumbs
         <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink
-              render={<Link href={`${getAbsoluteUrl(orgslug, '')}/courses`} />}
+              render={<Link href={`${getAbsoluteUrl('')}/courses`} />}
               className="flex items-center space-x-2"
             >
               <Book

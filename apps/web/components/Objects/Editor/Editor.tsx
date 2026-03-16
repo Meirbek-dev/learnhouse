@@ -212,7 +212,7 @@ const Editor = (props: EditorProps) => {
                             props.course.course_uuid,
                             props.course.thumbnail_image,
                           )
-                        : getAbsoluteUrl(props.org?.slug, '/empty_thumbnail.webp')
+                        : getAbsoluteUrl('/empty_thumbnail.webp')
                     }`}
                     alt={`${props.course.name} Thumbnail`}
                   />

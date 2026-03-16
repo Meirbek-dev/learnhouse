@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Missing host header' }, { status: 400 });
   }
 
-  const baseUrl = getAbsoluteUrl(orgSlug, '/');
+  const baseUrl = getAbsoluteUrl('/');
 
   const sitemapUrls: SitemapUrl[] = [
     { loc: baseUrl, priority: 1, changefreq: 'daily' },

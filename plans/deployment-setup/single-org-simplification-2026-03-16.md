@@ -1,5 +1,16 @@
 # Single-Org Simplification Plan
 
+## Status
+
+Implemented on 2026-03-16.
+
+Final decisions applied:
+
+- keep `/orgs/[orgslug]` as an internal Next.js implementation detail behind rewrites
+- remove dead backend hosting flags and auth org callback parameters
+- centralize the platform org slug in backend and frontend shared constants
+- keep public URLs path-based, without orgslug query parameters or org-aware URL helpers
+
 ## Goal
 
 Simplify the platform for the actual deployment model:
@@ -199,4 +210,4 @@ Removing those pieces now would break page resolution, auth redirects, or organi
 
 `PLATFORM_USE_DEFAULT_ORG` and `PLATFORM_SELF_HOSTED` were dead configuration and safe to remove now.
 
-The rest of the single-org simplification is real, but it is not just "delete multitenancy code". The current app still depends on orgslug-shaped routing and default-org membership logic, so the next cleanup should be done in phases with constants-first refactors before any route flattening.
+The single-org refactor is now applied. The app still uses `/orgs/[orgslug]` internally, but public navigation, auth redirects, platform-org selection, and backend membership logic no longer rely on multi-tenant env flags, auth org parameters, or public orgslug-based URL generation.

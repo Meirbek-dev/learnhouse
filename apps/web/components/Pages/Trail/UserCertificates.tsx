@@ -9,11 +9,7 @@ import Link from '@components/ui/AppLink';
 import type React from 'react';
 import useSWR from 'swr';
 
-interface UserCertificatesProps {
-  orgslug: string;
-}
-
-const UserCertificates: React.FC<UserCertificatesProps> = ({ orgslug }) => {
+const UserCertificates: React.FC = () => {
   const session = usePlatformSession();
   const access_token = session?.data?.tokens?.access_token;
   const format = useFormatter();
@@ -90,7 +86,6 @@ const UserCertificates: React.FC<UserCertificatesProps> = ({ orgslug }) => {
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
         {certificatesData.map((certificate: any) => {
           const verificationLink = getAbsoluteUrl(
-            orgslug,
             `/certificates/${certificate.certificate_user.user_certification_uuid}/verify`,
           );
           const awardedDate = format.dateTime(new Date(certificate.certificate_user.created_at), {

@@ -89,7 +89,6 @@ async def send_reset_password_code(
     isEmailSent = send_password_reset_email(
         generated_reset_code=generated_reset_code,
         user=user,
-        organization=org,
         email=user.email,
     )
 

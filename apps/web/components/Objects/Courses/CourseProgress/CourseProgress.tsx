@@ -260,7 +260,7 @@ const CourseProgress: FC<CourseProgressProps> = ({ course, orgslug, isOpen, onCl
                       return (
                         <AppLink
                           key={activity.activity_uuid}
-                          href={`${getAbsoluteUrl(orgslug, '')}/course/${courseId}/activity/${activityId}`}
+                          href={`${getAbsoluteUrl('')}/course/${courseId}/activity/${activityId}`}
                           onClick={onClose}
                         >
                           <div

@@ -96,7 +96,7 @@ const ResetPasswordClient = () => {
             <span className="text-sm font-semibold">{t('success')}</span>
           </div>
           <Link
-            href={getUriWithoutOrg(`/login?orgslug=${org?.slug}`)}
+            href={getUriWithoutOrg('/login')}
             className="block text-center text-sm underline"
           >
             {t('loginAgain')}

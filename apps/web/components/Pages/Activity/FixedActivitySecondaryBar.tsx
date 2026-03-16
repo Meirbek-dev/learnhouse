@@ -12,7 +12,6 @@ import type { ReactNode } from 'react';
 interface FixedActivitySecondaryBarProps {
   course: any;
   currentActivityId: string;
-  orgslug: string;
   activity: any;
 }
 
@@ -162,7 +161,7 @@ export default function FixedActivitySecondaryBar(props: FixedActivitySecondaryB
     if (!activity) return;
 
     const cleanCourseUuid = props.course.course_uuid?.replace('course_', '');
-    router.push(`${getAbsoluteUrl(props.orgslug, '')}/course/${cleanCourseUuid}/activity/${activity.cleanUuid}`);
+    router.push(`${getAbsoluteUrl('')}/course/${cleanCourseUuid}/activity/${activity.cleanUuid}`);
   };
 
   useEffect(() => {

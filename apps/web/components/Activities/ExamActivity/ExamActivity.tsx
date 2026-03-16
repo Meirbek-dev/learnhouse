@@ -188,7 +188,7 @@ export default function ExamActivity({ activity, course, orgslug }: ExamActivity
       }
 
       const cleanCourseUuid = course.course_uuid?.replace('course_', '');
-      router.push(`${getAbsoluteUrl(orgslug, '')}/course/${cleanCourseUuid}/activity/${nextActivity.cleanUuid}`);
+      router.push(`${getAbsoluteUrl('')}/course/${cleanCourseUuid}/activity/${nextActivity.cleanUuid}`);
     } catch (error) {
       console.error('Failed to navigate to next activity', error);
       toast.error(t('navigationError') || 'Navigation failed');

@@ -80,7 +80,7 @@ const SettingsPage = ({ params }: { params: Promise<SettingsParams> }) => {
         <SettingsTabs
           value={subpage}
           tabs={tabs}
-          getHref={(tab) => `${getAbsoluteUrl(orgslug, '')}/dash/user-account/settings/${tab.id}`}
+          getHref={(tab) => `${getAbsoluteUrl('')}/dash/user-account/settings/${tab.id}`}
           translationNamespace="DashPage.UserAccountSettings"
         />
       </SettingsHeader>

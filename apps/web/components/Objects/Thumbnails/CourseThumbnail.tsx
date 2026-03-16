@@ -560,8 +560,8 @@ const CourseThumbnail: FC<CourseThumbnailProps> = ({
   }, [course.thumbnail_image, course.course_uuid, org?.org_uuid]);
 
   const courseUrl = useMemo(
-    () => customLink || getAbsoluteUrl(orgslug, `/course/${cleanCourseUuid}`),
-    [customLink, orgslug, cleanCourseUuid],
+    () => customLink || getAbsoluteUrl(`/course/${cleanCourseUuid}`),
+    [customLink, cleanCourseUuid],
   );
 
   const isEnrolled = Boolean(courseRun);

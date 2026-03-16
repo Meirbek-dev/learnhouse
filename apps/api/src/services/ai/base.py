@@ -21,6 +21,8 @@ from langgraph.graph.state import CompiledStateGraph
 from langgraph.prebuilt import create_react_agent
 from ulid import ULID
 
+from src.core.platform import PLATFORM_CHAT_KEY_PREFIX
+
 if TYPE_CHECKING:
     from langchain_chroma import Chroma
 
@@ -606,7 +608,7 @@ def get_chat_session_history(
                     url=redis_conn_string,
                     ttl=message_ttl,
                     session_id=session_id,
-                    key_prefix="openu_chat:",
+                    key_prefix=PLATFORM_CHAT_KEY_PREFIX,
                 )
 
                 # Fast-path: fetch only the tail of the Redis list instead of

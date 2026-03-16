@@ -16,10 +16,9 @@ import { Book } from 'lucide-react';
 interface ActivityBreadcrumbsProps {
   course: any;
   activity: any;
-  orgslug: string;
 }
 
-export default function ActivityBreadcrumbs({ course, activity, orgslug }: ActivityBreadcrumbsProps) {
+export default function ActivityBreadcrumbs({ course, activity }: ActivityBreadcrumbsProps) {
   const cleanCourseUuid = course.course_uuid?.replace('course_', '');
   const t = useTranslations('General');
 
@@ -29,7 +28,7 @@ export default function ActivityBreadcrumbs({ course, activity, orgslug }: Activ
         <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink
-              render={<Link href={`${getAbsoluteUrl(orgslug, '')}/courses`} />}
+              render={<Link href={`${getAbsoluteUrl('')}/courses`} />}
               className="flex items-center space-x-2"
             >
               <Book
@@ -41,7 +40,7 @@ export default function ActivityBreadcrumbs({ course, activity, orgslug }: Activ
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbLink render={<Link href={`${getAbsoluteUrl(orgslug, '')}/course/${cleanCourseUuid}`} />}>
+            <BreadcrumbLink render={<Link href={`${getAbsoluteUrl('')}/course/${cleanCourseUuid}`} />}>
               {course.name}
             </BreadcrumbLink>
           </BreadcrumbItem>

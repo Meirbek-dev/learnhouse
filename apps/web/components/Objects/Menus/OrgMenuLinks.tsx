@@ -4,7 +4,7 @@ import { getTranslations } from 'next-intl/server';
 import Link from '@components/ui/AppLink';
 import { auth } from '@/auth';
 
-const MenuLinks = async (props: { orgslug: string }) => {
+const MenuLinks = async () => {
   const session = await auth();
   const isAuthenticated = Boolean(session?.user);
 
@@ -14,18 +14,15 @@ const MenuLinks = async (props: { orgslug: string }) => {
         <LinkItem
           link="/courses"
           type="courses"
-          orgslug={props.orgslug}
         />
         <LinkItem
           link="/collections"
           type="collections"
-          orgslug={props.orgslug}
         />
         {isAuthenticated && (
           <LinkItem
             link="/trail"
             type="trail"
-            orgslug={props.orgslug}
           />
         )}
       </ul>
@@ -35,11 +32,10 @@ const MenuLinks = async (props: { orgslug: string }) => {
 const LinkItem = async (props: any) => {
   const t = await getTranslations('Components.OrgMenuLinks');
   const { link } = props;
-  const { orgslug } = props;
   return (
     <Link
       prefetch={false}
-      href={getAbsoluteUrl(orgslug, link)}
+      href={getAbsoluteUrl(link)}
     >
       <li className="flex items-center space-x-2 font-medium text-[#909192]">
         {props.type === 'courses' && (

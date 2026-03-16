@@ -33,8 +33,6 @@ interface NewAccountBody {
   username: string;
   email: string;
   password: string;
-  org_slug: string;
-  org_id: number;
   first_name?: string;
   last_name?: string;
 }
@@ -148,15 +146,9 @@ export async function loginAndGetToken(username: any, password: any): Promise<Re
  * @param email - User email from OAuth provider
  * @param provider - OAuth provider name
  * @param accessToken - OAuth access token
- * @param orgId - Optional organization ID to link user to
  * @returns Promise<Response> - Raw response for compatibility
  */
-export async function loginWithOAuthToken(
-  email: string,
-  provider: string,
-  accessToken: string,
-  orgId?: number,
-): Promise<Response> {
+export async function loginWithOAuthToken(email: string, provider: string, accessToken: string): Promise<Response> {
   // Input validation
   if (!(email?.trim() && validateEmail(email))) {
     throw createAuthError('Valid email is required', 400, 'INVALID_EMAIL');
@@ -186,12 +178,7 @@ export async function loginWithOAuthToken(
       credentials: 'include',
     };
 
-    // Add org_id as query parameter if provided
-    const url = orgId
-      ? `${getAPIUrl()}${AUTH_ENDPOINTS.oauth}?org_id=${orgId}`
-      : `${getAPIUrl()}${AUTH_ENDPOINTS.oauth}`;
-
-    return await fetchWithRetry(url, requestOptions);
+    return await fetchWithRetry(`${getAPIUrl()}${AUTH_ENDPOINTS.oauth}`, requestOptions);
   } catch (error) {
     if (error instanceof Error) {
       throw createAuthError(`OAuth login failed: ${error.message}`, undefined, 'OAUTH_ERROR');

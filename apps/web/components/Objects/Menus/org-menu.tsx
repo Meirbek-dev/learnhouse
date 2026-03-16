@@ -23,11 +23,10 @@ interface OrgMenuProps {
 interface NavigationLinkProps {
   href: string;
   type: 'courses' | 'collections' | 'trail';
-  orgslug: string;
 }
 
 // Navigation link component with icon and label
-const NavigationLinkItem = ({ href, type, orgslug }: NavigationLinkProps) => {
+const NavigationLinkItem = ({ href, type }: NavigationLinkProps) => {
   const t = useTranslations('Components.OrgMenuLinks');
   const pathname = usePathname();
 
@@ -44,7 +43,7 @@ const NavigationLinkItem = ({ href, type, orgslug }: NavigationLinkProps) => {
     <NavigationMenuItem>
       <Link
         prefetch={false}
-        href={getAbsoluteUrl(orgslug, href)}
+        href={getAbsoluteUrl(href)}
         className={`hover:text-primary flex max-h-[36px] items-center gap-3 rounded-md px-4 py-2 font-medium transition-colors ${
           isActive ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:bg-accent/60 hover:text-foreground'
         }`}
@@ -199,7 +198,7 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
           <div className="flex items-center gap-8 md:gap-10">
             {/* Logo */}
             <Link
-              href={getAbsoluteUrl(orgslug, '/')}
+              href={getAbsoluteUrl('/')}
               className="hover:bg-accent/60 flex items-center justify-center rounded-md p-2 transition-colors"
             >
               <Image
@@ -219,18 +218,15 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
                   <NavigationLinkItem
                     href="/courses"
                     type="courses"
-                    orgslug={orgslug}
                   />
                   <NavigationLinkItem
                     href="/collections"
                     type="collections"
-                    orgslug={orgslug}
                   />
                   {isAuthenticated && (
                     <NavigationLinkItem
                       href="/trail"
                       type="trail"
-                      orgslug={orgslug}
                     />
                   )}
                 </NavigationMenuList>
@@ -348,7 +344,6 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
                         <NavigationLinkItem
                           href="/courses"
                           type="courses"
-                          orgslug={orgslug}
                         />
                       </div>
                       <div
@@ -359,7 +354,6 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
                         <NavigationLinkItem
                           href="/collections"
                           type="collections"
-                          orgslug={orgslug}
                         />
                       </div>
                       {isAuthenticated && (
@@ -371,7 +365,6 @@ export default function OrgMenu({ orgslug }: OrgMenuProps) {
                           <NavigationLinkItem
                             href="/trail"
                             type="trail"
-                            orgslug={orgslug}
                           />
                         </div>
                       )}

@@ -5,6 +5,7 @@ import { getAbsoluteUrl, getUriWithoutOrg } from '@services/config/config';
 import PasswordInput from '@components/ui/custom/password-input';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { SiGoogle } from '@icons-pack/react-simple-icons';
+import { useOrg } from '@components/Contexts/OrgContext';
 import { AlertTriangle, Loader2 } from 'lucide-react';
 import { Separator } from '@components/ui/separator';
 import { useState, useTransition } from 'react';
@@ -16,12 +17,7 @@ import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
 import { useForm } from 'react-hook-form';
 import { signIn } from 'next-auth/react';
-import type { Org } from '@/types/org';
 import * as v from 'valibot';
-
-interface LoginClientProps {
-  org: Org;
-}
 
 const createValidationSchema = (t: (key: string, values?: any) => string) =>
   v.object({
@@ -31,9 +27,10 @@ const createValidationSchema = (t: (key: string, values?: any) => string) =>
 
 type LoginFormData = v.InferOutput<ReturnType<typeof createValidationSchema>>;
 
-const LoginClient = (props: LoginClientProps) => {
+const LoginClient = () => {
   const validationT = useTranslations('Validation');
   const t = useTranslations('Auth.Login');
+  const org = useOrg();
   const [error, setError] = useState('');
   const [isPending, startTransition] = useTransition();
   const validationSchema = createValidationSchema(validationT);
@@ -72,11 +69,8 @@ const LoginClient = (props: LoginClientProps) => {
 
   const handleGoogleSignIn = () => {
     startTransition(() => {
-      if (props.org?.id) {
-        document.cookie = `oauth_org_id=${props.org.id}; path=/; max-age=600; samesite=lax`;
-      }
       signIn('google', {
-        callbackUrl: `/redirect_from_auth?org_id=${props.org?.id || ''}&org_slug=${props.org?.slug || ''}`,
+        callbackUrl: '/redirect_from_auth',
       });
     });
   };
@@ -85,7 +79,7 @@ const LoginClient = (props: LoginClientProps) => {
     <AuthCard>
       <Link
         prefetch={false}
-        href={getAbsoluteUrl(props.org.slug, '/')}
+        href={getAbsoluteUrl('/')}
       >
         <AuthLogo />
       </Link>
@@ -146,10 +140,7 @@ const LoginClient = (props: LoginClientProps) => {
         <div className="flex justify-end">
           <Link
             prefetch={false}
-            href={{
-              pathname: getUriWithoutOrg('/forgot'),
-              query: props.org.slug ? { orgslug: props.org.slug } : undefined,
-            }}
+            href={getUriWithoutOrg('/forgot')}
             className="text-muted-foreground text-xs underline"
           >
             {t('forgotPassword')}
@@ -179,10 +170,7 @@ const LoginClient = (props: LoginClientProps) => {
         {t('noAccount')}
         <Link
           prefetch={false}
-          href={{
-            pathname: getUriWithoutOrg('/signup'),
-            query: props.org.slug ? { orgslug: props.org.slug } : undefined,
-          }}
+          href={getUriWithoutOrg('/signup')}
           className="text-muted-foreground ml-1 underline"
         >
           {t('signup')}

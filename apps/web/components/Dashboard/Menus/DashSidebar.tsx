@@ -244,7 +244,7 @@ const DashSidebar = ({ className }: SidebarProps) => {
     try {
       await signOut({
         redirect: true,
-        callbackUrl: getUriWithoutOrg(`/login?orgslug=${org?.slug}`),
+        callbackUrl: getUriWithoutOrg('/login'),
       });
     } catch (error) {
       console.error('Logout failed:', error);

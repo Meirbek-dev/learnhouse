@@ -109,7 +109,7 @@ const LinkToUserGroup = (props: LinkToUserGroupProps) => {
             <Link
               className="mx-1 rounded-full bg-blue-100 px-3 py-1 font-semibold text-blue-700"
               target="_blank"
-              href={getAbsoluteUrl(org.slug, '/dash/users/settings/usergroups')}
+              href={getAbsoluteUrl('/dash/users/settings/usergroups')}
             >
               {t('createUserGroupLink')}
             </Link>

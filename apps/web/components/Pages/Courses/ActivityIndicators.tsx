@@ -21,7 +21,6 @@ import { Fragment } from 'react';
 
 interface Props {
   course: any;
-  orgslug: string;
   course_uuid: string;
   current_activity?: string;
   enableNavigation?: boolean;
@@ -275,15 +274,7 @@ const ChapterTooltipContent = ({
   );
 };
 
-const CertificationBadge = ({
-  courseid,
-  orgslug,
-  isCompleted,
-}: {
-  courseid: string;
-  orgslug: string;
-  isCompleted: boolean;
-}) => {
+const CertificationBadge = ({ courseid, isCompleted }: { courseid: string; isCompleted: boolean }) => {
   const t = useTranslations('Certificates.ActivityIndicators');
   return (
     <ToolTip
@@ -315,7 +306,7 @@ const CertificationBadge = ({
       }
     >
       <Link
-        href={`${getAbsoluteUrl(orgslug, '')}/course/${courseid}/activity/end`}
+        href={`${getAbsoluteUrl('')}/course/${courseid}/activity/end`}
         prefetch={false}
         className={`ml-3 flex items-center transition-all duration-200 focus:outline-none ${
           isCompleted ? 'opacity-100' : 'pointer-events-none opacity-40'
@@ -342,7 +333,6 @@ const CertificationBadge = ({
 const ActivityIndicators = (props: Props) => {
   const t = useTranslations('ActivityIndicators');
   const { course } = props;
-  const { orgslug } = props;
   const courseid = props.course_uuid.replace('course_', '');
   const { enableNavigation } = props;
   const router = useRouter();
@@ -387,7 +377,7 @@ const ActivityIndicators = (props: Props) => {
     if (currentActivityIndex > 0) {
       const prevActivity = allActivities[currentActivityIndex - 1];
       const activityId = prevActivity.activity_uuid.replace('activity_', '');
-      router.push(`${getAbsoluteUrl(orgslug, '')}/course/${courseid}/activity/${activityId}`);
+      router.push(`${getAbsoluteUrl('')}/course/${courseid}/activity/${activityId}`);
     }
   }
 
@@ -395,7 +385,7 @@ const ActivityIndicators = (props: Props) => {
     if (currentActivityIndex < allActivities.length - 1) {
       const nextActivity = allActivities[currentActivityIndex + 1];
       const activityId = nextActivity.activity_uuid.replace('activity_', '');
-      router.push(`${getAbsoluteUrl(orgslug, '')}/course/${courseid}/activity/${activityId}`);
+      router.push(`${getAbsoluteUrl('')}/course/${courseid}/activity/${activityId}`);
     }
   }
 
@@ -432,7 +422,7 @@ const ActivityIndicators = (props: Props) => {
           const firstActivity = chapter.activities[0];
           const firstActivityId = firstActivity?.activity_uuid?.replace('activity_', '');
           const chapterLinkHref = firstActivityId
-            ? `${getAbsoluteUrl(orgslug, '')}/course/${courseid}/activity/${firstActivityId}`
+            ? `${getAbsoluteUrl('')}/course/${courseid}/activity/${firstActivityId}`
             : undefined;
 
           return (
@@ -507,7 +497,7 @@ const ActivityIndicators = (props: Props) => {
                     >
                       <Link
                         prefetch={false}
-                        href={`${getAbsoluteUrl(orgslug, '')}/course/${courseid}/activity/${activity.activity_uuid.replace(
+                        href={`${getAbsoluteUrl('')}/course/${courseid}/activity/${activity.activity_uuid.replace(
                           'activity_',
                           '',
                         )}`}
@@ -538,7 +528,6 @@ const ActivityIndicators = (props: Props) => {
         {/* Certification Badge */}
         <CertificationBadge
           courseid={courseid}
-          orgslug={orgslug}
           isCompleted={isCourseCompleted}
         />
       </div>

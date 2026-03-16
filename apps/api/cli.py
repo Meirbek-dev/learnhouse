@@ -8,6 +8,7 @@ from sqlalchemy.engine.base import Engine
 from sqlmodel import Session, SQLModel, select
 
 from config.config import get_settings
+from src.core.platform import PLATFORM_BRAND_NAME, PLATFORM_ORG_SLUG
 from src.db.organizations import Organization, OrganizationCreate
 from src.db.users import User, UserCreate
 from src.services.analytics.rollups import refresh_teacher_analytics_rollups
@@ -61,22 +62,22 @@ def install(
             raise typer.Exit(code=1)
 
         # Create the Organization
-        print("Creating Ashyq Bilim...")
+        print(f"Creating {PLATFORM_BRAND_NAME}...")
         org = OrganizationCreate(
-            name="Ashyq Bilim",
-            description="Ashyq Bilim",
-            about="Ashyq Bilim - Образовательная платформа для онлайн-обучения",
-            slug="openu",
+            name=PLATFORM_BRAND_NAME,
+            description=PLATFORM_BRAND_NAME,
+            about=f"{PLATFORM_BRAND_NAME} - Образовательная платформа для онлайн-обучения",
+            slug=PLATFORM_ORG_SLUG,
             email=settings.contact_email,
             logo_image="",
             thumbnail_image="",
-            label="Ashyq Bilim",
+            label=PLATFORM_BRAND_NAME,
         )
         install_create_organization(org, db_session)
-        print("Ashyq Bilim created ✅")
+        print(f"{PLATFORM_BRAND_NAME} created ✅")
 
         # Create Organization User
-        print("Creating Ashyq Bilim user...")
+        print(f"Creating {PLATFORM_BRAND_NAME} user...")
         print(
             f"Using email from PLATFORM_INITIAL_ADMIN_EMAIL environment variable: {admin_email}"
         )
@@ -88,8 +89,10 @@ def install(
             email=str(admin_email),
             password=admin_password,
         )
-        asyncio.run(install_create_organization_user(user, "openu", db_session))
-        print("Ashyq Bilim user created ✅")
+        asyncio.run(
+            install_create_organization_user(user, PLATFORM_ORG_SLUG, db_session)
+        )
+        print(f"{PLATFORM_BRAND_NAME} user created ✅")
 
         # Show the user how to login
         print("Installation completed ✅")
@@ -101,15 +104,15 @@ def install(
 
     else:
         # Create the Organization
-        print("Creating your organization...")
+        print("Creating your platform organization...")
         orgname = typer.prompt("What's shall we call your organization?")
-        slug = typer.prompt(
-            "What's the slug for your organization? (e.g. school, acme)"
+        print(
+            f"Single-org mode uses a fixed slug: {PLATFORM_ORG_SLUG}"
         )
         org = OrganizationCreate(
             name=orgname,
-            description="Ashyq Bilim",
-            slug=slug,
+            description=PLATFORM_BRAND_NAME,
+            slug=PLATFORM_ORG_SLUG,
             email="",
             logo_image="",
             thumbnail_image="",
@@ -123,7 +126,9 @@ def install(
         email = typer.prompt("What's the email for the user?")
         password = typer.prompt("What's the password for the user?", hide_input=True)
         user = UserCreate(username=username, email=email, password=password)
-        asyncio.run(install_create_organization_user(user, "openu", db_session))
+        asyncio.run(
+            install_create_organization_user(user, PLATFORM_ORG_SLUG, db_session)
+        )
         print(username + " user created ✅")
 
         # Show the user how to login
@@ -163,7 +168,7 @@ def refresh_analytics(
 
 @cli.command()
 def migrate_users_to_default_org() -> None:
-    """Migrate all existing users without organization membership to the default 'openu' organization."""
+    """Migrate users without membership into the platform organization."""
     from src.db.permission_enums import RoleSlug
     from src.db.permissions import Role, UserRole
 
@@ -178,22 +183,24 @@ def migrate_users_to_default_org() -> None:
     db_session = Session(engine)
 
     print("=" * 80)
-    print("Migrating users to default organization")
+    print("Migrating users to platform organization")
     print("=" * 80)
 
-    # Get the default organization
-    default_org = db_session.exec(
-        select(Organization).where(Organization.slug == "openu")
+    # Get the platform organization
+    platform_org = db_session.exec(
+        select(Organization).where(Organization.slug == PLATFORM_ORG_SLUG)
     ).first()
 
-    if not default_org:
-        print("❌ Error: Default organization 'openu' not found")
+    if not platform_org:
+        print(f"❌ Error: Platform organization '{PLATFORM_ORG_SLUG}' not found")
         print(
-            "Please create the default organization first using 'python cli.py install'"
+            "Please create the platform organization first using 'python cli.py install'"
         )
         raise typer.Exit(code=1)
 
-    print(f"✅ Found default organization: {default_org.name} (ID: {default_org.id})")
+    print(
+        f"✅ Found platform organization: {platform_org.name} (ID: {platform_org.id})"
+    )
 
     # Get the default 'user' role
     user_role = db_session.exec(select(Role).where(Role.slug == RoleSlug.USER)).first()
@@ -203,7 +210,7 @@ def migrate_users_to_default_org() -> None:
         print("Please run migrations first")
         raise typer.Exit(code=1)
 
-    print(f"✅ Found default user role: {user_role.name} (ID: {user_role.id})")
+    print(f"✅ Found platform user role: {user_role.name} (ID: {user_role.id})")
 
     # Get all users
     all_users = db_session.exec(select(User)).all()
@@ -217,14 +224,14 @@ def migrate_users_to_default_org() -> None:
     # Filter to users without any organization membership
     users_without_org = [u for u in all_users if u.id not in user_ids_with_roles]
     print(
-        f"📊 {len(users_without_org)} users need to be migrated to default organization\n"
+        f"📊 {len(users_without_org)} users need to be migrated to the platform organization\n"
     )
 
     if not users_without_org:
         print("✅ All users already have organization memberships. Nothing to do!")
         return
 
-    # Add users to default organization
+    # Add users to the platform organization
     migrated_count = 0
     skipped_count = 0
 
@@ -234,12 +241,12 @@ def migrate_users_to_default_org() -> None:
             new_user_role = UserRole(
                 user_id=user.id,
                 role_id=user_role.id,
-                org_id=default_org.id,
+                org_id=platform_org.id,
             )
             db_session.add(new_user_role)
             migrated_count += 1
             print(
-                f"  ✅ Added user {user.username} (ID: {user.id}) to {default_org.name}"
+                f"  ✅ Added user {user.username} (ID: {user.id}) to {platform_org.name}"
             )
         except Exception as e:
             skipped_count += 1

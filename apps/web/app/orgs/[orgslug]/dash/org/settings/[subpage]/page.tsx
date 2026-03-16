@@ -120,7 +120,7 @@ const OrgPage = (props: { params: Promise<OrgParams> }) => {
         <SettingsTabs
           value={params.subpage}
           tabs={SETTING_TABS.map((t) => ({ id: t.id, labelKey: t.label, icon: t.icon }))}
-          getHref={(tab) => `${getAbsoluteUrl(params.orgslug, '')}/dash/org/settings/${tab.id}`}
+          getHref={(tab) => `${getAbsoluteUrl('')}/dash/org/settings/${tab.id}`}
           translationNamespace="DashPage.OrgSettings"
         />
       </SettingsHeader>

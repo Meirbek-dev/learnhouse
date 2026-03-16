@@ -40,13 +40,13 @@ const CoursePaidOptions = ({ course }: CoursePaidOptionsProps) => {
   const handleCheckout = async (productId: number) => {
     if (!session.data?.user) {
       // Redirect to login if user is not authenticated
-      router.push(`/signup?orgslug=${org.slug}`);
+      router.push('/signup');
       return;
     }
 
     try {
       startTransition(() => setIsProcessing((prev) => ({ ...prev, [productId]: true })));
-      const redirect_uri = getAbsoluteUrl(org.slug, '/courses');
+      const redirect_uri = getAbsoluteUrl('/courses');
       const response = await getStripeProductCheckoutSession(
         course.org_id,
         productId,

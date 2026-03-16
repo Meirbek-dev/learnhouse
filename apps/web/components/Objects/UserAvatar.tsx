@@ -95,7 +95,7 @@ const UserAvatar = (props: UserAvatarProps) => {
     // If predefined avatar is specified
     if (predefined_avatar) {
       const avatarType = predefined_avatar === 'ai' ? 'platform_logo.svg' : 'empty_avatar.webp';
-      return getAbsoluteUrl(params.orgslug as string, `/${avatarType}`);
+      return getAbsoluteUrl(`/${avatarType}`);
     }
 
     // If avatar_url prop is provided
@@ -127,7 +127,7 @@ const UserAvatar = (props: UserAvatarProps) => {
     // If username was provided but no user data found, don't fall back to session
     // This prevents showing the wrong user's avatar for usernames that don't exist
     if (username) {
-      return getAbsoluteUrl(params.orgslug as string, '/empty_avatar.webp');
+      return getAbsoluteUrl('/empty_avatar.webp');
     }
 
     // If user has an avatar in session (only if session exists and no username was provided)
@@ -142,7 +142,7 @@ const UserAvatar = (props: UserAvatarProps) => {
     }
 
     // Fallback to empty avatar
-    return getAbsoluteUrl(params.orgslug as string, '/empty_avatar.webp');
+    return getAbsoluteUrl('/empty_avatar.webp');
   };
 
   const getFallbackText = (): string => {

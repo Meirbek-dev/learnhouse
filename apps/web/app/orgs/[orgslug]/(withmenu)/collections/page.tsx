@@ -77,7 +77,7 @@ const CollectionsPage = async (params: any) => {
             scope={Scopes.ORG}
             fallback={null}
           >
-            <Link href={getAbsoluteUrl(orgslug, '/collections/new')}>
+            <Link href={getAbsoluteUrl('/collections/new')}>
               <NewCollectionButton />
             </Link>
           </PermissionGuard>
@@ -114,7 +114,7 @@ const CollectionsPage = async (params: any) => {
                     scope={Scopes.ORG}
                     fallback={null}
                   >
-                    <Link href={getAbsoluteUrl(orgslug, '/collections/new')}>
+                    <Link href={getAbsoluteUrl('/collections/new')}>
                       <NewCollectionButton />
                     </Link>
                   </PermissionGuard>

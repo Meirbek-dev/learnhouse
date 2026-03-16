@@ -144,7 +144,7 @@ function CourseWorkspaceChrome({
               size="sm"
               nativeButton={false}
               variant="outline"
-              render={<a href={getAbsoluteUrl(orgslug, `/course/${courseuuid}`)} />}
+              render={<a href={getAbsoluteUrl(`/course/${courseuuid}`)} />}
               className="gap-2"
             >
               <Eye className="size-4" />

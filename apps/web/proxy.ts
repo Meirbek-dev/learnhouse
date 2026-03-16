@@ -1,4 +1,4 @@
-import { defaultOrg, getTopLevelCookieDomain, getAbsoluteUrl } from './services/config/config';
+import { PLATFORM_ORG_SLUG, getAbsoluteUrl } from './services/config/config';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
@@ -19,10 +19,7 @@ export const config = {
 };
 
 export default async function proxy(req: NextRequest) {
-  // Get initial data
-  const cookieDomain = getTopLevelCookieDomain();
   const { pathname, search } = req.nextUrl;
-  const cookie_orgslug = req.cookies.get('current_orgslug')?.value;
 
   // If path already starts with /orgs/, allow it to pass through
   if (pathname.startsWith('/orgs/')) {
@@ -38,14 +35,7 @@ export default async function proxy(req: NextRequest) {
   }
 
   if (auth_paths.includes(pathname)) {
-    const response = NextResponse.rewrite(new URL(`/auth${pathname}${search}`, req.url));
-
-    response.cookies.set({
-      name: 'current_orgslug',
-      value: 'openu',
-      domain: cookieDomain,
-    });
-    return response;
+    return NextResponse.rewrite(new URL(`/auth${pathname}${search}`, req.url));
   }
 
   // Dynamic Pages Editor
@@ -60,21 +50,16 @@ export default async function proxy(req: NextRequest) {
 
   // Auth Redirects
   if (pathname === '/redirect_from_auth') {
-    if (cookie_orgslug) {
-      const { searchParams } = req.nextUrl;
-      const queryString = searchParams.toString();
-      const redirectPathname = '/';
-      const redirectUrl = new URL(getAbsoluteUrl(cookie_orgslug, redirectPathname), req.url);
+    const { searchParams } = req.nextUrl;
+    const queryString = searchParams.toString();
+    const redirectUrl = new URL(getAbsoluteUrl('/'), req.url);
 
-      if (queryString) {
-        redirectUrl.search = queryString;
-      }
-      return NextResponse.redirect(redirectUrl);
+    if (queryString) {
+      redirectUrl.search = queryString;
     }
-    return 'Did not find the orgslug in the cookie';
+    return NextResponse.redirect(redirectUrl);
   }
 
-  const orgslug: string = defaultOrg as string;
   if (pathname.startsWith('/sitemap.xml')) {
     const sitemapUrl = new URL('/api/sitemap', req.url);
 
@@ -82,21 +67,11 @@ export default async function proxy(req: NextRequest) {
     const response = NextResponse.rewrite(sitemapUrl);
 
     // Set the orgslug in a header
-    response.headers.set('X-Sitemap-Orgslug', orgslug);
+    response.headers.set('X-Sitemap-Orgslug', PLATFORM_ORG_SLUG);
 
     return response;
   }
 
   // Single Organization Mode
-  const response = NextResponse.rewrite(new URL(`/orgs/${orgslug}${pathname}`, req.url));
-
-  // Set the cookie with the orgslug value
-  response.cookies.set({
-    name: 'current_orgslug',
-    value: orgslug,
-    domain: cookieDomain,
-    path: '/',
-  });
-
-  return response;
+  return NextResponse.rewrite(new URL(`/orgs/${PLATFORM_ORG_SLUG}${pathname}`, req.url));
 }

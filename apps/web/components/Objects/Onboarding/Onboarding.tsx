@@ -115,7 +115,7 @@ const Onboarding: FC = () => {
         {
           label: t('step2Button'),
           action: () => {
-            router.push(getAbsoluteUrl(org?.slug, '/courses?new=true'));
+            router.push(getAbsoluteUrl('/courses?new=true'));
           },
           icon: <Book size={16} />,
         },
@@ -165,7 +165,7 @@ const Onboarding: FC = () => {
         {
           label: t('step6Button'),
           action: () => {
-            router.push(getAbsoluteUrl(org?.slug, '/dash/users/settings/usergroups'));
+            router.push(getAbsoluteUrl('/dash/users/settings/usergroups'));
           },
           icon: <SquareUser size={16} />,
         },
@@ -185,7 +185,7 @@ const Onboarding: FC = () => {
         {
           label: t('step8Button'),
           action: () => {
-            router.push(getAbsoluteUrl(org?.slug, '/dash/assignments?new=true'));
+            router.push(getAbsoluteUrl('/dash/assignments?new=true'));
           },
           icon: <Book size={16} />,
         },
@@ -199,7 +199,7 @@ const Onboarding: FC = () => {
         {
           label: t('step9Button'),
           action: () => {
-            router.push(getAbsoluteUrl(org?.slug, '/dash/payments/customers'));
+            router.push(getAbsoluteUrl('/dash/payments/customers'));
           },
           icon: <CreditCard size={16} />,
         },

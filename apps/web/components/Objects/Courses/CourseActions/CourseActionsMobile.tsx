@@ -208,7 +208,7 @@ const CourseActionsMobile = ({ courseuuid, orgslug, course, trailData }: CourseA
 
   const handleCourseAction = async () => {
     if (!session.data?.user) {
-      router.push(getUriWithoutOrg(`/signup?orgslug=${orgslug}`));
+      router.push(getUriWithoutOrg('/signup'));
       return;
     }
 
@@ -240,7 +240,7 @@ const CourseActionsMobile = ({ courseuuid, orgslug, course, trailData }: CourseA
 
       if (targetActivity) {
         router.push(
-          `${getAbsoluteUrl(orgslug, '')}/course/${courseuuid}/activity/${targetActivity.activity_uuid.replace('activity_', '')}`,
+          `${getAbsoluteUrl('')}/course/${courseuuid}/activity/${targetActivity.activity_uuid.replace('activity_', '')}`,
         );
       }
       return;
@@ -259,7 +259,7 @@ const CourseActionsMobile = ({ courseuuid, orgslug, course, trailData }: CourseA
         // Redirect to the first activity
         await revalidateTags(['activities'], orgslug);
         router.push(
-          `${getAbsoluteUrl(orgslug, '')}/course/${courseuuid}/activity/${firstActivity.activity_uuid.replace('activity_', '')}`,
+          `${getAbsoluteUrl('')}/course/${courseuuid}/activity/${firstActivity.activity_uuid.replace('activity_', '')}`,
         );
       } else {
         router.refresh();

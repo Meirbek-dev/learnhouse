@@ -246,7 +246,6 @@ async def third_party_login(
     request: Request,
     response: Response,
     body: ThirdPartyLogin,
-    org_id: int | None = None,
     current_user: Annotated[
         PublicUser | AnonymousUser, Depends(get_current_user_optional)
     ] = None,
@@ -259,7 +258,7 @@ async def third_party_login(
     # Google
     if body.provider == "google":
         user = await signWithGoogle(
-            request, body.access_token, body.email, org_id, current_user, db_session
+            request, body.access_token, body.email, current_user, db_session
         )
 
     if not user:

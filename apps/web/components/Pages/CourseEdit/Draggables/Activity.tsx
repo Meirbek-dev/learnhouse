@@ -151,7 +151,7 @@ const Activity = (props: any) => {
           <div className="flex flex-row space-x-2">
             {props.activity.type === 'TYPE_DYNAMIC' && (
               <Link
-                href={`${getAbsoluteUrl(props.orgslug, '')}/course/${
+                href={`${getAbsoluteUrl('')}/course/${
                   props.courseid
                 }/activity/${props.activity.uuid.replace('activity_', '')}/edit`}
                 className="items-center rounded-md bg-sky-700 p-1 px-3 hover:cursor-pointer"
@@ -161,7 +161,7 @@ const Activity = (props: any) => {
               </Link>
             )}
             <Link
-              href={`${getAbsoluteUrl(props.orgslug, '')}/course/${
+              href={`${getAbsoluteUrl('')}/course/${
                 props.courseid
               }/activity/${props.activity.uuid.replace('activity_', '')}`}
               className="rounded-md bg-gray-200 p-1 px-3 hover:cursor-pointer"

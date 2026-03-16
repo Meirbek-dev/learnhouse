@@ -400,7 +400,7 @@ const SearchPage = () => {
                       <Link
                         prefetch={false}
                         key={course.course_uuid}
-                        href={getAbsoluteUrl(org?.slug, `/course/${removeCoursePrefix(course.course_uuid)}`)}
+                        href={getAbsoluteUrl(`/course/${removeCoursePrefix(course.course_uuid)}`)}
                         className="soft-shadow group overflow-hidden rounded-xl bg-white transition-all hover:shadow-md"
                       >
                         <div className="aspect-video w-full overflow-hidden">
@@ -470,10 +470,7 @@ const SearchPage = () => {
                       <Link
                         prefetch={false}
                         key={collection.collection_uuid}
-                        href={getAbsoluteUrl(
-                          org?.slug,
-                          `/collection/${collection.collection_uuid.replace('collection_', '')}`,
-                        )}
+                        href={getAbsoluteUrl(`/collection/${collection.collection_uuid.replace('collection_', '')}`)}
                         className="soft-shadow flex items-start gap-4 rounded-xl bg-white p-4 transition-all hover:shadow-md"
                       >
                         <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-black/5">
@@ -510,7 +507,7 @@ const SearchPage = () => {
                       <Link
                         prefetch={false}
                         key={user.user_uuid}
-                        href={getAbsoluteUrl(org?.slug, `/user/${user.username}`)}
+                        href={getAbsoluteUrl(`/user/${user.username}`)}
                         className="soft-shadow flex items-center gap-4 rounded-xl bg-white p-4 transition-all hover:shadow-md"
                       >
                         <UserAvatar

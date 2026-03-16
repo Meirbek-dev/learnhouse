@@ -1,28 +1,17 @@
-'use client';
-
-import ErrorUI from '@/components/Objects/Elements/Error/Error';
-import { OrgProvider } from '@components/Contexts/OrgContext';
+import { getPlatformOrganizationContextInfo } from '@services/organizations/orgs';
+import PlatformOrgProvider from '@components/Contexts/PlatformOrgProvider';
 import { Spinner } from '@components/ui/spinner';
 import { useTranslations } from 'next-intl';
 import { Suspense } from 'react';
 
-function AuthContent({ children }: { children: React.ReactNode }) {
-  const t = useTranslations('Auth.Layout');
-  const orgslug = 'openu';
-
-  if (orgslug) {
-    return <OrgProvider orgslug={orgslug}>{children}</OrgProvider>;
-  }
-
-  return (
-    <ErrorUI
-      message={t('orgNotSpecified')}
-      submessage={t('accessFromOrg')}
-    />
-  );
+function AuthContent({ children, initialOrg }: { children: React.ReactNode; initialOrg: unknown }) {
+  useTranslations('Auth.Layout');
+  return <PlatformOrgProvider initialOrg={initialOrg}>{children}</PlatformOrgProvider>;
 }
 
-export default function AuthLayout({ children }: { children: React.ReactNode }) {
+export default async function AuthLayout({ children }: { children: React.ReactNode }) {
+  const initialOrg = await getPlatformOrganizationContextInfo();
+
   return (
     <Suspense
       fallback={
@@ -31,7 +20,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         </div>
       }
     >
-      <AuthContent>{children}</AuthContent>
+      <AuthContent initialOrg={initialOrg}>{children}</AuthContent>
     </Suspense>
   );
 }

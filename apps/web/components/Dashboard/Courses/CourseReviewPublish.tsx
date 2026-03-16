@@ -104,7 +104,7 @@ export default function CourseReviewPublish({
               nativeButton={false}
               render={
                 <a
-                  href={getAbsoluteUrl(orgslug, `/course/${courseuuid}`)}
+                  href={getAbsoluteUrl(`/course/${courseuuid}`)}
                   target="_blank"
                   rel="noopener noreferrer"
                 />

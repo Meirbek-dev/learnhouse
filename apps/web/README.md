@@ -49,9 +49,10 @@ docker compose up -d --build app
   into the build.
 - The authoritative contract is documented in `/docs/FRONTEND_ENV.md`.
 - `extra/.env` is the deployment env file used by the `app` service at runtime.
-- `extra/example-conf.env` is the deployment template; `apps/web/.env.example` is the local web-only example.
-- When using root `docker compose`, pass build-time public env via shell env or `--env-file extra/.env`
-  because `env_file` does not populate Docker build args.
+- `extra/example-conf.env` is the deployment template; `apps/web/.env.example` is the local web-only
+  example.
+- When using root `docker compose`, pass build-time public env via shell env or
+  `--env-file extra/.env` because `env_file` does not populate Docker build args.
 
 ## Troubleshooting
 

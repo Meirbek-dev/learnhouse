@@ -476,7 +476,7 @@ const ActivityClient = (props: ActivityClientProps) => {
     if (!activityToNavigate) return;
 
     const cleanCourseUuid = course.course_uuid?.replace('course_', '');
-    router.push(`${getAbsoluteUrl(orgslug, '')}/course/${cleanCourseUuid}/activity/${activityToNavigate.cleanUuid}`);
+    router.push(`${getAbsoluteUrl('')}/course/${cleanCourseUuid}/activity/${activityToNavigate.cleanUuid}`);
   };
 
   // Save focus mode to localStorage when it changes
@@ -650,7 +650,7 @@ const ActivityClient = (props: ActivityClientProps) => {
                         <div className="flex">
                           <Link
                             prefetch={false}
-                            href={`${getAbsoluteUrl(orgslug, '')}/course/${courseuuid}`}
+                            href={`${getAbsoluteUrl('')}/course/${courseuuid}`}
                           >
                             <img
                               className="h-[34px] w-[60px] rounded-md drop-shadow-md"
@@ -687,7 +687,6 @@ const ActivityClient = (props: ActivityClientProps) => {
                               ? activity.activity_uuid.replace('activity_', '')
                               : activityid.replace('activity_', '')
                           }
-                          orgslug={orgslug}
                           trailData={trailData}
                         />
                         <motion.button
@@ -821,7 +820,6 @@ const ActivityClient = (props: ActivityClientProps) => {
               {activityid === 'end' ? (
                 <CourseEndView
                   courseName={course.name ?? ''}
-                  orgslug={orgslug}
                   courseUuid={course.course_uuid}
                   thumbnailImage={course.thumbnail_image ?? ''}
                   course={course}
@@ -833,7 +831,6 @@ const ActivityClient = (props: ActivityClientProps) => {
                     <ActivityBreadcrumbs
                       course={course}
                       activity={activity}
-                      orgslug={orgslug}
                     />
                     <div className="activity-info-section space-y-4 pb-4">
                       <div className="flex items-center justify-between">
@@ -841,7 +838,7 @@ const ActivityClient = (props: ActivityClientProps) => {
                           <div className="flex">
                             <Link
                               prefetch={false}
-                              href={`${getAbsoluteUrl(orgslug, '')}/course/${courseuuid}`}
+                              href={`${getAbsoluteUrl('')}/course/${courseuuid}`}
                             >
                               <img
                                 className="h-[57px] w-[100px] rounded-md drop-shadow-md"
@@ -868,7 +865,6 @@ const ActivityClient = (props: ActivityClientProps) => {
                       <ActivityIndicators
                         course_uuid={courseuuid}
                         current_activity={activityid}
-                        orgslug={orgslug}
                         course={course}
                         enableNavigation
                         trailData={trailData}
@@ -1010,13 +1006,12 @@ const ActivityClient = (props: ActivityClientProps) => {
                                         ? activity.activity_uuid.replace('activity_', '')
                                         : activityid.replace('activity_', '')
                                     }
-                                    orgslug={orgslug}
                                     trailData={trailData}
                                   />
                                   {contributorStatus === 'ACTIVE' && activity.activity_type === 'TYPE_DYNAMIC' && (
                                     <Link
                                       prefetch={false}
-                                      href={`${getAbsoluteUrl(orgslug, '')}/course/${courseuuid}/activity/${activityid}/edit`}
+                                      href={`${getAbsoluteUrl('')}/course/${courseuuid}/activity/${activityid}/edit`}
                                       className="flex items-center space-x-2 rounded-full bg-emerald-600 p-2.5 px-5 text-white drop-shadow-md transition delay-150 duration-300 ease-in-out hover:cursor-pointer"
                                     >
                                       <Edit2 size={17} />
@@ -1105,7 +1100,6 @@ const ActivityClient = (props: ActivityClientProps) => {
                       <FixedActivitySecondaryBar
                         course={course}
                         currentActivityId={activityid}
-                        orgslug={orgslug}
                         activity={activity}
                       />
                     ) : null}
@@ -1198,7 +1192,7 @@ export const MarkStatus = (props: {
 
       if (willCompleteAll) {
         const cleanCourseUuid = props.course.course_uuid.replace('course_', '');
-        router.push(`${getAbsoluteUrl(props.orgslug, '')}/course/${cleanCourseUuid}/activity/end`);
+        router.push(`${getAbsoluteUrl('')}/course/${cleanCourseUuid}/activity/end`);
       }
     } catch (error) {
       console.error('Error marking activity as complete:', error);
@@ -1352,7 +1346,7 @@ const NextActivityButton = ({
   function navigateToActivity() {
     if (!nextActivity) return;
     const cleanCourseUuid = course.course_uuid?.replace('course_', '');
-    router.push(`${getAbsoluteUrl(orgslug, '')}/course/${cleanCourseUuid}/activity/${nextActivity.cleanUuid}`);
+    router.push(`${getAbsoluteUrl('')}/course/${cleanCourseUuid}/activity/${nextActivity.cleanUuid}`);
   }
 
   if (!nextActivity) return null;
@@ -1411,7 +1405,7 @@ const PreviousActivityButton = ({
   function navigateToActivityPrevious() {
     if (!previousActivity) return;
     const cleanCourseUuid = course.course_uuid?.replace('course_', '');
-    router.push(`${getAbsoluteUrl(orgslug, '')}/course/${cleanCourseUuid}/activity/${previousActivity.cleanUuid}`);
+    router.push(`${getAbsoluteUrl('')}/course/${cleanCourseUuid}/activity/${previousActivity.cleanUuid}`);
   }
 
   if (!previousActivity) return null;

@@ -69,19 +69,19 @@ const PaymentsPage = (props: { params: Promise<PaymentsParams> }) => {
         </div>
         <div className="flex space-x-0.5 text-sm font-bold">
           <TabLink
-            href={getAbsoluteUrl(params.orgslug, '/dash/payments/customers')}
+            href={getAbsoluteUrl('/dash/payments/customers')}
             icon={<Users size={16} />}
             label={t('customers')}
             isActive={subpage === 'customers'}
           />
           <TabLink
-            href={getAbsoluteUrl(params.orgslug, '/dash/payments/paid-products')}
+            href={getAbsoluteUrl('/dash/payments/paid-products')}
             icon={<Gem size={16} />}
             label={t('productsSubscriptions')}
             isActive={subpage === 'paid-products'}
           />
           <TabLink
-            href={getAbsoluteUrl(params.orgslug, '/dash/payments/configuration')}
+            href={getAbsoluteUrl('/dash/payments/configuration')}
             icon={<Settings size={16} />}
             label={t('configuration')}
             isActive={subpage === 'configuration'}

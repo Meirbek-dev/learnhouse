@@ -30,12 +30,13 @@ export const OrgProvider = ({
   const accessToken = session?.data?.tokens?.access_token;
   const isAuthenticated = session.status === 'authenticated' && Boolean(accessToken);
   const t = useTranslations('Contexts.Org');
-  const isAllowedPathname = ['/login', '/signup'].includes(pathname);
+  const isAllowedPathname =
+    pathname.startsWith('/auth/') || ['/login', '/signup', '/forgot', '/reset'].includes(pathname);
 
   const handleSignOut = async () => {
     await signOut({
       redirect: true,
-      callbackUrl: getUriWithoutOrg('/login?orgslug=' + orgslug),
+      callbackUrl: getUriWithoutOrg('/login'),
     });
   };
 

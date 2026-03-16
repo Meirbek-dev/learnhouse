@@ -203,13 +203,8 @@ const createAuthConfig = (): NextAuthConfig => {
           // Google OAuth sign-in
           if (account?.provider === 'google' && user?.email && account.access_token) {
             try {
-              const cookieStore = await cookies();
-              const orgIdCookie = cookieStore.get('oauth_org_id');
-              const orgId = orgIdCookie?.value ? Number.parseInt(orgIdCookie.value, 10) : undefined;
-              if (orgIdCookie) cookieStore.delete('oauth_org_id');
-
               const res = await getResponseMetadata(
-                await loginWithOAuthToken(user.email.toLowerCase().trim(), 'google', account.access_token, orgId),
+                await loginWithOAuthToken(user.email.toLowerCase().trim(), 'google', account.access_token),
               );
 
               if (!res.success || !res.data) {

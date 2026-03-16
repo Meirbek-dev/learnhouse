@@ -8,9 +8,8 @@ from src.core.events.database import get_db_session
 from src.db.users import User, UserCreate, UserRead
 from src.security.auth import get_current_user
 from src.services.users.users import (
-    create_user,
     create_user_without_org,
-    ensure_user_in_default_org,
+    ensure_user_in_platform_org,
 )
 
 
@@ -33,7 +32,6 @@ async def signWithGoogle(
     request: Request,
     access_token: str,
     email: str,
-    org_id: int | None = None,
     current_user=Depends(get_current_user),
     db_session: Session = Depends(get_db_session),
 ):
@@ -85,11 +83,11 @@ async def signWithGoogle(
             avatar_image=picture,
         )
 
-        # Always create user without org - it will auto-join 'openu'
-        # The org_id parameter is now ignored as all users join the default org
+        # Always create the user without an explicit org; single-org mode will
+        # attach them to the platform organization automatically.
         return await create_user_without_org(
             request, db_session, current_user, user_object
         )
 
-    await ensure_user_in_default_org(db_session, user.id)
+    await ensure_user_in_platform_org(db_session, user.id)
     return UserRead.model_validate(user)

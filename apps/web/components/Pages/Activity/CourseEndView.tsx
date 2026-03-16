@@ -20,21 +20,13 @@ import QRCode from 'qrcode';
 
 interface CourseEndViewProps {
   courseName: string;
-  orgslug: string;
   courseUuid: string;
   thumbnailImage: string;
   course: any;
   trailData: any;
 }
 
-const CourseEndView: FC<CourseEndViewProps> = ({
-  courseName,
-  orgslug,
-  courseUuid,
-  thumbnailImage,
-  course,
-  trailData,
-}) => {
+const CourseEndView: FC<CourseEndViewProps> = ({ courseName, courseUuid, thumbnailImage, course, trailData }) => {
   const { width, height } = useWindowSize();
   const org = useOrg() as any;
   const session = usePlatformSession();
@@ -46,7 +38,6 @@ const CourseEndView: FC<CourseEndViewProps> = ({
   const [dialogAlertOpen, setDialogAlertOpen] = useState(false);
   const [dialogAlertMessage, setDialogAlertMessage] = useState('');
   const qrCodeLink = getAbsoluteUrl(
-    orgslug,
     `/certificates/${userCertificate?.certificate_user.user_certification_uuid}/verify`,
   );
 
@@ -925,7 +916,6 @@ const CourseEndView: FC<CourseEndViewProps> = ({
                 <Link
                   prefetch={false}
                   href={getAbsoluteUrl(
-                    orgslug,
                     `/certificates/${userCertificate.certificate_user.user_certification_uuid}/verify`,
                   )}
                   target="_blank"
@@ -946,7 +936,7 @@ const CourseEndView: FC<CourseEndViewProps> = ({
           <div className="pt-6">
             <Link
               prefetch={false}
-              href={getAbsoluteUrl(orgslug, `/course/${courseUuid.replace('course_', '')}`)}
+              href={getAbsoluteUrl(`/course/${courseUuid.replace('course_', '')}`)}
               className="inline-flex items-center space-x-2 rounded-full bg-gray-800 px-6 py-3 text-white transition duration-200 hover:bg-gray-700"
             >
               <ArrowLeft className="h-5 w-5" />
@@ -1018,7 +1008,7 @@ const CourseEndView: FC<CourseEndViewProps> = ({
 
         <div className="pt-6">
           <Link
-            href={getAbsoluteUrl(orgslug, `/course/${courseUuid.replace('course_', '')}`)}
+            href={getAbsoluteUrl(`/course/${courseUuid.replace('course_', '')}`)}
             className="inline-flex items-center space-x-2 rounded-full bg-blue-600 px-6 py-3 text-white transition duration-200 hover:bg-blue-700"
           >
             <ArrowLeft className="h-5 w-5" />

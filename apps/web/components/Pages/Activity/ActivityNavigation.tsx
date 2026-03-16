@@ -9,7 +9,6 @@ import type { ReactNode } from 'react';
 interface ActivityNavigationProps {
   course: any;
   currentActivityId: string;
-  orgslug: string;
 }
 
 // Navigation buttons component - reused for both top and bottom
@@ -180,7 +179,7 @@ export default function ActivityNavigation(props: ActivityNavigationProps): Reac
     if (!activity) return;
 
     const cleanCourseUuid = props.course.course_uuid?.replace('course_', '');
-    router.push(`${getAbsoluteUrl(props.orgslug, '')}/course/${cleanCourseUuid}/activity/${activity.cleanUuid}`);
+    router.push(`${getAbsoluteUrl('')}/course/${cleanCourseUuid}/activity/${activity.cleanUuid}`);
   };
 
   // Set up intersection observer to detect when bottom nav is out of viewport
