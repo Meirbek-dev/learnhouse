@@ -10,8 +10,8 @@ import { ChevronDown, Crown, LogOut, Shield, User, User as UserIcon, Users } fro
 import { Tooltip, TooltipContent, TooltipTrigger } from '@components/ui/tooltip';
 import { useNavigationPermissions } from '@/hooks/useNavigationPermissions';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { getUriWithoutOrg } from '@services/config/config';
-import { useOrg } from '@components/Contexts/OrgContext';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { RoleSlugs } from '@/types/permissions';
 import { Button } from '@components/ui/button';
@@ -37,7 +37,7 @@ interface CustomRoleInfo {
 export const HeaderProfileBox = () => {
   const session = usePlatformSession() as any;
   const { canAccessDashboard } = useNavigationPermissions();
-  const org = useOrg();
+  const org = usePlatformOrg();
   const t = useTranslations('Header');
 
   const userRoles = session?.data?.roles ?? [];

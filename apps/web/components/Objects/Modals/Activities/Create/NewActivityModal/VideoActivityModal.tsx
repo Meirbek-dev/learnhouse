@@ -22,7 +22,7 @@ import {
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@components/ui/dropdown-menu';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import type { ChangeEvent, ComponentType, DragEvent, FormEvent } from 'react';
-import { useOrg } from '@components/Contexts/OrgContext';
+import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { constructAcceptValue } from '@/lib/constants';
 import { AnimatePresence, motion } from 'motion/react';
 import { Separator } from '@components/ui/separator';
@@ -798,7 +798,7 @@ const VideoSettingsForm = ({
 
 const VideoModal = ({ submitFileActivity, submitExternalVideo, chapterId, course }: any) => {
   const t = useTranslations('Components.VideoModal');
-  const org = useOrg();
+  const org = usePlatformOrg();
   const [video, setVideo] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [name, setName] = useState('');

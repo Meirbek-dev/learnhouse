@@ -1,20 +1,12 @@
 import type { Action, Resource, Scope } from '@/types/permissions';
-import { PLATFORM_ORG_SLUG } from '@/services/config/config';
 import { perm } from '@/types/permissions';
-import { notFound, redirect } from 'next/navigation';
+import { redirect } from 'next/navigation';
 import { auth } from '@/auth';
-
-function assertPlatformRoute(orgslug: string): void {
-  if (orgslug !== PLATFORM_ORG_SLUG) {
-    notFound();
-  }
-}
 
 /**
  * Get the current session or redirect to login.
  */
-export async function requireAuth(orgslug: string) {
-  assertPlatformRoute(orgslug);
+export async function requireAuth() {
   const session = await auth();
   if (!session?.user) {
     redirect('/auth');
@@ -40,14 +32,8 @@ export function sessionCan(
  * Require a specific permission or redirect.
  * Verifies that session permissions are scoped to the correct org.
  */
-export async function requirePermission(
-  orgslug: string,
-  action: Action,
-  resource: Resource,
-  scope: Scope,
-  redirectTo?: string,
-) {
-  const session = await requireAuth(orgslug);
+export async function requirePermission(action: Action, resource: Resource, scope: Scope, redirectTo?: string) {
+  const session = await requireAuth();
   if (!session.permissions_org_id) {
     redirect(redirectTo ?? '/unauthorized');
   }
@@ -64,11 +50,10 @@ export async function requirePermission(
  * Verifies that session permissions are scoped to the correct org.
  */
 export async function requireAnyPermission(
-  orgslug: string,
   checks: { action: Action; resource: Resource; scope: Scope }[],
   redirectTo?: string,
 ) {
-  const session = await requireAuth(orgslug);
+  const session = await requireAuth();
   if (!session.permissions_org_id) {
     redirect(redirectTo ?? '/unauthorized');
   }

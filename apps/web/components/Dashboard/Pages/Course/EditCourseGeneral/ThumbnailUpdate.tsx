@@ -5,8 +5,8 @@ import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { Alert, AlertDescription, AlertTitle } from '@components/ui/alert';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { updateCourseThumbnail } from '@services/courses/courses';
+import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useOrg } from '@components/Contexts/OrgContext';
 import { Card, CardContent } from '@components/ui/card';
 import { Button } from '@components/ui/button';
 import { useTranslations } from 'next-intl';
@@ -42,7 +42,7 @@ const ThumbnailUpdate = ({ thumbnailType, disabled = false, disabledReason }: Th
   const course = useCourse();
   const dispatchCourse = useCourseDispatch();
   const session = usePlatformSession() as any;
-  const org = useOrg() as any;
+  const org = usePlatformOrg() as any;
   const t = useTranslations('CourseEdit.General.Thumbnail');
 
   const [localThumbnail, setLocalThumbnail] = useState<LocalThumbnail | null>(null);

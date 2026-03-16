@@ -4,4 +4,4 @@ PLATFORM_CHAT_KEY_PREFIX = f"{PLATFORM_ORG_SLUG}_chat:"
 
 
 def is_platform_org_slug(org_slug: str | None) -> bool:
-	return org_slug == PLATFORM_ORG_SLUG
+    return org_slug == PLATFORM_ORG_SLUG

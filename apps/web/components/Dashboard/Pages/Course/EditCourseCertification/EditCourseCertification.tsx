@@ -9,6 +9,7 @@ import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { AlertTriangle, Award, FileText, Sparkles } from 'lucide-react';
+import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { valibotResolver } from '@hookform/resolvers/valibot';
@@ -26,10 +27,6 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { useTranslations } from 'next-intl';
 import * as v from 'valibot';
-
-interface EditCourseCertificationProps {
-  orgslug: string;
-}
 
 const CERTIFICATE_PATTERNS = [
   { value: 'royal', icon: '👑' },
@@ -77,13 +74,14 @@ const _certFormSchemaForTypes = v.object({
 
 type FormValues = v.InferOutput<typeof _certFormSchemaForTypes>;
 
-const EditCourseCertification = (props: EditCourseCertificationProps) => {
+const EditCourseCertification = () => {
   const [error, setError] = useState('');
   const [hasHydrated, setHasHydrated] = useState(false);
 
   const course = useCourse();
   const { isLoading, courseStructure, editorData } = course;
   const session = usePlatformSession() as any;
+  const org = usePlatformOrg() as { slug?: string } | null;
   const access_token = session?.data?.tokens?.access_token;
   const t = useTranslations('Certificates.EditCourseCertification');
   const tCommon = useTranslations('Common');
@@ -264,14 +262,14 @@ const EditCourseCertification = (props: EditCourseCertificationProps) => {
           if (existingCertification) {
             return updateCertification(existingCertification.certification_uuid, config, access_token, {
               courseUuid: courseStructure.course_uuid,
-              orgSlug: props.orgslug,
+              orgSlug: org?.slug,
               lastKnownUpdateDate: courseStructure.update_date,
             });
           }
 
           return createCertification(courseStructure.id, config, access_token, {
             courseUuid: courseStructure.course_uuid,
-            orgSlug: props.orgslug,
+            orgSlug: org?.slug,
             lastKnownUpdateDate: courseStructure.update_date,
           });
         }
@@ -279,7 +277,7 @@ const EditCourseCertification = (props: EditCourseCertificationProps) => {
         if (existingCertification) {
           return deleteCertification(existingCertification.certification_uuid, access_token, {
             courseUuid: courseStructure.course_uuid,
-            orgSlug: props.orgslug,
+            orgSlug: org?.slug,
             lastKnownUpdateDate: courseStructure.update_date,
           });
         }

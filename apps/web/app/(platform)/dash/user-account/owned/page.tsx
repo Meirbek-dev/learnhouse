@@ -1,22 +1,25 @@
- 'use client';
+'use client';
 
 import CourseThumbnail from '@components/Objects/Thumbnails/CourseThumbnail';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
+import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { getOwnedCourses } from '@services/payments/payments';
-import { PLATFORM_ORG_SLUG } from '@services/config/config';
-import { useOrg } from '@components/Contexts/OrgContext';
 import { Package2, ShoppingCart } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import useSWR from 'swr';
 
 export default function PlatformOwnedCoursesPage() {
   const t = useTranslations('DashPage.Courses');
-  const org = useOrg() as any;
+  const org = usePlatformOrg() as any;
   const session = usePlatformSession();
   const access_token = session?.data?.tokens?.access_token;
 
-  const { data: ownedCourses, error, isLoading } = useSWR(
+  const {
+    data: ownedCourses,
+    error,
+    isLoading,
+  } = useSWR(
     org && access_token ? [`/payments/${org.id}/courses/owned`, access_token] : null,
     ([_url, token]) => getOwnedCourses(org.id, token),
     { revalidateOnFocus: false, dedupingInterval: 60_000 },
@@ -62,11 +65,7 @@ export default function PlatformOwnedCoursesPage() {
         </div>
       </div>
 
-      {!ownedCourses || ownedCourses.length === 0 ? (
-        <EmptyState t={t} />
-      ) : (
-        <CourseGrid ownedCourses={ownedCourses} />
-      )}
+      {!ownedCourses || ownedCourses.length === 0 ? <EmptyState t={t} /> : <CourseGrid ownedCourses={ownedCourses} />}
     </div>
   );
 }
@@ -88,8 +87,11 @@ const EmptyState = ({ t }: { t: any }) => (
 const CourseGrid = ({ ownedCourses }: { ownedCourses: any[] }) => (
   <div className="grid w-full grid-cols-1 gap-6 pb-12 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4">
     {ownedCourses.map((course: any) => (
-      <div key={course.course_uuid} className="mx-auto w-full max-w-[300px] transition-transform duration-200 hover:scale-[1.02]">
-        <CourseThumbnail course={course} orgslug={PLATFORM_ORG_SLUG} />
+      <div
+        key={course.course_uuid}
+        className="mx-auto w-full max-w-[300px] transition-transform duration-200 hover:scale-[1.02]"
+      >
+        <CourseThumbnail course={course} />
       </div>
     ))}
   </div>

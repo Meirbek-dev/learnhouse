@@ -2,9 +2,9 @@
 
 import { ArrowBigDown, ArrowBigUp, Clock, Edit, Trash2 } from 'lucide-react';
 import { useFormatter, useNow, useTranslations } from 'next-intl';
+import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { Actions, Resources, Scopes } from '@/types/permissions';
 import RichContentRenderer from './rich-content-renderer';
-import { useOrg } from '@components/Contexts/OrgContext';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { usePermissions } from '@/components/Security';
 import { Button } from '@/components/ui/button';
@@ -42,7 +42,7 @@ export default function DiscussionReply({
   const [_isPending, startTransition] = useTransition();
   const format = useFormatter();
   const now = useNow();
-  const org = useOrg();
+  const org = usePlatformOrg();
   const { can } = usePermissions();
   const canModerateDiscussion = can(Actions.MODERATE, Resources.DISCUSSION, Scopes.ORG);
 

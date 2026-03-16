@@ -1,4 +1,4 @@
- 'use client';
+'use client';
 
 import UserGamificationSettings from '@components/Dashboard/Pages/UserAccount/UserGamificationSettings/UserGamificationSettings';
 import UserEditPassword from '@components/Dashboard/Pages/UserAccount/UserEditPassword/UserEditPassword';
@@ -38,13 +38,19 @@ export default function PlatformUserSettingsPage(props: { params: Promise<{ subp
     [],
   );
 
-  const tabs = useMemo(() => navigationItems.map((it) => ({ id: it.id, labelKey: it.label, icon: it.icon })), [navigationItems]);
+  const tabs = useMemo(
+    () => navigationItems.map((it) => ({ id: it.id, labelKey: it.label, icon: it.icon })),
+    [navigationItems],
+  );
 
   const CurrentComponent = navigationItems.find((item) => item.id === subpage)?.component;
 
   return (
     <div className="flex h-full w-full flex-col">
-      <SettingsHeader breadcrumbType="user" title={t('title')}>
+      <SettingsHeader
+        breadcrumbType="user"
+        title={t('title')}
+      >
         <SettingsTabs
           value={subpage}
           tabs={tabs}

@@ -2,7 +2,7 @@
 
 import { linkUserToUserGroup, unLinkUserToUserGroup } from '@services/usergroups/usergroups';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { useOrg } from '@components/Contexts/OrgContext';
+import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import type { ColumnDef } from '@tanstack/react-table';
 import { getAPIUrl } from '@services/config/config';
@@ -28,12 +28,10 @@ interface OrgUserRow {
 
 const ManageUsers = (props: ManageUsersProps) => {
   const t = useTranslations('Components.ManageUsers');
-  const org = useOrg() as any;
+  const org = usePlatformOrg() as any;
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
-  const { data: OrgUsers } = useSWR(org ? `${getAPIUrl()}orgs/users` : null, (url) =>
-    swrFetcher(url, access_token),
-  );
+  const { data: OrgUsers } = useSWR(org ? `${getAPIUrl()}orgs/users` : null, (url) => swrFetcher(url, access_token));
   const { data: UGusers } = useSWR(org ? `${getAPIUrl()}usergroups/${props.usergroup_id}/users` : null, (url) =>
     swrFetcher(url, access_token),
   );

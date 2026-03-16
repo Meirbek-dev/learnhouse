@@ -3,8 +3,8 @@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { createUserGroup } from '@services/usergroups/usergroups';
+import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { valibotResolver } from '@hookform/resolvers/valibot';
-import { useOrg } from '@components/Contexts/OrgContext';
 import { getAPIUrl } from '@services/config/config';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
@@ -30,7 +30,7 @@ type UserGroupFormValues = v.InferOutput<ReturnType<typeof createValidationSchem
 
 const AddUserGroup = (props: AddUserGroupProps) => {
   const t = useTranslations('Components.AddUserGroup');
-  const org = useOrg() as any;
+  const org = usePlatformOrg() as any;
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const validationSchema = createValidationSchema(t);

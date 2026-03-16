@@ -1,10 +1,10 @@
 'use client';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { revalidateTags } from '@services/utils/ts/requests';
 import { updateOrganization } from '@services/settings/org';
-import { useOrg } from '@components/Contexts/OrgContext';
 import { getAPIUrl } from '@services/config/config';
 import { Textarea } from '@components/ui/textarea';
 import { Button } from '@components/ui/button';
@@ -32,7 +32,7 @@ type OrganizationValues = v.InferOutput<ReturnType<typeof createValidationSchema
 const OrgEditGeneral: FC = () => {
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
-  const org = useOrg() as any;
+  const org = usePlatformOrg() as any;
   const t = useTranslations('DashPage.OrgSettings.General');
   const validationSchema = createValidationSchema(t);
 

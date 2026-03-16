@@ -8,7 +8,7 @@ import {
   updateDiscussion,
 } from '@services/courses/discussions';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { useOrg } from '@components/Contexts/OrgContext';
+import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { useEffect, useRef, useState } from 'react';
 import DiscussionPost from './discussion-post';
@@ -84,7 +84,7 @@ export default function DiscussionList({ initialPosts, currentUser, courseUuid, 
     }
     return [];
   });
-  const org = useOrg();
+  const org = usePlatformOrg();
   const session = usePlatformSession();
   const access_token = session?.data?.tokens?.access_token;
   const postsRafRef = useRef<number | null>(null);

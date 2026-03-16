@@ -1,4 +1,4 @@
- 'use client';
+'use client';
 
 import PaymentsConfigurationPage from '@components/Dashboard/Pages/Payments/PaymentsConfigurationPage';
 import PaymentsCustomersPage from '@components/Dashboard/Pages/Payments/PaymentsCustomersPage';
@@ -23,14 +23,18 @@ export default function PlatformPaymentsPage(props: { params: Promise<{ subpage:
 
   const getPageTitle = () => {
     switch (subpage) {
-      case 'customers':
+      case 'customers': {
         return { h1: t('customers'), h2: t('customerInfo') };
-      case 'paid-products':
+      }
+      case 'paid-products': {
         return { h1: t('paidProducts'), h2: t('paidProductsInfo') };
-      case 'configuration':
+      }
+      case 'configuration': {
         return { h1: t('configuration'), h2: t('configurationInfo') };
-      default:
+      }
+      default: {
         return { h1: t('title'), h2: t('overview') };
+      }
     }
   };
 
@@ -47,9 +51,24 @@ export default function PlatformPaymentsPage(props: { params: Promise<{ subpage:
           </div>
         </div>
         <div className="flex space-x-0.5 text-sm font-bold">
-          <TabLink href={getAbsoluteUrl('/dash/payments/customers')} icon={<Users size={16} />} label={t('customers')} isActive={subpage === 'customers'} />
-          <TabLink href={getAbsoluteUrl('/dash/payments/paid-products')} icon={<Gem size={16} />} label={t('productsSubscriptions')} isActive={subpage === 'paid-products'} />
-          <TabLink href={getAbsoluteUrl('/dash/payments/configuration')} icon={<Settings size={16} />} label={t('configuration')} isActive={subpage === 'configuration'} />
+          <TabLink
+            href={getAbsoluteUrl('/dash/payments/customers')}
+            icon={<Users size={16} />}
+            label={t('customers')}
+            isActive={subpage === 'customers'}
+          />
+          <TabLink
+            href={getAbsoluteUrl('/dash/payments/paid-products')}
+            icon={<Gem size={16} />}
+            label={t('productsSubscriptions')}
+            isActive={subpage === 'paid-products'}
+          />
+          <TabLink
+            href={getAbsoluteUrl('/dash/payments/configuration')}
+            icon={<Settings size={16} />}
+            label={t('configuration')}
+            isActive={subpage === 'configuration'}
+          />
         </div>
       </div>
       <div className="h-6 shrink-0" />
@@ -68,9 +87,21 @@ export default function PlatformPaymentsPage(props: { params: Promise<{ subpage:
   );
 }
 
-const TabLink = ({ href, icon, label, isActive }: { href: string; icon: ReactNode; label: string; isActive: boolean }) => (
+const TabLink = ({
+  href,
+  icon,
+  label,
+  isActive,
+}: {
+  href: string;
+  icon: ReactNode;
+  label: string;
+  isActive: boolean;
+}) => (
   <Link href={href}>
-    <div className={`border-primary w-fit py-2 text-center transition-all ease-linear ${isActive ? 'border-b-4' : 'opacity-50'} cursor-pointer`}>
+    <div
+      className={`border-primary w-fit py-2 text-center transition-all ease-linear ${isActive ? 'border-b-4' : 'opacity-50'} cursor-pointer`}
+    >
       <div className="mx-2 flex items-center space-x-2.5">
         {icon}
         <div>{label}</div>

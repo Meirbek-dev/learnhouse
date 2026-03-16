@@ -16,11 +16,9 @@ import AppLink from '@/components/ui/AppLink';
 import { useTranslations } from 'next-intl';
 
 export default function CourseWorkspaceOverview({
-  orgslug,
   courseuuid,
   capabilities,
 }: {
-  orgslug: string;
   courseuuid: string;
   capabilities: CourseWorkspaceCapabilities;
 }) {

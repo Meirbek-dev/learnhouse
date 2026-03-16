@@ -1,8 +1,7 @@
+import UserRolesClient from '@/app/_shared/dash/admin/users/client';
 import { Actions, Resources, Scopes } from '@/types/permissions';
 import { requirePermission } from '@/lib/server-auth';
-import { PLATFORM_ORG_SLUG } from '@/services/config/config';
 import { getTranslations } from 'next-intl/server';
-import UserRolesClient from '@/app/_shared/dash/admin/users/client';
 import type { Metadata } from 'next';
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -15,6 +14,6 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function PlatformAdminUsersPage() {
-  await requirePermission(PLATFORM_ORG_SLUG, Actions.UPDATE, Resources.ROLE, Scopes.ORG);
+  await requirePermission(Actions.UPDATE, Resources.ROLE, Scopes.ORG);
   return <UserRolesClient />;
 }

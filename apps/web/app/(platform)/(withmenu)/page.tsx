@@ -1,8 +1,8 @@
 import { getPlatformOrganizationContextInfo } from '@services/organizations/orgs';
+import { LandingContent } from '@/app/_shared/withmenu/LandingContent';
 import { getOrgThumbnailMediaDirectory } from '@services/media/media';
 import { PageSuspense } from '@components/Utils/PageSuspense';
 import { getTranslations } from 'next-intl/server';
-import { LandingContent } from '@/app/_shared/withmenu/LandingContent';
 import type { Metadata } from 'next';
 
 function CourseGridSkeleton() {

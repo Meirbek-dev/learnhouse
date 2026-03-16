@@ -7,7 +7,7 @@ import {
   updatePreferencesOnServer,
   updateStreakOnServer,
 } from '@/services/gamification/server';
-import type { DashboardData, OrganizationLeaderboard, XPAwardResponse } from '@/types/gamification';
+import type { DashboardData, PlatformLeaderboard, XPAwardResponse } from '@/types/gamification';
 
 export async function getDashboardDataAction(orgId: number): Promise<DashboardData | null> {
   if (!orgId) return null;
@@ -15,7 +15,7 @@ export async function getDashboardDataAction(orgId: number): Promise<DashboardDa
   return data ?? null;
 }
 
-export async function getLeaderboardAction(orgId: number, limit = 20): Promise<OrganizationLeaderboard | null> {
+export async function getLeaderboardAction(orgId: number, limit = 20): Promise<PlatformLeaderboard | null> {
   if (!orgId) return null;
   const data = await getServerOrganizationLeaderboard(orgId, limit);
   return data ?? null;

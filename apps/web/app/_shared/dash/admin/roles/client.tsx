@@ -53,7 +53,7 @@ import type { Permission, RoleAuditEvent, RoleWithPermissions } from '@/types/pe
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useOrg } from '@components/Contexts/OrgContext';
+import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import type { ColumnDef } from '@tanstack/react-table';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -69,7 +69,7 @@ import useSWR from 'swr';
 type RoleDialogMode = 'create' | 'edit' | 'clone';
 
 export default function RBACAdminClient() {
-  const org = useOrg();
+  const org = usePlatformOrg();
   const session = usePlatformSession();
   const { can } = usePermissions();
   const t = useTranslations('Components.OrgRoles');

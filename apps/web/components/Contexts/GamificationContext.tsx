@@ -3,7 +3,7 @@
 import type {
   DashboardData,
   GamificationError,
-  OrganizationLeaderboard,
+  PlatformLeaderboard,
   UserGamificationProfile,
   XPAwardRequest,
   XPAwardResponse,
@@ -43,7 +43,7 @@ interface GamificationContextValue {
   // Core Data (provided by Server Components via props)
   profile: UserGamificationProfile | null;
   dashboard: DashboardData | null;
-  leaderboard: OrganizationLeaderboard | null;
+  leaderboard: PlatformLeaderboard | null;
 
   // States
   isLoading: boolean;
@@ -76,7 +76,7 @@ interface GamificationProviderProps {
   initialData?: {
     profile?: UserGamificationProfile | null;
     dashboard?: DashboardData | null;
-    leaderboard?: OrganizationLeaderboard | null;
+    leaderboard?: PlatformLeaderboard | null;
   };
 }
 
@@ -86,7 +86,7 @@ export function GamificationProvider({ children, orgId, initialData }: Gamificat
   // Server-provided data (updated via props)
   const [profile, setProfile] = useState<UserGamificationProfile | null>(initialData?.dashboard?.profile || null);
   const [dashboard, setDashboard] = useState<DashboardData | null>(initialData?.dashboard || null);
-  const [leaderboard, setLeaderboard] = useState<OrganizationLeaderboard | null>(
+  const [leaderboard, setLeaderboard] = useState<PlatformLeaderboard | null>(
     initialData?.dashboard?.leaderboard ?? null,
   );
   const [isLoading, setIsLoading] = useState(false);

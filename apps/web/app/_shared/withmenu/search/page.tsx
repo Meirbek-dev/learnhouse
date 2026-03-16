@@ -90,9 +90,7 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
       images: [getOrgThumbnailMediaDirectory(org?.org_uuid, org?.thumbnail_image)],
     },
     alternates: {
-      canonical: searchQuery
-        ? `/search?q=${encodeURIComponent(searchQuery)}`
-        : `/search`,
+      canonical: searchQuery ? `/search?q=${encodeURIComponent(searchQuery)}` : `/search`,
     },
   };
 }

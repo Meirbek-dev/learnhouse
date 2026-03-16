@@ -29,7 +29,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getUserAvatarMediaDirectory } from '@/services/media/media';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useOrg } from '@components/Contexts/OrgContext';
+import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import type { ColumnDef } from '@tanstack/react-table';
 import { useLocale, useTranslations } from 'next-intl';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -41,7 +41,7 @@ import { Card } from '@/components/ui/card';
 import { toast } from 'sonner';
 
 export default function UserRolesClient() {
-  const org = useOrg();
+  const org = usePlatformOrg();
   const session = usePlatformSession();
   const t = useTranslations('Components.OrgRoles');
   const locale = useLocale();

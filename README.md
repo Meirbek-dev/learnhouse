@@ -61,8 +61,10 @@ For Docker deployments, keep the live application configuration in `extra/.env`.
 - Start from `extra/example-conf.env` and copy it to `extra/.env`.
 - The `app` service reads backend runtime configuration from process environment variables only.
 - `apps/api/config/config.yaml` is reference-only and is not loaded at runtime.
-- `apps/api/.env.example` and `apps/web/.env.example` are local development examples, not deployment sources.
-- When building with `docker compose`, pass public web build variables with `--env-file extra/.env` or exported shell variables because `env_file` does not populate Docker build args.
+- `apps/api/.env.example` and `apps/web/.env.example` are local development examples, not deployment
+  sources.
+- When building with `docker compose`, pass public web build variables with `--env-file extra/.env`
+  or exported shell variables because `env_file` does not populate Docker build args.
 
 - [Self Hosting](https://docs.learnhouse.app/self-hosting/hosting-guide)
 

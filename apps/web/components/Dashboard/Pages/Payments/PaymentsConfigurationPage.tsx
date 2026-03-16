@@ -35,11 +35,11 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { useEffect, useEffectEvent, useRef, useState, useTransition } from 'react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { Alert, AlertDescription, AlertTitle } from '@components/ui/alert';
+import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { getUriWithoutOrg } from '@services/config/config';
 import { SiStripe } from '@icons-pack/react-simple-icons';
-import { useOrg } from '@components/Contexts/OrgContext';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
@@ -104,7 +104,7 @@ function ConfirmDeleteStripeConfig({ onDelete, t }: ConfirmDeleteStripeConfigPro
 }
 
 const PaymentsConfigurationPage: FC = () => {
-  const org = useOrg() as any;
+  const org = usePlatformOrg() as any;
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const {

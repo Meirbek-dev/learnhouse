@@ -23,8 +23,8 @@ import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 import { createElement, useEffect, useState, useTransition } from 'react';
 import { getOrgLandingMediaDirectory } from '@services/media/media';
+import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { getOrgCourses } from '@services/courses/courses';
-import { useOrg } from '@components/Contexts/OrgContext';
 import { Textarea } from '@components/ui/textarea';
 
 import { Switch } from '@components/ui/switch';
@@ -288,7 +288,7 @@ const makeGradientDirectionItems = (t: Function) =>
   Object.entries(getGradientDirections(t)).map(([value, label]) => ({ value, label }));
 
 const OrgEditLanding = () => {
-  const org = useOrg() as any;
+  const org = usePlatformOrg() as any;
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const [isLandingEnabled, setIsLandingEnabled] = useState(false);
@@ -1517,7 +1517,7 @@ interface ImageUploaderProps {
 }
 
 const ImageUploader: FC<ImageUploaderProps> = ({ t, onImageUploaded, className, buttonText, id }) => {
-  const org = useOrg() as any;
+  const org = usePlatformOrg() as any;
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const [isUploading, setIsUploading] = useState(false);
@@ -1991,7 +1991,7 @@ const FeaturedCoursesEditor: FC<{
   section: LandingFeaturedCourses;
   onChange: (section: LandingFeaturedCourses) => void;
 }> = ({ t, section, onChange }) => {
-  const org = useOrg() as any;
+  const org = usePlatformOrg() as any;
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
 

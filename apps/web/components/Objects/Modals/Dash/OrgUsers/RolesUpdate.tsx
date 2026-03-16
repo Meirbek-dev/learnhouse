@@ -4,9 +4,9 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { assignRoleToUser, removeRoleFromUser } from '@/services/rbac';
 import { BarLoader } from '@components/Objects/Loaders/BarLoader';
+import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { Alert, AlertDescription } from '@components/ui/alert';
 import { valibotResolver } from '@hookform/resolvers/valibot';
-import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
 import { useState, useTransition } from 'react';
@@ -35,7 +35,7 @@ interface FormData {
 const RolesUpdate: FC<Props> = (props) => {
   const validationT = useTranslations('Validation');
   const t = useTranslations('Components.RolesUpdate');
-  const org = useOrg() as any;
+  const org = usePlatformOrg() as any;
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const validationSchema = createValidationSchema(validationT);

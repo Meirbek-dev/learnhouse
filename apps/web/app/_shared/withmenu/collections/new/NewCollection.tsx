@@ -3,14 +3,14 @@
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { CheckCircle2, Globe, Image as ImageIcon, Loader2, Lock, Search } from 'lucide-react';
+import { getAbsoluteUrl, PLATFORM_ORG_SLUG } from '@services/config/config';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
+import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { createCollection } from '@services/courses/collections';
 import { useCourseListByOrg } from '@/hooks/useCourseListByOrg';
 import { revalidateTags } from '@services/utils/ts/requests';
-import { useOrg } from '@components/Contexts/OrgContext';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { getAbsoluteUrl, PLATFORM_ORG_SLUG } from '@services/config/config';
 import { useMemo, useState, useTransition } from 'react';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -33,7 +33,7 @@ interface CourseListItem {
 
 const NewCollection = () => {
   const t = useTranslations('NewCollectionPage');
-  const org = useOrg() as any;
+  const org = usePlatformOrg() as any;
   const session = usePlatformSession() as any;
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');

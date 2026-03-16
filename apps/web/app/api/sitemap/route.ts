@@ -1,7 +1,7 @@
 import { getPlatformOrganizationContextInfo } from '@services/organizations/orgs';
+import { getAbsoluteUrl, PLATFORM_ORG_SLUG } from '@services/config/config';
 import { getOrgCollections } from '@services/courses/collections';
 import { getOrgCourses } from '@services/courses/courses';
-import { getAbsoluteUrl, PLATFORM_ORG_SLUG } from '@services/config/config';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 

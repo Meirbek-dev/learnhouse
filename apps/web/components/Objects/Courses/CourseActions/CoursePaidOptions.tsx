@@ -3,7 +3,7 @@
 import { getProductsByCourse, getStripeProductCheckoutSession } from '@services/payments/products';
 import { ChevronDown, ChevronUp, Loader2, RefreshCcw, SquareCheck } from 'lucide-react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { useOrg } from '@components/Contexts/OrgContext';
+import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { getAbsoluteUrl } from '@services/config/config';
 import { useState, useTransition } from 'react';
 import { Button } from '@components/ui/button';
@@ -22,7 +22,7 @@ interface CoursePaidOptionsProps {
 
 const CoursePaidOptions = ({ course }: CoursePaidOptionsProps) => {
   const t = useTranslations('Courses.CoursePaidOptions');
-  const org = useOrg() as any;
+  const org = usePlatformOrg() as any;
   const session = usePlatformSession() as any;
   const [expandedProducts, setExpandedProducts] = useState<Record<string, boolean>>({});
   const [isProcessing, setIsProcessing] = useState<Record<string, boolean>>({});

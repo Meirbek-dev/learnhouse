@@ -9,10 +9,10 @@ import { updateAssignmentTask, updateReferenceFile } from '@services/courses/ass
 import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { useEffect, useRef, useState, useTransition } from 'react';
+import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { Alert, AlertDescription } from '@components/ui/alert';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { getTaskRefFileDir } from '@services/media/media';
-import { useOrg } from '@components/Contexts/OrgContext';
 import { constructAcceptValue } from '@/lib/constants';
 import { DragDropContext } from '@hello-pangea/dnd';
 import { Textarea } from '@components/ui/textarea';
@@ -248,7 +248,7 @@ export const AssignmentTaskGeneralEdit = () => {
 const UpdateTaskRef = () => {
   const t = useTranslations('DashPage.Assignments.TaskGeneralEdit');
   const session = usePlatformSession();
-  const org = useOrg() as any;
+  const org = usePlatformOrg() as any;
   const access_token = session?.data?.tokens?.access_token;
   const assignmentTaskState = useAssignmentsTask();
   const assignmentTaskStateHook = useAssignmentsTaskDispatch();

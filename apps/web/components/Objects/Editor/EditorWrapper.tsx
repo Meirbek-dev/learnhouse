@@ -2,7 +2,7 @@
 
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 
-import { OrgProvider } from '@components/Contexts/OrgContext';
+import { PlatformOrgContextProvider } from '@components/Contexts/OrgContext';
 import { updateActivity } from '@services/courses/activities';
 import { useTranslations } from 'next-intl';
 import type { JSX } from 'react';
@@ -51,7 +51,7 @@ const EditorWrapper = (props: EditorWrapperProps): JSX.Element => {
   }
 
   return (
-    <OrgProvider orgslug={props.org.slug}>
+    <PlatformOrgContextProvider initialOrg={props.org}>
       {isReady ? (
         <Editor
           org={props.org}
@@ -62,7 +62,7 @@ const EditorWrapper = (props: EditorWrapperProps): JSX.Element => {
           session={session}
         />
       ) : null}
-    </OrgProvider>
+    </PlatformOrgContextProvider>
   );
 };
 

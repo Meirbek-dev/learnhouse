@@ -4,8 +4,8 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { linkResourcesToUserGroup } from '@services/usergroups/usergroups';
 import { getAPIUrl, getAbsoluteUrl } from '@services/config/config';
+import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { useCourse } from '@components/Contexts/CourseContext';
-import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
@@ -27,7 +27,7 @@ interface LinkToUserGroupProps {
 const LinkToUserGroup = (props: LinkToUserGroupProps) => {
   const t = useTranslations('Components.LinkToUserGroup');
   const course = useCourse();
-  const org = useOrg() as any;
+  const org = usePlatformOrg() as any;
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const { courseStructure } = course;

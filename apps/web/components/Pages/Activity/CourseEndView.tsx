@@ -6,7 +6,7 @@ import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { getUserCertificates } from '@services/courses/certifications';
 import SimpleAlertDialog from '@/components/ui/alert-dialog-simple';
-import { useOrg } from '@components/Contexts/OrgContext';
+import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { getAbsoluteUrl } from '@services/config/config';
 import { useLocale, useTranslations } from 'next-intl';
 import { useWindowSize } from '@/hooks/useWindowSize';
@@ -28,7 +28,7 @@ interface CourseEndViewProps {
 
 const CourseEndView: FC<CourseEndViewProps> = ({ courseName, courseUuid, thumbnailImage, course, trailData }) => {
   const { width, height } = useWindowSize();
-  const org = useOrg() as any;
+  const org = usePlatformOrg() as any;
   const session = usePlatformSession();
   const [userCertificate, setUserCertificate] = useState<any>(null);
   const [isLoadingCertificate, setIsLoadingCertificate] = useState(false);

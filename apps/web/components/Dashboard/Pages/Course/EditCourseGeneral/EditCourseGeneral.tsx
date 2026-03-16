@@ -7,6 +7,7 @@ import { SectionHeader } from '@components/Dashboard/Courses/SectionHeader';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { Card, CardContent, CardHeader } from '@components/ui/card';
+import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { updateCourseMetadata } from '@services/courses/courses';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { TagsInput } from '@components/ui/custom/tags-input';
@@ -67,10 +68,6 @@ function buildFormValues(courseStructure: any): FormValues {
   };
 }
 
-interface EditCourseStructureProps {
-  orgslug: string;
-}
-
 interface FormValues {
   name: string;
   description: string;
@@ -117,7 +114,7 @@ const validateValues = (values: FormValues, t: any) => {
   return errors;
 };
 
-function EditCourseGeneral(props: EditCourseStructureProps) {
+function EditCourseGeneral() {
   const t = useTranslations('CourseEdit.General');
   const tCommon = useTranslations('Common');
   const [error, setError] = useState('');
@@ -168,6 +165,7 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
   const { isLoading, courseStructure } = course;
   const formId = useId();
   const session = usePlatformSession() as any;
+  const org = usePlatformOrg() as { slug?: string } | null;
   const accessToken = session?.data?.tokens?.access_token;
 
   const { isDirty, isDirtyRef, markDirty, markClean } = useDirtySection('general');
@@ -232,7 +230,7 @@ function EditCourseGeneral(props: EditCourseStructureProps) {
       async () =>
         updateCourseMetadata(course.courseStructure.course_uuid, values, accessToken, {
           lastKnownUpdateDate: course.courseStructure.update_date,
-          orgSlug: props.orgslug,
+          orgSlug: org?.slug,
         }),
       {
         onSuccess: () => {

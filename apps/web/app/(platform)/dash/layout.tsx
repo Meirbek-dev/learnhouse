@@ -1,6 +1,5 @@
 import { getTranslations } from 'next-intl/server';
 import { requireAuth } from '@/lib/server-auth';
-import { PLATFORM_ORG_SLUG } from '@/services/config/config';
 import type { Metadata } from 'next';
 
 import ClientAdminLayout from './client-admin-layout';
@@ -14,7 +13,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function PlatformDashLayout({ children }: { children: React.ReactNode }) {
-  await requireAuth(PLATFORM_ORG_SLUG);
+  await requireAuth();
 
   return <ClientAdminLayout>{children}</ClientAdminLayout>;
 }

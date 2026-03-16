@@ -6,9 +6,9 @@ import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import ArtPlayer from '@components/Objects/Activities/Video/Artplayer';
 import { getActivityBlockMediaDirectory } from '@services/media/media';
 import { uploadNewVideoFile } from '@services/blocks/Video/video';
+import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { useCourse } from '@components/Contexts/CourseContext';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
-import { useOrg } from '@components/Contexts/OrgContext';
 import { constructAcceptValue } from '@/lib/constants';
 import { AnimatePresence, motion } from 'motion/react';
 import { useLocale, useTranslations } from 'next-intl';
@@ -77,7 +77,7 @@ const VideoBlockComponent = (props: ExtendedNodeViewProps) => {
   const fullLocale = useLocale();
   const locale = fullLocale.split('-')[0];
   const { node, extension, updateAttributes } = props;
-  const org = useOrg() as Organization | null;
+  const org = usePlatformOrg() as Organization | null;
   const course = useCourse() as Course | null;
 
   const subtitleEntries = [

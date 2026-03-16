@@ -11,13 +11,12 @@ import type { FC } from 'react';
 
 interface CourseProgressProps {
   course: any;
-  orgslug: string;
   isOpen: boolean;
   onClose: () => void;
   trailData: any;
 }
 
-const CourseProgress: FC<CourseProgressProps> = ({ course, orgslug, isOpen, onClose, trailData }) => {
+const CourseProgress: FC<CourseProgressProps> = ({ course, isOpen, onClose, trailData }) => {
   const t = useTranslations('Courses.CoursesActions');
   const [expandedChapters, setExpandedChapters] = useState<Set<string>>(new Set());
 

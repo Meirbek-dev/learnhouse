@@ -23,7 +23,12 @@ async function PlatformAnalyticsCoursesPageInner(props: {
   const t = await getTranslations('TeacherAnalytics');
 
   if (!accessToken) {
-    return <AnalyticsEmptyState title={t('pages.coursesUnavailableTitle')} description={t('pages.coursesUnavailableDesc')} />;
+    return (
+      <AnalyticsEmptyState
+        title={t('pages.coursesUnavailableTitle')}
+        description={t('pages.coursesUnavailableDesc')}
+      />
+    );
   }
 
   try {
@@ -47,18 +52,54 @@ async function PlatformAnalyticsCoursesPageInner(props: {
           </CardHeader>
           <CardContent className="text-sm text-slate-600">{t('pages.courseRankingDescription')}</CardContent>
         </Card>
-        <TeacherFilterBar path="/dash/analytics/courses" query={query} courseCount={courseList.total} courseOptions={courseList.course_options} cohortOptions={courseList.cohort_options} />
+        <TeacherFilterBar
+          path="/dash/analytics/courses"
+          query={query}
+          courseCount={courseList.total}
+          courseOptions={courseList.course_options}
+          cohortOptions={courseList.cohort_options}
+        />
         <div className="flex items-center justify-between text-sm text-slate-500">
-          <span>{t('table.showingRows', { from: (courseList.page - 1) * courseList.page_size + 1, to: Math.min(courseList.page * courseList.page_size, courseList.total), total: courseList.total })}</span>
+          <span>
+            {t('table.showingRows', {
+              from: (courseList.page - 1) * courseList.page_size + 1,
+              to: Math.min(courseList.page * courseList.page_size, courseList.total),
+              total: courseList.total,
+            })}
+          </span>
         </div>
-        <CourseHealthTable rows={courseList.items} storageKey="courses-page" serverPaginated />
+        <CourseHealthTable
+          rows={courseList.items}
+          storageKey="courses-page"
+          serverPaginated
+        />
         {totalPages > 1 ? (
           <div className="flex items-center justify-end gap-2">
-            <Button variant="outline" size="sm" disabled={courseList.page <= 1} render={<Link href={`/dash/analytics/courses?${new URLSearchParams({ ...Object.fromEntries(params.entries()), page: String(Math.max(1, courseList.page - 1)), page_size: String(courseList.page_size) }).toString()}`} />}>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={courseList.page <= 1}
+              render={
+                <Link
+                  href={`/dash/analytics/courses?${new URLSearchParams({ ...Object.fromEntries(params.entries()), page: String(Math.max(1, courseList.page - 1)), page_size: String(courseList.page_size) }).toString()}`}
+                />
+              }
+            >
               {t('table.prev')}
             </Button>
-            <span className="text-sm text-slate-600">{t('table.page', { current: courseList.page, total: totalPages })}</span>
-            <Button variant="outline" size="sm" disabled={courseList.page >= totalPages} render={<Link href={`/dash/analytics/courses?${new URLSearchParams({ ...Object.fromEntries(params.entries()), page: String(Math.min(totalPages, courseList.page + 1)), page_size: String(courseList.page_size) }).toString()}`} />}>
+            <span className="text-sm text-slate-600">
+              {t('table.page', { current: courseList.page, total: totalPages })}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={courseList.page >= totalPages}
+              render={
+                <Link
+                  href={`/dash/analytics/courses?${new URLSearchParams({ ...Object.fromEntries(params.entries()), page: String(Math.min(totalPages, courseList.page + 1)), page_size: String(courseList.page_size) }).toString()}`}
+                />
+              }
+            >
               {t('table.next')}
             </Button>
           </div>
@@ -66,6 +107,11 @@ async function PlatformAnalyticsCoursesPageInner(props: {
       </div>
     );
   } catch (error) {
-    return <AnalyticsEmptyState title={t('pages.coursesUnavailableTitle')} description={error instanceof Error ? error.message : t('pages.coursesLoadError')} />;
+    return (
+      <AnalyticsEmptyState
+        title={t('pages.coursesUnavailableTitle')}
+        description={error instanceof Error ? error.message : t('pages.coursesLoadError')}
+      />
+    );
   }
 }

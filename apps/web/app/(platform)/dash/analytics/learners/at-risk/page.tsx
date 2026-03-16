@@ -13,14 +13,21 @@ export default function PlatformAnalyticsAtRiskPage(props: {
   return <PlatformAnalyticsAtRiskPageInner searchParams={props.searchParams} />;
 }
 
-async function PlatformAnalyticsAtRiskPageInner(props: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+async function PlatformAnalyticsAtRiskPageInner(props: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const session = await auth();
   const accessToken = session?.tokens?.access_token;
   const query = normalizeAnalyticsQuery(await props.searchParams);
   const t = await getTranslations('TeacherAnalytics');
 
   if (!accessToken) {
-    return <AnalyticsEmptyState title={t('pages.atRiskUnavailableTitle')} description={t('pages.atRiskUnavailableDesc')} />;
+    return (
+      <AnalyticsEmptyState
+        title={t('pages.atRiskUnavailableTitle')}
+        description={t('pages.atRiskUnavailableDesc')}
+      />
+    );
   }
 
   try {
@@ -38,18 +45,54 @@ async function PlatformAnalyticsAtRiskPageInner(props: { searchParams: Promise<R
 
     return (
       <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-6 px-4 py-6 md:px-6 xl:px-8">
-        <TeacherFilterBar path="/dash/analytics/learners/at-risk" query={query} courseCount={risk.course_options.length} courseOptions={risk.course_options} cohortOptions={risk.cohort_options} />
+        <TeacherFilterBar
+          path="/dash/analytics/learners/at-risk"
+          query={query}
+          courseCount={risk.course_options.length}
+          courseOptions={risk.course_options}
+          cohortOptions={risk.cohort_options}
+        />
         <div className="flex items-center justify-between text-sm text-slate-500">
-          <span>{t('table.showingRows', { from: (risk.page - 1) * risk.page_size + 1, to: Math.min(risk.page * risk.page_size, risk.total), total: risk.total })}</span>
+          <span>
+            {t('table.showingRows', {
+              from: (risk.page - 1) * risk.page_size + 1,
+              to: Math.min(risk.page * risk.page_size, risk.total),
+              total: risk.total,
+            })}
+          </span>
         </div>
-        <AtRiskLearnersTable rows={risk.items} title={t('pages.atRiskPageTitle')} description={t('pages.atRiskPageDescription', { total: risk.total })} storageKey="at-risk-page" serverPaginated />
+        <AtRiskLearnersTable
+          rows={risk.items}
+          title={t('pages.atRiskPageTitle')}
+          description={t('pages.atRiskPageDescription', { total: risk.total })}
+          storageKey="at-risk-page"
+          serverPaginated
+        />
         {totalPages > 1 ? (
           <div className="flex items-center justify-end gap-2">
-            <Button variant="outline" size="sm" disabled={risk.page <= 1} render={<Link href={`/dash/analytics/learners/at-risk?${new URLSearchParams({ ...Object.fromEntries(params.entries()), page: String(Math.max(1, risk.page - 1)), page_size: String(risk.page_size) }).toString()}`} />}>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={risk.page <= 1}
+              render={
+                <Link
+                  href={`/dash/analytics/learners/at-risk?${new URLSearchParams({ ...Object.fromEntries(params.entries()), page: String(Math.max(1, risk.page - 1)), page_size: String(risk.page_size) }).toString()}`}
+                />
+              }
+            >
               {t('table.prev')}
             </Button>
             <span className="text-sm text-slate-600">{t('table.page', { current: risk.page, total: totalPages })}</span>
-            <Button variant="outline" size="sm" disabled={risk.page >= totalPages} render={<Link href={`/dash/analytics/learners/at-risk?${new URLSearchParams({ ...Object.fromEntries(params.entries()), page: String(Math.min(totalPages, risk.page + 1)), page_size: String(risk.page_size) }).toString()}`} />}>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={risk.page >= totalPages}
+              render={
+                <Link
+                  href={`/dash/analytics/learners/at-risk?${new URLSearchParams({ ...Object.fromEntries(params.entries()), page: String(Math.min(totalPages, risk.page + 1)), page_size: String(risk.page_size) }).toString()}`}
+                />
+              }
+            >
               {t('table.next')}
             </Button>
           </div>
@@ -57,6 +100,11 @@ async function PlatformAnalyticsAtRiskPageInner(props: { searchParams: Promise<R
       </div>
     );
   } catch (error) {
-    return <AnalyticsEmptyState title={t('pages.atRiskUnavailableTitle')} description={error instanceof Error ? error.message : t('pages.atRiskLoadError')} />;
+    return (
+      <AnalyticsEmptyState
+        title={t('pages.atRiskUnavailableTitle')}
+        description={error instanceof Error ? error.message : t('pages.atRiskLoadError')}
+      />
+    );
   }
 }

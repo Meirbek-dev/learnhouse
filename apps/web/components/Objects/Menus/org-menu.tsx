@@ -16,10 +16,6 @@ import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
 import Image from 'next/image';
 
-interface OrgMenuProps {
-  orgslug: string;
-}
-
 interface NavigationLinkProps {
   href: string;
   type: 'courses' | 'collections' | 'trail';
@@ -58,7 +54,7 @@ const NavigationLinkItem = ({ href, type }: NavigationLinkProps) => {
   );
 };
 
-export default function OrgMenu({ orgslug }: OrgMenuProps) {
+export default function OrgMenu() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();

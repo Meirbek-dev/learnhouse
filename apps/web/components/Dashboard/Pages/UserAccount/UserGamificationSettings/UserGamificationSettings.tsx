@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useOptionalGamificationContext } from '@/components/Contexts/GamificationContext';
 import { GamificationProfileSection } from '@/components/Dashboard/Gamification';
 import { updatePreferencesAction } from '@/app/actions/gamification';
-import { useOrg } from '@components/Contexts/OrgContext';
+import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { Check, Loader2, Save } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Switch } from '@/components/ui/switch';
@@ -36,7 +36,7 @@ const DEFAULT_PREFERENCES: GamificationPreferences = {
 
 export default function UserGamificationSettings() {
   const t = useTranslations('DashPage.UserAccountSettings.Gamification');
-  const org = useOrg() as any;
+  const org = usePlatformOrg() as any;
   const orgId = org?.id;
   const ctx = useOptionalGamificationContext();
   const profile = ctx?.profile;

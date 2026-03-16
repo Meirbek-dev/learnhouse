@@ -14,9 +14,9 @@ import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import { removeCoursePrefix } from '../Thumbnails/CourseThumbnail';
+import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import type { ChangeEvent, FC, KeyboardEvent } from 'react';
 import { searchOrgContent } from '@services/search/search';
-import { useOrg } from '@components/Contexts/OrgContext';
 import { getAbsoluteUrl } from '@services/config/config';
 import { useDebouncedValue } from '@/hooks/useDebounce';
 import { Input } from '@components/ui/input';
@@ -109,7 +109,7 @@ const CourseResultsSkeleton = () => (
 
 export const SearchBar: FC<SearchBarProps> = ({ className = '', isMobile = false, showSearchSuggestions = false }) => {
   const t = useTranslations('Components.SearchBar');
-  const org = useOrg() as any;
+  const org = usePlatformOrg() as any;
   const orgslug = org?.slug;
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<SearchResults>({

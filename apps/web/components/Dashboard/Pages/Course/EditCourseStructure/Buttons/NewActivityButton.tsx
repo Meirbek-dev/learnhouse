@@ -11,8 +11,8 @@ import {
 import { createActivity, createExternalVideoActivity, createFileActivity } from '@services/courses/activities';
 import NewActivityModal from '@components/Objects/Modals/Activities/Create/NewActivity';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { useCourse } from '@components/Contexts/CourseContext';
-import { useOrg } from '@components/Contexts/OrgContext';
 import { Button } from '@/components/ui/button';
 import { useTranslations } from 'next-intl';
 import { Layers } from 'lucide-react';
@@ -27,7 +27,7 @@ interface NewActivityButtonProps {
 const NewActivityButton = (props: NewActivityButtonProps) => {
   const [newActivityModal, setNewActivityModal] = useState(false);
   const course = useCourse();
-  const org = useOrg() as any;
+  const org = usePlatformOrg() as any;
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const { showConflict, refreshCourseMeta } = course;

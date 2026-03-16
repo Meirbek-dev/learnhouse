@@ -29,14 +29,14 @@ import { CourseStatusBadge, courseWorkflowSummaryCardClass } from '@components/D
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import CourseThumbnail, { removeCoursePrefix } from '@components/Objects/Thumbnails/CourseThumbnail';
 import { deleteCourseFromBackend, updateCourseAccess } from '@services/courses/courses';
-import { useOrg } from '@components/Contexts/OrgContext';
 import { Actions, Resources, Scopes, usePermissions } from '@/components/Security';
 import { useCallback, useEffect, useMemo, useState, useTransition } from 'react';
 import type { Course } from '@components/Objects/Thumbnails/CourseThumbnail';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { PLATFORM_ORG_SLUG } from '@services/config/config';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
+import { usePlatformOrg } from '@components/Contexts/OrgContext';
+import { PLATFORM_ORG_SLUG } from '@services/config/config';
 import type { ColumnDef } from '@tanstack/react-table';
 import { Checkbox } from '@/components/ui/checkbox';
 import DataTable from '@/components/ui/data-table';
@@ -87,7 +87,7 @@ const CoursesHome = ({
   const viewMode = searchParams.get('view') === 'cards' ? 'cards' : 'table';
   const { can } = usePermissions();
   const session = usePlatformSession() as any;
-  const org = useOrg() as { slug?: string } | null;
+  const org = usePlatformOrg() as { slug?: string } | null;
   const accessToken = session?.data?.tokens?.access_token;
   const orgslug = org?.slug || PLATFORM_ORG_SLUG;
   const canCreateCourse = can(Actions.CREATE, Resources.COURSE, Scopes.ORG);
@@ -634,7 +634,6 @@ const CoursesHome = ({
               <CourseThumbnail
                 customLink={buildCourseWorkspacePath(removeCoursePrefix(course.course_uuid))}
                 course={course}
-                orgslug={orgslug}
               />
             </div>
           ))}
@@ -778,9 +777,7 @@ function CourseRowActions({ course, orgslug }: { course: ManageableCourse; orgsl
         }
       />
       <DropdownMenuContent align="end">
-        <DropdownMenuItem
-          onClick={() => router.push(buildCourseWorkspacePath(removeCoursePrefix(course.course_uuid)))}
-        >
+        <DropdownMenuItem onClick={() => router.push(buildCourseWorkspacePath(removeCoursePrefix(course.course_uuid)))}>
           <List className="size-4" />
           {t('rowActions.openWorkspace')}
         </DropdownMenuItem>

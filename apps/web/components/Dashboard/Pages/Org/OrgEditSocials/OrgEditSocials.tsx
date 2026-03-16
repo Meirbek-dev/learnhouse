@@ -3,9 +3,9 @@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { SiFacebook, SiInstagram, SiTiktok, SiX, SiYoutube } from '@icons-pack/react-simple-icons';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { revalidateTags } from '@services/utils/ts/requests';
 import { updateOrganization } from '@services/settings/org';
-import { useOrg } from '@components/Contexts/OrgContext';
 import { getAPIUrl } from '@services/config/config';
 import { Plus, X as XIcon } from 'lucide-react';
 import { Button } from '@components/ui/button';
@@ -31,7 +31,7 @@ interface OrganizationValues {
 export default function OrgEditSocials() {
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
-  const org = useOrg() as any;
+  const org = usePlatformOrg() as any;
   const t = useTranslations('DashPage.OrgSettings.Socials');
 
   const defaultValues = {

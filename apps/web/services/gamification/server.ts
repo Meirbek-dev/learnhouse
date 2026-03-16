@@ -2,7 +2,7 @@
 
 // Server-only data fetchers with Next.js cacheComponents
 
-import type { DashboardData, OrganizationLeaderboard, UserGamificationProfile } from '@/types/gamification';
+import type { DashboardData, PlatformLeaderboard, UserGamificationProfile } from '@/types/gamification';
 import { gamificationTag, gamificationTags } from '@/lib/cacheTags';
 import { extractStreakInfo } from '@/types/gamification/profile';
 import { CacheProfiles, cacheLife, cacheTag } from '@/lib/cache';
@@ -90,7 +90,7 @@ function normalizeTransactions(transactions: unknown[] | undefined) {
   });
 }
 
-function normalizeLeaderboard(payload?: RawLeaderboardResponse | null): OrganizationLeaderboard {
+function normalizeLeaderboard(payload?: RawLeaderboardResponse | null): PlatformLeaderboard {
   const fallbackDate = nowISO();
   const entries = Array.isArray(payload?.entries) ? payload?.entries : [];
   return {
@@ -256,7 +256,7 @@ export async function getServerGamificationDashboard(orgId: number): Promise<Das
 export async function getServerOrganizationLeaderboard(
   orgId: number,
   limit = 20,
-): Promise<OrganizationLeaderboard | null> {
+): Promise<PlatformLeaderboard | null> {
   // Check if user is authenticated first
   const accessToken = await getAccessToken();
   if (!accessToken) {

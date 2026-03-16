@@ -7,6 +7,6 @@ export default async function PlatformCourseDetailsPage(props: { params: Promise
   return renderCourseWorkspacePage({
     courseuuid,
     activeStage: 'details',
-    children: <EditCourseGeneral orgslug={PLATFORM_ORG_SLUG} />,
+    children: <EditCourseGeneral />,
   });
 }

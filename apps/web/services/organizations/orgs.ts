@@ -6,8 +6,8 @@ import {
   errorHandling,
   getResponseMetadata,
 } from '@services/utils/ts/requests';
-import { getAPIUrl } from '@services/config/config';
 import { CacheProfiles, cacheLife, cacheTag } from '@/lib/cache';
+import { getAPIUrl } from '@services/config/config';
 import { tags } from '@/lib/cacheTags';
 
 /*

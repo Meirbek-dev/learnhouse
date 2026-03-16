@@ -34,16 +34,16 @@ import type { ResourceAction } from '@/components/Utils/ResourceActionsMenu';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { usePermissions } from '@/components/Security/PermissionProvider';
 import { Card, CardContent, CardFooter } from '@components/ui/card';
+import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { Resources, Actions, Scopes } from '@/types/permissions';
-import { useOrg } from '@components/Contexts/OrgContext';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { Button } from '@components/ui/button';
 import { Badge } from '@components/ui/badge';
 import Link from '@components/ui/AppLink';
 
 import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media';
+import { getAbsoluteUrl, PLATFORM_ORG_SLUG } from '@services/config/config';
 import { deleteCourseFromBackend } from '@services/courses/courses';
-import { getAbsoluteUrl } from '@services/config/config';
 
 // ============================================================================
 // Types
@@ -83,7 +83,6 @@ export interface Course {
 
 export interface CourseThumbnailProps {
   course: Course;
-  orgslug: string;
   customLink?: string;
   trailData?: any;
   trailLoading?: boolean;
@@ -379,11 +378,10 @@ const CourseActions: FC<CourseActionsProps> = ({
 
 interface AdminMenuProps {
   course: Course;
-  orgSlug: string;
   onDelete: () => Promise<void>;
 }
 
-const AdminMenu: FC<AdminMenuProps> = ({ course, orgSlug, onDelete }) => {
+const AdminMenu: FC<AdminMenuProps> = ({ course, onDelete }) => {
   const t = useTranslations('Components.CourseThumbnail');
   const router = useRouter();
   const session = usePlatformSession();
@@ -511,7 +509,6 @@ const AdminMenu: FC<AdminMenuProps> = ({ course, orgSlug, onDelete }) => {
 
 const CourseThumbnail: FC<CourseThumbnailProps> = ({
   course,
-  orgslug,
   customLink,
   trailData,
   trailLoading = false,
@@ -520,7 +517,7 @@ const CourseThumbnail: FC<CourseThumbnailProps> = ({
   const t = useTranslations('Components.CourseThumbnail');
   const locale = useLocale();
   const router = useRouter();
-  const org = useOrg() as any;
+  const org = usePlatformOrg() as any;
   const session = usePlatformSession() as any;
 
   // Memoized computed values
@@ -579,7 +576,7 @@ const CourseThumbnail: FC<CourseThumbnailProps> = ({
     const toastId = toast.loading(t('deleting'));
     try {
       await deleteCourseFromBackend(course.course_uuid, session.data?.tokens?.access_token, {
-        orgSlug: orgslug,
+        orgSlug: org?.slug || PLATFORM_ORG_SLUG,
       });
       toast.success(t('toastDeleteSuccess'));
       router.refresh();
@@ -599,7 +596,6 @@ const CourseThumbnail: FC<CourseThumbnailProps> = ({
     >
       <AdminMenu
         course={course}
-        orgSlug={orgslug}
         onDelete={handleDelete}
       />
 

@@ -7,10 +7,10 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { CourseChoiceCard, courseWorkflowSummaryCardClass } from './courseWorkflowUi';
 import { createNewCourse, getCourseMetadata } from '@services/courses/courses';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { useOrg } from '@components/Contexts/OrgContext';
-import { PLATFORM_ORG_SLUG } from '@services/config/config';
 import { useQueryState, useQueryStates, parseAsString } from 'nuqs';
+import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { PLATFORM_ORG_SLUG } from '@services/config/config';
 import { createChapter } from '@services/courses/chapters';
 import { useEffect, useMemo, useTransition } from 'react';
 import { RadioGroup } from '@/components/ui/radio-group';
@@ -35,7 +35,7 @@ export default function CourseCreationWizard({ sourceCourses }: CourseCreationWi
   const router = useRouter();
   const searchParams = useSearchParams();
   const session = usePlatformSession() as any;
-  const org = useOrg() as { id?: number; slug?: string } | null;
+  const org = usePlatformOrg() as { id?: number; slug?: string } | null;
   const accessToken = session?.data?.tokens?.access_token;
   const orgId = org?.id;
   const orgSlug = org?.slug || PLATFORM_ORG_SLUG;

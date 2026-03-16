@@ -18,9 +18,9 @@ import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getActivityBlockMediaDirectory } from '@services/media/media';
 import { uploadNewImageFile } from '@services/blocks/Image/images';
+import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { useCourse } from '@components/Contexts/CourseContext';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
-import { useOrg } from '@components/Contexts/OrgContext';
 import { constructAcceptValue } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 
@@ -411,7 +411,7 @@ function ViewerControls({ onExpand, onDownload, t }: ViewerControlsProps) {
 
 export default function ImageBlockComponent({ node, updateAttributes, extension }: ImageBlockProps) {
   const t = useTranslations('DashPage.Editor.ImageBlock');
-  const org = useOrg() as { org_uuid: string } | null;
+  const org = usePlatformOrg() as { org_uuid: string } | null;
   const course = useCourse();
   const { isEditable } = useEditorProvider();
   const session = usePlatformSession() as {

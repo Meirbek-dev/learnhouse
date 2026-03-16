@@ -2,8 +2,8 @@
 
 import { getCoursesLinkedToProduct, unlinkCourseFromProduct } from '@services/payments/products';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
-import { useOrg } from '@components/Contexts/OrgContext';
 import { BookOpen, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@components/ui/button';
 import { useTranslations } from 'next-intl';
@@ -21,7 +21,7 @@ interface ProductLinkedCoursesProps {
 export default function ProductLinkedCourses({ productId }: ProductLinkedCoursesProps) {
   const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
   const session = usePlatformSession() as any;
-  const org = useOrg() as any;
+  const org = usePlatformOrg() as any;
   const accessToken = session?.data?.tokens?.access_token;
   const orgId = org?.id;
   const tNotify = useTranslations('DashPage.Notifications');

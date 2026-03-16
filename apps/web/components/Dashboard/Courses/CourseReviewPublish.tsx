@@ -7,11 +7,12 @@ import {
   courseWorkflowSummaryCardClass,
 } from './courseWorkflowUi';
 import type { CourseWorkspaceCapabilities } from '@/lib/course-management-server';
+import { getAbsoluteUrl, PLATFORM_ORG_SLUG } from '@services/config/config';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { buildCourseWorkspacePath } from '@/lib/course-management';
+import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { updateCourseAccess } from '@services/courses/courses';
-import { getAbsoluteUrl } from '@services/config/config';
 import { ExternalLink, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState, useTransition } from 'react';
@@ -20,11 +21,9 @@ import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
 export default function CourseReviewPublish({
-  orgslug,
   courseuuid,
   capabilities,
 }: {
-  orgslug: string;
   courseuuid: string;
   capabilities: CourseWorkspaceCapabilities;
 }) {
@@ -32,6 +31,7 @@ export default function CourseReviewPublish({
   const tReadiness = useTranslations('DashPage.CourseManagement.Readiness');
   const session = usePlatformSession() as any;
   const accessToken = session?.data?.tokens?.access_token;
+  const org = usePlatformOrg() as { slug?: string } | null;
   const course = useCourse();
   const { readiness } = course;
   const [isPending, startTransition] = useTransition();
@@ -58,7 +58,7 @@ export default function CourseReviewPublish({
             accessToken,
             {
               lastKnownUpdateDate: course.courseStructure.update_date,
-              orgSlug: orgslug,
+              orgSlug: org?.slug || PLATFORM_ORG_SLUG,
             },
           );
 

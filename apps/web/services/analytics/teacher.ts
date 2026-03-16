@@ -69,11 +69,7 @@ export function getTeacherCourseList(accessToken: string, query?: AnalyticsQuery
   return analyticsRequest<TeacherCourseListResponse>('teacher/courses', accessToken, query);
 }
 
-export function getTeacherCourseDetailByUuid(
-  courseUuid: string,
-  accessToken: string,
-  query?: AnalyticsQuery,
-) {
+export function getTeacherCourseDetailByUuid(courseUuid: string, accessToken: string, query?: AnalyticsQuery) {
   return analyticsRequest<TeacherCourseDetailResponse>(`teacher/courses/by-uuid/${courseUuid}`, accessToken, query);
 }
 

@@ -56,10 +56,9 @@ function mapCourseRightsToCapabilities(session: any, rights: CourseRightsRespons
 }
 
 export async function getCourseWorkspaceCapabilitiesForCourse(
-  orgslug: string,
   courseuuid: string,
 ): Promise<CourseWorkspaceCapabilities> {
-  const session = await requireAuth(orgslug);
+  const session = await requireAuth();
   const accessToken = session?.tokens?.access_token;
   if (!accessToken) {
     redirect('/unauthorized');
@@ -79,11 +78,10 @@ export async function getCourseWorkspaceCapabilitiesForCourse(
 }
 
 export async function requireCourseWorkspaceStageAccess(
-  orgslug: string,
   courseuuid: string,
   stage: CourseWorkspaceStage,
 ): Promise<CourseWorkspaceCapabilities> {
-  const capabilities = await getCourseWorkspaceCapabilitiesForCourse(orgslug, courseuuid);
+  const capabilities = await getCourseWorkspaceCapabilitiesForCourse(courseuuid);
 
   const allowedByStage: Record<CourseWorkspaceStage, boolean> = {
     overview: capabilities.canViewWorkspace,

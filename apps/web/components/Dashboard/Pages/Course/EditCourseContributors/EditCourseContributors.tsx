@@ -25,10 +25,10 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { Check, ChevronDown, Search, UserPen, Users } from 'lucide-react';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
+import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { searchOrgContent } from '@services/search/search';
 import { useDirtySection } from '@/hooks/useDirtySection';
-import { useOrg } from '@components/Contexts/OrgContext';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { RadioGroup } from '@/components/ui/radio-group';
 import UserAvatar from '@components/Objects/UserAvatar';
@@ -41,10 +41,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import type { Locale } from '@/i18n/config';
 import { toast } from 'sonner';
-
-interface EditCourseContributorsProps {
-  orgslug: string;
-}
 
 type ContributorRole = 'CREATOR' | 'CONTRIBUTOR' | 'MAINTAINER' | 'REPORTER';
 type ContributorStatus = 'ACTIVE' | 'INACTIVE' | 'PENDING';
@@ -173,14 +169,14 @@ const StatusDropdown = ({
   </DropdownMenu>
 );
 
-const EditCourseContributors = (props: EditCourseContributorsProps) => {
+const EditCourseContributors = () => {
   const t = useTranslations('DashPage.EditCourseContributors');
   const locale = useLocale() as Locale;
   const session = usePlatformSession();
   const access_token = session?.data?.tokens?.access_token;
   const course = useCourse();
   const { courseStructure, editorData, refreshCourseEditor, showConflict } = course;
-  const org = useOrg() as any;
+  const org = usePlatformOrg() as any;
   const contributors = (editorData.contributors.data ?? []) as Contributor[];
   const isContributorsLoading = course.isEditorDataLoading && editorData.contributors.data === null;
 

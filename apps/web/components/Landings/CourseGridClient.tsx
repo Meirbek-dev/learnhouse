@@ -13,7 +13,7 @@ import CourseThumbnail from '@components/Objects/Thumbnails/CourseThumbnail';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getCoursesSwrKey, getTrailSwrKey } from '@services/courses/keys';
 import { swrFetcherWithHeaders } from '@services/utils/ts/requests';
-import { useOrg } from '@components/Contexts/OrgContext';
+import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { useMemo, useState } from 'react';
 import useSWR from 'swr';
@@ -28,7 +28,7 @@ interface CourseGridClientProps {
 
 export default function CourseGridClient({ initialCourses, initialTotal, orgslug }: CourseGridClientProps) {
   const session = usePlatformSession();
-  const org = useOrg();
+  const org = usePlatformOrg();
   const accessToken = session?.data?.tokens?.access_token;
   const orgId = org?.id;
   const [page, setPage] = useState(1);
@@ -121,7 +121,6 @@ export default function CourseGridClient({ initialCourses, initialTotal, orgslug
               >
                 <CourseThumbnail
                   course={course}
-                  orgslug={orgslug}
                   trailData={trailData}
                   trailLoading={isTrailLoading}
                   priority={page === 1 && index < 3}

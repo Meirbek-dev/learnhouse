@@ -18,12 +18,12 @@ import OnBoardWelcome from '@public/onboarding/OnBoardWelcome.png';
 import OnBoardCourses from '@public/onboarding/OnBoardCourses.png';
 import OnBoardEditor from '@public/onboarding/OnBoardEditor.png';
 import OnBoardAccess from '@public/onboarding/OnBoardAccess.png';
+import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { Actions, Resources, Scopes } from '@/types/permissions';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
 import OnBoardMore from '@public/onboarding/OnBoardMore.png';
 import OnBoardUGs from '@public/onboarding/OnBoardUGs.png';
 import OnBoardAI from '@public/onboarding/OnBoardAI.png';
-import { useOrg } from '@components/Contexts/OrgContext';
 import { getAbsoluteUrl } from '@services/config/config';
 import { usePermissions } from '@/components/Security';
 import type { StaticImageData } from 'next/image';
@@ -96,7 +96,7 @@ const Onboarding: FC = () => {
   });
   const isMobile = useIsMobile();
   const router = useRouter();
-  const org = useOrg() as any;
+  const org = usePlatformOrg() as any;
   const { can } = usePermissions();
   const canManageOrg =
     can(Actions.MANAGE, Resources.ORGANIZATION, Scopes.OWN) || can(Actions.MANAGE, Resources.ORGANIZATION, Scopes.ORG);

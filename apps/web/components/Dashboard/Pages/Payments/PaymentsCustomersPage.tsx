@@ -4,9 +4,9 @@ import UnconfiguredPaymentsDisclaimer from '@components/Pages/Payments/Unconfigu
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
+import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { usePaymentsEnabled } from '@hooks/usePaymentsEnabled';
 import { getOrgCustomers } from '@services/payments/payments';
-import { useOrg } from '@components/Contexts/OrgContext';
 import UserAvatar from '@components/Objects/UserAvatar';
 import type { ColumnDef } from '@tanstack/react-table';
 import { RefreshCcw, SquareCheck } from 'lucide-react';
@@ -133,7 +133,7 @@ const PaymentsUsersTable = ({ data }: { data: PaymentUserData[] }) => {
 };
 
 const PaymentsCustomersPage = () => {
-  const org = useOrg() as any;
+  const org = usePlatformOrg() as any;
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const { isEnabled, isLoading } = usePaymentsEnabled();

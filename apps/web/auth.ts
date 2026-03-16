@@ -5,9 +5,9 @@ import {
   loginWithOAuthToken,
 } from '@/services/auth/auth';
 import { SESSION_CACHE_MAX_SIZE, SESSION_CACHE_TTL_MS, TOKEN_REFRESH_BUFFER_MS } from '@/lib/constants';
-import { PLATFORM_ORG_SLUG } from '@/services/config/config';
 import type { NextAuthConfig, NextAuthResult, Session } from 'next-auth';
 import { getResponseMetadata } from '@/services/utils/ts/requests';
+import { PLATFORM_ORG_SLUG } from '@/services/config/config';
 import Credentials from 'next-auth/providers/credentials';
 import { getAbsoluteUrl } from '@/services/config/config';
 import { getServerConfig } from '@/services/config/env';

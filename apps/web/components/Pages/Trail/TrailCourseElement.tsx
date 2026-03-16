@@ -1,12 +1,12 @@
 'use client';
+import { getAbsoluteUrl, PLATFORM_ORG_SLUG } from '@services/config/config';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { getUserCertificates } from '@services/courses/certifications';
+import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { revalidateTags } from '@services/utils/ts/requests';
 import { Award, ExternalLink, Loader2 } from 'lucide-react';
 import { removeCourse } from '@services/courses/activity';
-import { useOrg } from '@components/Contexts/OrgContext';
-import { getAbsoluteUrl } from '@services/config/config';
 import { getTrailSwrKey } from '@services/courses/keys';
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -17,11 +17,10 @@ import { mutate } from 'swr';
 interface TrailCourseElementProps {
   course: any;
   run: any;
-  orgslug: string;
 }
 
-const TrailCourseElement = ({ course, run, orgslug }: TrailCourseElementProps) => {
-  const org = useOrg() as any;
+const TrailCourseElement = ({ course, run }: TrailCourseElementProps) => {
+  const org = usePlatformOrg() as any;
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const courseid = course.course_uuid.replace('course_', '');
@@ -37,7 +36,7 @@ const TrailCourseElement = ({ course, run, orgslug }: TrailCourseElementProps) =
 
   async function quitCourse(course_uuid: string) {
     // Close activity
-    await removeCourse(course_uuid, orgslug, access_token);
+    await removeCourse(course_uuid, org?.slug || PLATFORM_ORG_SLUG, access_token);
     // Mutate course
     await revalidateTags(['courses']);
     router.refresh();

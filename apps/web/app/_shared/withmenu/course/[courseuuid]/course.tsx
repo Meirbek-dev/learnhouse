@@ -28,7 +28,7 @@ import { getDiscussionsSwrKey } from '@services/courses/discussions-keys';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { CourseProvider } from '@components/Contexts/CourseContext';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
-import { useOrg } from '@components/Contexts/OrgContext';
+import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 // Import the new discussions component
 import CourseDiscussions from '@/components/discussions';
@@ -53,9 +53,8 @@ const CourseClient = (props: any) => {
   const [activeThumbnailType, setActiveThumbnailType] = useState<'image' | 'video'>('image');
 
   const { courseuuid } = props;
-  const { orgslug } = props;
   const { course } = props;
-  const org = useOrg() as any;
+  const org = usePlatformOrg() as any;
   const isMobile = useIsMobile();
   const session = usePlatformSession();
   const access_token = session?.data?.tokens?.access_token;
@@ -383,7 +382,6 @@ const CourseClient = (props: any) => {
                 {/* Actions Box */}
                 <CoursesActions
                   courseuuid={courseuuid}
-                  orgslug={orgslug}
                   course={course}
                   trailData={trailData}
                 />
@@ -579,7 +577,6 @@ const CourseClient = (props: any) => {
           {isMobile ? (
             <CourseActionsMobile
               courseuuid={courseuuid}
-              orgslug={orgslug}
               course={course}
               trailData={trailData}
             />

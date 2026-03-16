@@ -16,6 +16,7 @@ import { AlertTriangle, CheckCircle2, Hexagon, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
+import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { DragDropContext, Droppable } from '@hello-pangea/dnd';
 import { Button } from '@/components/ui/button';
 import { useTranslations } from 'next-intl';
@@ -23,10 +24,6 @@ import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 import ChapterElement from './DraggableElements/ChapterElement';
-
-interface EditCourseStructureProps {
-  orgslug: string;
-}
 
 export type OrderPayload =
   | {
@@ -40,8 +37,9 @@ export type OrderPayload =
     }
   | undefined;
 
-const EditCourseStructure = (props: EditCourseStructureProps) => {
+const EditCourseStructure = () => {
   const session = usePlatformSession() as any;
+  const org = usePlatformOrg() as { slug?: string } | null;
   const access_token = session?.data?.tokens?.access_token;
   const t = useTranslations('CourseEdit.Structure');
 
@@ -193,7 +191,7 @@ const EditCourseStructure = (props: EditCourseStructureProps) => {
                   <ChapterElement
                     key={chapter.chapter_uuid}
                     chapterIndex={index}
-                    orgslug={props.orgslug}
+                    orgslug={org?.slug || ''}
                     course_uuid={course_uuid}
                     chapter={chapter}
                   />

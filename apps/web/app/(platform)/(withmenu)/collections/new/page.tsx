@@ -1,6 +1,6 @@
 import { getPlatformOrganizationContextInfo } from '@services/organizations/orgs';
-import { getTranslations } from 'next-intl/server';
 import NewCollection from '@/app/_shared/withmenu/collections/new/NewCollection';
+import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
 
 export async function generateMetadata(): Promise<Metadata> {

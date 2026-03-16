@@ -1,4 +1,4 @@
- 'use client';
+'use client';
 
 import OrgUserGroups from '@components/Dashboard/Pages/Users/OrgUserGroups/OrgUserGroups';
 import { Actions, Resources, Scopes, usePermissions } from '@/components/Security';
@@ -35,8 +35,22 @@ export default function PlatformUsersSettingsPage(props: { params: Promise<{ sub
 
   const allTabs: TabConfig[] = useMemo(
     () => [
-      { id: 'users', icon: Users, labelKey: 'users', titleKey: 'usersTitle', descriptionKey: 'usersDescription', component: OrgUsers },
-      { id: 'usergroups', icon: SquareUserRound, labelKey: 'usergroups', titleKey: 'usergroupsTitle', descriptionKey: 'usergroupsDescription', component: OrgUserGroups },
+      {
+        id: 'users',
+        icon: Users,
+        labelKey: 'users',
+        titleKey: 'usersTitle',
+        descriptionKey: 'usersDescription',
+        component: OrgUsers,
+      },
+      {
+        id: 'usergroups',
+        icon: SquareUserRound,
+        labelKey: 'usergroups',
+        titleKey: 'usergroupsTitle',
+        descriptionKey: 'usergroupsDescription',
+        component: OrgUserGroups,
+      },
     ],
     [],
   );
@@ -50,25 +64,35 @@ export default function PlatformUsersSettingsPage(props: { params: Promise<{ sub
     () =>
       allTabs.filter((tab) => {
         switch (tab.id) {
-          case 'users':
+          case 'users': {
             return can(Actions.READ, Resources.USER, Scopes.ORG) || can(Actions.UPDATE, Resources.USER, Scopes.ORG);
-          case 'usergroups':
+          }
+          case 'usergroups': {
             return can(Actions.MANAGE, Resources.USERGROUP, Scopes.ORG);
-          default:
+          }
+          default: {
             return true;
+          }
         }
       }),
     [allTabs, can],
   );
 
-  const currentTab: TabConfig = useMemo(() => tabs.find((tab) => tab.id === params.subpage) ?? tabs[0]!, [tabs, params.subpage]);
+  const currentTab: TabConfig = useMemo(
+    () => tabs.find((tab) => tab.id === params.subpage) ?? tabs[0]!,
+    [tabs, params.subpage],
+  );
 
   const ActiveComponent = currentTab.component;
 
   return (
     <DesktopOnlyGuard>
       <div className="bg-background flex h-screen w-full flex-col">
-        <SettingsHeader breadcrumbType="orgusers" title={t(currentTab.titleKey)} description={t(currentTab.descriptionKey)}>
+        <SettingsHeader
+          breadcrumbType="orgusers"
+          title={t(currentTab.titleKey)}
+          description={t(currentTab.descriptionKey)}
+        >
           <SettingsTabs
             value={params.subpage}
             tabs={tabs}

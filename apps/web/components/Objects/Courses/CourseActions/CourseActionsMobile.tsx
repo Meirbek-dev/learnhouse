@@ -1,11 +1,12 @@
 'use client';
 
+import { getAbsoluteUrl, getUriWithoutOrg, PLATFORM_ORG_SLUG } from '@services/config/config';
 import { AlertCircle, BookOpen, Loader2, LogIn, ShoppingCart } from 'lucide-react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { getAbsoluteUrl, getUriWithoutOrg } from '@services/config/config';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
 import { useEffect, useRef, useState, useTransition } from 'react';
 import { getProductsByCourse } from '@services/payments/products';
+import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
 import { checkPaidAccess } from '@services/payments/payments';
 import { revalidateTags } from '@services/utils/ts/requests';
@@ -55,7 +56,6 @@ interface Course {
 
 interface CourseActionsMobileProps {
   courseuuid: string;
-  orgslug: string;
   course: Course & {
     org_id: number;
   };
@@ -142,10 +142,11 @@ const MultipleAuthors = ({ authors }: { authors: Author[] }) => {
   );
 };
 
-const CourseActionsMobile = ({ courseuuid, orgslug, course, trailData }: CourseActionsMobileProps) => {
+const CourseActionsMobile = ({ courseuuid, course, trailData }: CourseActionsMobileProps) => {
   const t = useTranslations('Courses.CourseActionsMobile');
   const router = useRouter();
   const session = usePlatformSession() as any;
+  const org = usePlatformOrg() as { slug?: string } | null;
   // stable primitives to avoid effects depending on the whole session object
   const accessToken = session.data?.tokens?.access_token;
   const userId = session.data?.user?.id;
@@ -248,7 +249,7 @@ const CourseActionsMobile = ({ courseuuid, orgslug, course, trailData }: CourseA
 
     startTransition(() => setIsActionLoading(true));
     try {
-      await startCourse(`course_${courseuuid}`, orgslug, session.data?.tokens?.access_token);
+      await startCourse(`course_${courseuuid}`, org?.slug || PLATFORM_ORG_SLUG, session.data?.tokens?.access_token);
       await revalidateTags(['courses']);
 
       // Get the first activity from the first chapter

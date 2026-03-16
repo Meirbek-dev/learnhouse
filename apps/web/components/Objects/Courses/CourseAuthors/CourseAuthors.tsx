@@ -15,12 +15,12 @@ import { createCourseUpdate, deleteCourseUpdate } from '@services/courses/update
 import { AlertTriangle, Loader2, PencilLine, Rss, TentTree } from 'lucide-react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
+import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { Actions, Resources, Scopes } from '@/types/permissions';
 import { getCourseUpdatesSwrKey } from '@services/courses/keys';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { useDateFnsLocale } from '@/hooks/useDateFnsLocale';
-import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { usePermissions } from '@/components/Security';
@@ -226,7 +226,7 @@ const createUpdateFormSchema = (t: (key: string) => string) =>
 type UpdateFormValues = v.InferOutput<ReturnType<typeof createUpdateFormSchema>>;
 
 const NewUpdateForm = ({ setSelectedView }: { setSelectedView: (view: string) => void }) => {
-  const org = useOrg() as any;
+  const org = usePlatformOrg() as any;
   const course = useCourse();
   const session = usePlatformSession() as any;
   const t = useTranslations('Courses.CourseAuthors');

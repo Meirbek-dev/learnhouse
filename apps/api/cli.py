@@ -106,9 +106,7 @@ def install(
         # Create the Organization
         print("Creating your platform organization...")
         orgname = typer.prompt("What's shall we call your organization?")
-        print(
-            f"Single-org mode uses a fixed slug: {PLATFORM_ORG_SLUG}"
-        )
+        print(f"Single-org mode uses a fixed slug: {PLATFORM_ORG_SLUG}")
         org = OrganizationCreate(
             name=orgname,
             description=PLATFORM_BRAND_NAME,

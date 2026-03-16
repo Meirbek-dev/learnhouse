@@ -1,14 +1,14 @@
 import { FileText } from 'lucide-react';
 
-import { getAssignmentsFromCourses } from '@services/courses/assignments';
-import { getEditableOrgCourses } from '@services/courses/courses';
 import { getPlatformOrganizationContextInfo } from '@services/organizations/orgs';
+import { getAssignmentsFromCourses } from '@services/courses/assignments';
+import { CourseCard } from '@/app/_shared/dash/assignments/ClientParts';
+import { getEditableOrgCourses } from '@services/courses/courses';
 import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
-import { Card, CardContent } from '@/components/ui/card';
 import { PLATFORM_ORG_SLUG } from '@/services/config/config';
+import { Card, CardContent } from '@/components/ui/card';
 import { getTranslations } from 'next-intl/server';
 import { Spinner } from '@components/ui/spinner';
-import { CourseCard } from '@/app/_shared/dash/assignments/ClientParts';
 import { auth } from '@/auth';
 
 interface Course {

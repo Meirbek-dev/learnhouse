@@ -1,14 +1,14 @@
-import { LoginBonusHandler } from '@/app/_shared/withmenu/_components/LoginBonusHandler';
 import NewCollectionButton from '@/components/Objects/Elements/Buttons/NewCollectionButton';
 import TypeOfContentTitle from '@/components/Objects/Elements/Titles/TypeOfContentTitle';
+import { LoginBonusHandler } from '@/app/_shared/withmenu/_components/LoginBonusHandler';
 import CollectionThumbnail from '@components/Objects/Thumbnails/CollectionThumbnail';
 import GeneralWrapper from '@/components/Objects/Elements/Wrappers/GeneralWrapper';
 import { GamificationProvider } from '@/components/Contexts/GamificationContext';
 import { HeroSection } from '@/components/Dashboard/Gamification/hero-section';
+import { getAbsoluteUrl, PLATFORM_ORG_SLUG } from '@services/config/config';
 import PermissionGuard from '@components/Security/PermissionGuard';
 import { Actions, Resources, Scopes } from '@/types/permissions';
 import type { DashboardData } from '@/types/gamification';
-import { getAbsoluteUrl, PLATFORM_ORG_SLUG } from '@services/config/config';
 import CreateCourseTrigger from './CreateCourseTrigger';
 import { BookOpen, FolderKanban } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
@@ -83,11 +83,7 @@ const CollectionGrid = ({ collections, org_id }: GridProps) => (
         key={collection.collection_uuid}
         className="transition-transform duration-200 focus-within:scale-[1.02] hover:scale-[1.02]"
       >
-        <CollectionThumbnail
-          collection={collection}
-          orgslug={PLATFORM_ORG_SLUG}
-          org_id={org_id}
-        />
+        <CollectionThumbnail collection={collection} />
       </div>
     ))}
   </div>

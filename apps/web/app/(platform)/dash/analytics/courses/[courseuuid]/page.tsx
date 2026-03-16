@@ -14,7 +14,12 @@ export default function PlatformAnalyticsCourseDetailPage(props: {
   params: Promise<{ courseuuid: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  return <PlatformAnalyticsCourseDetailPageInner params={props.params} searchParams={props.searchParams} />;
+  return (
+    <PlatformAnalyticsCourseDetailPageInner
+      params={props.params}
+      searchParams={props.searchParams}
+    />
+  );
 }
 
 async function PlatformAnalyticsCourseDetailPageInner(props: {
@@ -28,7 +33,12 @@ async function PlatformAnalyticsCourseDetailPageInner(props: {
   const t = await getTranslations('TeacherAnalytics');
 
   if (!accessToken) {
-    return <AnalyticsEmptyState title={t('pages.courseDetailTitle')} description={t('pages.courseDetailDesc')} />;
+    return (
+      <AnalyticsEmptyState
+        title={t('pages.courseDetailTitle')}
+        description={t('pages.courseDetailDesc')}
+      />
+    );
   }
 
   try {
@@ -44,24 +54,50 @@ async function PlatformAnalyticsCourseDetailPageInner(props: {
             <CardTitle className="mt-3 text-3xl">{detail.course.name}</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-3 md:grid-cols-3">
-            <div className="rounded-2xl border border-slate-200 p-4"><div className="text-xs uppercase tracking-wide text-slate-500">{t('pages.courseStatCompletion')}</div><div className="mt-2 text-3xl font-semibold">{detail.summary.completion_rate}%</div></div>
-            <div className="rounded-2xl border border-slate-200 p-4"><div className="text-xs uppercase tracking-wide text-slate-500">{t('pages.courseStatAvgProgress')}</div><div className="mt-2 text-3xl font-semibold">{detail.summary.avg_progress_pct}%</div></div>
-            <div className="rounded-2xl border border-slate-200 p-4"><div className="text-xs uppercase tracking-wide text-slate-500">{t('pages.courseStatUngraded')}</div><div className="mt-2 text-3xl font-semibold">{detail.summary.ungraded_submissions}</div></div>
+            <div className="rounded-2xl border border-slate-200 p-4">
+              <div className="text-xs uppercase tracking-wide text-slate-500">{t('pages.courseStatCompletion')}</div>
+              <div className="mt-2 text-3xl font-semibold">{detail.summary.completion_rate}%</div>
+            </div>
+            <div className="rounded-2xl border border-slate-200 p-4">
+              <div className="text-xs uppercase tracking-wide text-slate-500">{t('pages.courseStatAvgProgress')}</div>
+              <div className="mt-2 text-3xl font-semibold">{detail.summary.avg_progress_pct}%</div>
+            </div>
+            <div className="rounded-2xl border border-slate-200 p-4">
+              <div className="text-xs uppercase tracking-wide text-slate-500">{t('pages.courseStatUngraded')}</div>
+              <div className="mt-2 text-3xl font-semibold">{detail.summary.ungraded_submissions}</div>
+            </div>
           </CardContent>
         </Card>
 
         <div className="grid gap-6 xl:grid-cols-2">
-          <EngagementAreaChart title={t('pages.courseEngagementTitle')} description={t('pages.courseEngagementDesc')} data={detail.engagement_trend} />
-          <CompletionFunnelChart title={t('pages.courseFunnelTitle')} description={t('pages.courseFunnelDesc')} data={detail.funnels.course_completion} />
+          <EngagementAreaChart
+            title={t('pages.courseEngagementTitle')}
+            description={t('pages.courseEngagementDesc')}
+            data={detail.engagement_trend}
+          />
+          <CompletionFunnelChart
+            title={t('pages.courseFunnelTitle')}
+            description={t('pages.courseFunnelDesc')}
+            data={detail.funnels.course_completion}
+          />
         </div>
 
-        <CompletionFunnelChart title={t('pages.courseChapterDropoffTitle')} description={t('pages.courseChapterDropoffDesc')} data={detail.funnels.chapter_dropoff} />
+        <CompletionFunnelChart
+          title={t('pages.courseChapterDropoffTitle')}
+          description={t('pages.courseChapterDropoffDesc')}
+          data={detail.funnels.chapter_dropoff}
+        />
 
         <Card className="border-slate-200 bg-white/90 shadow-sm">
-          <CardHeader><CardTitle>{t('pages.courseContentHealthTitle')}</CardTitle></CardHeader>
+          <CardHeader>
+            <CardTitle>{t('pages.courseContentHealthTitle')}</CardTitle>
+          </CardHeader>
           <CardContent className="grid gap-3 md:grid-cols-3">
             {detail.content_health.map((item) => (
-              <div key={item.signal} className="rounded-2xl border border-slate-200 p-4">
+              <div
+                key={item.signal}
+                className="rounded-2xl border border-slate-200 p-4"
+              >
                 <div className="flex items-center gap-2">
                   <Badge
                     variant={
@@ -90,6 +126,11 @@ async function PlatformAnalyticsCourseDetailPageInner(props: {
       </div>
     );
   } catch (error) {
-    return <AnalyticsEmptyState title={t('pages.courseDetailTitle')} description={error instanceof Error ? error.message : t('pages.courseDetailLoadError')} />;
+    return (
+      <AnalyticsEmptyState
+        title={t('pages.courseDetailTitle')}
+        description={error instanceof Error ? error.message : t('pages.courseDetailLoadError')}
+      />
+    );
   }
 }

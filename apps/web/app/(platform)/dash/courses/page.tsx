@@ -51,8 +51,8 @@ export async function generateMetadata(): Promise<Metadata> {
       follow: true,
       nocache: true,
       googleBot: {
-        index: true,
-        follow: true,
+        'index': true,
+        'follow': true,
         'max-image-preview': 'large',
       },
     },
@@ -83,7 +83,15 @@ async function PlatformDashCoursesPageInner(props: {
   const access_token = session?.tokens?.access_token;
   const [org, { courses, total, summary }] = await Promise.all([
     getPlatformOrganizationContextInfo(access_token || undefined),
-    getEditableOrgCourses(PLATFORM_ORG_SLUG, access_token || undefined, currentPage, COURSES_PER_PAGE, query, sortBy, preset),
+    getEditableOrgCourses(
+      PLATFORM_ORG_SLUG,
+      access_token || undefined,
+      currentPage,
+      COURSES_PER_PAGE,
+      query,
+      sortBy,
+      preset,
+    ),
   ]);
 
   return (

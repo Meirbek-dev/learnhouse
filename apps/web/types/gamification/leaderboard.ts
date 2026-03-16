@@ -25,8 +25,7 @@ export interface LeaderboardEntry {
 // Leaderboard badge types
 export type LeaderboardBadge = 'gold' | 'silver' | 'bronze';
 
-// Organization leaderboard
-export interface OrganizationLeaderboard {
+export interface PlatformLeaderboard {
   entries: LeaderboardEntry[];
   total_participants: number;
   last_updated: string; // ISO timestamp
@@ -117,11 +116,11 @@ export function calculatePercentile(rank: number, totalParticipants: number): nu
   return Math.round(((totalParticipants - rank + 1) / totalParticipants) * 100);
 }
 
-export function findUserInLeaderboard(leaderboard: OrganizationLeaderboard, userId: number): LeaderboardEntry | null {
+export function findUserInLeaderboard(leaderboard: PlatformLeaderboard, userId: number): LeaderboardEntry | null {
   return leaderboard.entries.find((entry) => entry.user_id === userId) ?? null;
 }
 
-export function getNearbyEntries(leaderboard: OrganizationLeaderboard, userId: number, range = 2): LeaderboardEntry[] {
+export function getNearbyEntries(leaderboard: PlatformLeaderboard, userId: number, range = 2): LeaderboardEntry[] {
   const userIndex = leaderboard.entries.findIndex((entry) => entry.user_id === userId);
   if (userIndex === -1) return [];
 
@@ -131,12 +130,12 @@ export function getNearbyEntries(leaderboard: OrganizationLeaderboard, userId: n
   return leaderboard.entries.slice(start, end);
 }
 
-export function getTopEntries(leaderboard: OrganizationLeaderboard, limit = 10): LeaderboardEntry[] {
+export function getTopEntries(leaderboard: PlatformLeaderboard, limit = 10): LeaderboardEntry[] {
   return leaderboard.entries.slice(0, limit);
 }
 
 export function enrichUserRank(
-  leaderboard: OrganizationLeaderboard,
+  leaderboard: PlatformLeaderboard,
   userId: number,
   previousRank?: number,
 ): UserRank | null {

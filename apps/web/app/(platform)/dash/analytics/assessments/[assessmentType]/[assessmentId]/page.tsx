@@ -14,7 +14,12 @@ export default function PlatformAnalyticsAssessmentDetailPage(props: {
   params: Promise<{ assessmentType: AssessmentType; assessmentId: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  return <PlatformAnalyticsAssessmentDetailPageInner params={props.params} searchParams={props.searchParams} />;
+  return (
+    <PlatformAnalyticsAssessmentDetailPageInner
+      params={props.params}
+      searchParams={props.searchParams}
+    />
+  );
 }
 
 async function PlatformAnalyticsAssessmentDetailPageInner(props: {
@@ -29,7 +34,12 @@ async function PlatformAnalyticsAssessmentDetailPageInner(props: {
   const t = await getTranslations('TeacherAnalytics');
 
   if (!accessToken) {
-    return <AnalyticsEmptyState title={t('pages.assessmentDetailTitle')} description={t('pages.assessmentDetailDesc')} />;
+    return (
+      <AnalyticsEmptyState
+        title={t('pages.assessmentDetailTitle')}
+        description={t('pages.assessmentDetailDesc')}
+      />
+    );
   }
 
   try {
@@ -45,10 +55,35 @@ async function PlatformAnalyticsAssessmentDetailPageInner(props: {
             <CardTitle className="mt-3 text-3xl">{detail.title}</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-3 md:grid-cols-4">
-            <div className="rounded-2xl border border-slate-200 p-4"><div className="text-xs uppercase tracking-wide text-slate-500">{t('pages.assessmentStatSubmissionRate')}</div><div className="mt-2 text-3xl font-semibold">{detail.summary.submission_rate ?? t('atRisk.na')}{detail.summary.submission_rate !== null ? '%' : ''}</div></div>
-            <div className="rounded-2xl border border-slate-200 p-4"><div className="text-xs uppercase tracking-wide text-slate-500">{t('pages.assessmentStatPassRate')}</div><div className="mt-2 text-3xl font-semibold">{detail.summary.pass_rate ?? t('atRisk.na')}{detail.summary.pass_rate !== null ? '%' : ''}</div></div>
-            <div className="rounded-2xl border border-slate-200 p-4"><div className="text-xs uppercase tracking-wide text-slate-500">{t('pages.assessmentStatMedianScore')}</div><div className="mt-2 text-3xl font-semibold">{detail.summary.median_score ?? t('atRisk.na')}{detail.summary.median_score !== null ? '%' : ''}</div></div>
-            <div className="rounded-2xl border border-slate-200 p-4"><div className="text-xs uppercase tracking-wide text-slate-500">{t('pages.assessmentStatGenerated')}</div><div className="mt-2 text-lg font-semibold">{new Date(detail.generated_at).toLocaleString(locale)}</div></div>
+            <div className="rounded-2xl border border-slate-200 p-4">
+              <div className="text-xs uppercase tracking-wide text-slate-500">
+                {t('pages.assessmentStatSubmissionRate')}
+              </div>
+              <div className="mt-2 text-3xl font-semibold">
+                {detail.summary.submission_rate ?? t('atRisk.na')}
+                {detail.summary.submission_rate !== null ? '%' : ''}
+              </div>
+            </div>
+            <div className="rounded-2xl border border-slate-200 p-4">
+              <div className="text-xs uppercase tracking-wide text-slate-500">{t('pages.assessmentStatPassRate')}</div>
+              <div className="mt-2 text-3xl font-semibold">
+                {detail.summary.pass_rate ?? t('atRisk.na')}
+                {detail.summary.pass_rate !== null ? '%' : ''}
+              </div>
+            </div>
+            <div className="rounded-2xl border border-slate-200 p-4">
+              <div className="text-xs uppercase tracking-wide text-slate-500">
+                {t('pages.assessmentStatMedianScore')}
+              </div>
+              <div className="mt-2 text-3xl font-semibold">
+                {detail.summary.median_score ?? t('atRisk.na')}
+                {detail.summary.median_score !== null ? '%' : ''}
+              </div>
+            </div>
+            <div className="rounded-2xl border border-slate-200 p-4">
+              <div className="text-xs uppercase tracking-wide text-slate-500">{t('pages.assessmentStatGenerated')}</div>
+              <div className="mt-2 text-lg font-semibold">{new Date(detail.generated_at).toLocaleString(locale)}</div>
+            </div>
           </CardContent>
         </Card>
 
@@ -106,6 +141,11 @@ async function PlatformAnalyticsAssessmentDetailPageInner(props: {
       </div>
     );
   } catch (error) {
-    return <AnalyticsEmptyState title={t('pages.assessmentDetailTitle')} description={error instanceof Error ? error.message : t('pages.assessmentDetailLoadError')} />;
+    return (
+      <AnalyticsEmptyState
+        title={t('pages.assessmentDetailTitle')}
+        description={error instanceof Error ? error.message : t('pages.assessmentDetailLoadError')}
+      />
+    );
   }
 }

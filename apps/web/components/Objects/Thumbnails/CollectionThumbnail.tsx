@@ -15,10 +15,10 @@ import {
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { PermissionTooltip } from '@/components/Utils/PermissionTooltip';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
+import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { deleteCollection } from '@services/courses/collections';
 import { AlertTriangle, Crown, Loader2, X } from 'lucide-react';
 import { revalidateTags } from '@services/utils/ts/requests';
-import { useOrg } from '@components/Contexts/OrgContext';
 import { getAbsoluteUrl } from '@services/config/config';
 import { useState, useTransition } from 'react';
 import { Badge } from '@components/ui/badge';
@@ -28,8 +28,6 @@ import Link from '@components/ui/AppLink';
 
 interface PropsType {
   collection: any;
-  orgslug: string;
-  org_id: number;
 }
 
 const removeCollectionPrefix = (collectionid: string) => {
@@ -39,7 +37,7 @@ const removeCollectionPrefix = (collectionid: string) => {
 const CollectionThumbnail = (props: PropsType) => {
   const t = useTranslations('Components.CollectionThumbnail');
   const tCommon = useTranslations('Common');
-  const org = useOrg() as any;
+  const org = usePlatformOrg() as any;
 
   // Use backend metadata for ownership and permissions
   const isOwner = props.collection.is_owner ?? false;
@@ -91,8 +89,6 @@ const CollectionThumbnail = (props: PropsType) => {
           </div>
         </div>
         <CollectionAdminEditsArea
-          orgslug={props.orgslug}
-          org_id={props.org_id}
           collection_uuid={props.collection.collection_uuid}
           collection={props.collection}
           canDelete={canDelete}

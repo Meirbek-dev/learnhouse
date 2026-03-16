@@ -11,16 +11,16 @@ import {
   Trophy,
   UserPen,
 } from 'lucide-react';
+import { getAbsoluteUrl, getUriWithoutOrg, PLATFORM_ORG_SLUG } from '@services/config/config';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { getAbsoluteUrl, getUriWithoutOrg } from '@services/config/config';
 import { useContributorStatus } from '@/hooks/useContributorStatus';
 import { getProductsByCourse } from '@services/payments/products';
+import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { applyForContributor } from '@services/courses/courses';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
 import CourseProgress from '../CourseProgress/CourseProgress';
 import { checkPaidAccess } from '@services/payments/payments';
 import { revalidateTags } from '@services/utils/ts/requests';
-import { useOrg } from '@components/Contexts/OrgContext';
 import { startCourse } from '@services/courses/activity';
 import { Card, CardContent } from '@/components/ui/card';
 import UserAvatar from '@components/Objects/UserAvatar';
@@ -64,14 +64,13 @@ interface Course {
 
 interface CourseActionsProps {
   courseuuid: string;
-  orgslug: string;
   course: Course & {
     org_id: number;
   };
   trailData?: any;
 }
 
-const CoursesActions = ({ courseuuid, orgslug, course, trailData }: CourseActionsProps) => {
+const CoursesActions = ({ courseuuid, course, trailData }: CourseActionsProps) => {
   const router = useRouter();
   const session = usePlatformSession() as any;
   const [linkedProducts, setLinkedProducts] = useState<any[]>([]);
@@ -82,7 +81,7 @@ const CoursesActions = ({ courseuuid, orgslug, course, trailData }: CourseAction
   const [hasAccess, setHasAccess] = useState<boolean | null>(null);
   const { contributorStatus, refetch } = useContributorStatus(courseuuid);
   const [isProgressOpen, setIsProgressOpen] = useState(false);
-  const org = useOrg() as any;
+  const org = usePlatformOrg() as any;
   const t = useTranslations('Courses.CoursesActions');
 
   // stable primitives to avoid effects depending on whole session object
@@ -185,7 +184,7 @@ const CoursesActions = ({ courseuuid, orgslug, course, trailData }: CourseAction
     const loadingToast = toast.loading(t('startingCourse'));
 
     try {
-      await startCourse(`course_${courseuuid}`, orgslug, session.data?.tokens?.access_token);
+      await startCourse(`course_${courseuuid}`, org?.slug || PLATFORM_ORG_SLUG, session.data?.tokens?.access_token);
       mutate([getTrailSwrKey(org?.id), session.data?.tokens?.access_token]);
       toast.success(t('startedCourseSuccess'), { id: loadingToast });
 
@@ -544,7 +543,6 @@ const CoursesActions = ({ courseuuid, orgslug, course, trailData }: CourseAction
         {/* Course Progress Modal */}
         <CourseProgress
           course={course}
-          orgslug={orgslug}
           isOpen={isProgressOpen}
           onClose={() => setIsProgressOpen(false)}
           trailData={trailData}

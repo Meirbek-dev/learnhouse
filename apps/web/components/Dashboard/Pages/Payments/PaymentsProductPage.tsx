@@ -32,11 +32,11 @@ import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import ProductLinkedCourses from './SubComponents/ProductLinkedCourses';
 import { getPaymentsProductsSwrKey } from '@services/payments/keys';
 import CreateProductForm from './SubComponents/CreateProductForm';
+import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { getPaymentConfigs } from '@services/payments/payments';
 import { usePaymentsEnabled } from '@hooks/usePaymentsEnabled';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
 import { valibotResolver } from '@hookform/resolvers/valibot';
-import { useOrg } from '@components/Contexts/OrgContext';
 import { Textarea } from '@components/ui/textarea';
 import { useState, useTransition } from 'react';
 import { Button } from '@components/ui/button';
@@ -142,7 +142,7 @@ function ArchiveProductButton({ productId, productName, onArchive, t }: ArchiveP
 }
 
 const PaymentsProductPage = () => {
-  const org = useOrg() as any;
+  const org = usePlatformOrg() as any;
   const session = usePlatformSession() as any;
   const accessToken = session?.data?.tokens?.access_token;
   const orgId = org?.id;
@@ -359,7 +359,7 @@ const EditProductForm = ({
   onSuccess: () => void;
   onCancel: () => void;
 }) => {
-  const org = useOrg() as any;
+  const org = usePlatformOrg() as any;
   const session = usePlatformSession() as any;
   const currencies = currencyCodes.data.map((currency) => ({
     code: currency.code,

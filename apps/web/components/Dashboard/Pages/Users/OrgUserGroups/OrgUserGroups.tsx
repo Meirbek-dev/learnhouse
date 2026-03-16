@@ -18,8 +18,8 @@ import AddUserGroup from '@components/Objects/Modals/Dash/OrgUserGroups/AddUserG
 import ManageUsers from '@components/Objects/Modals/Dash/OrgUserGroups/ManageUsers';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { deleteUserGroup } from '@services/usergroups/usergroups';
+import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
-import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import type { ColumnDef } from '@tanstack/react-table';
 import { getAPIUrl } from '@services/config/config';
@@ -90,7 +90,7 @@ function DeleteUserGroupButton({ usergroupId, onDelete, t }: DeleteUserGroupButt
 }
 
 const OrgUserGroups = () => {
-  const org = useOrg() as any;
+  const org = usePlatformOrg() as any;
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const t = useTranslations('DashPage.UserSettings.usergroupsSection');

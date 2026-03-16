@@ -4,8 +4,8 @@ import CertificatePreview from '@components/Dashboard/Pages/Course/EditCourseCer
 import { AlertTriangle, ArrowLeft, CheckCircle, Loader2, Shield, XCircle } from 'lucide-react';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { getCertificateByUuid } from '@services/courses/certifications';
+import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { useEffect, useEffectEvent, useState } from 'react';
-import { useOrg } from '@components/Contexts/OrgContext';
 import { getAbsoluteUrl } from '@services/config/config';
 import { useLocale, useTranslations } from 'next-intl';
 import { Label } from '@/components/ui/label';
@@ -21,7 +21,7 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [verificationStatus, setVerificationStatus] = useState<'valid' | 'invalid' | 'loading'>('loading');
-  const org = useOrg() as any;
+  const org = usePlatformOrg() as any;
   const locale = useLocale();
   const t = useTranslations('Certificates.CertificateVerificationPage');
   // Certificate type translation helper
@@ -167,9 +167,7 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
     return null;
   }
 
-  const qrCodeLink = getAbsoluteUrl(
-    `/certificates/${certificateData.certificate_user.user_certification_uuid}/verify`,
-  );
+  const qrCodeLink = getAbsoluteUrl(`/certificates/${certificateData.certificate_user.user_certification_uuid}/verify`);
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">

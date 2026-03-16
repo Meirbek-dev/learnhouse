@@ -1,30 +1,22 @@
 'use client';
 
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { getAPIUrl, getUriWithoutOrg, PLATFORM_ORG_SLUG } from '@services/config/config';
-import { createContext, useContext } from 'react';
+import { getAPIUrl, getUriWithoutOrg } from '@services/config/config';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import ErrorUI from '@/components/Objects/Elements/Error/Error';
 import { Home, LogOut, PersonStanding } from 'lucide-react';
 import { swrFetcher } from '@services/utils/ts/requests';
-import { signOut } from 'next-auth/react';
+import { createContext, useContext } from 'react';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { signOut } from 'next-auth/react';
 import type { Org } from '@/types/org';
 import type { ReactNode } from 'react';
 import useSWR from 'swr';
 
-export const OrgContext = createContext<Org | null>(null);
+export const PlatformOrgContext = createContext<Org | null>(null);
 
-export const OrgProvider = ({
-  children,
-  orgslug,
-  initialOrg,
-}: {
-  children: ReactNode;
-  orgslug: string;
-  initialOrg?: any;
-}) => {
+export const PlatformOrgContextProvider = ({ children, initialOrg }: { children: ReactNode; initialOrg?: any }) => {
   const session = usePlatformSession();
   const pathname = usePathname();
   const accessToken = session?.data?.tokens?.access_token;
@@ -33,10 +25,6 @@ export const OrgProvider = ({
   const isAllowedPathname =
     pathname.startsWith('/auth/') || ['/login', '/signup', '/forgot', '/reset'].includes(pathname);
   const orgContextKey = `${getAPIUrl()}orgs/platform`;
-
-  if (orgslug !== PLATFORM_ORG_SLUG) {
-    return <ErrorUI message={t('fetchError')} />;
-  }
 
   const handleSignOut = async () => {
     await signOut({
@@ -123,9 +111,13 @@ export const OrgProvider = ({
     );
   }
 
-  return <OrgContext.Provider value={org}>{children}</OrgContext.Provider>;
+  return <PlatformOrgContext.Provider value={org}>{children}</PlatformOrgContext.Provider>;
 };
 
-export function useOrg(): Org | null {
-  return useContext(OrgContext);
+export function usePlatformOrg(): Org | null {
+  return useContext(PlatformOrgContext);
+}
+
+export function usePlatformOrgId(): number {
+  return 1;
 }

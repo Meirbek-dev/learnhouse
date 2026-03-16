@@ -5,9 +5,9 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { createAssignmentWithActivity } from '@services/courses/assignments';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { BarLoader } from '@components/Objects/Loaders/BarLoader';
+import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { revalidateTags } from '@services/utils/ts/requests';
-import { useOrg } from '@components/Contexts/OrgContext';
 import { de, enUS, es, fr, ru } from 'date-fns/locale';
 import { useLocale, useTranslations } from 'next-intl';
 import { Textarea } from '@/components/ui/textarea';
@@ -44,7 +44,7 @@ const NewAssignment = ({ submitActivity, chapterId, course, closeModal, orgslug 
   const t = useTranslations('Components.NewAssignmentModal');
   const fullLocale = useLocale();
   const locale = fullLocale.split('-')[0] ?? 'ru';
-  const org = useOrg() as any;
+  const org = usePlatformOrg() as any;
   const session = usePlatformSession() as any;
   const validationSchema = createValidationSchema(validationT);
   const withUnpublishedActivities = course ? course.withUnpublishedActivities : false;

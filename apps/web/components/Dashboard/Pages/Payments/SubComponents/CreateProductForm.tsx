@@ -4,9 +4,9 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getPaymentsProductsSwrKey } from '@services/payments/keys';
+import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { createProduct } from '@services/payments/products';
-import { useOrg } from '@components/Contexts/OrgContext';
 import { Textarea } from '@components/ui/textarea';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
@@ -39,7 +39,7 @@ const createValidationSchema = (t: (key: string, values?: any) => string) =>
 type ProductFormValues = v.InferOutput<ReturnType<typeof createValidationSchema>>;
 
 const CreateProductForm: FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
-  const org = useOrg() as any;
+  const org = usePlatformOrg() as any;
   const session = usePlatformSession() as any;
   const accessToken = session?.data?.tokens?.access_token;
   const orgId = org?.id;

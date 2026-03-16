@@ -1,7 +1,6 @@
 import { getActivityWithAuthHeader } from '@services/courses/activities';
 import { getOptionalSession } from '@/lib/get-optional-session';
 import { getCourseMetadata } from '@services/courses/courses';
-import { PLATFORM_ORG_SLUG } from '@/services/config/config';
 import { getTranslations } from 'next-intl/server';
 import { jetBrainsMono } from '@/lib/fonts';
 import type { Metadata } from 'next';
@@ -78,7 +77,6 @@ const ActivityPage = async (params: any) => {
       <ActivityClient
         activityid={activityid}
         courseuuid={courseuuid}
-        orgslug={PLATFORM_ORG_SLUG}
         activity={activity}
         course={course_meta}
       />

@@ -27,9 +27,9 @@ import {
 } from 'lucide-react';
 import { useNavigationPermissions } from '@/hooks/useNavigationPermissions';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import platformLogoLight from '@public/platform_logo_light.svg';
 import { getUriWithoutOrg } from '@services/config/config';
-import { useOrg } from '@components/Contexts/OrgContext';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import UserAvatar from '../../Objects/UserAvatar';
@@ -231,7 +231,7 @@ const NavItem = ({ item, isCollapsed }: { item: NavigationItem; isCollapsed: boo
 );
 
 const DashSidebar = ({ className }: SidebarProps) => {
-  const org = useOrg();
+  const org = usePlatformOrg();
   const session = usePlatformSession();
   const { state, toggleSidebar } = useSidebar();
   const t = useTranslations('SidebarMenu');

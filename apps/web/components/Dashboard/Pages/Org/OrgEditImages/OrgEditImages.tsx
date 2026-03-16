@@ -16,7 +16,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 import { SiLoom, SiYoutube } from '@icons-pack/react-simple-icons';
-import { useOrg } from '@components/Contexts/OrgContext';
+import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { constructAcceptValue } from '@/lib/constants';
 import type { ChangeEvent, MouseEvent } from 'react';
 import type { DropResult } from '@hello-pangea/dnd';
@@ -83,7 +83,7 @@ export default function OrgEditImages() {
   const router = useRouter();
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
-  const org = useOrg() as any;
+  const org = usePlatformOrg() as any;
   const tNotify = useTranslations('DashPage.Notifications');
   const t = useTranslations('DashPage.OrgSettings.Images');
   const [localLogo, setLocalLogo] = useState<string | null>(null);

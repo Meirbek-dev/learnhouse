@@ -29,6 +29,7 @@ import { SectionHeader } from '@components/Dashboard/Courses/SectionHeader';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { useEffect, useRef, useState, useTransition } from 'react';
+import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { updateCourseAccess } from '@services/courses/courses';
 import { useDirtySection } from '@/hooks/useDirtySection';
@@ -39,12 +40,9 @@ import { Button } from '@/components/ui/button';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
-interface EditCourseAccessProps {
-  orgslug: string;
-}
-
-const EditCourseAccess = (props: EditCourseAccessProps) => {
+const EditCourseAccess = () => {
   const session = usePlatformSession() as any;
+  const org = usePlatformOrg() as { slug?: string } | null;
   const access_token = session?.data?.tokens?.access_token;
   const course = useCourse();
   const { courseStructure, editorData } = course;
@@ -82,7 +80,7 @@ const EditCourseAccess = (props: EditCourseAccessProps) => {
     await save(async () => {
       const response = await updateCourseAccess(courseStructure.course_uuid, { public: draftPublic }, access_token, {
         lastKnownUpdateDate: courseStructure.update_date,
-        orgSlug: props.orgslug,
+        orgSlug: org?.slug,
       });
       if (response.success) {
         initialRef.current = draftPublic;
@@ -150,7 +148,7 @@ const EditCourseAccess = (props: EditCourseAccessProps) => {
         <UserGroupsSection
           usergroups={usergroups}
           isLoading={isUserGroupsLoading}
-          orgslug={props.orgslug}
+          orgslug={org?.slug}
         />
       )}
     </div>
@@ -164,7 +162,7 @@ const UserGroupsSection = ({
 }: {
   usergroups: any[];
   isLoading: boolean;
-  orgslug: string;
+  orgslug?: string;
 }) => {
   const course = useCourse();
   const [userGroupModal, setUserGroupModal] = useState(false);
@@ -253,7 +251,7 @@ const UnlinkUserGroupRow = ({
   usergroup: any;
   courseUuid: string;
   accessToken: string;
-  orgslug: string;
+  orgslug?: string;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();

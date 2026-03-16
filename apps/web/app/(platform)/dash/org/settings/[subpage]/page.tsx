@@ -1,4 +1,4 @@
- 'use client';
+'use client';
 
 import OrgEditSocials from '@components/Dashboard/Pages/Org/OrgEditSocials/OrgEditSocials';
 import OrgEditLanding from '@components/Dashboard/Pages/Org/OrgEditLanding/OrgEditLanding';
@@ -28,8 +28,20 @@ interface TabItem {
 
 const SETTING_TABS: TabItem[] = [
   { id: 'general', label: 'general', icon: TextIcon, titleKey: 'generalTitle', descriptionKey: 'generalDescription' },
-  { id: 'landing', label: 'landing', icon: LayoutDashboardIcon, titleKey: 'landingTitle', descriptionKey: 'landingDescription' },
-  { id: 'previews', label: 'previews', icon: ImageIcon, titleKey: 'previewsTitle', descriptionKey: 'previewsDescription' },
+  {
+    id: 'landing',
+    label: 'landing',
+    icon: LayoutDashboardIcon,
+    titleKey: 'landingTitle',
+    descriptionKey: 'landingDescription',
+  },
+  {
+    id: 'previews',
+    label: 'previews',
+    icon: ImageIcon,
+    titleKey: 'previewsTitle',
+    descriptionKey: 'previewsDescription',
+  },
   { id: 'socials', label: 'socials', icon: Share2Icon, titleKey: 'socialsTitle', descriptionKey: 'socialsDescription' },
 ];
 
@@ -37,13 +49,20 @@ export default function PlatformOrgSettingsPage(props: { params: Promise<{ subpa
   const t = useTranslations('DashPage.OrgSettings');
   const params = use(props.params);
 
-  const currentTab = useMemo(() => SETTING_TABS.find((tab) => tab.id === params.subpage) || SETTING_TABS[0], [params.subpage]);
+  const currentTab = useMemo(
+    () => SETTING_TABS.find((tab) => tab.id === params.subpage) || SETTING_TABS[0],
+    [params.subpage],
+  );
   const pageTitle = useMemo(() => t(currentTab!.titleKey), [currentTab, t]);
   const pageDescription = useMemo(() => t(currentTab!.descriptionKey), [currentTab, t]);
 
   return (
     <div className="bg-background flex h-full w-full flex-col">
-      <SettingsHeader breadcrumbType="org" title={pageTitle} description={pageDescription}>
+      <SettingsHeader
+        breadcrumbType="org"
+        title={pageTitle}
+        description={pageDescription}
+      >
         <SettingsTabs
           value={params.subpage}
           tabs={SETTING_TABS.map((tab) => ({ id: tab.id, labelKey: tab.label, icon: tab.icon }))}
@@ -66,16 +85,21 @@ export default function PlatformOrgSettingsPage(props: { params: Promise<{ subpa
 const ContentRenderer = ({ subpage }: { subpage: string }) => {
   const content = useMemo(() => {
     switch (subpage) {
-      case 'general':
+      case 'general': {
         return <OrgEditGeneral />;
-      case 'previews':
+      }
+      case 'previews': {
         return <OrgEditImages />;
-      case 'socials':
+      }
+      case 'socials': {
         return <OrgEditSocials />;
-      case 'landing':
+      }
+      case 'landing': {
         return <OrgEditLanding />;
-      default:
+      }
+      default: {
         return null;
+      }
     }
   }, [subpage]);
 

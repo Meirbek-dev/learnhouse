@@ -46,7 +46,7 @@ export interface OrgFeatures {
 // Org config
 // ============================================================================
 
-export interface OrgConfigData {
+export interface ConfigData {
   config_version: string;
   general: { enabled: boolean; color: string };
   features: OrgFeatures;
@@ -54,10 +54,10 @@ export interface OrgConfigData {
   landing: Record<string, unknown>;
 }
 
-export interface OrgConfig {
+export interface Config {
   id: number;
   org_id: number;
-  config: OrgConfigData;
+  config: ConfigData;
   creation_date: string | null;
   update_date: string | null;
 }
@@ -80,7 +80,7 @@ export interface Org {
   thumbnail_image: string | null;
   previews: Record<string, unknown> | null;
   label: string | null;
-  config: OrgConfig | null;
+  config: Config | null;
   creation_date: string;
   update_date: string;
 }

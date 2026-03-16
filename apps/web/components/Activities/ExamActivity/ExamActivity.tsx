@@ -193,7 +193,7 @@ export default function ExamActivity({ activity, course, orgslug }: ExamActivity
       console.error('Failed to navigate to next activity', error);
       toast.error(t('navigationError') || 'Navigation failed');
     }
-  }, [activity, course, orgslug, router, t]);
+  }, [activity, course, router, t]);
 
   const handleBackToPreExam = useCallback(() => {
     if (state.phase === 'results' || state.phase === 'manage' || state.phase === 'reviewing') {

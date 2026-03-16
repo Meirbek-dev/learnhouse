@@ -350,10 +350,7 @@ const UserProfileClient = ({ userData, profile }: UserProfileClientProps) => {
                                   key={course.id}
                                   className="mx-auto w-full max-w-[300px]"
                                 >
-                                  <CourseThumbnail
-                                    course={course}
-                                    orgslug={userData.org_slug || course.org_slug}
-                                  />
+                                  <CourseThumbnail course={course} />
                                 </div>
                               ))}
                             </div>

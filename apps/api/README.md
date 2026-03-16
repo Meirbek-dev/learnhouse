@@ -41,9 +41,12 @@ docker compose up -d --build app
 
 ## Environment and notes
 
-- The backend runtime configuration is environment-only. It does not auto-load `apps/api/.env` and it does not read `apps/api/config/config.yaml` at runtime.
-- Use `extra/.env` for Docker deployments and treat `extra/example-conf.env` as the canonical template.
-- Use `apps/api/.env.example` only as a local backend example when you want a file to copy from during development.
+- The backend runtime configuration is environment-only. It does not auto-load `apps/api/.env` and
+  it does not read `apps/api/config/config.yaml` at runtime.
+- Use `extra/.env` for Docker deployments and treat `extra/example-conf.env` as the canonical
+  template.
+- Use `apps/api/.env.example` only as a local backend example when you want a file to copy from
+  during development.
 - If you modify dependencies, rebuild the image.
 - If you need to inspect logs:
 

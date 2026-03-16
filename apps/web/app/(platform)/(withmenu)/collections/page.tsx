@@ -3,13 +3,13 @@ import TypeOfContentTitle from '@/components/Objects/Elements/Titles/TypeOfConte
 import CollectionThumbnail from '@components/Objects/Thumbnails/CollectionThumbnail';
 import GeneralWrapper from '@/components/Objects/Elements/Wrappers/GeneralWrapper';
 import { getPlatformOrganizationContextInfo } from '@services/organizations/orgs';
+import { getAbsoluteUrl } from '@services/config/config';
 import { PermissionGuard } from '@components/Security/PermissionGuard';
 import { getOrgThumbnailMediaDirectory } from '@services/media/media';
 import ProtectedText from '@components/Objects/ContentPlaceHolder';
 import { getOrgCollections } from '@services/courses/collections';
 import { Actions, Resources, Scopes } from '@/types/permissions';
 import { getOptionalSession } from '@/lib/get-optional-session';
-import { getAbsoluteUrl, PLATFORM_ORG_SLUG } from '@services/config/config';
 import { getTranslations } from 'next-intl/server';
 import Link from '@components/ui/AppLink';
 import type { Metadata } from 'next';
@@ -84,11 +84,7 @@ export default async function PlatformCollectionsPage() {
               key={collection.collection_uuid}
               className="p-3"
             >
-              <CollectionThumbnail
-                collection={collection}
-                orgslug={PLATFORM_ORG_SLUG}
-                org_id={org_id}
-              />
+              <CollectionThumbnail collection={collection} />
             </div>
           ))}
           {collections.length === 0 && (

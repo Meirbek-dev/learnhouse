@@ -1,8 +1,8 @@
 import { getPlatformOrganizationContextInfo } from '@services/organizations/orgs';
 import { getOrgThumbnailMediaDirectory } from '@services/media/media';
 import { getOptionalSession } from '@/lib/get-optional-session';
-import { getOrgCourses } from '@services/courses/courses';
 import { PLATFORM_ORG_SLUG } from '@/services/config/config';
+import { getOrgCourses } from '@services/courses/courses';
 import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
 

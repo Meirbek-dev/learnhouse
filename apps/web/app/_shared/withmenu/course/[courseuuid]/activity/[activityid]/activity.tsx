@@ -41,6 +41,7 @@ import type { Activity, Chapter, CourseStructure } from '@components/Contexts/Co
 import { useOptionalGamificationContext } from '@/components/Contexts/GamificationContext';
 import ActivityChapterDropdown from '@components/Pages/Activity/ActivityChapterDropdown';
 import { AssignmentProvider } from '@components/Contexts/Assignments/AssignmentContext';
+import { getAPIUrl, getAbsoluteUrl, PLATFORM_ORG_SLUG } from '@services/config/config';
 import GeneralWrapper from '@/components/Objects/Elements/Wrappers/GeneralWrapper';
 import { Suspense, lazy, useEffect, useRef, useState, useTransition } from 'react';
 import ActivityBreadcrumbs from '@components/Pages/Activity/ActivityBreadcrumbs';
@@ -52,8 +53,7 @@ import { useFormatter, useLocale, useTranslations } from 'next-intl';
 import ToolTip from '@/components/Objects/Elements/Tooltip/Tooltip';
 import { CourseProvider } from '@components/Contexts/CourseContext';
 import { useContributorStatus } from '@/hooks/useContributorStatus';
-import { getAPIUrl, getAbsoluteUrl } from '@services/config/config';
-import { useOrg } from '@components/Contexts/OrgContext';
+import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { getTrailSwrKey } from '@services/courses/keys';
@@ -215,7 +215,6 @@ function SubmitAssignmentDialog({ onSubmit, t }: SubmitAssignmentDialogProps) {
 interface ActivityClientProps {
   activityid: string;
   courseuuid: string;
-  orgslug: string;
   activity: Activity | null;
   course: CourseStructure;
 }
@@ -262,7 +261,7 @@ const ActivityActions = ({
 }: ActivityActionsProps) => {
   const t = useTranslations('ActivityPage');
   const { contributorStatus } = useContributorStatus(course.course_uuid);
-  const org = useOrg() as any;
+  const org = usePlatformOrg() as any;
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const isAuthenticated = session.status === 'authenticated';
@@ -326,10 +325,10 @@ function getValidTiptapContent(content: any): any {
 const ActivityClient = (props: ActivityClientProps) => {
   const { activityid } = props;
   const { courseuuid } = props;
-  const { orgslug } = props;
   const { activity } = props;
   const { course } = props;
-  const org = useOrg() as any;
+  const org = usePlatformOrg() as any;
+  const orgslug = org?.slug || PLATFORM_ORG_SLUG;
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const isAuthenticated = session.status === 'authenticated';
@@ -1127,7 +1126,7 @@ export const MarkStatus = (props: {
   const { t } = props;
   const router = useRouter();
   const session = usePlatformSession() as any;
-  const org = useOrg() as any;
+  const org = usePlatformOrg() as any;
   const [isLoading, setIsLoading] = useState(false);
 
   // Gamification state via unified context

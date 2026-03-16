@@ -1,10 +1,10 @@
 import { getActivityMediaDirectory } from '@services/media/media';
-import { useOrg } from '@components/Contexts/OrgContext';
+import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { useTranslations } from 'next-intl';
 
 const DocumentPdfActivity = ({ activity, course }: { activity: any; course: any }) => {
   const t = useTranslations('Activities.DocumentPdf');
-  const org = useOrg() as any;
+  const org = usePlatformOrg() as any;
 
   return (
     <div className="m-8 mt-14 rounded-md bg-zinc-900">

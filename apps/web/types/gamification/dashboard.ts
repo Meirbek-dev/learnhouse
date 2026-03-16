@@ -1,5 +1,5 @@
 import type { StreakInfo, UserGamificationProfile } from './profile';
-import type { OrganizationLeaderboard } from './leaderboard';
+import type { PlatformLeaderboard } from './leaderboard';
 import * as v from 'valibot';
 
 /**
@@ -11,7 +11,7 @@ import * as v from 'valibot';
 export interface DashboardData {
   profile: UserGamificationProfile;
   recent_transactions: any[];
-  leaderboard: OrganizationLeaderboard;
+  leaderboard: PlatformLeaderboard;
   user_rank: number | null;
   streak_info: StreakInfo;
 }

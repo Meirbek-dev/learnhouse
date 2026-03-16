@@ -20,12 +20,12 @@ import TrailCourseElement from '@components/Pages/Trail/TrailCourseElement';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { revalidateTags, swrFetcher } from '@services/utils/ts/requests';
 import UserCertificates from '@components/Pages/Trail/UserCertificates';
+import { getAPIUrl, PLATFORM_ORG_SLUG } from '@services/config/config';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
+import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { AlertTriangle, BookOpen, Loader2 } from 'lucide-react';
 import { removeCourse } from '@services/courses/activity';
-import { useOrg } from '@components/Contexts/OrgContext';
 import { getTrailSwrKey } from '@services/courses/keys';
-import { getAPIUrl, PLATFORM_ORG_SLUG } from '@services/config/config';
 import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -34,7 +34,7 @@ import useSWR from 'swr';
 const Trail = () => {
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
-  const org = useOrg() as any;
+  const org = usePlatformOrg() as any;
   const orgID = org?.id;
   const t = useTranslations('TrailPage');
   const router = useRouter();
@@ -183,7 +183,6 @@ const Trail = () => {
                   key={run.course.course_uuid}
                   run={run}
                   course={run.course}
-                  orgslug={org?.slug || PLATFORM_ORG_SLUG}
                 />
               ))}
             </div>

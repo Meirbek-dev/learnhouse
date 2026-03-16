@@ -29,9 +29,9 @@ import DataTable from '@/components/ui/data-table';
 
 import { AlertTriangle, KeyRound, Loader2, LogOut } from 'lucide-react';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
+import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { removeUserFromOrg } from '@services/organizations/orgs';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
-import { useOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import React, { useState, useTransition } from 'react';
 import { getAPIUrl } from '@services/config/config';
@@ -114,7 +114,7 @@ function RemoveUserButton({ userId, username, onRemove, t }: RemoveUserButtonPro
 }
 
 const OrgUsers = () => {
-  const org = useOrg() as any;
+  const org = usePlatformOrg() as any;
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const t = useTranslations('DashPage.UserSettings.usersSection');

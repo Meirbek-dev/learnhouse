@@ -13,11 +13,13 @@ This review covers the backend env and config system centered on:
 - `docker-compose.yml`
 - `extra/example-conf.env`
 
-It reflects the current codebase state on 2026-03-15, including the recent `pydantic-settings` refactor that moved most direct env reads behind typed settings models.
+It reflects the current codebase state on 2026-03-15, including the recent `pydantic-settings`
+refactor that moved most direct env reads behind typed settings models.
 
 ## Executive Summary
 
-The backend env system is better than it was before the recent refactor, but it is still more complex than it needs to be and still has real operational risk.
+The backend env system is better than it was before the recent refactor, but it is still more
+complex than it needs to be and still has real operational risk.
 
 The main issue is not field validation. The main issue is source ambiguity.
 
@@ -28,7 +30,8 @@ Today the backend can derive configuration from all of the following at once:
 3. `apps/api/.env` through `load_dotenv(...)` and `SettingsConfigDict(env_file=...)`.
 4. `apps/api/config/config.yaml` when `PLATFORM_DEVELOPMENT_MODE` is absent or truthy.
 
-That means the system has more than one authoritative source of truth, and the precedence rules are partly explicit, partly implicit, and partly spread across different modules.
+That means the system has more than one authoritative source of truth, and the precedence rules are
+partly explicit, partly implicit, and partly spread across different modules.
 
 The short version:
 
@@ -36,19 +39,20 @@ The short version:
 - Source control is not.
 - Deployment behavior is harder to reason about than it should be.
 - There is still duplication in files, naming, loading, and caching.
-- The current setup is especially fragile around Docker builds, local development, and secret handling.
+- The current setup is especially fragile around Docker builds, local development, and secret
+  handling.
 
 ## Current Backend Env Sources
 
 ## Active sources
 
-| Source | Current role | Notes |
-| --- | --- | --- |
-| Runtime process env | Primary override source | Correct place for production configuration. |
-| `extra/.env` | Compose runtime source | Used by the `app` container in `docker-compose.yml`. |
-| `apps/api/.env` | Backend-local dotenv source | Loaded explicitly in code and also through Pydantic settings. |
-| `apps/api/config/config.yaml` | Local-development fallback | Enabled when `PLATFORM_DEVELOPMENT_MODE` is missing or truthy. |
-| Raw `os.getenv` / `os.environ` reads | Special-case bootstrap logic | Still used for development-mode bootstrap and `TESTING`. |
+| Source                               | Current role                 | Notes                                                          |
+| ------------------------------------ | ---------------------------- | -------------------------------------------------------------- |
+| Runtime process env                  | Primary override source      | Correct place for production configuration.                    |
+| `extra/.env`                         | Compose runtime source       | Used by the `app` container in `docker-compose.yml`.           |
+| `apps/api/.env`                      | Backend-local dotenv source  | Loaded explicitly in code and also through Pydantic settings.  |
+| `apps/api/config/config.yaml`        | Local-development fallback   | Enabled when `PLATFORM_DEVELOPMENT_MODE` is missing or truthy. |
+| Raw `os.getenv` / `os.environ` reads | Special-case bootstrap logic | Still used for development-mode bootstrap and `TESTING`.       |
 
 ## Effective precedence
 
@@ -60,7 +64,9 @@ In practice the precedence is roughly:
 4. File secrets source if added later.
 5. YAML defaults when allowed.
 
-The problem is that the backend also preloads `apps/api/.env` into process env with `load_dotenv(...)`, so the separation between step 2 and step 3 is already blurred before Pydantic runs.
+The problem is that the backend also preloads `apps/api/.env` into process env with
+`load_dotenv(...)`, so the separation between step 2 and step 3 is already blurred before Pydantic
+runs.
 
 ## Critical Findings
 
@@ -68,7 +74,9 @@ The problem is that the backend also preloads `apps/api/.env` into process env w
 
 This is the highest-level problem.
 
-The backend container receives env vars from `extra/.env`, but backend code also hard-wires `apps/api/.env` as a second dotenv source. That means Docker runtime config and backend-local config can drift independently.
+The backend container receives env vars from `extra/.env`, but backend code also hard-wires
+`apps/api/.env` as a second dotenv source. That means Docker runtime config and backend-local config
+can drift independently.
 
 Consequences:
 
@@ -96,19 +104,24 @@ Consequences:
 
 ### 3. The root image can accidentally bake in backend-local `.env`
 
-The root `Dockerfile` copies `./apps/api` into the image. The root `.dockerignore` excludes `extra/.env`, but it does not exclude `apps/api/.env`.
+The root `Dockerfile` copies `./apps/api` into the image. The root `.dockerignore` excludes
+`extra/.env`, but it does not exclude `apps/api/.env`.
 
-That means a backend-local secret file can become part of the image build context and potentially the final image, even though the runtime container is already getting env through `extra/.env`.
+That means a backend-local secret file can become part of the image build context and potentially
+the final image, even though the runtime container is already getting env through `extra/.env`.
 
 This is not just duplication. It is a secret-leak and drift risk.
 
 ### 4. YAML fallback is useful for dev, but it makes runtime resolution harder to reason about
 
-`config.yaml` is acting as a local-development defaults source, gated by `_should_load_yaml_defaults()` which itself depends on a raw env read of `PLATFORM_DEVELOPMENT_MODE`.
+`config.yaml` is acting as a local-development defaults source, gated by
+`_should_load_yaml_defaults()` which itself depends on a raw env read of
+`PLATFORM_DEVELOPMENT_MODE`.
 
 This creates a bootstrap cycle:
 
-- One env var is read manually to decide whether the rest of the typed config system should load YAML.
+- One env var is read manually to decide whether the rest of the typed config system should load
+  YAML.
 - That same env var also exists as a typed settings field inside `GeneralConfig`.
 
 This is understandable, but still structurally awkward.
@@ -142,9 +155,11 @@ Consequences:
 Examples:
 
 - `apps/api/app.py` stores `platform_config = get_platform_config()` at module import time.
-- `apps/api/src/security/security.py` stores `SECRET_KEY = get_platform_config().security_config.auth_jwt_secret_key` at module import time.
+- `apps/api/src/security/security.py` stores
+  `SECRET_KEY = get_platform_config().security_config.auth_jwt_secret_key` at module import time.
 
-Once this happens, `reload_platform_config_cache()` does not fully represent a config reload anymore.
+Once this happens, `reload_platform_config_cache()` does not fully represent a config reload
+anymore.
 
 Consequences:
 
@@ -184,7 +199,8 @@ Consequences:
 
 `TESTING=true` is still read directly in `apps/api/src/core/events/database.py`.
 
-This is one of the remaining intentional raw env reads, but it still means test behavior is governed outside the typed config system.
+This is one of the remaining intentional raw env reads, but it still means test behavior is governed
+outside the typed config system.
 
 Consequences:
 
@@ -193,7 +209,8 @@ Consequences:
 
 ### 10. Secret-bearing env files exist in multiple locations
 
-The workspace currently contains multiple secret-bearing env files for backend-related configuration, including runtime and backup-style variants.
+The workspace currently contains multiple secret-bearing env files for backend-related
+configuration, including runtime and backup-style variants.
 
 Consequences:
 
@@ -226,7 +243,8 @@ Use one runtime configuration path for the backend:
 2. Optional dotenv loading is development-only and explicit.
 3. YAML is not part of normal runtime resolution.
 4. All backend settings are exposed through one top-level settings object.
-5. No module should snapshot config at import time unless it is truly immutable for the process lifetime.
+5. No module should snapshot config at import time unless it is truly immutable for the process
+   lifetime.
 
 ## Practical target rules
 
@@ -258,7 +276,8 @@ Why:
 - It makes config precedence obvious.
 - It aligns Docker, local Python, CI, and production more closely.
 
-If removing YAML now is too disruptive, keep it temporarily but require an explicit opt-in flag or explicit dev entrypoint instead of loading it automatically.
+If removing YAML now is too disruptive, keep it temporarily but require an explicit opt-in flag or
+explicit dev entrypoint instead of loading it automatically.
 
 ## Concrete Plan
 
@@ -266,7 +285,8 @@ If removing YAML now is too disruptive, keep it temporarily but require an expli
 
 1. Stop baking backend-local env files into images.
 2. Add `apps/api/.env` and `**/.env` exceptions as appropriate to the root `.dockerignore`.
-3. Audit whether any secret-bearing env backup files should be removed from the workspace or relocated outside the repo tree.
+3. Audit whether any secret-bearing env backup files should be removed from the workspace or
+   relocated outside the repo tree.
 4. Treat `apps/api/.env` as local-only and never as a deploy-time source.
 
 Success criteria:
@@ -315,7 +335,8 @@ Success criteria:
 
 1. Replace module-level config constants with lazy accessors or dependency injection.
 2. In particular, stop freezing JWT secret and app config at import time.
-3. Where repeated lookup is a concern, cache the settings object centrally rather than caching individual derived constants across modules.
+3. Where repeated lookup is a concern, cache the settings object centrally rather than caching
+   individual derived constants across modules.
 
 Success criteria:
 
@@ -325,13 +346,15 @@ Success criteria:
 ### Phase 5: Normalize naming and remove legacy aliases
 
 1. Standardize env names under one convention.
-2. Recommended rule: all backend env vars use `PLATFORM_` or a replacement global prefix chosen once.
+2. Recommended rule: all backend env vars use `PLATFORM_` or a replacement global prefix chosen
+   once.
 3. Rename outliers over a migration window:
    - `CHROMADB_PERSIST_PATH` -> `PLATFORM_CHROMADB_PERSIST_PATH`
 4. Remove temporary compatibility aliases after migration:
    - `cookies_config`
    - legacy Chroma field names
-5. Keep naming flat if you want low churn, or move to nested env names if you want cleaner long-term structure.
+5. Keep naming flat if you want low churn, or move to nested env names if you want cleaner long-term
+   structure.
 
 Recommended approach:
 
@@ -341,7 +364,7 @@ Recommended approach:
 
 ### Phase 7: Decide what to do with YAML
 
-####  Remove YAML from runtime completely
+#### Remove YAML from runtime completely
 
 Best for simplicity.
 
@@ -390,19 +413,23 @@ To reduce rollout risk, do this in order:
 3. Consolidate accessor API third.
 4. Remove YAML fallback last.
 
-That order gives the biggest safety improvement earliest, without forcing a large config migration on day one.
+That order gives the biggest safety improvement earliest, without forcing a large config migration
+on day one.
 
 ## Final Recommendation
 
 The backend env system should be simplified around one principle:
 
-> Production config should come from env, development config should be explicit, and there should be exactly one default runtime resolution path.
+> Production config should come from env, development config should be explicit, and there should be
+> exactly one default runtime resolution path.
 
-The current system is close enough that this can be done incrementally. The immediate priorities are:
+The current system is close enough that this can be done incrementally. The immediate priorities
+are:
 
 1. stop local `.env` files from entering images,
 2. stop loading the same dotenv file in multiple places,
 3. reduce the config API to one settings object,
 4. remove automatic YAML fallback from the normal runtime path.
 
-If those four changes are made, most of the remaining duplication and ambiguity disappears naturally.
+If those four changes are made, most of the remaining duplication and ambiguity disappears
+naturally.

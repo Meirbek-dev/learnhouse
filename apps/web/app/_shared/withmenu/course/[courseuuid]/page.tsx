@@ -2,7 +2,6 @@ import { getPlatformOrganizationContextInfo } from '@services/organizations/orgs
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { getOptionalSession } from '@/lib/get-optional-session';
 import { getCourseMetadata } from '@services/courses/courses';
-import { PLATFORM_ORG_SLUG } from '@/services/config/config';
 import type { Metadata } from 'next';
 
 import CourseClient from './course';
@@ -66,7 +65,6 @@ const CoursePage = async (params: any) => {
   return (
     <CourseClient
       courseuuid={courseuuid}
-      orgslug={PLATFORM_ORG_SLUG}
       course={course_meta}
       access_token={access_token}
     />

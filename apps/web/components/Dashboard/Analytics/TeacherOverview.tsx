@@ -29,12 +29,7 @@ interface TeacherOverviewProps {
   cohortOptions?: AnalyticsFilterOption[];
 }
 
-export default function TeacherOverview({
-  query,
-  data,
-  courseOptions = [],
-  cohortOptions = [],
-}: TeacherOverviewProps) {
+export default function TeacherOverview({ query, data, courseOptions = [], cohortOptions = [] }: TeacherOverviewProps) {
   const t = useTranslations('TeacherAnalytics');
   const locale = useLocale();
   const router = useRouter();

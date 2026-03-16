@@ -1,11 +1,11 @@
-import { getServerGamificationDashboard } from '@/services/gamification/server';
 import { getPlatformOrganizationContextInfo } from '@services/organizations/orgs';
+import { getServerGamificationDashboard } from '@/services/gamification/server';
 import { getOrgCollections } from '@services/courses/collections';
 import LandingClassic from '@components/Landings/LandingClassic';
 import { getOptionalSession } from '@/lib/get-optional-session';
 import LandingCustom from '@components/Landings/LandingCustom';
-import { getOrgCourses } from '@services/courses/courses';
 import { PLATFORM_ORG_SLUG } from '@services/config/config';
+import { getOrgCourses } from '@services/courses/courses';
 
 export async function LandingContent() {
   try {

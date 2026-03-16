@@ -1,7 +1,7 @@
 import { getTeacherOverview, normalizeAnalyticsQuery } from '@services/analytics/teacher';
 import AnalyticsEmptyState from '@components/Dashboard/Analytics/AnalyticsEmptyState';
-import TeacherOverview from '@components/Dashboard/Analytics/TeacherOverview';
 import { getPlatformOrganizationContextInfo } from '@services/organizations/orgs';
+import TeacherOverview from '@components/Dashboard/Analytics/TeacherOverview';
 import { getTranslations } from 'next-intl/server';
 import { auth } from '@/auth';
 
@@ -22,13 +22,23 @@ async function PlatformAnalyticsPageInner(props: {
   const t = await getTranslations('TeacherAnalytics');
 
   if (!analyticsEnabled || !accessToken) {
-    return <AnalyticsEmptyState title={t('pages.overviewDisabledTitle')} description={t('pages.overviewDisabledDesc')} />;
+    return (
+      <AnalyticsEmptyState
+        title={t('pages.overviewDisabledTitle')}
+        description={t('pages.overviewDisabledDesc')}
+      />
+    );
   }
 
   try {
     const overview = await getTeacherOverview(accessToken, query);
 
-    return <TeacherOverview query={query} data={overview} />;
+    return (
+      <TeacherOverview
+        query={query}
+        data={overview}
+      />
+    );
   } catch (error) {
     return (
       <AnalyticsEmptyState

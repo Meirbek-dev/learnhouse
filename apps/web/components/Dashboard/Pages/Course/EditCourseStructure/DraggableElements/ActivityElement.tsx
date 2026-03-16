@@ -41,8 +41,8 @@ import { deleteActivity, updateActivity } from '@services/courses/activities';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import ToolTip from '@/components/Objects/Elements/Tooltip/Tooltip';
 import { getAPIUrl, getAbsoluteUrl } from '@services/config/config';
+import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { useCourse } from '@components/Contexts/CourseContext';
-import { useOrg } from '@components/Contexts/OrgContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -544,7 +544,7 @@ const ActivityEditButton = ({
   onRequestAssignment: () => void;
 }) => {
   const t = useTranslations('CourseEdit.ActivityElement');
-  const org = useOrg() as Organization;
+  const org = usePlatformOrg() as Organization;
   const course = useCourse() as Course;
   const isMobile = useIsMobile();
 

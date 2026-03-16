@@ -2,10 +2,10 @@
 
 import { Field, FieldContent, FieldError, FieldLabel } from '@components/ui/field';
 import PasswordInput from '@components/ui/custom/password-input';
+import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { AlertTriangle, Info, Loader2 } from 'lucide-react';
 import { getUriWithoutOrg } from '@services/config/config';
-import { useOrg } from '@components/Contexts/OrgContext';
 import { resetPassword } from '@services/auth/auth';
 import { useSearchParams } from 'next/navigation';
 import { useState, useTransition } from 'react';
@@ -45,7 +45,7 @@ type ResetPasswordFormData = v.InferOutput<ReturnType<typeof createValidationSch
 const ResetPasswordClient = () => {
   const validationT = useTranslations('Validation');
   const t = useTranslations('Auth.Reset');
-  const org = useOrg() as any;
+  const org = usePlatformOrg() as any;
   const searchParams = useSearchParams();
   const reset_code = searchParams.get('resetCode') || '';
   const email = searchParams.get('email') || '';

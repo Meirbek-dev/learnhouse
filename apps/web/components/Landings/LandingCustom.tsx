@@ -273,10 +273,7 @@ const LandingCustom = ({ landing, org_id, gamificationData }: LandingCustomProps
                   key={course.course_uuid}
                   className="mx-auto w-full max-w-[300px]"
                 >
-                  <CourseThumbnail
-                    course={course}
-                    orgslug={PLATFORM_ORG_SLUG}
-                  />
+                  <CourseThumbnail course={course} />
                 </div>
               ))}
               {featuredCourses.length === 0 && (

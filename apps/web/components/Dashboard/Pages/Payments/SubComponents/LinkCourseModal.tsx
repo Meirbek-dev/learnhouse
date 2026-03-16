@@ -4,8 +4,8 @@ import { getCoursesLinkedToProduct, linkCourseToProduct } from '@services/paymen
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { getPaymentsProductsSwrKey } from '@services/payments/keys';
+import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { getOrgCourses } from '@services/courses/courses';
-import { useOrg } from '@components/Contexts/OrgContext';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
@@ -33,7 +33,7 @@ interface CoursePreviewProps {
 }
 
 const CoursePreview = ({ course, orgslug, onLink, isLinked }: CoursePreviewProps) => {
-  const org = useOrg() as any;
+  const org = usePlatformOrg() as any;
   const t = useTranslations('Payments.LinkCourseModal');
 
   const thumbnailImage = course.thumbnail_image
@@ -82,7 +82,7 @@ const CoursePreview = ({ course, orgslug, onLink, isLinked }: CoursePreviewProps
 
 export default function LinkCourseModal({ productId, onSuccess }: LinkCourseModalProps) {
   const [searchTerm, setSearchTerm] = useState('');
-  const org = useOrg() as any;
+  const org = usePlatformOrg() as any;
   const session = usePlatformSession() as any;
   const accessToken = session?.data?.tokens?.access_token;
   const orgId = org?.id;

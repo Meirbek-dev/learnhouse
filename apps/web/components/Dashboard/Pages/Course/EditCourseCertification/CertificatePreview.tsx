@@ -1,8 +1,8 @@
 'use client';
 
 import { Award, Building, Calendar, CheckCircle, Hash, QrCode, User } from 'lucide-react';
+import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { getOrgLogoMediaDirectory } from '@services/media/media';
-import { useOrg } from '@components/Contexts/OrgContext';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -81,7 +81,7 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
   qrCodeLink,
 }) => {
   const [qrCodeUrl, setQrCodeUrl] = useState<string>('');
-  const org = useOrg();
+  const org = usePlatformOrg();
   const tTypes = useTranslations('Certificates.EditCourseCertification.certificationTypes');
   const t = useTranslations('Certificates.CertificatePreview');
   const layout = getCertificateLayout(certificatePattern);
