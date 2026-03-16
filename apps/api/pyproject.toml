@@ -31,7 +31,7 @@ dependencies = [
   "slowapi>=0.1.9",
   "pyjwt>=2.12.1",
   "langgraph>=1.1.2",
-  "pydantic-settings[yaml]>=2.13.1",
+  "pydantic-settings>=2.13.1",
 ]
 
 [dependency-groups]
@@ -82,10 +82,8 @@ asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
 markers = ["asyncio: mark test as async"]
 
-filterwarnings = ["ignore:.*Importing tools from langchain is deprecated.*"]
-
 [tool.logfire]
 ignore_no_config = true
 
 [tool.pyrefly]
-project-includes = ["**/*.py*", "**/*.ipynb"]
+project-includes = ["**/*.py*"]

@@ -11,7 +11,7 @@ from fastapi import HTTPException, UploadFile
 
 
 def validate_image_content(content: bytes) -> bool:
-    """Validate image content using magic bytes (no deprecated modules)."""
+    """Validate image content using magic bytes."""
     if len(content) < 12:
         return False
 
