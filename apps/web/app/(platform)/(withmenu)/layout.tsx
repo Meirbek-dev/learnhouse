@@ -1,7 +1,6 @@
-import LegacyLayout from '@/app/orgs/[orgslug]/(withmenu)/layout';
-
-import { withPlatformParams } from '../legacy-route';
+import WithMenuClientLayout from './with-menu-client-layout';
+import '@styles/globals.css';
 
 export default function PlatformWithMenuLayout({ children }: { children: React.ReactNode }) {
-  return <LegacyLayout params={withPlatformParams({})}>{children}</LegacyLayout>;
+  return <WithMenuClientLayout>{children}</WithMenuClientLayout>;
 }

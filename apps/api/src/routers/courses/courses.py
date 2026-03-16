@@ -202,70 +202,6 @@ async def api_get_course_meta(
     )
 
 
-@router.get("/org_slug/{org_slug}/page/{page}/limit/{limit}")
-async def api_get_course_by_orgslug(
-    request: Request,
-    response: Response,
-    page: int,
-    limit: int,
-    org_slug: str,
-    current_user: Annotated[
-        PublicUser | AnonymousUser, Depends(get_current_user_optional)
-    ] = None,
-    db_session=Depends(get_db_session),
-) -> list[CourseReadWithPermissions]:
-    """
-    Get courses by org slug with pagination
-    Adds basic HTTP caching headers for public (anonymous) requests to allow
-    upstream caches (nginx/CDN) to reduce load and avoid 429s.
-    Returns X-Total-Count header with total number of courses.
-    """
-    courses = await get_courses_orgslug(
-        request, current_user, org_slug, db_session, page, limit
-    )
-
-    # Get total count for pagination
-    total_count = await count_courses_orgslug(current_user, org_slug, db_session)
-    response.headers["X-Total-Count"] = str(total_count)
-    response.headers["Access-Control-Expose-Headers"] = "X-Total-Count"
-
-    # Set cache headers for public responses to help upstream caching
-    # and reduce the request rate to university nginx.
-    response.headers["Cache-Control"] = "public, max-age=60, stale-while-revalidate=120"
-
-    # Set Last-Modified based on latest update_date among returned courses
-    try:
-        latest = None
-        for c in courses:
-            ud = getattr(c, "update_date", None)
-            if ud and (latest is None or ud > latest):
-                latest = ud
-        if latest:
-            # Format as HTTP-date
-            response.headers["Last-Modified"] = latest.strftime(
-                "%a, %d %b %Y %H:%M:%S GMT"
-            )
-
-            # Respect If-Modified-Since: return 304 when no changes
-            ims = request.headers.get("If-Modified-Since")
-            if ims:
-                try:
-                    from email.utils import parsedate_to_datetime
-
-                    ims_dt = parsedate_to_datetime(ims)
-                    # If upstream client has a timestamp >= latest, nothing changed
-                    if ims_dt >= latest:
-                        return Response(status_code=304)
-                except Exception:
-                    # If parsing fails, ignore and continue
-                    pass
-    except Exception:
-        # Don't fail the endpoint just for caching header computation
-        pass
-
-    return courses
-
-
 @router.get("/page/{page}/limit/{limit}")
 async def api_get_platform_courses(
     request: Request,
@@ -277,47 +213,40 @@ async def api_get_platform_courses(
     ] = None,
     db_session=Depends(get_db_session),
 ) -> list[CourseReadWithPermissions]:
-    return await api_get_course_by_orgslug(
-        request=request,
-        response=response,
-        page=page,
-        limit=limit,
-        org_slug=PLATFORM_ORG_SLUG,
-        current_user=current_user,
-        db_session=db_session,
+    courses = await get_courses_orgslug(
+        request, current_user, PLATFORM_ORG_SLUG, db_session, page, limit
     )
 
-
-@router.get("/org_slug/{org_slug}/editable/page/{page}/limit/{limit}")
-async def api_get_editable_courses_by_orgslug(
-    request: Request,
-    response: Response,
-    page: int,
-    limit: int,
-    org_slug: str,
-    query: str | None = None,
-    sort_by: str | None = "updated",
-    preset: str | None = "all",
-    current_user: Annotated[PublicUser, Depends(get_current_user)] = None,
-    db_session=Depends(get_db_session),
-) -> list[CourseReadWithPermissions]:
-    """
-    Get courses by org slug that the current user can edit.
-
-    Only returns courses where the user has ``course:update`` permission.
-    Returns X-Total-Count header with the number of editable courses.
-    """
-    courses, total_count, summary = await list_editable_courses_orgslug(
-        request, current_user, org_slug, db_session, page, limit, query, sort_by, preset
+    total_count = await count_courses_orgslug(
+        current_user, PLATFORM_ORG_SLUG, db_session
     )
     response.headers["X-Total-Count"] = str(total_count)
-    response.headers["X-Summary-Total"] = str(summary["total"])
-    response.headers["X-Summary-Ready"] = str(summary["ready"])
-    response.headers["X-Summary-Private"] = str(summary["private"])
-    response.headers["X-Summary-Attention"] = str(summary["attention"])
-    response.headers["Access-Control-Expose-Headers"] = (
-        "X-Total-Count, X-Summary-Total, X-Summary-Ready, X-Summary-Private, X-Summary-Attention"
-    )
+    response.headers["Access-Control-Expose-Headers"] = "X-Total-Count"
+    response.headers["Cache-Control"] = "public, max-age=60, stale-while-revalidate=120"
+
+    try:
+        latest = None
+        for c in courses:
+            ud = getattr(c, "update_date", None)
+            if ud and (latest is None or ud > latest):
+                latest = ud
+        if latest:
+            response.headers["Last-Modified"] = latest.strftime(
+                "%a, %d %b %Y %H:%M:%S GMT"
+            )
+
+            ims = request.headers.get("If-Modified-Since")
+            if ims:
+                try:
+                    from email.utils import parsedate_to_datetime
+
+                    ims_dt = parsedate_to_datetime(ims)
+                    if ims_dt >= latest:
+                        return Response(status_code=304)
+                except Exception:
+                    pass
+    except Exception:
+        pass
 
     return courses
 
@@ -334,36 +263,27 @@ async def api_get_platform_editable_courses(
     current_user: Annotated[PublicUser, Depends(get_current_user)] = None,
     db_session=Depends(get_db_session),
 ) -> list[CourseReadWithPermissions]:
-    return await api_get_editable_courses_by_orgslug(
-        request=request,
-        response=response,
-        page=page,
-        limit=limit,
-        org_slug=PLATFORM_ORG_SLUG,
-        query=query,
-        sort_by=sort_by,
-        preset=preset,
-        current_user=current_user,
-        db_session=db_session,
+    courses, total_count, summary = await list_editable_courses_orgslug(
+        request,
+        current_user,
+        PLATFORM_ORG_SLUG,
+        db_session,
+        page,
+        limit,
+        query,
+        sort_by,
+        preset,
+    )
+    response.headers["X-Total-Count"] = str(total_count)
+    response.headers["X-Summary-Total"] = str(summary["total"])
+    response.headers["X-Summary-Ready"] = str(summary["ready"])
+    response.headers["X-Summary-Private"] = str(summary["private"])
+    response.headers["X-Summary-Attention"] = str(summary["attention"])
+    response.headers["Access-Control-Expose-Headers"] = (
+        "X-Total-Count, X-Summary-Total, X-Summary-Ready, X-Summary-Private, X-Summary-Attention"
     )
 
-
-@router.get("/org_slug/{org_slug}/search")
-async def api_search_courses(
-    request: Request,
-    org_slug: str,
-    query: str,
-    page: int = 1,
-    limit: int = 20,
-    current_user: Annotated[PublicUser, Depends(get_current_user)] = None,
-    db_session=Depends(get_db_session),
-) -> list[CourseRead]:
-    """
-    Search courses by title and description
-    """
-    return await search_courses(
-        request, current_user, org_slug, query, db_session, page, limit
-    )
+    return courses
 
 
 @router.get("/search")

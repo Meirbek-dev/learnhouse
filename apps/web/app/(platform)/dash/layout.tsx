@@ -1,7 +1,20 @@
-import LegacyLayout from '@/app/orgs/[orgslug]/dash/layout';
+import { getTranslations } from 'next-intl/server';
+import { requireAuth } from '@/lib/server-auth';
+import { PLATFORM_ORG_SLUG } from '@/services/config/config';
+import type { Metadata } from 'next';
 
-import { withPlatformParams } from '../legacy-route';
+import ClientAdminLayout from './client-admin-layout';
 
-export default function PlatformDashLayout({ children }: { children: React.ReactNode }) {
-  return <LegacyLayout params={withPlatformParams({})}>{children}</LegacyLayout>;
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('DashPage');
+
+  return {
+    title: t('DashboardTitle'),
+  };
+}
+
+export default async function PlatformDashLayout({ children }: { children: React.ReactNode }) {
+  await requireAuth(PLATFORM_ORG_SLUG);
+
+  return <ClientAdminLayout>{children}</ClientAdminLayout>;
 }

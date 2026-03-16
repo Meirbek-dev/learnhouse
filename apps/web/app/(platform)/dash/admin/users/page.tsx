@@ -1,7 +1,20 @@
-import LegacyPage from '@/app/orgs/[orgslug]/dash/admin/users/page';
+import { Actions, Resources, Scopes } from '@/types/permissions';
+import { requirePermission } from '@/lib/server-auth';
+import { PLATFORM_ORG_SLUG } from '@/services/config/config';
+import { getTranslations } from 'next-intl/server';
+import UserRolesClient from '@/app/_shared/dash/admin/users/client';
+import type { Metadata } from 'next';
 
-import { withPlatformParams } from '../../../legacy-route';
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('Components.OrgRoles');
 
-export default function PlatformAdminUsersPage() {
-  return <LegacyPage params={withPlatformParams({})} />;
+  return {
+    title: t('userRolesTitle'),
+    description: t('userRolesDescription'),
+  };
+}
+
+export default async function PlatformAdminUsersPage() {
+  await requirePermission(PLATFORM_ORG_SLUG, Actions.UPDATE, Resources.ROLE, Scopes.ORG);
+  return <UserRolesClient />;
 }

@@ -1,7 +1,15 @@
-import LegacyLayout from '@/app/orgs/[orgslug]/layout';
+import { getPlatformOrganizationContextInfo } from '@services/organizations/orgs';
+import PlatformClientProviders from './platform-client-providers';
+import '@styles/globals.css';
 
-import { withPlatformParams } from './legacy-route';
+export default async function PlatformLayout({ children }: { children: React.ReactNode }) {
+  let initialOrg = null;
 
-export default function PlatformLayout({ children }: { children: React.ReactNode }) {
-  return <LegacyLayout params={withPlatformParams({})}>{children}</LegacyLayout>;
+  try {
+    initialOrg = await getPlatformOrganizationContextInfo();
+  } catch {
+    initialOrg = null;
+  }
+
+  return <PlatformClientProviders initialOrg={initialOrg}>{children}</PlatformClientProviders>;
 }

@@ -1,9 +1,63 @@
-import LegacyPage from '@/app/orgs/[orgslug]/(withmenu)/courses/page';
+import { getPlatformOrganizationContextInfo } from '@services/organizations/orgs';
+import { getOrgThumbnailMediaDirectory } from '@services/media/media';
+import { getOptionalSession } from '@/lib/get-optional-session';
+import { getOrgCourses } from '@services/courses/courses';
+import { PLATFORM_ORG_SLUG } from '@/services/config/config';
+import { getTranslations } from 'next-intl/server';
+import type { Metadata } from 'next';
 
-import { withPlatformParams } from '../../legacy-route';
+import Courses from '@/app/_shared/withmenu/courses/courses';
 
-export default function PlatformCoursesPage(props: {
+interface MetadataProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
-}) {
-  return <LegacyPage params={withPlatformParams({})} searchParams={props.searchParams} />;
+}
+
+export async function generateMetadata(_props: MetadataProps): Promise<Metadata> {
+  const t = await getTranslations('General');
+  const org = await getPlatformOrganizationContextInfo();
+
+  return {
+    title: `${t('courses')} - Ashyq Bilim`,
+    description: org.description,
+    keywords: `${org.name}, ${org.description}, ${t('courses')}, ${t('learning')}, ${t('education')}, ${t('onlineLearning')}, ${t('edu')}, ${t('onlineCourses')}, ${org.name} ${t('courses')}`,
+    robots: {
+      index: true,
+      follow: true,
+      nocache: true,
+      googleBot: {
+        'index': true,
+        'follow': true,
+        'max-image-preview': 'large',
+      },
+    },
+    openGraph: {
+      title: `${t('courses')} - Ashyq Bilim`,
+      description: org.description,
+      type: 'website',
+      images: [
+        {
+          url: getOrgThumbnailMediaDirectory(org?.org_uuid, org?.thumbnail_image),
+          width: 800,
+          height: 600,
+          alt: org.name,
+        },
+      ],
+    },
+  };
+}
+
+export default async function PlatformCoursesPage() {
+  const session = await getOptionalSession();
+  const access_token = session?.tokens?.access_token;
+  const { courses, total } = await getOrgCourses(PLATFORM_ORG_SLUG, undefined, access_token || null);
+
+  return (
+    <div>
+      <Courses
+        orgslug={PLATFORM_ORG_SLUG}
+        courses={courses}
+        totalCourses={total}
+      />
+    </div>
+  );
 }

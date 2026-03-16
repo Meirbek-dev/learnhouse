@@ -5,7 +5,7 @@ import { getAPIUrl } from '@services/config/config';
  */
 export function getTrailSwrKey(orgId: number | null | undefined) {
   if (!orgId) return '';
-  return `${getAPIUrl()}trail/org/${orgId}/trail`;
+  return `${getAPIUrl()}trail`;
 }
 
 export function getCoursesSwrKey(orgSlug: string, page = 1, limit = 20) {

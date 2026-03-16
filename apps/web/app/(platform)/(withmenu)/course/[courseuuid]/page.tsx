@@ -1,10 +1,68 @@
-import LegacyPage from '@/app/orgs/[orgslug]/(withmenu)/course/[courseuuid]/page';
+import { getPlatformOrganizationContextInfo } from '@services/organizations/orgs';
+import { getCourseThumbnailMediaDirectory } from '@services/media/media';
+import { getOptionalSession } from '@/lib/get-optional-session';
+import { getCourseMetadata } from '@services/courses/courses';
+import { PLATFORM_ORG_SLUG } from '@/services/config/config';
+import type { Metadata } from 'next';
 
-import { withPlatformParams } from '../../../legacy-route';
+import CourseClient from '@/app/_shared/withmenu/course/[courseuuid]/course';
 
-export default function PlatformCoursePage(props: {
+interface MetadataProps {
   params: Promise<{ courseuuid: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
-}) {
-  return <LegacyPage params={withPlatformParams(props.params)} searchParams={props.searchParams} />;
+}
+
+export async function generateMetadata(props: MetadataProps): Promise<Metadata> {
+  const params = await props.params;
+  const session = await getOptionalSession();
+  const access_token = session?.tokens?.access_token;
+  const org = await getPlatformOrganizationContextInfo();
+  const course_meta = await getCourseMetadata(params.courseuuid, undefined, access_token || null);
+
+  return {
+    title: `${course_meta.name} - Ashyq Bilim`,
+    description: course_meta.description,
+    keywords: course_meta.learnings,
+    robots: {
+      index: true,
+      follow: true,
+      nocache: true,
+      googleBot: {
+        'index': true,
+        'follow': true,
+        'max-image-preview': 'large',
+      },
+    },
+    openGraph: {
+      title: `${course_meta.name} - Ashyq Bilim`,
+      description: course_meta.description || '',
+      images: [
+        {
+          url: getCourseThumbnailMediaDirectory(org?.org_uuid, course_meta?.course_uuid, course_meta?.thumbnail_image),
+          width: 800,
+          height: 600,
+          alt: course_meta.name,
+        },
+      ],
+      type: 'article',
+      publishedTime: course_meta.creation_date || '',
+      tags: course_meta.learnings || [],
+    },
+  };
+}
+
+export default async function PlatformCoursePage(props: { params: Promise<{ courseuuid: string }> }) {
+  const session = await getOptionalSession();
+  const access_token = session?.tokens?.access_token;
+  const { courseuuid } = await props.params;
+  const course_meta = await getCourseMetadata(courseuuid, undefined, access_token || null);
+
+  return (
+    <CourseClient
+      courseuuid={courseuuid}
+      orgslug={PLATFORM_ORG_SLUG}
+      course={course_meta}
+      access_token={access_token}
+    />
+  );
 }

@@ -154,34 +154,6 @@ async def check_trail_presence(
     return trail
 
 
-async def get_user_trail_with_orgid(
-    request: Request, user: PublicUser | AnonymousUser, org_id: int, db_session: Session
-) -> TrailRead:
-    if isinstance(user, AnonymousUser):
-        # Anonymous visitors can view public trail metadata but never persist data.
-        # Return a consistent empty payload instead of erroring so upstream callers
-        # (SSR sitemap, marketing pages, etc.) do not fail while unauthenticated.
-        return TrailRead(
-            id=None,
-            trail_uuid=None,
-            org_id=org_id,
-            user_id=user.id,
-            creation_date=None,
-            update_date=None,
-            runs=[],
-        )
-
-    trail = await check_trail_presence(
-        org_id=org_id,
-        user_id=user.id,
-        request=request,
-        user=user,
-        db_session=db_session,
-    )
-
-    return _hydrate_trail(trail, user.id, db_session)
-
-
 async def add_activity_to_trail(
     request: Request,
     user: PublicUser,

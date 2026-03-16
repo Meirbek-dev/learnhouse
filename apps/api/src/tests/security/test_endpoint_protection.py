@@ -32,7 +32,7 @@ EXEMPT_ENDPOINTS = {
     "/orgs/",  # Create org (public signup)
     "/orgs/{org_id}",  # GET only (public read)
     # Public course browsing (GET only)
-    "/courses/org_slug/{org_slug}",
+    "/courses/page/{page}/limit/{limit}",
     "/courses/{course_uuid}",  # GET only
     "/courses/{course_uuid}/meta",  # GET only
     # User profile (own account)
@@ -100,7 +100,7 @@ def is_read_only_endpoint(method: str, path: str) -> bool:
 
     # GET endpoints on public resources are often safe
     public_patterns = [
-        "/courses/org_slug/",
+        "/courses/page/",
         "/courses/{course_uuid}",
         "/orgs/{org_id}",
     ]

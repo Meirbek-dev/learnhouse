@@ -83,6 +83,9 @@ async function fetchPlatformOrganization(access_token?: string) {
 }
 
 export async function getOrganizationContextInfo(org_slug: string, _next?: unknown, access_token?: string) {
+  if (org_slug === PLATFORM_ORG_SLUG) {
+    return fetchPlatformOrganization(access_token);
+  }
   return fetchOrganizationBySlug(org_slug, access_token);
 }
 
@@ -123,6 +126,9 @@ export async function getOrganizationContextInfoWithoutCredentials(org_slug: str
 }
 
 export async function getOrganizationContextInfoNoAsync(org_slug: string, next: unknown, access_token: string) {
+  if (org_slug === PLATFORM_ORG_SLUG) {
+    return await fetch(`${getAPIUrl()}orgs/platform`, RequestBodyWithAuthHeader('GET', null, next, access_token));
+  }
   return await fetch(`${getAPIUrl()}orgs/slug/${org_slug}`, RequestBodyWithAuthHeader('GET', null, next, access_token));
 }
 

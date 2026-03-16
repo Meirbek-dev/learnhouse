@@ -1,7 +1,16 @@
-import LegacyLayout from '@/app/orgs/[orgslug]/dash/assignments/layout';
+import { Actions, Resources, Scopes } from '@/types/permissions';
+import { requireAnyPermission } from '@/lib/server-auth';
+import { PLATFORM_ORG_SLUG } from '@/services/config/config';
+import type { ReactNode } from 'react';
 
-import { withPlatformParams } from '../../legacy-route';
+export default async function PlatformAssignmentsLayout({ children }: { children: ReactNode }) {
+  await requireAnyPermission(PLATFORM_ORG_SLUG, [
+    { action: Actions.CREATE, resource: Resources.COURSE, scope: Scopes.ORG },
+    { action: Actions.UPDATE, resource: Resources.COURSE, scope: Scopes.ORG },
+    { action: Actions.UPDATE, resource: Resources.COURSE, scope: Scopes.OWN },
+    { action: Actions.GRADE, resource: Resources.ASSIGNMENT, scope: Scopes.ORG },
+    { action: Actions.CREATE, resource: Resources.ASSIGNMENT, scope: Scopes.ORG },
+  ]);
 
-export default function PlatformAssignmentsLayout({ children }: { children: React.ReactNode }) {
-  return <LegacyLayout params={withPlatformParams({})}>{children}</LegacyLayout>;
+  return <>{children}</>;
 }

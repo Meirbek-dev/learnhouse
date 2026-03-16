@@ -1,9 +1,56 @@
-import LegacyPage from '@/app/orgs/[orgslug]/(withmenu)/trail/page';
+import { getServerGamificationDashboard, getServerOrganizationLeaderboard } from '@/services/gamification/server';
+import { GamificationProvider } from '@/components/Contexts/GamificationContext';
+import { getPlatformOrganizationContextInfo } from '@services/organizations/orgs';
+import { getOptionalSession } from '@/lib/get-optional-session';
+import { PLATFORM_ORG_SLUG } from '@/services/config/config';
+import { getTranslations } from 'next-intl/server';
+import type { Metadata } from 'next';
 
-import { withPlatformParams } from '../../legacy-route';
+import Trail from '@/app/_shared/withmenu/trail/trail';
 
-export default function PlatformTrailPage(props: {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
-}) {
-  return <LegacyPage params={withPlatformParams({})} searchParams={props.searchParams} />;
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('TrailPage');
+
+  return {
+    title: `${t('title')} - Ashyq Bilim`,
+    description: t('metaDescription'),
+  };
+}
+
+export default async function PlatformTrailPage() {
+  const session = await getOptionalSession();
+  const accessToken = session?.tokens?.access_token;
+  const org = await getPlatformOrganizationContextInfo(accessToken || undefined);
+  const orgId = Number(org?.org_id ?? org?.id ?? 0);
+  const content = (
+    <div>
+      <Trail orgslug={PLATFORM_ORG_SLUG} />
+    </div>
+  );
+
+  if (!orgId) {
+    return content;
+  }
+
+  const [dashboardData, leaderboardData] = await Promise.all([
+    getServerGamificationDashboard(orgId),
+    getServerOrganizationLeaderboard(orgId, 10),
+  ]);
+
+  if (!dashboardData) {
+    return content;
+  }
+
+  return (
+    <GamificationProvider
+      orgId={orgId}
+      initialData={{
+        profile: dashboardData.profile,
+        dashboard: dashboardData,
+        leaderboard: leaderboardData ?? null,
+      }}
+    >
+      {content}
+    </GamificationProvider>
+  );
 }

@@ -6,7 +6,7 @@ import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { revalidateTags } from '@services/utils/ts/requests';
 import { updateOrganization } from '@services/settings/org';
 import { useOrg } from '@components/Contexts/OrgContext';
-import { getAPIUrl } from '@services/config/config';
+import { getAPIUrl, PLATFORM_ORG_SLUG } from '@services/config/config';
 import { Plus, X as XIcon } from 'lucide-react';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
@@ -51,7 +51,9 @@ export default function OrgEditSocials() {
     try {
       await updateOrganization(org.id, values, access_token);
       await revalidateTags(['organizations']);
-      mutate(`${getAPIUrl()}orgs/slug/${org.slug}`);
+      const orgContextKey =
+        org?.slug === PLATFORM_ORG_SLUG ? `${getAPIUrl()}orgs/platform` : `${getAPIUrl()}orgs/slug/${org.slug}`;
+      mutate(orgContextKey);
       toast.success(t('orgUpdatedSuccess'), { id: loadingToast });
     } catch {
       toast.error(t('orgUpdateFailed'), { id: loadingToast });

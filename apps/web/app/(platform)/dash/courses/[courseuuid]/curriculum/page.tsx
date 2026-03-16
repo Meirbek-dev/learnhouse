@@ -1,7 +1,14 @@
-import LegacyPage from '@/app/orgs/[orgslug]/dash/courses/[courseuuid]/curriculum/page';
+import EditCourseStructure from '@components/Dashboard/Pages/Course/EditCourseStructure/EditCourseStructure';
+import { renderCourseWorkspacePage } from '@components/Dashboard/Courses/renderCourseWorkspacePage';
+import { PLATFORM_ORG_SLUG } from '@/services/config/config';
 
-import { withPlatformParams } from '../../../../legacy-route';
+export default async function PlatformCourseCurriculumPage(props: { params: Promise<{ courseuuid: string }> }) {
+  const { courseuuid } = await props.params;
 
-export default function PlatformCourseCurriculumPage(props: { params: Promise<{ courseuuid: string }> }) {
-  return <LegacyPage params={withPlatformParams(props.params)} />;
+  return renderCourseWorkspacePage({
+    orgslug: PLATFORM_ORG_SLUG,
+    courseuuid,
+    activeStage: 'curriculum',
+    children: <EditCourseStructure orgslug={PLATFORM_ORG_SLUG} />,
+  });
 }

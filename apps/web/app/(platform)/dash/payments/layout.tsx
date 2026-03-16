@@ -1,7 +1,13 @@
-import LegacyLayout from '@/app/orgs/[orgslug]/dash/payments/layout';
+import { Actions, Resources, Scopes } from '@/types/permissions';
+import { requireAnyPermission } from '@/lib/server-auth';
+import { PLATFORM_ORG_SLUG } from '@/services/config/config';
+import type { ReactNode } from 'react';
 
-import { withPlatformParams } from '../../legacy-route';
+export default async function PlatformPaymentsLayout({ children }: { children: ReactNode }) {
+  await requireAnyPermission(PLATFORM_ORG_SLUG, [
+    { action: Actions.MANAGE, resource: Resources.PAYMENT, scope: Scopes.ORG },
+    { action: Actions.MANAGE, resource: Resources.ORGANIZATION, scope: Scopes.OWN },
+  ]);
 
-export default function PlatformPaymentsLayout({ children }: { children: React.ReactNode }) {
-  return <LegacyLayout params={withPlatformParams({})}>{children}</LegacyLayout>;
+  return <>{children}</>;
 }

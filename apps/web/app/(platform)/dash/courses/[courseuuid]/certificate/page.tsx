@@ -1,7 +1,14 @@
-import LegacyPage from '@/app/orgs/[orgslug]/dash/courses/[courseuuid]/certificate/page';
+import EditCourseCertification from '@components/Dashboard/Pages/Course/EditCourseCertification/EditCourseCertification';
+import { renderCourseWorkspacePage } from '@components/Dashboard/Courses/renderCourseWorkspacePage';
+import { PLATFORM_ORG_SLUG } from '@/services/config/config';
 
-import { withPlatformParams } from '../../../../legacy-route';
+export default async function PlatformCourseCertificatePage(props: { params: Promise<{ courseuuid: string }> }) {
+  const { courseuuid } = await props.params;
 
-export default function PlatformCourseCertificatePage(props: { params: Promise<{ courseuuid: string }> }) {
-  return <LegacyPage params={withPlatformParams(props.params)} />;
+  return renderCourseWorkspacePage({
+    orgslug: PLATFORM_ORG_SLUG,
+    courseuuid,
+    activeStage: 'certificate',
+    children: <EditCourseCertification orgslug={PLATFORM_ORG_SLUG} />,
+  });
 }

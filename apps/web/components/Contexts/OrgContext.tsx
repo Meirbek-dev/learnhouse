@@ -1,7 +1,7 @@
 'use client';
 
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { getAPIUrl, getUriWithoutOrg } from '@services/config/config';
+import { getAPIUrl, getUriWithoutOrg, PLATFORM_ORG_SLUG } from '@services/config/config';
 import { createContext, useContext } from 'react';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import ErrorUI from '@/components/Objects/Elements/Error/Error';
@@ -32,6 +32,11 @@ export const OrgProvider = ({
   const t = useTranslations('Contexts.Org');
   const isAllowedPathname =
     pathname.startsWith('/auth/') || ['/login', '/signup', '/forgot', '/reset'].includes(pathname);
+  const orgContextKey = `${getAPIUrl()}orgs/platform`;
+
+  if (orgslug !== PLATFORM_ORG_SLUG) {
+    return <ErrorUI message={t('fetchError')} />;
+  }
 
   const handleSignOut = async () => {
     await signOut({
@@ -44,7 +49,7 @@ export const OrgProvider = ({
     data: org,
     error: orgError,
     isLoading: isOrgLoading,
-  } = useSWR(`${getAPIUrl()}orgs/slug/${orgslug}`, (url: string) => swrFetcher(url, accessToken), {
+  } = useSWR(orgContextKey, (url: string) => swrFetcher(url, accessToken), {
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
     revalidateIfStale: !initialOrg,

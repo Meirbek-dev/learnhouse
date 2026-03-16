@@ -1,9 +1,14 @@
-import LegacyLayout from '@/app/orgs/[orgslug]/dash/courses/[courseuuid]/layout';
+import { getCourseWorkspaceCapabilitiesForCourse } from '@/lib/course-management-server';
+import { PLATFORM_ORG_SLUG } from '@/services/config/config';
+import type { ReactNode } from 'react';
 
-import { withPlatformParams } from '../../../legacy-route';
+export default async function PlatformCourseWorkspaceLayout(props: {
+  children: ReactNode;
+  params: Promise<{ courseuuid: string }>;
+}) {
+  const { courseuuid } = await props.params;
 
-export default function PlatformCourseWorkspaceLayout(
-  props: { children: React.ReactNode; params: Promise<{ courseuuid: string }> },
-) {
-  return <LegacyLayout params={withPlatformParams(props.params)}>{props.children}</LegacyLayout>;
+  await getCourseWorkspaceCapabilitiesForCourse(PLATFORM_ORG_SLUG, courseuuid);
+
+  return <>{props.children}</>;
 }
