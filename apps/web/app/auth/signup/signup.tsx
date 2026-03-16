@@ -7,7 +7,6 @@ import PasswordInput from '@components/ui/custom/password-input';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { useEffect, useState, useTransition } from 'react';
 import { SiGoogle } from '@icons-pack/react-simple-icons';
-import { useOrg } from '@components/Contexts/OrgContext';
 import { AlertTriangle, Loader2 } from 'lucide-react';
 import { Separator } from '@components/ui/separator';
 import { passwordSchema } from '@/lib/schemas/auth';
@@ -47,7 +46,6 @@ type SignUpFormData = v.InferOutput<ReturnType<typeof buildFormSchema>>;
 const SignUpClient = () => {
   const session = usePlatformSession();
   const router = useRouter();
-  const org = useOrg();
   const t = useTranslations('Auth.Signup');
   const validationT = useTranslations('Validation');
   const [isPending, startTransition] = useTransition();

@@ -2,12 +2,12 @@
 
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getAPIUrl, getUriWithoutOrg } from '@services/config/config';
-import { createContext, useContext, useEffect, useRef } from 'react';
+import { createContext, useContext } from 'react';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import ErrorUI from '@/components/Objects/Elements/Error/Error';
 import { Home, LogOut, PersonStanding } from 'lucide-react';
 import { swrFetcher } from '@services/utils/ts/requests';
-import { signOut, useSession } from 'next-auth/react';
+import { signOut } from 'next-auth/react';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import type { Org } from '@/types/org';
@@ -71,35 +71,6 @@ export const OrgProvider = ({
   const isLoading =
     session.status === 'loading' || (!org && isOrgLoading) || (isAuthenticated && !orgs && isUserOrgsLoading);
   const hasError = Boolean(orgError) || (isAuthenticated && Boolean(orgsError));
-
-  // Refresh session permissions when org changes
-  const { update: updateSession } = useSession();
-  const prevOrgIdRef = useRef<number | undefined>(undefined);
-  const isInitialMount = useRef(true);
-
-  useEffect(() => {
-    if (!org?.id || !isAuthenticated) return;
-
-    // Set the current_org_id cookie so the session callback picks up the right org
-    if (prevOrgIdRef.current !== org.id) {
-      document.cookie = `current_org_id=${org.id};path=/;max-age=${60 * 60 * 24 * 365}`;
-
-      // Only update session if this is a user-initiated org change (not initial mount)
-      // and only if we have a previous org (meaning we actually switched orgs)
-      if (!isInitialMount.current && prevOrgIdRef.current !== undefined) {
-        // Use setTimeout to defer the session update and prevent navigation interruption
-        const timeoutId = setTimeout(() => {
-          updateSession();
-        }, 100);
-
-        return () => clearTimeout(timeoutId);
-      }
-
-      prevOrgIdRef.current = org.id;
-      isInitialMount.current = false;
-    }
-    return;
-  }, [org?.id, isAuthenticated, updateSession]);
 
   const isUserPartOfTheOrg: boolean = (() => {
     if (!isAuthenticated || !org?.id || !Array.isArray(orgs)) {

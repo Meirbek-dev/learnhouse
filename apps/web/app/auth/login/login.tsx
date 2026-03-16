@@ -5,7 +5,6 @@ import { getAbsoluteUrl, getUriWithoutOrg } from '@services/config/config';
 import PasswordInput from '@components/ui/custom/password-input';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { SiGoogle } from '@icons-pack/react-simple-icons';
-import { useOrg } from '@components/Contexts/OrgContext';
 import { AlertTriangle, Loader2 } from 'lucide-react';
 import { Separator } from '@components/ui/separator';
 import { useState, useTransition } from 'react';
@@ -30,7 +29,6 @@ type LoginFormData = v.InferOutput<ReturnType<typeof createValidationSchema>>;
 const LoginClient = () => {
   const validationT = useTranslations('Validation');
   const t = useTranslations('Auth.Login');
-  const org = useOrg();
   const [error, setError] = useState('');
   const [isPending, startTransition] = useTransition();
   const validationSchema = createValidationSchema(validationT);

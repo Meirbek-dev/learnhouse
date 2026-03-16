@@ -115,7 +115,7 @@ export const HeaderProfileBox = () => {
             <li>
               <Link
                 prefetch={false}
-                href={{ pathname: getUriWithoutOrg('/login'), query: org ? { orgslug: org.slug } : undefined }}
+                href={getUriWithoutOrg('/login')}
               >
                 <Button
                   variant="ghost"
@@ -128,7 +128,7 @@ export const HeaderProfileBox = () => {
             <li>
               <Link
                 prefetch={false}
-                href={{ pathname: getUriWithoutOrg('/signup'), query: org ? { orgslug: org.slug } : undefined }}
+                href={getUriWithoutOrg('/signup')}
               >
                 <Button size="sm">{t('signUp')}</Button>
               </Link>

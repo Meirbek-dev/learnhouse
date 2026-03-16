@@ -80,10 +80,7 @@ const CollectionThumbnail = (props: PropsType) => {
           <div className="flex flex-col">
             <Link
               prefetch={false}
-              href={getAbsoluteUrl(
-                props.orgslug,
-                `/collection/${removeCollectionPrefix(props.collection.collection_uuid)}`,
-              )}
+              href={getAbsoluteUrl(`/collection/${removeCollectionPrefix(props.collection.collection_uuid)}`)}
               className="text-lg font-bold text-white hover:underline"
             >
               {props.collection.name}

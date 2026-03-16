@@ -5,6 +5,7 @@ import {
   loginWithOAuthToken,
 } from '@/services/auth/auth';
 import { SESSION_CACHE_MAX_SIZE, SESSION_CACHE_TTL_MS, TOKEN_REFRESH_BUFFER_MS } from '@/lib/constants';
+import { PLATFORM_ORG_SLUG } from '@/services/config/config';
 import type { NextAuthConfig, NextAuthResult, Session } from 'next-auth';
 import { getResponseMetadata } from '@/services/utils/ts/requests';
 import Credentials from 'next-auth/providers/credentials';
@@ -13,7 +14,6 @@ import { getServerConfig } from '@/services/config/env';
 import Google from 'next-auth/providers/google';
 import type { JWT } from 'next-auth/jwt';
 import { createHash } from 'node:crypto';
-import { cookies } from 'next/headers';
 import { LRUCache } from 'lru-cache';
 import NextAuth from 'next-auth';
 
@@ -54,6 +54,10 @@ const getSessionCache = (): LRUCache<string, SessionData> => {
 const createCacheKey = (accessToken: string): string | null => {
   if (!accessToken) return null;
   return `user_session_${createHash('sha256').update(accessToken).digest('hex')}`;
+};
+
+const resolvePlatformOrgId = (roles?: SessionData['roles']): number | undefined => {
+  return roles?.find((role) => role.org.slug === PLATFORM_ORG_SLUG)?.org.id;
 };
 
 // ─── Token Helpers ────────────────────────────────────────────────────────────
@@ -308,11 +312,9 @@ const createAuthConfig = (): NextAuthConfig => {
         }
 
         try {
-          const cookieStore = await cookies();
-          const orgIdCookie = cookieStore.get('current_org_id');
-          const currentOrgId = orgIdCookie?.value ? Number.parseInt(orgIdCookie.value, 10) : undefined;
-
-          const apiSession = await getUserSession(tokens.access_token, currentOrgId);
+          const baseSession = await getUserSession(tokens.access_token);
+          const platformOrgId = resolvePlatformOrgId(baseSession.roles);
+          const apiSession = platformOrgId ? await getUserSession(tokens.access_token, platformOrgId) : baseSession;
 
           if (!apiSession?.user) {
             console.error('Invalid session data from getUserSession');
@@ -324,7 +326,7 @@ const createAuthConfig = (): NextAuthConfig => {
             roles: apiSession.roles ?? [],
             tokens,
             permissions: apiSession.permissions ?? [],
-            permissions_org_id: currentOrgId ?? null,
+            permissions_org_id: platformOrgId ?? null,
           };
 
           if (cacheKey) {

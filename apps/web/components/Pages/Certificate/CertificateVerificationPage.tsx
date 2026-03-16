@@ -168,7 +168,6 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
   }
 
   const qrCodeLink = getAbsoluteUrl(
-    org?.org_slug || '',
     `/certificates/${certificateData.certificate_user.user_certification_uuid}/verify`,
   );
 
@@ -315,10 +314,7 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
                 {/* View Course Link */}
                 <div className="shrink-0">
                   <Link
-                    href={getAbsoluteUrl(
-                      org?.org_slug || '',
-                      `/course/${certificateData.course.course_uuid.replace('course_', '')}`,
-                    )}
+                    href={getAbsoluteUrl(`/course/${certificateData.course.course_uuid.replace('course_', '')}`)}
                     className="inline-flex items-center space-x-1 text-sm text-neutral-400 transition-colors hover:text-neutral-600"
                   >
                     <span>{t('viewCourse')}</span>

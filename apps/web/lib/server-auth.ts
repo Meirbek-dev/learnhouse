@@ -1,24 +1,20 @@
 import type { Action, Resource, Scope } from '@/types/permissions';
+import { PLATFORM_ORG_SLUG } from '@/services/config/config';
 import { perm } from '@/types/permissions';
-import { redirect } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { auth } from '@/auth';
 
-/**
- * Resolve the numeric org ID from the session's roles by matching the orgslug.
- * Returns undefined if no matching org is found in the user's roles.
- */
-function resolveOrgId(
-  session: { roles?: { org: { id: number; slug: string } }[] },
-  orgslug: string,
-): number | undefined {
-  const role = session.roles?.find((r) => r.org.slug === orgslug);
-  return role?.org.id;
+function assertPlatformRoute(orgslug: string): void {
+  if (orgslug !== PLATFORM_ORG_SLUG) {
+    notFound();
+  }
 }
 
 /**
  * Get the current session or redirect to login.
  */
 export async function requireAuth(orgslug: string) {
+  assertPlatformRoute(orgslug);
   const session = await auth();
   if (!session?.user) {
     redirect(`/orgs/${orgslug}/auth`);
@@ -52,16 +48,7 @@ export async function requirePermission(
   redirectTo?: string,
 ) {
   const session = await requireAuth(orgslug);
-  const currentOrgId = resolveOrgId(session, orgslug);
-
-  // If we can resolve the org and permissions were loaded for another org, they're stale - deny access.
-  if (currentOrgId && session.permissions_org_id !== currentOrgId) {
-    redirect(redirectTo ?? `/orgs/${orgslug}/unauthorized`);
-  }
-
-  // If we cannot resolve org membership for this orgslug but the session is scoped to another org,
-  // deny access to avoid carrying over stale permissions from a previous org context.
-  if (!currentOrgId && session.permissions_org_id) {
+  if (!session.permissions_org_id) {
     redirect(redirectTo ?? `/orgs/${orgslug}/unauthorized`);
   }
 
@@ -82,16 +69,7 @@ export async function requireAnyPermission(
   redirectTo?: string,
 ) {
   const session = await requireAuth(orgslug);
-  const currentOrgId = resolveOrgId(session, orgslug);
-
-  // If we can resolve the org and permissions were loaded for another org, they're stale - deny access.
-  if (currentOrgId && session.permissions_org_id !== currentOrgId) {
-    redirect(redirectTo ?? `/orgs/${orgslug}/unauthorized`);
-  }
-
-  // If we cannot resolve org membership for this orgslug but the session is scoped to another org,
-  // deny access to avoid carrying over stale permissions from a previous org context.
-  if (!currentOrgId && session.permissions_org_id) {
+  if (!session.permissions_org_id) {
     redirect(redirectTo ?? `/orgs/${orgslug}/unauthorized`);
   }
 
