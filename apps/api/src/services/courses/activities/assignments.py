@@ -42,7 +42,7 @@ from src.services.courses.activities.uploads.tasks_ref_files import (
 from src.services.courses.certifications import (
     check_course_completion_and_create_certificate,
 )
-from src.services.platform import get_platform_org_id, get_platform_organization
+from src.services.platform import get_platform_organization
 from src.services.trail.trail import check_trail_presence
 
 logger = logging.getLogger(__name__)
@@ -71,7 +71,6 @@ async def create_assignment(
     checker.require(
         current_user.id,
         "assignment:create",
-        get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 
@@ -123,7 +122,6 @@ async def read_assignment(
     checker.require(
         current_user.id,
         "assignment:read",
-        get_platform_org_id(db_session),
         is_assigned=True,
         resource_owner_id=course.creator_id,
     )
@@ -173,7 +171,6 @@ async def read_assignment_from_activity_uuid(
     checker.require(
         current_user.id,
         "assignment:read",
-        get_platform_org_id(db_session),
         is_assigned=True,
         resource_owner_id=course.creator_id,
     )
@@ -214,7 +211,6 @@ async def update_assignment(
     checker.require(
         current_user.id,
         "assignment:update",
-        get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 
@@ -265,7 +261,6 @@ async def delete_assignment(
     checker.require(
         current_user.id,
         "assignment:delete",
-        get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 
@@ -318,7 +313,6 @@ async def delete_assignment_from_activity_uuid(
     checker.require(
         current_user.id,
         "assignment:delete",
-        get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 
@@ -365,7 +359,6 @@ async def create_assignment_task(
     checker.require(
         current_user.id,
         "assignment:create",
-        get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 
@@ -426,7 +419,6 @@ async def read_assignment_tasks(
     checker.require(
         current_user.id,
         "assignment:read",
-        get_platform_org_id(db_session),
         is_assigned=True,
         resource_owner_id=course.creator_id,
     )
@@ -481,7 +473,6 @@ async def read_assignment_task(
     checker.require(
         current_user.id,
         "assignment:read",
-        get_platform_org_id(db_session),
         is_assigned=True,
         resource_owner_id=course.creator_id,
     )
@@ -540,7 +531,6 @@ async def put_assignment_task_reference_file(
     checker.require(
         current_user.id,
         "assignment:update",
-        get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 
@@ -622,14 +612,13 @@ async def put_assignment_task_submission_file(
     checker.require(
         current_user.id,
         "assignment:read",
-        get_platform_org_id(db_session),
         is_assigned=True,
         resource_owner_id=course.creator_id,
     )
 
     # Check if user is enrolled in the course
     can_view = checker.check(
-        current_user.id, "course:read", get_platform_org_id(db_session)
+        current_user.id, "course:read"
     )
     if not can_view:
         raise HTTPException(
@@ -699,7 +688,6 @@ async def update_assignment_task(
     checker.require(
         current_user.id,
         "assignment:update",
-        get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 
@@ -762,7 +750,6 @@ async def delete_assignment_task(
     checker.require(
         current_user.id,
         "assignment:delete",
-        get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 
@@ -823,7 +810,6 @@ async def handle_assignment_task_submission(
     is_instructor = checker.check(
         current_user.id,
         "course:update",
-        get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 
@@ -831,7 +817,7 @@ async def handle_assignment_task_submission(
     if not is_instructor:
         # Check if user is enrolled in the course
         can_view = checker.check(
-            current_user.id, "course:read", get_platform_org_id(db_session)
+            current_user.id, "course:read"
         )
         if not can_view:
             raise HTTPException(
@@ -855,7 +841,6 @@ async def handle_assignment_task_submission(
         checker.require(
             current_user.id,
             "assignment:read",
-            get_platform_org_id(db_session),
             is_assigned=True,
         )
     else:
@@ -863,7 +848,6 @@ async def handle_assignment_task_submission(
         checker.require(
             current_user.id,
             "assignment:update",
-            get_platform_org_id(db_session),
             resource_owner_id=course.creator_id,
         )
 
@@ -982,7 +966,6 @@ async def read_user_assignment_task_submissions(
     checker.require(
         current_user.id,
         "assignment:read",
-        get_platform_org_id(db_session),
         is_assigned=True,
         resource_owner_id=course.creator_id,
     )
@@ -1044,7 +1027,6 @@ async def read_user_assignment_task_submissions_me(
     checker.require(
         current_user.id,
         "assignment:read",
-        get_platform_org_id(db_session),
         is_assigned=True,
         resource_owner_id=course.creator_id,
     )
@@ -1107,7 +1089,6 @@ async def read_assignment_task_submissions(
     checker.require(
         current_user.id,
         "assignment:read",
-        get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 
@@ -1177,7 +1158,6 @@ async def update_assignment_task_submission(
     checker.require(
         current_user.id,
         "assignment:read",
-        get_platform_org_id(db_session),
         is_assigned=True,
         resource_owner_id=course.creator_id,
     )
@@ -1284,7 +1264,6 @@ async def delete_assignment_task_submission(
     checker.require(
         current_user.id,
         "assignment:delete",
-        get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 
@@ -1343,7 +1322,6 @@ async def create_assignment_submission(
     checker.require(
         current_user.id,
         "assignment:read",
-        get_platform_org_id(db_session),
         is_assigned=True,
         resource_owner_id=course.creator_id,
     )
@@ -1481,7 +1459,6 @@ async def read_assignment_submissions(
     checker.require(
         current_user.id,
         "assignment:read",
-        get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 
@@ -1530,7 +1507,6 @@ async def read_user_assignment_submissions(
     checker.require(
         current_user.id,
         "assignment:read",
-        get_platform_org_id(db_session),
         is_assigned=True,
         resource_owner_id=course.creator_id,
     )
@@ -1603,7 +1579,6 @@ async def update_assignment_submission(
     checker.require(
         current_user.id,
         "assignment:read",
-        get_platform_org_id(db_session),
         is_assigned=True,
         resource_owner_id=course.creator_id,
     )
@@ -1684,7 +1659,6 @@ async def delete_assignment_submission(
     checker.require(
         current_user.id,
         "assignment:delete",
-        get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 
@@ -1728,7 +1702,6 @@ async def grade_assignment_submission(
     checker.require(
         current_user.id,
         "assignment:grade",
-        get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 
@@ -1892,7 +1865,6 @@ async def mark_activity_as_done_for_user(
     checker.require(
         current_user.id,
         "assignment:update",
-        get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 
@@ -1970,7 +1942,6 @@ async def create_assignment_with_activity(
     checker.require(
         current_user.id,
         "assignment:create",
-        get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 
@@ -2055,7 +2026,6 @@ async def get_assignments_from_course(
     checker.require(
         current_user.id,
         "assignment:read",
-        get_platform_org_id(db_session),
         is_assigned=True,
         resource_owner_id=course.creator_id,
     )
@@ -2088,7 +2058,6 @@ async def get_assignments_from_courses(
         checker.require(
             current_user.id,
             "assignment:read",
-            get_platform_org_id(db_session),
             is_assigned=True,
             resource_owner_id=c.creator_id,
         )
@@ -2155,7 +2124,6 @@ async def get_editable_assignments_from_courses(
         if checker.check(
             current_user.id,
             "assignment:update",
-            get_platform_org_id(db_session),
             resource_owner_id=c.creator_id,
         ):
             editable_course_ids.add(c.id)

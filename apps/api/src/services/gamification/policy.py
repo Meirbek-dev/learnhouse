@@ -1,8 +1,8 @@
-"""Policy repository and TTL cache for gamification org overrides.
+"""Policy repository and TTL cache for gamification config overrides.
 
 Provides:
-- get_org_policy(db, org_id) -> (rewards: dict[str,int], daily_limit: int)
-- invalidate_org_policy(org_id)
+- get_policy(db) -> (rewards: dict[str,int], daily_limit: int)
+- invalidate_policy()
 
 Default cache is in-process with a short TTL. Can be swapped to Redis later.
 """
@@ -10,30 +10,27 @@ Default cache is in-process with a short TTL. Can be swapped to Redis later.
 from __future__ import annotations
 
 from datetime import datetime, timedelta
-from typing import Dict, Tuple
 
 from sqlmodel import Session, select
 
 from src.core.timezone import now as tz_now
 from src.db.gamification import DAILY_XP_LIMIT, XP_REWARDS, OrgGamificationConfig
 
-# In-process TTL cache: org_id -> (rewards, daily_limit, cached_at)
-_CACHE: dict[int, tuple[dict[str, int], int, datetime]] = {}
+# In-process TTL cache: (rewards, daily_limit, cached_at)
+_CACHE: tuple[dict[str, int], int, datetime] | None = None
 _TTL = timedelta(minutes=5)
 
 
-def invalidate_org_policy(org_id: int | None = None) -> None:
-    if org_id is None:
-        _CACHE.clear()
-        return
-    _CACHE.pop(int(org_id), None)
+def invalidate_policy() -> None:
+    global _CACHE
+    _CACHE = None
 
 
-def get_org_policy(db: Session, org_id: int) -> tuple[dict[str, int], int]:
+def get_policy(db: Session) -> tuple[dict[str, int], int]:
+    global _CACHE
     now = tz_now()
-    cached = _CACHE.get(org_id)
-    if cached and now - cached[2] < _TTL:
-        return cached[0], cached[1]
+    if _CACHE is not None and now - _CACHE[2] < _TTL:
+        return _CACHE[0], _CACHE[1]
 
     cfg = db.exec(select(OrgGamificationConfig)).first()
 
@@ -62,5 +59,16 @@ def get_org_policy(db: Session, org_id: int) -> tuple[dict[str, int], int]:
             if dl is not None and dl > 0:
                 daily_limit = dl
 
-    _CACHE[org_id] = (rewards, daily_limit, now)
+    _CACHE = (rewards, daily_limit, now)
     return rewards, daily_limit
+
+
+# Keep old names as aliases for callers that haven't been updated yet
+def get_org_policy(
+    db: Session, org_id: int | None = None
+) -> tuple[dict[str, int], int]:
+    return get_policy(db)
+
+
+def invalidate_org_policy(org_id: int | None = None) -> None:
+    invalidate_policy()

@@ -90,6 +90,7 @@ class CourseDiscussionCreate(SQLModelStrictBaseModel):
 
         return v
 
+
 class CourseDiscussionRead(SQLModelStrictBaseModel):
     id: int
     discussion_uuid: str

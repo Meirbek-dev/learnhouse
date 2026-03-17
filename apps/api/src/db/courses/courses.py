@@ -1,7 +1,7 @@
 import json
 from datetime import UTC, datetime, timezone
-from uuid import uuid4
 from enum import Enum, StrEnum
+from uuid import uuid4
 
 from pydantic import ConfigDict, field_validator
 from pydantic import Field as PydanticField

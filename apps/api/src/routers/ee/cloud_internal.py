@@ -3,10 +3,10 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Request
 from sqlmodel import Session
+from src.db.organization_config import OrganizationConfigBase
 
 from config.config import get_settings
 from src.core.events.database import get_db_session
-from src.db.organization_config import OrganizationConfigBase
 from src.security.rbac import InternalAuthFailed
 from src.services.orgs.orgs import update_org_with_config_no_auth
 

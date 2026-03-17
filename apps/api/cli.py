@@ -90,7 +90,9 @@ def install(
             email=str(admin_email),
             password=admin_password,
         )
-        asyncio.run(install_create_organization_user(user, created_org.id or 0, db_session))
+        asyncio.run(
+            install_create_organization_user(user, created_org.id or 0, db_session)
+        )
         print(f"{PLATFORM_BRAND_NAME} user created ✅")
 
         # Show the user how to login
@@ -122,7 +124,9 @@ def install(
         email = typer.prompt("What's the email for the user?")
         password = typer.prompt("What's the password for the user?", hide_input=True)
         user = UserCreate(username=username, email=email, password=password)
-        asyncio.run(install_create_organization_user(user, created_org.id or 0, db_session))
+        asyncio.run(
+            install_create_organization_user(user, created_org.id or 0, db_session)
+        )
         print(username + " user created ✅")
 
         # Show the user how to login
@@ -232,7 +236,7 @@ def migrate_users_to_default_org() -> None:
                 "user_id": user.id,
                 "role_id": user_role.id,
             }
-            user_role_payload["_".join(("org", "id"))] = platform_org.id
+            user_role_payload["org_id"] = platform_org.id
             new_user_role = UserRole(**user_role_payload)
             db_session.add(new_user_role)
             migrated_count += 1

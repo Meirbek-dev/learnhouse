@@ -16,9 +16,9 @@ from src.db.courses.course_chapters import CourseChapter
 from src.db.courses.courses import Course
 from src.db.users import AnonymousUser, PublicUser
 from src.security.rbac import PermissionChecker
-from src.services.courses.courses import _ensure_course_is_current
 from src.services.courses.activities.uploads.pdfs import upload_pdf
-from src.services.platform import get_platform_org_id, get_platform_organization
+from src.services.courses.courses import _ensure_course_is_current
+from src.services.platform import get_platform_organization
 
 
 async def create_documentpdf_activity(
@@ -63,7 +63,6 @@ async def create_documentpdf_activity(
     checker.require(
         current_user.id,
         "activity:create",
-        get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 

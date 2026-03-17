@@ -17,7 +17,6 @@ from src.services.courses.certifications import (
     check_course_completion_and_create_certificate,
 )
 from src.services.gamification import service as gamification_service
-from src.services.platform import get_platform_org_id
 
 logger = logging.getLogger(__name__)
 
@@ -228,7 +227,6 @@ async def add_activity_to_trail(
             gamification_service.on_activity_completed(
                 db=db_session,
                 user_id=user.id,
-                org_id=get_platform_org_id(db_session),
                 activity_id=activity.id,
                 source_id=str(activity.id),
                 idempotency_key=f"activity_{activity.id}_{user.id}",

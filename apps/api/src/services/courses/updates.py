@@ -13,7 +13,6 @@ from src.db.courses.course_updates import (
 from src.db.courses.courses import Course
 from src.db.users import AnonymousUser, PublicUser
 from src.security.rbac import PermissionChecker
-from src.services.platform import get_platform_org_id
 
 
 async def create_update(
@@ -36,7 +35,6 @@ async def create_update(
     checker.require(
         current_user.id,
         "course:update",
-        get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 
@@ -84,7 +82,6 @@ async def update_update(
     checker.require(
         current_user.id,
         "course:update",
-        get_platform_org_id(db_session),
         resource_owner_id=update_course.creator_id if update_course else None,
     )
 
@@ -125,7 +122,6 @@ async def delete_update(
     checker.require(
         current_user.id,
         "course:update",
-        get_platform_org_id(db_session),
         resource_owner_id=update_course.creator_id if update_course else None,
     )
 

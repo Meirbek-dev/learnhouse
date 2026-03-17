@@ -23,7 +23,6 @@ from src.db.users import AnonymousUser, PublicUser
 from src.db.users import User as UserModel
 from src.security.auth import get_current_user
 from src.security.rbac import PermissionCheckerDep
-from src.services.platform import get_platform_org_id
 
 audit_log = logging.getLogger("rbac.audit")
 
@@ -135,7 +134,7 @@ async def check_permission(
         )
 
     perm = f"{body.resource}:{body.action}"
-    granted = checker.check(current_user.id, perm, get_platform_org_id(checker.db))
+    granted = checker.check(current_user.id, perm)
     return PermissionCheckResponse(granted=granted, permission=perm)
 
 
@@ -152,7 +151,7 @@ async def check_permissions_batch(
     if isinstance(current_user, AnonymousUser):
         return BatchPermissionCheckResponse(results=dict.fromkeys(perms, False))
 
-    results = checker.check_many(current_user.id, perms, get_platform_org_id(checker.db))
+    results = checker.check_many(current_user.id, perms)
     return BatchPermissionCheckResponse(results=results)
 
 
@@ -166,14 +165,11 @@ async def get_my_permissions(
     current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
     checker: PermissionCheckerDep,
 ):
-    platform_org_id = get_platform_org_id(checker.db)
     if isinstance(current_user, AnonymousUser):
         return UserPermissionsResponse(roles=[], permissions=[])
 
-    roles = checker.get_user_roles(current_user.id, platform_org_id)
-    permissions = sorted(
-        checker.get_expanded_permissions(current_user.id, platform_org_id)
-    )
+    roles = checker.get_user_roles(current_user.id)
+    permissions = sorted(checker.get_expanded_permissions(current_user.id))
 
     return UserPermissionsResponse(
         roles=roles,
@@ -192,9 +188,8 @@ async def list_org_user_roles(
     current_user: Annotated[PublicUser, Depends(get_current_user)] = None,
     checker: PermissionCheckerDep = None,
 ):
-    """List user↔role assignments for a given organization."""
-    platform_org_id = get_platform_org_id(db_session)
-    checker.require(current_user.id, "role:read", platform_org_id)
+    """List user↔role assignments."""
+    checker.require(current_user.id, "role:read")
 
     rows = db_session.exec(
         select(UserRole, UserModel, Role)
@@ -243,8 +238,7 @@ async def assign_role(
 
     **Required Permission**: `role:create`
     """
-    platform_org_id = get_platform_org_id(db_session)
-    checker.require(current_user.id, "role:create", platform_org_id)
+    checker.require(current_user.id, "role:create")
 
     checker.assign_role(
         user_id=request.user_id,
@@ -258,7 +252,6 @@ async def assign_role(
             "actor_id": current_user.id,
             "target_user_id": request.user_id,
             "role_id": request.role_id,
-            "org_id": platform_org_id,
         },
     )
     return {"message": "Role assigned"}
@@ -276,8 +269,7 @@ async def revoke_role(
 
     **Required Permission**: `role:delete`
     """
-    platform_org_id = get_platform_org_id(db_session)
-    checker.require(current_user.id, "role:delete", platform_org_id)
+    checker.require(current_user.id, "role:delete")
 
     checker.revoke_role(
         user_id=request.user_id,
@@ -290,7 +282,6 @@ async def revoke_role(
             "actor_id": current_user.id,
             "target_user_id": request.user_id,
             "role_id": request.role_id,
-            "org_id": platform_org_id,
         },
     )
     return {"message": "Role revoked"}

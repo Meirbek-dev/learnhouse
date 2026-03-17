@@ -54,7 +54,6 @@ from src.security.rbac import (
     PermissionChecker,
     ResourceAccessDenied,
 )
-from src.services.platform import get_platform_org_id
 from src.services.code_challenges.grading import (
     apply_grading_strategy,
     calculate_composite_score,
@@ -71,6 +70,7 @@ from src.services.code_challenges.sanitize import (
     sanitize_stderr,
     sanitize_stdout,
 )
+from src.services.platform import get_platform_org_id
 
 logger = logging.getLogger(__name__)
 router = APIRouter()

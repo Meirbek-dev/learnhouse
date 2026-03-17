@@ -4,6 +4,7 @@ from datetime import UTC, datetime
 from fastapi import HTTPException
 from sqlmodel import Session, select
 from ulid import ULID
+
 from src.db.organizations import Organization, OrganizationCreate
 from src.db.permission_enums import RoleSlug
 from src.db.users import User, UserCreate, UserRead
@@ -105,7 +106,6 @@ async def install_create_organization_user(
     checker.assign_role(
         user_id=user.id or 0,
         role_id=admin_role.id,
-        org_id=org.id or 0,
     )
 
     return UserRead.model_validate(user)

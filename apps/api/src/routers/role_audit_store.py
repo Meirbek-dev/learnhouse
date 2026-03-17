@@ -11,7 +11,6 @@ class RoleAuditEvent(BaseModel):
     action: str
     target_role_id: int | None = None
     target_role_slug: str | None = None
-    org_id: int | None = None
     diff_summary: str | None = None
 
 
@@ -32,8 +31,9 @@ def append_role_audit_event(
     action: str,
     target_role_id: int | None,
     target_role_slug: str | None,
-    org_id: int | None,
     diff_summary: str | None = None,
+    # legacy kwarg — ignored
+    org_id: int | None = None,
 ) -> None:
     event = RoleAuditEvent(
         timestamp=datetime.now(UTC),
@@ -41,16 +41,12 @@ def append_role_audit_event(
         action=action,
         target_role_id=target_role_id,
         target_role_slug=target_role_slug,
-        org_id=org_id,
         diff_summary=diff_summary,
     )
     with _lock:
         _events.appendleft(event)
 
 
-def list_role_audit_events(org_id: int | None = None) -> list[RoleAuditEvent]:
+def list_role_audit_events() -> list[RoleAuditEvent]:
     with _lock:
-        events = list(_events)
-    if org_id is None:
-        return events
-    return [event for event in events if event.org_id == org_id]
+        return list(_events)

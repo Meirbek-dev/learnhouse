@@ -49,7 +49,6 @@ from src.security.rbac import (
     PermissionDenied,
     ResourceAccessDenied,
 )
-from src.services.platform import get_platform_org_id
 
 logger = logging.getLogger(__name__)
 
@@ -119,7 +118,6 @@ async def create_exam(
     checker.require(
         current_user.id,
         "exam:create",
-        get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 
@@ -175,7 +173,6 @@ async def read_exam(
     checker.require(
         current_user.id,
         "exam:read",
-        get_platform_org_id(db_session),
         is_assigned=True,
         resource_owner_id=course.creator_id,
     )
@@ -210,7 +207,6 @@ async def read_exam_from_activity_uuid(
     checker.require(
         current_user.id,
         "exam:read",
-        get_platform_org_id(db_session),
         is_assigned=True,
         resource_owner_id=course.creator_id,
     )
@@ -241,7 +237,6 @@ async def update_exam(
     checker.require(
         current_user.id,
         "exam:update",
-        get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 
@@ -292,7 +287,6 @@ async def delete_exam(
     checker.require(
         current_user.id,
         "exam:delete",
-        get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 
@@ -326,7 +320,6 @@ async def create_exam_with_activity(
     checker.require(
         current_user.id,
         "exam:create",
-        get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 
@@ -436,7 +429,6 @@ async def create_question(
     checker.require(
         current_user.id,
         "exam:create",
-        get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 
@@ -532,7 +524,6 @@ async def read_questions(
     checker.require(
         current_user.id,
         "exam:read",
-        get_platform_org_id(db_session),
         is_assigned=True,
         resource_owner_id=course.creator_id,
     )
@@ -587,7 +578,6 @@ async def update_question(
     checker.require(
         current_user.id,
         "exam:update",
-        get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 
@@ -631,7 +621,6 @@ async def delete_question(
     checker.require(
         current_user.id,
         "exam:delete",
-        get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 
@@ -837,8 +826,7 @@ async def _grade_and_finalize_attempt(
 
             award_xp(
                 db=db_session,
-                user_id=user_id,
-                org_id=get_platform_org_id(db_session),
+                user_id=user_id
                 source="exam_completion",
                 source_id=f"exam_{attempt.attempt_uuid}",
                 idempotency_key=f"exam_completion_{attempt.attempt_uuid}",
@@ -847,8 +835,7 @@ async def _grade_and_finalize_attempt(
             if percentage == 100:
                 award_xp(
                     db=db_session,
-                    user_id=user_id,
-                    org_id=get_platform_org_id(db_session),
+                    user_id=user_id
                     source="streak_bonus",
                     source_id=f"exam_perfect_{attempt.attempt_uuid}",
                     idempotency_key=f"exam_perfect_{attempt.attempt_uuid}",
@@ -1271,7 +1258,6 @@ async def get_all_exam_attempts(
     has_rbac_access = checker.check(
         current_user.id,
         "exam:read",
-        get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
     is_contributor = await is_course_contributor_or_admin(
@@ -1368,7 +1354,7 @@ async def export_questions_csv(
     if not course:
         raise HTTPException(status_code=404, detail="Курс не найден")
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "exam:read", get_platform_org_id(db_session))
+    checker.require(current_user.id, "exam:read")
 
     # Get questions
     questions_statement = (
@@ -1442,7 +1428,7 @@ async def import_questions_csv(
     if not course:
         raise HTTPException(status_code=404, detail="Курс не найден")
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "exam:create", get_platform_org_id(db_session))
+    checker.require(current_user.id, "exam:create")
 
     # Parse CSV
     import csv
@@ -1555,7 +1541,6 @@ async def reorder_questions(
     checker.require(
         current_user.id,
         "exam:update",
-        get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 

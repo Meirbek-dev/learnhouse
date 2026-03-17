@@ -5,18 +5,18 @@ Revises: d1e2f3a4b5c7
 Create Date: 2026-03-17 14:19:44.324759
 
 """
+
 from collections.abc import Sequence
 from typing import Union
 
 import sqlalchemy as sa
 from alembic import op
 
-
 # revision identifiers, used by Alembic.
 revision: str = "37881a918cc1"
-down_revision: Union[str, None] = "d1e2f3a4b5c7"
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+down_revision: str | None = "d1e2f3a4b5c7"
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
 
 
 PRIMARY_KEY_REBUILDS: dict[str, list[str]] = {
@@ -213,7 +213,9 @@ def _dedup_gamification_profiles(conn) -> None:
     )
 
 
-def _create_unique_if_missing(conn, table: str, constraint: str, columns: list[str]) -> None:
+def _create_unique_if_missing(
+    conn, table: str, constraint: str, columns: list[str]
+) -> None:
     if _table_exists(conn, table) and not _constraint_exists(conn, table, constraint):
         op.create_unique_constraint(constraint, table, columns)
 
@@ -226,7 +228,7 @@ def _create_index_if_missing(
     op.execute(
         sa.text(
             f'CREATE {"UNIQUE " if unique else ""}INDEX IF NOT EXISTS "{index_name}" '
-            f'ON "{table}" ({", ".join(f"\"{column}\"" for column in columns)})'
+            f'ON "{table}" ({", ".join(f'"{column}"' for column in columns)})'
         )
     )
 

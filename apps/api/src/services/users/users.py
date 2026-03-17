@@ -22,8 +22,8 @@ from src.db.users import (
     User,
     UserCreate,
     UserRead,
-    UserSessionRole,
     UserSession,
+    UserSessionRole,
     UserUpdate,
     UserUpdatePassword,
     rebuild_user_models,
@@ -31,7 +31,7 @@ from src.db.users import (
 from src.security.rbac import PermissionChecker
 from src.security.security import security_hash_password, security_verify_password
 from src.services.cache import redis_client
-from src.services.platform import get_platform_org_id, get_platform_organization
+from src.services.platform import get_platform_organization
 from src.services.users.avatars import upload_avatar
 from src.services.users.emails import send_account_creation_email
 from src.services.users.usergroups import add_users_to_usergroup
@@ -51,16 +51,12 @@ async def create_user(
     db_session: Session,
     current_user: PublicUser | AnonymousUser,
     user_object: UserCreate,
-    org_id: int,
     checker: PermissionChecker | None = None,
 ):
     # RBAC check
     if checker is None:
         checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "user:create", org_id)
-
-    # Validate organization exists
-    await _validate_organization_exists(db_session, org_id)
+    checker.require(current_user.id, "user:create")
 
     # Create and validate user
     user = await _create_and_validate_user(db_session, user_object)
@@ -86,7 +82,6 @@ async def create_user_without_org(
     current_user: PublicUser | AnonymousUser,
     user_object: UserCreate,
     checker: PermissionChecker | None = None,
-    org_id: int | None = None,
 ):
     # Public self-registration: anonymous users may always create their own
     # account.  Authenticated callers (e.g. admins creating users on behalf of
@@ -95,13 +90,13 @@ async def create_user_without_org(
     if not isinstance(current_user, AnonymousUser):
         if checker is None:
             checker = PermissionChecker(db_session)
-        checker.require(current_user.id, "user:create", org_id)
+        checker.require(current_user.id, "user:create")
 
     # Create and validate user
     user = await _create_and_validate_user(db_session, user_object)
 
     # Automatically join the platform organization in single-org mode.
-    platform_org = await _get_platform_organization(db_session)
+    await _get_platform_organization(db_session)
     await _link_user_to_organization(db_session, user.id)
     db_session.commit()
 
@@ -123,7 +118,6 @@ async def update_user(
     current_user: PublicUser | AnonymousUser,
     user_object: UserUpdate,
     checker: PermissionChecker | None = None,
-    org_id: int | None = None,
 ):
     # Get user (bypass cache for mutations to ensure ORM-attached instance)
     user = await _get_user_by_field(db_session, "id", user_id, use_cache=False)
@@ -150,7 +144,7 @@ async def update_user(
     # RBAC check (only for real updates)
     if checker is None:
         checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "user:update", org_id, resource_owner_id=user_id)
+    checker.require(current_user.id, "user:update", resource_owner_id=user_id)
 
     if user_object.username:
         await _validate_unique_username(
@@ -191,7 +185,6 @@ async def update_user_avatar(
     current_user: PublicUser | AnonymousUser,
     avatar_file: UploadFile | None = None,
     checker: PermissionChecker | None = None,
-    org_id: int | None = None,
 ):
     # Get user (bypass cache for mutations to ensure ORM-attached instance)
     user = await _get_user_by_field(db_session, "id", current_user.id, use_cache=False)
@@ -199,9 +192,7 @@ async def update_user_avatar(
     # RBAC check
     if checker is None:
         checker = PermissionChecker(db_session)
-    checker.require(
-        current_user.id, "user:update", org_id, resource_owner_id=current_user.id
-    )
+    checker.require(current_user.id, "user:update", resource_owner_id=current_user.id)
 
     # Upload avatar with security validation
     if avatar_file and avatar_file.filename:
@@ -238,7 +229,6 @@ async def update_user_password(
     user_id: int,
     form: UserUpdatePassword,
     checker: PermissionChecker | None = None,
-    org_id: int | None = None,
 ):
     # Get user (bypass cache for mutations to ensure ORM-attached instance)
     user = await _get_user_by_field(db_session, "id", user_id, use_cache=False)
@@ -246,7 +236,7 @@ async def update_user_password(
     # RBAC check
     if checker is None:
         checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "user:update", org_id, resource_owner_id=user_id)
+    checker.require(current_user.id, "user:update", resource_owner_id=user_id)
 
     if not security_verify_password(form.old_password, user.password):
         raise HTTPException(
@@ -312,18 +302,16 @@ async def get_user_session(
 
     checker = PermissionChecker(db_session)
 
-    platform_org_id = get_platform_org_id(db_session)
     roles = [
         UserSessionRole(role=RoleRead.model_validate(role_dict))
-        for role_dict in checker.get_user_roles(user_id=user.id, org_id=platform_org_id)
+        for role_dict in checker.get_user_roles(user_id=user.id)
     ]
 
-    # Resolve permissions for the requested org (or None for system-only perms)
+    # Resolve permissions
     permissions: list[str] = []
     permissions_timestamp: int | None = None
-    target_org_id = platform_org_id
     try:
-        effective = checker.get_expanded_permissions(current_user.id, target_org_id)
+        effective = checker.get_expanded_permissions(current_user.id)
         permissions = sorted(effective)
         permissions_timestamp = int(datetime.now(UTC).timestamp())
     except Exception as e:
@@ -343,7 +331,6 @@ async def delete_user_by_id(
     current_user: PublicUser | AnonymousUser,
     user_id: int,
     checker: PermissionChecker | None = None,
-    org_id: int | None = None,
 ) -> str:
     # Get user (bypass cache for mutations to ensure ORM-attached instance)
     user = await _get_user_by_field(db_session, "id", user_id, use_cache=False)
@@ -351,7 +338,7 @@ async def delete_user_by_id(
     # RBAC check
     if checker is None:
         checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "user:delete", org_id)
+    checker.require(current_user.id, "user:delete")
 
     # Delete user
     db_session.delete(user)
@@ -494,9 +481,7 @@ def _safe_organization_read(org: Organization) -> OrganizationRead:
         )
 
 
-async def _link_user_to_organization(
-    db_session: Session, user_id: int | None
-) -> None:
+async def _link_user_to_organization(db_session: Session, user_id: int | None) -> None:
     """Link user to organization with default 'user' role using new RBAC system."""
     from src.db.permissions import Role
     from src.security.rbac import PermissionChecker
@@ -610,7 +595,7 @@ async def _get_platform_organization(db_session: Session) -> Organization:
 
 async def ensure_user_in_platform_org(db_session: Session, user_id: int) -> None:
     """Ensure a user is a member of the platform organization (idempotent)."""
-    platform_org = await _get_platform_organization(db_session)
+    await _get_platform_organization(db_session)
     await _link_user_to_organization(db_session, user_id)
     db_session.commit()
 

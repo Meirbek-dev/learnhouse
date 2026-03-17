@@ -11,7 +11,6 @@ from src.db.payments.payments import (
 )
 from src.db.users import AnonymousUser, InternalUser, PublicUser
 from src.security.rbac import PermissionChecker
-from src.services.platform import get_platform_org_id
 
 
 async def init_payments_config(
@@ -20,10 +19,9 @@ async def init_payments_config(
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
 ) -> PaymentsConfig:
-    platform_org_id = get_platform_org_id(db_session)
     # Verify permissions
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:create", platform_org_id)
+    checker.require(current_user.id, "organization:create")
 
     # Check for existing config
     existing_config = db_session.exec(select(PaymentsConfig)).first()
@@ -69,10 +67,9 @@ async def update_payments_config(
     current_user: PublicUser | AnonymousUser | InternalUser,
     db_session: Session,
 ) -> PaymentsConfig:
-    platform_org_id = get_platform_org_id(db_session)
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:update", platform_org_id)
+    checker.require(current_user.id, "organization:update")
 
     # Get existing payments config
     statement = select(PaymentsConfig)
@@ -96,10 +93,9 @@ async def delete_payments_config(
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
 ) -> None:
-    platform_org_id = get_platform_org_id(db_session)
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:delete", platform_org_id)
+    checker.require(current_user.id, "organization:delete")
 
     # Get existing payments config
     statement = select(PaymentsConfig)

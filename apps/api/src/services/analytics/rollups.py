@@ -52,7 +52,7 @@ def _unwrap_scalar_date(value: Any) -> date | None:
 
 
 def _latest_metric_date(
-    db_session: Session, model: type, date_column: object, org_id: int
+    db_session: Session, model: type, date_column: object
 ) -> date | None:
     value = db_session.exec(select(func.max(date_column))).one_or_none()
     return _unwrap_scalar_date(value)
@@ -61,11 +61,10 @@ def _latest_metric_date(
 def get_latest_teacher_rollup(
     db_session: Session,
     *,
-    org_id: int,
     teacher_user_id: int,
 ) -> DailyTeacherMetrics | None:
     metric_date = _latest_metric_date(
-        db_session, DailyTeacherMetrics, DailyTeacherMetrics.metric_date, org_id
+        db_session, DailyTeacherMetrics, DailyTeacherMetrics.metric_date
     )
     if metric_date is None:
         return None
@@ -80,12 +79,11 @@ def get_latest_teacher_rollup(
 def list_latest_course_rollups(
     db_session: Session,
     *,
-    org_id: int,
     course_ids: list[int],
     teacher_user_id: int | None = None,
 ) -> list[DailyCourseMetrics]:
     metric_date = _latest_metric_date(
-        db_session, DailyCourseMetrics, DailyCourseMetrics.metric_date, org_id
+        db_session, DailyCourseMetrics, DailyCourseMetrics.metric_date
     )
     if metric_date is None or not course_ids:
         return []
@@ -103,11 +101,10 @@ def list_latest_course_rollups(
 def list_latest_assessment_rollups(
     db_session: Session,
     *,
-    org_id: int,
     course_ids: list[int],
 ) -> list[DailyAssessmentMetrics]:
     metric_date = _latest_metric_date(
-        db_session, DailyAssessmentMetrics, DailyAssessmentMetrics.metric_date, org_id
+        db_session, DailyAssessmentMetrics, DailyAssessmentMetrics.metric_date
     )
     if metric_date is None or not course_ids:
         return []
@@ -136,7 +133,6 @@ def _merge_teacher_metrics(
     db_session: Session,
     *,
     target_date: date,
-    current_org_id: int,
     teacher_user_id: int,
     teacher_course_ids: set[int],
     teacher_events: list,
@@ -241,7 +237,6 @@ def refresh_teacher_analytics_rollups(
             continue
 
         scope = TeacherAnalyticsScope(
-            org_id=current_org_id,
             teacher_user_id=0,
             course_ids=course_ids,
             cohort_ids=[],
@@ -415,7 +410,6 @@ def refresh_teacher_analytics_rollups(
             _merge_teacher_metrics(
                 db_session,
                 target_date=target_date,
-                current_org_id=current_org_id,
                 teacher_user_id=teacher_id,
                 teacher_course_ids=teacher_course_ids,
                 teacher_events=teacher_events,
@@ -431,7 +425,6 @@ def refresh_teacher_analytics_rollups(
         _merge_teacher_metrics(
             db_session,
             target_date=target_date,
-            current_org_id=current_org_id,
             teacher_user_id=0,
             teacher_course_ids=set(course_ids),
             teacher_events=events,

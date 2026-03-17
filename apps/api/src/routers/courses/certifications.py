@@ -1,6 +1,6 @@
+from datetime import datetime
 from typing import Annotated
 
-from datetime import datetime
 from fastapi import APIRouter, Depends, Query, Request
 from sqlmodel import Session
 

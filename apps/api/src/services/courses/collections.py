@@ -15,7 +15,7 @@ from src.db.collections_courses import CollectionCourse
 from src.db.courses.courses import Course
 from src.db.users import AnonymousUser, PublicUser
 from src.security.rbac import PermissionChecker
-from src.services.platform import get_platform_org_id, require_platform_org_id
+from src.services.platform import get_platform_organization
 
 ####################################################
 # CRUD
@@ -40,11 +40,9 @@ async def get_collection(
     if checker is None:
         checker = PermissionChecker(db_session)
     if not collection.public:
-        platform_org_id = get_platform_org_id(db_session)
         checker.require(
             current_user.id,
             "collection:read",
-            org_id=platform_org_id,
             resource_owner_id=collection.creator_id,
         )
 
@@ -73,7 +71,6 @@ async def get_collection(
         checker.check(
             current_user.id,
             "collection:update",
-            get_platform_org_id(db_session),
             resource_owner_id=collection.creator_id,
         )
         if current_user.id
@@ -83,7 +80,6 @@ async def get_collection(
         checker.check(
             current_user.id,
             "collection:delete",
-            get_platform_org_id(db_session),
             resource_owner_id=collection.creator_id,
         )
         if current_user.id
@@ -114,10 +110,7 @@ async def create_collection(
     # For now, we'll use the existing RBAC check but with proper organization context
     if checker is None:
         checker = PermissionChecker(db_session)
-    platform_org_id = get_platform_org_id(db_session)
-    checker.require(
-        current_user.id, "collection:create", org_id=platform_org_id
-    )
+    checker.require(current_user.id, "collection:create")
 
     # Complete the collection object
     collection.collection_uuid = f"collection_{ULID()}"
@@ -140,7 +133,7 @@ async def create_collection(
         if found_courses:
             # Permission check uses the same org_id for every course — run it once
             try:
-                checker.require(current_user.id, "course:read", org_id=platform_org_id)
+                checker.require(current_user.id, "course:read")
             except HTTPException:
                 raise HTTPException(
                     status_code=403,
@@ -192,11 +185,9 @@ async def update_collection(
     # RBAC check
     if checker is None:
         checker = PermissionChecker(db_session)
-    platform_org_id = get_platform_org_id(db_session)
     checker.require(
         current_user.id,
         "collection:update",
-        org_id=platform_org_id,
         resource_owner_id=collection.creator_id,
     )
 
@@ -266,11 +257,9 @@ async def delete_collection(
     # RBAC check
     if checker is None:
         checker = PermissionChecker(db_session)
-    platform_org_id = get_platform_org_id(db_session)
     checker.require(
         current_user.id,
         "collection:delete",
-        org_id=platform_org_id,
         resource_owner_id=collection.creator_id,
     )
 
@@ -288,14 +277,12 @@ async def delete_collection(
 
 async def get_collections(
     request: Request,
-    org_id: int,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
     page: int = 1,
     limit: int = 10,
     checker: PermissionChecker | None = None,
 ) -> list[CollectionReadWithPermissions]:
-    platform_org_id = require_platform_org_id(db_session, org_id)
 
     statement_public = select(Collection).where(Collection.public)
     statement_all = select(Collection).distinct(Collection.id)
@@ -338,7 +325,6 @@ async def get_collections(
             checker.check(
                 current_user.id,
                 "collection:update",
-                platform_org_id,
                 resource_owner_id=collection.creator_id,
             )
             if current_user.id
@@ -348,7 +334,6 @@ async def get_collections(
             checker.check(
                 current_user.id,
                 "collection:delete",
-                platform_org_id,
                 resource_owner_id=collection.creator_id,
             )
             if current_user.id

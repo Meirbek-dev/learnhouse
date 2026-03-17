@@ -82,7 +82,7 @@ def _build_rollup_assessment_rows(
     if not supports_rollup_reads(filters):
         return None
     rollups = list_latest_assessment_rollups(
-        db_session, org_id=scope.org_id, course_ids=scope.course_ids
+        db_session, course_ids=scope.course_ids
     )
     if not rollups:
         return None
@@ -634,9 +634,7 @@ def get_teacher_assessment_list(
                 select(Course).where(Course.id.in_(scope.course_ids))
             ).all()
         }
-        usergroups = list(
-            db_session.exec(select(UserGroup)).all()
-        )
+        usergroups = list(db_session.exec(select(UserGroup)).all())
         return TeacherAssessmentListResponse(
             generated_at=generated_at,
             total=len(rows),

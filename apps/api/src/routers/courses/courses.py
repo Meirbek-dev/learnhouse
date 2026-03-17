@@ -1,5 +1,4 @@
 from datetime import datetime
-
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Form, Request, Response, UploadFile
@@ -45,8 +44,8 @@ from src.services.courses.courses import (
     get_editable_courses,
     list_editable_courses,
     search_courses,
-    update_course_access,
     update_course,
+    update_course_access,
     update_course_metadata,
     update_course_thumbnail,
 )
@@ -211,13 +210,9 @@ async def api_get_platform_courses(
     ] = None,
     db_session=Depends(get_db_session),
 ) -> list[CourseReadWithPermissions]:
-    courses = await get_courses(
-        request, current_user, db_session, page, limit
-    )
+    courses = await get_courses(request, current_user, db_session, page, limit)
 
-    total_count = await count_courses(
-        current_user, db_session
-    )
+    total_count = await count_courses(current_user, db_session)
     response.headers["X-Total-Count"] = str(total_count)
     response.headers["Access-Control-Expose-Headers"] = "X-Total-Count"
     response.headers["Cache-Control"] = "public, max-age=60, stale-while-revalidate=120"
@@ -292,9 +287,7 @@ async def api_search_platform_courses(
     current_user: Annotated[PublicUser, Depends(get_current_user)] = None,
     db_session=Depends(get_db_session),
 ) -> list[CourseRead]:
-    return await search_courses(
-        request, current_user, query, db_session, page, limit
-    )
+    return await search_courses(request, current_user, query, db_session, page, limit)
 
 
 @router.put("/{course_uuid}")

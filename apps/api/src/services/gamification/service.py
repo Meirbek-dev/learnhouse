@@ -14,7 +14,6 @@ Notes:
 
 from __future__ import annotations
 
-import contextlib
 import logging
 from datetime import datetime
 from typing import Any
@@ -33,7 +32,7 @@ from src.db.gamification import (
     XPTransaction,
     calculate_level,
 )
-from src.services.gamification.policy import get_org_policy
+from src.services.gamification.policy import get_policy
 
 logger = logging.getLogger(__name__)
 
@@ -100,7 +99,7 @@ def _fetch_count(db: Session, stmt: SelectOfScalar[int]) -> int:
         return 0
 
 
-def _count_users_with_more_xp(db: Session, org_id: int, xp: int) -> int:
+def _count_users_with_more_xp(db: Session, xp: int) -> int:
     stmt = (
         select(func.count())
         .select_from(GamificationProfile)
@@ -109,12 +108,12 @@ def _count_users_with_more_xp(db: Session, org_id: int, xp: int) -> int:
     return _fetch_count(db, stmt)
 
 
-def _count_profiles(db: Session, org_id: int) -> int:
+def _count_profiles(db: Session) -> int:
     stmt = select(func.count()).select_from(GamificationProfile)
     return _fetch_count(db, stmt)
 
 
-def get_profile(db: Session, user_id: int, org_id: int) -> GamificationProfile:
+def get_profile(db: Session, user_id: int) -> GamificationProfile:
     stmt = select(GamificationProfile).where(GamificationProfile.user_id == user_id)
     # Removed with_for_update() lock to prevent hanging on new user creation
     # The unique constraint on user_id handles concurrency
@@ -138,7 +137,6 @@ def get_profile(db: Session, user_id: int, org_id: int) -> GamificationProfile:
 def award_xp(
     db: Session,
     user_id: int,
-    org_id: int,
     source: str,
     amount: int | None = None,
     source_id: str | None = None,
@@ -156,7 +154,7 @@ def award_xp(
             msg = f"Invalid XP source: {source}"
             raise GamificationError(msg)
 
-        rewards, daily_limit = get_org_policy(db, org_id)
+        rewards, daily_limit = get_policy(db)
         resolved_amount = (
             amount if amount is not None else rewards.get(xp_source.value, 0)
         )
@@ -164,7 +162,7 @@ def award_xp(
             msg = f"Invalid XP amount: {resolved_amount}"
             raise GamificationError(msg)
 
-        pre_profile = get_profile(db, user_id, org_id)
+        pre_profile = get_profile(db, user_id)
         old_level = pre_profile.level
         tx = XPTransaction(
             user_id=user_id,
@@ -201,7 +199,7 @@ def award_xp(
             s in str(e).lower()
             for s in ["uq_xp_tx_user_source_once", "idempotency_key", "unique"]
         ):
-            profile = get_profile(db, user_id, org_id)
+            profile = get_profile(db, user_id)
             stmt = None
             if idempotency_key:
                 stmt = select(XPTransaction).where(
@@ -241,10 +239,8 @@ def award_xp(
         raise
 
 
-def update_streak(
-    db: Session, user_id: int, org_id: int, streak_type: str
-) -> GamificationProfile:
-    profile = get_profile(db, user_id, org_id)
+def update_streak(db: Session, user_id: int, streak_type: str) -> GamificationProfile:
+    profile = get_profile(db, user_id)
     now = tz_now()
     today = now.date()
     try:
@@ -289,7 +285,7 @@ def update_streak(
 
 
 def get_leaderboard(
-    db: Session, org_id: int, limit: int = 10, offset: int = 0
+    db: Session, limit: int = 10, offset: int = 0
 ) -> list[GamificationProfile]:
     stmt = (
         select(GamificationProfile)
@@ -301,7 +297,7 @@ def get_leaderboard(
 
 
 def get_recent_transactions(
-    db: Session, user_id: int, org_id: int, limit: int = 10
+    db: Session, user_id: int, limit: int = 10
 ) -> list[XPTransaction]:
     stmt = (
         select(XPTransaction)
@@ -313,16 +309,16 @@ def get_recent_transactions(
 
 
 def get_dashboard_data(
-    db: Session, user_id: int, org_id: int, *, include_leaderboard: bool = False
+    db: Session, user_id: int, *, include_leaderboard: bool = False
 ) -> dict:
-    profile = get_profile(db, user_id, org_id)
-    transactions = get_recent_transactions(db, user_id, org_id, limit=10)
+    profile = get_profile(db, user_id)
+    transactions = get_recent_transactions(db, user_id, limit=10)
     user_xp = profile.total_xp
-    higher_count = _count_users_with_more_xp(db, org_id, user_xp)
+    higher_count = _count_users_with_more_xp(db, user_xp)
     user_rank = higher_count + 1 if profile else None
     leaderboard: LeaderboardRead | None = None
     if include_leaderboard:
-        leaderboard = get_leaderboard_read(db, org_id, limit=10, offset=0)
+        leaderboard = get_leaderboard_read(db, limit=10, offset=0)
 
     return {
         "profile": profile,
@@ -339,14 +335,14 @@ def get_dashboard_data(
 
 
 def update_preferences(
-    db: Session, user_id: int, org_id: int, updates: dict[str, Any]
+    db: Session, user_id: int, updates: dict[str, Any]
 ) -> GamificationProfile:
     """Merge and persist profile preferences, returning updated profile.
 
     - Non-dict values in updates are ignored
     - None values remove keys from preferences
     """
-    profile = get_profile(db, user_id, org_id)
+    profile = get_profile(db, user_id)
     prefs = dict(profile.preferences or {})
     for k, v in updates.items():
         if v is None:
@@ -361,13 +357,13 @@ def update_preferences(
     return profile
 
 
-def get_leaderboard_read(db: Session, org_id: int, limit: int = 10, offset: int = 0):
+def get_leaderboard_read(db: Session, limit: int = 10, offset: int = 0):
     """Return typed LeaderboardRead including total participants and usernames."""
     from src.db.gamification import LeaderboardEntryRead, LeaderboardRead
     from src.db.users import User as DBUser
 
-    profiles = get_leaderboard(db, org_id, limit=limit, offset=offset)
-    total = _count_profiles(db, org_id)
+    profiles = get_leaderboard(db, limit=limit, offset=offset)
+    total = _count_profiles(db)
 
     ids = [p.user_id for p in profiles]
     user_map: dict[int, DBUser] = {}
@@ -383,15 +379,11 @@ def get_leaderboard_read(db: Session, org_id: int, limit: int = 10, offset: int 
     for i, p in enumerate(profiles):
         user = user_map.get(p.user_id)
 
-        # Construct full avatar URL if user has an avatar image
         avatar_url = None
         if user and user.avatar_image:
-            # Check if it's already a full URL (external avatar)
             if user.avatar_image.startswith(("http://", "https://")):
                 avatar_url = user.avatar_image
             else:
-                # Construct the media directory path
-                # Format: content/users/{user_uuid}/avatars/{filename}
                 avatar_url = (
                     f"content/users/{user.user_uuid}/avatars/{user.avatar_image}"
                 )
@@ -412,18 +404,17 @@ def get_leaderboard_read(db: Session, org_id: int, limit: int = 10, offset: int 
     return LeaderboardRead(entries=entries, total_participants=total)
 
 
-def get_user_rank(db: Session, user_id: int, org_id: int) -> int | None:
-    profile = get_profile(db, user_id, org_id)
+def get_user_rank(db: Session, user_id: int) -> int | None:
+    profile = get_profile(db, user_id)
     if not profile:
         return None
-    higher_count = _count_users_with_more_xp(db, org_id, profile.total_xp)
+    higher_count = _count_users_with_more_xp(db, profile.total_xp)
     return higher_count + 1
 
 
 def on_activity_completed(
     db: Session,
     user_id: int,
-    org_id: int,
     *,
     activity_id: int | None = None,
     source_id: str | None = None,
@@ -432,7 +423,6 @@ def on_activity_completed(
     profile, _tx, _level_up, _is_new = award_xp(
         db=db,
         user_id=user_id,
-        org_id=org_id,
         source=XPSource.ACTIVITY_COMPLETION.value,
         amount=None,
         source_id=source_id
@@ -442,8 +432,8 @@ def on_activity_completed(
     )
     # Only update streaks and counters if this call resulted in a new XP transaction
     if _is_new:
-        profile = update_streak(db, user_id, org_id, StreakType.LEARNING.value)
-        profile = get_profile(db, user_id, org_id)
+        profile = update_streak(db, user_id, StreakType.LEARNING.value)
+        profile = get_profile(db, user_id)
         profile.total_activities_completed = (
             profile.total_activities_completed or 0
         ) + 1
@@ -457,7 +447,6 @@ def on_activity_completed(
 def on_course_completed(
     db: Session,
     user_id: int,
-    org_id: int,
     *,
     course_id: int | None = None,
     source_id: str | None = None,
@@ -466,7 +455,6 @@ def on_course_completed(
     profile, _tx, _level_up, _is_new = award_xp(
         db=db,
         user_id=user_id,
-        org_id=org_id,
         source=XPSource.COURSE_COMPLETION.value,
         amount=None,
         source_id=source_id
@@ -476,8 +464,8 @@ def on_course_completed(
     )
     # Only update streaks and counters if this call resulted in a new XP transaction
     if _is_new:
-        profile = update_streak(db, user_id, org_id, StreakType.LEARNING.value)
-        profile = get_profile(db, user_id, org_id)
+        profile = update_streak(db, user_id, StreakType.LEARNING.value)
+        profile = get_profile(db, user_id)
         profile.total_courses_completed = (profile.total_courses_completed or 0) + 1
         profile.updated_at = tz_now()
     db.add(profile)

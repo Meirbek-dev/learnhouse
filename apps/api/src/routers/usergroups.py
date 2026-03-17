@@ -8,7 +8,6 @@ from src.db.usergroups import UserGroup, UserGroupCreate, UserGroupRead, UserGro
 from src.db.users import PublicUser, UserRead
 from src.security.auth import get_current_user
 from src.security.rbac import PermissionCheckerDep
-from src.services.platform import get_platform_org_id
 from src.services.users.usergroups import (
     add_resources_to_usergroup,
     add_users_to_usergroup,
@@ -17,7 +16,7 @@ from src.services.users.usergroups import (
     get_usergroups_by_resource,
     get_users_linked_to_usergroup,
     read_usergroup_by_id,
-    read_usergroups_by_org_id,
+    read_usergroups,
     remove_resources_from_usergroup,
     remove_users_from_usergroup,
     update_usergroup_by_id,
@@ -40,7 +39,7 @@ async def api_create_usergroup(
 
     **Required Permission**: `usergroup:create:org`
     """
-    checker.require(current_user.id, "usergroup:create", get_platform_org_id(db_session))
+    checker.require(current_user.id, "usergroup:create")
 
     return await create_usergroup(request, db_session, current_user, usergroup_object)
 
@@ -85,7 +84,7 @@ async def api_get_usergroups(
     """
     Get UserGroups by Org
     """
-    return await read_usergroups_by_org_id(
+    return await read_usergroups(
         request,
         db_session,
         current_user,
@@ -123,8 +122,7 @@ async def api_update_usergroup(
 
     **Required Permission**: `usergroup:update:org`
     """
-    org_id = get_platform_org_id(db_session)
-    checker.require(current_user.id, "usergroup:update", org_id)
+    checker.require(current_user.id, "usergroup:update")
 
     return await update_usergroup_by_id(
         request, db_session, current_user, usergroup_id, usergroup_object
@@ -145,8 +143,7 @@ async def api_delete_usergroup(
 
     **Required Permission**: `usergroup:delete:org`
     """
-    org_id = get_platform_org_id(db_session)
-    checker.require(current_user.id, "usergroup:delete", org_id)
+    checker.require(current_user.id, "usergroup:delete")
 
     return await delete_usergroup_by_id(request, db_session, current_user, usergroup_id)
 
@@ -166,8 +163,7 @@ async def api_add_users_to_usergroup(
 
     **Required Permission**: `usergroup:manage:org`
     """
-    org_id = get_platform_org_id(db_session)
-    checker.require(current_user.id, "usergroup:manage", org_id)
+    checker.require(current_user.id, "usergroup:manage")
 
     return await add_users_to_usergroup(
         request, db_session, current_user, usergroup_id, user_ids

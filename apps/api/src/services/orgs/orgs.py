@@ -15,13 +15,13 @@ from src.db.permission_enums import ADMIN_ROLE_SLUGS, RoleSlug
 from src.db.permissions import Role, UserRole
 from src.db.users import AnonymousUser, InternalUser, PublicUser
 from src.security.rbac import PermissionChecker
-from src.services.platform import get_platform_organization
 from src.services.orgs.uploads import (
     upload_org_landing_content,
     upload_org_logo,
     upload_org_preview,
     upload_org_thumbnail,
 )
+from src.services.platform import get_platform_organization
 
 
 async def get_organization(
@@ -36,7 +36,7 @@ async def get_organization(
     if checker is None:
         checker = PermissionChecker(db_session)
     checker.require(
-        current_user.id, "organization:read", org.id, resource_owner_id=org.creator_id
+        current_user.id, "organization:read", resource_owner_id=org.creator_id
     )
 
     return OrganizationRead.model_validate(org)
@@ -55,7 +55,7 @@ async def update_org(
     if checker is None:
         checker = PermissionChecker(db_session)
     checker.require(
-        current_user.id, "organization:update", org.id, resource_owner_id=org.creator_id
+        current_user.id, "organization:update", resource_owner_id=org.creator_id
     )
 
     # Update only the fields that were passed in
@@ -88,7 +88,7 @@ async def update_org_logo(
     if checker is None:
         checker = PermissionChecker(db_session)
     checker.require(
-        current_user.id, "organization:update", org.id, resource_owner_id=org.creator_id
+        current_user.id, "organization:update", resource_owner_id=org.creator_id
     )
 
     # Upload logo
@@ -120,7 +120,7 @@ async def update_org_thumbnail(
     if checker is None:
         checker = PermissionChecker(db_session)
     checker.require(
-        current_user.id, "organization:update", org.id, resource_owner_id=org.creator_id
+        current_user.id, "organization:update", resource_owner_id=org.creator_id
     )
 
     # Upload logo
@@ -152,7 +152,7 @@ async def update_org_preview(
     if checker is None:
         checker = PermissionChecker(db_session)
     checker.require(
-        current_user.id, "organization:update", org.id, resource_owner_id=org.creator_id
+        current_user.id, "organization:update", resource_owner_id=org.creator_id
     )
 
     # Upload logo
@@ -173,7 +173,7 @@ async def delete_org(
     if checker is None:
         checker = PermissionChecker(db_session)
     checker.require(
-        current_user.id, "organization:delete", org.id, resource_owner_id=org.creator_id
+        current_user.id, "organization:delete", resource_owner_id=org.creator_id
     )
 
     db_session.delete(org)
@@ -226,7 +226,9 @@ async def get_orgs_by_user(
     page: int = 1,
     limit: int = 10,
 ) -> list[OrganizationRead]:
-    has_role = db_session.exec(select(UserRole).where(UserRole.user_id == int(user_id))).first()
+    has_role = db_session.exec(
+        select(UserRole).where(UserRole.user_id == int(user_id))
+    ).first()
     if not has_role or page != 1 or limit < 1:
         return []
 
@@ -258,7 +260,7 @@ async def update_org_landing(
     if checker is None:
         checker = PermissionChecker(db_session)
     checker.require(
-        current_user.id, "organization:update", org.id, resource_owner_id=org.creator_id
+        current_user.id, "organization:update", resource_owner_id=org.creator_id
     )
 
     org.landing = landing_object
@@ -284,7 +286,7 @@ async def upload_org_landing_content_service(
     if checker is None:
         checker = PermissionChecker(db_session)
     checker.require(
-        current_user.id, "organization:update", org.id, resource_owner_id=org.creator_id
+        current_user.id, "organization:update", resource_owner_id=org.creator_id
     )
 
     # Upload content

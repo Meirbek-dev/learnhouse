@@ -12,7 +12,6 @@ from config.config import get_settings
 from src.core.events.events import shutdown_app, startup_app
 from src.router import v1_router
 
-
 # ── Cached static files ────────────────────────────────────────────────────────
 # Starlette's default StaticFiles sets no meaningful Cache-Control header.
 # Content files are content-addressed (UUID paths), so aggressive caching is safe.

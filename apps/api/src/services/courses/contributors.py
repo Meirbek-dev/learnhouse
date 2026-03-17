@@ -11,19 +11,17 @@ from src.db.resource_authors import (
 )
 from src.db.users import AnonymousUser, PublicUser, User, UserRead
 from src.security.rbac import PermissionChecker
-from src.services.platform import get_platform_org_id
 
 
 def _require_contributor_management(
     checker: PermissionChecker,
     current_user_id: int,
     course: Course,
-    db_session: Session,
-):
+    db_session: Session | None = None,
+) -> None:
     checker.require(
         current_user_id,
         "course:update",
-        get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 
@@ -194,7 +192,7 @@ async def get_course_contributors(
 
     # SECURITY: Require read access to the course
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "course:read", get_platform_org_id(db_session))
+    checker.require(current_user.id, "course:read")
 
     # Get all contributors for this course with user information
     statement = (

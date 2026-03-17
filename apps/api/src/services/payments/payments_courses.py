@@ -6,7 +6,6 @@ from src.db.payments.payments_courses import PaymentsCourse
 from src.db.payments.payments_products import PaymentsProduct
 from src.db.users import AnonymousUser, PublicUser
 from src.security.rbac import PermissionChecker
-from src.services.platform import get_platform_org_id
 
 
 async def link_course_to_product(
@@ -28,7 +27,6 @@ async def link_course_to_product(
     checker.require(
         current_user.id,
         "course:update",
-        get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 
@@ -78,7 +76,6 @@ async def unlink_course_from_product(
     checker.require(
         current_user.id,
         "course:update",
-        get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 

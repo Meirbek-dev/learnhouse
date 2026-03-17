@@ -496,7 +496,6 @@ export async function signup(body: NewAccountBody): Promise<Response> {
       redirect: 'follow',
     };
 
-    // Users are now automatically joined to 'openu' organization on the backend
     return await fetchWithRetry(`${getAPIUrl()}${AUTH_ENDPOINTS.signup}`, requestOptions);
   } catch (error) {
     if (error instanceof Error) {

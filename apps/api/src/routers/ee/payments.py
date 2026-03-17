@@ -4,7 +4,11 @@ from fastapi import APIRouter, Depends, Query, Request
 from sqlmodel import Session
 
 from src.core.events.database import get_db_session
-from src.db.payments.payments import PaymentsConfig, PaymentsConfigRead, PaymentsConfigUpdate
+from src.db.payments.payments import (
+    PaymentsConfig,
+    PaymentsConfigRead,
+    PaymentsConfigUpdate,
+)
 from src.db.payments.payments_products import (
     PaymentsProductCreate,
     PaymentsProductRead,
@@ -97,7 +101,9 @@ async def api_update_payments_config(
         if not any(config.id == id for config in configs):
             raise ValueError("Payments config not found")
 
-    return await update_payments_config(request, payments_config, current_user, db_session)
+    return await update_payments_config(
+        request, payments_config, current_user, db_session
+    )
 
 
 @router.delete("/config")
@@ -141,7 +147,9 @@ async def api_create_payments_product(
     platform_org_id = get_platform_org_id(db_session)
     checker.require(current_user.id, "organization:manage", platform_org_id)
 
-    return await create_payments_product(request, payments_product, current_user, db_session)
+    return await create_payments_product(
+        request, payments_product, current_user, db_session
+    )
 
 
 @router.get("/products")
@@ -238,9 +246,7 @@ async def api_get_courses_by_product(
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
-    return await get_courses_by_product(
-        request, product_id, current_user, db_session
-    )
+    return await get_courses_by_product(request, product_id, current_user, db_session)
 
 
 @router.get("/courses/{course_id}/products")
@@ -250,9 +256,7 @@ async def api_get_products_by_course(
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
-    return await get_products_by_course(
-        request, course_id, current_user, db_session
-    )
+    return await get_products_by_course(request, course_id, current_user, db_session)
 
 
 # Payments webhooks
@@ -362,6 +366,4 @@ async def stripe_oauth_callback(
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
-    return await handle_stripe_oauth_callback(
-        request, code, current_user, db_session
-    )
+    return await handle_stripe_oauth_callback(request, code, current_user, db_session)

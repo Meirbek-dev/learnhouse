@@ -9,7 +9,8 @@
       "Bash(bun oxlint:*)",
       "Bash(bun tsc:*)",
       "Bash(grep:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(find:*)"
     ]
   }
 }

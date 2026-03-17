@@ -21,7 +21,6 @@ from src.security.rbac import (
     PermissionDenied,
     ResourceAccessDenied,
 )
-from src.services.platform import get_platform_org_id
 from src.services.courses.courses import get_user_courses
 from src.services.users.password_reset import (
     change_password_with_reset_code,
@@ -149,7 +148,7 @@ async def api_update_user(
     is_own_profile = user_id == current_user.id
 
     if not is_own_profile:
-        checker.require(current_user.id, "user:update", get_platform_org_id(db_session))
+        checker.require(current_user.id, "user:update")
 
     return await update_user(request, db_session, user_id, current_user, user_object)
 
@@ -173,7 +172,7 @@ async def api_update_avatar_user(
     is_own_avatar = user_id == current_user.id
 
     if not is_own_avatar:
-        checker.require(current_user.id, "user:update", get_platform_org_id(db_session))
+        checker.require(current_user.id, "user:update")
 
     return await update_user_avatar(request, db_session, current_user, avatar_file)
 
@@ -287,8 +286,7 @@ async def api_delete_user(
 
     **Required Permission**: `user:delete:org`
     """
-    org_id = get_platform_org_id(db_session)
-    checker.require(current_user.id, "user:delete", org_id)
+    checker.require(current_user.id, "user:delete")
 
     # Prevent self-deletion
     if user_id == current_user.id:

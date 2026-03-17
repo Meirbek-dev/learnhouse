@@ -11,7 +11,7 @@ from src.db.usergroup_user import UserGroupUser
 from src.db.usergroups import UserGroup, UserGroupCreate, UserGroupRead, UserGroupUpdate
 from src.db.users import AnonymousUser, InternalUser, PublicUser, User, UserRead
 from src.security.rbac import PermissionChecker
-from src.services.platform import get_platform_org_id, get_platform_organization
+from src.services.platform import get_platform_organization
 
 
 async def create_usergroup(
@@ -26,7 +26,7 @@ async def create_usergroup(
     # RBAC check
     if checker is None:
         checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "usergroup:create", get_platform_org_id(db_session))
+    checker.require(current_user.id, "usergroup:create")
 
     # Complete the object
     usergroup.usergroup_uuid = f"usergroup_{ULID()}"
@@ -64,7 +64,6 @@ async def read_usergroup_by_id(
     checker.require(
         current_user.id,
         "usergroup:read",
-        get_platform_org_id(db_session),
         resource_owner_id=usergroup.creator_id,
     )
 
@@ -93,7 +92,6 @@ async def get_users_linked_to_usergroup(
     checker.require(
         current_user.id,
         "usergroup:read",
-        get_platform_org_id(db_session),
         resource_owner_id=usergroup.creator_id,
     )
 
@@ -110,7 +108,7 @@ async def get_users_linked_to_usergroup(
     return [UserRead.model_validate(user) for user in users]
 
 
-async def read_usergroups_by_org_id(
+async def read_usergroups(
     request: Request,
     db_session: Session,
     current_user: PublicUser | AnonymousUser,
@@ -122,7 +120,7 @@ async def read_usergroups_by_org_id(
     # RBAC check
     if checker is None:
         checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "usergroup:read", get_platform_org_id(db_session))
+    checker.require(current_user.id, "usergroup:read")
 
     return [UserGroupRead.model_validate(usergroup) for usergroup in usergroups]
 
@@ -142,7 +140,7 @@ async def get_usergroups_by_resource(
     # RBAC check
     if checker is None:
         checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "usergroup:read", get_platform_org_id(db_session))
+    checker.require(current_user.id, "usergroup:read")
 
     usergroup_ids = [usergroup.usergroup_id for usergroup in usergroup_resources]
 
@@ -179,7 +177,6 @@ async def update_usergroup_by_id(
     checker.require(
         current_user.id,
         "usergroup:update",
-        get_platform_org_id(db_session),
         resource_owner_id=usergroup.creator_id,
     )
 
@@ -216,7 +213,6 @@ async def delete_usergroup_by_id(
     checker.require(
         current_user.id,
         "usergroup:delete",
-        get_platform_org_id(db_session),
         resource_owner_id=usergroup.creator_id,
     )
 

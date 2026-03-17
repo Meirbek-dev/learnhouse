@@ -5,6 +5,7 @@ from datetime import UTC, datetime, timedelta
 import orjson
 from fastapi import HTTPException, Request
 from sqlmodel import Session, select
+
 from src.db.organizations import (
     OrganizationRead,
     OrganizationUser,
@@ -35,23 +36,19 @@ async def get_organization_users(
 
     # RBAC check
     checker.require(
-        current_user.id, "organization:read", org.id, resource_owner_id=org.creator_id
+        current_user.id, "organization:read", resource_owner_id=org.creator_id
     )
 
     # Build base query joining via UserRole
     # Get distinct users who have any role in this org; use DISTINCT on `User.id`
     # to avoid comparing JSON columns (which don't have equality operators).
     base_statement = (
-        select(User)
-        .join(UserRole, UserRole.user_id == User.id)
-        .distinct(User.id)
+        select(User).join(UserRole, UserRole.user_id == User.id).distinct(User.id)
     )
 
     # Get total count by selecting distinct user IDs only (avoids JSON equality issues)
     all_user_ids = db_session.exec(
-        select(User.id)
-        .join(UserRole, UserRole.user_id == User.id)
-        .distinct()
+        select(User.id).join(UserRole, UserRole.user_id == User.id).distinct()
     ).all()
     total = len(all_user_ids)
 
@@ -116,7 +113,7 @@ async def remove_user_from_org(
 
     # RBAC check
     checker.require(
-        current_user.id, "organization:manage", org.id, resource_owner_id=org.creator_id
+        current_user.id, "organization:manage", resource_owner_id=org.creator_id
     )
 
     # Check if user has any roles in this org (i.e., is a member)
@@ -138,11 +135,7 @@ async def remove_user_from_org(
     admin_role_id = admin_role.id if admin_role else 1
 
     # Count admins by checking UserRole with role_id = admin_role_id
-    statement = (
-        select(UserRole)
-        .where(UserRole.role_id == admin_role_id)
-        .distinct()
-    )
+    statement = select(UserRole).where(UserRole.role_id == admin_role_id).distinct()
     result = db_session.exec(statement)
     admin_roles = result.all()
 
@@ -185,7 +178,7 @@ async def update_user_role(
 
     # RBAC check
     checker.require(
-        current_user.id, "organization:update", org.id, resource_owner_id=org.creator_id
+        current_user.id, "organization:update", resource_owner_id=org.creator_id
     )
 
     # Last-admin protection
@@ -215,7 +208,9 @@ async def update_user_role(
         )
 
     # Verify user has existing roles in this org
-    existing_roles = db_session.exec(select(UserRole).where(UserRole.user_id == user_id)).all()
+    existing_roles = db_session.exec(
+        select(UserRole).where(UserRole.user_id == user_id)
+    ).all()
     if not existing_roles:
         raise HTTPException(status_code=404, detail="User not found")
 

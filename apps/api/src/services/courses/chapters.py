@@ -24,7 +24,6 @@ from src.db.courses.courses import Course
 from src.db.users import AnonymousUser, PublicUser
 from src.security.rbac import PermissionChecker
 from src.services.courses.courses import _ensure_course_is_current
-from src.services.platform import get_platform_org_id
 
 ####################################################
 # CRUD
@@ -45,11 +44,9 @@ async def create_chapter(
 
     # RBAC check
     checker = PermissionChecker(db_session)
-    platform_org_id = get_platform_org_id(db_session)
     checker.require(
         current_user.id,
         "chapter:create",
-        platform_org_id,
         resource_owner_id=course.creator_id,
     )
 
@@ -132,7 +129,7 @@ async def get_chapter(
 
     # RBAC check (use parent Course for read access so public courses allow anonymous reads)
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "course:read", get_platform_org_id(db_session))
+    checker.require(current_user.id, "course:read")
 
     # Get activities for this chapter
     statement = (
@@ -171,11 +168,9 @@ async def update_chapter(
 
     # RBAC check
     checker = PermissionChecker(db_session)
-    platform_org_id = get_platform_org_id(db_session)
     checker.require(
         current_user.id,
         "chapter:update",
-        platform_org_id,
         resource_owner_id=chapter.creator_id,
     )
 
@@ -220,11 +215,9 @@ async def delete_chapter(
 
     # RBAC check
     checker = PermissionChecker(db_session)
-    platform_org_id = get_platform_org_id(db_session)
     checker.require(
         current_user.id,
         "chapter:delete",
-        platform_org_id,
         resource_owner_id=chapter.creator_id,
     )
 
@@ -272,7 +265,7 @@ async def get_course_chapters(
     # RBAC check (rights are determined by parent Course for read access)
     checker = PermissionChecker(db_session)
     if not course.public:
-        checker.require(current_user.id, "course:read", get_platform_org_id(db_session))
+        checker.require(current_user.id, "course:read")
 
     statement = (
         select(Chapter)
@@ -319,13 +312,11 @@ async def get_course_chapters(
                 can_update = checker.check(
                     current_user.id,
                     "activity:update",
-                    get_platform_org_id(db_session),
                     resource_owner_id=activity.creator_id,
                 )
                 can_delete = checker.check(
                     current_user.id,
                     "activity:delete",
-                    get_platform_org_id(db_session),
                     resource_owner_id=activity.creator_id,
                 )
                 is_owner = activity.creator_id == current_user.id
@@ -367,11 +358,9 @@ async def reorder_chapters_and_activities(
 
     # RBAC check
     checker = PermissionChecker(db_session)
-    platform_org_id = get_platform_org_id(db_session)
     checker.require(
         current_user.id,
         "chapter:update",
-        platform_org_id,
         resource_owner_id=course.creator_id,
     )
 

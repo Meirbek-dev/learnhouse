@@ -20,9 +20,9 @@ from src.db.courses.courses import Course
 from src.db.strict_base_model import PydanticStrictBaseModel
 from src.db.users import AnonymousUser, PublicUser
 from src.security.rbac import PermissionChecker
-from src.services.courses.courses import _ensure_course_is_current
 from src.services.courses.activities.uploads.videos import upload_subtitle, upload_video
-from src.services.platform import get_platform_org_id, get_platform_organization
+from src.services.courses.courses import _ensure_course_is_current
+from src.services.platform import get_platform_organization
 
 
 def _get_language_label(language_code: str) -> str:
@@ -120,7 +120,6 @@ async def create_video_activity(
     checker.require(
         current_user.id,
         "activity:create",
-        get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 
@@ -327,7 +326,6 @@ async def create_external_video_activity(
     checker.require(
         current_user.id,
         "activity:create",
-        get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 

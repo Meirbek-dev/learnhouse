@@ -11,6 +11,7 @@ from typing import Any
 
 from langchain_community.chat_message_histories import RedisChatMessageHistory
 from langchain_core.messages import AIMessage, HumanMessage
+
 from src.services.ai.exceptions import (
     AIProcessingError,
     AITimeoutError,

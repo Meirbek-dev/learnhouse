@@ -13,7 +13,6 @@ from sqlalchemy import func
 from sqlmodel import Session, or_, select
 
 from src.core.events.database import get_db_session
-from src.services.platform import get_platform_org_id
 from src.db.permissions import (
     Permission,
     PermissionRead,
@@ -42,9 +41,9 @@ class AddPermissionBody(BaseModel):
     permission_id: int
 
 
-def _is_admin(checker: PermissionCheckerDep, user_id: int, org_id: int | None, db=None) -> bool:
+def _is_admin(checker: PermissionCheckerDep, user_id: int) -> bool:
     """Check if user is an admin using the permission system itself."""
-    return checker.check(user_id, "role:manage", org_id)
+    return checker.check(user_id, "role:manage")
 
 
 # ── List / Read ───────────────────────────────────────────────────────────
@@ -57,7 +56,7 @@ async def list_all_permissions(
     checker: PermissionCheckerDep,
 ):
     """List all permission definitions. Used by the RBAC admin panel."""
-    checker.require(current_user.id, "role:read", get_platform_org_id(db))
+    checker.require(current_user.id, "role:read")
     perms = db.exec(
         select(Permission).order_by(Permission.resource_type, Permission.action)
     ).all()
@@ -70,9 +69,8 @@ async def list_roles(
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     checker: PermissionCheckerDep,
 ):
-    """List all roles available in the platform org (system roles + org-specific)."""
-    platform_org_id = get_platform_org_id(db)
-    checker.require(current_user.id, "role:read", platform_org_id)
+    """List all roles available in the platform."""
+    checker.require(current_user.id, "role:read")
     roles = db.exec(select(Role).order_by(Role.priority.desc())).all()
 
     role_ids = [role.id for role in roles if role.id is not None]
@@ -113,7 +111,7 @@ async def get_role_audit_log(
     page: Annotated[int, Query(ge=1)] = 1,
     page_size: Annotated[int, Query(ge=1, le=100)] = 20,
 ):
-    checker.require(current_user.id, "role:read", get_platform_org_id(db))
+    checker.require(current_user.id, "role:read")
     events = list_role_audit_events()
     total = len(events)
     start = (page - 1) * page_size
@@ -134,7 +132,7 @@ async def get_role(
     checker: PermissionCheckerDep,
 ):
     """Get a single role by ID (includes its permissions via separate endpoint)."""
-    checker.require(current_user.id, "role:read", get_platform_org_id(db))
+    checker.require(current_user.id, "role:read")
     role = db.get(Role, role_id)
     if not role:
         raise HTTPException(404, detail="Role not found")
@@ -166,11 +164,11 @@ async def create_role(
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     checker: PermissionCheckerDep,
 ):
-    """Create a new custom role for an org."""
-    checker.require(current_user.id, "role:create", get_platform_org_id(db))
+    """Create a new custom role."""
+    checker.require(current_user.id, "role:create")
 
     # Escalation prevention: new role priority must not exceed caller's highest
-    caller_roles = checker.get_user_roles(current_user.id, get_platform_org_id(db))
+    caller_roles = checker.get_user_roles(current_user.id)
     caller_max_priority = max((r["priority"] for r in caller_roles), default=0)
     new_priority = body.priority
     if new_priority > caller_max_priority:
@@ -189,14 +187,12 @@ async def create_role(
     db.add(role)
     db.commit()
     db.refresh(role)
-    platform_org_id = get_platform_org_id(db)
     audit_log.info(
         "role_created",
         extra={
             "actor_id": current_user.id,
             "role_id": role.id,
             "role_slug": role.slug,
-            "org_id": platform_org_id,
         },
     )
     append_role_audit_event(
@@ -204,7 +200,6 @@ async def create_role(
         action="role_created",
         target_role_id=role.id,
         target_role_slug=role.slug,
-        org_id=platform_org_id,
     )
     return RoleRead.model_validate(role)
 
@@ -221,19 +216,17 @@ async def update_role(
     checker: PermissionCheckerDep,
 ):
     """Update a role's name, description, or priority."""
-    platform_org_id = get_platform_org_id(db)
-    checker.require(current_user.id, "role:update", platform_org_id)
+    checker.require(current_user.id, "role:update")
     role = db.get(Role, role_id)
     if not role:
         raise HTTPException(404, detail="Role not found")
-    target_org_id = platform_org_id
-    actor_is_admin = _is_admin(checker, current_user.id, target_org_id)
+    actor_is_admin = _is_admin(checker, current_user.id)
     if role.is_system and not actor_is_admin:
         raise HTTPException(403, detail="System roles cannot be modified")
 
     requested_priority = body.priority if body.priority is not None else role.priority
     if not actor_is_admin:
-        caller_roles = checker.get_user_roles(current_user.id, target_org_id)
+        caller_roles = checker.get_user_roles(current_user.id)
         caller_max_priority = max((r["priority"] for r in caller_roles), default=0)
         if requested_priority > caller_max_priority:
             raise HTTPException(
@@ -251,7 +244,6 @@ async def update_role(
         extra={
             "actor_id": current_user.id,
             "role_id": role_id,
-            "org_id": platform_org_id,
             "fields": list(changed_fields.keys()),
         },
     )
@@ -260,7 +252,6 @@ async def update_role(
         action="role_updated",
         target_role_id=role_id,
         target_role_slug=role.slug,
-        org_id=target_org_id,
         diff_summary=", ".join(changed_fields.keys()) if changed_fields else None,
     )
     return RoleRead.model_validate(role)
@@ -276,13 +267,11 @@ async def delete_role(
     checker: PermissionCheckerDep,
 ):
     """Delete a custom role."""
-    platform_org_id = get_platform_org_id(db)
-    checker.require(current_user.id, "role:delete", platform_org_id)
+    checker.require(current_user.id, "role:delete")
     role = db.get(Role, role_id)
     if not role:
         raise HTTPException(404, detail="Role not found")
-    target_org_id = platform_org_id
-    actor_is_admin = _is_admin(checker, current_user.id, target_org_id)
+    actor_is_admin = _is_admin(checker, current_user.id)
     if role.is_system and not actor_is_admin:
         raise HTTPException(403, detail="System roles cannot be deleted")
     db.delete(role)
@@ -293,7 +282,6 @@ async def delete_role(
             "actor_id": current_user.id,
             "role_id": role_id,
             "role_slug": role.slug,
-            "org_id": platform_org_id,
         },
     )
     append_role_audit_event(
@@ -301,7 +289,6 @@ async def delete_role(
         action="role_deleted",
         target_role_id=role_id,
         target_role_slug=role.slug,
-        org_id=target_org_id,
     )
     return {"ok": True}
 
@@ -313,8 +300,7 @@ async def get_role_users_count(
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     checker: PermissionCheckerDep,
 ):
-    platform_org_id = get_platform_org_id(db)
-    checker.require(current_user.id, "role:read", platform_org_id)
+    checker.require(current_user.id, "role:read")
     role = db.get(Role, role_id)
     if not role:
         raise HTTPException(404, detail="Role not found")
@@ -336,8 +322,7 @@ async def get_role_permissions(
     checker: PermissionCheckerDep,
 ):
     """Get all permissions assigned to a role."""
-    platform_org_id = get_platform_org_id(db)
-    checker.require(current_user.id, "role:read", platform_org_id)
+    checker.require(current_user.id, "role:read")
     role = db.get(Role, role_id)
     if not role:
         raise HTTPException(404, detail="Role not found")
@@ -360,14 +345,12 @@ async def add_permission_to_role(
     checker: PermissionCheckerDep,
 ):
     """Add a permission to a role."""
-    platform_org_id = get_platform_org_id(db)
-    checker.require(current_user.id, "role:update", platform_org_id)
+    checker.require(current_user.id, "role:update")
     permission_id = body.permission_id
     role = db.get(Role, role_id)
     if not role:
         raise HTTPException(404, detail="Role not found")
-    target_org_id = platform_org_id
-    actor_is_admin = _is_admin(checker, current_user.id, target_org_id)
+    actor_is_admin = _is_admin(checker, current_user.id)
     if role.is_system and not actor_is_admin:
         raise HTTPException(403, detail="System roles cannot be modified")
     perm = db.get(Permission, permission_id)
@@ -378,7 +361,7 @@ async def add_permission_to_role(
     # Use expanded permissions so wildcards (e.g. course:*:org) resolve to concrete
     # permission strings (e.g. course:create:org) before comparison.
     if not actor_is_admin:
-        caller_perms = checker.get_expanded_permissions(current_user.id, target_org_id)
+        caller_perms = checker.get_expanded_permissions(current_user.id)
         if perm.name not in caller_perms:
             raise HTTPException(
                 403,
@@ -404,7 +387,6 @@ async def add_permission_to_role(
             "role_id": role_id,
             "permission_id": permission_id,
             "permission_name": perm.name,
-            "org_id": platform_org_id,
         },
     )
     append_role_audit_event(
@@ -412,7 +394,6 @@ async def add_permission_to_role(
         action="permission_added_to_role",
         target_role_id=role_id,
         target_role_slug=role.slug,
-        org_id=target_org_id,
         diff_summary=perm.name,
     )
     return {"ok": True}
@@ -429,13 +410,11 @@ async def remove_permission_from_role(
     checker: PermissionCheckerDep,
 ):
     """Remove a permission from a role."""
-    platform_org_id = get_platform_org_id(db)
-    checker.require(current_user.id, "role:update", platform_org_id)
+    checker.require(current_user.id, "role:update")
     role = db.get(Role, role_id)
     if not role:
         raise HTTPException(404, detail="Role not found")
-    target_org_id = platform_org_id
-    actor_is_admin = _is_admin(checker, current_user.id, target_org_id)
+    actor_is_admin = _is_admin(checker, current_user.id)
     if role.is_system and not actor_is_admin:
         raise HTTPException(403, detail="System roles cannot be modified")
     rp = db.exec(
@@ -449,23 +428,19 @@ async def remove_permission_from_role(
     db.delete(rp)
     db.commit()
     perm = db.get(Permission, permission_id)
-    (
-        audit_log.info(
-            "permission_removed_from_role",
-            extra={
-                "actor_id": current_user.id,
-                "role_id": role_id,
-                "permission_id": permission_id,
-                "org_id": platform_org_id,
-            },
-        ),
+    audit_log.info(
+        "permission_removed_from_role",
+        extra={
+            "actor_id": current_user.id,
+            "role_id": role_id,
+            "permission_id": permission_id,
+        },
     )
     append_role_audit_event(
         actor_id=current_user.id,
         action="permission_removed_from_role",
         target_role_id=role_id,
         target_role_slug=role.slug,
-        org_id=target_org_id,
         diff_summary=perm.name if perm else None,
     )
     return {"ok": True}

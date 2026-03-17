@@ -30,6 +30,7 @@ from src.services.analytics.scope import (
     ensure_course_in_scope,
     resolve_teacher_scope,
 )
+
 router = APIRouter()
 
 
@@ -49,7 +50,9 @@ def _scope_for(
     action: str,
 ):
     checker = PermissionChecker(db_session)
-    return resolve_teacher_scope(db_session, checker, current_user, filters, action=action)
+    return resolve_teacher_scope(
+        db_session, checker, current_user, filters, action=action
+    )
 
 
 def _course_scope_for(

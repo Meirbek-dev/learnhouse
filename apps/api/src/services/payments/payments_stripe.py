@@ -22,7 +22,6 @@ from src.services.payments.payments_users import (
     create_payment_user,
     delete_payment_user,
 )
-from src.services.platform import get_platform_org_id
 
 logger = logging.getLogger(__name__)
 
@@ -211,7 +210,6 @@ async def create_checkout_session(
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
 ):
-    platform_org_id = get_platform_org_id(db_session)
     # Get Stripe credentials
     creds = await get_stripe_internal_credentials()
     stripe.api_key = creds.get("stripe_secret_key")
@@ -248,7 +246,6 @@ async def create_checkout_session(
                 email=current_user.email,
                 metadata={
                     "user_id": str(current_user.id),
-                    "org_id": str(platform_org_id),
                 },
                 stripe_account=stripe_acc_id,
             )

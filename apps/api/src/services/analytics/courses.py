@@ -49,7 +49,6 @@ def _build_rollup_course_rows(
         return None
     rollups = list_latest_course_rollups(
         db_session,
-        org_id=scope.org_id,
         course_ids=scope.course_ids,
         teacher_user_id=scope.teacher_user_id,
     )
@@ -57,7 +56,7 @@ def _build_rollup_course_rows(
         return None
 
     assessment_rollups = list_latest_assessment_rollups(
-        db_session, org_id=scope.org_id, course_ids=scope.course_ids
+        db_session, course_ids=scope.course_ids
     )
     difficulty_by_course: dict[int, list[float]] = defaultdict(list)
     for assessment in assessment_rollups:
@@ -354,9 +353,7 @@ def get_teacher_course_list(
                 select(Course).where(Course.id.in_(scope.course_ids))
             ).all()
         }
-        usergroups = list(
-            db_session.exec(select(UserGroup)).all()
-        )
+        usergroups = list(db_session.exec(select(UserGroup)).all())
         return TeacherCourseListResponse(
             generated_at=generated_at,
             total=len(rows),

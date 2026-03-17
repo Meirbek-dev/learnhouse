@@ -12,7 +12,6 @@ from src.db.organizations import (
 from src.db.users import PublicUser
 from src.security.auth import get_current_user
 from src.security.rbac import PermissionCheckerDep
-from src.services.platform import get_platform_org_id, get_platform_organization
 from src.services.orgs.orgs import (
     update_org,
     update_org_landing,
@@ -26,6 +25,7 @@ from src.services.orgs.users import (
     remove_user_from_org,
     update_user_role,
 )
+from src.services.platform import get_platform_organization
 
 router = APIRouter()
 
@@ -126,8 +126,7 @@ async def api_update_org_logo(
 
     **Required Permission**: `organization:update`
     """
-    platform_org_id = get_platform_org_id(db_session)
-    checker.require(current_user.id, "organization:update", platform_org_id)
+    checker.require(current_user.id, "organization:update")
     return await update_org_logo(
         request=request,
         logo_file=logo_file,
@@ -149,8 +148,7 @@ async def api_update_org_thumbnail(
 
     **Required Permission**: `organization:update`
     """
-    platform_org_id = get_platform_org_id(db_session)
-    checker.require(current_user.id, "organization:update", platform_org_id)
+    checker.require(current_user.id, "organization:update")
     return await update_org_thumbnail(
         request=request,
         thumbnail_file=thumbnail_file,
@@ -172,8 +170,7 @@ async def api_update_org_preview(
 
     **Required Permission**: `organization:update`
     """
-    platform_org_id = get_platform_org_id(db_session)
-    checker.require(current_user.id, "organization:update", platform_org_id)
+    checker.require(current_user.id, "organization:update")
     return await update_org_preview(
         request=request,
         preview_file=preview_file,
@@ -195,8 +192,7 @@ async def api_update_org(
 
     **Required Permission**: `organization:update`
     """
-    platform_org_id = get_platform_org_id(db_session)
-    checker.require(current_user.id, "organization:update", platform_org_id)
+    checker.require(current_user.id, "organization:update")
     return await update_org(request, org_object, current_user, db_session)
 
 
@@ -213,8 +209,7 @@ async def api_update_org_landing(
 
     **Required Permission**: `organization:update`
     """
-    platform_org_id = get_platform_org_id(db_session)
-    checker.require(current_user.id, "organization:update", platform_org_id)
+    checker.require(current_user.id, "organization:update")
     return await update_org_landing(request, landing_object, current_user, db_session)
 
 
@@ -231,8 +226,7 @@ async def api_upload_org_landing_content(
 
     **Required Permission**: `organization:update`
     """
-    platform_org_id = get_platform_org_id(db_session)
-    checker.require(current_user.id, "organization:update", platform_org_id)
+    checker.require(current_user.id, "organization:update")
     return await upload_org_landing_content_service(
         request=request,
         content_file=content_file,

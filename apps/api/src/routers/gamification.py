@@ -1,5 +1,5 @@
 """
-Gamification Router (single-org mode)
+Gamification Router
 
 - GET /        → Dashboard
 - POST /xp     → Award XP
@@ -39,14 +39,9 @@ from src.services.gamification.service import (
     DailyLimitExceededError,
     GamificationError,
 )
-from src.services.platform import get_platform_org_id
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
-
-
-def _platform_org_id(db: Session = Depends(get_db_session)) -> int:
-    return get_platform_org_id(db)
 
 
 def _profile_to_read(p: GamificationProfile) -> ProfileRead:
@@ -92,9 +87,8 @@ async def get_unified_dashboard(
     db: Annotated[Session, Depends(get_db_session)],
 ):
     """Unified endpoint: Get complete gamification dashboard, profile, leaderboard, and config"""
-    org_id = get_platform_org_id(db)
     try:
-        data = service.get_dashboard_data(db, user.id, org_id, include_leaderboard=True)
+        data = service.get_dashboard_data(db, user.id, include_leaderboard=True)
         profile = _profile_to_read(data["profile"])
         recent_txs = [
             TransactionRead(
@@ -130,7 +124,6 @@ async def award_xp(
     checker: PermissionCheckerDep,
 ):
     """Award XP with strong typing and idempotency."""
-    org_id = get_platform_org_id(db)
     logger.info(f"Award XP request: user={user.id} payload={payload}")
     try:
         if payload.custom_amount is not None:
@@ -139,7 +132,7 @@ async def award_xp(
                     status_code=400,
                     detail="custom_amount allowed only with ADMIN_AWARD source",
                 )
-            checker.require(user.id, "organization:manage", org_id)
+            checker.require(user.id, "organization:manage")
 
         try:
             normalized_source = (
@@ -153,7 +146,6 @@ async def award_xp(
         profile, transaction, level_up, is_new = service.award_xp(
             db=db,
             user_id=user.id,
-            org_id=org_id,
             source=normalized_source,
             amount=payload.custom_amount,
             source_id=payload.source_id,
@@ -185,9 +177,8 @@ async def update_streak(
     user: Annotated[PublicUser, Depends(get_current_user)],
     db: Annotated[Session, Depends(get_db_session)],
 ):
-    org_id = get_platform_org_id(db)
     try:
-        profile = service.update_streak(db, user.id, org_id, streak_type.value)
+        profile = service.update_streak(db, user.id, streak_type.value)
         if streak_type == DBStreakType.LOGIN:
             return StreakUpdateRead(
                 streak_type=streak_type.value,
@@ -214,11 +205,10 @@ async def update_preferences(
     user: Annotated[PublicUser, Depends(get_current_user)] = None,
     db: Annotated[Session, Depends(get_db_session)] = None,
 ):
-    org_id = get_platform_org_id(db)
     if not isinstance(data, dict):
         raise HTTPException(status_code=400, detail="Invalid preferences body")
     try:
-        profile = service.update_preferences(db, user.id, org_id, data)
+        profile = service.update_preferences(db, user.id, data)
         return _profile_to_read(profile)
     except Exception as e:
         logger.exception("Update preferences error for user %s: %s", user.id, e)
@@ -232,9 +222,8 @@ async def get_leaderboard(
     user: Annotated[PublicUser, Depends(get_current_user)] = None,
     db: Annotated[Session, Depends(get_db_session)] = None,
 ):
-    org_id = get_platform_org_id(db)
     try:
-        return service.get_leaderboard_read(db, org_id, limit=limit, offset=offset)
+        return service.get_leaderboard_read(db, limit=limit, offset=offset)
     except Exception as e:
         logger.exception("Leaderboard error: %s", e)
         raise HTTPException(status_code=500, detail="Failed to get leaderboard")
@@ -246,12 +235,11 @@ async def get_user_rank(
     db: Annotated[Session, Depends(get_db_session)],
 ):
     """Return the current user's rank within the platform."""
-    org_id = get_platform_org_id(db)
     try:
-        rank = service.get_user_rank(db, user.id, org_id)
+        rank = service.get_user_rank(db, user.id)
         if rank is None:
-            service.get_profile(db, user.id, org_id)
-            rank = service.get_user_rank(db, user.id, org_id)
+            service.get_profile(db, user.id)
+            rank = service.get_user_rank(db, user.id)
         return {"user_id": user.id, "rank": rank}
     except Exception as e:
         logger.exception("User rank error for user %s: %s", user.id, e)

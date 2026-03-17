@@ -18,12 +18,10 @@ from src.security.rbac import (
     PermissionDenied,
 )
 from src.services.analytics.filters import AnalyticsFilters
-from src.services.platform import require_platform_org_id
 
 
 @dataclass(slots=True)
 class TeacherAnalyticsScope:
-    org_id: int
     teacher_user_id: int
     course_ids: list[int]
     cohort_ids: list[int]
@@ -47,9 +45,9 @@ def _coerce_course_id(value: Any) -> int | None:
 
 
 def _has_analytics_scope(
-    checker: PermissionChecker, user_id: int, org_id: int, action: str, scope: str
+    checker: PermissionChecker, user_id: int, action: str, scope: str
 ) -> bool:
-    permissions = checker.get_expanded_permissions(user_id, org_id)
+    permissions = checker.get_expanded_permissions(user_id)
     return (
         f"analytics:{action}:{scope}" in permissions
         or f"analytics:*:{scope}" in permissions
@@ -58,10 +56,10 @@ def _has_analytics_scope(
 
 
 def ensure_analytics_access(
-    checker: PermissionChecker, user_id: int, org_id: int, action: str
+    checker: PermissionChecker, user_id: int, action: str
 ) -> None:
     if any(
-        _has_analytics_scope(checker, user_id, org_id, action, scope)
+        _has_analytics_scope(checker, user_id, action, scope)
         for scope in ("assigned", "org", "all")
     ):
         return
@@ -79,11 +77,9 @@ def resolve_teacher_scope(
     if isinstance(current_user, AnonymousUser):
         raise AuthenticationRequired
 
-    platform_org_id = require_platform_org_id(db_session)
-
-    ensure_analytics_access(checker, current_user.id, platform_org_id, action)
+    ensure_analytics_access(checker, current_user.id, action)
     has_org_scope = any(
-        _has_analytics_scope(checker, current_user.id, platform_org_id, action, scope)
+        _has_analytics_scope(checker, current_user.id, action, scope)
         for scope in ("org", "all")
     )
 
@@ -146,7 +142,6 @@ def resolve_teacher_scope(
         normalized_course_ids = sorted(requested)
 
     return TeacherAnalyticsScope(
-        org_id=platform_org_id,
         teacher_user_id=target_user_id,
         course_ids=normalized_course_ids,
         cohort_ids=filters.cohort_ids,
