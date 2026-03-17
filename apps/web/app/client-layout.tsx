@@ -1,6 +1,6 @@
 'use client';
 
-import PlatformSessionProvider, { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import PlatformSessionProvider, { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { PermissionProvider } from '@/components/Security/PermissionProvider';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { swrFetcher } from '@services/utils/ts/requests';

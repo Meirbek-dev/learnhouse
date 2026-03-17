@@ -51,8 +51,8 @@ import { Actions, PermissionGuard, Resources, Scopes, usePermissions } from '@/c
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import type { Permission, RoleAuditEvent, RoleWithPermissions } from '@/types/permissions';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { usePlatformOrg } from '@components/Contexts/OrgContext';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
+import { usePlatform } from '@/components/Contexts/PlatformContext';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ColumnDef } from '@tanstack/react-table';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -70,9 +70,9 @@ type RoleDialogMode = 'create' | 'edit' | 'clone';
 
 export default function RBACAdminClient() {
   const session = usePlatformSession();
-  const org = usePlatformOrg();
+  const org = usePlatform();
   const { can } = usePermissions();
-  const t = useTranslations('Components.OrgRoles');
+  const t = useTranslations('Components.Roles');
 
   const [roles, setRoles] = useState<RoleWithPermissions[]>([]);
   const [loadingRoles, setLoadingRoles] = useState(true);
@@ -1114,7 +1114,7 @@ function RoleEditForm({
   onSubmit: (data: { name: string; slug: string; description: string; priority: number }) => Promise<void>;
   onCancel: () => void;
 }) {
-  const t = useTranslations('Components.OrgRoles');
+  const t = useTranslations('Components.Roles');
   const [name, setName] = useState(role?.name || '');
   const [description, setDescription] = useState(role?.description || '');
   const [priority, setPriority] = useState(role?.priority ?? 0);

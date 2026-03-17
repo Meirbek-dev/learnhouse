@@ -6,7 +6,7 @@ import TaskFileObject from '@/app/_shared/dash/assignments/[assignmentuuid]/_com
 import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
 import { Popover, PopoverContent, PopoverTrigger } from '@components/ui/popover';
 import { Backpack, Calendar, Download, Info } from 'lucide-react';
-import { usePlatformOrg } from '@components/Contexts/OrgContext';
+import { usePlatform } from '@/components/Contexts/PlatformContext';
 import { getTaskRefFileDir } from '@services/media/media';
 import { Card, CardContent } from '@components/ui/card';
 import { Separator } from '@components/ui/separator';
@@ -55,7 +55,7 @@ interface AssignmentsData {
 const AssignmentStudentActivity = () => {
   const t = useTranslations('Activities.AssignmentStudentActivity');
   const assignments = useAssignments() as AssignmentsData | null;
-  const org = usePlatformOrg() as OrgData | null;
+  const org = usePlatform() as OrgData | null;
 
   // Early returns for loading/error states
   if (!assignments) {

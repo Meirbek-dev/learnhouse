@@ -1,6 +1,6 @@
 'use client';
 
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { verifyStripeConnection } from '@services/payments/payments';
 import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import { AlertTriangle, Check, Loader2 } from 'lucide-react';

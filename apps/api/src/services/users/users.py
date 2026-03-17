@@ -373,16 +373,6 @@ async def security_get_user(request: Request, db_session: Session, email: str) -
 # Helper functions for user operations
 
 
-async def _validate_organization_exists(db_session: Session, org_id: int) -> None:
-    """Validate that organization exists."""
-    statement = select(Organization).where(Organization.id == org_id)
-    if not db_session.exec(statement).first():
-        raise HTTPException(
-            status_code=400,
-            detail="Organization does not exist",
-        )
-
-
 async def _validate_unique_username(
     db_session: Session, username: str, exclude_user_id: int | None = None
 ) -> None:
@@ -465,7 +455,7 @@ def _safe_organization_read(org: Organization) -> OrganizationRead:
         return OrganizationRead.model_validate(org)
     except ValidationError as exc:  # pragma: no cover - defensive path
         _logger.warning(
-            "Organization validation failed for org_id=%s. Using best-effort fallback. Error: %s",
+            "Organization validation failed for org=%s. Using best-effort fallback. Error: %s",
             getattr(org, "id", None),
             exc,
         )
@@ -473,7 +463,7 @@ def _safe_organization_read(org: Organization) -> OrganizationRead:
         return OrganizationRead.model_construct(
             **org.model_dump(),
             config=build_default_org_config(
-                org_id=org.id or 0,
+                platform_id=org.id or 0,
                 landing=org.landing,
                 creation_date=org.creation_date,
                 update_date=org.update_date,

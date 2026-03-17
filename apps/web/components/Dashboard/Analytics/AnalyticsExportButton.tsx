@@ -1,6 +1,6 @@
 'use client';
 
-import { usePlatformSession } from '@/components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { Download, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';

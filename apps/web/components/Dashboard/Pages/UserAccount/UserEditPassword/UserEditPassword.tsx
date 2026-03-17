@@ -1,10 +1,10 @@
 'use client';
 
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import PasswordInput from '@components/ui/custom/password-input';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { updatePassword } from '@services/settings/password';
-import { getUriWithoutOrg } from '@services/config/config';
+import { getAbsoluteUrl } from '@services/config/config';
 import { useState, useTransition } from 'react';
 import { Button } from '@components/ui/button';
 import { Label } from '@components/ui/label';
@@ -87,7 +87,7 @@ const UserEditPassword = () => {
 
         // Wait for 4 seconds before signing out
         await new Promise((resolve) => setTimeout(resolve, 4000));
-        signOut({ redirect: true, callbackUrl: getUriWithoutOrg('/') });
+        signOut({ redirect: true, callbackUrl: getAbsoluteUrl('/') });
       } else {
         toast.error(t('passwordUpdateError'), {
           id: loadingToast,

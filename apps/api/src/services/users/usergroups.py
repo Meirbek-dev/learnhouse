@@ -245,7 +245,6 @@ async def add_users_to_usergroup(
     checker.require(
         current_user.id,
         "usergroup:manage",
-        get_platform_org_id(db_session),
         resource_owner_id=usergroup.creator_id,
     )
 
@@ -328,7 +327,6 @@ async def remove_users_from_usergroup(
     checker.require(
         current_user.id,
         "usergroup:manage",
-        get_platform_org_id(db_session),
         resource_owner_id=usergroup.creator_id,
     )
 
@@ -386,7 +384,6 @@ async def add_resources_to_usergroup(
     checker.require(
         current_user.id,
         "usergroup:manage",
-        get_platform_org_id(db_session),
         resource_owner_id=usergroup.creator_id,
     )
 
@@ -451,7 +448,6 @@ async def remove_resources_from_usergroup(
     checker.require(
         current_user.id,
         "usergroup:manage",
-        get_platform_org_id(db_session),
         resource_owner_id=usergroup.creator_id,
     )
 

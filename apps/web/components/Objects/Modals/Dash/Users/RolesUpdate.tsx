@@ -1,7 +1,7 @@
 'use client';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { assignRoleToUser, removeRoleFromUser } from '@/services/rbac';
 import { BarLoader } from '@components/Objects/Loaders/BarLoader';
 import { Alert, AlertDescription } from '@components/ui/alert';

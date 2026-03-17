@@ -18,7 +18,6 @@ from src.services.courses.collections import (
     get_collections,
     update_collection,
 )
-from src.services.platform import get_platform_org_id
 from src.services.users.users import PublicUser
 
 router = APIRouter()
@@ -67,7 +66,6 @@ async def api_get_platform_collections(
     """
     return await get_collections(
         request,
-        get_platform_org_id(db_session),
         current_user,
         db_session,
         page,

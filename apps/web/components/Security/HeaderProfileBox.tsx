@@ -9,8 +9,8 @@ import {
 import { ChevronDown, Crown, LogOut, Shield, User, User as UserIcon, Users } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@components/ui/tooltip';
 import { useNavigationPermissions } from '@/hooks/useNavigationPermissions';
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { getUriWithoutOrg } from '@services/config/config';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
+import { getAbsoluteUrl } from '@services/config/config';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { RoleSlugs } from '@/types/permissions';
 import { Button } from '@components/ui/button';
@@ -105,7 +105,7 @@ export const HeaderProfileBox = () => {
             <li>
               <Link
                 prefetch={false}
-                href={getUriWithoutOrg('/login')}
+                href={getAbsoluteUrl('/login')}
               >
                 <Button
                   variant="ghost"
@@ -118,7 +118,7 @@ export const HeaderProfileBox = () => {
             <li>
               <Link
                 prefetch={false}
-                href={getUriWithoutOrg('/signup')}
+                href={getAbsoluteUrl('/signup')}
               >
                 <Button size="sm">{t('signUp')}</Button>
               </Link>

@@ -32,8 +32,6 @@ def append_role_audit_event(
     target_role_id: int | None,
     target_role_slug: str | None,
     diff_summary: str | None = None,
-    # legacy kwarg — ignored
-    org_id: int | None = None,
 ) -> None:
     event = RoleAuditEvent(
         timestamp=datetime.now(UTC),

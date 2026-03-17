@@ -1,7 +1,7 @@
 'use client';
 
 import { NavigationMenu, NavigationMenuList, NavigationMenuItem } from '@/components/ui/navigation-menu';
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { HeaderProfileBox } from '@/components/Security/HeaderProfileBox';
 import { BookCopy, Menu, Signpost, SquareLibrary, X } from 'lucide-react';
 import { LocaleSwitcher } from '@/components/Utils/LocaleSwitcher';

@@ -29,7 +29,6 @@ from src.services.blocks.block_types.quizBlock.grading import (
     grade_quiz,
 )
 from src.services.gamification.service import award_xp
-from src.services.platform import get_platform_org_id
 
 logger = logging.getLogger(__name__)
 
@@ -67,7 +66,6 @@ async def submit_quiz(
     checker.require(
         current_user.id,
         "quiz:submit",
-        get_platform_org_id(db_session),
         resource_owner_id=activity.creator_id,
         is_assigned=True,
     )
@@ -259,7 +257,6 @@ async def get_quiz_attempts(
     checker.require(
         current_user.id,
         "quiz:read",
-        get_platform_org_id(db_session),
         is_assigned=True,
         resource_owner_id=activity.creator_id,
     )
@@ -271,7 +268,6 @@ async def get_quiz_attempts(
     can_view_all = checker.check(
         current_user.id,
         "quiz:update",
-        get_platform_org_id(db_session),
         resource_owner_id=activity.creator_id,
     )
 
@@ -313,7 +309,6 @@ async def get_quiz_stats(
     checker.require(
         current_user.id,
         "quiz:read",
-        get_platform_org_id(db_session),
         resource_owner_id=activity.creator_id,
     )
 

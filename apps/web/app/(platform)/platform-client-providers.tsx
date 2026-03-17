@@ -1,6 +1,6 @@
 'use client';
 
-import PlatformOrgProvider from '@components/Contexts/PlatformOrgProvider';
+import PlatformProvider from '@/components/Contexts/PlatformProvider';
 import { useTheme } from '@/components/providers/theme-provider';
 import NextTopLoader from 'nextjs-toploader';
 import type { ReactNode } from 'react';
@@ -26,9 +26,9 @@ export default function PlatformClientProviders({ children, initialOrg }: Platfo
   };
 
   return (
-    <PlatformOrgProvider initialOrg={initialOrg}>
+    <PlatformProvider initialOrg={initialOrg}>
       <NextTopLoader {...topLoaderProps} />
       {children}
-    </PlatformOrgProvider>
+    </PlatformProvider>
   );
 }

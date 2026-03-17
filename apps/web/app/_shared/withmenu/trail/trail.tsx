@@ -17,7 +17,7 @@ import TypeOfContentTitle from '@/components/Objects/Elements/Titles/TypeOfConte
 import GeneralWrapper from '@/components/Objects/Elements/Wrappers/GeneralWrapper';
 import { Leaderboard } from '@/components/Dashboard/Gamification/leaderboard';
 import TrailCourseElement from '@components/Pages/Trail/TrailCourseElement';
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { revalidateTags, swrFetcher } from '@services/utils/ts/requests';
 import UserCertificates from '@components/Pages/Trail/UserCertificates';
 import PageLoading from '@components/Objects/Loaders/PageLoading';

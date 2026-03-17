@@ -826,7 +826,7 @@ async def _grade_and_finalize_attempt(
 
             award_xp(
                 db=db_session,
-                user_id=user_id
+                user_id=user_id,
                 source="exam_completion",
                 source_id=f"exam_{attempt.attempt_uuid}",
                 idempotency_key=f"exam_completion_{attempt.attempt_uuid}",
@@ -835,7 +835,7 @@ async def _grade_and_finalize_attempt(
             if percentage == 100:
                 award_xp(
                     db=db_session,
-                    user_id=user_id
+                    user_id=user_id,
                     source="streak_bonus",
                     source_id=f"exam_perfect_{attempt.attempt_uuid}",
                     idempotency_key=f"exam_perfect_{attempt.attempt_uuid}",

@@ -26,7 +26,7 @@ import { Actions, PermissionGuard, Resources, Scopes } from '@/components/Securi
 import { AlertTriangle, Calendar, Plus, Shield, Trash2, User } from 'lucide-react';
 import type { OrgUserBasic, Role, UserRoleAssignment } from '@/types/permissions';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { getUserAvatarMediaDirectory } from '@/services/media/media';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ColumnDef } from '@tanstack/react-table';
@@ -41,7 +41,7 @@ import { toast } from 'sonner';
 
 export default function UserRolesClient() {
   const session = usePlatformSession();
-  const t = useTranslations('Components.OrgRoles');
+  const t = useTranslations('Components.Roles');
   const locale = useLocale();
 
   const [userRoles, setUserRoles] = useState<UserRoleAssignment[]>([]);

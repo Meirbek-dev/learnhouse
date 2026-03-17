@@ -1,6 +1,6 @@
 'use client';
 
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { getAssignmentTask } from '@services/courses/assignments';
 import { createContext, use, useEffect, useReducer } from 'react';
 import { getAPIUrl } from '@services/config/config';

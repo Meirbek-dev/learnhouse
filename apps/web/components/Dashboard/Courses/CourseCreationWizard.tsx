@@ -6,7 +6,7 @@ import { ArrowLeft, ArrowRight, CheckCircle2, ChevronDown, Loader2, Sparkles } f
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { CourseChoiceCard, courseWorkflowSummaryCardClass } from './courseWorkflowUi';
 import { createNewCourse, getCourseMetadata } from '@services/courses/courses';
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { useQueryState, useQueryStates, parseAsString } from 'nuqs';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createChapter } from '@services/courses/chapters';

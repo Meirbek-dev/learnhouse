@@ -1,5 +1,5 @@
 import { useAssignmentsTaskDispatch } from '@components/Contexts/Assignments/AssignmentsTaskContext';
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { createAssignmentTask } from '@services/courses/assignments';
 import { AArrowUp, FileUp, ListTodo } from 'lucide-react';
 import { getAPIUrl } from '@services/config/config';

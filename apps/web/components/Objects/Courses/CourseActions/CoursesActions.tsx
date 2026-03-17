@@ -11,8 +11,8 @@ import {
   Trophy,
   UserPen,
 } from 'lucide-react';
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { getAbsoluteUrl, getUriWithoutOrg } from '@services/config/config';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
+import { getAbsoluteUrl } from '@services/config/config';
 import { useContributorStatus } from '@/hooks/useContributorStatus';
 import { getProductsByCourse } from '@services/payments/products';
 import { applyForContributor } from '@services/courses/courses';
@@ -138,7 +138,7 @@ const CoursesActions = ({ courseuuid, course, trailData }: CourseActionsProps) =
 
   const handleCourseAction = async () => {
     if (!session.data?.user) {
-      router.push(getUriWithoutOrg('/signup'));
+      router.push(getAbsoluteUrl('/signup'));
       return;
     }
 
@@ -209,7 +209,7 @@ const CoursesActions = ({ courseuuid, course, trailData }: CourseActionsProps) =
 
   const handleApplyToContribute = async () => {
     if (!session.data?.user) {
-      router.push(getUriWithoutOrg('/signup'));
+      router.push(getAbsoluteUrl('/signup'));
       return;
     }
 
@@ -268,7 +268,7 @@ const CoursesActions = ({ courseuuid, course, trailData }: CourseActionsProps) =
       return (
         <Button
           variant="outline"
-          onClick={() => router.push(getUriWithoutOrg('/signup'))}
+          onClick={() => router.push(getAbsoluteUrl('/signup'))}
           aria-label={t('aria.signupToApply')}
           className="w-full gap-2"
         >

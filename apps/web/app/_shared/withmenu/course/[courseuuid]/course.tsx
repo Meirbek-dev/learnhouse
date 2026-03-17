@@ -22,13 +22,13 @@ import CourseAuthors from '@components/Objects/Courses/CourseAuthors/CourseAutho
 import GeneralWrapper from '@/components/Objects/Elements/Wrappers/GeneralWrapper';
 import ActivityIndicators from '@components/Pages/Courses/ActivityIndicators';
 import CourseBreadcrumbs from '@components/Pages/Courses/CourseBreadcrumbs';
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { getDiscussionsSwrKey } from '@services/courses/discussions-keys';
 // Import existing components and utilities
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { CourseProvider } from '@components/Contexts/CourseContext';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
-import { usePlatformOrg } from '@components/Contexts/OrgContext';
+import { usePlatform } from '@/components/Contexts/PlatformContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 // Import the new discussions component
 import CourseDiscussions from '@/components/discussions';
@@ -54,7 +54,7 @@ const CourseClient = (props: any) => {
 
   const { courseuuid } = props;
   const { course } = props;
-  const org = usePlatformOrg() as any;
+  const org = usePlatform() as any;
   const isMobile = useIsMobile();
   const session = usePlatformSession();
   const access_token = session?.data?.tokens?.access_token;

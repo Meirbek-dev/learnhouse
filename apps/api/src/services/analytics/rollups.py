@@ -202,7 +202,7 @@ def _merge_teacher_metrics(
 
 
 def refresh_teacher_analytics_rollups(
-    db_session: Session, *, org_id: int | None = None, snapshot_date: date | None = None
+    db_session: Session, *, snapshot_date: date | None = None
 ) -> dict[str, object]:
     from src.services.analytics.assessments import (
         build_assessment_rows,
@@ -216,25 +216,17 @@ def refresh_teacher_analytics_rollups(
         window="28d", compare="previous_period", bucket="day", timezone="UTC"
     )
 
-    org_ids = [org_id] if org_id is not None else [None]
-    refreshed_orgs: list[dict[str, object]] = []
+    refreshed_courses: list[dict[str, object]] = []
 
     logger.info(
         "Refreshing teacher analytics rollups",
         extra={
-            "org_id": org_id,
             "snapshot_date": target_date.isoformat(),
-            "org_count": len(org_ids),
         },
     )
 
-    for current_org_id in org_ids:
-        if current_org_id is None:
-            current_org_id = 0
-
-        course_ids = list(db_session.exec(select(Course.id)).all())
-        if not course_ids:
-            continue
+    course_ids = list(db_session.exec(select(Course.id)).all())
+    if course_ids:
 
         scope = TeacherAnalyticsScope(
             teacher_user_id=0,
@@ -535,9 +527,8 @@ def refresh_teacher_analytics_rollups(
 
         db_session.commit()
         logger.info(
-            "Refreshed teacher analytics rollups for org",
+            "Refreshed teacher analytics rollups",
             extra={
-                "org_id": current_org_id,
                 "snapshot_date": target_date.isoformat(),
                 "course_rows": len(course_rows),
                 "assessment_rows": len(assessment_rows),
@@ -545,20 +536,18 @@ def refresh_teacher_analytics_rollups(
                 "progress_rows": len(snapshots),
             },
         )
-        refreshed_orgs.append(
+        refreshed_courses = [
             {
-                "org_id": current_org_id,
                 "courses": len(course_rows),
                 "assessments": len(assessment_rows),
                 "risk_rows": len(risk_rows),
                 "progress_rows": len(snapshots),
             }
-        )
+        ]
 
     return {
         "status": "ok",
-        "org_id": org_id,
         "snapshot_date": target_date.isoformat(),
         "message": "Агрегаты аналитики преподавателя обновлены из оперативных аналитических моделей чтения.",
-        "orgs": refreshed_orgs,
+        "result": refreshed_courses[0] if refreshed_courses else {},
     }

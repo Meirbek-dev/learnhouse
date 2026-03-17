@@ -589,7 +589,7 @@ async def check_course_completion_and_create_certificate(
     if not user:
         return False
 
-    # Get the course to find org_id
+    # Get the course
     course_statement = select(Course).where(Course.id == course_id)
     course = db_session.exec(course_statement).first()
 

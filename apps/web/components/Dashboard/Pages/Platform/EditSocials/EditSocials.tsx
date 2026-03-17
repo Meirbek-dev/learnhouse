@@ -2,10 +2,10 @@
 
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { SiFacebook, SiInstagram, SiTiktok, SiX, SiYoutube } from '@icons-pack/react-simple-icons';
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { usePlatformOrg } from '@components/Contexts/OrgContext';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
+import { usePlatform } from '@/components/Contexts/PlatformContext';
 import { revalidateTags } from '@services/utils/ts/requests';
-import { updateOrganization } from '@services/settings/org';
+import { updatePlatform } from '@/services/settings/platform';
 import { getAPIUrl } from '@services/config/config';
 import { Plus, X as XIcon } from 'lucide-react';
 import { Button } from '@components/ui/button';
@@ -16,7 +16,7 @@ import { useTransition } from 'react';
 import { toast } from 'sonner';
 import { mutate } from 'swr';
 
-interface OrganizationValues {
+interface SocialMediaData {
   socials: {
     twitter?: string;
     facebook?: string;
@@ -31,7 +31,7 @@ interface OrganizationValues {
 export default function EditSocials() {
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
-  const org = usePlatformOrg() as any;
+  const org = usePlatform() as any;
   const t = useTranslations('DashPage.OrgSettings.Socials');
 
   const defaultValues = {
@@ -39,17 +39,17 @@ export default function EditSocials() {
     links: org?.links || {},
   };
 
-  const form = useForm<OrganizationValues>({
+  const form = useForm<SocialMediaData>({
     defaultValues,
   });
 
   const links = form.watch('links');
   const [isPending, startTransition] = useTransition();
 
-  const updateOrg = async (values: OrganizationValues) => {
+  const updateOrg = async (values: SocialMediaData) => {
     const loadingToast = toast.loading(t('updatingOrg'));
     try {
-      await updateOrganization(values, access_token);
+      await updatePlatform(values, access_token);
       await revalidateTags(['organizations']);
       mutate(`${getAPIUrl()}orgs/platform`);
       toast.success(t('orgUpdatedSuccess'), { id: loadingToast });

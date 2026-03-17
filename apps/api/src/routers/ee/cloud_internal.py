@@ -1,14 +1,15 @@
 import hmac
+from datetime import datetime
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Request
 from sqlmodel import Session
-from src.db.organization_config import OrganizationConfigBase
 
 from config.config import get_settings
 from src.core.events.database import get_db_session
+from src.db.organizations import OrganizationUpdate
 from src.security.rbac import InternalAuthFailed
-from src.services.orgs.orgs import update_org_with_config_no_auth
+from src.services.platform import get_platform_organization
 
 router = APIRouter()
 
@@ -23,13 +24,20 @@ def check_internal_cloud_key(request: Request) -> None:
 
 
 @router.put("/update_org_config")
-async def update_org_Config(
+async def update_org_config(
     request: Request,
-    org_id: int,
-    config_object: OrganizationConfigBase,
+    config_object: OrganizationUpdate,
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
     check_internal_cloud_key(request)
-    return await update_org_with_config_no_auth(
-        request, config_object, org_id, db_session
-    )
+    org = get_platform_organization(db_session)
+    update_data = config_object.model_dump(exclude_unset=True)
+    update_data.pop("slug", None)
+    for field, value in update_data.items():
+        if value is not None:
+            setattr(org, field, value)
+    org.update_date = str(datetime.now())
+    db_session.add(org)
+    db_session.commit()
+    db_session.refresh(org)
+    return {"detail": "Organization config updated"}

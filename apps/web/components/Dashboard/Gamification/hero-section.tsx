@@ -1,6 +1,6 @@
 'use client';
 
-import { usePlatformSession } from '@/components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import GamifiedUserAvatar from '@/components/Objects/GamifiedUserAvatar';
 import { Calendar, Flame, TrendingUp, Trophy, Zap } from 'lucide-react';
 import { GlowingLevelBadge, getLevelInfo } from '@/lib/gamification';

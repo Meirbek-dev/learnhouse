@@ -46,7 +46,6 @@ from src.services.payments.payments_stripe import (
 )
 from src.services.payments.payments_users import get_owned_courses
 from src.services.payments.webhooks.payments_webhooks import handle_stripe_webhook
-from src.services.platform import get_platform_org_id
 
 router = APIRouter()
 
@@ -64,8 +63,7 @@ async def api_create_payments_config(
 
     **Required Permission**: `organization:manage:org` (admin only)
     """
-    platform_org_id = get_platform_org_id(db_session)
-    checker.require(current_user.id, "organization:manage", platform_org_id)
+    checker.require(current_user.id, "organization:manage")
 
     return await init_payments_config(request, provider, current_user, db_session)
 
@@ -93,8 +91,7 @@ async def api_update_payments_config(
 
     **Required Permission**: `organization:manage:org` (admin only)
     """
-    platform_org_id = get_platform_org_id(db_session)
-    checker.require(current_user.id, "organization:manage", platform_org_id)
+    checker.require(current_user.id, "organization:manage")
 
     if id is not None:
         configs = await get_payments_config(request, current_user, db_session)
@@ -119,8 +116,7 @@ async def api_delete_payments_config(
 
     **Required Permission**: `organization:manage:org` (admin only)
     """
-    platform_org_id = get_platform_org_id(db_session)
-    checker.require(current_user.id, "organization:manage", platform_org_id)
+    checker.require(current_user.id, "organization:manage")
 
     if id is not None:
         configs = await get_payments_config(request, current_user, db_session)
@@ -144,8 +140,7 @@ async def api_create_payments_product(
 
     **Required Permission**: `organization:manage:org`
     """
-    platform_org_id = get_platform_org_id(db_session)
-    checker.require(current_user.id, "organization:manage", platform_org_id)
+    checker.require(current_user.id, "organization:manage")
 
     return await create_payments_product(
         request, payments_product, current_user, db_session
@@ -185,8 +180,7 @@ async def api_update_payments_product(
 
     **Required Permission**: `organization:manage:org`
     """
-    platform_org_id = get_platform_org_id(db_session)
-    checker.require(current_user.id, "organization:manage", platform_org_id)
+    checker.require(current_user.id, "organization:manage")
 
     return await update_payments_product(
         request, product_id, payments_product, current_user, db_session
@@ -206,8 +200,7 @@ async def api_delete_payments_product(
 
     **Required Permission**: `organization:manage:org`
     """
-    platform_org_id = get_platform_org_id(db_session)
-    checker.require(current_user.id, "organization:manage", platform_org_id)
+    checker.require(current_user.id, "organization:manage")
 
     await delete_payments_product(request, product_id, current_user, db_session)
     return {"message": "Payments product deleted successfully"}

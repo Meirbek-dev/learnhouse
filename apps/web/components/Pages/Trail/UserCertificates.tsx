@@ -1,7 +1,7 @@
 'use client';
 
 import { Award, Building, Calendar, ExternalLink, Hash } from 'lucide-react';
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { getAPIUrl, getAbsoluteUrl } from '@services/config/config';
 import { useFormatter, useTranslations } from 'next-intl';
 import { swrFetcher } from '@services/utils/ts/requests';

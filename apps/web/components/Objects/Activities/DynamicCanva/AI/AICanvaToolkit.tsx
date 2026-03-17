@@ -1,5 +1,5 @@
 import { useAIChatBot, useAIChatBotDispatch } from '@components/Contexts/AI/AIChatBotContext';
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import ToolTip from '@/components/Objects/Elements/Tooltip/Tooltip';
 import { BookOpen, FormInput, Languages } from 'lucide-react';
 import { useActivityChat } from '@/hooks/useActivityChat';

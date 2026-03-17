@@ -41,7 +41,7 @@ def install_create_organization(org_object: OrganizationCreate, db_session: Sess
 
 
 async def install_create_organization_user(
-    user_object: UserCreate, org_id: int, db_session: Session
+    user_object: UserCreate, db_session: Session
 ):
     user = User.model_validate(user_object)
 
@@ -52,10 +52,8 @@ async def install_create_organization_user(
     user.creation_date = str(datetime.now())
     user.update_date = str(datetime.now())
 
-    # Verifications
-
     # Check if Organization exists
-    org = db_session.get(Organization, org_id)
+    org = get_platform_organization(db_session)
 
     if not org:
         raise HTTPException(

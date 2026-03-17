@@ -1,6 +1,6 @@
 'use client';
 
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
@@ -9,9 +9,9 @@ import type { Org } from '@/types/org';
 import type { ReactNode } from 'react';
 import useSWR from 'swr';
 
-export const PlatformOrgContext = createContext<Org | null>(null);
+export const PlatformContext = createContext<Org | null>(null);
 
-export const PlatformOrgContextProvider = ({ children, initialOrg }: { children: ReactNode; initialOrg?: any }) => {
+export const PlatformContextProvider = ({ children, initialOrg }: { children: ReactNode; initialOrg?: any }) => {
   const session = usePlatformSession();
   const accessToken = session?.data?.tokens?.access_token;
   const orgContextKey = `${getAPIUrl()}orgs/platform`;
@@ -27,9 +27,9 @@ export const PlatformOrgContextProvider = ({ children, initialOrg }: { children:
 
   if (isLoading) return <PageLoading />;
 
-  return <PlatformOrgContext.Provider value={org}>{children}</PlatformOrgContext.Provider>;
+  return <PlatformContext.Provider value={org}>{children}</PlatformContext.Provider>;
 };
 
-export function usePlatformOrg(): Org | null {
-  return useContext(PlatformOrgContext);
+export function usePlatform(): Org | null {
+  return useContext(PlatformContext);
 }

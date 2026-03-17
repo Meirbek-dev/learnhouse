@@ -5,11 +5,11 @@ import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
 
 export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations('Components.OrgRoles');
+  const t = await getTranslations('Components.Roles');
 
   return {
     title: t('userRolesTitle'),
-    description: t('userRolesDescription'),
+    description: t('userRolesDescription')
   };
 }
 

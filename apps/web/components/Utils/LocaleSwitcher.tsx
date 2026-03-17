@@ -1,7 +1,7 @@
 'use client';
 
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { updateUserLocale } from '@services/users/users';
 import { useLocale, useTranslations } from 'next-intl';
 import { setUserLocale } from '@/i18n/locale';

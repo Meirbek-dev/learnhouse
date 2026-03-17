@@ -63,14 +63,14 @@ export function getActivityMediaDirectory(
   return undefined;
 }
 
-export function getOrgLogoMediaDirectory(orgUUID: string, fileId: string): string {
+export function getLogoMediaDirectory(orgUUID: string, fileId: string): string {
   return `${getMediaUrl()}content/orgs/${orgUUID}/logos/${fileId}`;
 }
 
-export function getOrgThumbnailMediaDirectory(orgUUID: string, fileId: string): string {
+export function getThumbnailMediaDirectory(orgUUID: string, fileId: string): string {
   return `${getMediaUrl()}content/orgs/${orgUUID}/thumbnails/${fileId}`;
 }
 
-export function getOrgPreviewMediaDirectory(orgUUID: string, fileId: string): string {
+export function getPreviewMediaDirectory(orgUUID: string, fileId: string): string {
   return `${getMediaUrl()}content/orgs/${orgUUID}/previews/${fileId}`;
 }

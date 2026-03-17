@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { AlertTriangle, Eye, File, Loader2, MoreVertical, Pencil, Save, Sparkles, Video, X } from 'lucide-react';
 import { deleteActivity, updateActivity } from '@services/courses/activities';
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { getAPIUrl, getAbsoluteUrl } from '@services/config/config';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { revalidateTags } from '@services/utils/ts/requests';

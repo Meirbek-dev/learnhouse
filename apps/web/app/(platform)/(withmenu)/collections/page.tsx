@@ -2,11 +2,11 @@ import NewCollectionButton from '@/components/Objects/Elements/Buttons/NewCollec
 import TypeOfContentTitle from '@/components/Objects/Elements/Titles/TypeOfContentTitle';
 import CollectionThumbnail from '@components/Objects/Thumbnails/CollectionThumbnail';
 import GeneralWrapper from '@/components/Objects/Elements/Wrappers/GeneralWrapper';
-import { getPlatformOrganizationContextInfo } from '@services/organizations/orgs';
+import { getPlatformOrganizationContextInfo } from '@/services/platform/platform';
 import { PermissionGuard } from '@components/Security/PermissionGuard';
-import { getOrgThumbnailMediaDirectory } from '@services/media/media';
+import { getThumbnailMediaDirectory } from '@services/media/media';
 import ProtectedText from '@components/Objects/ContentPlaceHolder';
-import { getOrgCollections } from '@services/courses/collections';
+import { getCollections } from '@services/courses/collections';
 import { Actions, Resources, Scopes } from '@/types/permissions';
 import { getOptionalSession } from '@/lib/get-optional-session';
 import { getAbsoluteUrl } from '@services/config/config';
@@ -41,7 +41,7 @@ export async function generateMetadata(_props: MetadataProps): Promise<Metadata>
       type: 'website',
       images: [
         {
-          url: getOrgThumbnailMediaDirectory(org?.org_uuid, org?.thumbnail_image),
+          url: getThumbnailMediaDirectory(org?.org_uuid, org?.thumbnail_image),
           width: 800,
           height: 600,
           alt: org.name,
@@ -56,7 +56,7 @@ export default async function PlatformCollectionsPage() {
   const session = await getOptionalSession();
   const access_token = session?.tokens?.access_token;
   const org = await getPlatformOrganizationContextInfo(access_token || undefined);
-  const collections = await getOrgCollections(access_token);
+  const collections = await getCollections(access_token);
 
   return (
     <GeneralWrapper>

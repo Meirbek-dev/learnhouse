@@ -66,9 +66,9 @@ export async function getCollectionById(collection_uuid: string, access_token?: 
 }
 
 /**
- * Cached fetch for organization collections
+ * Cached fetch for collections
  */
-async function fetchOrgCollections(access_token?: string) {
+async function fetchCollections(access_token?: string) {
   'use cache';
   cacheTag(tags.collections);
   cacheLife(CacheProfiles.courses);
@@ -85,6 +85,6 @@ async function fetchOrgCollections(access_token?: string) {
   return await errorHandling(result);
 }
 
-export async function getOrgCollections(access_token?: string, _next?: any) {
-  return fetchOrgCollections(access_token);
+export async function getCollections(access_token?: string, _next?: any) {
+  return fetchCollections(access_token);
 }

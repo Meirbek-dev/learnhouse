@@ -17,7 +17,7 @@ class FeatureFlag(PydanticStrictBaseModel):
 
 
 class AIFeatureFlag(FeatureFlag):
-    model: str = "gpt-5-nano"
+    model: str = "gpt-5.4-nano"
     streaming_enabled: bool = True
     response_cache_enabled: bool = True
     semantic_cache_enabled: bool = True
@@ -63,7 +63,6 @@ class OrgConfigData(PydanticStrictBaseModel):
 
 class OrgConfig(PydanticStrictBaseModel):
     id: int
-    org_id: int
     config: OrgConfigData = Field(default_factory=OrgConfigData)
     creation_date: str | None = None
     update_date: str | None = None
@@ -71,14 +70,13 @@ class OrgConfig(PydanticStrictBaseModel):
 
 def build_default_org_config(
     *,
-    org_id: int,
+    platform_id: int,
     landing: dict | None = None,
     creation_date: str | None = None,
     update_date: str | None = None,
 ) -> OrgConfig:
     return OrgConfig(
-        id=org_id,
-        org_id=org_id,
+        id=platform_id,
         config=OrgConfigData(landing=landing or {}),
         creation_date=creation_date,
         update_date=update_date,
@@ -159,7 +157,7 @@ class OrganizationRead(OrganizationBase):
 
         if data.get("config") is None and data.get("id") is not None:
             data["config"] = build_default_org_config(
-                org_id=data["id"],
+                platform_id=data["id"],
                 landing=data.get("landing"),
                 creation_date=data.get("creation_date"),
                 update_date=data.get("update_date"),

@@ -1,10 +1,10 @@
 'use client';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { usePlatformOrg } from '@components/Contexts/OrgContext';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
+import { usePlatform } from '@/components/Contexts/PlatformContext';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { revalidateTags } from '@services/utils/ts/requests';
-import { updateOrganization } from '@services/settings/org';
+import { updatePlatform } from '@/services/settings/platform';
 import { getAPIUrl } from '@services/config/config';
 import { Textarea } from '@components/ui/textarea';
 import { Button } from '@components/ui/button';
@@ -27,16 +27,16 @@ const createValidationSchema = (t: (key: string, values?: any) => string) =>
     about: v.optional(v.pipe(v.string(), v.maxLength(400, t('Form.aboutMax')))),
   });
 
-type OrganizationValues = v.InferOutput<ReturnType<typeof createValidationSchema>>;
+type PlatformValues = v.InferOutput<ReturnType<typeof createValidationSchema>>;
 
 const EditGeneral: FC = () => {
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
-  const org = usePlatformOrg() as any;
+  const org = usePlatform() as any;
   const t = useTranslations('DashPage.OrgSettings.General');
   const validationSchema = createValidationSchema(t);
 
-  const form = useForm<OrganizationValues>({
+  const form = useForm<PlatformValues>({
     resolver: valibotResolver(validationSchema),
     defaultValues: {
       description: org?.description || '',
@@ -45,11 +45,11 @@ const EditGeneral: FC = () => {
   });
   const [isPending, startTransition] = useTransition();
 
-  const updateOrg = async (values: OrganizationValues) => {
+  const updateOrg = async (values: PlatformValues) => {
     const loadingToast = toast.loading(t('updatingOrg'));
     try {
       startTransition(() => {
-        void updateOrganization(values, access_token)
+        void updatePlatform(values, access_token)
           .then(async () => {
             await revalidateTags(['organizations']);
             mutate(`${getAPIUrl()}orgs/platform`);

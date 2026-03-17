@@ -2,9 +2,9 @@
 
 import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media';
 import { removeCoursePrefix } from '@components/Objects/Thumbnails/CourseThumbnail';
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { Book, GraduationCap, Search, Users } from 'lucide-react';
-import { usePlatformOrg } from '@components/Contexts/OrgContext';
+import { usePlatform } from '@/components/Contexts/PlatformContext';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { searchOrgContent } from '@services/search/search';
 import { getAbsoluteUrl } from '@services/config/config';
@@ -166,7 +166,7 @@ const SearchPage = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const session = usePlatformSession();
-  const org = usePlatformOrg() as any;
+  const org = usePlatform() as any;
   const t = useTranslations('SearchPage');
 
   // Search state

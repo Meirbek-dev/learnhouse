@@ -1,4 +1,4 @@
-import { getServerGamificationDashboard, getServerOrganizationLeaderboard } from '@/services/gamification/server';
+import { getServerGamificationDashboard, getServerLeaderboard } from '@/services/gamification/server';
 import { GamificationProvider } from '@/components/Contexts/GamificationContext';
 import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
@@ -27,7 +27,7 @@ const TrailPage = async () => {
 
   const [dashboardData, leaderboardData] = await Promise.all([
     getServerGamificationDashboard(),
-    getServerOrganizationLeaderboard(10),
+    getServerLeaderboard(10),
   ]);
 
   if (!dashboardData) {

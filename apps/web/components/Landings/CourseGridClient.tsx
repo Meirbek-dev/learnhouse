@@ -10,7 +10,7 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination';
 import CourseThumbnail from '@components/Objects/Thumbnails/CourseThumbnail';
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { getCoursesSwrKey, getTrailSwrKey } from '@services/courses/keys';
 import { swrFetcherWithHeaders } from '@services/utils/ts/requests';
 import { swrFetcher } from '@services/utils/ts/requests';

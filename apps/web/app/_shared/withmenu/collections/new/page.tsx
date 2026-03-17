@@ -1,4 +1,4 @@
-import { getPlatformOrganizationContextInfo } from '@services/organizations/orgs';
+import { getPlatformOrganizationContextInfo } from '@/services/platform/platform';
 import { getTranslations } from 'next-intl/server';
 import NewCollection from './NewCollection';
 import type { Metadata } from 'next';

@@ -15,11 +15,11 @@ import { courseTag, tags } from '@/lib/cacheTags';
 */
 
 /**
- * Cached fetch for organization courses
+ * Cached fetch for courses
  * Uses `use cache` directive for cacheComponents
  * Returns both courses and total count for pagination
  */
-async function fetchOrgCourses(
+async function fetchCourses(
   page = 1,
   limit = 20,
   access_token?: string,
@@ -51,14 +51,14 @@ async function fetchOrgCourses(
   return { courses, total };
 }
 
-export async function getOrgCourses(_next?: any, access_token?: any, page = 1, limit = 20) {
-  return fetchOrgCourses(page, limit, access_token);
+export async function getCourses(_next?: any, access_token?: any, page = 1, limit = 20) {
+  return fetchCourses(page, limit, access_token);
 }
 
 /**
- * Cached fetch for courses the current user can edit in an org
+ * Cached fetch for courses the current user can edit
  */
-async function fetchEditableOrgCourses(
+async function fetchEditableCourses(
   page = 1,
   limit = 20,
   access_token?: string,
@@ -131,7 +131,7 @@ export async function getEditableOrgCourses(
   sortBy = 'updated',
   preset?: string,
 ) {
-  return fetchEditableOrgCourses(page, limit, access_token, query, sortBy, preset);
+  return fetchEditableCourses(page, limit, access_token, query, sortBy, preset);
 }
 
 export async function getCourseUserRights(course_uuid: string, access_token?: string | null) {

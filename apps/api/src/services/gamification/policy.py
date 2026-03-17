@@ -63,12 +63,3 @@ def get_policy(db: Session) -> tuple[dict[str, int], int]:
     return rewards, daily_limit
 
 
-# Keep old names as aliases for callers that haven't been updated yet
-def get_org_policy(
-    db: Session, org_id: int | None = None
-) -> tuple[dict[str, int], int]:
-    return get_policy(db)
-
-
-def invalidate_org_policy(org_id: int | None = None) -> None:
-    invalidate_policy()

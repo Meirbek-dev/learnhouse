@@ -28,7 +28,7 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 import UnconfiguredPaymentsDisclaimer from '@components/Pages/Payments/UnconfiguredPaymentsDisclaimer';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { archiveProduct, getProducts, updateProduct } from '@services/payments/products';
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import ProductLinkedCourses from './SubComponents/ProductLinkedCourses';
 import { getPaymentsProductsSwrKey } from '@services/payments/keys';
 import CreateProductForm from './SubComponents/CreateProductForm';

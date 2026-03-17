@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl';
 import useSWR from 'swr';
 
 import { CodeChallengeEditor } from '@/components/features/courses/code-challenges';
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getAPIUrl } from '@services/config/config';
 import { Badge } from '@/components/ui/badge';

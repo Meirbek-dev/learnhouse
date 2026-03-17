@@ -12,7 +12,6 @@ def test_payments_config_read_parses_legacy_string_timestamps() -> None:
     model = PaymentsConfigRead.model_validate(
         {
             "id": 1,
-            "org_id": 42,
             "enabled": True,
             "active": False,
             "provider": "stripe",
@@ -31,7 +30,6 @@ def test_payments_product_read_parses_legacy_string_timestamps() -> None:
     model = PaymentsProductRead.model_validate(
         {
             "id": 7,
-            "org_id": 42,
             "payments_config_id": 3,
             "name": "Starter",
             "description": "",

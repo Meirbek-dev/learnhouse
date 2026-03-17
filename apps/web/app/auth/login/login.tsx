@@ -1,7 +1,7 @@
 'use client';
 
 import { Field, FieldContent, FieldError, FieldLabel } from '@components/ui/field';
-import { getAbsoluteUrl, getUriWithoutOrg } from '@services/config/config';
+import { getAbsoluteUrl } from '@services/config/config';
 import PasswordInput from '@components/ui/custom/password-input';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { SiGoogle } from '@icons-pack/react-simple-icons';
@@ -138,7 +138,7 @@ const LoginClient = () => {
         <div className="flex justify-end">
           <Link
             prefetch={false}
-            href={getUriWithoutOrg('/forgot')}
+            href={getAbsoluteUrl('/forgot')}
             className="text-muted-foreground text-xs underline"
           >
             {t('forgotPassword')}
@@ -168,7 +168,7 @@ const LoginClient = () => {
         {t('noAccount')}
         <Link
           prefetch={false}
-          href={getUriWithoutOrg('/signup')}
+          href={getAbsoluteUrl('/signup')}
           className="text-muted-foreground ml-1 underline"
         >
           {t('signup')}

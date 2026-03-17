@@ -1,4 +1,4 @@
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { getCourseContributors } from '@services/courses/courses';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';

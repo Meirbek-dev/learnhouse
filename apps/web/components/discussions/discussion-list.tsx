@@ -7,7 +7,7 @@ import {
   toggleDiscussionLike,
   updateDiscussion,
 } from '@services/courses/discussions';
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { useEffect, useRef, useState } from 'react';
 import DiscussionPost from './discussion-post';

@@ -1363,7 +1363,7 @@
       "courses": "Курстар",
       "trail": "Прогресс"
     },
-    "OrgRoles": {
+    "Roles": {
       "AddRole": {
         "cancel": "Бас тарту",
         "couldntCreateNewRole": "Жаңа рөлді құру мүмкін болмады",

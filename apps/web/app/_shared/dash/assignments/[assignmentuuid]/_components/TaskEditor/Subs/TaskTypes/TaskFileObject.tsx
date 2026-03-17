@@ -9,8 +9,8 @@ import { useAssignmentsTaskDispatch } from '@components/Contexts/Assignments/Ass
 import { AlertCircle, Cloud, Download, File, Info, Loader2, UploadCloud } from 'lucide-react';
 import AssignmentBoxUI from '@components/Objects/Activities/Assignment/AssignmentBoxUI';
 import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { usePlatformOrg } from '@components/Contexts/OrgContext';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
+import { usePlatform } from '@/components/Contexts/PlatformContext';
 import { getTaskFileSubmissionDir } from '@services/media/media';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
@@ -79,7 +79,7 @@ const formatUUID = (uuid: string): string => `${uuid.slice(0, UUID_PREVIEW_START
 export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: TaskFileObjectProps) {
   const t = useTranslations('DashPage.Assignments.TaskFileObject');
   const session = usePlatformSession();
-  const org = usePlatformOrg() as Org | null;
+  const org = usePlatform() as Org | null;
   const assignment = useAssignments() as Assignment | null;
   const assignmentTaskDispatch = useAssignmentsTaskDispatch();
 

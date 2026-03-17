@@ -1,8 +1,8 @@
 'use client';
 
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import platformLogoFull from '@public/platform_logo_full.svg';
-import { getUriWithoutOrg } from '@services/config/config';
+import { getAbsoluteUrl } from '@services/config/config';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { useTranslations } from 'next-intl';
 import { signOut } from 'next-auth/react';
@@ -34,7 +34,7 @@ const HomeClient = () => {
         </span>
       </div>
       <div className="mx-auto flex cursor-pointer items-center space-x-4 pt-16 text-2xl font-semibold">
-        <span onClick={() => signOut({ redirect: true, callbackUrl: getUriWithoutOrg('/') })}>{t('signOut')}</span>
+        <span onClick={() => signOut({ redirect: true, callbackUrl: getAbsoluteUrl('/') })}>{t('signOut')}</span>
       </div>
     </div>
   );

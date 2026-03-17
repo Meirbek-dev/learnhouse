@@ -7,7 +7,7 @@ import {
   courseWorkflowSummaryCardClass,
 } from './courseWorkflowUi';
 import type { CourseWorkspaceCapabilities } from '@/lib/course-management-server';
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { buildCourseWorkspacePath } from '@/lib/course-management';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { updateCourseAccess } from '@services/courses/courses';
@@ -28,7 +28,7 @@ export default function CourseReviewPublish({
 }) {
   const t = useTranslations('DashPage.CourseManagement.Review');
   const tReadiness = useTranslations('DashPage.CourseManagement.Readiness');
-  const session = usePlatformSession() as any;
+  const session = usePlatformSession();
   const accessToken = session?.data?.tokens?.access_token;
   const course = useCourse();
   const { readiness } = course;
@@ -145,7 +145,7 @@ export default function CourseReviewPublish({
                       variant="outline"
                       size="sm"
                       nativeButton={false}
-                      render={<AppLink href={buildCourseWorkspacePath(courseuuid, item.href as any)} />}
+                      render={<AppLink href={buildCourseWorkspacePath(courseuuid, item.href)} />}
                     >
                       {t('openAction')}
                     </Button>

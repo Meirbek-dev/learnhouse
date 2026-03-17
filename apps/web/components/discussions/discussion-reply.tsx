@@ -2,7 +2,7 @@
 
 import { ArrowBigDown, ArrowBigUp, Clock, Edit, Trash2 } from 'lucide-react';
 import { useFormatter, useNow, useTranslations } from 'next-intl';
-import { usePlatformOrg } from '@components/Contexts/OrgContext';
+import { usePlatform } from '@/components/Contexts/PlatformContext';
 import { Actions, Resources, Scopes } from '@/types/permissions';
 import RichContentRenderer from './rich-content-renderer';
 import UserAvatar from '@components/Objects/UserAvatar';
@@ -42,7 +42,7 @@ export default function DiscussionReply({
   const [_isPending, startTransition] = useTransition();
   const format = useFormatter();
   const now = useNow();
-  const org = usePlatformOrg();
+  const org = usePlatform();
   const { can } = usePermissions();
   const canModerateDiscussion = can(Actions.MODERATE, Resources.DISCUSSION, Scopes.ORG);
 

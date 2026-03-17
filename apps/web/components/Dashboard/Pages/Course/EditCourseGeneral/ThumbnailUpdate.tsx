@@ -1,11 +1,11 @@
 import { ArrowBigUpDash, Image as ImageIcon, UploadCloud, Video } from 'lucide-react';
 import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs';
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { Alert, AlertDescription, AlertTitle } from '@components/ui/alert';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { updateCourseThumbnail } from '@services/courses/courses';
-import { usePlatformOrg } from '@components/Contexts/OrgContext';
+import { usePlatform } from '@/components/Contexts/PlatformContext';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Card, CardContent } from '@components/ui/card';
 import { Button } from '@components/ui/button';
@@ -42,7 +42,7 @@ const ThumbnailUpdate = ({ thumbnailType, disabled = false, disabledReason }: Th
   const course = useCourse();
   const dispatchCourse = useCourseDispatch();
   const session = usePlatformSession() as any;
-  const org = usePlatformOrg() as any;
+  const org = usePlatform() as any;
   const t = useTranslations('CourseEdit.General.Thumbnail');
 
   const [localThumbnail, setLocalThumbnail] = useState<LocalThumbnail | null>(null);

@@ -1,6 +1,6 @@
-import { getPlatformOrganizationContextInfo } from '@services/organizations/orgs';
+import { getPlatformOrganizationContextInfo } from '@/services/platform/platform';
 import { LandingContent } from '@/app/_shared/withmenu/LandingContent';
-import { getOrgThumbnailMediaDirectory } from '@services/media/media';
+import { getThumbnailMediaDirectory } from '@services/media/media';
 import { PageSuspense } from '@components/Utils/PageSuspense';
 import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
@@ -69,7 +69,7 @@ export async function generateMetadata(_props: MetadataProps): Promise<Metadata>
       type: 'website',
       images: [
         {
-          url: getOrgThumbnailMediaDirectory(org?.org_uuid, org?.thumbnail_image),
+          url: getThumbnailMediaDirectory(org?.org_uuid, org?.thumbnail_image),
           width: 800,
           height: 600,
           alt: org.name,

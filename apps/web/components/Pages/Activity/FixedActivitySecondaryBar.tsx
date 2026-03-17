@@ -1,7 +1,7 @@
 'use client';
 
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
-import { usePlatformOrg } from '@components/Contexts/OrgContext';
+import { usePlatform } from '@/components/Contexts/PlatformContext';
 import { getAbsoluteUrl } from '@services/config/config';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
@@ -130,7 +130,7 @@ export default function FixedActivitySecondaryBar(props: FixedActivitySecondaryB
   const [isScrolled, setIsScrolled] = useState(false);
   const [shouldShow, setShouldShow] = useState(false);
   const mainActivityInfoRef = useRef<HTMLDivElement | null>(null);
-  const org = usePlatformOrg() as any;
+  const org = usePlatform() as any;
 
   const { allActivities, currentIndex } = (() => {
     const allActivities: any[] = [];

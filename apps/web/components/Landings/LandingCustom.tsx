@@ -1,11 +1,11 @@
 'use client';
 
-import type { LandingSection } from '@components/Dashboard/Pages/Org/OrgEditLanding/landing_types';
+import type { LandingSection } from '@/components/Dashboard/Pages/Platform/EditLanding/landing_types';
 import { LoginBonusHandler } from '@/app/_shared/withmenu/_components/LoginBonusHandler';
 import { GamificationProvider } from '@/components/Contexts/GamificationContext';
 import CourseThumbnail from '@components/Objects/Thumbnails/CourseThumbnail';
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { getOrgCourses } from '@services/courses/courses';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
+import { getCourses } from '@services/courses/courses';
 import type { DashboardData } from '@/types/gamification';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { useTranslations } from 'next-intl';
@@ -26,7 +26,7 @@ const LandingCustom = ({ landing, gamificationData }: LandingCustomProps) => {
 
   // Fetch all courses for the organization
   const { data: coursesData } = useSWR(access_token ? ['org-courses', access_token] : null, ([, token]) =>
-    getOrgCourses(null, token),
+    getCourses(null, token),
   );
   const allCourses = coursesData?.courses;
 

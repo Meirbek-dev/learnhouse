@@ -1,6 +1,6 @@
 import { getTeacherOverview, normalizeAnalyticsQuery } from '@services/analytics/teacher';
 import AnalyticsEmptyState from '@components/Dashboard/Analytics/AnalyticsEmptyState';
-import { getPlatformOrganizationContextInfo } from '@services/organizations/orgs';
+import { getPlatformOrganizationContextInfo } from '@/services/platform/platform';
 import TeacherOverview from '@components/Dashboard/Analytics/TeacherOverview';
 import { getTranslations } from 'next-intl/server';
 import { auth } from '@/auth';

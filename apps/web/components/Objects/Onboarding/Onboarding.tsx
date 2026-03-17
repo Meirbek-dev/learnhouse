@@ -18,7 +18,7 @@ import OnBoardWelcome from '@public/onboarding/OnBoardWelcome.png';
 import OnBoardCourses from '@public/onboarding/OnBoardCourses.png';
 import OnBoardEditor from '@public/onboarding/OnBoardEditor.png';
 import OnBoardAccess from '@public/onboarding/OnBoardAccess.png';
-import { usePlatformOrg } from '@components/Contexts/OrgContext';
+import { usePlatform } from '@/components/Contexts/PlatformContext';
 import { Actions, Resources, Scopes } from '@/types/permissions';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
 import OnBoardMore from '@public/onboarding/OnBoardMore.png';
@@ -96,7 +96,7 @@ const Onboarding: FC = () => {
   });
   const isMobile = useIsMobile();
   const router = useRouter();
-  const org = usePlatformOrg() as any;
+  const org = usePlatform();
   const { can } = usePermissions();
   const canManageOrg =
     can(Actions.MANAGE, Resources.ORGANIZATION, Scopes.OWN) || can(Actions.MANAGE, Resources.ORGANIZATION, Scopes.ORG);

@@ -1,5 +1,5 @@
 import GeneralWrapper from '@/components/Objects/Elements/Wrappers/GeneralWrapper';
-import { getPlatformOrganizationContextInfo } from '@services/organizations/orgs';
+import { getPlatformOrganizationContextInfo } from '@/services/platform/platform';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { getCollectionById } from '@services/courses/collections';
 import { getOptionalSession } from '@/lib/get-optional-session';

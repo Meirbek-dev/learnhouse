@@ -136,7 +136,7 @@ async def _prepare_context(
         "- Format responses with markdown when helpful (headings, lists, code blocks)."
     )
 
-    ai_model = "gpt-5-nano"
+    ai_model = "gpt-5.4-nano"
     streaming_enabled = True
 
     return _ChatContext(

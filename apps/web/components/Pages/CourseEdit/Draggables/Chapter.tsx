@@ -11,7 +11,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { AlertTriangle, Hexagon, Loader2, MoreVertical, Pencil, Save, Sparkles, X } from 'lucide-react';
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { revalidateTags } from '@services/utils/ts/requests';
 import { updateChapter } from '@services/courses/chapters';

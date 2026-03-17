@@ -1,12 +1,12 @@
-import { getPlatformOrganizationContextInfo } from '@services/organizations/orgs';
-import PlatformOrgProvider from '@components/Contexts/PlatformOrgProvider';
+import { getPlatformOrganizationContextInfo } from '@/services/platform/platform';
+import PlatformProvider from '@/components/Contexts/PlatformProvider';
 import { Spinner } from '@components/ui/spinner';
 import { useTranslations } from 'next-intl';
 import { Suspense } from 'react';
 
 function AuthContent({ children, initialOrg }: { children: React.ReactNode; initialOrg: unknown }) {
   useTranslations('Auth.Layout');
-  return <PlatformOrgProvider initialOrg={initialOrg}>{children}</PlatformOrgProvider>;
+  return <PlatformProvider initialOrg={initialOrg}>{children}</PlatformProvider>;
 }
 
 export default async function AuthLayout({ children }: { children: React.ReactNode }) {

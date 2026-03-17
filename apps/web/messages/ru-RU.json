@@ -1363,7 +1363,7 @@
       "courses": "Курсы",
       "trail": "Прогресс"
     },
-    "OrgRoles": {
+    "Roles": {
       "AddRole": {
         "cancel": "Отмена",
         "couldntCreateNewRole": "Не удалось создать новую роль",

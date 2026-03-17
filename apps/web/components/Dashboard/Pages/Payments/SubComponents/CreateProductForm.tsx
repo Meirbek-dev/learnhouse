@@ -2,7 +2,7 @@
 
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { getPaymentsProductsSwrKey } from '@services/payments/keys';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { createProduct } from '@services/payments/products';

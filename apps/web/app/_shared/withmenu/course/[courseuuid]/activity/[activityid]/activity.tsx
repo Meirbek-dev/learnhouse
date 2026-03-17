@@ -45,8 +45,8 @@ import GeneralWrapper from '@/components/Objects/Elements/Wrappers/GeneralWrappe
 import { Suspense, lazy, useEffect, useRef, useState, useTransition } from 'react';
 import ActivityBreadcrumbs from '@components/Pages/Activity/ActivityBreadcrumbs';
 import ActivityIndicators from '@components/Pages/Courses/ActivityIndicators';
-import { usePlatformOrg } from '@components/Contexts/OrgContext';
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { usePlatform } from '@/components/Contexts/PlatformContext';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import AIChatBotProvider from '@components/Contexts/AI/AIChatBotContext';
 import CourseEndView from '@components/Pages/Activity/CourseEndView';
 import { useFormatter, useLocale, useTranslations } from 'next-intl';
@@ -318,7 +318,7 @@ const ActivityClient = (props: ActivityClientProps) => {
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const isAuthenticated = session.status === 'authenticated';
-  const org = usePlatformOrg();
+  const org = usePlatform();
   const [assignment, setAssignment] = useState(null) as any;
   const [isFocusMode, setIsFocusMode] = useState(() => {
     if (typeof globalThis.window !== 'undefined') {

@@ -1,6 +1,6 @@
 import { FileText } from 'lucide-react';
 
-import { getPlatformOrganizationContextInfo } from '@services/organizations/orgs';
+import { getPlatformOrganizationContextInfo } from '@/services/platform/platform';
 import { getAssignmentsFromCourses } from '@services/courses/assignments';
 import { CourseCard } from '@/app/_shared/dash/assignments/ClientParts';
 import { getEditableOrgCourses } from '@services/courses/courses';

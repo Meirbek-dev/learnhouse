@@ -1,7 +1,7 @@
 'use client';
 
 import { linkUserToUserGroup, unLinkUserToUserGroup } from '@services/usergroups/usergroups';
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import type { ColumnDef } from '@tanstack/react-table';
 import { getAPIUrl } from '@services/config/config';

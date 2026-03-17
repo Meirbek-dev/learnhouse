@@ -9,7 +9,7 @@ import { tags } from '@/lib/cacheTags';
  GET requests are called from the frontend using SWR (https://swr.vercel.app/)
 */
 
-export async function updateOrganization(data: any, access_token: string) {
+export async function updatePlatform(data: any, access_token: string) {
   const result: any = await fetch(
     `${getAPIUrl()}orgs/platform`,
     RequestBodyWithAuthHeader('PUT', data, null, access_token),

@@ -12,7 +12,7 @@ import {
   Users,
 } from 'lucide-react';
 import { useNavigationPermissions } from '@/hooks/useNavigationPermissions';
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import ToolTip from '@/components/Objects/Elements/Tooltip/Tooltip';
 import AppLink from '@/components/ui/AppLink';
 import { useTranslations } from 'next-intl';

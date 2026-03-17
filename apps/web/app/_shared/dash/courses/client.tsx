@@ -32,7 +32,7 @@ import { deleteCourseFromBackend, updateCourseAccess } from '@services/courses/c
 import { Actions, Resources, Scopes, usePermissions } from '@/components/Security';
 import { useCallback, useEffect, useMemo, useState, useTransition } from 'react';
 import type { Course } from '@components/Objects/Thumbnails/CourseThumbnail';
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
 import type { ColumnDef } from '@tanstack/react-table';
@@ -84,7 +84,7 @@ const CoursesHome = ({
   const [searchInput, setSearchInput] = useState(searchQuery);
   const viewMode = searchParams.get('view') === 'cards' ? 'cards' : 'table';
   const { can } = usePermissions();
-  const session = usePlatformSession() as any;
+  const session = usePlatformSession();
   const accessToken = session?.data?.tokens?.access_token;
   const canCreateCourse = can(Actions.CREATE, Resources.COURSE, Scopes.ORG);
   const [selectedCourseUuids, setSelectedCourseUuids] = useState<string[]>([]);
@@ -705,7 +705,7 @@ const CoursesHome = ({
 function CourseRowActions({ course }: { course: ManageableCourse }) {
   const t = useTranslations('DashPage.CourseManagement.Dashboard');
   const router = useRouter();
-  const session = usePlatformSession() as any;
+  const session = usePlatformSession();
   const { can } = usePermissions();
   const accessToken = session?.data?.tokens?.access_token;
   const [isPending, startTransition] = useTransition();

@@ -1,10 +1,10 @@
-import { getPlatformOrganizationContextInfo } from '@services/organizations/orgs';
+import { getPlatformOrganizationContextInfo } from '@/services/platform/platform';
 import { getServerGamificationDashboard } from '@/services/gamification/server';
-import { getOrgCollections } from '@services/courses/collections';
+import { getCollections } from '@services/courses/collections';
 import LandingClassic from '@components/Landings/LandingClassic';
 import { getOptionalSession } from '@/lib/get-optional-session';
 import LandingCustom from '@components/Landings/LandingCustom';
-import { getOrgCourses } from '@services/courses/courses';
+import { getCourses } from '@services/courses/courses';
 
 export async function LandingContent() {
   try {
@@ -36,13 +36,13 @@ export async function LandingContent() {
       : Promise.resolve(null);
 
     const [coursesData, collections, gamificationData] = await Promise.all([
-      getOrgCourses('', access_token || undefined).catch((error: unknown) => {
+      getCourses('', access_token || undefined).catch((error: unknown) => {
         console.error('[LandingContent] Courses fetch failed:', {
           message: error instanceof Error ? error.message : 'Unknown error',
         });
         return { courses: [], total: 0 };
       }),
-      getOrgCollections(access_token).catch((error: unknown) => {
+      getCollections(access_token).catch((error: unknown) => {
         console.error('[LandingContent] Collections fetch failed:', {
           message: error instanceof Error ? error.message : 'Unknown error',
         });

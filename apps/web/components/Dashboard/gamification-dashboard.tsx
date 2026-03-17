@@ -1,4 +1,4 @@
-import { getServerGamificationDashboard, getServerOrganizationLeaderboard } from '@/services/gamification/server';
+import { getServerGamificationDashboard, getServerLeaderboard } from '@/services/gamification/server';
 import { GamificationProvider } from '@/components/Contexts/GamificationContext';
 import { RecentActivityFeed } from './Gamification/recent-activity-feed';
 import { HeroSection } from './Gamification/hero-section';
@@ -26,7 +26,7 @@ export default async function GamificationDashboard() {
     // Caching is handled inside the service functions via `use cache`
     const [dashboardData, leaderboardData] = await Promise.all([
       getServerGamificationDashboard(),
-      getServerOrganizationLeaderboard(10),
+      getServerLeaderboard(10),
     ]);
 
     // If no dashboard data (error or not available), return null silently

@@ -1,7 +1,7 @@
 'use client';
 
 import { AlertTriangle, HomeIcon, RefreshCcw } from 'lucide-react';
-import { getUriWithoutOrg } from '@services/config/config';
+import { getAbsoluteUrl } from '@services/config/config';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
@@ -41,7 +41,7 @@ const ErrorUI = ({ message, submessage }: { message?: string; submessage?: strin
           <span className="text-base font-bold">{t('retryButton')}</span>
         </button>
         <Link
-          href={getUriWithoutOrg('/home')}
+          href={getAbsoluteUrl('/home')}
           className="flex items-center space-x-2 rounded-full bg-gray-700 px-4 py-1 text-gray-200 shadow-lg transition-all ease-linear hover:bg-gray-800"
         >
           <HomeIcon

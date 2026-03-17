@@ -1,7 +1,7 @@
 'use client';
 
 import UnconfiguredPaymentsDisclaimer from '@components/Pages/Payments/UnconfiguredPaymentsDisclaimer';
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { usePaymentsEnabled } from '@hooks/usePaymentsEnabled';
@@ -132,7 +132,7 @@ const PaymentsUsersTable = ({ data }: { data: PaymentUserData[] }) => {
 };
 
 const PaymentsCustomersPage = () => {
-  const session = usePlatformSession() as any;
+  const session = usePlatformSession();
   const access_token = session?.data?.tokens?.access_token;
   const { isEnabled, isLoading } = usePaymentsEnabled();
   const t = useTranslations('Payments.CustomersPage');

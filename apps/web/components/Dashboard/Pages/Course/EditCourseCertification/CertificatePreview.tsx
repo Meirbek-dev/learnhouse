@@ -1,8 +1,8 @@
 'use client';
 
 import { Award, Building, Calendar, CheckCircle, Hash, QrCode, User } from 'lucide-react';
-import { usePlatformOrg } from '@components/Contexts/OrgContext';
-import { getOrgLogoMediaDirectory } from '@services/media/media';
+import { usePlatform } from '@/components/Contexts/PlatformContext';
+import { getLogoMediaDirectory } from '@services/media/media';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -81,7 +81,7 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
   qrCodeLink,
 }) => {
   const [qrCodeUrl, setQrCodeUrl] = useState<string>('');
-  const org = usePlatformOrg();
+  const org = usePlatform();
   const tTypes = useTranslations('Certificates.EditCourseCertification.certificationTypes');
   const t = useTranslations('Certificates.CertificatePreview');
   const layout = getCertificateLayout(certificatePattern);
@@ -179,7 +179,7 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
                 <div className="flex items-center justify-center">
                   {org?.logo_image ? (
                     <img
-                      src={`${getOrgLogoMediaDirectory(org.org_uuid, org.logo_image)}`}
+                      src={`${getLogoMediaDirectory(org.org_uuid, org.logo_image)}`}
                       alt={t('organizationLogoAlt')}
                       className="h-10 w-10 object-contain"
                     />
@@ -189,7 +189,7 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
                     </div>
                   )}
                 </div>
-                <div className="text-sm font-medium text-foreground">{(org as any)?.name || ''}</div>
+                <div className="text-sm font-medium text-foreground">{(org)?.name || ''}</div>
               </div>
 
               <div className="space-y-1 text-right">

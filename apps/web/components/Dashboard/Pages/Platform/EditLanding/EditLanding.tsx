@@ -17,14 +17,14 @@ import {
   Users,
 } from 'lucide-react';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
-import { updateOrgLanding, uploadLandingContent } from '@services/organizations/orgs';
+import { updateOrgLanding, uploadLandingContent } from '@/services/platform/platform';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs';
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 import { createElement, useEffect, useState, useTransition } from 'react';
 import { getOrgLandingMediaDirectory } from '@services/media/media';
-import { usePlatformOrg } from '@components/Contexts/OrgContext';
-import { getOrgCourses } from '@services/courses/courses';
+import { usePlatform } from '@/components/Contexts/PlatformContext';
+import { getCourses } from '@services/courses/courses';
 import { Textarea } from '@components/ui/textarea';
 
 import { Switch } from '@components/ui/switch';
@@ -288,7 +288,7 @@ const makeGradientDirectionItems = (t: Function) =>
   Object.entries(getGradientDirections(t)).map(([value, label]) => ({ value, label }));
 
 const EditLanding = () => {
-  const org = usePlatformOrg() as any;
+  const org = usePlatform() as any;
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const [isLandingEnabled, setIsLandingEnabled] = useState(false);
@@ -1511,7 +1511,7 @@ interface ImageUploaderProps {
 }
 
 const ImageUploader: FC<ImageUploaderProps> = ({ t, onImageUploaded, className, buttonText, id }) => {
-  const org = usePlatformOrg() as any;
+  const org = usePlatform() as any;
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const [isUploading, setIsUploading] = useState(false);
@@ -1985,12 +1985,12 @@ const FeaturedCoursesEditor: FC<{
   section: LandingFeaturedCourses;
   onChange: (section: LandingFeaturedCourses) => void;
 }> = ({ t, section, onChange }) => {
-  const org = usePlatformOrg() as any;
+  const org = usePlatform() as any;
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
 
   const { data: coursesData } = useSWR(access_token ? ['org-courses', access_token] : null, ([, token]) =>
-    getOrgCourses(null, token),
+    getCourses(null, token),
   );
   const courses = coursesData?.courses;
 

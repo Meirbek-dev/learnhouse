@@ -22,11 +22,11 @@ import {
 } from 'lucide-react';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { getUser, updateUserAvatar } from '@services/users/users';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { updateProfile } from '@services/settings/profile';
-import { getUriWithoutOrg } from '@services/config/config';
+import { getAbsoluteUrl } from '@services/config/config';
 import { useDebouncedCallback } from '@/hooks/useDebounce';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { constructAcceptValue } from '@/lib/constants';
@@ -730,7 +730,7 @@ const UserEditGeneral = () => {
 
     // Wait for 4 seconds before signing out
     await new Promise((resolve) => setTimeout(resolve, 4000));
-    signOut({ redirect: true, callbackUrl: getUriWithoutOrg('/') });
+    signOut({ redirect: true, callbackUrl: getAbsoluteUrl('/') });
   };
 
   const onSubmit = async (values: FormValues) => {

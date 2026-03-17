@@ -90,7 +90,7 @@ def downgrade() -> None:
                     'ai', jsonb_build_object(
                         'enabled', true,
                         'limit', 10,
-                        'model', 'gpt-5-nano',
+                        'model', 'gpt-5.4-nano',
                         'streaming_enabled', true,
                         'response_cache_enabled', true,
                         'semantic_cache_enabled', true,

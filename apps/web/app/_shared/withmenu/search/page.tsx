@@ -1,5 +1,5 @@
-import { getPlatformOrganizationContextInfo } from '@services/organizations/orgs';
-import { getOrgThumbnailMediaDirectory } from '@services/media/media';
+import { getPlatformOrganizationContextInfo } from '@/services/platform/platform';
+import { getThumbnailMediaDirectory } from '@services/media/media';
 import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
 
@@ -76,7 +76,7 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
       siteName: org.name,
       images: [
         {
-          url: getOrgThumbnailMediaDirectory(org?.org_uuid, org?.thumbnail_image),
+          url: getThumbnailMediaDirectory(org?.org_uuid, org?.thumbnail_image),
           width: 800,
           height: 600,
           alt: `${org.name} - ${t('search')}`,
@@ -87,7 +87,7 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
       card: 'summary_large_image',
       title,
       description,
-      images: [getOrgThumbnailMediaDirectory(org?.org_uuid, org?.thumbnail_image)],
+      images: [getThumbnailMediaDirectory(org?.org_uuid, org?.thumbnail_image)],
     },
     alternates: {
       canonical: searchQuery ? `/search?q=${encodeURIComponent(searchQuery)}` : `/search`,

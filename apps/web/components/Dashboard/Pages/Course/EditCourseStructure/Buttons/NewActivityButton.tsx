@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/dialog';
 import { createActivity, createExternalVideoActivity, createFileActivity } from '@services/courses/activities';
 import NewActivityModal from '@components/Objects/Modals/Activities/Create/NewActivity';
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { Button } from '@/components/ui/button';
 import { useTranslations } from 'next-intl';

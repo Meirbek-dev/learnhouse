@@ -34,31 +34,31 @@ class _FakeDb:
 
 
 def test_assign_role_blocks_higher_priority_assignment(monkeypatch) -> None:
-    role = SimpleNamespace(id=2, org_id=1, priority=90)
+    role = SimpleNamespace(id=2, priority=90)
     db = _FakeDb(role)
     checker = PermissionChecker(db)  # type: ignore[arg-type]
 
     monkeypatch.setattr(
         checker,
         "get_user_roles",
-        lambda _user_id, _org_id: [{"priority": 50}],
+        lambda _user_id: [{"priority": 50}],
     )
 
     with pytest.raises(PermissionDenied):
-        checker.assign_role(user_id=100, role_id=2, org_id=1, assigned_by=200)
+        checker.assign_role(user_id=100, role_id=2, assigned_by=200)
 
 
 def test_assign_role_allows_equal_or_lower_priority_assignment(monkeypatch) -> None:
-    role = SimpleNamespace(id=2, org_id=1, priority=50)
+    role = SimpleNamespace(id=2, priority=50)
     db = _FakeDb(role)
     checker = PermissionChecker(db)  # type: ignore[arg-type]
 
     monkeypatch.setattr(
         checker,
         "get_user_roles",
-        lambda _user_id, _org_id: [{"priority": 50}],
+        lambda _user_id: [{"priority": 50}],
     )
 
-    checker.assign_role(user_id=100, role_id=2, org_id=1, assigned_by=200)
+    checker.assign_role(user_id=100, role_id=2, assigned_by=200)
 
     assert len(db.added) == 1

@@ -6,7 +6,7 @@ import {
   getCourseEditorBundleKey,
   getCourseMetadataKey,
 } from '@services/courses/editor';
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { createContext, use, useEffect, useMemo, useReducer } from 'react';
 import { getCourseReadinessSummary } from '@/lib/course-management';
 import type { CourseEditorBundle } from '@services/courses/editor';

@@ -75,7 +75,7 @@ export async function uploadLandingContent(content_file: File, access_token: str
   return await getResponseMetadata(result);
 }
 
-export async function removeUserFromOrg(user_id: number, access_token: string) {
+export async function removeUser(user_id: number, access_token: string) {
   const result = await fetch(
     `${getAPIUrl()}orgs/users/${user_id}`,
     RequestBodyWithAuthHeader('DELETE', null, null, access_token),

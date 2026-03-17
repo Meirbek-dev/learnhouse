@@ -22,14 +22,14 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination';
 import { Actions, Resources, Scopes, usePermissions } from '@/components/Security';
-import RolesUpdate from '@components/Objects/Modals/Dash/OrgUsers/RolesUpdate';
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import RolesUpdate from '@/components/Objects/Modals/Dash/Users/RolesUpdate';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import type { ColumnDef } from '@tanstack/react-table';
 import DataTable from '@/components/ui/data-table';
 
 import { AlertTriangle, KeyRound, Loader2, LogOut } from 'lucide-react';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
-import { removeUserFromOrg } from '@services/organizations/orgs';
+import { removeUser } from '@/services/platform/platform';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
 import { swrFetcher } from '@services/utils/ts/requests';
 import React, { useState, useTransition } from 'react';
@@ -47,7 +47,7 @@ interface RemoveUserButtonProps {
   t: (key: string, values?: Record<string, string>) => string;
 }
 
-interface OrgUserRow {
+interface UserRow {
   user: {
     id: number;
     user_uuid?: string;
@@ -168,7 +168,7 @@ const Users = () => {
   const handleRemoveUser = async (user_id: number) => {
     const toastId = toast.loading(t('removingUser'));
     try {
-      const res = await removeUserFromOrg(user_id, access_token);
+      const res = await removeUser(user_id, access_token);
       if (res.status === 200) {
         // Revalidate the current page data
         await mutate(`${getAPIUrl()}orgs/users?page=${currentPage}&per_page=${USERS_PER_PAGE}`);
@@ -181,8 +181,8 @@ const Users = () => {
     }
   };
 
-  const users = (orgUsersData?.users ?? []) as OrgUserRow[];
-  const columns: ColumnDef<OrgUserRow>[] = [
+  const users = (orgUsersData?.users ?? []) as UserRow[];
+  const columns: ColumnDef<UserRow>[] = [
     {
       accessorFn: (row) =>
         [row.user.first_name, row.user.middle_name, row.user.last_name, row.user.username, row.user.email]

@@ -74,7 +74,7 @@ def _metric(
 
 
 def _query_previous_at_risk_count(
-    db_session: Session, org_id: int, course_ids: list[int], before_date: date
+    db_session: Session, course_ids: list[int], before_date: date
 ) -> float | None:
     """Return the at-risk learner count from the most recent LearnerRiskSnapshot before *before_date*."""
     latest_date_result = db_session.exec(
@@ -98,7 +98,7 @@ def _query_previous_at_risk_count(
 
 
 def _query_previous_negative_engagement(
-    db_session: Session, org_id: int, teacher_user_id: int, before_date: date
+    db_session: Session, teacher_user_id: int, before_date: date
 ) -> float | None:
     """Return the courses_with_negative_engagement from the most recent DailyTeacherMetrics before *before_date*."""
     stmt = (
@@ -115,7 +115,7 @@ def _query_previous_negative_engagement(
 
 
 def _query_previous_teacher_metrics(
-    db_session: Session, org_id: int, teacher_user_id: int, before_date: date
+    db_session: Session, teacher_user_id: int, before_date: date
 ) -> DailyTeacherMetrics | None:
     stmt = (
         select(DailyTeacherMetrics)
@@ -170,7 +170,6 @@ def get_teacher_overview(
     if supports_rollup_reads(filters):
         teacher_rollup = get_latest_teacher_rollup(
             db_session,
-            org_id=scope.org_id,
             teacher_user_id=scope.teacher_user_id,
         )
 
@@ -195,10 +194,10 @@ def get_teacher_overview(
     at_risk_count = sum(1 for row in risk_rows if row.risk_level in {"medium", "high"})
     # Query the most recent LearnerRiskSnapshot before the current window to get a real previous value.
     previous_at_risk = _query_previous_at_risk_count(
-        db_session, scope.org_id, scope.course_ids, previous_end.date()
+        db_session, scope.course_ids, previous_end.date()
     )
     previous_teacher_metrics = _query_previous_teacher_metrics(
-        db_session, scope.org_id, scope.teacher_user_id, previous_end.date()
+        db_session, scope.teacher_user_id, previous_end.date()
     )
     ungraded_submissions = sum(
         1
@@ -219,7 +218,7 @@ def get_teacher_overview(
     )
     # Query the previous period's DailyTeacherMetrics to get actual previous value instead of hardcoded 0.
     previous_negative_engagement = _query_previous_negative_engagement(
-        db_session, scope.org_id, scope.teacher_user_id, previous_end.date()
+        db_session, scope.teacher_user_id, previous_end.date()
     )
 
     completions_events = []
@@ -346,7 +345,6 @@ def get_teacher_overview(
         window=filters.window,
         compare=filters.compare,
         scope=TeacherOverviewScope(
-            org_id=scope.org_id,
             teacher_user_id=scope.teacher_user_id,
             course_ids=scope.course_ids,
             cohort_ids=scope.cohort_ids,

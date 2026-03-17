@@ -3,11 +3,11 @@
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { CheckCircle2, Globe, Image as ImageIcon, Loader2, Lock, Search } from 'lucide-react';
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
-import { usePlatformOrg } from '@components/Contexts/OrgContext';
+import { usePlatform } from '@/components/Contexts/PlatformContext';
 import { createCollection } from '@services/courses/collections';
-import { useCourseListByOrg } from '@/hooks/useCourseListByOrg';
+import { useCourseList } from '@/hooks/useCourseListByOrg';
 import { revalidateTags } from '@services/utils/ts/requests';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { getAbsoluteUrl } from '@services/config/config';
@@ -33,7 +33,7 @@ interface CourseListItem {
 
 const NewCollection = () => {
   const t = useTranslations('NewCollectionPage');
-  const org = usePlatformOrg() as any;
+  const org = usePlatform() as any;
   const session = usePlatformSession() as any;
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -42,7 +42,7 @@ const NewCollection = () => {
   const [isPending, startTransition] = useTransition();
   const [searchQuery, setSearchQuery] = useState('');
   const router = useRouter();
-  const { data: courses, error, isLoading } = useCourseListByOrg();
+  const { data: courses, error, isLoading } = useCourseList();
   const [isPublic, setIsPublic] = useState(true);
 
   const filteredCourses = useMemo(() => {

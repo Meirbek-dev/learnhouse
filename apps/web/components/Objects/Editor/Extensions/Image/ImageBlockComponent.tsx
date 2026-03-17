@@ -15,10 +15,10 @@ import { NodeViewWrapper } from '@tiptap/react';
 import { useTranslations } from 'next-intl';
 
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { getActivityBlockMediaDirectory } from '@services/media/media';
 import { uploadNewImageFile } from '@services/blocks/Image/images';
-import { usePlatformOrg } from '@components/Contexts/OrgContext';
+import { usePlatform } from '@/components/Contexts/PlatformContext';
 import { useCourse } from '@components/Contexts/CourseContext';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
 import { constructAcceptValue } from '@/lib/constants';
@@ -411,7 +411,7 @@ function ViewerControls({ onExpand, onDownload, t }: ViewerControlsProps) {
 
 export default function ImageBlockComponent({ node, updateAttributes, extension }: ImageBlockProps) {
   const t = useTranslations('DashPage.Editor.ImageBlock');
-  const org = usePlatformOrg() as { org_uuid: string } | null;
+  const org = usePlatform() as { org_uuid: string } | null;
   const course = useCourse();
   const { isEditable } = useEditorProvider();
   const session = usePlatformSession() as {

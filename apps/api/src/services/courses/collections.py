@@ -131,7 +131,7 @@ async def create_collection(
         ).all()
 
         if found_courses:
-            # Permission check uses the same org_id for every course — run it once
+            # Permission check — run it once for all courses
             try:
                 checker.require(current_user.id, "course:read")
             except HTTPException:

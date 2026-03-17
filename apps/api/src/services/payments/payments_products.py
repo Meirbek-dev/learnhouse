@@ -20,7 +20,6 @@ from src.services.payments.payments_stripe import (
     create_stripe_product,
     update_stripe_product,
 )
-from src.services.platform import get_platform_org_id
 
 
 async def create_payments_product(
@@ -29,10 +28,9 @@ async def create_payments_product(
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
 ) -> PaymentsProductRead:
-    platform_org_id = get_platform_org_id(db_session)
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:create", platform_org_id)
+    checker.require(current_user.id, "organization:create")
 
     # Check if payments config exists, has a valid id, and is active
     statement = select(PaymentsConfig)
@@ -70,10 +68,9 @@ async def get_payments_product(
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
 ) -> PaymentsProductRead:
-    platform_org_id = get_platform_org_id(db_session)
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:read", platform_org_id)
+    checker.require(current_user.id, "organization:read")
 
     # Get payments product
     statement = select(PaymentsProduct).where(PaymentsProduct.id == product_id)
@@ -91,10 +88,9 @@ async def update_payments_product(
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
 ) -> PaymentsProductRead:
-    platform_org_id = get_platform_org_id(db_session)
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:update", platform_org_id)
+    checker.require(current_user.id, "organization:update")
 
     # Get existing payments product
     statement = select(PaymentsProduct).where(PaymentsProduct.id == product_id)
@@ -127,10 +123,9 @@ async def delete_payments_product(
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
 ) -> None:
-    platform_org_id = get_platform_org_id(db_session)
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:delete", platform_org_id)
+    checker.require(current_user.id, "organization:delete")
 
     # Get existing payments product
     statement = select(PaymentsProduct).where(PaymentsProduct.id == product_id)
@@ -167,10 +162,9 @@ async def list_payments_products(
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
 ) -> list[PaymentsProductRead]:
-    platform_org_id = get_platform_org_id(db_session)
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:read", platform_org_id)
+    checker.require(current_user.id, "organization:read")
 
     # Get payments products ordered by id
     statement = select(PaymentsProduct).order_by(PaymentsProduct.id.desc())
@@ -196,7 +190,7 @@ async def get_products_by_course(
     checker = PermissionChecker(db_session)
     if not course.public:
         checker.require(
-            current_user.id, "organization:read", get_platform_org_id(db_session)
+            current_user.id, "organization:read"
         )
 
     # Get all products linked to this course with explicit join

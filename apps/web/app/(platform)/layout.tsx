@@ -1,4 +1,4 @@
-import { getPlatformOrganizationContextInfo } from '@services/organizations/orgs';
+import { getPlatformOrganizationContextInfo } from '@/services/platform/platform';
 import PlatformClientProviders from './platform-client-providers';
 import '@styles/globals.css';
 

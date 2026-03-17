@@ -1,9 +1,9 @@
 'use client';
 
-import UserGroups from '@components/Dashboard/Pages/Users/OrgUserGroups/OrgUserGroups';
+import UserGroups from '@/components/Dashboard/Pages/Users/UserGroups/UserGroups';
 import { Actions, Resources, Scopes, usePermissions } from '@/components/Security';
 import DesktopOnlyGuard from '@components/Dashboard/Misc/DesktopOnlyGuard';
-import Users from '@components/Dashboard/Pages/Users/OrgUsers/OrgUsers';
+import Users from '@/components/Dashboard/Pages/Users/Users/Users';
 import SettingsHeader from '@components/Dashboard/Misc/SettingsHeader';
 import SettingsTabs from '@components/Dashboard/Misc/SettingsTabs';
 import { SquareUserRound, UsersIcon } from 'lucide-react';

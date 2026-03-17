@@ -55,7 +55,6 @@ from src.services.courses.updates import (
     get_updates_by_course_uuid,
     update_update,
 )
-from src.services.platform import get_platform_org_id
 
 router = APIRouter()
 
@@ -85,9 +84,6 @@ async def api_create_course(
 
     **Required Permission**: `course:create:org`
     """
-    org_id = get_platform_org_id(db_session)
-    checker.require(current_user.id, "course:create", org_id)
-
     course = CourseCreate(
         name=name,
         description=description,
@@ -99,7 +95,6 @@ async def api_create_course(
     )
     return await create_course(
         request,
-        org_id,
         course,
         current_user,
         db_session,

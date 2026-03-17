@@ -3,7 +3,7 @@
 import { ArrowBigDown, ArrowBigUp, Clock, Edit, Reply, Send, Trash2 } from 'lucide-react';
 import { PermissionTooltip } from '@/components/Utils/PermissionTooltip';
 import { useFormatter, useNow, useTranslations } from 'next-intl';
-import { usePlatformOrg } from '@components/Contexts/OrgContext';
+import { usePlatform } from '@/components/Contexts/PlatformContext';
 import RichContentRenderer from './rich-content-renderer';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { Separator } from '@/components/ui/separator';
@@ -70,7 +70,7 @@ export default function DiscussionPost({
   const [editContent, setEditContent] = useState(post.postMessage);
   const format = useFormatter();
   const now = useNow();
-  const org = usePlatformOrg();
+  const org = usePlatform();
 
   // Use backend permission metadata
   const canUpdate = post.can_update ?? false;

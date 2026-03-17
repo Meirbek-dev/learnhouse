@@ -63,5 +63,3 @@ export const getTopLevelCookieDomain = () => {
   const { hostname } = new URL(cookieSourceUrl);
   return isUnsupportedCookieDomain(hostname) ? undefined : hostname;
 };
-
-export const getUriWithoutOrg = (path: string) => getAbsoluteUrl(path);

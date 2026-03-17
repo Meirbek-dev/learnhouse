@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@components/ui/popover';
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { createElement, useEffect, useEffectEvent, useState } from 'react';
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 import { updateProfile } from '@services/settings/profile';

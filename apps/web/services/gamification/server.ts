@@ -244,7 +244,7 @@ export async function getServerGamificationDashboard(): Promise<DashboardData | 
  * Fetch platform leaderboard
  * Returns null if user is not authenticated or if fetch fails
  */
-export async function getServerOrganizationLeaderboard(limit = 20): Promise<PlatformLeaderboard | null> {
+export async function getServerLeaderboard(limit = 20): Promise<PlatformLeaderboard | null> {
   // Check if user is authenticated first
   const accessToken = await getAccessToken();
   if (!accessToken) {

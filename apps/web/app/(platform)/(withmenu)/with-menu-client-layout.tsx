@@ -1,6 +1,6 @@
 'use client';
 
-import NavBar from '@components/Objects/Menus/org-menu';
+import NavBar from '@/components/Objects/Menus/nav-menu';
 import type { ReactNode } from 'react';
 
 interface WithMenuClientLayoutProps {

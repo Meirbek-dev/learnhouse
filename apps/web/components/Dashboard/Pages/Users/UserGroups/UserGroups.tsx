@@ -13,10 +13,10 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { AlertTriangle, Loader2, Pencil, SquareUserRound, Users, X } from 'lucide-react';
-import EditUserGroup from '@components/Objects/Modals/Dash/OrgUserGroups/EditUserGroup';
-import AddUserGroup from '@components/Objects/Modals/Dash/OrgUserGroups/AddUserGroup';
-import ManageUsers from '@components/Objects/Modals/Dash/OrgUserGroups/ManageUsers';
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import EditUserGroup from '@/components/Objects/Modals/Dash/UserGroups/EditUserGroup';
+import AddUserGroup from '@/components/Objects/Modals/Dash/UserGroups/AddUserGroup';
+import ManageUsers from '@/components/Objects/Modals/Dash/UserGroups/ManageUsers';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { deleteUserGroup } from '@services/usergroups/usergroups';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
 import { swrFetcher } from '@services/utils/ts/requests';

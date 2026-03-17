@@ -3,7 +3,7 @@
 import {
   awardXPOnServer,
   getServerGamificationDashboard,
-  getServerOrganizationLeaderboard,
+  getServerLeaderboard,
   updatePreferencesOnServer,
   updateStreakOnServer,
 } from '@/services/gamification/server';
@@ -15,7 +15,7 @@ export async function getDashboardDataAction(): Promise<DashboardData | null> {
 }
 
 export async function getLeaderboardAction(limit = 20): Promise<PlatformLeaderboard | null> {
-  const data = await getServerOrganizationLeaderboard(limit);
+  const data = await getServerLeaderboard(limit);
   return data ?? null;
 }
 

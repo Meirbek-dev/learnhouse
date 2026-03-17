@@ -6,7 +6,7 @@ import { createContext, use } from 'react';
 import type { ReactNode } from 'react';
 import useSWR from 'swr';
 
-import { usePlatformSession } from '../LHSessionContext';
+import { usePlatformSession } from '../SessionContext';
 
 // Types for assignment submission
 export type AssignmentSubmissionStatus = 'PENDING' | 'SUBMITTED' | 'GRADED' | 'LATE' | 'NOT_SUBMITTED';

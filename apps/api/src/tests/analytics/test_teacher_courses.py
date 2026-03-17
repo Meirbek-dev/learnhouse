@@ -36,7 +36,6 @@ class _FakeModelRow:
 
 def test_ensure_course_in_scope_allows_scoped_course() -> None:
     scope = TeacherAnalyticsScope(
-        org_id=10,
         teacher_user_id=99,
         course_ids=[1, 2, 3],
         cohort_ids=[],
@@ -48,7 +47,6 @@ def test_ensure_course_in_scope_allows_scoped_course() -> None:
 
 def test_ensure_course_in_scope_rejects_out_of_scope_course() -> None:
     scope = TeacherAnalyticsScope(
-        org_id=10,
         teacher_user_id=99,
         course_ids=[1, 2, 3],
         cohort_ids=[],

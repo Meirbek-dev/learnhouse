@@ -36,7 +36,6 @@ class _FakeSession:
 def _public_course() -> Course:
     return Course(
         id=1,
-        org_id=11,
         name="Public course",
         description="",
         about="",

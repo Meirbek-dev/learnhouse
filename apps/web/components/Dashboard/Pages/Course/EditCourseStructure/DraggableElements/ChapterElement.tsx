@@ -16,7 +16,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { AlertTriangle, GripVertical, Hexagon, Loader2, MoreHorizontal, Pencil, Save, Trash2, X } from 'lucide-react';
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { deleteChapter, updateChapter } from '@services/courses/chapters';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { Draggable, Droppable } from '@hello-pangea/dnd';

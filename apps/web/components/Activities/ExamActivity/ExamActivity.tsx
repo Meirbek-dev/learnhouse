@@ -6,7 +6,7 @@ import useSWR, { mutate } from 'swr';
 import { toast } from 'sonner';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { getAPIUrl, getAbsoluteUrl } from '@/services/config/config';
 import { useContributorStatus } from '@/hooks/useContributorStatus';
 import PageLoading from '@components/Objects/Loaders/PageLoading';

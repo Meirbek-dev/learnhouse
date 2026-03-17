@@ -16,15 +16,3 @@ def get_platform_organization(db_session: Session) -> Organization:
     return platform_org
 
 
-def get_platform_org_id(db_session: Session) -> int:
-    return get_platform_organization(db_session).id
-
-
-def require_platform_org_id(db_session: Session, org_id: int | None = None) -> int:
-    platform_org_id = get_platform_org_id(db_session)
-    if org_id is not None and org_id != platform_org_id:
-        msg = (
-            f"Single-org mode only supports platform organization id {platform_org_id}."
-        )
-        raise RuntimeError(msg)
-    return platform_org_id

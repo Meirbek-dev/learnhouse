@@ -33,11 +33,11 @@ import {
 } from 'lucide-react';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { useEffect, useEffectEvent, useRef, useState, useTransition } from 'react';
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { Alert, AlertDescription, AlertTitle } from '@components/ui/alert';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
 import { valibotResolver } from '@hookform/resolvers/valibot';
-import { getUriWithoutOrg } from '@services/config/config';
+import { getAbsoluteUrl } from '@services/config/config';
 import { SiStripe } from '@icons-pack/react-simple-icons';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
@@ -161,7 +161,7 @@ const PaymentsConfigurationPage: FC = () => {
       startTransition(() => setIsOnboardingLoading(true));
       const { connect_url } = await getStripeOnboardingLink(
         access_token,
-        getUriWithoutOrg('/payments/stripe/connect/oauth'),
+        getAbsoluteUrl('/payments/stripe/connect/oauth'),
       );
       window.open(connect_url, '_blank');
       toast.dismiss(loadingToast);

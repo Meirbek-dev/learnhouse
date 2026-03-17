@@ -1,8 +1,8 @@
 'use client';
 
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 
-import { PlatformOrgContextProvider } from '@components/Contexts/OrgContext';
+import { PlatformContextProvider } from '@/components/Contexts/PlatformContext';
 import { updateActivity } from '@services/courses/activities';
 import { useTranslations } from 'next-intl';
 import type { JSX } from 'react';
@@ -51,7 +51,7 @@ const EditorWrapper = (props: EditorWrapperProps): JSX.Element => {
   }
 
   return (
-    <PlatformOrgContextProvider initialOrg={props.org}>
+    <PlatformContextProvider initialOrg={props.org}>
       {isReady ? (
         <Editor
           org={props.org}
@@ -62,7 +62,7 @@ const EditorWrapper = (props: EditorWrapperProps): JSX.Element => {
           session={session}
         />
       ) : null}
-    </PlatformOrgContextProvider>
+    </PlatformContextProvider>
   );
 };
 

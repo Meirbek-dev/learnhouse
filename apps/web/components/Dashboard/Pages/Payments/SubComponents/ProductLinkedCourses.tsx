@@ -1,7 +1,7 @@
 'use client';
 
 import { getCoursesLinkedToProduct, unlinkCourseFromProduct } from '@services/payments/products';
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
 import { BookOpen, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@components/ui/button';

@@ -4,7 +4,7 @@ import { Field, FieldContent, FieldError, FieldLabel } from '@components/ui/fiel
 import PasswordInput from '@components/ui/custom/password-input';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { AlertTriangle, Info, Loader2 } from 'lucide-react';
-import { getUriWithoutOrg } from '@services/config/config';
+import { getAbsoluteUrl } from '@services/config/config';
 import { resetPassword } from '@services/auth/auth';
 import { useSearchParams } from 'next/navigation';
 import { useState, useTransition } from 'react';
@@ -94,7 +94,7 @@ const ResetPasswordClient = () => {
             <span className="text-sm font-semibold">{t('success')}</span>
           </div>
           <Link
-            href={getUriWithoutOrg('/login')}
+            href={getAbsoluteUrl('/login')}
             className="block text-center text-sm underline"
           >
             {t('loginAgain')}

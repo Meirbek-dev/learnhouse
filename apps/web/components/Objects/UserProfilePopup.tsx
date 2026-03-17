@@ -16,7 +16,7 @@ import {
   Users,
 } from 'lucide-react';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { useCallback, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { getUser } from '@services/users/users';

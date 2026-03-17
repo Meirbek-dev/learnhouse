@@ -1,6 +1,6 @@
 // hooks/usePaymentsEnabled.ts
 
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { getPaymentConfigs } from '@services/payments/payments';
 import useSWR from 'swr';
 

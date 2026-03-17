@@ -1,8 +1,8 @@
 'use client';
 
 import { Field, FieldContent, FieldError, FieldLabel } from '@components/ui/field';
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { getAbsoluteUrl, getUriWithoutOrg } from '@services/config/config';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
+import { getAbsoluteUrl } from '@services/config/config';
 import PasswordInput from '@components/ui/custom/password-input';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { useEffect, useState, useTransition } from 'react';
@@ -89,7 +89,7 @@ const SignUpClient = () => {
           if (signInRes?.ok) {
             globalThis.location.href = '/redirect_from_auth';
           } else {
-            router.push(getUriWithoutOrg('/login'));
+            router.push(getAbsoluteUrl('/login'));
           }
         } else {
           const body = await res.json().catch(() => ({}));
@@ -249,7 +249,7 @@ const SignUpClient = () => {
         {t('alreadyHaveAccount')}
         <Link
           prefetch={false}
-          href={getUriWithoutOrg('/login')}
+          href={getAbsoluteUrl('/login')}
           className="text-muted-foreground ml-1 underline"
         >
           {t('signIn')}

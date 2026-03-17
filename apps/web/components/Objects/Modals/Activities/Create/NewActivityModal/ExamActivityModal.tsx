@@ -11,7 +11,7 @@ import * as v from 'valibot';
 import useSWR from 'swr';
 
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { getAPIUrl } from '@/services/config/config';
 import { Textarea } from '@components/ui/textarea';
 import { Switch } from '@components/ui/switch';

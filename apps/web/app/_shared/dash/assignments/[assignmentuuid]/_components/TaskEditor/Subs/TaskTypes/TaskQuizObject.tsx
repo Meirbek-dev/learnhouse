@@ -57,7 +57,7 @@ import {
 } from '@components/Contexts/Assignments/AssignmentsTaskContext';
 import AssignmentBoxUI from '@components/Objects/Activities/Assignment/AssignmentBoxUI';
 import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import QuizSkeleton from '@components/Objects/Quiz/QuizSkeleton';
 import { useTestGuard } from '@/hooks/useTestGuard';
 

@@ -17,7 +17,7 @@ import {
   X,
 } from 'lucide-react';
 import CourseThumbnail from '@components/Objects/Thumbnails/CourseThumbnail';
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
 import { getCoursesByUser } from '@services/users/users';
 import UserAvatar from '@components/Objects/UserAvatar';

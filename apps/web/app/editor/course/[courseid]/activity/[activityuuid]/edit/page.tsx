@@ -1,5 +1,5 @@
 import EditorOptionsProvider from '@components/Contexts/Editor/EditorContext';
-import { getOrganizationContextInfo } from '@services/organizations/orgs';
+import { getOrganizationContextInfo } from '@/services/platform/platform';
 import { getActivityWithAuthHeader } from '@services/courses/activities';
 import AIEditorProvider from '@components/Contexts/AI/AIEditorContext';
 import EditorWrapper from '@components/Objects/Editor/EditorWrapper';

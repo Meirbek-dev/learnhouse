@@ -1,22 +1,22 @@
 'use client';
 import {
-  updateOrganization,
+  updatePlatform,
   uploadOrganizationLogo,
   uploadOrganizationPreview,
   uploadOrganizationThumbnail,
-} from '@services/settings/org';
+} from '@/services/settings/platform';
 import {
-  getOrgLogoMediaDirectory,
-  getOrgPreviewMediaDirectory,
-  getOrgThumbnailMediaDirectory,
+  getLogoMediaDirectory,
+  getPreviewMediaDirectory,
+  getThumbnailMediaDirectory,
 } from '@services/media/media';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@components/ui/dialog';
 import { GripVertical, ImageIcon, Images, Info, Plus, StarIcon, UploadCloud, X } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs';
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 import { SiLoom, SiYoutube } from '@icons-pack/react-simple-icons';
-import { usePlatformOrg } from '@components/Contexts/OrgContext';
+import { usePlatform } from '@/components/Contexts/PlatformContext';
 import { constructAcceptValue } from '@/lib/constants';
 import type { ChangeEvent, MouseEvent } from 'react';
 import type { DropResult } from '@hello-pangea/dnd';
@@ -83,7 +83,7 @@ export default function EditImages() {
   const router = useRouter();
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
-  const org = usePlatformOrg() as any;
+  const org = usePlatform() as any;
   const tNotify = useTranslations('DashPage.Notifications');
   const t = useTranslations('DashPage.OrgSettings.Images');
   const [localLogo, setLocalLogo] = useState<string | null>(null);
@@ -97,7 +97,7 @@ export default function EditImages() {
       .filter((item: any) => item?.filename) // Filter out empty filenames
       .map((item: any, index: number) => ({
         id: item.filename,
-        url: getOrgThumbnailMediaDirectory(org?.org_uuid, item.filename),
+        url: getThumbnailMediaDirectory(org?.org_uuid, item.filename),
         filename: item.filename,
         type: 'image' as const,
         order: item.order ?? index, // Use existing order or fallback to index
@@ -198,7 +198,7 @@ export default function EditImages() {
         const newPreviews = await Promise.all(uploadPromises);
         const updatedPreviews = [...previews, ...newPreviews];
 
-        await updateOrganization(
+        await updatePlatform(
           {
             previews: {
               images: updatedPreviews
@@ -239,7 +239,7 @@ export default function EditImages() {
       const updatedPreviews = previews.filter((p) => p.id !== id);
       const updatedPreviewFilenames = updatedPreviews.map((p) => p.filename);
 
-      await updateOrganization(
+      await updatePlatform(
         {
           previews: {
             images: updatedPreviewFilenames,
@@ -303,7 +303,7 @@ export default function EditImages() {
 
       const updatedPreviews = [...previews, newPreview];
 
-      await updateOrganization(
+      await updatePlatform(
         {
           previews: {
             images: updatedPreviews
@@ -352,7 +352,7 @@ export default function EditImages() {
     // Update the order in the backend
     const loadingToast = toast.loading(tNotify('updatingPreviewOrder'));
     try {
-      await updateOrganization(
+      await updatePlatform(
         {
           previews: {
             images: reorderedItems
@@ -435,7 +435,7 @@ export default function EditImages() {
                   <img
                     src={
                       org?.logo_image
-                        ? localLogo || getOrgLogoMediaDirectory(org?.org_uuid, org?.logo_image)
+                        ? localLogo || getLogoMediaDirectory(org?.org_uuid, org?.logo_image)
                         : '/empty_thumbnail.webp'
                     }
                     alt="Лого организации"
@@ -501,7 +501,7 @@ export default function EditImages() {
                   <img
                     src={
                       org?.thumbnail_image
-                        ? localThumbnail || getOrgThumbnailMediaDirectory(org?.org_uuid, org?.thumbnail_image)
+                        ? localThumbnail || getThumbnailMediaDirectory(org?.org_uuid, org?.thumbnail_image)
                         : '/empty_thumbnail.webp'
                     }
                     alt="Organization thumbnail"
@@ -617,7 +617,7 @@ export default function EditImages() {
                                 </div>
                                 {preview.type === 'image' ? (
                                   <img
-                                    src={getOrgPreviewMediaDirectory(org?.org_uuid, preview.id)}
+                                    src={getPreviewMediaDirectory(org?.org_uuid, preview.id)}
                                     alt={`Preview ${preview.id}`}
                                     className={cn(
                                       'size-auto max-h-28 max-w-48 rounded-xl bg-white object-contain',

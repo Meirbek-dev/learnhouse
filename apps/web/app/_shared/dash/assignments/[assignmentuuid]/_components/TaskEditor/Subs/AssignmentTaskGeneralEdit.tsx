@@ -7,9 +7,9 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { AlertCircle, Cloud, Download, File, Info, Loader2, UploadCloud } from 'lucide-react';
 import { updateAssignmentTask, updateReferenceFile } from '@services/courses/assignments';
 import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { useEffect, useRef, useState, useTransition } from 'react';
-import { usePlatformOrg } from '@components/Contexts/OrgContext';
+import { usePlatform } from '@/components/Contexts/PlatformContext';
 import { Alert, AlertDescription } from '@components/ui/alert';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { getTaskRefFileDir } from '@services/media/media';
@@ -248,7 +248,7 @@ export const AssignmentTaskGeneralEdit = () => {
 const UpdateTaskRef = () => {
   const t = useTranslations('DashPage.Assignments.TaskGeneralEdit');
   const session = usePlatformSession();
-  const org = usePlatformOrg() as any;
+  const org = usePlatform() as any;
   const access_token = session?.data?.tokens?.access_token;
   const assignmentTaskState = useAssignmentsTask();
   const assignmentTaskStateHook = useAssignmentsTaskDispatch();

@@ -5,8 +5,8 @@ import TaskFileObject from '../../_components/TaskEditor/Subs/TaskTypes/TaskFile
 import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { BookOpenCheck, Check, Download, Info, MoveRight, X } from 'lucide-react';
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { usePlatformOrg } from '@components/Contexts/OrgContext';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
+import { usePlatform } from '@/components/Contexts/PlatformContext';
 import { getTaskRefFileDir } from '@services/media/media';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
@@ -16,7 +16,7 @@ const EvaluateAssignment = ({ user_id }: any) => {
   const t = useTranslations('DashPage.Assignments.EvaluateModal');
   const assignments = useAssignments();
   const session = usePlatformSession();
-  const org = usePlatformOrg() as any;
+  const org = usePlatform() as any;
 
   // Guard clause for missing assignment data
   if (!assignments?.assignment_object) {

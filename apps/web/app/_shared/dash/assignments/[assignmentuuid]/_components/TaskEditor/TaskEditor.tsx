@@ -5,7 +5,7 @@ import {
   useAssignmentsTaskDispatch,
 } from '@components/Contexts/Assignments/AssignmentsTaskContext';
 import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { GalleryVerticalEnd, Info, TentTree, Trash } from 'lucide-react';
 import { deleteAssignmentTask } from '@services/courses/assignments';
 import { getAPIUrl } from '@services/config/config';

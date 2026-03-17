@@ -1,8 +1,8 @@
 'use client';
 
 import { AlertCircle, BookOpen, Loader2, LogIn, ShoppingCart } from 'lucide-react';
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { getAbsoluteUrl, getUriWithoutOrg } from '@services/config/config';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
+import { getAbsoluteUrl } from '@services/config/config';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
 import { useEffect, useRef, useState, useTransition } from 'react';
 import { getProductsByCourse } from '@services/payments/products';
@@ -205,7 +205,7 @@ const CourseActionsMobile = ({ courseuuid, course, trailData }: CourseActionsMob
 
   const handleCourseAction = async () => {
     if (!session.data?.user) {
-      router.push(getUriWithoutOrg('/signup'));
+      router.push(getAbsoluteUrl('/signup'));
       return;
     }
 

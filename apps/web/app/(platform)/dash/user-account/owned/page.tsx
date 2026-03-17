@@ -1,7 +1,7 @@
 'use client';
 
 import CourseThumbnail from '@components/Objects/Thumbnails/CourseThumbnail';
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { getOwnedCourses } from '@services/payments/payments';
 import { Package2, ShoppingCart } from 'lucide-react';

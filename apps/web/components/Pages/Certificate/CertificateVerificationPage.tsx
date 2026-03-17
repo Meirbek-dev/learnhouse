@@ -4,7 +4,7 @@ import CertificatePreview from '@components/Dashboard/Pages/Course/EditCourseCer
 import { AlertTriangle, ArrowLeft, CheckCircle, Loader2, Shield, XCircle } from 'lucide-react';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { getCertificateByUuid } from '@services/courses/certifications';
-import { usePlatformOrg } from '@components/Contexts/OrgContext';
+import { usePlatform } from '@/components/Contexts/PlatformContext';
 import { useEffect, useEffectEvent, useState } from 'react';
 import { getAbsoluteUrl } from '@services/config/config';
 import { useLocale, useTranslations } from 'next-intl';
@@ -21,7 +21,7 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [verificationStatus, setVerificationStatus] = useState<'valid' | 'invalid' | 'loading'>('loading');
-  const org = usePlatformOrg() as any;
+  const org = usePlatform() as any;
   const locale = useLocale();
   const t = useTranslations('Certificates.CertificateVerificationPage');
   // Certificate type translation helper

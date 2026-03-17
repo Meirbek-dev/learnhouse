@@ -5,7 +5,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { AlertTriangle, Image as ImageIcon, Loader2, Tag, Video } from 'lucide-react';
 import { SectionHeader } from '@components/Dashboard/Courses/SectionHeader';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { Card, CardContent, CardHeader } from '@components/ui/card';
 import { updateCourseMetadata } from '@services/courses/courses';
 import { useCourse } from '@components/Contexts/CourseContext';
@@ -163,7 +163,7 @@ function EditCourseGeneral() {
   const course = useCourse();
   const { isLoading, courseStructure } = course;
   const formId = useId();
-  const session = usePlatformSession() as any;
+  const session = usePlatformSession();
   const accessToken = session?.data?.tokens?.access_token;
 
   const { isDirty, isDirtyRef, markDirty, markClean } = useDirtySection('general');

@@ -1,5 +1,5 @@
-import { getOrgCollections } from '@services/courses/collections';
-import { getOrgCourses } from '@services/courses/courses';
+import { getCollections } from '@services/courses/collections';
+import { getCourses } from '@services/courses/courses';
 import { getAbsoluteUrl } from '@services/config/config';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
@@ -12,13 +12,13 @@ export async function GET(request: NextRequest) {
   let hasMore = true;
 
   while (hasMore) {
-    const { courses: pageCourses, total } = await getOrgCourses(null, null, page, COURSES_PER_PAGE);
+    const { courses: pageCourses, total } = await getCourses(null, null, page, COURSES_PER_PAGE);
     allCourses.push(...pageCourses);
     hasMore = page * COURSES_PER_PAGE < total;
     page += 1;
   }
 
-  const collections = await getOrgCollections();
+  const collections = await getCollections();
 
   const baseUrl = getAbsoluteUrl('/');
 

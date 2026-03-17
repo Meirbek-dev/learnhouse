@@ -1,11 +1,11 @@
 'use client';
 
 import { getCoursesLinkedToProduct, linkCourseToProduct } from '@services/payments/products';
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { getPaymentsProductsSwrKey } from '@services/payments/keys';
-import { usePlatformOrg } from '@components/Contexts/OrgContext';
-import { getOrgCourses } from '@services/courses/courses';
+import { usePlatform } from '@/components/Contexts/PlatformContext';
+import { getCourses } from '@services/courses/courses';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
@@ -32,7 +32,7 @@ interface CoursePreviewProps {
 }
 
 const CoursePreview = ({ course, onLink, isLinked }: CoursePreviewProps) => {
-  const org = usePlatformOrg() as any;
+  const org = usePlatform() as any;
   const t = useTranslations('Payments.LinkCourseModal');
 
   const thumbnailImage = course.thumbnail_image
@@ -90,7 +90,7 @@ export default function LinkCourseModal({ productId, onSuccess }: LinkCourseModa
 
   const { data: coursesData, error: coursesError } = useSWR(
     () => (accessToken ? ['org-courses', accessToken] : null),
-    ([, token]) => getOrgCourses(null, token),
+    ([, token]) => getCourses(null, token),
   );
 
   const courses = coursesData?.courses;

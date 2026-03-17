@@ -14,7 +14,6 @@ from src.db.payments.payments_users import (
 from src.db.resource_authors import ResourceAuthor
 from src.db.users import AnonymousUser, InternalUser, PublicUser, User, UserRead
 from src.security.rbac import PermissionChecker
-from src.services.platform import get_platform_org_id
 
 
 async def create_payment_user(
@@ -26,10 +25,9 @@ async def create_payment_user(
     current_user: PublicUser | AnonymousUser | InternalUser,
     db_session: Session,
 ) -> PaymentsUser:
-    platform_org_id = get_platform_org_id(db_session)
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:create", platform_org_id)
+    checker.require(current_user.id, "organization:create")
 
     # Check if product exists
     statement = select(PaymentsProduct).where(PaymentsProduct.id == product_id)
@@ -83,10 +81,9 @@ async def get_payment_user(
     current_user: PublicUser | AnonymousUser | InternalUser,
     db_session: Session,
 ) -> PaymentsUser:
-    platform_org_id = get_platform_org_id(db_session)
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:read", platform_org_id)
+    checker.require(current_user.id, "organization:read")
 
     # Get payment user
     statement = select(PaymentsUser).where(PaymentsUser.id == payment_user_id)
@@ -104,10 +101,9 @@ async def update_payment_user_status(
     current_user: PublicUser | AnonymousUser | InternalUser,
     db_session: Session,
 ) -> PaymentsUser:
-    platform_org_id = get_platform_org_id(db_session)
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:update", platform_org_id)
+    checker.require(current_user.id, "organization:update")
 
     # Get existing payment user
     statement = select(PaymentsUser).where(PaymentsUser.id == payment_user_id)
@@ -131,10 +127,9 @@ async def list_payment_users(
     current_user: PublicUser | AnonymousUser | InternalUser,
     db_session: Session,
 ) -> list[PaymentsUser]:
-    platform_org_id = get_platform_org_id(db_session)
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:read", platform_org_id)
+    checker.require(current_user.id, "organization:read")
 
     # Get all payment users for org ordered by id
     statement = select(PaymentsUser).order_by(PaymentsUser.id.desc())
@@ -147,10 +142,9 @@ async def delete_payment_user(
     current_user: PublicUser | AnonymousUser | InternalUser,
     db_session: Session,
 ) -> None:
-    platform_org_id = get_platform_org_id(db_session)
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:delete", platform_org_id)
+    checker.require(current_user.id, "organization:delete")
 
     # Get existing payment user
     statement = select(PaymentsUser).where(PaymentsUser.id == payment_user_id)

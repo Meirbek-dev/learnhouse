@@ -5,7 +5,7 @@ import { createCertification, deleteCertification, updateCertification } from '@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { SectionHeader } from '@components/Dashboard/Courses/SectionHeader';
-import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { AlertTriangle, Award, FileText, Sparkles } from 'lucide-react';
@@ -79,7 +79,7 @@ const EditCourseCertification = () => {
 
   const course = useCourse();
   const { isLoading, courseStructure, editorData } = course;
-  const session = usePlatformSession() as any;
+  const session = usePlatformSession();
   const access_token = session?.data?.tokens?.access_token;
   const t = useTranslations('Certificates.EditCourseCertification');
   const tCommon = useTranslations('Common');

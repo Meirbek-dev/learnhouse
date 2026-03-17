@@ -1379,7 +1379,7 @@
       "courses": "Courses",
       "trail": "Progress"
     },
-    "OrgRoles": {
+    "Roles": {
       "AddRole": {
         "cancel": "Cancel",
         "couldntCreateNewRole": "Couldn't create new role",

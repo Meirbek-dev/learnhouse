@@ -70,7 +70,6 @@ from src.services.code_challenges.sanitize import (
     sanitize_stderr,
     sanitize_stdout,
 )
-from src.services.platform import get_platform_org_id
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -130,7 +129,7 @@ async def check_challenge_access(
 
     checker = PermissionChecker(db_session)
     perm = "course:update" if require_instructor else "course:read"
-    checker.require(user.id, perm, get_platform_org_id(db_session))
+    checker.require(user.id, perm)
 
     return course
 
