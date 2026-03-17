@@ -8,7 +8,8 @@
       "Bash(uv run alembic revision:*)",
       "Bash(bun oxlint:*)",
       "Bash(bun tsc:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(ls:*)"
     ]
   }
 }

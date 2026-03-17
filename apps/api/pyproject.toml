@@ -23,7 +23,6 @@ dependencies = [
   "alembic-postgresql-enum>=1.10.0",
   "stripe>=14.4.1",
   "logfire[fastapi,sqlalchemy]>=4.29.0",
-  "beautifulsoup4>=4.14.3",
   "python-ulid>=3.1.0",
   "argon2-cffi>=25.1.0",
   "orjson>=3.11.7",
@@ -32,6 +31,7 @@ dependencies = [
   "pyjwt>=2.12.1",
   "langgraph>=1.1.2",
   "pydantic-settings>=2.13.1",
+  "selectolax>=0.4.7",
 ]
 
 [dependency-groups]

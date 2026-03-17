@@ -35,7 +35,6 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { useEffect, useEffectEvent, useRef, useState, useTransition } from 'react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { Alert, AlertDescription, AlertTitle } from '@components/ui/alert';
-import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { getUriWithoutOrg } from '@services/config/config';
@@ -104,7 +103,6 @@ function ConfirmDeleteStripeConfig({ onDelete, t }: ConfirmDeleteStripeConfigPro
 }
 
 const PaymentsConfigurationPage: FC = () => {
-  const org = usePlatformOrg() as any;
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const {
@@ -112,8 +110,8 @@ const PaymentsConfigurationPage: FC = () => {
     error,
     isLoading,
   } = useSWR(
-    () => (org && access_token ? [`/payments/${org.id}/config`, access_token] : null),
-    ([_url, token]) => getPaymentConfigs(org.id, token),
+    () => (access_token ? ['/payments/config', access_token] : null),
+    ([_url, token]) => getPaymentConfigs(token),
   );
 
   const stripeConfig = paymentConfigs?.find((config: any) => config.provider === 'stripe');
@@ -128,9 +126,9 @@ const PaymentsConfigurationPage: FC = () => {
     try {
       setIsOnboarding(true);
       const newConfig = { provider: 'stripe', enabled: true };
-      const _config = await initializePaymentConfig(org.id, newConfig, 'stripe', access_token);
+      const _config = await initializePaymentConfig(newConfig, 'stripe', access_token);
       toast.success(t('stripeEnabledSuccess'), { id: loadingToast });
-      mutate([`/payments/${org.id}/config`, access_token]);
+      mutate(['/payments/config', access_token]);
     } catch (error) {
       console.error('Error enabling Stripe:', error);
       toast.error(t('errors.enableStripeFailed'), { id: loadingToast });
@@ -146,9 +144,9 @@ const PaymentsConfigurationPage: FC = () => {
   const deleteConfig = async () => {
     const loadingToast = toast.loading(t('deletingStripeConfig'));
     try {
-      await deletePaymentConfig(org.id, stripeConfig.id, access_token);
+      await deletePaymentConfig(stripeConfig.id, access_token);
       toast.success(t('stripeConfigDeletedSuccess'), { id: loadingToast });
-      mutate([`/payments/${org.id}/config`, access_token]);
+      mutate(['/payments/config', access_token]);
     } catch (error) {
       console.error('Error deleting Stripe configuration:', error);
       toast.error(t('errors.deleteStripeConfigFailed'), {
@@ -162,7 +160,6 @@ const PaymentsConfigurationPage: FC = () => {
     try {
       startTransition(() => setIsOnboardingLoading(true));
       const { connect_url } = await getStripeOnboardingLink(
-        org.id,
         access_token,
         getUriWithoutOrg('/payments/stripe/connect/oauth'),
       );
@@ -319,7 +316,6 @@ const PaymentsConfigurationPage: FC = () => {
       </div>
       {stripeConfig ? (
         <EditStripeConfigModal
-          orgId={org.id}
           configId={stripeConfig.id}
           accessToken={access_token}
           isOpen={isModalOpen}
@@ -333,7 +329,6 @@ const PaymentsConfigurationPage: FC = () => {
 };
 
 interface EditStripeConfigModalProps {
-  orgId: number;
   configId: string;
   accessToken: string;
   isOpen: boolean;
@@ -347,7 +342,7 @@ const createStripeConfigSchema = (t: (key: string) => string) =>
 
 type StripeConfigFormValues = v.InferOutput<ReturnType<typeof createStripeConfigSchema>>;
 
-const EditStripeConfigModal: FC<EditStripeConfigModalProps> = ({ orgId, configId, accessToken, isOpen, onClose }) => {
+const EditStripeConfigModal: FC<EditStripeConfigModalProps> = ({ configId, accessToken, isOpen, onClose }) => {
   const t = useTranslations('Payments.Configuration');
   const validationSchema = createStripeConfigSchema(t);
 
@@ -362,7 +357,7 @@ const EditStripeConfigModal: FC<EditStripeConfigModalProps> = ({ orgId, configId
 
   const fetchConfigEvent = useEffectEvent(async (signal?: AbortSignal) => {
     try {
-      const config = await getPaymentConfigs(orgId, accessToken);
+      const config = await getPaymentConfigs(accessToken);
       if (signal?.aborted) return;
       const stripeConfig = config.find((c: any) => c.id === configId);
       if (stripeConfig?.provider_specific_id) {
@@ -386,7 +381,7 @@ const EditStripeConfigModal: FC<EditStripeConfigModalProps> = ({ orgId, configId
     }
 
     return;
-  }, [isOpen, orgId, configId, accessToken, t, form]);
+  }, [isOpen, configId, accessToken, t, form]);
 
   const handleSubmit = async (values: StripeConfigFormValues) => {
     const loadingToast = toast.loading(t('updatingConfig'));
@@ -394,9 +389,9 @@ const EditStripeConfigModal: FC<EditStripeConfigModalProps> = ({ orgId, configId
       const stripe_config = {
         stripe_account_id: values.stripeAccountId,
       };
-      await updateStripeAccountID(orgId, stripe_config, accessToken);
+      await updateStripeAccountID(stripe_config, accessToken);
       toast.success(t('configUpdatedSuccess'), { id: loadingToast });
-      mutate([`/payments/${orgId}/config`, accessToken]);
+      mutate(['/payments/config', accessToken]);
       onClose();
     } catch (error) {
       console.error('Error updating config:', error);

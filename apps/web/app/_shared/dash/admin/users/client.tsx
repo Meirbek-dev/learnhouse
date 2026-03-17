@@ -29,7 +29,6 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getUserAvatarMediaDirectory } from '@/services/media/media';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import type { ColumnDef } from '@tanstack/react-table';
 import { useLocale, useTranslations } from 'next-intl';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -41,7 +40,6 @@ import { Card } from '@/components/ui/card';
 import { toast } from 'sonner';
 
 export default function UserRolesClient() {
-  const org = usePlatformOrg();
   const session = usePlatformSession();
   const t = useTranslations('Components.OrgRoles');
   const locale = useLocale();
@@ -75,37 +73,37 @@ export default function UserRolesClient() {
 
   // Fetch user roles
   const fetchUserRolesData = useCallback(async () => {
-    if (!accessToken || !org?.id) return;
+    if (!accessToken) return;
     try {
-      const data = await listUserRoles(accessToken, org.id);
+      const data = await listUserRoles(accessToken);
       setUserRoles(data);
     } catch (error) {
       console.error('Failed to fetch user roles:', error);
       toast.error(t('loadFailed'));
     }
-  }, [accessToken, org?.id, t]);
+  }, [accessToken, t]);
 
   // Fetch available roles
   const fetchRoles = useCallback(async () => {
-    if (!accessToken || !org?.id) return;
+    if (!accessToken) return;
     try {
-      const data = await listRoles(accessToken, org.id);
+      const data = await listRoles(accessToken);
       setAvailableRoles(data);
     } catch (error) {
       console.error('Failed to fetch roles:', error);
     }
-  }, [accessToken, org?.id]);
+  }, [accessToken]);
 
   // Fetch users for search
   const fetchUsers = useCallback(async () => {
-    if (!accessToken || !org?.id) return;
+    if (!accessToken) return;
     try {
-      const data = await listOrgUsers(accessToken, org.id);
+      const data = await listOrgUsers(accessToken);
       setUsers(data);
     } catch (error) {
       console.error('Failed to fetch users:', error);
     }
-  }, [accessToken, org?.id]);
+  }, [accessToken]);
   useEffect(() => {
     const fetchAll = async () => {
       setLoading(true);
@@ -117,10 +115,10 @@ export default function UserRolesClient() {
 
   // Add role to user
   const handleAddUserRole = async () => {
-    if (!accessToken || !selectedUserId || !selectedRoleId || !org?.id) return;
+    if (!accessToken || !selectedUserId || !selectedRoleId) return;
 
     try {
-      await assignRoleToUser(accessToken, selectedUserId, selectedRoleId, org.id);
+      await assignRoleToUser(accessToken, selectedUserId, selectedRoleId);
       toast.success(t('assignedRoleSuccess'));
       setIsAddDialogOpen(false);
       setSelectedUserId(null);
@@ -141,13 +139,13 @@ export default function UserRolesClient() {
 
   // Confirm remove role from user
   const confirmRemoveUserRole = async () => {
-    if (!accessToken || !org?.id || !assignmentToRemove) return;
+    if (!accessToken || !assignmentToRemove) return;
 
     const { userId, roleId } = assignmentToRemove;
     setAssignmentToRemove(null);
 
     try {
-      await removeRoleFromUser(accessToken, userId, roleId, org.id);
+      await removeRoleFromUser(accessToken, userId, roleId);
       toast.success(t('removedRoleSuccess'));
       await fetchUserRolesData();
       // Refresh session so permission changes take effect immediately
@@ -369,7 +367,7 @@ export default function UserRolesClient() {
             columns={columns}
             data={userRoles}
             pageSize={10}
-            storageKey={org?.id ? `org-${org.id}-user-roles` : 'org-user-roles'}
+            storageKey="org-user-roles"
             labels={{
               searchPlaceholder: t('searchUsersOrRoles'),
               emptyMessage: t('noUserRoleAssignments'),

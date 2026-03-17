@@ -46,41 +46,38 @@ async function request<T>(url: string, token: string, options?: RequestInit): Pr
 // My permissions
 // ============================================================================
 
-export function fetchMyPermissions(token: string, orgId?: number): Promise<UserRBACData> {
-  const qs = orgId ? `?org_id=${orgId}` : '';
-  return request(api(`rbac/me/permissions${qs}`), token);
+export function fetchMyPermissions(token: string): Promise<UserRBACData> {
+  return request(api('rbac/me/permissions'), token);
 }
 
 // ============================================================================
 // Permissions - read-only
 // ============================================================================
 
-export function listAllPermissions(token: string, orgId?: number): Promise<Permission[]> {
-  const qs = orgId ? `?org_id=${orgId}` : '';
-  return request(api(`roles/permissions/all${qs}`), token);
+export function listAllPermissions(token: string): Promise<Permission[]> {
+  return request(api('roles/permissions/all'), token);
 }
 
 // ============================================================================
 // Roles - CRUD
 // ============================================================================
 
-export function listRoles(token: string, orgId: number): Promise<Role[]> {
-  return request(api(`roles?org_id=${orgId}`), token);
+export function listRoles(token: string): Promise<Role[]> {
+  return request(api('roles'), token);
 }
 
 export function getRole(token: string, roleId: number): Promise<Role> {
   return request(api(`roles/${roleId}`), token);
 }
 
-export function getRolePermissions(token: string, roleId: number, orgId?: number): Promise<Permission[]> {
-  const qs = orgId ? `?org_id=${orgId}` : '';
-  return request(api(`roles/${roleId}/permissions${qs}`), token);
+export function getRolePermissions(token: string, roleId: number): Promise<Permission[]> {
+  return request(api(`roles/${roleId}/permissions`), token);
 }
 
-export function createRole(token: string, orgId: number, body: CreateRoleBody): Promise<Role> {
+export function createRole(token: string, body: CreateRoleBody): Promise<Role> {
   return request(api('roles'), token, {
     method: 'POST',
-    body: JSON.stringify({ ...body, org_id: orgId }),
+    body: JSON.stringify(body),
   });
 }
 
@@ -95,18 +92,12 @@ export function deleteRole(token: string, roleId: number): Promise<void> {
   return request(api(`roles/${roleId}`), token, { method: 'DELETE' });
 }
 
-export function getRoleUsersCount(token: string, roleId: number, orgId?: number): Promise<{ count: number }> {
-  const qs = orgId ? `?org_id=${orgId}` : '';
-  return request(api(`roles/${roleId}/users/count${qs}`), token);
+export function getRoleUsersCount(token: string, roleId: number): Promise<{ count: number }> {
+  return request(api(`roles/${roleId}/users/count`), token);
 }
 
-export function listRoleAuditLog(
-  token: string,
-  orgId: number,
-  page = 1,
-  pageSize = 20,
-): Promise<RoleAuditListResponse> {
-  return request(api(`roles/audit-log?org_id=${orgId}&page=${page}&page_size=${pageSize}`), token);
+export function listRoleAuditLog(token: string, page = 1, pageSize = 20): Promise<RoleAuditListResponse> {
+  return request(api(`roles/audit-log?page=${page}&page_size=${pageSize}`), token);
 }
 
 // ============================================================================
@@ -130,22 +121,21 @@ export function removePermissionFromRole(token: string, roleId: number, permissi
 // User ↔ Role assignment
 // ============================================================================
 
-export function listUserRoles(token: string, orgId: number): Promise<UserRoleAssignment[]> {
-  void orgId;
+export function listUserRoles(token: string): Promise<UserRoleAssignment[]> {
   return request<UserRoleAssignment[]>(api('rbac/user-roles'), token);
 }
 
-export function assignRoleToUser(token: string, userId: number, roleId: number, orgId: number): Promise<void> {
+export function assignRoleToUser(token: string, userId: number, roleId: number): Promise<void> {
   return request(api('rbac/roles/assign'), token, {
     method: 'POST',
-    body: JSON.stringify({ user_id: userId, role_id: roleId, org_id: orgId }),
+    body: JSON.stringify({ user_id: userId, role_id: roleId }),
   });
 }
 
-export function removeRoleFromUser(token: string, userId: number, roleId: number, orgId: number): Promise<void> {
+export function removeRoleFromUser(token: string, userId: number, roleId: number): Promise<void> {
   return request(api('rbac/roles/revoke'), token, {
     method: 'POST',
-    body: JSON.stringify({ user_id: userId, role_id: roleId, org_id: orgId }),
+    body: JSON.stringify({ user_id: userId, role_id: roleId }),
   });
 }
 
@@ -153,8 +143,7 @@ export function removeRoleFromUser(token: string, userId: number, roleId: number
 // Org users (used by role assignment UI)
 // ============================================================================
 
-export function listOrgUsers(token: string, orgId: number, limit = 100): Promise<OrgUserBasic[]> {
-  void orgId;
+export function listOrgUsers(token: string, limit = 100): Promise<OrgUserBasic[]> {
   // The endpoint may return { users: [...] } or a flat array.
   return request<OrgUserBasic[] | { users: OrgUserBasic[] }>(api(`orgs/users?limit=${limit}`), token).then((data) =>
     Array.isArray(data) ? data : data.users,

@@ -819,7 +819,6 @@ const VideoModal = ({ submitFileActivity, submitExternalVideo, chapterId, course
       org,
       hasOrg: Boolean(org),
       orgUuid: org?.org_uuid,
-      orgId: org?.id,
       courseProp: course,
       courseData: course?.courseStructure || course,
     });
@@ -900,7 +899,7 @@ const VideoModal = ({ submitFileActivity, submitExternalVideo, chapterId, course
     }
 
     // Validate org data is available
-    if (!org?.org_uuid || !org.id) {
+    if (!org?.org_uuid) {
       console.error('Organization data not available:', org);
       toast.error(t('organizationDataNotLoaded'));
       return;
@@ -931,7 +930,6 @@ const VideoModal = ({ submitFileActivity, submitExternalVideo, chapterId, course
             version: 1,
             course_id: courseData.id,
             course_uuid: courseData.course_uuid,
-            org_id: org.id,
             org_uuid: org.org_uuid,
             details: videoDetails,
           },

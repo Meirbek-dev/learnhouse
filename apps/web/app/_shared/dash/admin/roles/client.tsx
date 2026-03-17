@@ -52,8 +52,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import type { Permission, RoleAuditEvent, RoleWithPermissions } from '@/types/permissions';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { useCallback, useEffect, useMemo, useState } from 'react';
 import { usePlatformOrg } from '@components/Contexts/OrgContext';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ColumnDef } from '@tanstack/react-table';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -69,8 +69,8 @@ import useSWR from 'swr';
 type RoleDialogMode = 'create' | 'edit' | 'clone';
 
 export default function RBACAdminClient() {
-  const org = usePlatformOrg();
   const session = usePlatformSession();
+  const org = usePlatformOrg();
   const { can } = usePermissions();
   const t = useTranslations('Components.OrgRoles');
 
@@ -103,29 +103,24 @@ export default function RBACAdminClient() {
   const isSuperAdmin = can(Resources.ROLE, Actions.MANAGE, Scopes.ALL);
   const currentUserMaxPriority = useMemo(() => {
     const sessionRoles = session?.data?.roles ?? [];
-    const orgRoles = sessionRoles.filter((assignment) => assignment.org?.id === org?.id);
-    return orgRoles.reduce((maxPriority, assignment) => Math.max(maxPriority, assignment.role?.priority ?? 0), 0);
-  }, [org?.id, session?.data?.roles]);
+    return sessionRoles.reduce((maxPriority, assignment) => Math.max(maxPriority, assignment.role?.priority ?? 0), 0);
+  }, [session?.data?.roles]);
 
   const {
     data: permissions = [],
     isLoading: permissionsLoading,
     error: permissionsError,
-  } = useSWR(
-    accessToken && org?.id ? ['rbac-permissions', accessToken, org.id] : null,
-    ([, token, orgId]) => listAllPermissions(token, orgId),
-    {
-      dedupingInterval: 3_600_000,
-      revalidateOnFocus: false,
-    },
-  );
+  } = useSWR(accessToken ? ['rbac-permissions', accessToken] : null, ([, token]) => listAllPermissions(token), {
+    dedupingInterval: 3_600_000,
+    revalidateOnFocus: false,
+  });
 
   const fetchRoles = useCallback(async () => {
-    if (!accessToken || !org?.id) return;
+    if (!accessToken) return;
 
     setLoadingRoles(true);
     try {
-      const rolesData = await listRoles(accessToken, org.id);
+      const rolesData = await listRoles(accessToken);
       const sortedRoles = rolesData
         .toSorted((a, b) => {
           const aSystem = a.is_system ? 0 : 1;
@@ -141,7 +136,7 @@ export default function RBACAdminClient() {
     } finally {
       setLoadingRoles(false);
     }
-  }, [accessToken, org?.id, t]);
+  }, [accessToken, t]);
 
   const refreshSession = async () => {
     const timeoutMs = 5000;
@@ -156,13 +151,13 @@ export default function RBACAdminClient() {
   };
 
   const loadRoleWithPermissions = async (roleId: number): Promise<RoleWithPermissions> => {
-    if (!accessToken || !org?.id) {
+    if (!accessToken) {
       throw new Error('Missing credentials');
     }
 
     const [role, rolePermissions] = await Promise.all([
       apiGetRole(accessToken, roleId),
-      getRolePermissions(accessToken, roleId, org.id),
+      getRolePermissions(accessToken, roleId),
     ]);
 
     return {
@@ -199,10 +194,10 @@ export default function RBACAdminClient() {
 
   useEffect(() => {
     const fetchAudit = async () => {
-      if (!accessToken || !org?.id || activeTab !== 'audit') return;
+      if (!accessToken || activeTab !== 'audit') return;
       setIsAuditLoading(true);
       try {
-        const data = await listRoleAuditLog(accessToken, org.id, auditPage, 20);
+        const data = await listRoleAuditLog(accessToken, auditPage, 20);
         setAuditData({
           items: Array.isArray(data.items) ? data.items : [],
           total: typeof data.total === 'number' ? data.total : 0,
@@ -217,7 +212,7 @@ export default function RBACAdminClient() {
     };
 
     fetchAudit();
-  }, [accessToken, org?.id, activeTab, auditPage, t]);
+  }, [accessToken, activeTab, auditPage, t]);
 
   const permissionsByResource = permissions.reduce<Record<string, Permission[]>>((acc, permission) => {
     if (!acc[permission.resource_type]) {
@@ -287,12 +282,12 @@ export default function RBACAdminClient() {
     description: string;
     priority: number;
   }) => {
-    if (!accessToken || !org?.id) return;
+    if (!accessToken) return;
 
     const sourceRole = roleDialogMode === 'clone' ? roleDialogRole : null;
 
     try {
-      const newRole = await apiCreateRole(accessToken, org.id, data);
+      const newRole = await apiCreateRole(accessToken, data);
 
       if (sourceRole?.permissions?.length) {
         for (const permission of sourceRole.permissions) {
@@ -812,7 +807,7 @@ export default function RBACAdminClient() {
               columns={roleColumns}
               data={roles}
               pageSize={10}
-              storageKey={org?.id ? `org-${org.id}-rbac-roles` : 'rbac-roles'}
+              storageKey="rbac-roles"
               enableColumnVisibility
               enableCsvExport
               csvFileName={`${org?.slug ?? 'organization'}-roles.csv`}
@@ -844,7 +839,7 @@ export default function RBACAdminClient() {
                 columns={permissionColumns}
                 data={permissions}
                 pageSize={20}
-                storageKey={org?.id ? `org-${org.id}-rbac-permissions` : 'rbac-permissions'}
+                storageKey="rbac-permissions"
                 enableColumnVisibility
                 enableCsvExport
                 csvFileName={`${org?.slug ?? 'organization'}-permissions.csv`}
@@ -881,7 +876,7 @@ export default function RBACAdminClient() {
                     columns={auditColumns}
                     data={auditData?.items ?? []}
                     serverPaginated
-                    storageKey={org?.id ? `org-${org.id}-rbac-audit` : 'rbac-audit'}
+                    storageKey="rbac-audit"
                     labels={{
                       searchPlaceholder: t('permissionSearchPlaceholder'),
                       emptyMessage: t('audit.empty'),

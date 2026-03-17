@@ -13,6 +13,7 @@ from sqlalchemy import func
 from sqlmodel import Session, or_, select
 
 from src.core.events.database import get_db_session
+from src.services.platform import get_platform_org_id
 from src.db.permissions import (
     Permission,
     PermissionRead,
@@ -41,12 +42,8 @@ class AddPermissionBody(BaseModel):
     permission_id: int
 
 
-def _is_admin(checker: PermissionCheckerDep, user_id: int, org_id: int | None) -> bool:
-    """Check if user is an admin using the permission system itself.
-
-    Uses the *:*:* wildcard path rather than slug-matching so the check stays
-    consistent with all other permission decisions in the system.
-    """
+def _is_admin(checker: PermissionCheckerDep, user_id: int, org_id: int | None, db=None) -> bool:
+    """Check if user is an admin using the permission system itself."""
     return checker.check(user_id, "role:manage", org_id)
 
 
@@ -58,10 +55,9 @@ async def list_all_permissions(
     db: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     checker: PermissionCheckerDep,
-    org_id: Annotated[int | None, Query()] = None,
 ):
     """List all permission definitions. Used by the RBAC admin panel."""
-    checker.require(current_user.id, "role:read", org_id)
+    checker.require(current_user.id, "role:read", get_platform_org_id(db))
     perms = db.exec(
         select(Permission).order_by(Permission.resource_type, Permission.action)
     ).all()
@@ -73,15 +69,11 @@ async def list_roles(
     db: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     checker: PermissionCheckerDep,
-    org_id: Annotated[int | None, Query()] = None,
 ):
-    """List all roles available in an org (system roles + org-specific)."""
-    checker.require(current_user.id, "role:read", org_id)
-    query = select(Role)
-    if org_id is not None:
-        query = query.where(or_(Role.org_id == org_id, Role.org_id.is_(None)))
-    else:
-        query = query.where(Role.org_id.is_(None))
+    """List all roles available in the platform org (system roles + org-specific)."""
+    platform_org_id = get_platform_org_id(db)
+    checker.require(current_user.id, "role:read", platform_org_id)
+    query = select(Role).where(or_(Role.org_id == platform_org_id, Role.org_id.is_(None)))
     roles = db.exec(query.order_by(Role.priority.desc())).all()
 
     role_ids = [role.id for role in roles if role.id is not None]
@@ -118,12 +110,12 @@ async def list_roles(
 async def get_role_audit_log(
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     checker: PermissionCheckerDep,
-    org_id: Annotated[int | None, Query()] = None,
+    db: Annotated[Session, Depends(get_db_session)],
     page: Annotated[int, Query(ge=1)] = 1,
     page_size: Annotated[int, Query(ge=1, le=100)] = 20,
 ):
-    checker.require(current_user.id, "role:read", org_id)
-    events = list_role_audit_events(org_id)
+    checker.require(current_user.id, "role:read", get_platform_org_id(db))
+    events = list_role_audit_events()
     total = len(events)
     start = (page - 1) * page_size
     end = start + page_size
@@ -141,10 +133,9 @@ async def get_role(
     db: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     checker: PermissionCheckerDep,
-    org_id: Annotated[int | None, Query()] = None,
 ):
     """Get a single role by ID (includes its permissions via separate endpoint)."""
-    checker.require(current_user.id, "role:read", org_id)
+    checker.require(current_user.id, "role:read", get_platform_org_id(db))
     role = db.get(Role, role_id)
     if not role:
         raise HTTPException(404, detail="Role not found")
@@ -177,10 +168,10 @@ async def create_role(
     checker: PermissionCheckerDep,
 ):
     """Create a new custom role for an org."""
-    checker.require(current_user.id, "role:create", body.org_id)
+    checker.require(current_user.id, "role:create", get_platform_org_id(db))
 
     # Escalation prevention: new role priority must not exceed caller's highest
-    caller_roles = checker.get_user_roles(current_user.id, body.org_id)
+    caller_roles = checker.get_user_roles(current_user.id, get_platform_org_id(db))
     caller_max_priority = max((r["priority"] for r in caller_roles), default=0)
     new_priority = body.priority
     if new_priority > caller_max_priority:
@@ -194,19 +185,20 @@ async def create_role(
         name=body.name,
         description=body.description,
         priority=new_priority,
-        org_id=body.org_id,
+        org_id=get_platform_org_id(db),
         is_system=False,
     )
     db.add(role)
     db.commit()
     db.refresh(role)
+    platform_org_id = get_platform_org_id(db)
     audit_log.info(
         "role_created",
         extra={
             "actor_id": current_user.id,
             "role_id": role.id,
             "role_slug": role.slug,
-            "org_id": body.org_id,
+            "org_id": platform_org_id,
         },
     )
     append_role_audit_event(
@@ -214,7 +206,7 @@ async def create_role(
         action="role_created",
         target_role_id=role.id,
         target_role_slug=role.slug,
-        org_id=body.org_id,
+        org_id=platform_org_id,
     )
     return RoleRead.model_validate(role)
 

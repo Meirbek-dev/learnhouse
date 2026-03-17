@@ -54,7 +54,7 @@ const NavigationLinkItem = ({ href, type }: NavigationLinkProps) => {
   );
 };
 
-export default function OrgMenu() {
+export default function NavBar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();

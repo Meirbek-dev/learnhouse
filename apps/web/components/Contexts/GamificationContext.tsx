@@ -15,6 +15,7 @@ import {
   updatePreferencesAction,
   updateStreakAction,
 } from '@/app/actions/gamification';
+
 import React, { createContext, lazy, useContext, useEffect, useState } from 'react';
 import { useXPToast } from '@/lib/gamification/components/xp-toast';
 import { AnimatePresence } from 'motion/react';
@@ -72,7 +73,6 @@ const GamificationContext = createContext<GamificationContextValue | null>(null)
 
 interface GamificationProviderProps {
   children: React.ReactNode;
-  orgId: number;
   initialData?: {
     profile?: UserGamificationProfile | null;
     dashboard?: DashboardData | null;
@@ -80,7 +80,7 @@ interface GamificationProviderProps {
   };
 }
 
-export function GamificationProvider({ children, orgId, initialData }: GamificationProviderProps) {
+export function GamificationProvider({ children, initialData }: GamificationProviderProps) {
   const t = useTranslations('DashPage.UserAccountSettings.Gamification');
 
   // Server-provided data (updated via props)
@@ -134,8 +134,8 @@ export function GamificationProvider({ children, orgId, initialData }: Gamificat
         setLastFetchTime(now);
         try {
           const [dashboardData, leaderboardData] = await Promise.all([
-            getDashboardDataAction(orgId),
-            getLeaderboardAction(orgId),
+            getDashboardDataAction(),
+            getLeaderboardAction(),
           ]);
 
           if (dashboardData) {
@@ -161,7 +161,7 @@ export function GamificationProvider({ children, orgId, initialData }: Gamificat
     if (initialData === undefined) {
       fetchInitialData();
     }
-  }, [orgId, profile, isLoading, initialData, fetchAttempts, lastFetchTime]);
+  }, [profile, isLoading, initialData, fetchAttempts, lastFetchTime]);
 
   // Computed streaks
   const streaks = {
@@ -176,10 +176,7 @@ export function GamificationProvider({ children, orgId, initialData }: Gamificat
     // Fetch fresh data from server without full page reload
     setIsLoading(true);
     try {
-      const [dashboardData, leaderboardData] = await Promise.all([
-        getDashboardDataAction(orgId),
-        getLeaderboardAction(orgId),
-      ]);
+      const [dashboardData, leaderboardData] = await Promise.all([getDashboardDataAction(), getLeaderboardAction()]);
 
       if (dashboardData) {
         setProfile(dashboardData.profile);
@@ -202,7 +199,7 @@ export function GamificationProvider({ children, orgId, initialData }: Gamificat
 
     try {
       // Call Server Action
-      const result = await awardXPAction(orgId, payload);
+      const result = await awardXPAction(payload);
 
       // Optimistically update local state
       if (result.profile) {
@@ -250,7 +247,7 @@ export function GamificationProvider({ children, orgId, initialData }: Gamificat
   async function updateStreak(type: 'login' | 'learning') {
     setError(null);
     try {
-      const result = await updateStreakAction(orgId, type);
+      const result = await updateStreakAction(type);
 
       // Optimistically update local profile
       if (result) {
@@ -291,7 +288,7 @@ export function GamificationProvider({ children, orgId, initialData }: Gamificat
   async function updatePreferences(preferences: Record<string, any>) {
     setError(null);
     try {
-      await updatePreferencesAction(orgId, preferences);
+      await updatePreferencesAction(preferences);
 
       // Optimistically update local profile
       setProfile((prev) =>

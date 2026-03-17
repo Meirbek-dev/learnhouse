@@ -40,7 +40,7 @@ async def api_create_usergroup(
 
     **Required Permission**: `usergroup:create:org`
     """
-    checker.require(current_user.id, "usergroup:create", usergroup_object.org_id)
+    checker.require(current_user.id, "usergroup:create", get_platform_org_id(db_session))
 
     return await create_usergroup(request, db_session, current_user, usergroup_object)
 

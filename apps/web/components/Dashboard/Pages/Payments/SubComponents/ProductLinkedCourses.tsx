@@ -2,7 +2,6 @@
 
 import { getCoursesLinkedToProduct, unlinkCourseFromProduct } from '@services/payments/products';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
 import { BookOpen, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@components/ui/button';
@@ -21,22 +20,20 @@ interface ProductLinkedCoursesProps {
 export default function ProductLinkedCourses({ productId }: ProductLinkedCoursesProps) {
   const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
   const session = usePlatformSession() as any;
-  const org = usePlatformOrg() as any;
   const accessToken = session?.data?.tokens?.access_token;
-  const orgId = org?.id;
   const tNotify = useTranslations('DashPage.Notifications');
   const t = useTranslations('DashPage.Payments.LinkedCourses');
 
   // Use SWR to fetch linked courses
-  const LINKED_COURSES_KEY = orgId && productId ? getProductLinkedCoursesSwrKey(orgId, productId) : null;
-  const PRODUCTS_KEY = getPaymentsProductsSwrKey(orgId);
+  const LINKED_COURSES_KEY = productId ? getProductLinkedCoursesSwrKey(productId) : null;
+  const PRODUCTS_KEY = getPaymentsProductsSwrKey();
 
   const {
     data: linkedCourses,
     mutate: mutateLinkedCourses,
     error,
   } = useSWR(LINKED_COURSES_KEY && accessToken ? [LINKED_COURSES_KEY, accessToken] : null, async ([, token]) => {
-    const response = await getCoursesLinkedToProduct(orgId, productId, token);
+    const response = await getCoursesLinkedToProduct(productId, token);
     return response.data || [];
   });
 
@@ -58,7 +55,7 @@ export default function ProductLinkedCourses({ productId }: ProductLinkedCourses
     );
 
     try {
-      const response = await unlinkCourseFromProduct(orgId, productId, courseId, accessToken);
+      const response = await unlinkCourseFromProduct(productId, courseId, accessToken);
       if (response.success) {
         // Revalidate products list and linked courses list from server
         mutate([PRODUCTS_KEY, accessToken]);

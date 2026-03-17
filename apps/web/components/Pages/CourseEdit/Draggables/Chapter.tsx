@@ -184,7 +184,6 @@ const Chapter = (props: any) => {
                 <div className="flex flex-col">
                   {props.info.list.activities.map((activity: any, index: any) => (
                     <Activity
-                      orgslug={props.orgslug}
                       courseid={props.courseid}
                       key={activity.id}
                       activity={activity}

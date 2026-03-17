@@ -287,7 +287,7 @@ const makeGradientPresetItems = (t: Function) =>
 const makeGradientDirectionItems = (t: Function) =>
   Object.entries(getGradientDirections(t)).map(([value, label]) => ({ value, label }));
 
-const OrgEditLanding = () => {
+const EditLanding = () => {
   const org = usePlatformOrg() as any;
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
@@ -428,16 +428,10 @@ const OrgEditLanding = () => {
   };
 
   const handleSave = async () => {
-    if (!org?.id) {
-      toast.error(tNotify('orgIdNotFound'));
-      return;
-    }
-
     startTransition(() => setIsSaving(true));
     const loadingToast = toast.loading(tNotify('savingLandingPage'));
     try {
       const res = await updateOrgLanding(
-        org.id,
         {
           sections: landingData.sections,
           enabled: isLandingEnabled,
@@ -1541,7 +1535,7 @@ const ImageUploader: FC<ImageUploaderProps> = ({ t, onImageUploaded, className, 
     setIsUploading(true);
     const loadingToast = toast.loading(tNotify('uploadingImage'));
     try {
-      const response = await uploadLandingContent(org.id, file, access_token);
+      const response = await uploadLandingContent(file, access_token);
       if (response.status === 200) {
         const imageUrl = getOrgLandingMediaDirectory(org.org_uuid, response.data.filename);
         onImageUploaded(imageUrl);
@@ -1995,8 +1989,8 @@ const FeaturedCoursesEditor: FC<{
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
 
-  const { data: coursesData } = useSWR(org?.slug ? [org.slug, access_token] : null, ([orgSlug, token]) =>
-    getOrgCourses(orgSlug, null, token),
+  const { data: coursesData } = useSWR(access_token ? ['org-courses', access_token] : null, ([, token]) =>
+    getOrgCourses(null, token),
   );
   const courses = coursesData?.courses;
 
@@ -2075,4 +2069,4 @@ const FeaturedCoursesEditor: FC<{
   );
 };
 
-export default OrgEditLanding;
+export default EditLanding;

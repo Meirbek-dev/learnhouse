@@ -20,6 +20,7 @@ from src.db.courses.courses import (
     ThumbnailType,
 )
 from src.db.courses.enhanced_responses import CourseReadWithPermissions
+from src.core.platform import PLATFORM_ORG_SLUG
 from src.db.organizations import Organization
 from src.db.resource_authors import (
     ResourceAuthor,
@@ -175,10 +176,9 @@ def _matches_editable_course_preset(
     return True
 
 
-async def list_editable_courses_orgslug(
+async def list_editable_courses(
     request: Request,
     current_user: PublicUser | AnonymousUser,
-    org_slug: str,
     db_session: Session,
     page: int = 1,
     limit: int = 20,
@@ -186,10 +186,9 @@ async def list_editable_courses_orgslug(
     sort_by: str | None = "updated",
     preset: str | None = None,
 ) -> tuple[list[CourseReadWithPermissions], int, dict[str, int]]:
-    all_courses = await get_editable_courses_orgslug(
+    all_courses = await get_editable_courses(
         request,
         current_user,
-        org_slug,
         db_session,
         page=1,
         limit=10_000,
@@ -449,17 +448,16 @@ async def get_course_meta(
     )
 
 
-async def count_courses_orgslug(
+async def count_courses(
     current_user: PublicUser | AnonymousUser,
-    org_slug: str,
     db_session: Session,
 ) -> int:
-    """Count total courses for an organization with proper access filtering."""
+    """Count total courses for the platform organization with proper access filtering."""
     # Base count query
     query = (
         select(func.count(Course.id.distinct()))
         .join(Organization)
-        .where(Organization.slug == org_slug)
+        .where(Organization.slug == PLATFORM_ORG_SLUG)
     )
 
     if isinstance(current_user, AnonymousUser):
@@ -502,10 +500,9 @@ async def count_courses_orgslug(
     return db_session.exec(query).one()
 
 
-async def get_courses_orgslug(
+async def get_courses(
     request: Request,
     current_user: PublicUser | AnonymousUser,
-    org_slug: str,
     db_session: Session,
     page: int = 1,
     limit: int = 20,
@@ -519,7 +516,7 @@ async def get_courses_orgslug(
         set_json = None  # type: ignore
 
     # Only cache results for anonymous users (public content)
-    cache_key = f"courses:org:{org_slug}:page:{page}:limit:{limit}"
+    cache_key = f"courses:platform:page:{page}:limit:{limit}"
     if isinstance(current_user, AnonymousUser) and get_json is not None:
         try:
             cached = get_json(cache_key)
@@ -537,7 +534,7 @@ async def get_courses_orgslug(
 
     # Step 1: Build a subquery that selects the paginated course IDs
     # with proper access filtering
-    id_query = select(Course.id).join(Organization).where(Organization.slug == org_slug)
+    id_query = select(Course.id).join(Organization).where(Organization.slug == PLATFORM_ORG_SLUG)
 
     if isinstance(current_user, AnonymousUser):
         id_query = id_query.where(Course.public)
@@ -677,7 +674,6 @@ async def get_courses_orgslug(
 async def search_courses(
     request: Request,
     current_user: PublicUser | AnonymousUser,
-    org_slug: str,
     search_query: str,
     db_session: Session,
     page: int = 1,
@@ -687,7 +683,7 @@ async def search_courses(
     search_filter = _course_search_filter(search_query)
 
     # Base query
-    query = select(Course).join(Organization).where(Organization.slug == org_slug)
+    query = select(Course).join(Organization).where(Organization.slug == PLATFORM_ORG_SLUG)
     if search_filter is not None:
         query = query.where(search_filter)
 
@@ -1293,10 +1289,9 @@ async def get_user_courses(
     return result
 
 
-async def get_editable_courses_orgslug(
+async def get_editable_courses(
     request: Request,
     current_user: PublicUser | AnonymousUser,
-    org_slug: str,
     db_session: Session,
     page: int = 1,
     limit: int = 20,
@@ -1305,7 +1300,7 @@ async def get_editable_courses_orgslug(
     apply_pagination: bool = True,
 ) -> list[CourseReadWithPermissions]:
     """
-    Return courses for an org that the current user has permission to edit
+    Return courses for the platform org that the current user has permission to edit
     (i.e. course:update). Anonymous users always get an empty list.
 
     Scope resolution:
@@ -1321,7 +1316,7 @@ async def get_editable_courses_orgslug(
         return []
 
     org = db_session.exec(
-        select(Organization).where(Organization.slug == org_slug)
+        select(Organization).where(Organization.slug == PLATFORM_ORG_SLUG)
     ).first()
     if not org:
         return []
@@ -1338,7 +1333,7 @@ async def get_editable_courses_orgslug(
 
     if has_broad_update:
         id_query = (
-            select(Course.id).join(Organization).where(Organization.slug == org_slug)
+            select(Course.id).join(Organization).where(Organization.slug == PLATFORM_ORG_SLUG)
         )
         if search_filter is not None:
             id_query = id_query.where(search_filter)
@@ -1361,7 +1356,7 @@ async def get_editable_courses_orgslug(
         id_query = (
             select(Course.id)
             .join(Organization, Organization.id == Course.org_id)
-            .where(Organization.slug == org_slug, is_active_author)
+            .where(Organization.slug == PLATFORM_ORG_SLUG, is_active_author)
         )
         if search_filter is not None:
             id_query = id_query.where(search_filter)
@@ -1446,18 +1441,17 @@ async def get_editable_courses_orgslug(
     return course_reads
 
 
-async def count_editable_courses_orgslug(
+async def count_editable_courses(
     current_user: PublicUser | AnonymousUser,
-    org_slug: str,
     db_session: Session,
     search_query: str | None = None,
 ) -> int:
-    """Count courses the current user can edit in an org."""
+    """Count courses the current user can edit in the platform org."""
     if isinstance(current_user, AnonymousUser):
         return 0
 
     org = db_session.exec(
-        select(Organization).where(Organization.slug == org_slug)
+        select(Organization).where(Organization.slug == PLATFORM_ORG_SLUG)
     ).first()
     if not org:
         return 0
@@ -1474,7 +1468,7 @@ async def count_editable_courses_orgslug(
         query = (
             select(func.count(Course.id.distinct()))
             .join(Organization)
-            .where(Organization.slug == org_slug)
+            .where(Organization.slug == PLATFORM_ORG_SLUG)
         )
     else:
         has_own_update = PermissionChecker._has_perm(granted, "course", "update", "own")
@@ -1486,7 +1480,7 @@ async def count_editable_courses_orgslug(
             .join(Organization, Organization.id == Course.org_id)
             .join(ResourceAuthor, ResourceAuthor.resource_uuid == Course.course_uuid)
             .where(
-                Organization.slug == org_slug,
+                Organization.slug == PLATFORM_ORG_SLUG,
                 ResourceAuthor.user_id == current_user.id,
                 ResourceAuthor.authorship_status == ResourceAuthorshipStatusEnum.ACTIVE,
             )

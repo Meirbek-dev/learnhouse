@@ -224,6 +224,10 @@ export default function RichTextEditor({
     return null;
   }
 
+  // TipTap v3 doesn't expose extension commands on ChainedCommands without generic editor typing
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const ed = editor as any;
+
   return (
     <div className="overflow-hidden rounded-lg border">
       {/* Toolbar */}
@@ -233,7 +237,7 @@ export default function RichTextEditor({
           type="button"
           variant="ghost"
           size="sm"
-          onClick={() => editor.chain().focus().toggleBold().run()}
+          onClick={() => ed.chain().focus().toggleBold().run()}
           className={cn('h-8 w-8 p-0', editor.isActive('bold') && 'bg-gray-200')}
         >
           <Bold size={16} />
@@ -242,7 +246,7 @@ export default function RichTextEditor({
           type="button"
           variant="ghost"
           size="sm"
-          onClick={() => editor.chain().focus().toggleItalic().run()}
+          onClick={() => ed.chain().focus().toggleItalic().run()}
           className={cn('h-8 w-8 p-0', editor.isActive('italic') && 'bg-gray-200')}
         >
           <Italic size={16} />
@@ -251,7 +255,7 @@ export default function RichTextEditor({
           type="button"
           variant="ghost"
           size="sm"
-          onClick={() => editor.chain().focus().toggleCode().run()}
+          onClick={() => ed.chain().focus().toggleCode().run()}
           className={cn('h-8 w-8 p-0', editor.isActive('code') && 'bg-gray-200')}
         >
           <Code size={16} />
@@ -264,7 +268,7 @@ export default function RichTextEditor({
           type="button"
           variant="ghost"
           size="sm"
-          onClick={() => editor.chain().focus().toggleBulletList().run()}
+          onClick={() => ed.chain().focus().toggleBulletList().run()}
           className={cn('h-8 w-8 p-0', editor.isActive('bulletList') && 'bg-gray-200')}
         >
           <List size={16} />
@@ -273,7 +277,7 @@ export default function RichTextEditor({
           type="button"
           variant="ghost"
           size="sm"
-          onClick={() => editor.chain().focus().toggleOrderedList().run()}
+          onClick={() => ed.chain().focus().toggleOrderedList().run()}
           className={cn('h-8 w-8 p-0', editor.isActive('orderedList') && 'bg-gray-200')}
         >
           <ListOrdered size={16} />
@@ -282,7 +286,7 @@ export default function RichTextEditor({
           type="button"
           variant="ghost"
           size="sm"
-          onClick={() => editor.chain().focus().toggleBlockquote().run()}
+          onClick={() => ed.chain().focus().toggleBlockquote().run()}
           className={cn('h-8 w-8 p-0', editor.isActive('blockquote') && 'bg-gray-200')}
         >
           <Quote size={16} />
@@ -498,8 +502,8 @@ export default function RichTextEditor({
           type="button"
           variant="ghost"
           size="sm"
-          onClick={() => editor.chain().focus().undo().run()}
-          disabled={!editor.can().undo()}
+          onClick={() => ed.chain().focus().undo().run()}
+          disabled={!ed.can().undo()}
           className="h-8 w-8 p-0"
         >
           <Undo size={16} />
@@ -508,8 +512,8 @@ export default function RichTextEditor({
           type="button"
           variant="ghost"
           size="sm"
-          onClick={() => editor.chain().focus().redo().run()}
-          disabled={!editor.can().redo()}
+          onClick={() => ed.chain().focus().redo().run()}
+          disabled={!ed.can().redo()}
           className="h-8 w-8 p-0"
         >
           <Redo size={16} />

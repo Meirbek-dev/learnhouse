@@ -41,11 +41,11 @@ import type { Activity, Chapter, CourseStructure } from '@components/Contexts/Co
 import { useOptionalGamificationContext } from '@/components/Contexts/GamificationContext';
 import ActivityChapterDropdown from '@components/Pages/Activity/ActivityChapterDropdown';
 import { AssignmentProvider } from '@components/Contexts/Assignments/AssignmentContext';
-import { getAPIUrl, getAbsoluteUrl, PLATFORM_ORG_SLUG } from '@services/config/config';
 import GeneralWrapper from '@/components/Objects/Elements/Wrappers/GeneralWrapper';
 import { Suspense, lazy, useEffect, useRef, useState, useTransition } from 'react';
 import ActivityBreadcrumbs from '@components/Pages/Activity/ActivityBreadcrumbs';
 import ActivityIndicators from '@components/Pages/Courses/ActivityIndicators';
+import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import AIChatBotProvider from '@components/Contexts/AI/AIChatBotContext';
 import CourseEndView from '@components/Pages/Activity/CourseEndView';
@@ -53,7 +53,7 @@ import { useFormatter, useLocale, useTranslations } from 'next-intl';
 import ToolTip from '@/components/Objects/Elements/Tooltip/Tooltip';
 import { CourseProvider } from '@components/Contexts/CourseContext';
 import { useContributorStatus } from '@/hooks/useContributorStatus';
-import { usePlatformOrg } from '@components/Contexts/OrgContext';
+import { getAPIUrl, getAbsoluteUrl } from '@services/config/config';
 import { swrFetcher } from '@services/utils/ts/requests';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { getTrailSwrKey } from '@services/courses/keys';
@@ -223,7 +223,6 @@ interface ActivityActionsProps {
   activity: Activity | null;
   activityid: string;
   course: CourseStructure;
-  orgslug: string;
   assignment: { assignment_uuid: string } | null;
   showNavigation?: boolean;
 }
@@ -251,23 +250,15 @@ function useActivityPosition(course: CourseStructure, activityId: string) {
   return { allActivities, currentIndex };
 }
 
-const ActivityActions = ({
-  activity,
-  activityid,
-  course,
-  orgslug,
-  assignment,
-  showNavigation = true,
-}: ActivityActionsProps) => {
+const ActivityActions = ({ activity, activityid, course, assignment, showNavigation = true }: ActivityActionsProps) => {
   const t = useTranslations('ActivityPage');
   const { contributorStatus } = useContributorStatus(course.course_uuid);
-  const org = usePlatformOrg() as any;
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const isAuthenticated = session.status === 'authenticated';
 
   // Add SWR for trail data
-  const TRAIL_KEY = org?.id ? getTrailSwrKey(org?.id) : null;
+  const TRAIL_KEY = getTrailSwrKey();
   const { data: trailData } = useSWR(TRAIL_KEY && access_token ? [TRAIL_KEY, access_token] : null, ([url, token]) =>
     swrFetcher(url, token),
   );
@@ -284,7 +275,6 @@ const ActivityActions = ({
               activity={activity}
               activityid={activityid}
               course={course}
-              orgslug={orgslug}
               trailData={trailData}
               t={t}
             />
@@ -296,7 +286,6 @@ const ActivityActions = ({
                 activity={activity}
                 activityid={activityid}
                 course={course}
-                orgslug={orgslug}
                 t={t}
               />
             </AssignmentSubmissionProvider>
@@ -305,7 +294,6 @@ const ActivityActions = ({
             <NextActivityButton
               course={course}
               currentActivityId={activity.id}
-              orgslug={orgslug}
             />
           ) : null}
         </>
@@ -327,11 +315,10 @@ const ActivityClient = (props: ActivityClientProps) => {
   const { courseuuid } = props;
   const { activity } = props;
   const { course } = props;
-  const org = usePlatformOrg() as any;
-  const orgslug = org?.slug || PLATFORM_ORG_SLUG;
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const isAuthenticated = session.status === 'authenticated';
+  const org = usePlatformOrg();
   const [assignment, setAssignment] = useState(null) as any;
   const [isFocusMode, setIsFocusMode] = useState(() => {
     if (typeof globalThis.window !== 'undefined') {
@@ -373,7 +360,7 @@ const ActivityClient = (props: ActivityClientProps) => {
   };
 
   // Add SWR for trail data
-  const TRAIL_KEY = org?.id ? getTrailSwrKey(org?.id) : null;
+  const TRAIL_KEY = getTrailSwrKey();
   const { data: trailData } = useSWR(TRAIL_KEY && access_token ? [TRAIL_KEY, access_token] : null, ([url, token]) =>
     swrFetcher(url, token),
   );
@@ -448,7 +435,6 @@ const ActivityClient = (props: ActivityClientProps) => {
             <ExamActivity
               activity={activity}
               course={course}
-              orgslug={orgslug}
             />
           </Suspense>
         );
@@ -459,7 +445,6 @@ const ActivityClient = (props: ActivityClientProps) => {
             <CodeChallengeActivity
               activity={activity}
               course={course}
-              orgslug={orgslug}
             />
           </Suspense>
         );
@@ -656,7 +641,7 @@ const ActivityClient = (props: ActivityClientProps) => {
                               src={
                                 course.thumbnail_image
                                   ? `${getCourseThumbnailMediaDirectory(
-                                      org?.org_uuid,
+                                      org?.org_uuid ?? '',
                                       course.course_uuid,
                                       course.thumbnail_image,
                                     )}`
@@ -775,7 +760,6 @@ const ActivityClient = (props: ActivityClientProps) => {
                             activity={activity}
                             activityid={activityid}
                             course={course}
-                            orgslug={orgslug}
                             assignment={assignment}
                             showNavigation={false}
                           />
@@ -844,7 +828,7 @@ const ActivityClient = (props: ActivityClientProps) => {
                                 src={
                                   course.thumbnail_image
                                     ? `${getCourseThumbnailMediaDirectory(
-                                        org?.org_uuid,
+                                        org?.org_uuid ?? '',
                                         course.course_uuid,
                                         course.thumbnail_image,
                                       )}`
@@ -1071,7 +1055,6 @@ const ActivityClient = (props: ActivityClientProps) => {
                           <PreviousActivityButton
                             course={course}
                             currentActivityId={activity.id}
-                            orgslug={orgslug}
                           />
                         </div>
                         <div className="flex items-center space-x-2">
@@ -1079,14 +1062,12 @@ const ActivityClient = (props: ActivityClientProps) => {
                             activity={activity}
                             activityid={activityid}
                             course={course}
-                            orgslug={orgslug}
                             assignment={assignment}
                             showNavigation={false}
                           />
                           <NextActivityButton
                             course={course}
                             currentActivityId={activity.id}
-                            orgslug={orgslug}
                           />
                         </div>
                       </div>
@@ -1119,14 +1100,12 @@ export const MarkStatus = (props: {
   activity: any;
   activityid: string;
   course: any;
-  orgslug: string;
   trailData: any;
   t: ReturnType<typeof useTranslations<'ActivityPage'>>;
 }) => {
   const { t } = props;
   const router = useRouter();
   const session = usePlatformSession() as any;
-  const org = usePlatformOrg() as any;
   const [isLoading, setIsLoading] = useState(false);
 
   // Gamification state via unified context
@@ -1163,14 +1142,9 @@ export const MarkStatus = (props: {
       const willCompleteAll = areAllActivitiesCompleted();
       setIsLoading(true);
 
-      await markActivityAsComplete(
-        props.orgslug,
-        props.course.course_uuid,
-        props.activity.activity_uuid,
-        session.data?.tokens?.access_token,
-      );
+      await markActivityAsComplete(props.activity.activity_uuid, session.data?.tokens?.access_token);
 
-      await mutate([getTrailSwrKey(org?.id), session.data?.tokens?.access_token]);
+      await mutate([getTrailSwrKey(), session.data?.tokens?.access_token]);
 
       // Show XP feedback and update profile
       if (gamificationContext) {
@@ -1204,14 +1178,9 @@ export const MarkStatus = (props: {
   const unmarkActivityAsCompleteFront = async () => {
     try {
       setIsLoading(true);
-      await unmarkActivityAsComplete(
-        props.orgslug,
-        props.course.course_uuid,
-        props.activity.activity_uuid,
-        session.data?.tokens?.access_token,
-      );
+      await unmarkActivityAsComplete(props.activity.activity_uuid, session.data?.tokens?.access_token);
 
-      await mutate([getTrailSwrKey(org?.id), session.data?.tokens?.access_token]);
+      await mutate([getTrailSwrKey(), session.data?.tokens?.access_token]);
     } catch {
       toast.error(t('unmarkCompleteError'));
     } finally {
@@ -1305,15 +1274,7 @@ export const MarkStatus = (props: {
   );
 };
 
-const NextActivityButton = ({
-  course,
-  currentActivityId,
-  orgslug,
-}: {
-  course: CourseStructure;
-  currentActivityId: number;
-  orgslug: string;
-}) => {
+const NextActivityButton = ({ course, currentActivityId }: { course: CourseStructure; currentActivityId: number }) => {
   const router = useRouter();
   const t = useTranslations('ActivityPage');
 
@@ -1367,11 +1328,9 @@ const NextActivityButton = ({
 const PreviousActivityButton = ({
   course,
   currentActivityId,
-  orgslug,
 }: {
   course: CourseStructure;
   currentActivityId: number;
-  orgslug: string;
 }) => {
   const router = useRouter();
   const t = useTranslations('ActivityPage');
@@ -1427,7 +1386,6 @@ const AssignmentTools = (props: {
   activity: any;
   activityid: string;
   course: any;
-  orgslug: string;
   assignment: any;
   t: ReturnType<typeof useTranslations<'ActivityPage'>>;
 }) => {

@@ -11,11 +11,10 @@ import {
   Trophy,
   UserPen,
 } from 'lucide-react';
-import { getAbsoluteUrl, getUriWithoutOrg, PLATFORM_ORG_SLUG } from '@services/config/config';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { getAbsoluteUrl, getUriWithoutOrg } from '@services/config/config';
 import { useContributorStatus } from '@/hooks/useContributorStatus';
 import { getProductsByCourse } from '@services/payments/products';
-import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { applyForContributor } from '@services/courses/courses';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
 import CourseProgress from '../CourseProgress/CourseProgress';
@@ -64,9 +63,7 @@ interface Course {
 
 interface CourseActionsProps {
   courseuuid: string;
-  course: Course & {
-    org_id: number;
-  };
+  course: Course;
   trailData?: any;
 }
 
@@ -81,7 +78,6 @@ const CoursesActions = ({ courseuuid, course, trailData }: CourseActionsProps) =
   const [hasAccess, setHasAccess] = useState<boolean | null>(null);
   const { contributorStatus, refetch } = useContributorStatus(courseuuid);
   const [isProgressOpen, setIsProgressOpen] = useState(false);
-  const org = usePlatformOrg() as any;
   const t = useTranslations('Courses.CoursesActions');
 
   // stable primitives to avoid effects depending on whole session object
@@ -104,7 +100,7 @@ const CoursesActions = ({ courseuuid, course, trailData }: CourseActionsProps) =
   useEffect(() => {
     const fetchLinkedProducts = async () => {
       try {
-        const response = await getProductsByCourse(course.org_id, course.id, accessToken);
+        const response = await getProductsByCourse(course.id, accessToken);
         setLinkedProducts(response.data || []);
       } catch {
         console.error('Failed to fetch linked products');
@@ -117,13 +113,13 @@ const CoursesActions = ({ courseuuid, course, trailData }: CourseActionsProps) =
     if (fetchedLinkedProductsRef.current[course.id]) return;
     fetchedLinkedProductsRef.current[course.id] = true;
     fetchLinkedProducts();
-  }, [course.id, course.org_id, accessToken]);
+  }, [course.id, accessToken]);
 
   useEffect(() => {
     const checkAccess = async () => {
       if (!userId) return;
       try {
-        const response = await checkPaidAccess(course.id, course.org_id, accessToken);
+        const response = await checkPaidAccess(course.id, accessToken);
         setHasAccess(response.has_access);
       } catch {
         console.error('Failed to check course access');
@@ -138,7 +134,7 @@ const CoursesActions = ({ courseuuid, course, trailData }: CourseActionsProps) =
     if (checkedAccessRef.current[checkKey]) return;
     checkedAccessRef.current[checkKey] = true;
     checkAccess();
-  }, [course.id, course.org_id, accessToken, userId, linkedProducts, t]);
+  }, [course.id, accessToken, userId, linkedProducts, t]);
 
   const handleCourseAction = async () => {
     if (!session.data?.user) {
@@ -184,8 +180,8 @@ const CoursesActions = ({ courseuuid, course, trailData }: CourseActionsProps) =
     const loadingToast = toast.loading(t('startingCourse'));
 
     try {
-      await startCourse(`course_${courseuuid}`, org?.slug || PLATFORM_ORG_SLUG, session.data?.tokens?.access_token);
-      mutate([getTrailSwrKey(org?.id), session.data?.tokens?.access_token]);
+      await startCourse(`course_${courseuuid}`, session.data?.tokens?.access_token);
+      mutate([getTrailSwrKey(), session.data?.tokens?.access_token]);
       toast.success(t('startedCourseSuccess'), { id: loadingToast });
 
       // Get the first activity from the first chapter
@@ -198,7 +194,7 @@ const CoursesActions = ({ courseuuid, course, trailData }: CourseActionsProps) =
           `${getAbsoluteUrl('')}/course/${courseuuid}/activity/${firstActivity.activity_uuid.replace('activity_', '')}`,
         );
       } else {
-        mutate([getTrailSwrKey(org?.id), session.data?.tokens?.access_token]);
+        mutate([getTrailSwrKey(), session.data?.tokens?.access_token]);
         router.refresh();
       }
     } catch (error) {

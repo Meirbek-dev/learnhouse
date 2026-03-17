@@ -42,7 +42,6 @@ const NewChapterModal = ({ submitChapter, closeModal, course }: any) => {
       description: values.description,
       thumbnail_image: '',
       course_id: course.id,
-      org_id: course.org_id,
     };
 
     startTransition(() => {

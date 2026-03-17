@@ -54,3 +54,5 @@ backups/
 .idea
 temp-restore
 tmpclaude-*-cwd
+
+**/.eslintcache

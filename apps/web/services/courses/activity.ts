@@ -9,7 +9,7 @@ import { tags } from '@/lib/cacheTags';
  GET requests are called from the frontend using SWR (https://swr.vercel.app/)
 */
 
-export async function startCourse(course_uuid: string, _org_slug: string, access_token: string) {
+export async function startCourse(course_uuid: string, access_token: string) {
   const result = await fetch(
     `${getAPIUrl()}trail/add_course/${course_uuid}`,
     RequestBodyWithAuthHeader('POST', null, null, access_token),
@@ -25,7 +25,7 @@ export async function startCourse(course_uuid: string, _org_slug: string, access
   return data_result;
 }
 
-export async function removeCourse(course_uuid: string, _org_slug: string, access_token: string) {
+export async function removeCourse(course_uuid: string, access_token: string) {
   const result = await fetch(
     `${getAPIUrl()}trail/remove_course/${course_uuid}`,
     RequestBodyWithAuthHeader('DELETE', null, null, access_token),
@@ -41,12 +41,7 @@ export async function removeCourse(course_uuid: string, _org_slug: string, acces
   return data_result;
 }
 
-export async function markActivityAsComplete(
-  _org_slug: string,
-  _course_uuid: string,
-  activity_uuid: string,
-  access_token: string,
-) {
+export async function markActivityAsComplete(activity_uuid: string, access_token: string) {
   const result = await fetch(
     `${getAPIUrl()}trail/add_activity/${activity_uuid}`,
     RequestBodyWithAuthHeader('POST', null, null, access_token),
@@ -62,12 +57,7 @@ export async function markActivityAsComplete(
   return data_result;
 }
 
-export async function unmarkActivityAsComplete(
-  _org_slug: string,
-  _course_uuid: string,
-  activity_uuid: string,
-  access_token: string,
-) {
+export async function unmarkActivityAsComplete(activity_uuid: string, access_token: string) {
   const result = await fetch(
     `${getAPIUrl()}trail/remove_activity/${activity_uuid}`,
     RequestBodyWithAuthHeader('DELETE', null, null, access_token),

@@ -6,17 +6,13 @@ import { Leaderboard } from './Gamification/leaderboard';
 import { Skeleton } from '@/components/ui/skeleton';
 import { auth } from '@/auth';
 
-interface GamificationDashboardProps {
-  orgId: number;
-}
-
 /**
  * Unified Gamification Dashboard (Server Component)
  *
  * Fetches gamification data and renders dashboard components.
  * Returns null if user is not authenticated to avoid render loops.
  */
-export default async function GamificationDashboard({ orgId }: GamificationDashboardProps) {
+export default async function GamificationDashboard() {
   try {
     const session = await auth();
     const userId = session?.user?.id;
@@ -29,8 +25,8 @@ export default async function GamificationDashboard({ orgId }: GamificationDashb
     // Fetch dashboard data and leaderboard in parallel
     // Caching is handled inside the service functions via `use cache`
     const [dashboardData, leaderboardData] = await Promise.all([
-      getServerGamificationDashboard(orgId),
-      getServerOrganizationLeaderboard(orgId, 10),
+      getServerGamificationDashboard(),
+      getServerOrganizationLeaderboard(10),
     ]);
 
     // If no dashboard data (error or not available), return null silently
@@ -40,7 +36,6 @@ export default async function GamificationDashboard({ orgId }: GamificationDashb
 
     return (
       <GamificationProvider
-        orgId={orgId}
         initialData={{
           dashboard: dashboardData,
           profile: dashboardData.profile,

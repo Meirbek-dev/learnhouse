@@ -5,7 +5,6 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { createAssignmentWithActivity } from '@services/courses/assignments';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { BarLoader } from '@components/Objects/Loaders/BarLoader';
-import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { revalidateTags } from '@services/utils/ts/requests';
 import { de, enUS, es, fr, ru } from 'date-fns/locale';
@@ -39,12 +38,11 @@ interface FormValues {
   gradingType: 'NUMERIC' | 'PERCENTAGE';
 }
 
-const NewAssignment = ({ submitActivity, chapterId, course, closeModal, orgslug }: any) => {
+const NewAssignment = ({ submitActivity, chapterId, course, closeModal }: any) => {
   const validationT = useTranslations('Validation');
   const t = useTranslations('Components.NewAssignmentModal');
   const fullLocale = useLocale();
   const locale = fullLocale.split('-')[0] ?? 'ru';
-  const org = usePlatformOrg() as any;
   const session = usePlatformSession() as any;
   const validationSchema = createValidationSchema(validationT);
   const withUnpublishedActivities = course ? course.withUnpublishedActivities : false;
@@ -101,7 +99,6 @@ const NewAssignment = ({ submitActivity, chapterId, course, closeModal, orgslug 
               due_date: values.dueDate,
               grading_type: values.gradingType,
               course_id: course?.courseStructure.id,
-              org_id: org?.id,
               chapter_id: chapterId,
             },
             chapterId,
@@ -120,9 +117,7 @@ const NewAssignment = ({ submitActivity, chapterId, course, closeModal, orgslug 
               );
             }
 
-            if (orgslug) {
-              await revalidateTags(['courses']);
-            }
+            await revalidateTags(['courses']);
 
             closeModal();
           } else {

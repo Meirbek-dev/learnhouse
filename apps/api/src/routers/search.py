@@ -1,12 +1,9 @@
-from typing import Annotated
-
 from fastapi import APIRouter, Depends, Request
 
 from src.core.events.database import get_db_session
 from src.db.users import PublicUser
 from src.security.auth import get_current_user
 from src.services.search.search import SearchResult, search_across_org
-from src.services.platform import get_platform_organization
 
 router = APIRouter()
 
@@ -18,13 +15,11 @@ async def api_search_platform_content(
     page: int = 1,
     limit: int = 10,
     db_session=Depends(get_db_session),
-    current_user: Annotated[PublicUser, Depends(get_current_user)] = None,
+    current_user=Depends(get_current_user),
 ) -> SearchResult:
-    platform_org = get_platform_organization(db_session)
     return await search_across_org(
         request=request,
         current_user=current_user,
-        org_slug=platform_org.slug,
         search_query=query,
         db_session=db_session,
         page=page,

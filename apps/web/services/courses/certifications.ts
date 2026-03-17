@@ -1,8 +1,8 @@
 'use server';
 
 import { RequestBodyWithAuthHeader, errorHandling, getResponseMetadata } from '@services/utils/ts/requests';
-import { courseTag, getCourseListTags, tags } from '@/lib/cacheTags';
 import { getAPIUrl } from '@services/config/config';
+import { courseTag, tags } from '@/lib/cacheTags';
 
 /*
  This file includes certification-related API calls
@@ -19,7 +19,6 @@ export async function getCourseCertifications(course_uuid: string, next: any, ac
 
 interface CertificationInvalidationOptions {
   courseUuid?: string;
-  orgSlug?: string;
   includeEditableList?: boolean;
   lastKnownUpdateDate?: string | null;
 }
@@ -33,12 +32,7 @@ async function revalidateCertificationTags(options?: CertificationInvalidationOp
     tagsToRevalidate.add(courseTag.certifications(options.courseUuid));
   }
 
-  if (options?.orgSlug) {
-    getCourseListTags(options.orgSlug, {
-      includeEditable: options.includeEditableList ?? true,
-      includePublic: false,
-    }).forEach((tag) => tagsToRevalidate.add(tag));
-  } else if (options?.includeEditableList ?? true) {
+  if (options?.includeEditableList ?? true) {
     tagsToRevalidate.add(tags.editableCourses);
   }
 

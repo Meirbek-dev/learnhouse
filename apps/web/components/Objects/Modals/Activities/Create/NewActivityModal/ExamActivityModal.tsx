@@ -41,7 +41,7 @@ interface FormValues {
   allow_result_review: boolean;
 }
 
-const NewExam = ({ submitActivity, chapterId, course, closeModal, orgslug }: any) => {
+const NewExam = ({ submitActivity, chapterId, course, closeModal }: any) => {
   const validationT = useTranslations('Validation');
   const t = useTranslations('Components.NewExamModal');
   const session = usePlatformSession();
@@ -244,12 +244,12 @@ const NewExam = ({ submitActivity, chapterId, course, closeModal, orgslug }: any
                     max={limits?.time_limit?.max ?? 180}
                     placeholder="60"
                     {...field}
-                    onChange={(e) =>
+                    onChange={(e) => {
                       field.onChange(
                         Number.parseInt(e.target.value) ||
                           Math.min(Math.max(50, limits?.time_limit?.min ?? 1), limits?.time_limit?.max ?? 180),
-                      )
-                    }
+                      );
+                    }}
                   />
                 </FormControl>
                 <FormDescription>{t('timeLimitMinutesDescription')}</FormDescription>

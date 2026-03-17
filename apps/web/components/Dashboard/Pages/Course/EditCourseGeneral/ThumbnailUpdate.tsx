@@ -115,7 +115,6 @@ const ThumbnailUpdate = ({ thumbnailType, disabled = false, disabledReason }: Th
           session.data?.tokens?.access_token,
           {
             lastKnownUpdateDate: course.courseStructure.update_date,
-            orgSlug: org?.slug,
           },
         );
 
@@ -139,7 +138,7 @@ const ThumbnailUpdate = ({ thumbnailType, disabled = false, disabledReason }: Th
         setIsLoading(false);
       }
     },
-    [course, dispatchCourse, org?.slug, session, showError, t],
+    [course, dispatchCourse, session, showError, t],
   );
 
   const handleFileChange = useCallback(

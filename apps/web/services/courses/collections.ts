@@ -68,11 +68,10 @@ export async function getCollectionById(collection_uuid: string, access_token?: 
 /**
  * Cached fetch for organization collections
  */
-async function fetchOrgCollections(org_id: number, access_token?: string) {
+async function fetchOrgCollections(access_token?: string) {
   'use cache';
   cacheTag(tags.collections);
   cacheLife(CacheProfiles.courses);
-  void org_id;
 
   const headers: HeadersInit = { 'Content-Type': 'application/json' };
   if (access_token) {
@@ -86,6 +85,6 @@ async function fetchOrgCollections(org_id: number, access_token?: string) {
   return await errorHandling(result);
 }
 
-export async function getOrgCollections(org_id: number, access_token?: string, _next?: any) {
-  return fetchOrgCollections(org_id, access_token);
+export async function getOrgCollections(access_token?: string, _next?: any) {
+  return fetchOrgCollections(access_token);
 }

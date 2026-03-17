@@ -6,7 +6,6 @@ from fastapi import APIRouter, Depends, Form, Request, Response, UploadFile
 from sqlmodel import Session
 
 from src.core.events.database import get_db_session
-from src.core.platform import PLATFORM_ORG_SLUG
 from src.db.courses.course_updates import (
     CourseUpdateCreate,
     CourseUpdateRead,
@@ -34,17 +33,17 @@ from src.services.courses.contributors import (
     update_course_contributor,
 )
 from src.services.courses.courses import (
-    count_courses_orgslug,
-    count_editable_courses_orgslug,
+    count_courses,
+    count_editable_courses,
     create_course,
     delete_course,
     get_course,
     get_course_by_id,
     get_course_meta,
     get_course_user_rights,
-    get_courses_orgslug,
-    get_editable_courses_orgslug,
-    list_editable_courses_orgslug,
+    get_courses,
+    get_editable_courses,
+    list_editable_courses,
     search_courses,
     update_course_access,
     update_course,
@@ -78,7 +77,6 @@ async def api_create_course(
     about: Annotated[str | None, Form()] = None,
     thumbnail_type: Annotated[ThumbnailType, Form()] = ThumbnailType.IMAGE,
     thumbnail: UploadFile | None = None,
-    org_id: int | None = None,
     current_user: Annotated[PublicUser, Depends(get_current_user)] = None,
     checker: PermissionCheckerDep = None,
     db_session=Depends(get_db_session),
@@ -88,8 +86,8 @@ async def api_create_course(
 
     **Required Permission**: `course:create:org`
     """
-    resolved_org_id = org_id or get_platform_org_id(db_session)
-    checker.require(current_user.id, "course:create", resolved_org_id)
+    org_id = get_platform_org_id(db_session)
+    checker.require(current_user.id, "course:create", org_id)
 
     course = CourseCreate(
         name=name,
@@ -102,7 +100,7 @@ async def api_create_course(
     )
     return await create_course(
         request,
-        resolved_org_id,
+        org_id,
         course,
         current_user,
         db_session,
@@ -213,12 +211,12 @@ async def api_get_platform_courses(
     ] = None,
     db_session=Depends(get_db_session),
 ) -> list[CourseReadWithPermissions]:
-    courses = await get_courses_orgslug(
-        request, current_user, PLATFORM_ORG_SLUG, db_session, page, limit
+    courses = await get_courses(
+        request, current_user, db_session, page, limit
     )
 
-    total_count = await count_courses_orgslug(
-        current_user, PLATFORM_ORG_SLUG, db_session
+    total_count = await count_courses(
+        current_user, db_session
     )
     response.headers["X-Total-Count"] = str(total_count)
     response.headers["Access-Control-Expose-Headers"] = "X-Total-Count"
@@ -263,10 +261,9 @@ async def api_get_platform_editable_courses(
     current_user: Annotated[PublicUser, Depends(get_current_user)] = None,
     db_session=Depends(get_db_session),
 ) -> list[CourseReadWithPermissions]:
-    courses, total_count, summary = await list_editable_courses_orgslug(
+    courses, total_count, summary = await list_editable_courses(
         request,
         current_user,
-        PLATFORM_ORG_SLUG,
         db_session,
         page,
         limit,
@@ -296,7 +293,7 @@ async def api_search_platform_courses(
     db_session=Depends(get_db_session),
 ) -> list[CourseRead]:
     return await search_courses(
-        request, current_user, PLATFORM_ORG_SLUG, query, db_session, page, limit
+        request, current_user, query, db_session, page, limit
     )
 
 

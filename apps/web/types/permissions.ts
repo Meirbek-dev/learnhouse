@@ -90,7 +90,6 @@ export interface Role {
 export interface UserRBACData {
   roles: Role[];
   permissions: string[];
-  org_id: number | null;
 }
 
 /** Backend Permission entity. */

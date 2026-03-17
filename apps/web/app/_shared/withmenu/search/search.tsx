@@ -48,7 +48,6 @@ interface Course {
   public: boolean;
   open_to_contributors: boolean;
   id: number;
-  org_id: number;
   authors: Author[];
   course_uuid: string;
   creation_date: string;
@@ -231,7 +230,6 @@ const SearchPage = () => {
       setIsLoading(true);
       try {
         const response = await searchOrgContent(
-          org?.slug,
           query,
           page,
           perPage,
@@ -265,7 +263,7 @@ const SearchPage = () => {
     };
 
     fetchResults();
-  }, [query, page, selectedType, org?.slug, session?.data?.tokens?.access_token]);
+  }, [query, page, selectedType, session?.data?.tokens?.access_token]);
 
   const totalResults = searchResults.total_courses + searchResults.total_collections + searchResults.total_users;
   const totalPages = Math.ceil(totalResults / perPage);

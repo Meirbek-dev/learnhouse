@@ -4,7 +4,6 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { linkResourcesToUserGroup } from '@services/usergroups/usergroups';
 import { getAPIUrl, getAbsoluteUrl } from '@services/config/config';
-import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { useTranslations } from 'next-intl';
@@ -27,12 +26,11 @@ interface LinkToUserGroupProps {
 const LinkToUserGroup = (props: LinkToUserGroupProps) => {
   const t = useTranslations('Components.LinkToUserGroup');
   const course = useCourse();
-  const org = usePlatformOrg() as any;
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const { courseStructure } = course;
 
-  const { data: usergroups } = useSWR(courseStructure && org ? `${getAPIUrl()}usergroups` : null, (url) =>
+  const { data: usergroups } = useSWR(courseStructure ? `${getAPIUrl()}usergroups` : null, (url) =>
     swrFetcher(url, access_token),
   );
   const [selectedUserGroup, setSelectedUserGroup] = useState<number | null>(null);
@@ -51,7 +49,6 @@ const LinkToUserGroup = (props: LinkToUserGroupProps) => {
     try {
       const res = await linkResourcesToUserGroup(effectiveUserGroup, courseStructure.course_uuid, access_token, {
         courseUuid: courseStructure.course_uuid,
-        orgSlug: org.slug,
       });
       if (res.status === 200) {
         props.setUserGroupModal(false);

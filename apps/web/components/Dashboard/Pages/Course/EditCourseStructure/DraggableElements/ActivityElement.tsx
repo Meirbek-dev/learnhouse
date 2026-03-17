@@ -41,7 +41,6 @@ import { deleteActivity, updateActivity } from '@services/courses/activities';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import ToolTip from '@/components/Objects/Elements/Tooltip/Tooltip';
 import { getAPIUrl, getAbsoluteUrl } from '@services/config/config';
-import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
@@ -77,7 +76,6 @@ interface Activity {
 }
 
 interface ActivityElementProps {
-  orgslug: string;
   activity: Activity;
   activityIndex: number;
   course_uuid: string;
@@ -96,10 +94,6 @@ interface Course {
     course_uuid: string;
   };
   withUnpublishedActivities?: boolean;
-}
-
-interface Organization {
-  slug: string;
 }
 
 // Activity type configuration
@@ -139,7 +133,7 @@ const ACTIVITY_CONFIG = {
   },
 } as const;
 
-const ActivityElement = ({ orgslug, activity, activityIndex, course_uuid }: ActivityElementProps) => {
+const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityElementProps) => {
   // Hooks
   const session = usePlatformSession() as PlatformSession;
   const access_token = session?.data?.tokens?.access_token;
@@ -413,7 +407,6 @@ const ActivityElement = ({ orgslug, activity, activityIndex, course_uuid }: Acti
           <div className="flex flex-shrink-0 items-center gap-2">
             <ActivityEditButton
               activity={activity}
-              orgslug={orgslug}
               course_uuid={course_uuid}
               assignmentUUID={assignmentUUID ?? null}
               isAssignmentLoading={isAssignmentLoading}
@@ -530,21 +523,18 @@ const ActivityTypeBadge = ({ activityType }: { activityType: ActivityType }) => 
 
 const ActivityEditButton = ({
   activity,
-  orgslug,
   course_uuid,
   assignmentUUID,
   isAssignmentLoading,
   onRequestAssignment,
 }: {
   activity: Activity;
-  orgslug: string;
   course_uuid: string;
   assignmentUUID: string | null;
   isAssignmentLoading: boolean;
   onRequestAssignment: () => void;
 }) => {
   const t = useTranslations('CourseEdit.ActivityElement');
-  const org = usePlatformOrg() as Organization;
   const course = useCourse() as Course;
   const isMobile = useIsMobile();
 

@@ -29,7 +29,6 @@ import { SectionHeader } from '@components/Dashboard/Courses/SectionHeader';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { useEffect, useRef, useState, useTransition } from 'react';
-import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { updateCourseAccess } from '@services/courses/courses';
 import { useDirtySection } from '@/hooks/useDirtySection';
@@ -42,7 +41,6 @@ import { toast } from 'sonner';
 
 const EditCourseAccess = () => {
   const session = usePlatformSession() as any;
-  const org = usePlatformOrg() as { slug?: string } | null;
   const access_token = session?.data?.tokens?.access_token;
   const course = useCourse();
   const { courseStructure, editorData } = course;
@@ -80,7 +78,6 @@ const EditCourseAccess = () => {
     await save(async () => {
       const response = await updateCourseAccess(courseStructure.course_uuid, { public: draftPublic }, access_token, {
         lastKnownUpdateDate: courseStructure.update_date,
-        orgSlug: org?.slug,
       });
       if (response.success) {
         initialRef.current = draftPublic;
@@ -148,22 +145,13 @@ const EditCourseAccess = () => {
         <UserGroupsSection
           usergroups={usergroups}
           isLoading={isUserGroupsLoading}
-          orgslug={org?.slug}
         />
       )}
     </div>
   );
 };
 
-const UserGroupsSection = ({
-  usergroups,
-  isLoading,
-  orgslug,
-}: {
-  usergroups: any[];
-  isLoading: boolean;
-  orgslug?: string;
-}) => {
+const UserGroupsSection = ({ usergroups, isLoading }: { usergroups: any[]; isLoading: boolean }) => {
   const course = useCourse();
   const [userGroupModal, setUserGroupModal] = useState(false);
   const session = usePlatformSession() as any;
@@ -203,7 +191,6 @@ const UserGroupsSection = ({
                   usergroup={usergroup}
                   courseUuid={course.courseStructure.course_uuid}
                   accessToken={access_token}
-                  orgslug={orgslug}
                 />
               ))}
             </TableBody>
@@ -246,12 +233,10 @@ const UnlinkUserGroupRow = ({
   usergroup,
   courseUuid,
   accessToken,
-  orgslug,
 }: {
   usergroup: any;
   courseUuid: string;
   accessToken: string;
-  orgslug?: string;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -263,7 +248,6 @@ const UnlinkUserGroupRow = ({
       try {
         const res = await unLinkResourcesToUserGroup(usergroup.id, courseUuid, accessToken, {
           courseUuid,
-          orgSlug: orgslug,
         });
         if (res.status === 200) {
           toast.success(t('unlinkUserGroupSuccess'));

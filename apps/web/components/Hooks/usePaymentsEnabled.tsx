@@ -1,12 +1,10 @@
 // hooks/usePaymentsEnabled.ts
 
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { getPaymentConfigs } from '@services/payments/payments';
 import useSWR from 'swr';
 
 export function usePaymentsEnabled() {
-  const org = usePlatformOrg() as any;
   const session = usePlatformSession();
   const access_token = session?.data?.tokens?.access_token;
 
@@ -14,9 +12,7 @@ export function usePaymentsEnabled() {
     data: paymentConfigs,
     error,
     isLoading,
-  } = useSWR(org && access_token ? [`/payments/${org.id}/config`, access_token] : null, ([_url, token]) =>
-    getPaymentConfigs(org.id, token),
-  );
+  } = useSWR(access_token ? ['/payments/config', access_token] : null, ([_url, token]) => getPaymentConfigs(token));
 
   const isStripeEnabled = paymentConfigs?.some((config: any) => config.provider === 'stripe' && config.active);
 

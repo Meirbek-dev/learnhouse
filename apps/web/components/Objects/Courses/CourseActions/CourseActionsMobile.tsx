@@ -1,12 +1,11 @@
 'use client';
 
-import { getAbsoluteUrl, getUriWithoutOrg, PLATFORM_ORG_SLUG } from '@services/config/config';
 import { AlertCircle, BookOpen, Loader2, LogIn, ShoppingCart } from 'lucide-react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { getAbsoluteUrl, getUriWithoutOrg } from '@services/config/config';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
 import { useEffect, useRef, useState, useTransition } from 'react';
 import { getProductsByCourse } from '@services/payments/products';
-import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
 import { checkPaidAccess } from '@services/payments/payments';
 import { revalidateTags } from '@services/utils/ts/requests';
@@ -56,9 +55,7 @@ interface Course {
 
 interface CourseActionsMobileProps {
   courseuuid: string;
-  course: Course & {
-    org_id: number;
-  };
+  course: Course;
   trailData?: any;
 }
 
@@ -146,7 +143,6 @@ const CourseActionsMobile = ({ courseuuid, course, trailData }: CourseActionsMob
   const t = useTranslations('Courses.CourseActionsMobile');
   const router = useRouter();
   const session = usePlatformSession() as any;
-  const org = usePlatformOrg() as { slug?: string } | null;
   // stable primitives to avoid effects depending on the whole session object
   const accessToken = session.data?.tokens?.access_token;
   const userId = session.data?.user?.id;
@@ -173,7 +169,7 @@ const CourseActionsMobile = ({ courseuuid, course, trailData }: CourseActionsMob
   useEffect(() => {
     const fetchLinkedProducts = async () => {
       try {
-        const response = await getProductsByCourse(course.org_id, course.id, accessToken);
+        const response = await getProductsByCourse(course.id, accessToken);
         setLinkedProducts(response.data || []);
       } catch {
         console.error('Failed to fetch linked products');
@@ -186,13 +182,13 @@ const CourseActionsMobile = ({ courseuuid, course, trailData }: CourseActionsMob
     if (fetchedLinkedProductsRef.current[course.id]) return;
     fetchedLinkedProductsRef.current[course.id] = true;
     fetchLinkedProducts();
-  }, [course.id, course.org_id, accessToken]);
+  }, [course.id, accessToken]);
 
   useEffect(() => {
     const checkAccess = async () => {
       if (!userId) return;
       try {
-        const response = await checkPaidAccess(course.id, course.org_id, accessToken);
+        const response = await checkPaidAccess(course.id, accessToken);
         setHasAccess(response.has_access);
       } catch {
         console.error('Failed to check course access');
@@ -205,7 +201,7 @@ const CourseActionsMobile = ({ courseuuid, course, trailData }: CourseActionsMob
     if (checkedAccessRef.current[checkKey]) return;
     checkedAccessRef.current[checkKey] = true;
     checkAccess();
-  }, [course.id, course.org_id, accessToken, userId, linkedProducts]);
+  }, [course.id, accessToken, userId, linkedProducts]);
 
   const handleCourseAction = async () => {
     if (!session.data?.user) {
@@ -249,7 +245,7 @@ const CourseActionsMobile = ({ courseuuid, course, trailData }: CourseActionsMob
 
     startTransition(() => setIsActionLoading(true));
     try {
-      await startCourse(`course_${courseuuid}`, org?.slug || PLATFORM_ORG_SLUG, session.data?.tokens?.access_token);
+      await startCourse(`course_${courseuuid}`, session.data?.tokens?.access_token);
       await revalidateTags(['courses']);
 
       // Get the first activity from the first chapter

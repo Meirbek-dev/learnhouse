@@ -4,7 +4,6 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { assignRoleToUser, removeRoleFromUser } from '@/services/rbac';
 import { BarLoader } from '@components/Objects/Loaders/BarLoader';
-import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { Alert, AlertDescription } from '@components/ui/alert';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { swrFetcher } from '@services/utils/ts/requests';
@@ -35,7 +34,6 @@ interface FormData {
 const RolesUpdate: FC<Props> = (props) => {
   const validationT = useTranslations('Validation');
   const t = useTranslations('Components.RolesUpdate');
-  const org = usePlatformOrg() as any;
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const validationSchema = createValidationSchema(validationT);
@@ -50,9 +48,7 @@ const RolesUpdate: FC<Props> = (props) => {
   });
 
   // Fetch available roles for the organization and sort them by system flag + priority
-  const { data: roles, error: rolesError } = useSWR(org ? `${getAPIUrl()}roles?org_id=${org.id}` : null, (url) =>
-    swrFetcher(url, access_token),
-  );
+  const { data: roles, error: rolesError } = useSWR(`${getAPIUrl()}roles`, (url) => swrFetcher(url, access_token));
 
   const sortedRoles = (roles ?? []).toSorted((a: any, b: any) => {
     // System roles first, then by descending priority, then by name
@@ -76,9 +72,9 @@ const RolesUpdate: FC<Props> = (props) => {
 
         // Revoke old role, then assign new one
         if (!Number.isNaN(oldRoleId)) {
-          await removeRoleFromUser(access_token, userId, oldRoleId, org.id);
+          await removeRoleFromUser(access_token, userId, oldRoleId);
         }
-        await assignRoleToUser(access_token, userId, newRoleId, org.id);
+        await assignRoleToUser(access_token, userId, newRoleId);
 
         await mutate(`${getAPIUrl()}orgs/users`);
         props.setRolesModal(false);

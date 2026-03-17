@@ -3,7 +3,6 @@
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { CheckCircle2, Globe, Image as ImageIcon, Loader2, Lock, Search } from 'lucide-react';
-import { getAbsoluteUrl, PLATFORM_ORG_SLUG } from '@services/config/config';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { usePlatformOrg } from '@components/Contexts/OrgContext';
@@ -11,6 +10,7 @@ import { createCollection } from '@services/courses/collections';
 import { useCourseListByOrg } from '@/hooks/useCourseListByOrg';
 import { revalidateTags } from '@services/utils/ts/requests';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { getAbsoluteUrl } from '@services/config/config';
 import { useMemo, useState, useTransition } from 'react';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -42,7 +42,7 @@ const NewCollection = () => {
   const [isPending, startTransition] = useTransition();
   const [searchQuery, setSearchQuery] = useState('');
   const router = useRouter();
-  const { data: courses, error, isLoading } = useCourseListByOrg(PLATFORM_ORG_SLUG);
+  const { data: courses, error, isLoading } = useCourseListByOrg();
   const [isPublic, setIsPublic] = useState(true);
 
   const filteredCourses = useMemo(() => {
@@ -91,7 +91,6 @@ const NewCollection = () => {
         description: description.trim(),
         courses: selectedCourses,
         public: isPublic,
-        org_id: org.id,
       };
       await createCollection(collection, session.data?.tokens?.access_token);
       await revalidateTags(['collections']);

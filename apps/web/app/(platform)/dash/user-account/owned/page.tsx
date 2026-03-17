@@ -3,7 +3,6 @@
 import CourseThumbnail from '@components/Objects/Thumbnails/CourseThumbnail';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
-import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { getOwnedCourses } from '@services/payments/payments';
 import { Package2, ShoppingCart } from 'lucide-react';
 import { useTranslations } from 'next-intl';
@@ -11,7 +10,6 @@ import useSWR from 'swr';
 
 export default function PlatformOwnedCoursesPage() {
   const t = useTranslations('DashPage.Courses');
-  const org = usePlatformOrg() as any;
   const session = usePlatformSession();
   const access_token = session?.data?.tokens?.access_token;
 
@@ -20,8 +18,8 @@ export default function PlatformOwnedCoursesPage() {
     error,
     isLoading,
   } = useSWR(
-    org && access_token ? [`/payments/${org.id}/courses/owned`, access_token] : null,
-    ([_url, token]) => getOwnedCourses(org.id, token),
+    access_token ? ['/payments/courses/owned', access_token] : null,
+    ([_url, token]) => getOwnedCourses(token),
     { revalidateOnFocus: false, dedupingInterval: 60_000 },
   );
 

@@ -4,6 +4,7 @@ from fastapi import Request
 from sqlalchemy import true as sa_true
 from sqlmodel import Session, and_, or_, select, text
 
+from src.core.platform import PLATFORM_ORG_SLUG
 from src.db.collections import Collection, CollectionRead
 from src.db.collections_courses import CollectionCourse
 from src.db.courses.courses import Course, CourseRead
@@ -25,19 +26,18 @@ class SearchResult(PydanticStrictBaseModel):
 async def search_across_org(
     request: Request,
     current_user: PublicUser | AnonymousUser,
-    org_slug: str,
     search_query: str,
     db_session: Session,
     page: int = 1,
     limit: int = 10,
 ) -> SearchResult:
     """
-    Search across courses, collections and users within an organization
+    Search across courses, collections and users within the platform organization
     """
     offset = (page - 1) * limit
 
     # Get organization
-    org_statement = select(Organization).where(Organization.slug == org_slug)
+    org_statement = select(Organization).where(Organization.slug == PLATFORM_ORG_SLUG)
     org = db_session.exec(org_statement).first()
 
     if not org:
@@ -45,7 +45,7 @@ async def search_across_org(
 
     # Search courses using existing search_courses function
     courses = await search_courses(
-        request, current_user, org_slug, search_query, db_session, page, limit
+        request, current_user, search_query, db_session, page, limit
     )
 
     # Search collections

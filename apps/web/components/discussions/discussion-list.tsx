@@ -8,7 +8,6 @@ import {
   updateDiscussion,
 } from '@services/courses/discussions';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { useEffect, useRef, useState } from 'react';
 import DiscussionPost from './discussion-post';
@@ -84,7 +83,6 @@ export default function DiscussionList({ initialPosts, currentUser, courseUuid, 
     }
     return [];
   });
-  const org = usePlatformOrg();
   const session = usePlatformSession();
   const access_token = session?.data?.tokens?.access_token;
   const postsRafRef = useRef<number | null>(null);
@@ -109,8 +107,8 @@ export default function DiscussionList({ initialPosts, currentUser, courseUuid, 
   }, [initialPosts]);
 
   const handleSubmitDiscussion = async (content: string) => {
-    if (!(access_token && org?.id)) {
-      console.error('Missing access token or org ID:', { access_token: Boolean(access_token), org_id: org?.id });
+    if (!access_token) {
+      console.error('Missing access token');
       return;
     }
 
@@ -120,7 +118,6 @@ export default function DiscussionList({ initialPosts, currentUser, courseUuid, 
         {
           content,
           type: 'post',
-          org_id: org.id,
         },
         access_token,
       );
@@ -161,8 +158,8 @@ export default function DiscussionList({ initialPosts, currentUser, courseUuid, 
   };
 
   const handleSubmitReply = async (postId: string, replyContent: string) => {
-    if (!(access_token && org?.id)) {
-      console.error('Missing access token or org ID:', { access_token: Boolean(access_token), org_id: org?.id });
+    if (!access_token) {
+      console.error('Missing access token');
       return;
     }
 
@@ -180,7 +177,6 @@ export default function DiscussionList({ initialPosts, currentUser, courseUuid, 
           content: replyContent,
           type: 'reply',
           parent_discussion_id: Number.parseInt(parentPost.id, 10),
-          org_id: org.id,
         },
         access_token,
       );

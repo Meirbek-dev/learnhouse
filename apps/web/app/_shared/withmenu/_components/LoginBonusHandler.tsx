@@ -4,11 +4,9 @@ import { useGamificationContext } from '@/components/Contexts/GamificationContex
 import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
-interface LoginBonusHandlerProps {
-  orgId: number;
-}
+const TODAY_KEY = `gamification:lastLoginAward:${new Date().toISOString().slice(0, 10)}`;
 
-export function LoginBonusHandler({ orgId }: LoginBonusHandlerProps) {
+export function LoginBonusHandler() {
   const t = useTranslations('DashPage.UserAccountSettings.Gamification');
   const { profile, updateStreak, awardXP } = useGamificationContext();
   const [showBadge, setShowBadge] = useState(false);
@@ -18,14 +16,13 @@ export function LoginBonusHandler({ orgId }: LoginBonusHandlerProps) {
   const hasAttemptedRef = useRef<boolean>(false);
 
   useEffect(() => {
-    if (!orgId || !profile) return;
+    if (!profile) return;
     if (hasAttemptedRef.current) return;
 
     isMountedRef.current = true;
 
     try {
-      const todayKey = `gamification:lastLoginAward:${orgId}:${new Date().toISOString().slice(0, 10)}`;
-      const alreadyDone = typeof globalThis.window !== 'undefined' ? localStorage.getItem(todayKey) : null;
+      const alreadyDone = typeof globalThis.window !== 'undefined' ? localStorage.getItem(TODAY_KEY) : null;
 
       if (alreadyDone) return;
 
@@ -37,12 +34,12 @@ export function LoginBonusHandler({ orgId }: LoginBonusHandlerProps) {
           await awardXP(
             {
               source: 'login_bonus',
-              idempotency_key: `login_bonus_${profile.user_id}_${orgId}_${new Date().toISOString().slice(0, 10)}`,
+              idempotency_key: `login_bonus_${profile.user_id}_${new Date().toISOString().slice(0, 10)}`,
             },
             { silent: true },
           );
 
-          localStorage.setItem(todayKey, '1');
+          localStorage.setItem(TODAY_KEY, '1');
 
           if (isMountedRef.current) {
             setShowBadge(true);
@@ -62,7 +59,7 @@ export function LoginBonusHandler({ orgId }: LoginBonusHandlerProps) {
       isMountedRef.current = false;
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
-  }, [orgId, profile, updateStreak, awardXP]);
+  }, [profile, updateStreak, awardXP]);
 
   if (!showBadge) return null;
 

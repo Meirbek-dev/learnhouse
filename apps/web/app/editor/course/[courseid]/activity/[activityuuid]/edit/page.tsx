@@ -1,5 +1,5 @@
-import { getOrganizationContextInfoWithId } from '@services/organizations/orgs';
 import EditorOptionsProvider from '@components/Contexts/Editor/EditorContext';
+import { getOrganizationContextInfo } from '@services/organizations/orgs';
 import { getActivityWithAuthHeader } from '@services/courses/activities';
 import AIEditorProvider from '@components/Contexts/AI/AIEditorContext';
 import EditorWrapper from '@components/Objects/Editor/EditorWrapper';
@@ -42,7 +42,7 @@ const EditActivity = async (props: { params: Promise<{ courseid: string; activit
     getActivityWithAuthHeader(activityuuid, undefined, access_token),
   ]);
 
-  const org = await getOrganizationContextInfoWithId(courseInfo.org_id, undefined, access_token || '');
+  const org = await getOrganizationContextInfo(undefined, access_token || '');
 
   return (
     <div className={jetBrainsMono.variable}>

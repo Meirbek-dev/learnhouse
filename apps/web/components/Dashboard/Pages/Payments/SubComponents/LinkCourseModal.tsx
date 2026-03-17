@@ -27,12 +27,11 @@ interface CoursePreviewProps {
     thumbnail_image: string;
     course_uuid: string;
   };
-  orgslug: string;
   onLink: (courseId: number) => void;
   isLinked: boolean;
 }
 
-const CoursePreview = ({ course, orgslug, onLink, isLinked }: CoursePreviewProps) => {
+const CoursePreview = ({ course, onLink, isLinked }: CoursePreviewProps) => {
   const org = usePlatformOrg() as any;
   const t = useTranslations('Payments.LinkCourseModal');
 
@@ -82,32 +81,30 @@ const CoursePreview = ({ course, orgslug, onLink, isLinked }: CoursePreviewProps
 
 export default function LinkCourseModal({ productId, onSuccess }: LinkCourseModalProps) {
   const [searchTerm, setSearchTerm] = useState('');
-  const org = usePlatformOrg() as any;
   const session = usePlatformSession() as any;
   const accessToken = session?.data?.tokens?.access_token;
-  const orgId = org?.id;
   const tNotify = useTranslations('DashPage.Notifications');
   const t = useTranslations('DashPage.Payments.LinkCourseModal');
 
-  const PRODUCTS_KEY = getPaymentsProductsSwrKey(orgId);
+  const PRODUCTS_KEY = getPaymentsProductsSwrKey();
 
   const { data: coursesData, error: coursesError } = useSWR(
-    () => (org?.slug && accessToken ? [org.slug, accessToken] : null),
-    ([orgSlug, token]) => getOrgCourses(orgSlug, null, token),
+    () => (accessToken ? ['org-courses', accessToken] : null),
+    ([, token]) => getOrgCourses(null, token),
   );
 
   const courses = coursesData?.courses;
 
   const { data: linkedCoursesData, error: linkedCoursesError } = useSWR(
-    () => (orgId && accessToken ? [`/payments/${orgId}/products/${productId}/courses`, accessToken] : null),
-    ([_, token]) => getCoursesLinkedToProduct(orgId, productId, token),
+    () => (accessToken ? [`/payments/products/${productId}/courses`, accessToken] : null),
+    ([_, token]) => getCoursesLinkedToProduct(productId, token),
   );
 
   const handleLinkCourse = async (courseId: number) => {
     try {
-      const response = await linkCourseToProduct(orgId, productId, courseId, accessToken);
+      const response = await linkCourseToProduct(productId, courseId, accessToken);
       if (response.success) {
-        mutate([getPaymentsProductsSwrKey(orgId), accessToken]);
+        mutate([getPaymentsProductsSwrKey(), accessToken]);
         toast.success(tNotify('courseLinkedSuccess'));
         onSuccess();
       } else {
@@ -156,7 +153,6 @@ export default function LinkCourseModal({ productId, onSuccess }: LinkCourseModa
           <CoursePreview
             key={course.course_uuid}
             course={course}
-            orgslug={org.slug}
             onLink={handleLinkCourse}
             isLinked={isLinked(course.id)}
           />

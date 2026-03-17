@@ -30,7 +30,6 @@ interface NewActivityModalProps {
   submitExternalVideo: (external_video_data: any, activity: any, chapterId: number) => Promise<void>;
   chapterId: number;
   course: unknown;
-  orgslug: string;
 }
 
 const ACTIVITY_TYPES: ActivityType[] = [
@@ -91,14 +90,13 @@ export default function NewActivityModal({
   submitExternalVideo,
   chapterId,
   course,
-  orgslug,
 }: NewActivityModalProps) {
   const t = useTranslations('Components.NewActivity');
   const [selectedView, setSelectedView] = useState<ViewType>('home');
 
   const handleBack = useCallback(() => setSelectedView('home'), []);
 
-  const sharedProps = { chapterId, course, closeModal, orgslug };
+  const sharedProps = { chapterId, course, closeModal };
 
   if (selectedView === 'home') {
     return (

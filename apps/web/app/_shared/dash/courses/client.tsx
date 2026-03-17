@@ -35,8 +35,6 @@ import type { Course } from '@components/Objects/Thumbnails/CourseThumbnail';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
-import { usePlatformOrg } from '@components/Contexts/OrgContext';
-import { PLATFORM_ORG_SLUG } from '@services/config/config';
 import type { ColumnDef } from '@tanstack/react-table';
 import { Checkbox } from '@/components/ui/checkbox';
 import DataTable from '@/components/ui/data-table';
@@ -87,9 +85,7 @@ const CoursesHome = ({
   const viewMode = searchParams.get('view') === 'cards' ? 'cards' : 'table';
   const { can } = usePermissions();
   const session = usePlatformSession() as any;
-  const org = usePlatformOrg() as { slug?: string } | null;
   const accessToken = session?.data?.tokens?.access_token;
-  const orgslug = org?.slug || PLATFORM_ORG_SLUG;
   const canCreateCourse = can(Actions.CREATE, Resources.COURSE, Scopes.ORG);
   const [selectedCourseUuids, setSelectedCourseUuids] = useState<string[]>([]);
   const [isBulkPending, startBulkTransition] = useTransition();
@@ -211,7 +207,6 @@ const CoursesHome = ({
           targetCourses.map((course) =>
             updateCourseAccess(course.course_uuid, { public: nextPublic }, accessToken, {
               lastKnownUpdateDate: course.update_date,
-              orgSlug: orgslug,
             }),
           ),
         );
@@ -252,7 +247,7 @@ const CoursesHome = ({
     startBulkTransition(() => {
       void (async () => {
         const results = await Promise.allSettled(
-          targetCourses.map((course) => deleteCourseFromBackend(course.course_uuid, accessToken, { orgSlug: orgslug })),
+          targetCourses.map((course) => deleteCourseFromBackend(course.course_uuid, accessToken)),
         );
 
         const successCount = results.filter((result) => result.status === 'fulfilled').length;
@@ -449,12 +444,7 @@ const CoursesHome = ({
         header: '',
         enableSorting: false,
         meta: { label: t('table.actions'), exportable: false },
-        cell: ({ row }) => (
-          <CourseRowActions
-            course={row.original}
-            orgslug={orgslug}
-          />
-        ),
+        cell: ({ row }) => <CourseRowActions course={row.original} />,
       },
     ],
     [
@@ -462,7 +452,6 @@ const CoursesHome = ({
       canDeleteCourse,
       canManageCourse,
       courseReadinessMap,
-      orgslug,
       selectedCourseUuids,
       t,
       toggleAllVisibleCourses,
@@ -645,8 +634,8 @@ const CoursesHome = ({
             data={courses}
             enableColumnVisibility
             enableCsvExport
-            csvFileName={`courses-${orgslug}-${new Date().toISOString().slice(0, 10)}.csv`}
-            storageKey={`course-management-${orgslug}`}
+            csvFileName={`courses-${new Date().toISOString().slice(0, 10)}.csv`}
+            storageKey="course-management"
             serverPaginated
             toolbarContent={bulkToolbar}
             labels={{
@@ -713,7 +702,7 @@ const CoursesHome = ({
   );
 };
 
-function CourseRowActions({ course, orgslug }: { course: ManageableCourse; orgslug: string }) {
+function CourseRowActions({ course }: { course: ManageableCourse }) {
   const t = useTranslations('DashPage.CourseManagement.Dashboard');
   const router = useRouter();
   const session = usePlatformSession() as any;
@@ -734,7 +723,7 @@ function CourseRowActions({ course, orgslug }: { course: ManageableCourse; orgsl
     startTransition(() => {
       void (async () => {
         try {
-          await deleteCourseFromBackend(course.course_uuid, accessToken, { orgSlug: orgslug });
+          await deleteCourseFromBackend(course.course_uuid, accessToken);
           toast.success(t('rowActions.deleteSuccess'));
           router.refresh();
         } catch {
@@ -752,7 +741,6 @@ function CourseRowActions({ course, orgslug }: { course: ManageableCourse; orgsl
         try {
           await updateCourseAccess(course.course_uuid, { public: !course.public }, accessToken, {
             lastKnownUpdateDate: course.update_date,
-            orgSlug: orgslug,
           });
           toast.success(course.public ? t('rowActions.visibilityMovedPrivate') : t('rowActions.visibilityPublished'));
           router.refresh();

@@ -56,7 +56,6 @@ export interface ConfigData {
 
 export interface Config {
   id: number;
-  org_id: number;
   config: ConfigData;
   creation_date: string | null;
   update_date: string | null;
@@ -69,10 +68,10 @@ export interface Config {
 export interface Org {
   id: number;
   org_uuid: string;
+  slug: string;
   name: string;
   description: string | null;
   about: string | null;
-  slug: string;
   email: string;
   socials: Record<string, string> | null;
   links: Record<string, string> | null;

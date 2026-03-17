@@ -205,7 +205,6 @@ function LeaderboardEntryRow({
         showLevelBadge
         gamificationProfile={{
           user_id: entry.user_id,
-          org_id: 0,
           level: entry.level,
           total_xp: entry.total_xp,
           xp_to_next_level: 0,

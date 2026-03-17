@@ -1,13 +1,13 @@
 'use client';
 
-import OrgUserGroups from '@components/Dashboard/Pages/Users/OrgUserGroups/OrgUserGroups';
+import UserGroups from '@components/Dashboard/Pages/Users/OrgUserGroups/OrgUserGroups';
 import { Actions, Resources, Scopes, usePermissions } from '@/components/Security';
-import OrgUsers from '@components/Dashboard/Pages/Users/OrgUsers/OrgUsers';
 import DesktopOnlyGuard from '@components/Dashboard/Misc/DesktopOnlyGuard';
+import Users from '@components/Dashboard/Pages/Users/OrgUsers/OrgUsers';
 import SettingsHeader from '@components/Dashboard/Misc/SettingsHeader';
 import SettingsTabs from '@components/Dashboard/Misc/SettingsTabs';
+import { SquareUserRound, UsersIcon } from 'lucide-react';
 import { getAbsoluteUrl } from '@services/config/config';
-import { SquareUserRound, Users } from 'lucide-react';
 import { use, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -37,11 +37,11 @@ export default function PlatformUsersSettingsPage(props: { params: Promise<{ sub
     () => [
       {
         id: 'users',
-        icon: Users,
+        icon: UsersIcon,
         labelKey: 'users',
         titleKey: 'usersTitle',
         descriptionKey: 'usersDescription',
-        component: OrgUsers,
+        component: Users,
       },
       {
         id: 'usergroups',
@@ -49,7 +49,7 @@ export default function PlatformUsersSettingsPage(props: { params: Promise<{ sub
         labelKey: 'usergroups',
         titleKey: 'usergroupsTitle',
         descriptionKey: 'usergroupsDescription',
-        component: OrgUserGroups,
+        component: UserGroups,
       },
     ],
     [],

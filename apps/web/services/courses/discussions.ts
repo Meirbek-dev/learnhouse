@@ -13,7 +13,6 @@ export interface DiscussionCreate {
   content: string;
   type?: 'post' | 'reply';
   parent_discussion_id?: number;
-  org_id: number;
 }
 
 export interface DiscussionUpdate {
@@ -30,7 +29,6 @@ export interface Discussion {
   course_id: number;
   user_id: number;
   parent_discussion_id?: number;
-  org_id: number;
   likes_count: number;
   dislikes_count: number;
   replies_count: number;

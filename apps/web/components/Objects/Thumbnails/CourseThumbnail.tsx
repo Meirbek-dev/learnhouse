@@ -42,8 +42,8 @@ import { Badge } from '@components/ui/badge';
 import Link from '@components/ui/AppLink';
 
 import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media';
-import { getAbsoluteUrl, PLATFORM_ORG_SLUG } from '@services/config/config';
 import { deleteCourseFromBackend } from '@services/courses/courses';
+import { getAbsoluteUrl } from '@services/config/config';
 
 // ============================================================================
 // Types
@@ -68,7 +68,6 @@ export interface Course {
   name: string;
   description: string;
   thumbnail_image: string;
-  org_id: number;
   update_date: string;
   authors?: CourseAuthor[];
   chapters?: {
@@ -575,9 +574,7 @@ const CourseThumbnail: FC<CourseThumbnailProps> = ({
   const handleDelete = async () => {
     const toastId = toast.loading(t('deleting'));
     try {
-      await deleteCourseFromBackend(course.course_uuid, session.data?.tokens?.access_token, {
-        orgSlug: org?.slug || PLATFORM_ORG_SLUG,
-      });
+      await deleteCourseFromBackend(course.course_uuid, session.data?.tokens?.access_token);
       toast.success(t('toastDeleteSuccess'));
       router.refresh();
     } catch {

@@ -46,8 +46,6 @@ declare global {
     tokens: AuthTokens;
     /** User's effective permissions as flat string array */
     permissions: string[];
-    /** Org ID the permissions were loaded for (null = system-only) */
-    permissions_org_id: number | null;
   }
 
   interface TokenRefreshResult {
@@ -64,8 +62,6 @@ declare module 'next-auth' {
     expires: string;
     /** User's effective permissions as flat string array */
     permissions?: string[];
-    /** Org ID the permissions were loaded for (null = system-only) */
-    permissions_org_id?: number | null;
   }
 
   type User = UserWithTokens;

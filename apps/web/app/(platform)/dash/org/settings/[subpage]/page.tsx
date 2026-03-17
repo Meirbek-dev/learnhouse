@@ -1,9 +1,9 @@
 'use client';
 
-import OrgEditSocials from '@components/Dashboard/Pages/Org/OrgEditSocials/OrgEditSocials';
-import OrgEditLanding from '@components/Dashboard/Pages/Org/OrgEditLanding/OrgEditLanding';
-import OrgEditGeneral from '@components/Dashboard/Pages/Org/OrgEditGeneral/OrgEditGeneral';
-import OrgEditImages from '@components/Dashboard/Pages/Org/OrgEditImages/OrgEditImages';
+import EditSocials from '@components/Dashboard/Pages/Org/OrgEditSocials/OrgEditSocials';
+import EditLanding from '@components/Dashboard/Pages/Org/OrgEditLanding/OrgEditLanding';
+import EditGeneral from '@components/Dashboard/Pages/Org/OrgEditGeneral/OrgEditGeneral';
+import EditImages from '@components/Dashboard/Pages/Org/OrgEditImages/OrgEditImages';
 import { ImageIcon, LayoutDashboardIcon, Share2Icon, TextIcon } from 'lucide-react';
 import SettingsHeader from '@components/Dashboard/Misc/SettingsHeader';
 import SettingsTabs from '@components/Dashboard/Misc/SettingsTabs';
@@ -14,7 +14,7 @@ import type { LucideIcon } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { use, useMemo } from 'react';
 
-export interface OrgParams {
+export interface Params {
   subpage: string;
 }
 
@@ -86,16 +86,16 @@ const ContentRenderer = ({ subpage }: { subpage: string }) => {
   const content = useMemo(() => {
     switch (subpage) {
       case 'general': {
-        return <OrgEditGeneral />;
+        return <EditGeneral />;
       }
       case 'previews': {
-        return <OrgEditImages />;
+        return <EditImages />;
       }
       case 'socials': {
-        return <OrgEditSocials />;
+        return <EditSocials />;
       }
       case 'landing': {
-        return <OrgEditLanding />;
+        return <EditLanding />;
       }
       default: {
         return null;

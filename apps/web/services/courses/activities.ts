@@ -26,7 +26,6 @@ async function revalidateActivityCourseTags(options?: ActivityInvalidationOption
 export async function createActivity(
   data: any,
   chapter_id: number,
-  org_id: number,
   access_token: string,
   options?: ActivityInvalidationOptions,
 ) {
@@ -34,9 +33,8 @@ export async function createActivity(
   if (!data.content) {
     data.content = {};
   }
-  // ensure the server receives the target chapter and org so the activity is created under that chapter
+  // ensure the server receives the target chapter so the activity is created under that chapter
   data.chapter_id = chapter_id;
-  data.org_id = org_id;
   data.last_known_update_date = options?.lastKnownUpdateDate ?? data.last_known_update_date ?? undefined;
 
   const result = await fetch(`${getAPIUrl()}activities/`, RequestBodyWithAuthHeader('POST', data, null, access_token));

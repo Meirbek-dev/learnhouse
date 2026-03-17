@@ -28,7 +28,7 @@ interface OrganizationValues {
   links: Record<string, string>;
 }
 
-export default function OrgEditSocials() {
+export default function EditSocials() {
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const org = usePlatformOrg() as any;
@@ -49,7 +49,7 @@ export default function OrgEditSocials() {
   const updateOrg = async (values: OrganizationValues) => {
     const loadingToast = toast.loading(t('updatingOrg'));
     try {
-      await updateOrganization(org.id, values, access_token);
+      await updateOrganization(values, access_token);
       await revalidateTags(['organizations']);
       mutate(`${getAPIUrl()}orgs/platform`);
       toast.success(t('orgUpdatedSuccess'), { id: loadingToast });

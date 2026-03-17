@@ -5,7 +5,6 @@ import { LoginBonusHandler } from '@/app/_shared/withmenu/_components/LoginBonus
 import { GamificationProvider } from '@/components/Contexts/GamificationContext';
 import CourseThumbnail from '@components/Objects/Thumbnails/CourseThumbnail';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { PLATFORM_ORG_SLUG } from '@services/config/config';
 import { getOrgCourses } from '@services/courses/courses';
 import type { DashboardData } from '@/types/gamification';
 import UserAvatar from '@components/Objects/UserAvatar';
@@ -17,18 +16,17 @@ interface LandingCustomProps {
     sections: LandingSection[];
     enabled: boolean;
   };
-  org_id: number;
   gamificationData?: DashboardData | null;
 }
 
-const LandingCustom = ({ landing, org_id, gamificationData }: LandingCustomProps) => {
+const LandingCustom = ({ landing, gamificationData }: LandingCustomProps) => {
   const session = usePlatformSession();
   const access_token = session?.data?.tokens?.access_token;
   const t = useTranslations('LandingCustom');
 
   // Fetch all courses for the organization
-  const { data: coursesData } = useSWR([PLATFORM_ORG_SLUG, access_token] as const, ([slug, token]) =>
-    getOrgCourses(slug, null, token),
+  const { data: coursesData } = useSWR(access_token ? ['org-courses', access_token] : null, ([, token]) =>
+    getOrgCourses(null, token),
   );
   const allCourses = coursesData?.courses;
 
@@ -290,11 +288,8 @@ const LandingCustom = ({ landing, org_id, gamificationData }: LandingCustomProps
   };
 
   return (
-    <GamificationProvider
-      orgId={org_id}
-      initialData={{ dashboard: gamificationData }}
-    >
-      <LoginBonusHandler orgId={org_id} />
+    <GamificationProvider initialData={{ dashboard: gamificationData }}>
+      <LoginBonusHandler />
       <div className="mx-auto flex h-full w-full max-w-(--breakpoint-2xl) flex-col items-center justify-between px-4 sm:px-6 lg:px-16">
         {landing.sections.map((section) => renderSection(section))}
       </div>

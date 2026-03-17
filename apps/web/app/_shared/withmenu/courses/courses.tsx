@@ -5,7 +5,6 @@ import GeneralWrapper from '@/components/Objects/Elements/Wrappers/GeneralWrappe
 import { Actions, Resources, Scopes, usePermissions } from '@/components/Security';
 import CreateCourseTrigger from '@/components/Landings/CreateCourseTrigger';
 import CourseGridClient from '@components/Landings/CourseGridClient';
-import { PLATFORM_ORG_SLUG } from '@services/config/config';
 
 import { useTranslations } from 'next-intl';
 
@@ -73,7 +72,6 @@ const Courses = (props: CourseProps) => {
             <CourseGridClient
               initialCourses={courses}
               initialTotal={totalCourses}
-              orgslug={PLATFORM_ORG_SLUG}
             />
           )}
         </div>

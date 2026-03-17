@@ -3,7 +3,6 @@
 import { getProductsByCourse, getStripeProductCheckoutSession } from '@services/payments/products';
 import { ChevronDown, ChevronUp, Loader2, RefreshCcw, SquareCheck } from 'lucide-react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { getAbsoluteUrl } from '@services/config/config';
 import { useState, useTransition } from 'react';
 import { Button } from '@components/ui/button';
@@ -16,13 +15,11 @@ import useSWR from 'swr';
 interface CoursePaidOptionsProps {
   course: {
     id: number;
-    org_id: number;
   };
 }
 
 const CoursePaidOptions = ({ course }: CoursePaidOptionsProps) => {
   const t = useTranslations('Courses.CoursePaidOptions');
-  const org = usePlatformOrg() as any;
   const session = usePlatformSession() as any;
   const [expandedProducts, setExpandedProducts] = useState<Record<string, boolean>>({});
   const [isProcessing, setIsProcessing] = useState<Record<string, boolean>>({});
@@ -30,11 +27,8 @@ const CoursePaidOptions = ({ course }: CoursePaidOptionsProps) => {
   const router = useRouter();
 
   const { data: linkedProducts, error } = useSWR(
-    () =>
-      org && session
-        ? [`/payments/${course.org_id}/courses/${course.id}/products`, session.data?.tokens?.access_token]
-        : null,
-    ([_url, token]) => getProductsByCourse(course.org_id, course.id, token),
+    () => (session ? [`/payments/courses/${course.id}/products`, session.data?.tokens?.access_token] : null),
+    ([_url, token]) => getProductsByCourse(course.id, token),
   );
 
   const handleCheckout = async (productId: number) => {
@@ -48,7 +42,6 @@ const CoursePaidOptions = ({ course }: CoursePaidOptionsProps) => {
       startTransition(() => setIsProcessing((prev) => ({ ...prev, [productId]: true })));
       const redirect_uri = getAbsoluteUrl('/courses');
       const response = await getStripeProductCheckoutSession(
-        course.org_id,
         productId,
         redirect_uri,
         session.data?.tokens?.access_token,

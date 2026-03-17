@@ -1,6 +1,6 @@
 'use client';
 
-import OrgMenu from '@components/Objects/Menus/org-menu';
+import NavBar from '@components/Objects/Menus/org-menu';
 import type { ReactNode } from 'react';
 
 interface WithMenuClientLayoutProps {
@@ -10,7 +10,7 @@ interface WithMenuClientLayoutProps {
 export default function WithMenuClientLayout({ children }: WithMenuClientLayoutProps) {
   return (
     <>
-      <OrgMenu />
+      <NavBar />
       <div className="h-[52px]" />
       {children}
     </>

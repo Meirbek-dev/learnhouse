@@ -53,8 +53,6 @@ export const getSiteUrl = () => getPublicConfig().siteUrl;
 
 export const getBackendUrl = () => getSiteUrl();
 
-export const PLATFORM_ORG_SLUG = 'openu';
-
 export const getAbsoluteUrl = (path: string) => toAbsoluteUrl(path, getSiteUrl());
 
 export const getTopLevelCookieDomain = () => {
@@ -67,5 +65,3 @@ export const getTopLevelCookieDomain = () => {
 };
 
 export const getUriWithoutOrg = (path: string) => getAbsoluteUrl(path);
-
-export const getOrgFromUri = (): string => PLATFORM_ORG_SLUG;

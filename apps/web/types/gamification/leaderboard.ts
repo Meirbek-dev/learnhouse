@@ -64,7 +64,7 @@ export const LeaderboardEntrySchema = v.object({
   badge: v.optional(v.nullable(v.picklist(['gold', 'silver', 'bronze']))),
 });
 
-export const OrganizationLeaderboardSchema = v.object({
+export const LeaderboardSchema = v.object({
   entries: v.array(LeaderboardEntrySchema),
   total_participants: v.pipe(v.number(), v.minValue(0)),
   last_updated: v.string(),

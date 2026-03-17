@@ -1,13 +1,10 @@
-import { getPlatformOrganizationContextInfo } from '@services/organizations/orgs';
-import { getAbsoluteUrl, PLATFORM_ORG_SLUG } from '@services/config/config';
 import { getOrgCollections } from '@services/courses/collections';
 import { getOrgCourses } from '@services/courses/courses';
+import { getAbsoluteUrl } from '@services/config/config';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
-  const orgInfo = await getPlatformOrganizationContextInfo();
-
   // Fetch all courses with pagination (20 per page)
   const COURSES_PER_PAGE = 20;
   const allCourses: { course_uuid: string }[] = [];
@@ -15,13 +12,13 @@ export async function GET(request: NextRequest) {
   let hasMore = true;
 
   while (hasMore) {
-    const { courses: pageCourses, total } = await getOrgCourses(PLATFORM_ORG_SLUG, null, null, page, COURSES_PER_PAGE);
+    const { courses: pageCourses, total } = await getOrgCourses(null, null, page, COURSES_PER_PAGE);
     allCourses.push(...pageCourses);
     hasMore = page * COURSES_PER_PAGE < total;
     page += 1;
   }
 
-  const collections = await getOrgCollections(orgInfo.id);
+  const collections = await getOrgCollections();
 
   const baseUrl = getAbsoluteUrl('/');
 

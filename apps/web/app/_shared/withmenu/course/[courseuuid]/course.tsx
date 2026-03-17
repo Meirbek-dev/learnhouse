@@ -69,7 +69,7 @@ const CourseClient = (props: any) => {
   );
 
   // Add SWR for trail data
-  const TRAIL_KEY = org?.id ? getTrailSwrKey(org?.id) : null;
+  const TRAIL_KEY = getTrailSwrKey();
   const { data: trailData } = useSWR(TRAIL_KEY && access_token ? [TRAIL_KEY, access_token] : null, ([url, token]) =>
     swrFetcher(url, token),
   );
@@ -204,7 +204,7 @@ const CourseClient = (props: any) => {
 
   return (
     <>
-      {!(course || org) ? (
+      {!course ? (
         <PageLoading />
       ) : (
         <>

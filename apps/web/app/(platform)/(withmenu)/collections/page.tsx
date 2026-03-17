@@ -3,13 +3,13 @@ import TypeOfContentTitle from '@/components/Objects/Elements/Titles/TypeOfConte
 import CollectionThumbnail from '@components/Objects/Thumbnails/CollectionThumbnail';
 import GeneralWrapper from '@/components/Objects/Elements/Wrappers/GeneralWrapper';
 import { getPlatformOrganizationContextInfo } from '@services/organizations/orgs';
-import { getAbsoluteUrl } from '@services/config/config';
 import { PermissionGuard } from '@components/Security/PermissionGuard';
 import { getOrgThumbnailMediaDirectory } from '@services/media/media';
 import ProtectedText from '@components/Objects/ContentPlaceHolder';
 import { getOrgCollections } from '@services/courses/collections';
 import { Actions, Resources, Scopes } from '@/types/permissions';
 import { getOptionalSession } from '@/lib/get-optional-session';
+import { getAbsoluteUrl } from '@services/config/config';
 import { getTranslations } from 'next-intl/server';
 import Link from '@components/ui/AppLink';
 import type { Metadata } from 'next';
@@ -56,8 +56,7 @@ export default async function PlatformCollectionsPage() {
   const session = await getOptionalSession();
   const access_token = session?.tokens?.access_token;
   const org = await getPlatformOrganizationContextInfo(access_token || undefined);
-  const org_id = org.id;
-  const collections = await getOrgCollections(org_id, access_token);
+  const collections = await getOrgCollections(access_token);
 
   return (
     <GeneralWrapper>

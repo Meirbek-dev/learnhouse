@@ -61,8 +61,7 @@ async function fetchPlatformOrganization(access_token?: string) {
   return await errorHandling(result);
 }
 
-export async function getOrganizationContextInfo(org_slug: string, _next?: unknown, access_token?: string) {
-  void org_slug;
+export async function getOrganizationContextInfo(_next?: unknown, access_token?: string) {
   return fetchPlatformOrganization(access_token);
 }
 
@@ -70,44 +69,17 @@ export async function getPlatformOrganizationContextInfo(access_token?: string) 
   return fetchPlatformOrganization(access_token);
 }
 
-/**
- * Cached fetch for organization context info by ID
- */
-async function fetchOrganizationById(org_id: number, access_token: string) {
-  'use cache';
-  cacheTag(tags.organizations);
-  cacheLife(CacheProfiles.organization);
-
-  const result = await fetch(`${getAPIUrl()}orgs/${org_id}`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${access_token}`,
-    },
-  });
-  return await errorHandling(result);
-}
-
-export async function getOrganizationContextInfoWithId(org_id: number, _next?: unknown, access_token?: string) {
-  if (!access_token) {
-    throw new Error('Access token required');
-  }
-  return await fetchOrganizationById(org_id, access_token);
-}
-
-export async function getOrganizationContextInfoWithoutCredentials(org_slug: string, _next?: unknown) {
-  void org_slug;
+export async function getOrganizationContextInfoWithoutCredentials(_next?: unknown) {
   return await fetchPlatformOrganization();
 }
 
-export async function getOrganizationContextInfoNoAsync(org_slug: string, next: unknown, access_token: string) {
-  void org_slug;
+export async function getOrganizationContextInfoNoAsync(next: unknown, access_token: string) {
   return await fetch(`${getAPIUrl()}orgs/platform`, RequestBodyWithAuthHeader('GET', null, next, access_token));
 }
 
-export async function updateOrgLanding(org_id: number, landing_object: any, access_token: string) {
+export async function updateOrgLanding(landing_object: any, access_token: string) {
   const result = await fetch(
-    `${getAPIUrl()}orgs/${org_id}/landing`,
+    `${getAPIUrl()}orgs/landing`,
     RequestBodyWithAuthHeader('PUT', landing_object, null, access_token),
   );
   const metadata = await getResponseMetadata(result);
@@ -121,19 +93,18 @@ export async function updateOrgLanding(org_id: number, landing_object: any, acce
   return metadata;
 }
 
-export async function uploadLandingContent(org_uuid: string, content_file: File, access_token: string) {
+export async function uploadLandingContent(content_file: File, access_token: string) {
   const formData = new FormData();
   formData.append('content_file', content_file);
 
   const result = await fetch(
-    `${getAPIUrl()}orgs/${org_uuid}/landing/content`,
+    `${getAPIUrl()}orgs/landing/content`,
     RequestBodyFormWithAuthHeader('POST', formData, null, access_token),
   );
   return await getResponseMetadata(result);
 }
 
-export async function removeUserFromOrg(org_id: number, user_id: number, access_token: string) {
-  void org_id;
+export async function removeUserFromOrg(user_id: number, access_token: string) {
   const result = await fetch(
     `${getAPIUrl()}orgs/users/${user_id}`,
     RequestBodyWithAuthHeader('DELETE', null, null, access_token),

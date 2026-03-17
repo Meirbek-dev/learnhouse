@@ -16,7 +16,6 @@ import { AlertTriangle, CheckCircle2, Hexagon, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
-import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { DragDropContext, Droppable } from '@hello-pangea/dnd';
 import { Button } from '@/components/ui/button';
 import { useTranslations } from 'next-intl';
@@ -39,7 +38,6 @@ export type OrderPayload =
 
 const EditCourseStructure = () => {
   const session = usePlatformSession() as any;
-  const org = usePlatformOrg() as { slug?: string } | null;
   const access_token = session?.data?.tokens?.access_token;
   const t = useTranslations('CourseEdit.Structure');
 
@@ -191,7 +189,6 @@ const EditCourseStructure = () => {
                   <ChapterElement
                     key={chapter.chapter_uuid}
                     chapterIndex={index}
-                    orgslug={org?.slug || ''}
                     course_uuid={course_uuid}
                     chapter={chapter}
                   />

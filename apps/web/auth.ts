@@ -4,61 +4,78 @@ import {
   loginAndGetToken,
   loginWithOAuthToken,
 } from '@/services/auth/auth';
-import { SESSION_CACHE_MAX_SIZE, SESSION_CACHE_TTL_MS, TOKEN_REFRESH_BUFFER_MS } from '@/lib/constants';
+import { SESSION_CACHE_TTL_MS, TOKEN_REFRESH_BUFFER_MS } from '@/lib/constants';
 import type { NextAuthConfig, NextAuthResult, Session } from 'next-auth';
 import { getResponseMetadata } from '@/services/utils/ts/requests';
-import { PLATFORM_ORG_SLUG } from '@/services/config/config';
 import Credentials from 'next-auth/providers/credentials';
 import { getAbsoluteUrl } from '@/services/config/config';
 import { getServerConfig } from '@/services/config/env';
 import Google from 'next-auth/providers/google';
 import type { JWT } from 'next-auth/jwt';
 import { createHash } from 'node:crypto';
-import { LRUCache } from 'lru-cache';
 import NextAuth from 'next-auth';
-
-// ─── Session Cache Types ──────────────────────────────────────────────────────
-
-declare global {
-  var sessionCache: LRUCache<string, SessionData> | undefined;
-}
+import { cache } from 'react';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const SESSION_MAX_AGE = 30 * 24 * 60 * 60; // 30 days
 const SESSION_UPDATE_AGE = 24 * 60 * 60; // 24 hours
-const MAX_ACCESS_TOKEN_LIFETIME_MS = 60 * 60 * 1000; // 60 minutes
 
 export const isDevEnv = process.env.NODE_ENV !== 'production';
 
-// ─── Cache Helpers ────────────────────────────────────────────────────────────
+// ─── Cross-Request Session Store ──────────────────────────────────────────────
+//
+// React 19's cache() memoizes per request/render cycle, which handles
+// deduplication within a single request. For cross-request persistence we
+// maintain a plain Map with manual TTL eviction — same semantics as the
+// former LRU TTL, without the size-bound eviction policy.
+//
+// If bounded memory is a concern in production, swap the Map for a size-aware
+// structure (e.g., a simple FIFO ring-buffer map) without bringing back
+// lru-cache.
 
-const createSessionCache = (): LRUCache<string, SessionData> =>
-  new LRUCache<string, SessionData>({
-    max: SESSION_CACHE_MAX_SIZE,
-    ttl: SESSION_CACHE_TTL_MS,
-    updateAgeOnGet: false,
-    updateAgeOnHas: false,
-  });
+interface TimestampedSessionData {
+  data: SessionData;
+  expiresAt: number;
+}
 
-const getSessionCache = (): LRUCache<string, SessionData> => {
-  if (typeof globalThis === 'undefined') return createSessionCache();
+const sessionStore = new Map<string, TimestampedSessionData>();
 
-  if (!(globalThis.sessionCache instanceof LRUCache)) {
-    globalThis.sessionCache = createSessionCache();
-  }
-
-  return globalThis.sessionCache;
+const setSession = (key: string, data: SessionData): void => {
+  sessionStore.set(key, { data, expiresAt: Date.now() + SESSION_CACHE_TTL_MS });
 };
+
+const getSession = (key: string): SessionData | null => {
+  const entry = sessionStore.get(key);
+  if (!entry) return null;
+  if (Date.now() > entry.expiresAt) {
+    sessionStore.delete(key);
+    return null;
+  }
+  return entry.data;
+};
+
+const deleteSession = (key: string): void => {
+  sessionStore.delete(key);
+};
+
+// ─── Cache Key ────────────────────────────────────────────────────────────────
 
 const createCacheKey = (accessToken: string): string | null => {
   if (!accessToken) return null;
   return `user_session_${createHash('sha256').update(accessToken).digest('hex')}`;
 };
 
-const resolvePlatformOrgId = (roles?: SessionData['roles']): number | undefined => {
-  return roles?.find((role) => role.org.slug === PLATFORM_ORG_SLUG)?.org.id;
-};
+// ─── React 19 cache() — per-request deduplication ────────────────────────────
+//
+// cache() memoizes the wrapped function for the lifetime of a single server
+// request. Repeated calls to fetchUserSession() with the same access token
+// within one render tree are collapsed into one network round-trip.
+// The result is NOT shared across requests — that is the job of sessionStore.
+
+const fetchUserSession = cache(async (accessToken: string): Promise<Awaited<ReturnType<typeof getUserSession>>> => {
+  return getUserSession(accessToken);
+});
 
 // ─── Token Helpers ────────────────────────────────────────────────────────────
 
@@ -66,12 +83,9 @@ const assertValidTokenExpiry = (expiry: unknown): number => {
   if (typeof expiry !== 'number' || !Number.isFinite(expiry) || expiry <= 0) {
     throw new Error('Token expiry claim is missing or invalid');
   }
-
-  const now = Date.now();
-  if (expiry <= now) {
+  if (expiry <= Date.now()) {
     throw new Error('Token is already expired');
   }
-
   return expiry;
 };
 
@@ -86,10 +100,14 @@ const isTokenExpiringSoon = (expiry: number, bufferMs = TOKEN_REFRESH_BUFFER_MS)
   return expiring;
 };
 
+// ─── NextAuth Types ───────────────────────────────────────────────────────────
+
 type AuthFunction = NextAuthResult['auth'];
 type SignInFunction = NextAuthResult['signIn'];
 type SignOutFunction = NextAuthResult['signOut'];
 type AuthHandlers = NextAuthResult['handlers'];
+
+// ─── Auth Config ──────────────────────────────────────────────────────────────
 
 const createAuthConfig = (): NextAuthConfig => {
   const serverConfig = getServerConfig();
@@ -155,9 +173,7 @@ const createAuthConfig = (): NextAuthConfig => {
       Google({
         clientId: serverConfig.googleClientId,
         clientSecret: serverConfig.googleClientSecret,
-        authorization: {
-          params: { scope: 'openid email profile' },
-        },
+        authorization: { params: { scope: 'openid email profile' } },
       }),
     ],
 
@@ -189,7 +205,7 @@ const createAuthConfig = (): NextAuthConfig => {
     trustHost: true,
 
     callbacks: {
-      // ── jwt ────────────────────────────────────────────────────────────────
+      // ── jwt ──────────────────────────────────────────────────────────────
       async jwt({ token, user, account }): Promise<JWT | null> {
         try {
           // Credentials sign-in
@@ -231,7 +247,7 @@ const createAuthConfig = (): NextAuthConfig => {
             }
           }
 
-          // Subsequent requests - refresh if needed
+          // Subsequent requests — refresh access token when nearing expiry
           const userWithTokens = token.user;
           if (!userWithTokens?.tokens) {
             console.warn('No user tokens found in JWT callback');
@@ -275,9 +291,7 @@ const createAuthConfig = (): NextAuthConfig => {
           } catch (error) {
             console.error('Token refresh error:', error);
             const cacheKey = createCacheKey(tokens.access_token);
-            if (cacheKey) {
-              getSessionCache().delete(cacheKey);
-            }
+            if (cacheKey) deleteSession(cacheKey);
             return null;
           }
         } catch (error) {
@@ -286,7 +300,7 @@ const createAuthConfig = (): NextAuthConfig => {
         }
       },
 
-      // ── session ────────────────────────────────────────────────────────────
+      // ── session ──────────────────────────────────────────────────────────
       async session({ session, token }): Promise<Session> {
         const userWithTokens = token.user;
 
@@ -296,25 +310,18 @@ const createAuthConfig = (): NextAuthConfig => {
         }
 
         const { tokens } = userWithTokens;
-        const cache = getSessionCache();
         const cacheKey = createCacheKey(tokens.access_token);
-        const cached = cacheKey ? cache.get(cacheKey) : null;
 
+        // 1. Cross-request cache hit
+        const cached = cacheKey ? getSession(cacheKey) : null;
         if (cached) {
-          return {
-            ...session,
-            user: cached.user,
-            roles: cached.roles,
-            tokens: cached.tokens,
-            permissions: cached.permissions,
-            permissions_org_id: cached.permissions_org_id,
-          };
+          return { ...session, ...cached };
         }
 
+        // 2. fetchUserSession is wrapped with React 19 cache(), so concurrent
+        //    calls within the same request are automatically deduplicated.
         try {
-          const baseSession = await getUserSession(tokens.access_token);
-          const platformOrgId = resolvePlatformOrgId(baseSession.roles);
-          const apiSession = platformOrgId ? await getUserSession(tokens.access_token, platformOrgId) : baseSession;
+          const apiSession = await fetchUserSession(tokens.access_token);
 
           if (!apiSession?.user) {
             console.error('Invalid session data from getUserSession');
@@ -326,19 +333,14 @@ const createAuthConfig = (): NextAuthConfig => {
             roles: apiSession.roles ?? [],
             tokens,
             permissions: apiSession.permissions ?? [],
-            permissions_org_id: platformOrgId ?? null,
           };
 
-          if (cacheKey) {
-            cache.set(cacheKey, sessionData);
-          }
+          if (cacheKey) setSession(cacheKey, sessionData);
 
           return { ...session, ...sessionData };
         } catch (error) {
           console.error('Failed to fetch user session:', error);
-          if (cacheKey) {
-            cache.delete(cacheKey);
-          }
+          if (cacheKey) deleteSession(cacheKey);
 
           return {
             ...session,
@@ -356,7 +358,7 @@ const createAuthConfig = (): NextAuthConfig => {
         }
       },
 
-      // ── authorized ─────────────────────────────────────────────────────────
+      // ── authorized ────────────────────────────────────────────────────────
       async authorized({ auth, request: { nextUrl } }) {
         const isLoggedIn = Boolean(auth?.user);
         const isAuthPage = nextUrl.pathname.startsWith('/auth');
@@ -375,9 +377,7 @@ const createAuthConfig = (): NextAuthConfig => {
         const userWithTokens = token?.user as UserWithTokens | undefined;
         if (userWithTokens?.tokens?.access_token) {
           const cacheKey = createCacheKey(userWithTokens.tokens.access_token);
-          if (cacheKey) {
-            getSessionCache().delete(cacheKey);
-          }
+          if (cacheKey) deleteSession(cacheKey);
         }
       },
       async signIn({ user, account }) {
@@ -388,11 +388,12 @@ const createAuthConfig = (): NextAuthConfig => {
   };
 };
 
+// ─── Singleton NextAuth Result ────────────────────────────────────────────────
+
 let nextAuthResultCache: NextAuthResult | null = null;
 
 const getNextAuthResult = (): NextAuthResult => {
   if (nextAuthResultCache) return nextAuthResultCache;
-
   nextAuthResultCache = NextAuth(createAuthConfig());
   return nextAuthResultCache;
 };
@@ -407,8 +408,6 @@ export const handlers: AuthHandlers = {
 };
 
 export const signIn = ((...args: Parameters<SignInFunction>) => getNextAuthResult().signIn(...args)) as SignInFunction;
-
 export const signOut = ((...args: Parameters<SignOutFunction>) =>
   getNextAuthResult().signOut(...args)) as SignOutFunction;
-
 export const auth = ((...args: Parameters<AuthFunction>) => getNextAuthResult().auth(...args)) as AuthFunction;

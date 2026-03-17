@@ -79,7 +79,7 @@ const getAddPreviewOptions = (t: Function, isPreviewUploading: boolean, setSelec
   },
 ];
 
-export default function OrgEditImages() {
+export default function EditImages() {
   const router = useRouter();
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
@@ -131,7 +131,7 @@ export default function OrgEditImages() {
         startTransition(() => setIsLogoUploading(true));
         const loadingToast = toast.loading(tNotify('uploadingLogo'));
         try {
-          await uploadOrganizationLogo(org.id, file, access_token);
+          await uploadOrganizationLogo(file, access_token);
           await new Promise((r) => setTimeout(r, 1500));
           toast.success(tNotify('logoUpdatedSuccess'), { id: loadingToast });
           router.refresh();
@@ -152,7 +152,7 @@ export default function OrgEditImages() {
         startTransition(() => setIsThumbnailUploading(true));
         const loadingToast = toast.loading(tNotify('uploadingThumbnail'));
         try {
-          await uploadOrganizationThumbnail(org.id, file, access_token);
+          await uploadOrganizationThumbnail(file, access_token);
           await new Promise((r) => setTimeout(r, 1500));
           toast.success(tNotify('thumbnailUpdatedSuccess'), { id: loadingToast });
           router.refresh();
@@ -185,7 +185,7 @@ export default function OrgEditImages() {
 
       try {
         const uploadPromises = files.map(async (file) => {
-          const response = await uploadOrganizationPreview(org.id, file, access_token);
+          const response = await uploadOrganizationPreview(file, access_token);
           return {
             id: response.name_in_disk,
             url: URL.createObjectURL(file),
@@ -199,7 +199,6 @@ export default function OrgEditImages() {
         const updatedPreviews = [...previews, ...newPreviews];
 
         await updateOrganization(
-          org.id,
           {
             previews: {
               images: updatedPreviews
@@ -241,7 +240,6 @@ export default function OrgEditImages() {
       const updatedPreviewFilenames = updatedPreviews.map((p) => p.filename);
 
       await updateOrganization(
-        org.id,
         {
           previews: {
             images: updatedPreviewFilenames,
@@ -306,7 +304,6 @@ export default function OrgEditImages() {
       const updatedPreviews = [...previews, newPreview];
 
       await updateOrganization(
-        org.id,
         {
           previews: {
             images: updatedPreviews
@@ -356,7 +353,6 @@ export default function OrgEditImages() {
     const loadingToast = toast.loading(tNotify('updatingPreviewOrder'));
     try {
       await updateOrganization(
-        org.id,
         {
           previews: {
             images: reorderedItems

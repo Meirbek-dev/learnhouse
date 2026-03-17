@@ -17,7 +17,6 @@ import { createCourseUpdate, deleteCourseUpdate } from '@services/courses/update
 import { AlertTriangle, Loader2, PencilLine, Rss, TentTree } from 'lucide-react';
 import { useEffectEvent, useLayoutEffect, useState, useTransition } from 'react';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { Actions, Resources, Scopes } from '@/types/permissions';
 import { getCourseUpdatesSwrKey } from '@services/courses/keys';
 import { useCourse } from '@components/Contexts/CourseContext';
@@ -144,7 +143,6 @@ const createUpdateFormSchema = (t: (key: string) => string) =>
 type UpdateFormValues = v.InferOutput<ReturnType<typeof createUpdateFormSchema>>;
 
 const NewUpdateForm = ({ setSelectedView }: any) => {
-  const org = usePlatformOrg() as any;
   const course = useCourse();
   const session = usePlatformSession() as any;
   const t = useTranslations('Courses.CourseUpdates');
@@ -163,7 +161,6 @@ const NewUpdateForm = ({ setSelectedView }: any) => {
       title: values.title,
       content: values.content,
       course_uuid: course.courseStructure.course_uuid,
-      org_id: org.id,
     };
     const UPDATES_KEY = getCourseUpdatesSwrKey(course.courseStructure.course_uuid);
 

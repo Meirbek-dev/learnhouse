@@ -1,5 +1,4 @@
 'use client';
-import { getAbsoluteUrl, PLATFORM_ORG_SLUG } from '@services/config/config';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { getUserCertificates } from '@services/courses/certifications';
@@ -7,6 +6,7 @@ import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { revalidateTags } from '@services/utils/ts/requests';
 import { Award, ExternalLink, Loader2 } from 'lucide-react';
 import { removeCourse } from '@services/courses/activity';
+import { getAbsoluteUrl } from '@services/config/config';
 import { getTrailSwrKey } from '@services/courses/keys';
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -26,7 +26,6 @@ const TrailCourseElement = ({ course, run }: TrailCourseElementProps) => {
   const courseid = course.course_uuid.replace('course_', '');
   const router = useRouter();
   const t = useTranslations('Trail');
-  const orgID = org?.id;
   const { course_total_steps } = run;
   const course_completed_steps = run.steps.length;
   const course_progress = course_total_steps > 0 ? Math.round((course_completed_steps / course_total_steps) * 100) : 0;
@@ -36,13 +35,13 @@ const TrailCourseElement = ({ course, run }: TrailCourseElementProps) => {
 
   async function quitCourse(course_uuid: string) {
     // Close activity
-    await removeCourse(course_uuid, org?.slug || PLATFORM_ORG_SLUG, access_token);
+    await removeCourse(course_uuid, access_token);
     // Mutate course
     await revalidateTags(['courses']);
     router.refresh();
 
     // Mutate
-    mutate([getTrailSwrKey(orgID), access_token]);
+    mutate([getTrailSwrKey(), access_token]);
   }
 
   // Fetch certificate for this course

@@ -27,7 +27,7 @@ const AICanvaToolkit = (props: AICanvaToolkitProps) => {
       <BubbleMenu
         className="w-fit"
         editor={props.editor}
-        shouldShow={({ editor }) => {
+        shouldShow={({ editor }: { editor: Editor }) => {
           // Only show the bubble menu if text is selected
           return editor.isActive('text') && !editor.state.selection.empty;
         }}

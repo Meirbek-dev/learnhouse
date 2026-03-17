@@ -10,7 +10,6 @@ import * as v from 'valibot';
 export interface UserGamificationProfile {
   id?: number; // Optional; not always present in backend ProfileRead
   user_id: number;
-  org_id: number;
   total_xp: number;
   level: number;
 
@@ -70,7 +69,6 @@ export interface StreakInfo {
 export const UserGamificationProfileSchema = v.object({
   id: v.optional(v.number()),
   user_id: v.number(),
-  org_id: v.number(),
   total_xp: v.pipe(v.number(), v.minValue(0)),
   level: v.pipe(v.number(), v.minValue(1), v.maxValue(100)),
   login_streak: v.pipe(v.number(), v.minValue(0)),

@@ -13,7 +13,6 @@ import CourseThumbnail from '@components/Objects/Thumbnails/CourseThumbnail';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getCoursesSwrKey, getTrailSwrKey } from '@services/courses/keys';
 import { swrFetcherWithHeaders } from '@services/utils/ts/requests';
-import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { useMemo, useState } from 'react';
 import useSWR from 'swr';
@@ -23,18 +22,15 @@ const COURSES_PER_PAGE = 20;
 interface CourseGridClientProps {
   initialCourses: any[];
   initialTotal: number;
-  orgslug: string;
 }
 
-export default function CourseGridClient({ initialCourses, initialTotal, orgslug }: CourseGridClientProps) {
+export default function CourseGridClient({ initialCourses, initialTotal }: CourseGridClientProps) {
   const session = usePlatformSession();
-  const org = usePlatformOrg();
   const accessToken = session?.data?.tokens?.access_token;
-  const orgId = org?.id;
   const [page, setPage] = useState(1);
 
   // Fetch courses with pagination
-  const COURSES_KEY = orgslug ? getCoursesSwrKey(orgslug, page, COURSES_PER_PAGE) : null;
+  const COURSES_KEY = getCoursesSwrKey(page, COURSES_PER_PAGE);
   const { data: coursesResponse, isLoading: coursesLoading } = useSWR(
     COURSES_KEY ? [COURSES_KEY, accessToken] : null,
     ([url, token]) => swrFetcherWithHeaders(url, token),
@@ -53,9 +49,9 @@ export default function CourseGridClient({ initialCourses, initialTotal, orgslug
   const totalPages = Math.ceil(totalCount / COURSES_PER_PAGE);
 
   // Fetch trail data to show progress on course thumbnails
-  const TRAIL_KEY = orgId ? getTrailSwrKey(orgId) : null;
+  const TRAIL_KEY = getTrailSwrKey();
   const { data: trailData } = useSWR(
-    orgId && accessToken && TRAIL_KEY ? [TRAIL_KEY, accessToken] : null,
+    accessToken && TRAIL_KEY ? [TRAIL_KEY, accessToken] : null,
     ([url, token]) => swrFetcher(url, token),
     {
       revalidateOnFocus: false,
@@ -64,7 +60,7 @@ export default function CourseGridClient({ initialCourses, initialTotal, orgslug
     },
   );
 
-  const isTrailLoading = Boolean(orgId && accessToken && !trailData);
+  const isTrailLoading = Boolean(accessToken && !trailData);
 
   // Generate pagination range
   const paginationRange = useMemo(() => {

@@ -9,7 +9,6 @@ import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { AlertTriangle, Award, FileText, Sparkles } from 'lucide-react';
-import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { valibotResolver } from '@hookform/resolvers/valibot';
@@ -81,7 +80,6 @@ const EditCourseCertification = () => {
   const course = useCourse();
   const { isLoading, courseStructure, editorData } = course;
   const session = usePlatformSession() as any;
-  const org = usePlatformOrg() as { slug?: string } | null;
   const access_token = session?.data?.tokens?.access_token;
   const t = useTranslations('Certificates.EditCourseCertification');
   const tCommon = useTranslations('Common');
@@ -262,14 +260,12 @@ const EditCourseCertification = () => {
           if (existingCertification) {
             return updateCertification(existingCertification.certification_uuid, config, access_token, {
               courseUuid: courseStructure.course_uuid,
-              orgSlug: org?.slug,
               lastKnownUpdateDate: courseStructure.update_date,
             });
           }
 
           return createCertification(courseStructure.id, config, access_token, {
             courseUuid: courseStructure.course_uuid,
-            orgSlug: org?.slug,
             lastKnownUpdateDate: courseStructure.update_date,
           });
         }
@@ -277,7 +273,6 @@ const EditCourseCertification = () => {
         if (existingCertification) {
           return deleteCertification(existingCertification.certification_uuid, access_token, {
             courseUuid: courseStructure.course_uuid,
-            orgSlug: org?.slug,
             lastKnownUpdateDate: courseStructure.update_date,
           });
         }
@@ -342,7 +337,9 @@ const EditCourseCertification = () => {
                 <Switch
                   id="cert-toggle"
                   checked={isEnabled}
-                  onCheckedChange={(checked) => form.setValue('enable_certification', checked, { shouldDirty: true })}
+                  onCheckedChange={(checked) => {
+                    form.setValue('enable_certification', checked, { shouldDirty: true });
+                  }}
                   disabled={isSaving}
                 />
               </Label>
@@ -558,7 +555,9 @@ const EditCourseCertification = () => {
                 <p className="text-muted-foreground mb-6 max-w-sm text-sm">{t('noCertificationDescription')}</p>
                 <Button
                   type="button"
-                  onClick={() => form.setValue('enable_certification', true, { shouldDirty: true })}
+                  onClick={() => {
+                    form.setValue('enable_certification', true, { shouldDirty: true });
+                  }}
                   disabled={isSaving}
                 >
                   <Award className="h-4 w-4" />

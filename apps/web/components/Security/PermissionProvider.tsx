@@ -28,8 +28,6 @@ interface PermissionContextValue {
     (resource: Resource, action: Action, scope: Scope): boolean;
     (action: Action, resource: Resource, scope: Scope): boolean;
   };
-  /** The org ID these permissions are scoped to (null = no org context) */
-  orgId: number | null;
   /** Still loading session */
   loading: boolean;
 }
@@ -55,10 +53,6 @@ export function PermissionProvider({ children }: { children: ReactNode }) {
 
   const permissions = useMemo(() => new Set<string>(session?.permissions), [session?.permissions]);
 
-  const orgId = useMemo(() => {
-    return session?.permissions_org_id ?? null;
-  }, [session]);
-
   const can = useMemo(() => {
     return (...args: [Resource, Action, Scope] | [Action, Resource, Scope]): boolean => {
       const [first, second, scope] = args;
@@ -73,10 +67,9 @@ export function PermissionProvider({ children }: { children: ReactNode }) {
   const value: PermissionContextValue = useMemo(
     () => ({
       can,
-      orgId,
       loading: status === 'loading',
     }),
-    [can, orgId, status],
+    [can, status],
   );
 
   return <PermissionContext.Provider value={value}>{children}</PermissionContext.Provider>;

@@ -5,9 +5,9 @@ import {
   errorHandling,
   getResponseMetadata,
 } from '@services/utils/ts/requests';
-import { courseTag, getCourseListTags, tags } from '@/lib/cacheTags';
 import { CacheProfiles, cacheLife, cacheTag } from '@/lib/cache';
 import { getAPIUrl } from '@services/config/config';
+import { courseTag, tags } from '@/lib/cacheTags';
 
 /*
  This file includes POST, PUT, DELETE requests and cached GET requests
@@ -20,7 +20,6 @@ import { getAPIUrl } from '@services/config/config';
  * Returns both courses and total count for pagination
  */
 async function fetchOrgCourses(
-  org_slug: string,
   page = 1,
   limit = 20,
   access_token?: string,
@@ -52,15 +51,14 @@ async function fetchOrgCourses(
   return { courses, total };
 }
 
-export async function getOrgCourses(org_slug: string, _next?: any, access_token?: any, page = 1, limit = 20) {
-  return fetchOrgCourses(org_slug, page, limit, access_token);
+export async function getOrgCourses(_next?: any, access_token?: any, page = 1, limit = 20) {
+  return fetchOrgCourses(page, limit, access_token);
 }
 
 /**
  * Cached fetch for courses the current user can edit in an org
  */
 async function fetchEditableOrgCourses(
-  org_slug: string,
   page = 1,
   limit = 20,
   access_token?: string,
@@ -126,7 +124,6 @@ async function fetchEditableOrgCourses(
 }
 
 export async function getEditableOrgCourses(
-  org_slug: string,
   access_token?: any,
   page = 1,
   limit = 20,
@@ -134,7 +131,7 @@ export async function getEditableOrgCourses(
   sortBy = 'updated',
   preset?: string,
 ) {
-  return fetchEditableOrgCourses(org_slug, page, limit, access_token, query, sortBy, preset);
+  return fetchEditableOrgCourses(page, limit, access_token, query, sortBy, preset);
 }
 
 export async function getCourseUserRights(course_uuid: string, access_token?: string | null) {
@@ -153,14 +150,7 @@ export async function getCourseUserRights(course_uuid: string, access_token?: st
   return await errorHandling(result);
 }
 
-export async function searchOrgCourses(
-  org_slug: string,
-  query: string,
-  page = 1,
-  limit = 20,
-  next: any,
-  access_token?: any,
-) {
+export async function searchOrgCourses(query: string, page = 1, limit = 20, next: any, access_token?: any) {
   const result: any = await fetch(
     `${getAPIUrl()}courses/search?query=${encodeURIComponent(query)}&page=${page}&limit=${limit}`,
     RequestBodyWithAuthHeader('GET', null, next, access_token),
@@ -204,7 +194,6 @@ export async function getCourseMetadata(
 
 interface CourseWriteOptions {
   lastKnownUpdateDate?: string | null;
-  orgSlug?: string;
   includeEditableList?: boolean;
   includePublicList?: boolean;
 }
@@ -220,18 +209,11 @@ async function revalidateCourseMutationTags(course_uuid: string | undefined, opt
   const includeEditableList = options?.includeEditableList ?? true;
   const includePublicList = options?.includePublicList ?? true;
 
-  if (options?.orgSlug) {
-    getCourseListTags(options.orgSlug, {
-      includeEditable: includeEditableList,
-      includePublic: includePublicList,
-    }).forEach((tag) => tagsToRevalidate.add(tag));
-  } else {
-    if (includeEditableList) {
-      tagsToRevalidate.add(tags.editableCourses);
-    }
-    if (includePublicList) {
-      tagsToRevalidate.add(tags.courses);
-    }
+  if (includeEditableList) {
+    tagsToRevalidate.add(tags.editableCourses);
+  }
+  if (includePublicList) {
+    tagsToRevalidate.add(tags.courses);
   }
 
   for (const tag of tagsToRevalidate) {
@@ -385,11 +367,10 @@ export async function updateCourseThumbnail(
 }
 
 export async function createNewCourse(
-  org_id: number,
   course_body: any,
   thumbnail: any,
   access_token: string,
-  options?: Pick<CourseWriteOptions, 'orgSlug' | 'includeEditableList' | 'includePublicList'>,
+  options?: Pick<CourseWriteOptions, 'includeEditableList' | 'includePublicList'>,
 ) {
   // Send file thumbnail as form data
   const formData = new FormData();
@@ -405,7 +386,7 @@ export async function createNewCourse(
   }
 
   const result = await fetch(
-    `${getAPIUrl()}courses?org_id=${org_id}`,
+    `${getAPIUrl()}courses`,
     RequestBodyFormWithAuthHeader('POST', formData, null, access_token),
   );
   const metadata = await getResponseMetadata(result);
@@ -413,7 +394,6 @@ export async function createNewCourse(
   // Revalidate course cache after creating new course
   if (metadata.success) {
     await revalidateCourseMutationTags(undefined, {
-      orgSlug: options?.orgSlug,
       includeEditableList: options?.includeEditableList ?? true,
       includePublicList: options?.includePublicList ?? true,
     });
@@ -425,7 +405,7 @@ export async function createNewCourse(
 export async function deleteCourseFromBackend(
   course_uuid: string,
   access_token: string,
-  options?: Pick<CourseWriteOptions, 'orgSlug' | 'includeEditableList' | 'includePublicList'>,
+  options?: Pick<CourseWriteOptions, 'includeEditableList' | 'includePublicList'>,
 ) {
   const result: any = await fetch(
     `${getAPIUrl()}courses/${course_uuid}`,
@@ -436,7 +416,6 @@ export async function deleteCourseFromBackend(
   // Revalidate course cache after deletion
   if (result.ok) {
     await revalidateCourseMutationTags(course_uuid, {
-      orgSlug: options?.orgSlug,
       includeEditableList: options?.includeEditableList ?? true,
       includePublicList: options?.includePublicList ?? true,
     });
@@ -459,7 +438,7 @@ export async function editContributor(
   authorship: any,
   authorship_status: any,
   access_token: string | null | undefined,
-  options?: Pick<CourseWriteOptions, 'orgSlug' | 'includeEditableList' | 'includePublicList'>,
+  options?: Pick<CourseWriteOptions, 'includeEditableList' | 'includePublicList'>,
 ) {
   const result: any = await fetch(
     `${getAPIUrl()}courses/${course_uuid}/contributors/${contributor_id}?authorship=${authorship}&authorship_status=${authorship_status}`,
@@ -472,7 +451,6 @@ export async function editContributor(
     const { revalidateTag } = await import('next/cache');
     revalidateTag(courseTag.contributors(course_uuid), 'max');
     await revalidateCourseMutationTags(course_uuid, {
-      orgSlug: options?.orgSlug,
       includeEditableList: options?.includeEditableList ?? true,
       includePublicList: options?.includePublicList ?? false,
     });
@@ -501,7 +479,7 @@ export async function bulkAddContributors(
   course_uuid: string,
   data: any,
   access_token: string | null | undefined,
-  options?: Pick<CourseWriteOptions, 'orgSlug' | 'includeEditableList' | 'includePublicList'>,
+  options?: Pick<CourseWriteOptions, 'includeEditableList' | 'includePublicList'>,
 ) {
   const result: any = await fetch(
     `${getAPIUrl()}courses/${course_uuid}/bulk-add-contributors`,
@@ -514,7 +492,6 @@ export async function bulkAddContributors(
     const { revalidateTag } = await import('next/cache');
     revalidateTag(courseTag.contributors(course_uuid), 'max');
     await revalidateCourseMutationTags(course_uuid, {
-      orgSlug: options?.orgSlug,
       includeEditableList: options?.includeEditableList ?? true,
       includePublicList: options?.includePublicList ?? false,
     });
@@ -527,7 +504,7 @@ export async function bulkRemoveContributors(
   course_uuid: string,
   data: any,
   access_token: string | null | undefined,
-  options?: Pick<CourseWriteOptions, 'orgSlug' | 'includeEditableList' | 'includePublicList'>,
+  options?: Pick<CourseWriteOptions, 'includeEditableList' | 'includePublicList'>,
 ) {
   const result: any = await fetch(
     `${getAPIUrl()}courses/${course_uuid}/bulk-remove-contributors`,
@@ -540,7 +517,6 @@ export async function bulkRemoveContributors(
     const { revalidateTag } = await import('next/cache');
     revalidateTag(courseTag.contributors(course_uuid), 'max');
     await revalidateCourseMutationTags(course_uuid, {
-      orgSlug: options?.orgSlug,
       includeEditableList: options?.includeEditableList ?? true,
       includePublicList: options?.includePublicList ?? false,
     });

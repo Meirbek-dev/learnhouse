@@ -4,7 +4,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useOptionalGamificationContext } from '@/components/Contexts/GamificationContext';
 import { GamificationProfileSection } from '@/components/Dashboard/Gamification';
 import { updatePreferencesAction } from '@/app/actions/gamification';
-import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { Check, Loader2, Save } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Switch } from '@/components/ui/switch';
@@ -36,8 +35,6 @@ const DEFAULT_PREFERENCES: GamificationPreferences = {
 
 export default function UserGamificationSettings() {
   const t = useTranslations('DashPage.UserAccountSettings.Gamification');
-  const org = usePlatformOrg() as any;
-  const orgId = org?.id;
   const ctx = useOptionalGamificationContext();
   const profile = ctx?.profile;
 
@@ -65,11 +62,6 @@ export default function UserGamificationSettings() {
   };
 
   const handleSave = async () => {
-    if (!orgId) {
-      toast.error(t('errors.noOrgId'));
-      return;
-    }
-
     setIsSaving(true);
     try {
       // Map simplified preferences to full structure
@@ -85,7 +77,7 @@ export default function UserGamificationSettings() {
         },
       };
 
-      await updatePreferencesAction(orgId, fullPreferences);
+      await updatePreferencesAction(fullPreferences);
 
       setHasChanges(false);
       setSaveSuccess(true);
@@ -110,19 +102,10 @@ export default function UserGamificationSettings() {
     };
   }, []);
 
-  if (!orgId) {
-    return (
-      <div className="flex items-center justify-center p-8">
-        <p className="text-muted-foreground">{t('errors.noOrgId')}</p>
-      </div>
-    );
-  }
-
   return (
     <div className="mx-8 space-y-6">
       {/* Profile Overview */}
       <GamificationProfileSection
-        orgId={orgId}
         variant="full"
         showUnlocks
       />

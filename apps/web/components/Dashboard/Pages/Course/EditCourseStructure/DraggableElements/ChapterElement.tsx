@@ -64,7 +64,6 @@ interface Chapter {
 interface ChapterElementProps {
   chapter: Chapter;
   chapterIndex: number;
-  orgslug: string;
   course_uuid: string;
 }
 
@@ -76,7 +75,7 @@ interface PlatformSession {
   };
 }
 
-const ChapterElement = ({ chapter, chapterIndex, orgslug, course_uuid }: ChapterElementProps) => {
+const ChapterElement = ({ chapter, chapterIndex, course_uuid }: ChapterElementProps) => {
   // Hooks
   const session = usePlatformSession() as PlatformSession;
   const access_token = session?.data?.tokens?.access_token;
@@ -342,7 +341,6 @@ const ChapterElement = ({ chapter, chapterIndex, orgslug, course_uuid }: Chapter
                   activities.map((activity, index) => (
                     <ActivityElement
                       key={activity.activity_uuid}
-                      orgslug={orgslug}
                       course_uuid={course_uuid}
                       activityIndex={index}
                       activity={activity}
@@ -360,10 +358,7 @@ const ChapterElement = ({ chapter, chapterIndex, orgslug, course_uuid }: Chapter
 
           {/* New Activity Button */}
           <div className="px-4 pb-4">
-            <NewActivityButton
-              orgslug={orgslug}
-              chapterId={chapter.id}
-            />
+            <NewActivityButton chapterId={chapter.id} />
           </div>
         </div>
       )}

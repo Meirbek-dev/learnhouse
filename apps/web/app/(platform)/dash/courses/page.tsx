@@ -1,6 +1,5 @@
 import { getPlatformOrganizationContextInfo } from '@services/organizations/orgs';
 import { getEditableOrgCourses } from '@services/courses/courses';
-import { PLATFORM_ORG_SLUG } from '@/services/config/config';
 import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
 import { auth } from '@/auth';
@@ -83,15 +82,7 @@ async function PlatformDashCoursesPageInner(props: {
   const access_token = session?.tokens?.access_token;
   const [org, { courses, total, summary }] = await Promise.all([
     getPlatformOrganizationContextInfo(access_token || undefined),
-    getEditableOrgCourses(
-      PLATFORM_ORG_SLUG,
-      access_token || undefined,
-      currentPage,
-      COURSES_PER_PAGE,
-      query,
-      sortBy,
-      preset,
-    ),
+    getEditableOrgCourses(access_token || undefined, currentPage, COURSES_PER_PAGE, query, sortBy, preset),
   ]);
 
   return (

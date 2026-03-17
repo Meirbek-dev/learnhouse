@@ -5,10 +5,10 @@ import CollectionThumbnail from '@components/Objects/Thumbnails/CollectionThumbn
 import GeneralWrapper from '@/components/Objects/Elements/Wrappers/GeneralWrapper';
 import { GamificationProvider } from '@/components/Contexts/GamificationContext';
 import { HeroSection } from '@/components/Dashboard/Gamification/hero-section';
-import { getAbsoluteUrl, PLATFORM_ORG_SLUG } from '@services/config/config';
 import PermissionGuard from '@components/Security/PermissionGuard';
 import { Actions, Resources, Scopes } from '@/types/permissions';
 import type { DashboardData } from '@/types/gamification';
+import { getAbsoluteUrl } from '@services/config/config';
 import CreateCourseTrigger from './CreateCourseTrigger';
 import { BookOpen, FolderKanban } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
@@ -21,7 +21,6 @@ interface LandingClassicProps {
   courses: any[];
   totalCourses: number;
   collections: any[];
-  org_id: number;
   gamificationData?: DashboardData | null;
 }
 
@@ -31,7 +30,6 @@ interface EmptyStateProps {
 
 interface GridProps {
   collections: any[];
-  org_id: number;
 }
 
 // Empty State Components
@@ -76,7 +74,7 @@ const EmptyCoursesState = ({ t }: EmptyStateProps) => (
 );
 
 // Collection Grid Component
-const CollectionGrid = ({ collections, org_id }: GridProps) => (
+const CollectionGrid = ({ collections }: GridProps) => (
   <div className="grid w-full grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
     {collections.map((collection: any) => (
       <div
@@ -101,13 +99,7 @@ const SectionHeader = ({ title, type, action }: { title: string; type: 'cou' | '
 );
 
 // Main Component
-const LandingClassic = async ({
-  courses,
-  totalCourses,
-  collections,
-  org_id,
-  gamificationData,
-}: LandingClassicProps) => {
+const LandingClassic = async ({ courses, totalCourses, collections, gamificationData }: LandingClassicProps) => {
   const t = await getTranslations('HomePage');
   const gamificationProfile = gamificationData?.profile;
   const userRank = gamificationData?.user_rank;
@@ -116,11 +108,8 @@ const LandingClassic = async ({
   const hasCollections = collections.length > 0;
 
   return (
-    <GamificationProvider
-      orgId={org_id}
-      initialData={{ dashboard: gamificationData }}
-    >
-      <LoginBonusHandler orgId={org_id} />
+    <GamificationProvider initialData={{ dashboard: gamificationData }}>
+      <LoginBonusHandler />
       <div className="min-h-screen w-full">
         <GeneralWrapper>
           <div className="space-y-12">
@@ -147,7 +136,6 @@ const LandingClassic = async ({
                   <CourseGridClient
                     initialCourses={courses}
                     initialTotal={totalCourses}
-                    orgslug={PLATFORM_ORG_SLUG}
                   />
                 ) : (
                   <EmptyCoursesState t={t} />
@@ -178,14 +166,7 @@ const LandingClassic = async ({
               />
 
               <div className="min-h-[200px]">
-                {hasCollections ? (
-                  <CollectionGrid
-                    collections={collections}
-                    org_id={org_id}
-                  />
-                ) : (
-                  <EmptyCollectionsState t={t} />
-                )}
+                {hasCollections ? <CollectionGrid collections={collections} /> : <EmptyCollectionsState t={t} />}
               </div>
             </section>
           </div>

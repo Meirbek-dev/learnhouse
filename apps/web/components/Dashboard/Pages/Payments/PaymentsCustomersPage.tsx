@@ -4,7 +4,6 @@ import UnconfiguredPaymentsDisclaimer from '@components/Pages/Payments/Unconfigu
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
-import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { usePaymentsEnabled } from '@hooks/usePaymentsEnabled';
 import { getOrgCustomers } from '@services/payments/payments';
 import UserAvatar from '@components/Objects/UserAvatar';
@@ -133,7 +132,6 @@ const PaymentsUsersTable = ({ data }: { data: PaymentUserData[] }) => {
 };
 
 const PaymentsCustomersPage = () => {
-  const org = usePlatformOrg() as any;
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const { isEnabled, isLoading } = usePaymentsEnabled();
@@ -143,9 +141,7 @@ const PaymentsCustomersPage = () => {
     data: customers,
     error,
     isLoading: customersLoading,
-  } = useSWR(org ? [`/payments/${org.id}/customers`, access_token] : null, ([_url, token]) =>
-    getOrgCustomers(org.id, token),
-  );
+  } = useSWR(access_token ? ['/payments/customers', access_token] : null, ([_url, token]) => getOrgCustomers(token));
 
   if (!(isEnabled || isLoading)) {
     return <UnconfiguredPaymentsDisclaimer />;

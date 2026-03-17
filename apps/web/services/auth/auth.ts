@@ -190,21 +190,16 @@ export async function loginWithOAuthToken(email: string, provider: string, acces
 /**
  * Password reset link sender with validation
  * @param email - User email address
- * @param orgId - Organization ID
  * @returns Promise with response metadata
  */
-export async function sendResetLink(email: string, orgId: number) {
+export async function sendResetLink(email: string) {
   if (!(email?.trim() && validateEmail(email))) {
     throw createAuthError('Valid email is required', 400, 'INVALID_EMAIL');
   }
 
-  if (!Number.isInteger(orgId) || orgId <= 0) {
-    throw createAuthError('Valid organization ID is required', 400, 'INVALID_ORG_ID');
-  }
-
   try {
     const sanitizedEmail = sanitizeStringInput(email);
-    const url = `${getAPIUrl()}${AUTH_ENDPOINTS.resetPassword}/send_reset_code/${encodeURIComponent(sanitizedEmail)}?org_id=${orgId}`;
+    const url = `${getAPIUrl()}${AUTH_ENDPOINTS.resetPassword}/send_reset_code/${encodeURIComponent(sanitizedEmail)}`;
 
     const result = await fetchWithRetry(url, RequestBody('POST', null, null));
     return await getResponseMetadata(result);
@@ -220,11 +215,10 @@ export async function sendResetLink(email: string, orgId: number) {
  * Password reset with validation
  * @param email - User email address
  * @param newPassword - New password
- * @param orgId - Organization ID
  * @param resetCode - Password reset code
  * @returns Promise with response metadata
  */
-export async function resetPassword(email: string, newPassword: string, orgId: number, resetCode: string) {
+export async function resetPassword(email: string, newPassword: string, resetCode: string) {
   // Input validation
   if (!(email?.trim() && validateEmail(email))) {
     throw createAuthError('Valid email is required', 400, 'INVALID_EMAIL');
@@ -232,10 +226,6 @@ export async function resetPassword(email: string, newPassword: string, orgId: n
 
   if (!validatePassword(newPassword)) {
     throw createAuthError('Valid password is required', 400, 'INVALID_PASSWORD');
-  }
-
-  if (!Number.isInteger(orgId) || orgId <= 0) {
-    throw createAuthError('Valid organization ID is required', 400, 'INVALID_ORG_ID');
   }
 
   if (!resetCode?.trim()) {
@@ -247,7 +237,6 @@ export async function resetPassword(email: string, newPassword: string, orgId: n
     const params = new URLSearchParams({
       reset_code: resetCode.trim(),
       new_password: newPassword,
-      org_id: orgId.toString(),
     });
 
     const url = `${getAPIUrl()}${AUTH_ENDPOINTS.resetPassword}/change_password/${encodeURIComponent(sanitizedEmail)}?${params}`;
@@ -331,10 +320,9 @@ export async function getUserInfo(token: string): Promise<AuthUser> {
 /**
  * User session retrieval with validation
  * @param token - JWT access token
- * @param orgId - Optional organization ID to scope permissions
  * @returns Promise<UserSessionResponse> - User session information
  */
-export async function getUserSession(token: string, orgId?: number): Promise<UserSessionResponse> {
+export async function getUserSession(token: string): Promise<UserSessionResponse> {
   if (!token?.trim()) {
     throw createAuthError('Access token is required', 400, 'MISSING_TOKEN');
   }
@@ -352,8 +340,7 @@ export async function getUserSession(token: string, orgId?: number): Promise<Use
       cache: 'no-cache',
     };
 
-    const qs = orgId ? `?org_id=${orgId}` : '';
-    const response = await fetchWithRetry(`${getAPIUrl()}${AUTH_ENDPOINTS.userSession}${qs}`, requestOptions);
+    const response = await fetchWithRetry(`${getAPIUrl()}${AUTH_ENDPOINTS.userSession}`, requestOptions);
     return await handleAuthResponse<UserSessionResponse>(response, 'get user session');
   } catch (error) {
     if (error instanceof Error) {

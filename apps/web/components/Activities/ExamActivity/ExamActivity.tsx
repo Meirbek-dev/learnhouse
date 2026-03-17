@@ -28,10 +28,9 @@ import ExamLayout from './ExamLayout';
 interface ExamActivityProps {
   activity: any;
   course: any;
-  orgslug: string;
 }
 
-export default function ExamActivity({ activity, course, orgslug }: ExamActivityProps) {
+export default function ExamActivity({ activity, course }: ExamActivityProps) {
   const t = useTranslations('Activities.ExamActivity');
   const session = usePlatformSession();
   const accessToken = session?.data?.tokens?.access_token;
@@ -135,7 +134,7 @@ export default function ExamActivity({ activity, course, orgslug }: ExamActivity
 
     // Revalidate trail data
     try {
-      await mutate([getTrailSwrKey(exam?.org_id), accessToken]);
+      await mutate([getTrailSwrKey(), accessToken]);
     } catch (error) {
       console.warn('Failed to revalidate trail after exam completion', error);
     }
@@ -158,7 +157,7 @@ export default function ExamActivity({ activity, course, orgslug }: ExamActivity
     const lastAttempt = completedAttempt[0];
     dispatch(examActions.submitExam(lastAttempt));
     isCompletingRef.current = false;
-  }, [mutateAttempts, exam, course, examUuid, accessToken]);
+  }, [mutateAttempts, course, examUuid, accessToken]);
 
   const router = useRouter();
 

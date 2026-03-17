@@ -29,7 +29,6 @@ import DataTable from '@/components/ui/data-table';
 
 import { AlertTriangle, KeyRound, Loader2, LogOut } from 'lucide-react';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
-import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { removeUserFromOrg } from '@services/organizations/orgs';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
 import { swrFetcher } from '@services/utils/ts/requests';
@@ -113,8 +112,7 @@ function RemoveUserButton({ userId, username, onRemove, t }: RemoveUserButtonPro
   );
 }
 
-const OrgUsers = () => {
-  const org = usePlatformOrg() as any;
+const Users = () => {
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const t = useTranslations('DashPage.UserSettings.usersSection');
@@ -132,11 +130,10 @@ const OrgUsers = () => {
 
   const currentUserPriority = (() => {
     try {
-      if (!userRoles || userRoles.length === 0 || !org) return 0;
-      const orgRoles = userRoles.filter((r: any) => r.org?.id === org?.id);
-      if (!orgRoles || orgRoles.length === 0) return 0;
-      // return highest priority among user's roles in this org
-      return Math.max(...orgRoles.map((r: any) => getRolePriority(r.role || r)));
+      if (!userRoles || userRoles.length === 0) return 0;
+      if (userRoles.length === 0) return 0;
+      // return highest priority among user's roles
+      return Math.max(...userRoles.map((r: any) => getRolePriority(r.role || r)));
     } catch {
       return 0;
     }
@@ -148,7 +145,7 @@ const OrgUsers = () => {
     data: orgUsersData,
     error,
     isLoading,
-  } = useSWR(org ? `${getAPIUrl()}orgs/users?page=${currentPage}&per_page=${USERS_PER_PAGE}` : null, (url) =>
+  } = useSWR(`${getAPIUrl()}orgs/users?page=${currentPage}&per_page=${USERS_PER_PAGE}`, (url) =>
     swrFetcher(url, access_token),
   );
 
@@ -171,7 +168,7 @@ const OrgUsers = () => {
   const handleRemoveUser = async (user_id: number) => {
     const toastId = toast.loading(t('removingUser'));
     try {
-      const res = await removeUserFromOrg(org.id, user_id, access_token);
+      const res = await removeUserFromOrg(user_id, access_token);
       if (res.status === 200) {
         // Revalidate the current page data
         await mutate(`${getAPIUrl()}orgs/users?page=${currentPage}&per_page=${USERS_PER_PAGE}`);
@@ -306,7 +303,7 @@ const OrgUsers = () => {
               columns={columns}
               data={users}
               serverPaginated
-              storageKey={org?.id ? `org-${org.id}-users` : 'org-users'}
+              storageKey="org-users"
               labels={{
                 searchPlaceholder: t('searchPlaceholder'),
                 emptyMessage: t('noUsersFound'),
@@ -377,4 +374,4 @@ const OrgUsers = () => {
   );
 };
 
-export default OrgUsers;
+export default Users;

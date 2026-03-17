@@ -3,7 +3,6 @@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { createUserGroup } from '@services/usergroups/usergroups';
-import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { getAPIUrl } from '@services/config/config';
 import { Button } from '@components/ui/button';
@@ -23,14 +22,12 @@ const createValidationSchema = (t: (key: string) => string) =>
   v.object({
     name: v.pipe(v.string(), v.minLength(1, t('nameRequiredError'))),
     description: v.optional(v.string()),
-    org_id: v.number(),
   });
 
 type UserGroupFormValues = v.InferOutput<ReturnType<typeof createValidationSchema>>;
 
 const AddUserGroup = (props: AddUserGroupProps) => {
   const t = useTranslations('Components.AddUserGroup');
-  const org = usePlatformOrg() as any;
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const validationSchema = createValidationSchema(t);
@@ -40,7 +37,6 @@ const AddUserGroup = (props: AddUserGroupProps) => {
     defaultValues: {
       name: '',
       description: '',
-      org_id: org.id,
     },
   });
 

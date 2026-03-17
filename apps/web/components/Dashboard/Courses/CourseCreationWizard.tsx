@@ -8,9 +8,7 @@ import { CourseChoiceCard, courseWorkflowSummaryCardClass } from './courseWorkfl
 import { createNewCourse, getCourseMetadata } from '@services/courses/courses';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { useQueryState, useQueryStates, parseAsString } from 'nuqs';
-import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { PLATFORM_ORG_SLUG } from '@services/config/config';
 import { createChapter } from '@services/courses/chapters';
 import { useEffect, useMemo, useTransition } from 'react';
 import { RadioGroup } from '@/components/ui/radio-group';
@@ -35,10 +33,7 @@ export default function CourseCreationWizard({ sourceCourses }: CourseCreationWi
   const router = useRouter();
   const searchParams = useSearchParams();
   const session = usePlatformSession() as any;
-  const org = usePlatformOrg() as { id?: number; slug?: string } | null;
   const accessToken = session?.data?.tokens?.access_token;
-  const orgId = org?.id;
-  const orgSlug = org?.slug || PLATFORM_ORG_SLUG;
 
   const [step, setStep] = useQueryState('step', { defaultValue: '0', shallow: true });
   const currentStep = Math.min(2, Math.max(0, Number(step)));
@@ -126,7 +121,6 @@ export default function CourseCreationWizard({ sourceCourses }: CourseCreationWi
             description: chapter.description,
             thumbnail_image: '',
             course_id: createdCourse.id,
-            org_id: createdCourse.org_id,
           },
           accessToken,
           { courseUuid: createdCourse.course_uuid },
@@ -150,7 +144,6 @@ export default function CourseCreationWizard({ sourceCourses }: CourseCreationWi
             description: chapter.description || t('importedChapterDescription'),
             thumbnail_image: '',
             course_id: createdCourse.id,
-            org_id: createdCourse.org_id,
           },
           accessToken,
           { courseUuid: createdCourse.course_uuid },
@@ -165,16 +158,10 @@ export default function CourseCreationWizard({ sourceCourses }: CourseCreationWi
       return;
     }
 
-    if (!orgId) {
-      toast.error(t('errors.createWorkspace'));
-      return;
-    }
-
     startTransition(() => {
       void (async () => {
         try {
           const result = await createNewCourse(
-            orgId,
             {
               name: name.trim(),
               description: description.trim(),
@@ -184,7 +171,6 @@ export default function CourseCreationWizard({ sourceCourses }: CourseCreationWi
             },
             null,
             accessToken,
-            { orgSlug: orgSlug },
           );
 
           if (!result.success) {

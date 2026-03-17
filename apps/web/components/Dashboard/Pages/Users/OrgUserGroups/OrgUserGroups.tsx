@@ -18,7 +18,6 @@ import AddUserGroup from '@components/Objects/Modals/Dash/OrgUserGroups/AddUserG
 import ManageUsers from '@components/Objects/Modals/Dash/OrgUserGroups/ManageUsers';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { deleteUserGroup } from '@services/usergroups/usergroups';
-import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
 import { swrFetcher } from '@services/utils/ts/requests';
 import type { ColumnDef } from '@tanstack/react-table';
@@ -89,8 +88,7 @@ function DeleteUserGroupButton({ usergroupId, onDelete, t }: DeleteUserGroupButt
   );
 }
 
-const OrgUserGroups = () => {
-  const org = usePlatformOrg() as any;
+const UserGroups = () => {
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const t = useTranslations('DashPage.UserSettings.usergroupsSection');
@@ -105,7 +103,7 @@ const OrgUserGroups = () => {
     data: usergroups,
     error,
     isLoading,
-  } = useSWR(org ? `${getAPIUrl()}usergroups` : null, (url) => swrFetcher(url, access_token));
+  } = useSWR(`${getAPIUrl()}usergroups`, (url) => swrFetcher(url, access_token));
 
   const deleteUserGroupUI = async (usergroup_id: number) => {
     const toastId = toast.loading(t('deletingUserGroup'));
@@ -250,7 +248,7 @@ const OrgUserGroups = () => {
           columns={columns}
           data={usergroups ?? []}
           pageSize={10}
-          storageKey={org?.id ? `org-${org.id}-usergroups` : 'org-usergroups'}
+          storageKey="org-usergroups"
           labels={{ emptyMessage: t('noUserGroupsFound') }}
         />
         <div className="mt-3 mr-2 flex justify-end">
@@ -279,4 +277,4 @@ const OrgUserGroups = () => {
   );
 };
 
-export default OrgUserGroups;
+export default UserGroups;

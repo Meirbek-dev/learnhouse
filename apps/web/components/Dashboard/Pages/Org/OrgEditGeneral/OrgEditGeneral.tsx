@@ -29,7 +29,7 @@ const createValidationSchema = (t: (key: string, values?: any) => string) =>
 
 type OrganizationValues = v.InferOutput<ReturnType<typeof createValidationSchema>>;
 
-const OrgEditGeneral: FC = () => {
+const EditGeneral: FC = () => {
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const org = usePlatformOrg() as any;
@@ -49,7 +49,7 @@ const OrgEditGeneral: FC = () => {
     const loadingToast = toast.loading(t('updatingOrg'));
     try {
       startTransition(() => {
-        void updateOrganization(org.id, values, access_token)
+        void updateOrganization(values, access_token)
           .then(async () => {
             await revalidateTags(['organizations']);
             mutate(`${getAPIUrl()}orgs/platform`);
@@ -141,4 +141,4 @@ const OrgEditGeneral: FC = () => {
   );
 };
 
-export default OrgEditGeneral;
+export default EditGeneral;

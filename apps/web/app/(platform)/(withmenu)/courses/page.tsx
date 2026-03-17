@@ -1,7 +1,6 @@
 import { getPlatformOrganizationContextInfo } from '@services/organizations/orgs';
 import { getOrgThumbnailMediaDirectory } from '@services/media/media';
 import { getOptionalSession } from '@/lib/get-optional-session';
-import { PLATFORM_ORG_SLUG } from '@/services/config/config';
 import { getOrgCourses } from '@services/courses/courses';
 import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
@@ -49,7 +48,7 @@ export async function generateMetadata(_props: MetadataProps): Promise<Metadata>
 export default async function PlatformCoursesPage() {
   const session = await getOptionalSession();
   const access_token = session?.tokens?.access_token;
-  const { courses, total } = await getOrgCourses(PLATFORM_ORG_SLUG, undefined, access_token || null);
+  const { courses, total } = await getOrgCourses(null, access_token || null);
 
   return (
     <div>

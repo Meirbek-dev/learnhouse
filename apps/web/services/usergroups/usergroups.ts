@@ -1,11 +1,10 @@
 'use server';
 
 import { RequestBodyWithAuthHeader, getResponseMetadata } from '@services/utils/ts/requests';
-import { courseTag, getCourseListTags, tags } from '@/lib/cacheTags';
 import { getAPIUrl } from '@services/config/config';
+import { courseTag, tags } from '@/lib/cacheTags';
 
-export async function getUserGroups(org_id: number, access_token: string) {
-  void org_id;
+export async function getUserGroups(access_token: string) {
   const result: any = await fetch(
     `${getAPIUrl()}usergroups`,
     RequestBodyWithAuthHeader('GET', null, null, access_token),
@@ -117,7 +116,6 @@ export async function linkResourcesToUserGroup(
 
 interface UserGroupCourseInvalidationOptions {
   courseUuid?: string;
-  orgSlug?: string;
 }
 
 async function revalidateUserGroupCourseTags(options?: UserGroupCourseInvalidationOptions) {
@@ -129,14 +127,7 @@ async function revalidateUserGroupCourseTags(options?: UserGroupCourseInvalidati
     tagsToRevalidate.add(courseTag.access(options.courseUuid));
   }
 
-  if (options?.orgSlug) {
-    getCourseListTags(options.orgSlug, {
-      includeEditable: true,
-      includePublic: false,
-    }).forEach((tag) => tagsToRevalidate.add(tag));
-  } else {
-    tagsToRevalidate.add(tags.courses);
-  }
+  tagsToRevalidate.add(tags.courses);
 
   for (const tag of tagsToRevalidate) {
     revalidateTag(tag, 'max');

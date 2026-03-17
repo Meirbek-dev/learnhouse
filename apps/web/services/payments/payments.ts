@@ -3,25 +3,25 @@ import { RequestBodyWithAuthHeader, errorHandling } from '@services/utils/ts/req
 import { getAPIUrl } from '@services/config/config';
 import { tags } from '@/lib/cacheTags';
 
-export async function getPaymentConfigs(orgId: number, access_token: string) {
+export async function getPaymentConfigs(access_token: string) {
   const result = await fetch(
-    `${getAPIUrl()}payments/${orgId}/config`,
+    `${getAPIUrl()}payments/config`,
     RequestBodyWithAuthHeader('GET', null, null, access_token),
   );
   return await errorHandling(result);
 }
 
-export async function checkPaidAccess(courseId: number, orgId: number, access_token: string) {
+export async function checkPaidAccess(courseId: number, access_token: string) {
   const result = await fetch(
-    `${getAPIUrl()}payments/${orgId}/courses/${courseId}/access`,
+    `${getAPIUrl()}payments/courses/${courseId}/access`,
     RequestBodyWithAuthHeader('GET', null, null, access_token),
   );
   return await errorHandling(result);
 }
 
-export async function initializePaymentConfig(orgId: number, data: any, provider: string, access_token: string) {
+export async function initializePaymentConfig(data: any, provider: string, access_token: string) {
   const result = await fetch(
-    `${getAPIUrl()}payments/${orgId}/config?provider=${provider}`,
+    `${getAPIUrl()}payments/config?provider=${provider}`,
     RequestBodyWithAuthHeader('POST', data, null, access_token),
   );
   const responseData = await errorHandling(result);
@@ -35,9 +35,9 @@ export async function initializePaymentConfig(orgId: number, data: any, provider
   return responseData;
 }
 
-export async function updatePaymentConfig(orgId: number, id: string, data: any, access_token: string) {
+export async function updatePaymentConfig(id: string, data: any, access_token: string) {
   const result = await fetch(
-    `${getAPIUrl()}payments/${orgId}/config?id=${id}`,
+    `${getAPIUrl()}payments/config?id=${id}`,
     RequestBodyWithAuthHeader('PUT', data, null, access_token),
   );
   const responseData = await errorHandling(result);
@@ -51,9 +51,9 @@ export async function updatePaymentConfig(orgId: number, id: string, data: any, 
   return responseData;
 }
 
-export async function updateStripeAccountID(orgId: number, data: any, access_token: string) {
+export async function updateStripeAccountID(data: any, access_token: string) {
   const result = await fetch(
-    `${getAPIUrl()}payments/${orgId}/stripe/account?stripe_account_id=${data.stripe_account_id}`,
+    `${getAPIUrl()}payments/stripe/account?stripe_account_id=${data.stripe_account_id}`,
     RequestBodyWithAuthHeader('PUT', data, null, access_token),
   );
   const responseData = await errorHandling(result);
@@ -67,25 +67,25 @@ export async function updateStripeAccountID(orgId: number, data: any, access_tok
   return responseData;
 }
 
-export async function getStripeOnboardingLink(orgId: number, access_token: string, redirect_uri: string) {
+export async function getStripeOnboardingLink(access_token: string, redirect_uri: string) {
   const result = await fetch(
-    `${getAPIUrl()}payments/${orgId}/stripe/connect/link?redirect_uri=${redirect_uri}`,
+    `${getAPIUrl()}payments/stripe/connect/link?redirect_uri=${redirect_uri}`,
     RequestBodyWithAuthHeader('POST', null, null, access_token),
   );
   return await errorHandling(result);
 }
 
-export async function verifyStripeConnection(orgId: number, code: string, access_token: string) {
+export async function verifyStripeConnection(code: string, access_token: string) {
   const result = await fetch(
-    `${getAPIUrl()}payments/stripe/oauth/callback?code=${code}&org_id=${orgId}`,
+    `${getAPIUrl()}payments/stripe/oauth/callback?code=${code}`,
     RequestBodyWithAuthHeader('GET', null, null, access_token),
   );
   return await errorHandling(result);
 }
 
-export async function deletePaymentConfig(orgId: number, id: string, access_token: string) {
+export async function deletePaymentConfig(id: string, access_token: string) {
   const result = await fetch(
-    `${getAPIUrl()}payments/${orgId}/config?id=${id}`,
+    `${getAPIUrl()}payments/config?id=${id}`,
     RequestBodyWithAuthHeader('DELETE', null, null, access_token),
   );
   const responseData = await errorHandling(result);
@@ -99,17 +99,17 @@ export async function deletePaymentConfig(orgId: number, id: string, access_toke
   return responseData;
 }
 
-export async function getOrgCustomers(orgId: number, access_token: string) {
+export async function getOrgCustomers(access_token: string) {
   const result = await fetch(
-    `${getAPIUrl()}payments/${orgId}/customers`,
+    `${getAPIUrl()}payments/customers`,
     RequestBodyWithAuthHeader('GET', null, null, access_token),
   );
   return await errorHandling(result);
 }
 
-export async function getOwnedCourses(orgId: number, access_token: string) {
+export async function getOwnedCourses(access_token: string) {
   const result = await fetch(
-    `${getAPIUrl()}payments/${orgId}/courses/owned`,
+    `${getAPIUrl()}payments/courses/owned`,
     RequestBodyWithAuthHeader('GET', null, null, access_token),
   );
   return await errorHandling(result);

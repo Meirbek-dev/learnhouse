@@ -32,7 +32,6 @@ import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import ProductLinkedCourses from './SubComponents/ProductLinkedCourses';
 import { getPaymentsProductsSwrKey } from '@services/payments/keys';
 import CreateProductForm from './SubComponents/CreateProductForm';
-import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { getPaymentConfigs } from '@services/payments/payments';
 import { usePaymentsEnabled } from '@hooks/usePaymentsEnabled';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
@@ -142,10 +141,8 @@ function ArchiveProductButton({ productId, productName, onArchive, t }: ArchiveP
 }
 
 const PaymentsProductPage = () => {
-  const org = usePlatformOrg() as any;
   const session = usePlatformSession() as any;
   const accessToken = session?.data?.tokens?.access_token;
-  const orgId = org?.id;
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const [expandedProducts, setExpandedProducts] = useState<Record<string, boolean>>({});
@@ -153,13 +150,13 @@ const PaymentsProductPage = () => {
   const t = useTranslations('DashPage.Payments.ProductPage');
 
   const { data: products, error } = useSWR(
-    () => (orgId && accessToken ? [getPaymentsProductsSwrKey(orgId), accessToken] : null),
-    ([_url, token]) => getProducts(orgId, token),
+    () => (accessToken ? [getPaymentsProductsSwrKey(), accessToken] : null),
+    ([_url, token]) => getProducts(token),
   );
 
   const { data: paymentConfigs, error: paymentConfigError } = useSWR(
-    () => (orgId && accessToken ? [`/payments/${orgId}/config`, accessToken] : null),
-    ([_url, token]) => getPaymentConfigs(orgId, token),
+    () => (accessToken ? ['/payments/config', accessToken] : null),
+    ([_url, token]) => getPaymentConfigs(token),
   );
 
   const isStripeEnabled = paymentConfigs
@@ -168,8 +165,8 @@ const PaymentsProductPage = () => {
 
   const handleArchiveProduct = async (productId: string) => {
     try {
-      const res = await archiveProduct(orgId, productId, accessToken);
-      mutate([`/payments/${orgId}/products`, accessToken]);
+      const res = await archiveProduct(productId, accessToken);
+      mutate([getPaymentsProductsSwrKey(), accessToken]);
       if (res.status === 200) {
         toast.success(t('productArchivedSuccess'));
       } else {
@@ -359,7 +356,6 @@ const EditProductForm = ({
   onSuccess: () => void;
   onCancel: () => void;
 }) => {
-  const org = usePlatformOrg() as any;
   const session = usePlatformSession() as any;
   const currencies = currencyCodes.data.map((currency) => ({
     code: currency.code,
@@ -383,8 +379,8 @@ const EditProductForm = ({
 
   const handleSubmit = async (values: EditProductFormData) => {
     try {
-      await updateProduct(org.id, product.id, values, session.data?.tokens?.access_token);
-      mutate([`/payments/${org.id}/products`, session.data?.tokens?.access_token]);
+      await updateProduct(product.id, values, session.data?.tokens?.access_token);
+      mutate([getPaymentsProductsSwrKey(), session.data?.tokens?.access_token]);
       onSuccess();
       toast.success(t('productUpdatedSuccess'));
     } catch {

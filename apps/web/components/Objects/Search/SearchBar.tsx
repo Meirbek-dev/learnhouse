@@ -12,9 +12,9 @@ import {
 } from 'lucide-react';
 import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
+import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import { removeCoursePrefix } from '../Thumbnails/CourseThumbnail';
-import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import type { ChangeEvent, FC, KeyboardEvent } from 'react';
 import { searchOrgContent } from '@services/search/search';
 import { getAbsoluteUrl } from '@services/config/config';
@@ -56,7 +56,6 @@ interface Course {
   public: boolean;
   open_to_contributors: boolean;
   id: number;
-  org_id: number;
   authors: Author[];
   course_uuid: string;
   creation_date: string;
@@ -109,8 +108,6 @@ const CourseResultsSkeleton = () => (
 
 export const SearchBar: FC<SearchBarProps> = ({ className = '', isMobile = false, showSearchSuggestions = false }) => {
   const t = useTranslations('Components.SearchBar');
-  const org = usePlatformOrg() as any;
-  const orgslug = org?.slug;
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<SearchResults>({
     courses: [],
@@ -122,6 +119,7 @@ export const SearchBar: FC<SearchBarProps> = ({ className = '', isMobile = false
   const searchRef = useRef<HTMLDivElement>(null);
   const session = usePlatformSession();
   const accessToken = session?.data?.tokens?.access_token;
+  const org = usePlatformOrg();
   const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   // Debounce the search query value
@@ -144,13 +142,6 @@ export const SearchBar: FC<SearchBarProps> = ({ className = '', isMobile = false
     const controller = new AbortController();
     const currentQuery = debouncedSearch.trim();
 
-    if (!orgslug) {
-      setSearchResults({ courses: [], collections: [], users: [] });
-      setIsLoading(false);
-      setIsInitialLoad(false);
-      return () => {};
-    }
-
     if (currentQuery.length === 0) {
       setSearchResults({ courses: [], collections: [], users: [] });
       setIsLoading(false);
@@ -162,7 +153,7 @@ export const SearchBar: FC<SearchBarProps> = ({ className = '', isMobile = false
 
     (async () => {
       try {
-        const response = await searchOrgContent(orgslug, currentQuery, 1, 3, null, accessToken);
+        const response = await searchOrgContent(currentQuery, 1, 3, null, accessToken);
         if (controller.signal.aborted) return;
 
         // Type assertion and safe access
@@ -192,7 +183,7 @@ export const SearchBar: FC<SearchBarProps> = ({ className = '', isMobile = false
     return () => {
       controller.abort();
     };
-  }, [debouncedSearch, orgslug, accessToken]);
+  }, [debouncedSearch, accessToken]);
 
   const MemoizedEmptyState = !searchQuery.trim() ? (
     <div className="px-4 py-8">
@@ -310,7 +301,7 @@ export const SearchBar: FC<SearchBarProps> = ({ className = '', isMobile = false
                 <div className="relative">
                   {course.thumbnail_image ? (
                     <img
-                      src={getCourseThumbnailMediaDirectory(org?.org_uuid, course.course_uuid, course.thumbnail_image)}
+                      src={getCourseThumbnailMediaDirectory(org?.org_uuid ?? '', course.course_uuid, course.thumbnail_image)}
                       alt={course.name}
                       className="h-10 w-10 rounded-lg object-cover"
                     />

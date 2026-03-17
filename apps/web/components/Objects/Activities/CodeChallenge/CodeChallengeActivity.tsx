@@ -12,7 +12,6 @@ import { Badge } from '@/components/ui/badge';
 interface CodeChallengeActivityProps {
   activity: any;
   course: any;
-  orgslug: string;
 }
 
 const fetcher = async ([url, token]: [string, string]) => {
@@ -28,7 +27,7 @@ const fetcher = async ([url, token]: [string, string]) => {
   return res.json();
 };
 
-export default function CodeChallengeActivity({ activity, course, orgslug }: CodeChallengeActivityProps) {
+export default function CodeChallengeActivity({ activity, course }: CodeChallengeActivityProps) {
   const t = useTranslations('Activities.CodeChallenges');
   const session = usePlatformSession();
   const accessToken = session?.data?.tokens?.access_token;

@@ -32,7 +32,6 @@ interface CodeChallengeActivityModalProps {
   chapterId: number;
   course: any;
   closeModal?: () => void;
-  orgslug: string;
 }
 
 export default function CodeChallengeActivityModal({
@@ -40,7 +39,6 @@ export default function CodeChallengeActivityModal({
   chapterId,
   course,
   closeModal,
-  orgslug,
 }: CodeChallengeActivityModalProps) {
   const t = useTranslations('Components.NewActivity.CodeChallenge');
 

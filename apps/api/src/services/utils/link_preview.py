@@ -1,7 +1,7 @@
 from urllib.parse import urljoin, urlparse
 
 import httpx
-from bs4 import BeautifulSoup, Tag
+from selectolax.lexbor import LexborHTMLParser, LexborNode
 
 
 async def fetch_link_preview(url: str) -> dict[str, str | None]:
@@ -10,54 +10,49 @@ async def fetch_link_preview(url: str) -> dict[str, str | None]:
         response.raise_for_status()
         html = response.text
 
-    soup = BeautifulSoup(html, "html.parser")
+    tree = LexborHTMLParser(html)
 
     def get_meta(property_name: str, attr: str = "property") -> str | None:
-        tag = soup.find("meta", attrs={attr: property_name})
-        if tag and isinstance(tag, Tag) and tag.has_attr("content"):
-            content = tag["content"]
-            if isinstance(content, str):
-                return content
-        return None
+        node = tree.css_first(f'meta[{attr}="{property_name}"]')
+        return node.attributes.get("content") if node else None
 
     # Title
-    title = soup.title.string.strip() if soup.title and soup.title.string else None
+    title_node = tree.css_first("title")
+    title = title_node.text(strip=True) if title_node else None
+
     # Description
     description = get_meta("og:description") or get_meta("description", "name")
+
     # OG Image
     og_image = get_meta("og:image")
-    if og_image and isinstance(og_image, str) and not og_image.startswith("http"):
+    if og_image and not og_image.startswith("http"):
         og_image = urljoin(url, og_image)
+
     # Favicon (robust)
-    favicon = None
-    icon_rels = [
+    favicon: str | None = None
+    icon_rels = {
         "icon",
         "shortcut icon",
         "apple-touch-icon",
         "apple-touch-icon-precomposed",
-    ]
-    for link in soup.find_all("link"):
-        if not isinstance(link, Tag):
-            continue
-        rels = link.get("rel")
-        href = link.get("href")
-        if rels and href:
-            rels_lower = [r.lower() for r in rels]
-            if any(rel in rels_lower for rel in icon_rels):
-                if isinstance(href, str):
-                    favicon = href
-                    break
-    # Fallback to /favicon.ico if not found
+    }
+    for node in tree.css("link[rel]"):
+        rel = node.attributes.get("rel", "")
+        href = node.attributes.get("href", "")
+        if rel and href and rel.lower() in icon_rels:
+            favicon = href
+            break
+
+    # Fallback to /favicon.ico
     if not favicon:
         parsed = urlparse(url)
         favicon = f"{parsed.scheme}://{parsed.netloc}/favicon.ico"
-    elif favicon and not favicon.startswith("http"):
+    elif not favicon.startswith("http"):
         favicon = urljoin(url, favicon)
-    # OG Title
+
+    # OG meta
     og_title = get_meta("og:title")
-    # OG Type
     og_type = get_meta("og:type")
-    # OG URL
     og_url = get_meta("og:url")
 
     return {

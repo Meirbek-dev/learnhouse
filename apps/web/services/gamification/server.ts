@@ -47,7 +47,6 @@ function normalizeProfile(payload: Record<string, unknown> | undefined): UserGam
   const profile: UserGamificationProfile = {
     id: payload.id !== undefined ? numberOr(payload.id) : undefined,
     user_id: numberOr(payload.user_id),
-    org_id: numberOr(payload.org_id),
     total_xp: Math.max(0, numberOr(payload.total_xp)),
     level: Math.max(1, numberOr(payload.level, 1)),
     login_streak: Math.max(0, numberOr(payload.login_streak)),
@@ -79,7 +78,6 @@ function normalizeTransactions(transactions: unknown[] | undefined) {
     return {
       id: numberOr(transaction.id),
       user_id: numberOr(transaction.user_id),
-      org_id: numberOr(transaction.org_id),
       amount: numberOr(transaction.amount),
       source: typeof transaction.source === 'string' ? transaction.source : 'unknown',
       source_id: transaction.source_id ?? null,
@@ -138,13 +136,13 @@ async function requireAccessToken(): Promise<string> {
  * Cached fetch for unified gamification data
  * Uses `use cache` directive for cacheComponents
  */
-async function fetchGamificationData(orgId: number, accessToken: string): Promise<RawDashboardResponse | null> {
+async function fetchGamificationData(accessToken: string): Promise<RawDashboardResponse | null> {
   'use cache';
-  cacheTag(gamificationTag.dashboard(orgId));
+  cacheTag(gamificationTag.dashboard());
   cacheLife(CacheProfiles.realtime);
 
   try {
-    const res = await fetch(`${getAPIUrl()}gamification/${orgId}`, {
+    const res = await fetch(`${getAPIUrl()}gamification/`, {
       method: 'GET',
       headers: { Authorization: `Bearer ${accessToken}` },
     });
@@ -166,23 +164,16 @@ async function fetchGamificationData(orgId: number, accessToken: string): Promis
 /**
  * Cached fetch for leaderboard data
  */
-async function fetchLeaderboardData(
-  orgId: number,
-  limit: number,
-  accessToken: string,
-): Promise<RawLeaderboardResponse | null> {
+async function fetchLeaderboardData(limit: number, accessToken: string): Promise<RawLeaderboardResponse | null> {
   'use cache';
-  cacheTag(gamificationTag.leaderboard(orgId));
+  cacheTag(gamificationTag.leaderboard());
   cacheLife(CacheProfiles.realtime);
 
   try {
-    const res = await fetch(
-      `${getAPIUrl()}gamification/${orgId}/leaderboard?limit=${encodeURIComponent(String(limit))}`,
-      {
-        method: 'GET',
-        headers: { Authorization: `Bearer ${accessToken}` },
-      },
-    );
+    const res = await fetch(`${getAPIUrl()}gamification/leaderboard?limit=${encodeURIComponent(String(limit))}`, {
+      method: 'GET',
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
 
     if (!res.ok) {
       if (res.status === 401 || res.status === 403) return null;
@@ -201,7 +192,7 @@ async function fetchLeaderboardData(
  * Fetch unified gamification data from API
  * Returns null if user is not authenticated or if fetch fails
  */
-async function getUnifiedServerData(orgId: number): Promise<RawDashboardResponse | null> {
+async function getUnifiedServerData(): Promise<RawDashboardResponse | null> {
   // Check if user is authenticated first
   const accessToken = await getAccessToken();
   if (!accessToken) {
@@ -209,11 +200,11 @@ async function getUnifiedServerData(orgId: number): Promise<RawDashboardResponse
   }
 
   // Use the cached fetcher
-  return fetchGamificationData(orgId, accessToken);
+  return fetchGamificationData(accessToken);
 }
 
-export async function getServerGamificationProfile(orgId: number): Promise<UserGamificationProfile | null> {
-  const json = await getUnifiedServerData(orgId);
+export async function getServerGamificationProfile(): Promise<UserGamificationProfile | null> {
+  const json = await getUnifiedServerData();
 
   // Return null if no data (unauthorized or error)
   if (!json) {
@@ -223,8 +214,8 @@ export async function getServerGamificationProfile(orgId: number): Promise<UserG
   return normalizeProfile((json.profile ?? json) as Record<string, unknown> | undefined);
 }
 
-export async function getServerGamificationDashboard(orgId: number): Promise<DashboardData | null> {
-  const json = await getUnifiedServerData(orgId);
+export async function getServerGamificationDashboard(): Promise<DashboardData | null> {
+  const json = await getUnifiedServerData();
 
   // Return null if no data (unauthorized or error)
   if (!json) {
@@ -250,13 +241,10 @@ export async function getServerGamificationDashboard(orgId: number): Promise<Das
 }
 
 /**
- * Fetch organization leaderboard
+ * Fetch platform leaderboard
  * Returns null if user is not authenticated or if fetch fails
  */
-export async function getServerOrganizationLeaderboard(
-  orgId: number,
-  limit = 20,
-): Promise<PlatformLeaderboard | null> {
+export async function getServerOrganizationLeaderboard(limit = 20): Promise<PlatformLeaderboard | null> {
   // Check if user is authenticated first
   const accessToken = await getAccessToken();
   if (!accessToken) {
@@ -264,20 +252,19 @@ export async function getServerOrganizationLeaderboard(
   }
 
   // Use the cached fetcher
-  const json = await fetchLeaderboardData(orgId, limit, accessToken);
+  const json = await fetchLeaderboardData(limit, accessToken);
   return normalizeLeaderboard(json);
 }
 
 // Server-only revalidation utility after successful mutations
-export async function revalidateGamificationTags(orgId: number) {
-  if (!orgId) return;
-  for (const tag of gamificationTags(orgId)) {
+export async function revalidateGamificationTags() {
+  for (const tag of gamificationTags()) {
     revalidateTag(tag, 'max');
   }
 }
 
 // Server-side mutation helpers
-export async function awardXPOnServer(orgId: number, payload: Record<string, any>) {
+export async function awardXPOnServer(payload: Record<string, any>) {
   const accessToken = await requireAccessToken();
   const body = {
     source: payload.source,
@@ -285,7 +272,7 @@ export async function awardXPOnServer(orgId: number, payload: Record<string, any
     custom_amount: payload.custom_amount ?? payload.amount,
     idempotency_key: payload.idempotency_key,
   };
-  const res = await fetch(`${getAPIUrl()}gamification/${orgId}/xp`, {
+  const res = await fetch(`${getAPIUrl()}gamification/xp`, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${accessToken}`,
@@ -295,13 +282,13 @@ export async function awardXPOnServer(orgId: number, payload: Record<string, any
   });
   if (!res.ok) throw new Error(`Failed to award XP: ${res.status}`);
   const json = await res.json();
-  await revalidateGamificationTags(orgId);
+  await revalidateGamificationTags();
   return json;
 }
 
-export async function updateStreakOnServer(orgId: number, type: 'login' | 'learning') {
+export async function updateStreakOnServer(type: 'login' | 'learning') {
   const accessToken = await requireAccessToken();
-  const res = await fetch(`${getAPIUrl()}gamification/${orgId}/streaks/${encodeURIComponent(type)}`, {
+  const res = await fetch(`${getAPIUrl()}gamification/streaks/${encodeURIComponent(type)}`, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${accessToken}`,
@@ -309,13 +296,13 @@ export async function updateStreakOnServer(orgId: number, type: 'login' | 'learn
   });
   if (!res.ok) throw new Error(`Failed to update streak: ${res.status}`);
   const json = await res.json();
-  await revalidateGamificationTags(orgId);
+  await revalidateGamificationTags();
   return json;
 }
 
-export async function updatePreferencesOnServer(orgId: number, preferences: Record<string, any>) {
+export async function updatePreferencesOnServer(preferences: Record<string, any>) {
   const accessToken = await requireAccessToken();
-  const res = await fetch(`${getAPIUrl()}gamification/${orgId}/preferences`, {
+  const res = await fetch(`${getAPIUrl()}gamification/preferences`, {
     method: 'PATCH',
     headers: {
       'Authorization': `Bearer ${accessToken}`,
@@ -325,6 +312,6 @@ export async function updatePreferencesOnServer(orgId: number, preferences: Reco
   });
   if (!res.ok) throw new Error(`Failed to update preferences: ${res.status}`);
   const json = await res.json();
-  await revalidateGamificationTags(orgId);
+  await revalidateGamificationTags();
   return json;
 }

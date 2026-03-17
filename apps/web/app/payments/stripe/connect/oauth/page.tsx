@@ -22,18 +22,12 @@ const StripeConnectCallback = () => {
   const verifyConnectionEvent = useEffectEvent(async (signal?: AbortSignal) => {
     try {
       const code = searchParams.get('code');
-      const state = searchParams.get('state');
-      const orgId = state?.split('=')[1]; // Extract org_id value after '='
 
-      if (!(code && orgId && session?.data?.tokens?.access_token)) {
+      if (!(code && session?.data?.tokens?.access_token)) {
         throw new Error(t('missingParameters'));
       }
 
-      const _response = await verifyStripeConnection(
-        Number.parseInt(orgId, 10),
-        code,
-        session.data.tokens.access_token,
-      );
+      const _response = await verifyStripeConnection(code, session.data.tokens.access_token);
 
       // small delay for UX
       await new Promise((resolve) => setTimeout(resolve, 1000));

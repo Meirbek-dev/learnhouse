@@ -34,9 +34,6 @@ export function sessionCan(
  */
 export async function requirePermission(action: Action, resource: Resource, scope: Scope, redirectTo?: string) {
   const session = await requireAuth();
-  if (!session.permissions_org_id) {
-    redirect(redirectTo ?? '/unauthorized');
-  }
 
   const perms = new Set(session.permissions);
   if (!sessionCan(session, resource, action, scope, perms)) {
@@ -54,9 +51,6 @@ export async function requireAnyPermission(
   redirectTo?: string,
 ) {
   const session = await requireAuth();
-  if (!session.permissions_org_id) {
-    redirect(redirectTo ?? '/unauthorized');
-  }
 
   const perms = new Set(session.permissions);
   const hasAny = checks.some((c) => sessionCan(session, c.resource, c.action, c.scope, perms));

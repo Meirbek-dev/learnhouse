@@ -2,7 +2,6 @@
 
 import { Field, FieldContent, FieldError, FieldLabel } from '@components/ui/field';
 import { AlertTriangle, ArrowLeft, Info, Loader2 } from 'lucide-react';
-import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { getAbsoluteUrl } from '@services/config/config';
 import { sendResetLink } from '@services/auth/auth';
@@ -25,7 +24,6 @@ type ForgotPasswordFormData = v.InferOutput<ReturnType<typeof createValidationSc
 
 const ForgotPasswordClient = () => {
   const t = useTranslations('Auth.Forgot');
-  const org = usePlatformOrg() as any;
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
   const [isPending, startTransition] = useTransition();
@@ -44,7 +42,7 @@ const ForgotPasswordClient = () => {
     setError('');
     setMessage('');
     startTransition(async () => {
-      const res = await sendResetLink(values.email, org?.id);
+      const res = await sendResetLink(values.email);
       if (res.status === 200) {
         setMessage(t('checkEmail'));
       } else {

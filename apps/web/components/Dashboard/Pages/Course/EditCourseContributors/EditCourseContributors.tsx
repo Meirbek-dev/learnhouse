@@ -25,7 +25,6 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
 import { Check, ChevronDown, Search, UserPen, Users } from 'lucide-react';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
-import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { searchOrgContent } from '@services/search/search';
 import { useDirtySection } from '@/hooks/useDirtySection';
@@ -176,7 +175,6 @@ const EditCourseContributors = () => {
   const access_token = session?.data?.tokens?.access_token;
   const course = useCourse();
   const { courseStructure, editorData, refreshCourseEditor, showConflict } = course;
-  const org = usePlatformOrg() as any;
   const contributors = (editorData.contributors.data ?? []) as Contributor[];
   const isContributorsLoading = course.isEditorDataLoading && editorData.contributors.data === null;
 
@@ -223,7 +221,7 @@ const EditCourseContributors = () => {
       setIsSearching(true);
       setSearchOpen(true);
       try {
-        const response = await searchOrgContent(org?.slug, debouncedSearch, 1, 5, null, access_token);
+        const response = await searchOrgContent(debouncedSearch, 1, 5, null, access_token);
         if (response.success && response.data?.users) {
           const users = response.data.users.map((user: SearchUser) =>
             Object.assign(user, {
@@ -241,10 +239,10 @@ const EditCourseContributors = () => {
       setIsSearching(false);
     };
 
-    if (org?.slug && access_token) {
+    if (access_token) {
       searchUsers();
     }
-  }, [debouncedSearch, org?.slug, access_token, t]);
+  }, [debouncedSearch, access_token, t]);
 
   const masterCheckboxChecked = (() => {
     const nonCreatorContributors = contributors.filter((c) => c.authorship !== 'CREATOR');
@@ -259,9 +257,7 @@ const EditCourseContributors = () => {
     if (selectedUsers.length === 0 || isAdding) return;
     setIsAdding(true);
     try {
-      const response = await bulkAddContributors(courseStructure.course_uuid, selectedUsers, access_token, {
-        orgSlug: org.slug,
-      });
+      const response = await bulkAddContributors(courseStructure.course_uuid, selectedUsers, access_token);
       if (response.status === 409) {
         showConflict(response.data?.detail);
         return;
@@ -308,7 +304,6 @@ const EditCourseContributors = () => {
         updatedData.authorship,
         updatedData.authorship_status,
         access_token,
-        { orgSlug: org.slug },
       );
       if (res.status === 409) {
         showConflict(res.data?.detail);
@@ -358,9 +353,7 @@ const EditCourseContributors = () => {
       const selectedUsernames = contributors
         .filter((c) => selectedContributors.includes(c.user_id))
         .map((c) => c.user.username);
-      const response = await bulkRemoveContributors(courseStructure.course_uuid, selectedUsernames, access_token, {
-        orgSlug: org.slug,
-      });
+      const response = await bulkRemoveContributors(courseStructure.course_uuid, selectedUsernames, access_token);
       if (response.status === 409) {
         showConflict(response.data?.detail);
         return;
@@ -388,7 +381,7 @@ const EditCourseContributors = () => {
         courseStructure.course_uuid,
         { open_to_contributors: isOpenToContributors },
         access_token,
-        { lastKnownUpdateDate: courseStructure.update_date, orgSlug: org.slug },
+        { lastKnownUpdateDate: courseStructure.update_date },
       );
       if (response.success) {
         initialRef.current = isOpenToContributors;

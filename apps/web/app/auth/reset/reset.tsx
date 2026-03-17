@@ -2,7 +2,6 @@
 
 import { Field, FieldContent, FieldError, FieldLabel } from '@components/ui/field';
 import PasswordInput from '@components/ui/custom/password-input';
-import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { AlertTriangle, Info, Loader2 } from 'lucide-react';
 import { getUriWithoutOrg } from '@services/config/config';
@@ -45,7 +44,6 @@ type ResetPasswordFormData = v.InferOutput<ReturnType<typeof createValidationSch
 const ResetPasswordClient = () => {
   const validationT = useTranslations('Validation');
   const t = useTranslations('Auth.Reset');
-  const org = usePlatformOrg() as any;
   const searchParams = useSearchParams();
   const reset_code = searchParams.get('resetCode') || '';
   const email = searchParams.get('email') || '';
@@ -67,7 +65,7 @@ const ResetPasswordClient = () => {
     setError('');
     setMessage('');
     startTransition(async () => {
-      const res = await resetPassword(values.email, values.new_password, org?.id, values.reset_code);
+      const res = await resetPassword(values.email, values.new_password, values.reset_code);
       if (res.status === 200) {
         setMessage(t('success'));
       } else {

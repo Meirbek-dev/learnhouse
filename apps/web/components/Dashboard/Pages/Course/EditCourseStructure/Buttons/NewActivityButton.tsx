@@ -11,7 +11,6 @@ import {
 import { createActivity, createExternalVideoActivity, createFileActivity } from '@services/courses/activities';
 import NewActivityModal from '@components/Objects/Modals/Activities/Create/NewActivity';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { Button } from '@/components/ui/button';
 import { useTranslations } from 'next-intl';
@@ -21,13 +20,11 @@ import { toast } from 'sonner';
 
 interface NewActivityButtonProps {
   chapterId: number;
-  orgslug: string;
 }
 
 const NewActivityButton = (props: NewActivityButtonProps) => {
   const [newActivityModal, setNewActivityModal] = useState(false);
   const course = useCourse();
-  const org = usePlatformOrg() as any;
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const { showConflict, refreshCourseMeta } = course;
@@ -42,7 +39,7 @@ const NewActivityButton = (props: NewActivityButtonProps) => {
   const submitActivity = async (activity: any) => {
     const toast_loading = toast.loading(tNotify('creatingActivity'));
     try {
-      const response = await createActivity(activity, props.chapterId, org.org_id, access_token, {
+      const response = await createActivity(activity, props.chapterId, access_token, {
         courseUuid: course.courseStructure.course_uuid,
         lastKnownUpdateDate: course.courseStructure.update_date,
       });
@@ -153,7 +150,6 @@ const NewActivityButton = (props: NewActivityButtonProps) => {
             submitActivity={submitActivity}
             chapterId={props.chapterId}
             course={course}
-            orgslug={props.orgslug}
           />
         </DialogContent>
       </Dialog>

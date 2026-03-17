@@ -3,12 +3,11 @@ import { getAPIUrl } from '@services/config/config';
 /**
  * SWR key builders for course-related resources
  */
-export function getTrailSwrKey(orgId: number | null | undefined) {
-  if (!orgId) return '';
+export function getTrailSwrKey() {
   return `${getAPIUrl()}trail`;
 }
 
-export function getCoursesSwrKey(orgSlug: string, page = 1, limit = 20) {
+export function getCoursesSwrKey(page = 1, limit = 20) {
   return `${getAPIUrl()}courses/page/${page}/limit/${limit}`;
 }
 

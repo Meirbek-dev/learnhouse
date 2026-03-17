@@ -5,7 +5,6 @@ import { getAssignmentsFromCourses } from '@services/courses/assignments';
 import { CourseCard } from '@/app/_shared/dash/assignments/ClientParts';
 import { getEditableOrgCourses } from '@services/courses/courses';
 import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
-import { PLATFORM_ORG_SLUG } from '@/services/config/config';
 import { Card, CardContent } from '@/components/ui/card';
 import { getTranslations } from 'next-intl/server';
 import { Spinner } from '@components/ui/spinner';
@@ -34,7 +33,7 @@ export default async function PlatformAssignmentsPage() {
   }
 
   const org = await getPlatformOrganizationContextInfo(access_token);
-  const coursesData = await getEditableOrgCourses(PLATFORM_ORG_SLUG, access_token);
+  const coursesData = await getEditableOrgCourses(access_token);
   const courses = coursesData?.courses || [];
 
   let courseAssignments: Assignment[][] = [];

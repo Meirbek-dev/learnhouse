@@ -1,4 +1,4 @@
-import { PLATFORM_ORG_SLUG, getAbsoluteUrl } from './services/config/config';
+import { getAbsoluteUrl } from './services/config/config';
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
@@ -21,17 +21,7 @@ export const config = {
 export default async function proxy(req: NextRequest) {
   const { pathname, search } = req.nextUrl;
 
-  if (pathname.startsWith('/orgs/')) {
-    const platformPrefix = `/orgs/${PLATFORM_ORG_SLUG}`;
-    if (pathname === platformPrefix || pathname.startsWith(`${platformPrefix}/`)) {
-      const flattenedPath = pathname.slice(platformPrefix.length) || '/';
-      return NextResponse.redirect(new URL(`${flattenedPath}${search}`, req.url), 308);
-    }
-
-    return NextResponse.next();
-  }
-
-  // Out of orgslug paths & rewrite
+  // Standard path rewrites
   const standard_paths = ['/home'];
   const auth_paths = ['/login', '/signup', '/reset', '/forgot'];
   if (standard_paths.includes(pathname)) {
