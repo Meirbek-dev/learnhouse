@@ -20,7 +20,6 @@ from src.db.courses.courses import (
     ThumbnailType,
 )
 from src.db.courses.enhanced_responses import CourseReadWithPermissions
-from src.core.platform import PLATFORM_ORG_SLUG
 from src.db.organizations import Organization
 from src.db.resource_authors import (
     ResourceAuthor,
@@ -31,6 +30,7 @@ from src.db.usergroup_resources import UserGroupResource
 from src.db.usergroup_user import UserGroupUser
 from src.db.users import AnonymousUser, PublicUser, User, UserRead
 from src.security.rbac import PermissionChecker
+from src.services.platform import get_platform_org_id
 from src.services.courses.thumbnails import upload_thumbnail
 
 
@@ -453,12 +453,9 @@ async def count_courses(
     db_session: Session,
 ) -> int:
     """Count total courses for the platform organization with proper access filtering."""
+    platform_org_id = get_platform_org_id(db_session)
     # Base count query
-    query = (
-        select(func.count(Course.id.distinct()))
-        .join(Organization)
-        .where(Organization.slug == PLATFORM_ORG_SLUG)
-    )
+    query = select(func.count(Course.id.distinct())).where(Course.org_id == platform_org_id)
 
     if isinstance(current_user, AnonymousUser):
         # For anonymous users, only count public courses
@@ -531,10 +528,11 @@ async def get_courses(
     from sqlalchemy.orm import aliased
 
     offset = (page - 1) * limit
+    platform_org_id = get_platform_org_id(db_session)
 
     # Step 1: Build a subquery that selects the paginated course IDs
     # with proper access filtering
-    id_query = select(Course.id).join(Organization).where(Organization.slug == PLATFORM_ORG_SLUG)
+    id_query = select(Course.id).where(Course.org_id == platform_org_id)
 
     if isinstance(current_user, AnonymousUser):
         id_query = id_query.where(Course.public)
@@ -681,9 +679,10 @@ async def search_courses(
 ) -> list[CourseRead]:
     offset = (page - 1) * limit
     search_filter = _course_search_filter(search_query)
+    platform_org_id = get_platform_org_id(db_session)
 
     # Base query
-    query = select(Course).join(Organization).where(Organization.slug == PLATFORM_ORG_SLUG)
+    query = select(Course).where(Course.org_id == platform_org_id)
     if search_filter is not None:
         query = query.where(search_filter)
 
@@ -1315,14 +1314,10 @@ async def get_editable_courses(
     if isinstance(current_user, AnonymousUser):
         return []
 
-    org = db_session.exec(
-        select(Organization).where(Organization.slug == PLATFORM_ORG_SLUG)
-    ).first()
-    if not org:
-        return []
+    platform_org_id = get_platform_org_id(db_session)
 
     checker = PermissionChecker(db_session)
-    granted = checker._get_or_load(current_user.id, org.id)
+    granted = checker._get_or_load(current_user.id, platform_org_id)
 
     has_broad_update = PermissionChecker._has_perm(
         granted, "course", "update", "all"
@@ -1332,9 +1327,7 @@ async def get_editable_courses(
     offset = (page - 1) * limit
 
     if has_broad_update:
-        id_query = (
-            select(Course.id).join(Organization).where(Organization.slug == PLATFORM_ORG_SLUG)
-        )
+        id_query = select(Course.id).where(Course.org_id == platform_org_id)
         if search_filter is not None:
             id_query = id_query.where(search_filter)
         id_query = _apply_course_sort(id_query, sort_by)
@@ -1355,8 +1348,7 @@ async def get_editable_courses(
 
         id_query = (
             select(Course.id)
-            .join(Organization, Organization.id == Course.org_id)
-            .where(Organization.slug == PLATFORM_ORG_SLUG, is_active_author)
+            .where(Course.org_id == platform_org_id, is_active_author)
         )
         if search_filter is not None:
             id_query = id_query.where(search_filter)
@@ -1450,14 +1442,10 @@ async def count_editable_courses(
     if isinstance(current_user, AnonymousUser):
         return 0
 
-    org = db_session.exec(
-        select(Organization).where(Organization.slug == PLATFORM_ORG_SLUG)
-    ).first()
-    if not org:
-        return 0
+    platform_org_id = get_platform_org_id(db_session)
 
     checker = PermissionChecker(db_session)
-    granted = checker._get_or_load(current_user.id, org.id)
+    granted = checker._get_or_load(current_user.id, platform_org_id)
 
     has_broad_update = PermissionChecker._has_perm(
         granted, "course", "update", "all"
@@ -1465,11 +1453,7 @@ async def count_editable_courses(
     search_filter = _course_search_filter(search_query)
 
     if has_broad_update:
-        query = (
-            select(func.count(Course.id.distinct()))
-            .join(Organization)
-            .where(Organization.slug == PLATFORM_ORG_SLUG)
-        )
+        query = select(func.count(Course.id.distinct())).where(Course.org_id == platform_org_id)
     else:
         has_own_update = PermissionChecker._has_perm(granted, "course", "update", "own")
         if not has_own_update:
@@ -1477,10 +1461,9 @@ async def count_editable_courses(
 
         query = (
             select(func.count(Course.id.distinct()))
-            .join(Organization, Organization.id == Course.org_id)
             .join(ResourceAuthor, ResourceAuthor.resource_uuid == Course.course_uuid)
             .where(
-                Organization.slug == PLATFORM_ORG_SLUG,
+                Course.org_id == platform_org_id,
                 ResourceAuthor.user_id == current_user.id,
                 ResourceAuthor.authorship_status == ResourceAuthorshipStatusEnum.ACTIVE,
             )

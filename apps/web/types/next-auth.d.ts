@@ -2,14 +2,8 @@
 import type { Role } from './permissions';
 import 'next-auth';
 
-interface UserRoleWithOrg {
+interface UserRole {
   role: Role;
-  org: {
-    id: number;
-    org_uuid: string;
-    name: string;
-    slug: string;
-  };
 }
 
 // Ambient global auth domain types (no import needed elsewhere)
@@ -42,7 +36,7 @@ declare global {
 
   interface SessionData {
     user: AuthUser;
-    roles: UserRoleWithOrg[];
+    roles: UserRole[];
     tokens: AuthTokens;
     /** User's effective permissions as flat string array */
     permissions: string[];
@@ -57,7 +51,7 @@ declare global {
 declare module 'next-auth' {
   interface Session {
     user: AuthUser;
-    roles?: UserRoleWithOrg[];
+    roles?: UserRole[];
     tokens?: AuthTokens;
     expires: string;
     /** User's effective permissions as flat string array */

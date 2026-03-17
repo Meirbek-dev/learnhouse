@@ -8,19 +8,13 @@ interface LoginResponse {
   tokens: AuthTokens;
 }
 
-interface UserRoleWithOrg {
+interface UserRole {
   role: Role;
-  org: {
-    id: number;
-    org_uuid: string;
-    name: string;
-    slug: string;
-  };
 }
 
 interface UserSessionResponse {
   user: AuthUser;
-  roles: UserRoleWithOrg[];
+  roles: UserRole[];
   permissions: string[];
 }
 

@@ -30,7 +30,7 @@ EXEMPT_ENDPOINTS = {
     "/auth/reset-password",
     # Public organization discovery
     "/orgs/",  # Create org (public signup)
-    "/orgs/{org_id}",  # GET only (public read)
+    "/orgs/platform",  # GET only (public read)
     # Public course browsing (GET only)
     "/courses/page/{page}/limit/{limit}",
     "/courses/{course_uuid}",  # GET only
@@ -102,7 +102,7 @@ def is_read_only_endpoint(method: str, path: str) -> bool:
     public_patterns = [
         "/courses/page/",
         "/courses/{course_uuid}",
-        "/orgs/{org_id}",
+        "/orgs/platform",
     ]
 
     return any(pattern in path for pattern in public_patterns)

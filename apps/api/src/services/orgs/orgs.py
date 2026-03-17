@@ -54,82 +54,6 @@ async def get_organization(
     return OrganizationRead.model_validate(org)
 
 
-async def get_organization_by_slug(
-    request: Request,
-    org_slug: str,
-    db_session: Session,
-    current_user: PublicUser | AnonymousUser,
-) -> OrganizationRead:
-    statement = select(Organization).where(Organization.slug == org_slug)
-    result = db_session.exec(statement)
-
-    org = result.first()
-
-    if not org:
-        raise HTTPException(
-            status_code=404,
-            detail="Organization not found",
-        )
-
-    return OrganizationRead.model_validate(org)
-
-
-async def create_org(
-    request: Request,
-    org_object: OrganizationCreate,
-    current_user: PublicUser | AnonymousUser,
-    db_session: Session,
-):
-    statement = select(Organization).where(Organization.slug == org_object.slug)
-    result = db_session.exec(statement)
-
-    org = result.first()
-
-    if org:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Organization already exists",
-        )
-
-    org = Organization.model_validate(org_object)
-
-    if isinstance(current_user, AnonymousUser):
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="You should be logged in to be able to achieve this action",
-        )
-
-    # Complete the org object
-    org.org_uuid = f"org_{ULID()}"
-    org.creation_date = str(datetime.now())
-    org.update_date = str(datetime.now())
-    org.creator_id = current_user.id
-
-    db_session.add(org)
-    db_session.commit()
-    db_session.refresh(org)
-
-    from src.db.permissions import Role
-
-    admin_role = db_session.exec(
-        select(Role).where(Role.slug == RoleSlug.ADMIN)
-    ).first()
-    if not admin_role:
-        raise HTTPException(500, detail="Admin role not found")
-
-    # Link user to org by assigning admin role
-    from src.security.rbac import PermissionChecker
-
-    checker = PermissionChecker(db_session)
-    checker.assign_role(
-        user_id=int(current_user.id),
-        role_id=admin_role.id,
-        org_id=int(org.id or 0),
-    )
-
-    return OrganizationRead.model_validate(org)
-
-
 async def update_org(
     request: Request,
     org_object: OrganizationUpdate,
@@ -156,20 +80,9 @@ async def update_org(
         current_user.id, "organization:update", org.id, resource_owner_id=org.creator_id
     )
 
-    # Verify if the new slug is already in use
-    statement = select(Organization).where(Organization.slug == org_object.slug)
-    result = db_session.exec(statement)
-
-    slug_available = result.first()
-
-    if slug_available and slug_available.id != org_id:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Organization slug already exists",
-        )
-
     # Update only the fields that were passed in
     update_data = org_object.model_dump(exclude_unset=True)
+    update_data.pop("slug", None)
     for field, value in update_data.items():
         if value is not None:
             setattr(org, field, value)

@@ -88,7 +88,7 @@ async def handle_stripe_webhook(
                 db_session,
             )
 
-            logger.info(f"Account authorized for organization {org_id}")
+            logger.info("Account authorized for platform organization")
             return {"status": "success", "message": "Account authorized successfully"}
 
         if event_type == "account.application.deauthorized":
@@ -120,7 +120,7 @@ async def handle_stripe_webhook(
                 db_session,
             )
 
-            logger.info(f"Account deauthorized for organization {org_id}")
+            logger.info("Account deauthorized for platform organization")
             return {"status": "success", "message": "Account deauthorized successfully"}
 
         # Handle payment-related events

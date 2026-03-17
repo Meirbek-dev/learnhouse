@@ -8,7 +8,6 @@ from pydantic import ValidationError
 from sqlmodel import Session, select
 from ulid import ULID
 
-from src.core.platform import PLATFORM_ORG_SLUG
 from src.db.organizations import (
     Organization,
     OrganizationRead,
@@ -23,7 +22,7 @@ from src.db.users import (
     User,
     UserCreate,
     UserRead,
-    UserRoleWithOrg,
+    UserSessionRole,
     UserSession,
     UserUpdate,
     UserUpdatePassword,
@@ -32,6 +31,7 @@ from src.db.users import (
 from src.security.rbac import PermissionChecker
 from src.security.security import security_hash_password, security_verify_password
 from src.services.cache import redis_client
+from src.services.platform import get_platform_org_id, get_platform_organization
 from src.services.users.avatars import upload_avatar
 from src.services.users.emails import send_account_creation_email
 from src.services.users.usergroups import add_users_to_usergroup
@@ -313,39 +313,16 @@ async def get_user_session(
 
     checker = PermissionChecker(db_session)
 
-    # Get all orgs where user has roles
-    statement = select(UserRole).where(UserRole.user_id == user.id).distinct()
-    user_role_rows = db_session.exec(statement).all()
-    all_org_ids = {ur.org_id for ur in user_role_rows if ur.org_id}
-
-    # Batch fetch all orgs in one query
-    orgs_by_id = {
-        o.id: o
-        for o in db_session.exec(
-            select(Organization).where(Organization.id.in_(all_org_ids))
-        ).all()
-    }
-
-    # Build roles list - return ALL roles per org, not just the first
-    roles: list[UserRoleWithOrg] = []
-    for oid in all_org_ids:
-        org = orgs_by_id.get(oid)
-        if not org:
-            continue
-        user_roles = checker.get_user_roles(user_id=user.id, org_id=oid)
-        org_read = _safe_organization_read(org)
-        for role_dict in user_roles:
-            roles.append(
-                UserRoleWithOrg(
-                    role=RoleRead.model_validate(role_dict),
-                    org=org_read,
-                )
-            )
+    platform_org_id = get_platform_org_id(db_session)
+    roles = [
+        UserSessionRole(role=RoleRead.model_validate(role_dict))
+        for role_dict in checker.get_user_roles(user_id=user.id, org_id=platform_org_id)
+    ]
 
     # Resolve permissions for the requested org (or None for system-only perms)
     permissions: list[str] = []
     permissions_timestamp: int | None = None
-    target_org_id = org_id if org_id and org_id in all_org_ids else None
+    target_org_id = platform_org_id
     try:
         effective = checker.get_expanded_permissions(current_user.id, target_org_id)
         permissions = sorted(effective)
@@ -625,19 +602,13 @@ async def _get_user_by_field(
 
 async def _get_platform_organization(db_session: Session) -> Organization:
     """Get the platform organization used by single-org deployments."""
-    statement = select(Organization).where(Organization.slug == PLATFORM_ORG_SLUG)
-    org = db_session.exec(statement).first()
-
-    if not org:
+    try:
+        return get_platform_organization(db_session)
+    except RuntimeError as exc:
         raise HTTPException(
             status_code=500,
-            detail=(
-                f"Platform organization '{PLATFORM_ORG_SLUG}' not found. "
-                "Please contact system administrator."
-            ),
-        )
-
-    return org
+            detail="Platform organization not found. Please contact system administrator.",
+        ) from exc
 
 
 async def ensure_user_in_platform_org(db_session: Session, user_id: int) -> None:

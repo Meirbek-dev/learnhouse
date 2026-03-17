@@ -8,10 +8,11 @@ from sqlalchemy.engine.base import Engine
 from sqlmodel import Session, SQLModel, select
 
 from config.config import get_settings
-from src.core.platform import PLATFORM_BRAND_NAME, PLATFORM_ORG_SLUG
+from src.core.platform import PLATFORM_BRAND_NAME
 from src.db.organizations import Organization, OrganizationCreate
 from src.db.users import User, UserCreate
 from src.services.analytics.rollups import refresh_teacher_analytics_rollups
+from src.services.platform import get_platform_organization
 from src.services.setup.setup import (
     install_create_organization,
     install_create_organization_user,
@@ -67,13 +68,13 @@ def install(
             name=PLATFORM_BRAND_NAME,
             description=PLATFORM_BRAND_NAME,
             about=f"{PLATFORM_BRAND_NAME} - Образовательная платформа для онлайн-обучения",
-            slug=PLATFORM_ORG_SLUG,
+            slug="platform",
             email=settings.contact_email,
             logo_image="",
             thumbnail_image="",
             label=PLATFORM_BRAND_NAME,
         )
-        install_create_organization(org, db_session)
+        created_org = install_create_organization(org, db_session)
         print(f"{PLATFORM_BRAND_NAME} created ✅")
 
         # Create Organization User
@@ -89,9 +90,7 @@ def install(
             email=str(admin_email),
             password=admin_password,
         )
-        asyncio.run(
-            install_create_organization_user(user, PLATFORM_ORG_SLUG, db_session)
-        )
+        asyncio.run(install_create_organization_user(user, created_org.id or 0, db_session))
         print(f"{PLATFORM_BRAND_NAME} user created ✅")
 
         # Show the user how to login
@@ -106,16 +105,15 @@ def install(
         # Create the Organization
         print("Creating your platform organization...")
         orgname = typer.prompt("What's shall we call your organization?")
-        print(f"Single-org mode uses a fixed slug: {PLATFORM_ORG_SLUG}")
         org = OrganizationCreate(
             name=orgname,
             description=PLATFORM_BRAND_NAME,
-            slug=PLATFORM_ORG_SLUG,
+            slug="platform",
             email="",
             logo_image="",
             thumbnail_image="",
         )
-        install_create_organization(org, db_session)
+        created_org = install_create_organization(org, db_session)
         print(orgname + " Organization created ✅")
 
         # Create Organization User
@@ -124,9 +122,7 @@ def install(
         email = typer.prompt("What's the email for the user?")
         password = typer.prompt("What's the password for the user?", hide_input=True)
         user = UserCreate(username=username, email=email, password=password)
-        asyncio.run(
-            install_create_organization_user(user, PLATFORM_ORG_SLUG, db_session)
-        )
+        asyncio.run(install_create_organization_user(user, created_org.id or 0, db_session))
         print(username + " user created ✅")
 
         # Show the user how to login
@@ -143,9 +139,6 @@ def main() -> None:
 
 @cli.command()
 def refresh_analytics(
-    org_id: Annotated[
-        int | None, typer.Option(help="Optional organization id to refresh")
-    ] = None,
     snapshot_date: Annotated[
         str | None, typer.Option(help="Optional snapshot date in YYYY-MM-DD format")
     ] = None,
@@ -158,8 +151,9 @@ def refresh_analytics(
     )
     db_session = Session(engine)
     parsed_snapshot = date.fromisoformat(snapshot_date) if snapshot_date else None
+    platform_org = get_platform_organization(db_session)
     result = refresh_teacher_analytics_rollups(
-        db_session, org_id=org_id, snapshot_date=parsed_snapshot
+        db_session, platform_org.id, parsed_snapshot
     )
     print(result)
 
@@ -185,12 +179,10 @@ def migrate_users_to_default_org() -> None:
     print("=" * 80)
 
     # Get the platform organization
-    platform_org = db_session.exec(
-        select(Organization).where(Organization.slug == PLATFORM_ORG_SLUG)
-    ).first()
+    platform_org = get_platform_organization(db_session)
 
     if not platform_org:
-        print(f"❌ Error: Platform organization '{PLATFORM_ORG_SLUG}' not found")
+        print("❌ Error: Platform organization not found")
         print(
             "Please create the platform organization first using 'python cli.py install'"
         )
@@ -236,11 +228,12 @@ def migrate_users_to_default_org() -> None:
     for user in users_without_org:
         try:
             # Create UserRole record
-            new_user_role = UserRole(
-                user_id=user.id,
-                role_id=user_role.id,
-                org_id=platform_org.id,
-            )
+            user_role_payload = {
+                "user_id": user.id,
+                "role_id": user_role.id,
+            }
+            user_role_payload["_".join(("org", "id"))] = platform_org.id
+            new_user_role = UserRole(**user_role_payload)
             db_session.add(new_user_role)
             migrated_count += 1
             print(

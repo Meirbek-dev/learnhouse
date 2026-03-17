@@ -4241,7 +4241,7 @@
         "strongHabit": "Формируется привычка"
       },
       "errors": {
-        "noOrgId": "ID организации не найден"
+        "platformNotFound": "Контекст платформы не найден"
       },
       "levelUp": "Новый уровень!",
       "levelUpTitle": "Новый уровень!",
@@ -4405,7 +4405,7 @@
       "landingPageSavedSuccess": "Домашняя страница успешно сохранена",
       "loading": "Загрузка...",
       "newPasswordLabel": "Новый пароль",
-      "orgIdNotFound": "Идентификатор платформы не найден",
+      "platformNotFound": "Контекст платформы не найден",
       "passwordUpdateError": "Не удалось обновить пароль. Пожалуйста, попробуйте еще раз.",
       "passwordUpdateSuccess": "Пароль успешно обновлен",
       "productArchivedSuccess": "Продукт успешно заархивирован.",

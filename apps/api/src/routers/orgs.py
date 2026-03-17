@@ -1,26 +1,19 @@
-from typing import Annotated, Literal
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, Request, UploadFile
 from sqlmodel import Session
 
 from src.core.events.database import get_db_session
 from src.db.organizations import (
-    OrganizationCreate,
     OrganizationRead,
     OrganizationUpdate,
-    OrganizationUser,
     PaginatedOrganizationUsers,
 )
-from src.db.users import AnonymousUser, PublicUser
+from src.db.users import PublicUser
 from src.security.auth import get_current_user
 from src.security.rbac import PermissionCheckerDep
 from src.services.platform import get_platform_org_id, get_platform_organization
 from src.services.orgs.orgs import (
-    create_org,
-    delete_org,
-    get_organization,
-    get_orgs_by_user,
-    get_orgs_by_user_admin,
     update_org,
     update_org_landing,
     update_org_logo,
@@ -50,32 +43,6 @@ async def api_get_platform_org(
     """
     platform_org = get_platform_organization(db_session)
     return OrganizationRead.model_validate(platform_org)
-
-
-@router.post("")
-async def api_create_org(
-    request: Request,
-    org_object: OrganizationCreate,
-    current_user: Annotated[PublicUser, Depends(get_current_user)],
-    db_session: Annotated[Session, Depends(get_db_session)],
-) -> OrganizationRead:
-    """
-    Create new organization
-    """
-    return await create_org(request, org_object, current_user, db_session)
-
-
-@router.get("/{org_id}")
-async def api_get_org(
-    request: Request,
-    org_id: int,
-    current_user: Annotated[PublicUser, Depends(get_current_user)],
-    db_session: Annotated[Session, Depends(get_db_session)],
-) -> OrganizationRead:
-    """
-    Get single Org by ID
-    """
-    return await get_organization(request, org_id, db_session, current_user)
 
 
 @router.get("/users")
@@ -149,10 +116,9 @@ async def api_remove_user_from_platform_org(
     )
 
 
-@router.put("/{org_id}/logo")
+@router.put("/logo")
 async def api_update_org_logo(
     request: Request,
-    org_id: int,
     logo_file: UploadFile,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session: Annotated[Session, Depends(get_db_session)],
@@ -163,6 +129,7 @@ async def api_update_org_logo(
 
     **Required Permission**: `organization:update`
     """
+    org_id = get_platform_org_id(db_session)
     checker.require(current_user.id, "organization:update", org_id)
     return await update_org_logo(
         request=request,
@@ -173,10 +140,9 @@ async def api_update_org_logo(
     )
 
 
-@router.put("/{org_id}/thumbnail")
+@router.put("/thumbnail")
 async def api_update_org_thumbnail(
     request: Request,
-    org_id: int,
     thumbnail_file: UploadFile,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session: Annotated[Session, Depends(get_db_session)],
@@ -187,6 +153,7 @@ async def api_update_org_thumbnail(
 
     **Required Permission**: `organization:update`
     """
+    org_id = get_platform_org_id(db_session)
     checker.require(current_user.id, "organization:update", org_id)
     return await update_org_thumbnail(
         request=request,
@@ -197,10 +164,9 @@ async def api_update_org_thumbnail(
     )
 
 
-@router.put("/{org_id}/preview")
+@router.put("/preview")
 async def api_update_org_preview(
     request: Request,
-    org_id: int,
     preview_file: UploadFile,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session: Annotated[Session, Depends(get_db_session)],
@@ -211,6 +177,7 @@ async def api_update_org_preview(
 
     **Required Permission**: `organization:update`
     """
+    org_id = get_platform_org_id(db_session)
     checker.require(current_user.id, "organization:update", org_id)
     return await update_org_preview(
         request=request,
@@ -221,43 +188,10 @@ async def api_update_org_preview(
     )
 
 
-@router.get("/user/page/{page}/limit/{limit}")
-async def api_user_orgs(
-    request: Request,
-    page: int,
-    limit: int,
-    current_user: Annotated[PublicUser, Depends(get_current_user)],
-    db_session: Annotated[Session, Depends(get_db_session)],
-) -> list[OrganizationRead]:
-    """
-    Get orgs by page and limit by current user
-    """
-    return await get_orgs_by_user(
-        request, db_session, str(current_user.id), page, limit
-    )
-
-
-@router.get("/user_admin/page/{page}/limit/{limit}")
-async def api_user_orgs_admin(
-    request: Request,
-    page: int,
-    limit: int,
-    current_user: Annotated[PublicUser, Depends(get_current_user)],
-    db_session: Annotated[Session, Depends(get_db_session)],
-) -> list[OrganizationRead]:
-    """
-    Get orgs by page and limit by current user
-    """
-    return await get_orgs_by_user_admin(
-        request, db_session, str(current_user.id), page, limit
-    )
-
-
-@router.put("/{org_id}")
+@router.put("/platform")
 async def api_update_org(
     request: Request,
     org_object: OrganizationUpdate,
-    org_id: int,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session: Annotated[Session, Depends(get_db_session)],
     checker: PermissionCheckerDep,
@@ -267,31 +201,14 @@ async def api_update_org(
 
     **Required Permission**: `organization:update`
     """
+    org_id = get_platform_org_id(db_session)
     checker.require(current_user.id, "organization:update", org_id)
     return await update_org(request, org_object, org_id, current_user, db_session)
 
 
-@router.delete("/{org_id}")
-async def api_delete_org(
-    request: Request,
-    org_id: int,
-    current_user: Annotated[PublicUser, Depends(get_current_user)],
-    db_session: Annotated[Session, Depends(get_db_session)],
-    checker: PermissionCheckerDep,
-):
-    """
-    Delete Org by ID
-
-    **Required Permission**: `organization:delete`
-    """
-    checker.require(current_user.id, "organization:delete", org_id)
-    return await delete_org(request, org_id, current_user, db_session)
-
-
-@router.put("/{org_id}/landing")
+@router.put("/landing")
 async def api_update_org_landing(
     request: Request,
-    org_id: int,
     landing_object: dict,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session: Annotated[Session, Depends(get_db_session)],
@@ -302,16 +219,16 @@ async def api_update_org_landing(
 
     **Required Permission**: `organization:update`
     """
+    org_id = get_platform_org_id(db_session)
     checker.require(current_user.id, "organization:update", org_id)
     return await update_org_landing(
         request, landing_object, org_id, current_user, db_session
     )
 
 
-@router.post("/{org_id}/landing/content")
+@router.post("/landing/content")
 async def api_upload_org_landing_content(
     request: Request,
-    org_id: int,
     content_file: UploadFile,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session: Annotated[Session, Depends(get_db_session)],
@@ -322,6 +239,7 @@ async def api_upload_org_landing_content(
 
     **Required Permission**: `organization:update`
     """
+    org_id = get_platform_org_id(db_session)
     checker.require(current_user.id, "organization:update", org_id)
     return await upload_org_landing_content_service(
         request=request,

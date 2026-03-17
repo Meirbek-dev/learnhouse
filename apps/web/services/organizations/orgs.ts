@@ -15,35 +15,6 @@ import { tags } from '@/lib/cacheTags';
  Client-side GET requests are called from the frontend using SWR
 */
 
-export async function createNewOrganization(body: any, access_token: string) {
-  const result = await fetch(`${getAPIUrl()}orgs/`, RequestBodyWithAuthHeader('POST', body, null, access_token));
-  const data = await errorHandling(result);
-
-  // Revalidate organizations cache after creating organization
-  if (result.ok) {
-    const { revalidateTag } = await import('next/cache');
-    revalidateTag(tags.organizations, 'max');
-  }
-
-  return data;
-}
-
-export async function deleteOrganizationFromBackend(org_id: number, access_token: string) {
-  const result = await fetch(
-    `${getAPIUrl()}orgs/${org_id}`,
-    RequestBodyWithAuthHeader('DELETE', null, null, access_token),
-  );
-  const data = await errorHandling(result);
-
-  // Revalidate organizations cache after deleting organization
-  if (result.ok) {
-    const { revalidateTag } = await import('next/cache');
-    revalidateTag(tags.organizations, 'max');
-  }
-
-  return data;
-}
-
 async function fetchPlatformOrganization(access_token?: string) {
   'use cache';
   cacheTag(tags.organizations);

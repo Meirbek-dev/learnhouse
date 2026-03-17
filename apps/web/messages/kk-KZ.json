@@ -4241,7 +4241,7 @@
         "strongHabit": "Күшті әдетті қалыптастыру"
       },
       "errors": {
-        "noOrgId": "Ұйымдастыру идентификаторы табылмады"
+        "platformNotFound": "Платформа контексті табылмады"
       },
       "levelUp": "Деңгей!",
       "levelUpTitle": "Деңгей!",
@@ -4405,7 +4405,7 @@
       "landingPageSavedSuccess": "Нысана беті сәтті сақталды",
       "loading": "Жүктелуде...",
       "newPasswordLabel": "Жаңа құпия сөз",
-      "orgIdNotFound": "Ұйым идентификаторы табылмады",
+      "platformNotFound": "Платформа контексті табылмады",
       "passwordUpdateError": "Құпия сөзді жаңарту мүмкін болмады. Қайталап көріңіз.",
       "passwordUpdateSuccess": "Құпия сөз сәтті жаңартылды",
       "productArchivedSuccess": "Өнім сәтті мұрағатталды.",

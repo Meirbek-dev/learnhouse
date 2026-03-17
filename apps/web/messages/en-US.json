@@ -4226,7 +4226,7 @@
         "strongHabit": "Strong habit forming"
       },
       "errors": {
-        "noOrgId": "Organization ID not found"
+        "platformNotFound": "Platform context not found"
       },
       "levelUp": "Level Up!",
       "levelUpTitle": "Level Up!",
@@ -4390,7 +4390,7 @@
       "landingPageSavedSuccess": "Landing page saved successfully",
       "loading": "Loading...",
       "newPasswordLabel": "New Password",
-      "orgIdNotFound": "Organization ID not found",
+      "platformNotFound": "Platform context not found",
       "passwordUpdateError": "Failed to update password. Please try again.",
       "passwordUpdateSuccess": "Password updated successfully",
       "productArchivedSuccess": "Product archived successfully.",

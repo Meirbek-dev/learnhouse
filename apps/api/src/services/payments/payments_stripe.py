@@ -357,7 +357,7 @@ async def generate_stripe_connect_link(
     if not client_id:
         raise HTTPException(status_code=400, detail="Stripe client ID not configured")
 
-    state = f"org_id={org_id}"
+    state = "platform"
 
     # Generate OAuth link for existing accounts
     oauth_link = f"https://connect.stripe.com/oauth/authorize?response_type=code&client_id={client_id}&scope=read_write&redirect_uri={redirect_uri}&state={state}"

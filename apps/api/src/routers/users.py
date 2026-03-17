@@ -240,7 +240,6 @@ async def api_change_password_with_reset_code(
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     new_password: str,
     email: EmailStr,
-    org_id: int | None = None,
     reset_code: str,
 ):
     """
@@ -251,7 +250,7 @@ async def api_change_password_with_reset_code(
         db_session,
         current_user,
         new_password,
-        org_id or get_platform_org_id(db_session),
+        get_platform_org_id(db_session),
         email,
         reset_code,
     )
@@ -264,7 +263,6 @@ async def api_send_password_reset_email(
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     email: EmailStr,
-    org_id: int | None = None,
 ):
     """
     Send password reset email
@@ -273,7 +271,7 @@ async def api_send_password_reset_email(
         request,
         db_session,
         current_user,
-        org_id or get_platform_org_id(db_session),
+        get_platform_org_id(db_session),
         email,
     )
 
@@ -286,14 +284,13 @@ async def api_delete_user(
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     checker: PermissionCheckerDep,
     user_id: int,
-    org_id: Annotated[int | None, Query()] = None,
 ):
     """
     Delete User
 
     **Required Permission**: `user:delete:org`
     """
-    org_id = _resolve_org_id(db_session, current_user.id, org_id)
+    org_id = get_platform_org_id(db_session)
     checker.require(current_user.id, "user:delete", org_id)
 
     # Prevent self-deletion

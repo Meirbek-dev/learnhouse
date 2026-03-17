@@ -4,7 +4,6 @@ from fastapi import Request
 from sqlalchemy import true as sa_true
 from sqlmodel import Session, and_, or_, select, text
 
-from src.core.platform import PLATFORM_ORG_SLUG
 from src.db.collections import Collection, CollectionRead
 from src.db.collections_courses import CollectionCourse
 from src.db.courses.courses import Course, CourseRead
@@ -13,6 +12,7 @@ from src.db.permissions import UserRole
 from src.db.strict_base_model import PydanticStrictBaseModel
 from src.db.users import AnonymousUser, PublicUser, User, UserRead
 from src.services.courses.courses import search_courses
+from src.services.platform import get_platform_organization
 
 T = TypeVar("T")
 
@@ -37,8 +37,10 @@ async def search_across_org(
     offset = (page - 1) * limit
 
     # Get organization
-    org_statement = select(Organization).where(Organization.slug == PLATFORM_ORG_SLUG)
-    org = db_session.exec(org_statement).first()
+    try:
+        org = get_platform_organization(db_session)
+    except RuntimeError:
+        org = None
 
     if not org:
         return SearchResult(courses=[], collections=[], users=[])

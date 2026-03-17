@@ -111,7 +111,7 @@ class AIFeatureDisabledError(AIServiceException):
     """Raised when AI feature is disabled for organization."""
 
     def __init__(
-        self, feature_name: str, org_id: int, details: dict[str, Any] | None = None
+        self, feature_name: str, platform_id: int, details: dict[str, Any] | None = None
     ) -> None:
-        message = f"AI feature '{feature_name}' is disabled for organization {org_id}"
+        message = f"AI feature '{feature_name}' is disabled for platform {platform_id}"
         super().__init__(message, "AI_FEATURE_DISABLED", details)

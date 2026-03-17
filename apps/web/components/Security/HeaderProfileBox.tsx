@@ -10,7 +10,6 @@ import { ChevronDown, Crown, LogOut, Shield, User, User as UserIcon, Users } fro
 import { Tooltip, TooltipContent, TooltipTrigger } from '@components/ui/tooltip';
 import { useNavigationPermissions } from '@/hooks/useNavigationPermissions';
 import { usePlatformSession } from '@components/Contexts/LHSessionContext';
-import { usePlatformOrg } from '@components/Contexts/OrgContext';
 import { getUriWithoutOrg } from '@services/config/config';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { RoleSlugs } from '@/types/permissions';
@@ -37,68 +36,59 @@ interface CustomRoleInfo {
 export const HeaderProfileBox = () => {
   const session = usePlatformSession() as any;
   const { canAccessDashboard } = useNavigationPermissions();
-  const org = usePlatformOrg();
   const t = useTranslations('Header');
 
   const userRoles = session?.data?.roles ?? [];
 
   let userRoleInfo: RoleInfo | null = null;
   if (userRoles && userRoles.length > 0) {
-    // Find the highest priority role for the current organization
-    const orgRoles = userRoles.filter((role: any) => role.org.id === org?.id);
+    const sortedRoles = userRoles.toSorted((a: any, b: any) => {
+      return (b.role?.priority ?? 0) - (a.role?.priority ?? 0);
+    });
 
-    if (orgRoles.length > 0) {
-      // Sort by role priority (higher number = higher privilege)
-      const sortedRoles = orgRoles.toSorted((a: any, b: any) => {
-        return (b.role?.priority ?? 0) - (a.role?.priority ?? 0);
-      });
+    const highestRole = sortedRoles[0];
 
-      const highestRole = sortedRoles[0];
+    if (highestRole) {
+      const roleSlug = highestRole.role?.slug || '';
+      const roleConfigs: Record<string, RoleInfo> = {
+        [RoleSlugs.ADMIN]: {
+          name: t('profile.roles.admin.name'),
+          icon: <Crown size={12} />,
+          bgColor: 'bg-purple-600',
+          textColor: 'text-white',
+          description: t('profile.roles.admin.description'),
+        },
+        [RoleSlugs.MAINTAINER]: {
+          name: t('profile.roles.maintainer.name'),
+          icon: <Shield size={12} />,
+          bgColor: 'bg-blue-600',
+          textColor: 'text-white',
+          description: t('profile.roles.maintainer.description'),
+        },
+        [RoleSlugs.INSTRUCTOR]: {
+          name: t('profile.roles.instructor.name'),
+          icon: <Users size={12} />,
+          bgColor: 'bg-green-600',
+          textColor: 'text-white',
+          description: t('profile.roles.instructor.description'),
+        },
+        [RoleSlugs.USER]: {
+          name: t('profile.roles.user.name'),
+          icon: <User size={12} />,
+          bgColor: 'bg-gray-500',
+          textColor: 'text-white',
+          description: t('profile.roles.user.description'),
+        },
+      };
 
-      if (highestRole) {
-        // Define role configurations based on slug
-        const roleSlug = highestRole.role?.slug || '';
-        const roleConfigs: Record<string, RoleInfo> = {
-          [RoleSlugs.ADMIN]: {
-            name: t('profile.roles.admin.name'),
-            icon: <Crown size={12} />,
-            bgColor: 'bg-purple-600',
-            textColor: 'text-white',
-            description: t('profile.roles.admin.description'),
-          },
-          [RoleSlugs.MAINTAINER]: {
-            name: t('profile.roles.maintainer.name'),
-            icon: <Shield size={12} />,
-            bgColor: 'bg-blue-600',
-            textColor: 'text-white',
-            description: t('profile.roles.maintainer.description'),
-          },
-          [RoleSlugs.INSTRUCTOR]: {
-            name: t('profile.roles.instructor.name'),
-            icon: <Users size={12} />,
-            bgColor: 'bg-green-600',
-            textColor: 'text-white',
-            description: t('profile.roles.instructor.description'),
-          },
-          [RoleSlugs.USER]: {
-            name: t('profile.roles.user.name'),
-            icon: <User size={12} />,
-            bgColor: 'bg-gray-500',
-            textColor: 'text-white',
-            description: t('profile.roles.user.description'),
-          },
-        };
-
-        userRoleInfo = roleConfigs[roleSlug] || roleConfigs[RoleSlugs.USER] || null;
-      }
+      userRoleInfo = roleConfigs[roleSlug] || roleConfigs[RoleSlugs.USER] || null;
     }
   }
 
   const customRoles: CustomRoleInfo[] =
     userRoles && userRoles.length > 0
-      ? (userRoles.filter((role: any) => role.org.id === org?.id) ?? [])
+      ? userRoles
           .filter((role: any) => {
-            // Filter out system roles using the `is_system` flag provided by the backend
             return !role.role?.is_system;
           })
           .map((role: any) => ({

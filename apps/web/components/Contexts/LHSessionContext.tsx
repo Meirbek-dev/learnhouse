@@ -9,12 +9,6 @@ import type { ReactNode } from 'react';
 // Match the global UserRoleWithOrg interface from next-auth.d.ts
 interface UserRoleWithOrg {
   role: Role;
-  org: {
-    id: number;
-    org_uuid: string;
-    name: string;
-    slug: string;
-  };
 }
 
 // Extended session data interface - matches actual NextAuth session shape

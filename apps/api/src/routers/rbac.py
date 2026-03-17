@@ -11,7 +11,7 @@ RBAC API Endpoints
 import logging
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
 from slowapi import Limiter
 from slowapi.util import get_remote_address
@@ -52,7 +52,6 @@ class PermissionCheckRequest(BaseModel):
     action: str
     resource: str
     resource_id: str | None = None
-    org_id: int | None = None
     scope: str | None = None
 
 
@@ -63,7 +62,6 @@ class PermissionCheckResponse(BaseModel):
 
 class BatchPermissionCheckRequest(BaseModel):
     checks: list[PermissionCheckRequest]
-    org_id: int | None = None
 
 
 class BatchPermissionCheckResponse(BaseModel):
@@ -75,7 +73,6 @@ class RoleAssignmentRequest(BaseModel):
 
     user_id: int
     role_id: int
-    org_id: int | None = None
 
 
 class RoleRevocationRequest(BaseModel):
@@ -83,13 +80,11 @@ class RoleRevocationRequest(BaseModel):
 
     user_id: int
     role_id: int
-    org_id: int | None = None
 
 
 class UserPermissionsResponse(BaseModel):
     roles: list[dict]
     permissions: list[str]
-    org_id: int | None = None
 
 
 class UserRoleSummary(BaseModel):
@@ -142,7 +137,7 @@ async def check_permission(
         )
 
     perm = f"{body.resource}:{body.action}"
-    granted = checker.check(current_user.id, perm, body.org_id)
+    granted = checker.check(current_user.id, perm, get_platform_org_id(checker.db))
     return PermissionCheckResponse(granted=granted, permission=perm)
 
 
@@ -159,7 +154,7 @@ async def check_permissions_batch(
     if isinstance(current_user, AnonymousUser):
         return BatchPermissionCheckResponse(results=dict.fromkeys(perms, False))
 
-    results = checker.check_many(current_user.id, perms, body.org_id)
+    results = checker.check_many(current_user.id, perms, get_platform_org_id(checker.db))
     return BatchPermissionCheckResponse(results=results)
 
 
@@ -172,10 +167,10 @@ async def check_permissions_batch(
 async def get_my_permissions(
     current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
     checker: PermissionCheckerDep,
-    org_id: Annotated[int | None, Query()] = None,
 ):
+    org_id = get_platform_org_id(checker.db)
     if isinstance(current_user, AnonymousUser):
-        return UserPermissionsResponse(roles=[], permissions=[], org_id=org_id)
+        return UserPermissionsResponse(roles=[], permissions=[])
 
     roles = checker.get_user_roles(current_user.id, org_id)
     permissions = sorted(checker.get_expanded_permissions(current_user.id, org_id))
@@ -183,7 +178,6 @@ async def get_my_permissions(
     return UserPermissionsResponse(
         roles=roles,
         permissions=permissions,
-        org_id=org_id,
     )
 
 

@@ -27,7 +27,7 @@ export interface MembersFeatureFlag extends FeatureFlag {
   admin_limit: number;
 }
 
-export interface OrgFeatures {
+export interface Features {
   courses: FeatureFlag;
   members: MembersFeatureFlag;
   usergroups: FeatureFlag;
@@ -49,7 +49,7 @@ export interface OrgFeatures {
 export interface ConfigData {
   config_version: string;
   general: { enabled: boolean; color: string };
-  features: OrgFeatures;
+  features: Features;
   cloud: { plan: 'free' | 'standard' | 'pro'; custom_domain: boolean };
   landing: Record<string, unknown>;
 }

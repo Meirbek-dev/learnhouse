@@ -1,13 +1,13 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Query, Request
+from fastapi import APIRouter, Depends, Request
 from sqlmodel import Session
 
 from src.core.events.database import get_db_session
 from src.db.usergroups import UserGroup, UserGroupCreate, UserGroupRead, UserGroupUpdate
 from src.db.users import PublicUser, UserRead
 from src.security.auth import get_current_user
-from src.security.rbac import PermissionCheckerDep, PermissionDenied
+from src.security.rbac import PermissionCheckerDep
 from src.services.platform import get_platform_org_id
 from src.services.users.usergroups import (
     add_resources_to_usergroup,
@@ -118,19 +118,13 @@ async def api_update_usergroup(
     checker: PermissionCheckerDep,
     usergroup_id: int,
     usergroup_object: UserGroupUpdate,
-    org_id: Annotated[int | None, Query()] = None,
 ) -> UserGroupRead:
     """
     Update UserGroup
 
     **Required Permission**: `usergroup:update:org`
     """
-    # Resolve org_id from usergroup when not provided
-    if org_id is None:
-        ug = db_session.get(UserGroup, usergroup_id)
-        if ug:
-            org_id = ug.org_id
-
+    org_id = get_platform_org_id(db_session)
     checker.require(current_user.id, "usergroup:update", org_id)
 
     return await update_usergroup_by_id(
@@ -146,19 +140,13 @@ async def api_delete_usergroup(
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     checker: PermissionCheckerDep,
     usergroup_id: int,
-    org_id: Annotated[int | None, Query()] = None,
 ) -> str:
     """
     Delete UserGroup
 
     **Required Permission**: `usergroup:delete:org`
     """
-    # Resolve org_id from usergroup when not provided
-    if org_id is None:
-        ug = db_session.get(UserGroup, usergroup_id)
-        if ug:
-            org_id = ug.org_id
-
+    org_id = get_platform_org_id(db_session)
     checker.require(current_user.id, "usergroup:delete", org_id)
 
     return await delete_usergroup_by_id(request, db_session, current_user, usergroup_id)
@@ -173,19 +161,13 @@ async def api_add_users_to_usergroup(
     checker: PermissionCheckerDep,
     usergroup_id: int,
     user_ids: str,
-    org_id: Annotated[int | None, Query()] = None,
 ) -> str:
     """
     Add Users to UserGroup
 
     **Required Permission**: `usergroup:manage:org`
     """
-    # Resolve org_id from usergroup when not provided
-    if org_id is None:
-        ug = db_session.get(UserGroup, usergroup_id)
-        if ug:
-            org_id = ug.org_id
-
+    org_id = get_platform_org_id(db_session)
     checker.require(current_user.id, "usergroup:manage", org_id)
 
     return await add_users_to_usergroup(

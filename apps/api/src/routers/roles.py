@@ -221,9 +221,9 @@ async def update_role(
     db: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     checker: PermissionCheckerDep,
-    org_id: Annotated[int | None, Query()] = None,
 ):
     """Update a role's name, description, or priority."""
+    org_id = get_platform_org_id(db)
     checker.require(current_user.id, "role:update", org_id)
     role = db.get(Role, role_id)
     if not role:
@@ -276,9 +276,9 @@ async def delete_role(
     db: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     checker: PermissionCheckerDep,
-    org_id: Annotated[int | None, Query()] = None,
 ):
     """Delete a custom role."""
+    org_id = get_platform_org_id(db)
     checker.require(current_user.id, "role:delete", org_id)
     role = db.get(Role, role_id)
     if not role:
@@ -314,8 +314,8 @@ async def get_role_users_count(
     db: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     checker: PermissionCheckerDep,
-    org_id: Annotated[int | None, Query()] = None,
 ):
+    org_id = get_platform_org_id(db)
     checker.require(current_user.id, "role:read", org_id)
     role = db.get(Role, role_id)
     if not role:
@@ -336,9 +336,9 @@ async def get_role_permissions(
     db: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     checker: PermissionCheckerDep,
-    org_id: Annotated[int | None, Query()] = None,
 ):
     """Get all permissions assigned to a role."""
+    org_id = get_platform_org_id(db)
     checker.require(current_user.id, "role:read", org_id)
     role = db.get(Role, role_id)
     if not role:
@@ -360,9 +360,9 @@ async def add_permission_to_role(
     db: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     checker: PermissionCheckerDep,
-    org_id: Annotated[int | None, Query()] = None,
 ):
     """Add a permission to a role."""
+    org_id = get_platform_org_id(db)
     checker.require(current_user.id, "role:update", org_id)
     permission_id = body.permission_id
     role = db.get(Role, role_id)
@@ -429,9 +429,9 @@ async def remove_permission_from_role(
     db: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     checker: PermissionCheckerDep,
-    org_id: Annotated[int | None, Query()] = None,
 ):
     """Remove a permission from a role."""
+    org_id = get_platform_org_id(db)
     checker.require(current_user.id, "role:update", org_id)
     role = db.get(Role, role_id)
     if not role:

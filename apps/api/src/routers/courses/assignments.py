@@ -481,13 +481,13 @@ async def api_final_grade_submission(
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     checker: PermissionCheckerDep,
     db_session=Depends(get_db_session),
-    org_id: Annotated[int | None, Query()] = None,
 ):
     """
     Grade submissions for an assignment from a user
 
     **Required Permission**: `assignment:grade:org` (instructors/graders only)
     """
+    org_id = get_platform_org_id(db_session)
     checker.require(current_user.id, "assignment:grade", org_id)
 
     return await grade_assignment_submission(

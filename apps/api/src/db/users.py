@@ -7,10 +7,6 @@ from sqlmodel import Field
 from src.db.permissions import RoleRead
 from src.db.strict_base_model import PydanticStrictBaseModel, SQLModelStrictBaseModel
 
-if TYPE_CHECKING:
-    from src.db.organizations import OrganizationRead
-
-
 class UserBase(SQLModelStrictBaseModel):
     username: str
     first_name: str
@@ -60,15 +56,14 @@ class PublicUser(UserRead):
     pass
 
 
-class UserRoleWithOrg(PydanticStrictBaseModel):
+class UserSessionRole(PydanticStrictBaseModel):
     role: RoleRead
-    org: "OrganizationRead"  # noqa: UP037
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
 class UserSession(PydanticStrictBaseModel):
     user: UserRead
-    roles: list[UserRoleWithOrg]
+    roles: list[UserSessionRole]
     permissions: list[
         str
     ] = []  # Effective permissions: list of permission strings, e.g. "course:create:org"
@@ -108,7 +103,5 @@ class User(UserBase, table=True):
 
 def rebuild_user_models() -> None:
     """Rebuild user models to resolve forward references"""
-    from src.db.organizations import OrganizationRead
-
-    UserRoleWithOrg.model_rebuild()
+    UserSessionRole.model_rebuild()
     UserSession.model_rebuild()

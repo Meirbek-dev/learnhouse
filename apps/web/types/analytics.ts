@@ -84,7 +84,6 @@ export interface TeacherOverviewResponse {
   window: WindowPreset;
   compare: ComparePreset;
   scope: {
-    org_id: number;
     teacher_user_id: number;
     course_ids: number[];
     cohort_ids: number[];
@@ -188,7 +187,6 @@ export interface TeacherCourseDetailResponse {
     id: number;
     course_uuid: string;
     name: string;
-    org_id: number;
   };
   summary: {
     enrolled_learners: number;

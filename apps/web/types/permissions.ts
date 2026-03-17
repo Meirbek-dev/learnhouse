@@ -81,7 +81,6 @@ export interface Role {
   name: string;
   slug: string;
   description?: string;
-  org_id?: number | null;
   is_system: boolean;
   priority: number;
 }
@@ -140,7 +139,6 @@ export interface OrgUserBasic {
 export interface UserRoleAssignment {
   user_id: number;
   role_id: number;
-  org_id: number;
   assigned_at: string;
   assigned_by: number | null;
   user?: {

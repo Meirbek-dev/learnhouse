@@ -9,6 +9,7 @@ from src.db.permission_enums import RoleSlug
 from src.db.users import User, UserCreate, UserRead
 from src.security.rbac import PermissionChecker
 from src.security.security import security_hash_password
+from src.services.platform import get_platform_organization
 
 
 # Install Default roles
@@ -39,7 +40,7 @@ def install_create_organization(org_object: OrganizationCreate, db_session: Sess
 
 
 async def install_create_organization_user(
-    user_object: UserCreate, org_slug: str, db_session: Session
+    user_object: UserCreate, org_id: int, db_session: Session
 ):
     user = User.model_validate(user_object)
 
@@ -53,10 +54,9 @@ async def install_create_organization_user(
     # Verifications
 
     # Check if Organization exists
-    statement = select(Organization).where(Organization.slug == org_slug)
-    org = db_session.exec(statement)
+    org = db_session.get(Organization, org_id)
 
-    if not org.first():
+    if not org:
         raise HTTPException(
             status_code=409,
             detail="Organization does not exist",
@@ -92,12 +92,6 @@ async def install_create_organization_user(
     db_session.commit()
     db_session.refresh(user)
 
-    # get org id
-    statement = select(Organization).where(Organization.slug == org_slug)
-    org = db_session.exec(statement)
-    org = org.first()
-    org_id = org.id if org else 0
-
     from src.db.permissions import Role
 
     admin_role = db_session.exec(
@@ -111,7 +105,7 @@ async def install_create_organization_user(
     checker.assign_role(
         user_id=user.id or 0,
         role_id=admin_role.id,
-        org_id=org_id or 0,
+        org_id=org.id or 0,
     )
 
     return UserRead.model_validate(user)
