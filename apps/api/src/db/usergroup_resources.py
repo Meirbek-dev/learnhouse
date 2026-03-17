@@ -10,8 +10,5 @@ class UserGroupResource(SQLModelStrictBaseModel, table=True):
         sa_column=Column(Integer, ForeignKey("usergroup.id", ondelete="CASCADE"))
     )
     resource_uuid: str = ""
-    org_id: int = Field(
-        sa_column=Column(Integer, ForeignKey("organization.id", ondelete="CASCADE"))
-    )
     creation_date: str = ""
     update_date: str = ""

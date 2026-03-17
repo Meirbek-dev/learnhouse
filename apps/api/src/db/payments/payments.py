@@ -30,9 +30,6 @@ class PaymentsConfigBase(SQLModelStrictBaseModel):
 
 class PaymentsConfig(PaymentsConfigBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
-    org_id: int = Field(
-        sa_column=Column(BigInteger, ForeignKey("organization.id", ondelete="CASCADE"))
-    )
     creation_date: datetime = Field(default=datetime.now())
     update_date: datetime = Field(default=datetime.now())
 
@@ -49,7 +46,6 @@ class PaymentsConfigUpdate(PaymentsConfigBase):
 
 class PaymentsConfigRead(PaymentsConfigBase):
     id: int
-    org_id: int
     creation_date: datetime
     update_date: datetime
 

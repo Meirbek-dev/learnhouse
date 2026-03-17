@@ -30,9 +30,6 @@ class TrailRun(SQLModelStrictBaseModel, table=True):
     course_id: int = Field(
         sa_column=Column(Integer, ForeignKey("course.id", ondelete="CASCADE"))
     )
-    org_id: int = Field(
-        sa_column=Column(Integer, ForeignKey("organization.id", ondelete="CASCADE"))
-    )
     user_id: int = Field(
         sa_column=Column(Integer, ForeignKey("user.id", ondelete="CASCADE"))
     )
@@ -55,7 +52,6 @@ class TrailRunCreate(SQLModelStrictBaseModel):
     # foreign keys
     trail_id: int
     course_id: int
-    org_id: int
     user_id: int
 
     @field_validator("status", mode="before")
@@ -74,7 +70,6 @@ class TrailRunRead(PydanticStrictBaseModel):
     # foreign keys
     trail_id: int = Field(default=None, foreign_key="trail.id")
     course_id: int = Field(default=None, foreign_key="course.id")
-    org_id: int = Field(default=None, foreign_key="organization.id")
     user_id: int = Field(default=None, foreign_key="user.id")
     # course object
     course: dict | None = None

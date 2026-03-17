@@ -53,7 +53,6 @@ async def search_across_org(
     # Search collections
     collections_query = (
         select(Collection)
-        .where(Collection.org_id == org.id)
         .where(
             or_(
                 text('LOWER("collection".name) LIKE LOWER(:pattern)'),
@@ -66,10 +65,7 @@ async def search_across_org(
     # Search users
     users_query = (
         select(User)
-        .join(
-            UserRole,
-            and_(UserRole.user_id == User.id, UserRole.org_id == org.id),
-        )
+        .join(UserRole, UserRole.user_id == User.id)
         # Use DISTINCT on `User.id` to avoid comparing JSON columns
         .distinct(User.id)
         .where(
@@ -89,10 +85,8 @@ async def search_across_org(
         # For anonymous users, only show public collections
         collections_query = collections_query.where(Collection.public == sa_true())
     else:
-        # For authenticated users, show public collections and those in their org
-        collections_query = collections_query.where(
-            or_(Collection.public == sa_true(), Collection.org_id == org.id)
-        )
+        # For authenticated users, all collections are platform-wide.
+        collections_query = collections_query.where(sa_true())
 
     # Apply pagination to queries
     collections = db_session.exec(collections_query.offset(offset).limit(limit)).all()
@@ -105,10 +99,7 @@ async def search_across_org(
         batch_stmt = (
             select(CollectionCourse, Course)
             .join(Course, CollectionCourse.course_id == Course.id)
-            .where(
-                CollectionCourse.collection_id.in_(collection_ids),
-                CollectionCourse.org_id == org.id,
-            )
+            .where(CollectionCourse.collection_id.in_(collection_ids))
             .distinct()
         )
         courses_by_collection: dict[int, list] = {}

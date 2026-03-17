@@ -11,9 +11,9 @@ from src.db.courses.course_updates import (
     CourseUpdateUpdate,
 )
 from src.db.courses.courses import Course
-from src.db.organizations import Organization
 from src.db.users import AnonymousUser, PublicUser
 from src.security.rbac import PermissionChecker
+from src.services.platform import get_platform_org_id
 
 
 async def create_update(
@@ -23,15 +23,6 @@ async def create_update(
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
 ) -> CourseUpdateRead:
-    # CHekc if org exists
-    statement_org = select(Organization).where(Organization.id == update_object.org_id)
-    org = db_session.exec(statement_org).first()
-
-    if not org or org.id is None:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT, detail="Organization does not exist"
-        )
-
     statement = select(Course).where(Course.course_uuid == course_uuid)
     course = db_session.exec(statement).first()
 
@@ -45,7 +36,7 @@ async def create_update(
     checker.require(
         current_user.id,
         "course:update",
-        course.org_id,
+        get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 
@@ -93,7 +84,7 @@ async def update_update(
     checker.require(
         current_user.id,
         "course:update",
-        update.org_id,
+        get_platform_org_id(db_session),
         resource_owner_id=update_course.creator_id if update_course else None,
     )
 
@@ -134,7 +125,7 @@ async def delete_update(
     checker.require(
         current_user.id,
         "course:update",
-        update.org_id,
+        get_platform_org_id(db_session),
         resource_owner_id=update_course.creator_id if update_course else None,
     )
 

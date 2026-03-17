@@ -35,9 +35,6 @@ class Block(BlockBase, table=True):
     """Database table model for Block."""
 
     id: int | None = Field(default=None, primary_key=True)
-    org_id: int = Field(
-        sa_column=Column("org_id", ForeignKey("organization.id", ondelete="CASCADE"))
-    )
     course_id: int = Field(
         sa_column=Column("course_id", ForeignKey("course.id", ondelete="CASCADE"))
     )
@@ -61,7 +58,6 @@ class BlockRead(BlockBase):
     """Model for reading a block with all related data."""
 
     id: int
-    org_id: int
     course_id: int
     chapter_id: int | None
     activity_id: int

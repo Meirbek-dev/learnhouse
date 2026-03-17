@@ -73,8 +73,7 @@ async def list_roles(
     """List all roles available in the platform org (system roles + org-specific)."""
     platform_org_id = get_platform_org_id(db)
     checker.require(current_user.id, "role:read", platform_org_id)
-    query = select(Role).where(or_(Role.org_id == platform_org_id, Role.org_id.is_(None)))
-    roles = db.exec(query.order_by(Role.priority.desc())).all()
+    roles = db.exec(select(Role).order_by(Role.priority.desc())).all()
 
     role_ids = [role.id for role in roles if role.id is not None]
     permission_count_map: dict[int, int] = {}
@@ -185,7 +184,6 @@ async def create_role(
         name=body.name,
         description=body.description,
         priority=new_priority,
-        org_id=get_platform_org_id(db),
         is_system=False,
     )
     db.add(role)
@@ -223,12 +221,12 @@ async def update_role(
     checker: PermissionCheckerDep,
 ):
     """Update a role's name, description, or priority."""
-    org_id = get_platform_org_id(db)
-    checker.require(current_user.id, "role:update", org_id)
+    platform_org_id = get_platform_org_id(db)
+    checker.require(current_user.id, "role:update", platform_org_id)
     role = db.get(Role, role_id)
     if not role:
         raise HTTPException(404, detail="Role not found")
-    target_org_id = role.org_id if role.org_id is not None else org_id
+    target_org_id = platform_org_id
     actor_is_admin = _is_admin(checker, current_user.id, target_org_id)
     if role.is_system and not actor_is_admin:
         raise HTTPException(403, detail="System roles cannot be modified")
@@ -253,7 +251,7 @@ async def update_role(
         extra={
             "actor_id": current_user.id,
             "role_id": role_id,
-            "org_id": org_id,
+            "org_id": platform_org_id,
             "fields": list(changed_fields.keys()),
         },
     )
@@ -278,12 +276,12 @@ async def delete_role(
     checker: PermissionCheckerDep,
 ):
     """Delete a custom role."""
-    org_id = get_platform_org_id(db)
-    checker.require(current_user.id, "role:delete", org_id)
+    platform_org_id = get_platform_org_id(db)
+    checker.require(current_user.id, "role:delete", platform_org_id)
     role = db.get(Role, role_id)
     if not role:
         raise HTTPException(404, detail="Role not found")
-    target_org_id = role.org_id if role.org_id is not None else org_id
+    target_org_id = platform_org_id
     actor_is_admin = _is_admin(checker, current_user.id, target_org_id)
     if role.is_system and not actor_is_admin:
         raise HTTPException(403, detail="System roles cannot be deleted")
@@ -295,7 +293,7 @@ async def delete_role(
             "actor_id": current_user.id,
             "role_id": role_id,
             "role_slug": role.slug,
-            "org_id": org_id,
+            "org_id": platform_org_id,
         },
     )
     append_role_audit_event(
@@ -315,8 +313,8 @@ async def get_role_users_count(
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     checker: PermissionCheckerDep,
 ):
-    org_id = get_platform_org_id(db)
-    checker.require(current_user.id, "role:read", org_id)
+    platform_org_id = get_platform_org_id(db)
+    checker.require(current_user.id, "role:read", platform_org_id)
     role = db.get(Role, role_id)
     if not role:
         raise HTTPException(404, detail="Role not found")
@@ -338,8 +336,8 @@ async def get_role_permissions(
     checker: PermissionCheckerDep,
 ):
     """Get all permissions assigned to a role."""
-    org_id = get_platform_org_id(db)
-    checker.require(current_user.id, "role:read", org_id)
+    platform_org_id = get_platform_org_id(db)
+    checker.require(current_user.id, "role:read", platform_org_id)
     role = db.get(Role, role_id)
     if not role:
         raise HTTPException(404, detail="Role not found")
@@ -362,13 +360,13 @@ async def add_permission_to_role(
     checker: PermissionCheckerDep,
 ):
     """Add a permission to a role."""
-    org_id = get_platform_org_id(db)
-    checker.require(current_user.id, "role:update", org_id)
+    platform_org_id = get_platform_org_id(db)
+    checker.require(current_user.id, "role:update", platform_org_id)
     permission_id = body.permission_id
     role = db.get(Role, role_id)
     if not role:
         raise HTTPException(404, detail="Role not found")
-    target_org_id = role.org_id if role.org_id is not None else org_id
+    target_org_id = platform_org_id
     actor_is_admin = _is_admin(checker, current_user.id, target_org_id)
     if role.is_system and not actor_is_admin:
         raise HTTPException(403, detail="System roles cannot be modified")
@@ -406,7 +404,7 @@ async def add_permission_to_role(
             "role_id": role_id,
             "permission_id": permission_id,
             "permission_name": perm.name,
-            "org_id": org_id,
+            "org_id": platform_org_id,
         },
     )
     append_role_audit_event(
@@ -431,12 +429,12 @@ async def remove_permission_from_role(
     checker: PermissionCheckerDep,
 ):
     """Remove a permission from a role."""
-    org_id = get_platform_org_id(db)
-    checker.require(current_user.id, "role:update", org_id)
+    platform_org_id = get_platform_org_id(db)
+    checker.require(current_user.id, "role:update", platform_org_id)
     role = db.get(Role, role_id)
     if not role:
         raise HTTPException(404, detail="Role not found")
-    target_org_id = role.org_id if role.org_id is not None else org_id
+    target_org_id = platform_org_id
     actor_is_admin = _is_admin(checker, current_user.id, target_org_id)
     if role.is_system and not actor_is_admin:
         raise HTTPException(403, detail="System roles cannot be modified")
@@ -458,7 +456,7 @@ async def remove_permission_from_role(
                 "actor_id": current_user.id,
                 "role_id": role_id,
                 "permission_id": permission_id,
-                "org_id": org_id,
+                "org_id": platform_org_id,
             },
         ),
     )

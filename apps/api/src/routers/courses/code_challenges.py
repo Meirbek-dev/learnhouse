@@ -54,6 +54,7 @@ from src.security.rbac import (
     PermissionChecker,
     ResourceAccessDenied,
 )
+from src.services.platform import get_platform_org_id
 from src.services.code_challenges.grading import (
     apply_grading_strategy,
     calculate_composite_score,
@@ -129,7 +130,7 @@ async def check_challenge_access(
 
     checker = PermissionChecker(db_session)
     perm = "course:update" if require_instructor else "course:read"
-    checker.require(user.id, perm, course.org_id)
+    checker.require(user.id, perm, get_platform_org_id(db_session))
 
     return course
 
@@ -357,7 +358,6 @@ async def submit_code_challenge(
         submission_uuid=submission_uuid,
         activity_id=activity.id,
         user_id=current_user.id,
-        org_id=activity.org_id,
         language_id=submission.language_id,
         language_name=language_name,
         source_code=submission.source_code,  # Keep base64 encoded

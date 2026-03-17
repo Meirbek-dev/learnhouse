@@ -43,9 +43,6 @@ class PaymentsProductBase(SQLModelStrictBaseModel):
 
 class PaymentsProduct(PaymentsProductBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
-    org_id: int = Field(
-        sa_column=Column(BigInteger, ForeignKey("organization.id", ondelete="CASCADE"))
-    )
     payments_config_id: int = Field(
         sa_column=Column(
             BigInteger, ForeignKey("paymentsconfig.id", ondelete="CASCADE")
@@ -86,7 +83,6 @@ class PaymentsProductUpdate(SQLModelStrictBaseModel):
 
 class PaymentsProductRead(PaymentsProductBase):
     id: int
-    org_id: int
     payments_config_id: int
     creation_date: datetime
     update_date: datetime

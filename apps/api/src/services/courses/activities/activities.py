@@ -19,6 +19,7 @@ from src.db.users import AnonymousUser, PublicUser
 from src.security.rbac import PermissionChecker
 from src.services.courses.courses import _ensure_course_is_current
 from src.services.payments.payments_access import check_activity_paid_access
+from src.services.platform import get_platform_org_id
 
 logger = logging.getLogger(__name__)
 
@@ -54,10 +55,11 @@ async def create_activity(
         )
 
     checker = PermissionChecker(db_session)
+    platform_org_id = get_platform_org_id(db_session)
     checker.require(
         current_user.id,
         "activity:create",
-        course.org_id,
+        platform_org_id,
         resource_owner_id=course.creator_id,
     )
 
@@ -69,7 +71,6 @@ async def create_activity(
     activity.activity_uuid = f"activity_{ULID()}"
     activity.creation_date = datetime.now()
     activity.update_date = datetime.now()
-    activity.org_id = chapter.org_id
     activity.course_id = chapter.course_id
     activity.creator_id = current_user.id  # Track creator
 
@@ -94,7 +95,6 @@ async def create_activity(
         chapter_id=activity_object.chapter_id,
         activity_id=activity.id or 0,
         course_id=chapter.course_id,
-        org_id=chapter.org_id,
         creation_date=str(datetime.now()),
         update_date=str(datetime.now()),
         order=to_be_used_order,
@@ -135,7 +135,7 @@ async def get_activity(
     checker.require(
         current_user.id,
         "activity:read",
-        course.org_id,
+        get_platform_org_id(db_session),
         resource_owner_id=activity.creator_id,
     )
 
@@ -156,13 +156,13 @@ async def get_activity(
     can_update = checker.check(
         current_user.id,
         "activity:update",
-        activity.org_id,
+        get_platform_org_id(db_session),
         resource_owner_id=activity.creator_id,
     )
     can_delete = checker.check(
         current_user.id,
         "activity:delete",
-        activity.org_id,
+        get_platform_org_id(db_session),
         resource_owner_id=activity.creator_id,
     )
     is_owner = (
@@ -204,7 +204,7 @@ async def get_activityby_id(
     checker.require(
         current_user.id,
         "activity:read",
-        course.org_id,
+        get_platform_org_id(db_session),
         resource_owner_id=activity.creator_id,
     )
 
@@ -241,7 +241,7 @@ async def update_activity(
     checker.require(
         current_user.id,
         "activity:update",
-        course.org_id,
+        get_platform_org_id(db_session),
         resource_owner_id=activity.creator_id,
     )
 
@@ -303,7 +303,7 @@ async def delete_activity(
     checker.require(
         current_user.id,
         "activity:delete",
-        course.org_id,
+        get_platform_org_id(db_session),
         resource_owner_id=activity.creator_id,
     )
 
@@ -383,6 +383,6 @@ async def get_activities(
         )
 
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "activity:read", course.org_id)
+    checker.require(current_user.id, "activity:read", get_platform_org_id(db_session))
 
     return [ActivityRead.model_validate(activity) for activity in activities]

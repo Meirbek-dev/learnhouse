@@ -635,9 +635,7 @@ def get_teacher_assessment_list(
             ).all()
         }
         usergroups = list(
-            db_session.exec(
-                select(UserGroup).where(UserGroup.org_id == scope.org_id)
-            ).all()
+            db_session.exec(select(UserGroup)).all()
         )
         return TeacherAssessmentListResponse(
             generated_at=generated_at,

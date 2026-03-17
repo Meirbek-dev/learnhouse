@@ -31,7 +31,6 @@ from src.db.courses.assignments import (
 )
 from src.db.courses.chapter_activities import ChapterActivity
 from src.db.courses.courses import Course
-from src.db.organizations import Organization
 from src.db.trail_runs import TrailRun
 from src.db.trail_steps import TrailStep
 from src.db.users import AnonymousUser, PublicUser, User
@@ -43,6 +42,7 @@ from src.services.courses.activities.uploads.tasks_ref_files import (
 from src.services.courses.certifications import (
     check_course_completion_and_create_certificate,
 )
+from src.services.platform import get_platform_org_id, get_platform_organization
 from src.services.trail.trail import check_trail_presence
 
 logger = logging.getLogger(__name__)
@@ -71,7 +71,7 @@ async def create_assignment(
     checker.require(
         current_user.id,
         "assignment:create",
-        course.org_id,
+        get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 
@@ -82,7 +82,6 @@ async def create_assignment(
     assignment.assignment_uuid = f"assignment_{ULID()}"
     assignment.creation_date = datetime.now().isoformat()
     assignment.update_date = datetime.now().isoformat()
-    assignment.org_id = course.org_id
 
     # Insert Assignment in DB
     db_session.add(assignment)
@@ -124,7 +123,7 @@ async def read_assignment(
     checker.require(
         current_user.id,
         "assignment:read",
-        course.org_id,
+        get_platform_org_id(db_session),
         is_assigned=True,
         resource_owner_id=course.creator_id,
     )
@@ -174,7 +173,7 @@ async def read_assignment_from_activity_uuid(
     checker.require(
         current_user.id,
         "assignment:read",
-        course.org_id,
+        get_platform_org_id(db_session),
         is_assigned=True,
         resource_owner_id=course.creator_id,
     )
@@ -215,7 +214,7 @@ async def update_assignment(
     checker.require(
         current_user.id,
         "assignment:update",
-        course.org_id,
+        get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 
@@ -266,7 +265,7 @@ async def delete_assignment(
     checker.require(
         current_user.id,
         "assignment:delete",
-        course.org_id,
+        get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 
@@ -319,7 +318,7 @@ async def delete_assignment_from_activity_uuid(
     checker.require(
         current_user.id,
         "assignment:delete",
-        course.org_id,
+        get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 
@@ -366,7 +365,7 @@ async def create_assignment_task(
     checker.require(
         current_user.id,
         "assignment:create",
-        course.org_id,
+        get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 
@@ -377,7 +376,6 @@ async def create_assignment_task(
     assignment_task.assignment_task_uuid = f"assignmenttask_{ULID()}"
     assignment_task.creation_date = datetime.now().isoformat()
     assignment_task.update_date = datetime.now().isoformat()
-    assignment_task.org_id = course.org_id
     assignment_task.chapter_id = assignment.chapter_id
     assignment_task.activity_id = assignment.activity_id
     assignment_task.assignment_id = assignment.id
@@ -428,7 +426,7 @@ async def read_assignment_tasks(
     checker.require(
         current_user.id,
         "assignment:read",
-        course.org_id,
+        get_platform_org_id(db_session),
         is_assigned=True,
         resource_owner_id=course.creator_id,
     )
@@ -483,7 +481,7 @@ async def read_assignment_task(
     checker.require(
         current_user.id,
         "assignment:read",
-        course.org_id,
+        get_platform_org_id(db_session),
         is_assigned=True,
         resource_owner_id=course.creator_id,
     )
@@ -535,16 +533,14 @@ async def put_assignment_task_reference_file(
             detail="Course not found",
         )
 
-    # Get org uuid
-    org_statement = select(Organization).where(Organization.id == course.org_id)
-    org = db_session.exec(org_statement).first()
+    org = get_platform_organization(db_session)
 
     # RBAC check
     checker = PermissionChecker(db_session)
     checker.require(
         current_user.id,
         "assignment:update",
-        course.org_id,
+        get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 
@@ -619,22 +615,22 @@ async def put_assignment_task_submission_file(
             detail="Course not found",
         )
 
-    # Get org uuid
-    org_statement = select(Organization).where(Organization.id == course.org_id)
-    org = db_session.exec(org_statement).first()
+    org = get_platform_organization(db_session)
 
     # RBAC check - only need read permission to submit files
     checker = PermissionChecker(db_session)
     checker.require(
         current_user.id,
         "assignment:read",
-        course.org_id,
+        get_platform_org_id(db_session),
         is_assigned=True,
         resource_owner_id=course.creator_id,
     )
 
     # Check if user is enrolled in the course
-    can_view = checker.check(current_user.id, "course:read", course.org_id)
+    can_view = checker.check(
+        current_user.id, "course:read", get_platform_org_id(db_session)
+    )
     if not can_view:
         raise HTTPException(
             status_code=403,
@@ -703,7 +699,7 @@ async def update_assignment_task(
     checker.require(
         current_user.id,
         "assignment:update",
-        course.org_id,
+        get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 
@@ -766,7 +762,7 @@ async def delete_assignment_task(
     checker.require(
         current_user.id,
         "assignment:delete",
-        course.org_id,
+        get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 
@@ -827,14 +823,16 @@ async def handle_assignment_task_submission(
     is_instructor = checker.check(
         current_user.id,
         "course:update",
-        course.org_id,
+        get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 
     # For regular users, ensure they can only submit their own work
     if not is_instructor:
         # Check if user is enrolled in the course
-        can_view = checker.check(current_user.id, "course:read", course.org_id)
+        can_view = checker.check(
+            current_user.id, "course:read", get_platform_org_id(db_session)
+        )
         if not can_view:
             raise HTTPException(
                 status_code=403,
@@ -855,14 +853,17 @@ async def handle_assignment_task_submission(
 
         # Only need read permission for submissions
         checker.require(
-            current_user.id, "assignment:read", course.org_id, is_assigned=True
+            current_user.id,
+            "assignment:read",
+            get_platform_org_id(db_session),
+            is_assigned=True,
         )
     else:
         # SECURITY: Instructors/admins need update permission to grade
         checker.require(
             current_user.id,
             "assignment:update",
-            course.org_id,
+            get_platform_org_id(db_session),
             resource_owner_id=course.creator_id,
         )
 
@@ -981,7 +982,7 @@ async def read_user_assignment_task_submissions(
     checker.require(
         current_user.id,
         "assignment:read",
-        course.org_id,
+        get_platform_org_id(db_session),
         is_assigned=True,
         resource_owner_id=course.creator_id,
     )
@@ -1043,7 +1044,7 @@ async def read_user_assignment_task_submissions_me(
     checker.require(
         current_user.id,
         "assignment:read",
-        course.org_id,
+        get_platform_org_id(db_session),
         is_assigned=True,
         resource_owner_id=course.creator_id,
     )
@@ -1106,7 +1107,7 @@ async def read_assignment_task_submissions(
     checker.require(
         current_user.id,
         "assignment:read",
-        course.org_id,
+        get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 
@@ -1176,7 +1177,7 @@ async def update_assignment_task_submission(
     checker.require(
         current_user.id,
         "assignment:read",
-        course.org_id,
+        get_platform_org_id(db_session),
         is_assigned=True,
         resource_owner_id=course.creator_id,
     )
@@ -1283,7 +1284,7 @@ async def delete_assignment_task_submission(
     checker.require(
         current_user.id,
         "assignment:delete",
-        course.org_id,
+        get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 
@@ -1342,7 +1343,7 @@ async def create_assignment_submission(
     checker.require(
         current_user.id,
         "assignment:read",
-        course.org_id,
+        get_platform_org_id(db_session),
         is_assigned=True,
         resource_owner_id=course.creator_id,
     )
@@ -1385,7 +1386,6 @@ async def create_assignment_submission(
 
     # Add TrailStep
     trail = await check_trail_presence(
-        org_id=course.org_id,
         user_id=user.id,
         request=request,
         user=user,
@@ -1403,7 +1403,6 @@ async def create_assignment_submission(
         trailrun = TrailRun(
             trail_id=trail.id if trail.id is not None else 0,
             course_id=course.id if course.id is not None else 0,
-            org_id=course.org_id,
             user_id=user.id,
             creation_date=datetime.now().isoformat(),
             update_date=datetime.now().isoformat(),
@@ -1425,7 +1424,6 @@ async def create_assignment_submission(
             activity_id=activity.id if activity.id is not None else 0,
             course_id=course.id if course.id is not None else 0,
             trail_id=trail.id if trail.id is not None else 0,
-            org_id=course.org_id,
             complete=True,
             teacher_verified=False,
             grade=0,
@@ -1483,7 +1481,7 @@ async def read_assignment_submissions(
     checker.require(
         current_user.id,
         "assignment:read",
-        course.org_id,
+        get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 
@@ -1532,7 +1530,7 @@ async def read_user_assignment_submissions(
     checker.require(
         current_user.id,
         "assignment:read",
-        course.org_id,
+        get_platform_org_id(db_session),
         is_assigned=True,
         resource_owner_id=course.creator_id,
     )
@@ -1605,7 +1603,7 @@ async def update_assignment_submission(
     checker.require(
         current_user.id,
         "assignment:read",
-        course.org_id,
+        get_platform_org_id(db_session),
         is_assigned=True,
         resource_owner_id=course.creator_id,
     )
@@ -1686,7 +1684,7 @@ async def delete_assignment_submission(
     checker.require(
         current_user.id,
         "assignment:delete",
-        course.org_id,
+        get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 
@@ -1730,7 +1728,7 @@ async def grade_assignment_submission(
     checker.require(
         current_user.id,
         "assignment:grade",
-        course.org_id,
+        get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 
@@ -1894,7 +1892,7 @@ async def mark_activity_as_done_for_user(
     checker.require(
         current_user.id,
         "assignment:update",
-        course.org_id,
+        get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 
@@ -1972,7 +1970,7 @@ async def create_assignment_with_activity(
     checker.require(
         current_user.id,
         "assignment:create",
-        course.org_id,
+        get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 
@@ -1982,7 +1980,6 @@ async def create_assignment_with_activity(
         activity_type=ActivityTypeEnum.TYPE_ASSIGNMENT,
         activity_sub_type=ActivitySubTypeEnum.SUBTYPE_ASSIGNMENT_ANY,
         published=assignment_object.published,
-        org_id=assignment_object.org_id,
         course_id=assignment_object.course_id,
         activity_uuid=f"activity_{ULID()}",
         creation_date=datetime.now().isoformat(),
@@ -1998,7 +1995,6 @@ async def create_assignment_with_activity(
         chapter_id=chapter_id,
         activity_id=activity.id,
         course_id=assignment_object.course_id,
-        org_id=assignment_object.org_id,
         order=1,  # Default order, can be adjusted later
         creation_date=datetime.now().isoformat(),
         update_date=datetime.now().isoformat(),
@@ -2059,7 +2055,7 @@ async def get_assignments_from_course(
     checker.require(
         current_user.id,
         "assignment:read",
-        course.org_id,
+        get_platform_org_id(db_session),
         is_assigned=True,
         resource_owner_id=course.creator_id,
     )
@@ -2092,7 +2088,7 @@ async def get_assignments_from_courses(
         checker.require(
             current_user.id,
             "assignment:read",
-            c.org_id,
+            get_platform_org_id(db_session),
             is_assigned=True,
             resource_owner_id=c.creator_id,
         )
@@ -2159,7 +2155,7 @@ async def get_editable_assignments_from_courses(
         if checker.check(
             current_user.id,
             "assignment:update",
-            c.org_id,
+            get_platform_org_id(db_session),
             resource_owner_id=c.creator_id,
         ):
             editable_course_ids.add(c.id)

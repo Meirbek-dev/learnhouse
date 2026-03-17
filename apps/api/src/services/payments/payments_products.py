@@ -4,7 +4,6 @@ from fastapi import HTTPException, Request
 from sqlmodel import Session, select
 
 from src.db.courses.courses import Course
-from src.db.organizations import Organization
 from src.db.payments.payments import PaymentsConfig
 from src.db.payments.payments_courses import PaymentsCourse
 from src.db.payments.payments_products import (
@@ -21,27 +20,22 @@ from src.services.payments.payments_stripe import (
     create_stripe_product,
     update_stripe_product,
 )
+from src.services.platform import get_platform_org_id
 
 
 async def create_payments_product(
     request: Request,
-    org_id: int,
     payments_product: PaymentsProductCreate,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
 ) -> PaymentsProductRead:
-    # Check if organization exists
-    statement = select(Organization).where(Organization.id == org_id)
-    org = db_session.exec(statement).first()
-    if not org:
-        raise HTTPException(status_code=404, detail="Organization not found")
-
+    platform_org_id = get_platform_org_id(db_session)
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:create", org_id)
+    checker.require(current_user.id, "organization:create", platform_org_id)
 
     # Check if payments config exists, has a valid id, and is active
-    statement = select(PaymentsConfig).where(PaymentsConfig.org_id == org_id)
+    statement = select(PaymentsConfig)
     config = db_session.exec(statement).first()
     if not config or config.id is None:
         raise HTTPException(status_code=404, detail="Valid payments config not found")
@@ -51,14 +45,14 @@ async def create_payments_product(
 
     # Create new payments product
     new_product = PaymentsProduct(
-        **payments_product.model_dump(), org_id=org_id, payments_config_id=config.id
+        **payments_product.model_dump(), payments_config_id=config.id
     )
     new_product.creation_date = datetime.now()
     new_product.update_date = datetime.now()
 
     # Create product in Stripe
     stripe_product = await create_stripe_product(
-        request, org_id, new_product, current_user, db_session
+        request, new_product, current_user, db_session
     )
     new_product.provider_product_id = stripe_product.id
 
@@ -72,25 +66,17 @@ async def create_payments_product(
 
 async def get_payments_product(
     request: Request,
-    org_id: int,
     product_id: int,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
 ) -> PaymentsProductRead:
-    # Check if organization exists
-    statement = select(Organization).where(Organization.id == org_id)
-    org = db_session.exec(statement).first()
-    if not org:
-        raise HTTPException(status_code=404, detail="Organization not found")
-
+    platform_org_id = get_platform_org_id(db_session)
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:read", org_id)
+    checker.require(current_user.id, "organization:read", platform_org_id)
 
     # Get payments product
-    statement = select(PaymentsProduct).where(
-        PaymentsProduct.id == product_id, PaymentsProduct.org_id == org_id
-    )
+    statement = select(PaymentsProduct).where(PaymentsProduct.id == product_id)
     product = db_session.exec(statement).first()
     if not product:
         raise HTTPException(status_code=404, detail="Payments product not found")
@@ -100,26 +86,18 @@ async def get_payments_product(
 
 async def update_payments_product(
     request: Request,
-    org_id: int,
     product_id: int,
     payments_product: PaymentsProductUpdate,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
 ) -> PaymentsProductRead:
-    # Check if organization exists
-    statement = select(Organization).where(Organization.id == org_id)
-    org = db_session.exec(statement).first()
-    if not org:
-        raise HTTPException(status_code=404, detail="Organization not found")
-
+    platform_org_id = get_platform_org_id(db_session)
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:update", org_id)
+    checker.require(current_user.id, "organization:update", platform_org_id)
 
     # Get existing payments product
-    statement = select(PaymentsProduct).where(
-        PaymentsProduct.id == product_id, PaymentsProduct.org_id == org_id
-    )
+    statement = select(PaymentsProduct).where(PaymentsProduct.id == product_id)
     product = db_session.exec(statement).first()
     if not product:
         raise HTTPException(status_code=404, detail="Payments product not found")
@@ -137,7 +115,7 @@ async def update_payments_product(
 
     # Update product in Stripe
     await update_stripe_product(
-        request, org_id, product.provider_product_id, product, current_user, db_session
+        request, product.provider_product_id, product, current_user, db_session
     )
 
     return PaymentsProductRead.model_validate(product)
@@ -145,25 +123,17 @@ async def update_payments_product(
 
 async def delete_payments_product(
     request: Request,
-    org_id: int,
     product_id: int,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
 ) -> None:
-    # Check if organization exists
-    statement = select(Organization).where(Organization.id == org_id)
-    org = db_session.exec(statement).first()
-    if not org:
-        raise HTTPException(status_code=404, detail="Organization not found")
-
+    platform_org_id = get_platform_org_id(db_session)
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:delete", org_id)
+    checker.require(current_user.id, "organization:delete", platform_org_id)
 
     # Get existing payments product
-    statement = select(PaymentsProduct).where(
-        PaymentsProduct.id == product_id, PaymentsProduct.org_id == org_id
-    )
+    statement = select(PaymentsProduct).where(PaymentsProduct.id == product_id)
     product = db_session.exec(statement).first()
     if not product:
         raise HTTPException(status_code=404, detail="Payments product not found")
@@ -184,7 +154,7 @@ async def delete_payments_product(
 
     # Archive product in Stripe
     await archive_stripe_product(
-        request, org_id, product.provider_product_id, current_user, db_session
+        request, product.provider_product_id, current_user, db_session
     )
 
     # Delete product
@@ -194,26 +164,16 @@ async def delete_payments_product(
 
 async def list_payments_products(
     request: Request,
-    org_id: int,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
 ) -> list[PaymentsProductRead]:
-    # Check if organization exists
-    statement = select(Organization).where(Organization.id == org_id)
-    org = db_session.exec(statement).first()
-    if not org:
-        raise HTTPException(status_code=404, detail="Organization not found")
-
+    platform_org_id = get_platform_org_id(db_session)
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:read", org_id)
+    checker.require(current_user.id, "organization:read", platform_org_id)
 
     # Get payments products ordered by id
-    statement = (
-        select(PaymentsProduct)
-        .where(PaymentsProduct.org_id == org_id)
-        .order_by(PaymentsProduct.id.desc())
-    )
+    statement = select(PaymentsProduct).order_by(PaymentsProduct.id.desc())
     products = db_session.exec(statement).all()
 
     return [PaymentsProductRead.model_validate(product) for product in products]
@@ -221,7 +181,6 @@ async def list_payments_products(
 
 async def get_products_by_course(
     request: Request,
-    org_id: int,
     course_id: int,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
@@ -236,14 +195,16 @@ async def get_products_by_course(
     # RBAC check — skip for public courses (needed to display pricing to anonymous users)
     checker = PermissionChecker(db_session)
     if not course.public:
-        checker.require(current_user.id, "organization:read", org_id)
+        checker.require(
+            current_user.id, "organization:read", get_platform_org_id(db_session)
+        )
 
     # Get all products linked to this course with explicit join
     statement = (
         select(PaymentsProduct)
         .select_from(PaymentsProduct)
         .join(PaymentsCourse, PaymentsProduct.id == PaymentsCourse.payment_product_id)
-        .where(PaymentsCourse.course_id == course_id, PaymentsCourse.org_id == org_id)
+        .where(PaymentsCourse.course_id == course_id)
     )
     products = db_session.exec(statement).all()
 

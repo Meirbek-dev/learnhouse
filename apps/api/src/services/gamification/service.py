@@ -104,36 +104,23 @@ def _count_users_with_more_xp(db: Session, org_id: int, xp: int) -> int:
     stmt = (
         select(func.count())
         .select_from(GamificationProfile)
-        .where(
-            and_(
-                GamificationProfile.org_id == org_id,
-                GamificationProfile.total_xp > xp,
-            )
-        )
+        .where(GamificationProfile.total_xp > xp)
     )
     return _fetch_count(db, stmt)
 
 
 def _count_profiles(db: Session, org_id: int) -> int:
-    stmt = (
-        select(func.count())
-        .select_from(GamificationProfile)
-        .where(GamificationProfile.org_id == org_id)
-    )
+    stmt = select(func.count()).select_from(GamificationProfile)
     return _fetch_count(db, stmt)
 
 
 def get_profile(db: Session, user_id: int, org_id: int) -> GamificationProfile:
-    stmt = select(GamificationProfile).where(
-        and_(
-            GamificationProfile.user_id == user_id, GamificationProfile.org_id == org_id
-        )
-    )
+    stmt = select(GamificationProfile).where(GamificationProfile.user_id == user_id)
     # Removed with_for_update() lock to prevent hanging on new user creation
-    # The unique constraint on (user_id, org_id) handles concurrency
+    # The unique constraint on user_id handles concurrency
     profile = db.exec(stmt).first()
     if not profile:
-        profile = GamificationProfile(user_id=user_id, org_id=org_id)
+        profile = GamificationProfile(user_id=user_id)
         db.add(profile)
         try:
             db.commit()
@@ -181,7 +168,6 @@ def award_xp(
         old_level = pre_profile.level
         tx = XPTransaction(
             user_id=user_id,
-            org_id=org_id,
             amount=resolved_amount,
             source=xp_source,
             source_id=source_id,
@@ -213,7 +199,7 @@ def award_xp(
         db.rollback()
         if any(
             s in str(e).lower()
-            for s in ["uq_xp_tx_user_org_source_once", "idempotency_key", "unique"]
+            for s in ["uq_xp_tx_user_source_once", "idempotency_key", "unique"]
         ):
             profile = get_profile(db, user_id, org_id)
             stmt = None
@@ -221,7 +207,6 @@ def award_xp(
                 stmt = select(XPTransaction).where(
                     and_(
                         XPTransaction.user_id == user_id,
-                        XPTransaction.org_id == org_id,
                         XPTransaction.idempotency_key == idempotency_key,
                     )
                 )
@@ -234,7 +219,6 @@ def award_xp(
                     stmt = select(XPTransaction).where(
                         and_(
                             XPTransaction.user_id == user_id,
-                            XPTransaction.org_id == org_id,
                             XPTransaction.source == xp_source,
                             XPTransaction.source_id == source_id,
                         )
@@ -243,12 +227,7 @@ def award_xp(
             if existing_tx is None:
                 existing_tx = db.exec(
                     select(XPTransaction)
-                    .where(
-                        and_(
-                            XPTransaction.user_id == user_id,
-                            XPTransaction.org_id == org_id,
-                        )
-                    )
+                    .where(XPTransaction.user_id == user_id)
                     .order_by(XPTransaction.created_at.desc())
                 ).first()
             if existing_tx is None:
@@ -314,7 +293,6 @@ def get_leaderboard(
 ) -> list[GamificationProfile]:
     stmt = (
         select(GamificationProfile)
-        .where(GamificationProfile.org_id == org_id)
         .order_by(GamificationProfile.total_xp.desc())
         .offset(offset)
         .limit(limit)
@@ -327,7 +305,7 @@ def get_recent_transactions(
 ) -> list[XPTransaction]:
     stmt = (
         select(XPTransaction)
-        .where(and_(XPTransaction.user_id == user_id, XPTransaction.org_id == org_id))
+        .where(XPTransaction.user_id == user_id)
         .order_by(XPTransaction.created_at.desc())
         .limit(limit)
     )
@@ -431,7 +409,7 @@ def get_leaderboard_read(db: Session, org_id: int, limit: int = 10, offset: int 
                 rank_change=None,  # TODO: Implement rank change tracking
             )
         )
-    return LeaderboardRead(org_id=org_id, entries=entries, total_participants=total)
+    return LeaderboardRead(entries=entries, total_participants=total)
 
 
 def get_user_rank(db: Session, user_id: int, org_id: int) -> int | None:

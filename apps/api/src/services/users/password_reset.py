@@ -11,6 +11,7 @@ from src.db.organizations import Organization, OrganizationRead
 from src.db.users import AnonymousUser, PublicUser, User, UserRead
 from src.security.security import generate_secure_code, security_hash_password
 from src.services.cache.redis_client import delete_keys, get_json, get_redis_client
+from src.services.platform import get_platform_organization
 from src.services.users.emails import send_password_reset_email
 
 
@@ -18,7 +19,6 @@ async def send_reset_password_code(
     request: Request,
     db_session: Session,
     current_user: PublicUser | AnonymousUser,
-    org_id: int,
     email: EmailStr,
 ) -> str:
     # Get user
@@ -31,15 +31,7 @@ async def send_reset_password_code(
             detail="User does not exist",
         )
 
-    # Get org
-    statement = select(Organization).where(Organization.id == org_id)
-    org = db_session.exec(statement).first()
-
-    if not org:
-        raise HTTPException(
-            status_code=400,
-            detail="Organization not found",
-        )
+    org = get_platform_organization(db_session)
 
     # Redis init
     settings = get_settings()
@@ -106,7 +98,6 @@ async def change_password_with_reset_code(
     db_session: Session,
     current_user: PublicUser | AnonymousUser,
     new_password: str,
-    org_id: int,
     email: EmailStr,
     reset_code: str,
 ) -> str:
@@ -120,15 +111,7 @@ async def change_password_with_reset_code(
             detail="User does not exist",
         )
 
-    # Get org
-    statement = select(Organization).where(Organization.id == org_id)
-    org = db_session.exec(statement).first()
-
-    if not org:
-        raise HTTPException(
-            status_code=400,
-            detail="Organization not found",
-        )
+    org = get_platform_organization(db_session)
 
     # Redis init
     settings = get_settings()

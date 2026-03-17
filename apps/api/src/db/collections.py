@@ -12,9 +12,6 @@ class CollectionBase(SQLModelStrictBaseModel):
 
 class Collection(CollectionBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
-    org_id: int = Field(
-        sa_column=Column(BigInteger, ForeignKey("organization.id", ondelete="CASCADE"))
-    )
     creator_id: int | None = Field(
         default=None,
         sa_column=Column(BigInteger, ForeignKey("user.id", ondelete="SET NULL")),
@@ -26,7 +23,6 @@ class Collection(CollectionBase, table=True):
 
 class CollectionCreate(CollectionBase):
     courses: list[int]
-    org_id: int = Field(default=None, foreign_key="organization.id")
 
 
 class CollectionUpdate(SQLModelStrictBaseModel):

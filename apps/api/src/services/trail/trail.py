@@ -17,6 +17,7 @@ from src.services.courses.certifications import (
     check_course_completion_and_create_certificate,
 )
 from src.services.gamification import service as gamification_service
+from src.services.platform import get_platform_org_id
 
 logger = logging.getLogger(__name__)
 
@@ -88,9 +89,7 @@ async def create_user_trail(
     trail_object: TrailCreate,
     db_session: Session,
 ):
-    statement = select(Trail).where(
-        Trail.org_id == trail_object.org_id, Trail.user_id == user.id
-    )
+    statement = select(Trail).where(Trail.user_id == user.id)
     trail = db_session.exec(statement).first()
 
     if trail:
@@ -103,7 +102,6 @@ async def create_user_trail(
 
     trail.creation_date = str(datetime.now())
     trail.update_date = str(datetime.now())
-    trail.org_id = trail_object.org_id
     trail.trail_uuid = f"trail_{ULID()}"
 
     # create trail
@@ -131,13 +129,12 @@ async def get_user_trails(
 
 
 async def check_trail_presence(
-    org_id: int,
     user_id: int,
     request: Request,
     user: PublicUser,
     db_session: Session,
 ):
-    statement = select(Trail).where(Trail.org_id == org_id, Trail.user_id == user_id)
+    statement = select(Trail).where(Trail.user_id == user_id)
     trail = db_session.exec(statement).first()
 
     if not trail:
@@ -145,7 +142,6 @@ async def check_trail_presence(
             request,
             user,
             TrailCreate(
-                org_id=org_id,
                 user_id=user.id,
             ),
             db_session,
@@ -178,7 +174,6 @@ async def add_activity_to_trail(
         )
 
     trail = await check_trail_presence(
-        org_id=course.org_id,
         user_id=user.id,
         request=request,
         user=user,
@@ -196,7 +191,6 @@ async def add_activity_to_trail(
         trailrun = TrailRun(
             trail_id=trail.id if trail.id is not None else 0,
             course_id=course.id if course.id is not None else 0,
-            org_id=course.org_id,
             user_id=user.id,
             creation_date=str(datetime.now()),
             update_date=str(datetime.now()),
@@ -218,7 +212,6 @@ async def add_activity_to_trail(
             activity_id=activity.id if activity.id is not None else 0,
             course_id=course.id if course.id is not None else 0,
             trail_id=trail.id if trail.id is not None else 0,
-            org_id=course.org_id,
             complete=True,
             teacher_verified=False,
             grade=0,
@@ -235,7 +228,7 @@ async def add_activity_to_trail(
             gamification_service.on_activity_completed(
                 db=db_session,
                 user_id=user.id,
-                org_id=course.org_id,
+                org_id=get_platform_org_id(db_session),
                 activity_id=activity.id,
                 source_id=str(activity.id),
                 idempotency_key=f"activity_{activity.id}_{user.id}",
@@ -289,9 +282,7 @@ async def remove_activity_from_trail(
             status_code=status.HTTP_404_NOT_FOUND, detail="Course not found"
         )
 
-    statement = select(Trail).where(
-        Trail.org_id == course.org_id, Trail.user_id == user.id
-    )
+    statement = select(Trail).where(Trail.user_id == user.id)
     trail = db_session.exec(statement).first()
 
     if not trail:
@@ -340,9 +331,7 @@ async def add_course_to_trail(
             status_code=status.HTTP_400_BAD_REQUEST, detail="TrailRun already exists"
         )
 
-    statement = select(Trail).where(
-        Trail.org_id == course.org_id, Trail.user_id == user.id
-    )
+    statement = select(Trail).where(Trail.user_id == user.id)
     trail = db_session.exec(statement).first()
 
     if not trail:
@@ -361,7 +350,6 @@ async def add_course_to_trail(
         trail_run = TrailRun(
             trail_id=trail.id if trail.id is not None else 0,
             course_id=course.id if course.id is not None else 0,
-            org_id=course.org_id,
             user_id=user.id,
             creation_date=str(datetime.now()),
             update_date=str(datetime.now()),
@@ -387,9 +375,7 @@ async def remove_course_from_trail(
             status_code=status.HTTP_404_NOT_FOUND, detail="Course not found"
         )
 
-    statement = select(Trail).where(
-        Trail.org_id == course.org_id, Trail.user_id == user.id
-    )
+    statement = select(Trail).where(Trail.user_id == user.id)
     trail = db_session.exec(statement).first()
 
     if not trail:

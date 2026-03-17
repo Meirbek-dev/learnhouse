@@ -355,9 +355,7 @@ def get_teacher_course_list(
             ).all()
         }
         usergroups = list(
-            db_session.exec(
-                select(UserGroup).where(UserGroup.org_id == scope.org_id)
-            ).all()
+            db_session.exec(select(UserGroup)).all()
         )
         return TeacherCourseListResponse(
             generated_at=generated_at,
@@ -632,7 +630,6 @@ def get_teacher_course_detail(
             "id": course_id,
             "course_uuid": course.course_uuid,
             "name": course.name,
-            "org_id": course.org_id,
         },
         summary=TeacherCourseDetailSummary(
             enrolled_learners=enrolled,

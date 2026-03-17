@@ -6,12 +6,12 @@ from fastapi import HTTPException, Request
 from sqlmodel import Session, select
 from ulid import ULID
 
-from src.db.organizations import Organization
 from src.db.usergroup_resources import UserGroupResource
 from src.db.usergroup_user import UserGroupUser
 from src.db.usergroups import UserGroup, UserGroupCreate, UserGroupRead, UserGroupUpdate
 from src.db.users import AnonymousUser, InternalUser, PublicUser, User, UserRead
 from src.security.rbac import PermissionChecker
+from src.services.platform import get_platform_org_id, get_platform_organization
 
 
 async def create_usergroup(
@@ -26,17 +26,7 @@ async def create_usergroup(
     # RBAC check
     if checker is None:
         checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "usergroup:create", usergroup_create.org_id)
-
-    # Check if Organization exists
-    statement = select(Organization).where(Organization.id == usergroup_create.org_id)
-    org = db_session.exec(statement).first()
-
-    if not org or org.id is None:
-        raise HTTPException(
-            status_code=400,
-            detail="Organization does not exist",
-        )
+    checker.require(current_user.id, "usergroup:create", get_platform_org_id(db_session))
 
     # Complete the object
     usergroup.usergroup_uuid = f"usergroup_{ULID()}"
@@ -74,7 +64,7 @@ async def read_usergroup_by_id(
     checker.require(
         current_user.id,
         "usergroup:read",
-        usergroup.org_id,
+        get_platform_org_id(db_session),
         resource_owner_id=usergroup.creator_id,
     )
 
@@ -103,7 +93,7 @@ async def get_users_linked_to_usergroup(
     checker.require(
         current_user.id,
         "usergroup:read",
-        usergroup.org_id,
+        get_platform_org_id(db_session),
         resource_owner_id=usergroup.creator_id,
     )
 
@@ -124,16 +114,15 @@ async def read_usergroups_by_org_id(
     request: Request,
     db_session: Session,
     current_user: PublicUser | AnonymousUser,
-    org_id: int,
     checker: PermissionChecker | None = None,
 ) -> list[UserGroupRead]:
-    statement = select(UserGroup).where(UserGroup.org_id == org_id)
+    statement = select(UserGroup)
     usergroups = db_session.exec(statement).all()
 
     # RBAC check
     if checker is None:
         checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "usergroup:read", org_id)
+    checker.require(current_user.id, "usergroup:read", get_platform_org_id(db_session))
 
     return [UserGroupRead.model_validate(usergroup) for usergroup in usergroups]
 
@@ -144,7 +133,6 @@ async def get_usergroups_by_resource(
     current_user: PublicUser | AnonymousUser,
     resource_uuid: str,
     checker: PermissionChecker | None = None,
-    org_id: int | None = None,
 ) -> list[UserGroupRead]:
     statement = select(UserGroupResource).where(
         UserGroupResource.resource_uuid == resource_uuid
@@ -154,7 +142,7 @@ async def get_usergroups_by_resource(
     # RBAC check
     if checker is None:
         checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "usergroup:read", org_id)
+    checker.require(current_user.id, "usergroup:read", get_platform_org_id(db_session))
 
     usergroup_ids = [usergroup.usergroup_id for usergroup in usergroup_resources]
 
@@ -191,7 +179,7 @@ async def update_usergroup_by_id(
     checker.require(
         current_user.id,
         "usergroup:update",
-        usergroup.org_id,
+        get_platform_org_id(db_session),
         resource_owner_id=usergroup.creator_id,
     )
 
@@ -228,7 +216,7 @@ async def delete_usergroup_by_id(
     checker.require(
         current_user.id,
         "usergroup:delete",
-        usergroup.org_id,
+        get_platform_org_id(db_session),
         resource_owner_id=usergroup.creator_id,
     )
 
@@ -261,7 +249,7 @@ async def add_users_to_usergroup(
     checker.require(
         current_user.id,
         "usergroup:manage",
-        usergroup.org_id,
+        get_platform_org_id(db_session),
         resource_owner_id=usergroup.creator_id,
     )
 
@@ -306,7 +294,6 @@ async def add_users_to_usergroup(
                 UserGroupUser(
                     usergroup_id=usergroup_id,
                     user_id=user.id,
-                    org_id=usergroup.org_id,
                     creation_date=current_time,
                     update_date=current_time,
                 )
@@ -345,7 +332,7 @@ async def remove_users_from_usergroup(
     checker.require(
         current_user.id,
         "usergroup:manage",
-        usergroup.org_id,
+        get_platform_org_id(db_session),
         resource_owner_id=usergroup.creator_id,
     )
 
@@ -403,7 +390,7 @@ async def add_resources_to_usergroup(
     checker.require(
         current_user.id,
         "usergroup:manage",
-        usergroup.org_id,
+        get_platform_org_id(db_session),
         resource_owner_id=usergroup.creator_id,
     )
 
@@ -432,7 +419,6 @@ async def add_resources_to_usergroup(
             UserGroupResource(
                 usergroup_id=usergroup_id,
                 resource_uuid=resource_uuid,
-                org_id=usergroup.org_id,
                 creation_date=current_time,
                 update_date=current_time,
             )
@@ -469,7 +455,7 @@ async def remove_resources_from_usergroup(
     checker.require(
         current_user.id,
         "usergroup:manage",
-        usergroup.org_id,
+        get_platform_org_id(db_session),
         resource_owner_id=usergroup.creator_id,
     )
 

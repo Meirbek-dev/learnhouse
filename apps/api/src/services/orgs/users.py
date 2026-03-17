@@ -4,9 +4,8 @@ from datetime import UTC, datetime, timedelta
 
 import orjson
 from fastapi import HTTPException, Request
-from sqlmodel import Session, or_, select
+from sqlmodel import Session, select
 from src.db.organizations import (
-    Organization,
     OrganizationRead,
     OrganizationUser,
     PaginatedOrganizationUsers,
@@ -18,6 +17,7 @@ from src.db.users import AnonymousUser, PublicUser, User, UserRead
 from src.security.rbac import PermissionChecker
 from src.services.cache import redis_client
 from src.services.cache.redis_client import delete_keys, get_json, set_json
+from src.services.platform import get_platform_organization
 
 # Rebuild organization models to resolve forward references
 rebuild_organization_models()
@@ -25,26 +25,13 @@ rebuild_organization_models()
 
 async def get_organization_users(
     request: Request,
-    org_id: int,
     db_session: Session,
     current_user: PublicUser | AnonymousUser,
     checker: PermissionChecker,
     page: int = 1,
     per_page: int = 20,
 ) -> PaginatedOrganizationUsers:
-    # Convert org_id to int for proper type matching with database
-    org_id_int = int(org_id)
-
-    statement = select(Organization).where(Organization.id == org_id_int)
-    result = db_session.exec(statement)
-
-    org = result.first()
-
-    if not org:
-        raise HTTPException(
-            status_code=404,
-            detail="Organization not found",
-        )
+    org = get_platform_organization(db_session)
 
     # RBAC check
     checker.require(
@@ -57,7 +44,6 @@ async def get_organization_users(
     base_statement = (
         select(User)
         .join(UserRole, UserRole.user_id == User.id)
-        .where(UserRole.org_id == org_id_int)
         .distinct(User.id)
     )
 
@@ -65,7 +51,6 @@ async def get_organization_users(
     all_user_ids = db_session.exec(
         select(User.id)
         .join(UserRole, UserRole.user_id == User.id)
-        .where(UserRole.org_id == org_id_int)
         .distinct()
     ).all()
     total = len(all_user_ids)
@@ -85,7 +70,6 @@ async def get_organization_users(
             select(Role, UserRole)
             .join(UserRole, UserRole.role_id == Role.id)
             .where(UserRole.user_id.in_(user_ids))
-            .where(or_(UserRole.org_id == org_id_int, Role.org_id.is_(None)))
         ).all()
         for role, user_role in all_role_rows:
             roles_by_user[user_role.user_id].append(role)
@@ -94,7 +78,7 @@ async def get_organization_users(
         user_roles = roles_by_user.get(user.id, [])
 
         if not user_roles:
-            logging.warning(f"No roles found for user {user.id} in org {org_id_int}")
+            logging.warning(f"No roles found for user {user.id} in platform org")
             continue
 
         # Use the first role (primary role)
@@ -123,22 +107,12 @@ async def get_organization_users(
 
 async def remove_user_from_org(
     request: Request,
-    org_id: int,
     user_id: int,
     db_session: Session,
     current_user: PublicUser | AnonymousUser,
     checker: PermissionChecker,
 ):
-    statement = select(Organization).where(Organization.id == org_id)
-    result = db_session.exec(statement)
-
-    org = result.first()
-
-    if not org:
-        raise HTTPException(
-            status_code=404,
-            detail="Organization not found",
-        )
+    org = get_platform_organization(db_session)
 
     # RBAC check
     checker.require(
@@ -146,9 +120,7 @@ async def remove_user_from_org(
     )
 
     # Check if user has any roles in this org (i.e., is a member)
-    statement = select(UserRole).where(
-        UserRole.user_id == user_id, UserRole.org_id == org.id
-    )
+    statement = select(UserRole).where(UserRole.user_id == user_id)
     result = db_session.exec(statement)
 
     user_roles = result.all()
@@ -168,7 +140,7 @@ async def remove_user_from_org(
     # Count admins by checking UserRole with role_id = admin_role_id
     statement = (
         select(UserRole)
-        .where(UserRole.org_id == org.id, UserRole.role_id == admin_role_id)
+        .where(UserRole.role_id == admin_role_id)
         .distinct()
     )
     result = db_session.exec(statement)
@@ -193,7 +165,6 @@ async def remove_user_from_org(
 
 async def update_user_role(
     request: Request,
-    org_id: int,
     user_id: int,
     role_id: int,
     db_session: Session,
@@ -210,11 +181,7 @@ async def update_user_role(
     if not role:
         raise HTTPException(status_code=404, detail="Role not found")
 
-    org = db_session.exec(
-        select(Organization).where(Organization.id == int(org_id))
-    ).first()
-    if not org:
-        raise HTTPException(status_code=404, detail="Organization not found")
+    org = get_platform_organization(db_session)
 
     # RBAC check
     checker.require(
@@ -230,9 +197,7 @@ async def update_user_role(
     admin_user_ids = {
         ur.user_id
         for ur in db_session.exec(
-            select(UserRole).where(
-                UserRole.org_id == org.id, UserRole.role_id == admin_role_id
-            )
+            select(UserRole).where(UserRole.role_id == admin_role_id)
         ).all()
     }
     if not admin_user_ids:
@@ -250,9 +215,7 @@ async def update_user_role(
         )
 
     # Verify user has existing roles in this org
-    existing_roles = db_session.exec(
-        select(UserRole).where(UserRole.user_id == user_id, UserRole.org_id == org.id)
-    ).all()
+    existing_roles = db_session.exec(select(UserRole).where(UserRole.user_id == user_id)).all()
     if not existing_roles:
         raise HTTPException(status_code=404, detail="User not found")
 
@@ -261,7 +224,7 @@ async def update_user_role(
         db_session.delete(ur)
     db_session.flush()
 
-    checker.assign_role(user_id=user_id, role_id=role.id, org_id=int(org.id))
+    checker.assign_role(user_id=user_id, role_id=role.id)
     db_session.commit()
 
     return {"detail": "User role updated"}

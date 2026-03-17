@@ -540,15 +540,12 @@ def load_analytics_context(
         ]
     user_map = {user.id: user for user in users if user.id is not None}
 
-    org_ids = {course.org_id for course in courses}
     usergroup_names_by_id: dict[int, str] = {}
     cohort_ids_by_user: dict[int, set[int]] = defaultdict(set)
-    if org_ids:
+    if courses:
         usergroups = [
             _unwrap_model(usergroup, UserGroup)
-            for usergroup in db_session.exec(
-                select(UserGroup).where(UserGroup.org_id.in_(sorted(org_ids)))
-            ).all()
+            for usergroup in db_session.exec(select(UserGroup)).all()
         ]
         usergroup_names_by_id = {
             usergroup.id: usergroup.name

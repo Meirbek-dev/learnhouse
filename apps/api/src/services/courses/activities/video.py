@@ -17,12 +17,12 @@ from src.db.courses.chapter_activities import ChapterActivity
 from src.db.courses.chapters import Chapter
 from src.db.courses.course_chapters import CourseChapter
 from src.db.courses.courses import Course
-from src.db.organizations import Organization
 from src.db.strict_base_model import PydanticStrictBaseModel
 from src.db.users import AnonymousUser, PublicUser
 from src.security.rbac import PermissionChecker
 from src.services.courses.courses import _ensure_course_is_current
 from src.services.courses.activities.uploads.videos import upload_subtitle, upload_video
+from src.services.platform import get_platform_org_id, get_platform_organization
 
 
 def _get_language_label(language_code: str) -> str:
@@ -120,15 +120,13 @@ async def create_video_activity(
     checker.require(
         current_user.id,
         "activity:create",
-        course.org_id,
+        get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 
     _ensure_course_is_current(course, last_known_update_date)
 
-    # Get org_uuid
-    statement = select(Organization).where(Organization.id == coursechapter.org_id)
-    organization = db_session.exec(statement).first()
+    organization = get_platform_organization(db_session)
 
     # generate activity_uuid
     activity_uuid = f"activity_{ULID()}"
@@ -150,7 +148,6 @@ async def create_video_activity(
         activity_type=ActivityTypeEnum.TYPE_VIDEO,
         activity_sub_type=ActivitySubTypeEnum.SUBTYPE_VIDEO_HOSTED,
         activity_uuid=activity_uuid,
-        org_id=coursechapter.org_id,
         course_id=coursechapter.course_id,
         content={
             "filename": f"video.{video_format}",
@@ -264,7 +261,6 @@ async def create_video_activity(
         chapter_id=chapter.id,
         activity_id=activity.id,
         course_id=coursechapter.course_id,
-        org_id=coursechapter.org_id,
         creation_date=str(datetime.now()),
         update_date=str(datetime.now()),
         order=1,
@@ -331,7 +327,7 @@ async def create_external_video_activity(
     checker.require(
         current_user.id,
         "activity:create",
-        course.org_id,
+        get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 
@@ -349,7 +345,6 @@ async def create_external_video_activity(
         activity_sub_type=ActivitySubTypeEnum.SUBTYPE_VIDEO_YOUTUBE,
         activity_uuid=activity_uuid,
         course_id=coursechapter.course_id,
-        org_id=coursechapter.org_id,
         content={
             "uri": data.uri,
             "type": data.type,
@@ -371,7 +366,6 @@ async def create_external_video_activity(
         chapter_id=coursechapter.chapter_id,
         activity_id=activity.id,
         course_id=coursechapter.course_id,
-        org_id=coursechapter.org_id,
         creation_date=str(datetime.now()),
         update_date=str(datetime.now()),
         order=1,

@@ -69,12 +69,11 @@ class Permission(SQLModelStrictBaseModel, table=True):
 
 
 class Role(SQLModelStrictBaseModel, table=True):
-    """Role definition. System roles have is_system=True and org_id=NULL."""
+    """Role definition."""
 
     __tablename__ = "roles"
     __table_args__ = (
-        UniqueConstraint("slug", "org_id", name="uq_roles_slug_org"),
-        Index("idx_roles_org_id", "org_id"),
+        UniqueConstraint("slug", name="uq_roles_slug"),
         Index("idx_roles_slug", "slug"),
     )
 
@@ -86,10 +85,6 @@ class Role(SQLModelStrictBaseModel, table=True):
     description: str | None = Field(default=None)
     is_system: bool = Field(default=False)
     priority: int = Field(default=0)
-    org_id: int | None = Field(
-        default=None,
-        sa_column=Column(Integer, ForeignKey("organization.id", ondelete="CASCADE")),
-    )
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 
@@ -127,11 +122,12 @@ class RolePermission(SQLModelStrictBaseModel, table=True):
 
 
 class UserRole(SQLModelStrictBaseModel, table=True):
-    """Which users have which roles in which orgs."""
+    """Which users have which roles."""
 
     __tablename__ = "user_roles"
     __table_args__ = (
-        Index("idx_user_roles_user_org", "user_id", "org_id"),
+        UniqueConstraint("user_id", "role_id", name="uq_user_roles_user_role"),
+        Index("idx_user_roles_user_role", "user_id", "role_id"),
         Index("idx_user_roles_role", "role_id"),
     )
 
@@ -148,14 +144,6 @@ class UserRole(SQLModelStrictBaseModel, table=True):
         sa_column=Column(
             Integer, ForeignKey("roles.id", ondelete="CASCADE"), nullable=False
         )
-    )
-    org_id: int | None = Field(
-        default=None,
-        sa_column=Column(
-            Integer,
-            ForeignKey("organization.id", ondelete="CASCADE"),
-            nullable=True,
-        ),
     )
     assigned_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     assigned_by: int | None = Field(
@@ -174,7 +162,6 @@ class RoleCreate(PydanticStrictBaseModel):
     name: str
     description: str | None = None
     priority: int = 0
-    org_id: int  # Required - custom roles must belong to an org
 
 
 class RoleRead(PydanticStrictBaseModel):
@@ -186,7 +173,6 @@ class RoleRead(PydanticStrictBaseModel):
     description: str | None = None
     is_system: bool = False
     priority: int = 0
-    org_id: int | None = None
     permissions_count: int = 0
     users_count: int = 0
     created_at: datetime

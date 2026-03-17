@@ -47,9 +47,6 @@ class TrailStep(SQLModelStrictBaseModel, table=True):
     course_id: int = Field(
         sa_column=Column(Integer, ForeignKey("course.id", ondelete="CASCADE"))
     )
-    org_id: int = Field(
-        sa_column=Column(Integer, ForeignKey("organization.id", ondelete="CASCADE"))
-    )
     user_id: int = Field(
         sa_column=Column(Integer, ForeignKey("user.id", ondelete="CASCADE"))
     )
@@ -70,7 +67,6 @@ class TrailStepRead(PydanticStrictBaseModel):
     trail_id: int
     activity_id: int
     course_id: int
-    org_id: int
     user_id: int
     creation_date: str | None = None
     update_date: str | None = None

@@ -132,7 +132,6 @@ class ExamBase(SQLModelStrictBaseModel):
     description: str
     published: bool = False
 
-    org_id: int
     course_id: int
     chapter_id: int
     activity_id: int
@@ -170,9 +169,6 @@ class Exam(ExamBase, table=True):
 
     id: int | None = Field(default=None, primary_key=True)
     exam_uuid: str = ""
-    org_id: int = Field(
-        sa_column=Column(Integer, ForeignKey("organization.id", ondelete="CASCADE"))
-    )
     course_id: int = Field(
         sa_column=Column(Integer, ForeignKey("course.id", ondelete="CASCADE"))
     )
@@ -206,7 +202,6 @@ class QuestionBase(SQLModelStrictBaseModel):
     answer_options: list[dict] = Field(default_factory=list, sa_column=Column(JSON))
 
     exam_id: int | None = None
-    org_id: int | None = None
 
     @field_validator("question_type", mode="before")
     @classmethod
@@ -294,9 +289,6 @@ class Question(QuestionBase, table=True):
     exam_id: int = Field(
         sa_column=Column(Integer, ForeignKey("exam.id", ondelete="CASCADE"))
     )
-    org_id: int = Field(
-        sa_column=Column(Integer, ForeignKey("organization.id", ondelete="CASCADE"))
-    )
     creation_date: str = ""
     update_date: str = ""
 
@@ -317,7 +309,6 @@ class ExamAttemptBase(SQLModelStrictBaseModel):
 
     exam_id: int
     user_id: int
-    org_id: int
 
     status: AttemptStatusEnum = AttemptStatusEnum.IN_PROGRESS
     score: int | None = None
@@ -351,7 +342,6 @@ class ExamAttemptCreate(SQLModelStrictBaseModel):
 
     exam_id: int
     user_id: int
-    org_id: int
 
 
 class ExamAttemptRead(ExamAttemptBase):
@@ -397,9 +387,6 @@ class ExamAttempt(ExamAttemptBase, table=True):
     )
     user_id: int = Field(
         sa_column=Column(Integer, ForeignKey("user.id", ondelete="CASCADE"))
-    )
-    org_id: int = Field(
-        sa_column=Column(Integer, ForeignKey("organization.id", ondelete="CASCADE"))
     )
     creation_date: str = ""
     update_date: str = ""

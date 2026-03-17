@@ -4,7 +4,6 @@ from fastapi import HTTPException, Request
 from sqlmodel import Session, select
 
 from src.db.courses.courses import AuthorWithRole, Course, CourseRead
-from src.db.organizations import Organization
 from src.db.payments.payments_courses import PaymentsCourse
 from src.db.payments.payments_products import PaymentsProduct
 from src.db.payments.payments_users import (
@@ -15,11 +14,11 @@ from src.db.payments.payments_users import (
 from src.db.resource_authors import ResourceAuthor
 from src.db.users import AnonymousUser, InternalUser, PublicUser, User, UserRead
 from src.security.rbac import PermissionChecker
+from src.services.platform import get_platform_org_id
 
 
 async def create_payment_user(
     request: Request,
-    org_id: int,
     user_id: int,
     product_id: int,
     status: PaymentStatusEnum,
@@ -27,20 +26,13 @@ async def create_payment_user(
     current_user: PublicUser | AnonymousUser | InternalUser,
     db_session: Session,
 ) -> PaymentsUser:
-    # Check if organization exists
-    statement = select(Organization).where(Organization.id == org_id)
-    org = db_session.exec(statement).first()
-    if not org:
-        raise HTTPException(status_code=404, detail="Organization not found")
-
+    platform_org_id = get_platform_org_id(db_session)
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:create", org_id)
+    checker.require(current_user.id, "organization:create", platform_org_id)
 
     # Check if product exists
-    statement = select(PaymentsProduct).where(
-        PaymentsProduct.id == product_id, PaymentsProduct.org_id == org_id
-    )
+    statement = select(PaymentsProduct).where(PaymentsProduct.id == product_id)
     product = db_session.exec(statement).first()
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
@@ -52,7 +44,6 @@ async def create_payment_user(
     # Check if user already has a payment user for this product
     statement = select(PaymentsUser).where(
         PaymentsUser.user_id == user_id,
-        PaymentsUser.org_id == org_id,
         PaymentsUser.payment_product_id == product_id,
     )
     existing_payment_user = db_session.exec(statement).first()
@@ -74,7 +65,6 @@ async def create_payment_user(
     # Create new payment user
     payment_user = PaymentsUser(
         user_id=user_id,
-        org_id=org_id,
         payment_product_id=product_id,
         provider_specific_data=provider_specific_data.model_dump(),
         status=status,
@@ -89,25 +79,17 @@ async def create_payment_user(
 
 async def get_payment_user(
     request: Request,
-    org_id: int,
     payment_user_id: int,
     current_user: PublicUser | AnonymousUser | InternalUser,
     db_session: Session,
 ) -> PaymentsUser:
-    # Check if organization exists
-    statement = select(Organization).where(Organization.id == org_id)
-    org = db_session.exec(statement).first()
-    if not org:
-        raise HTTPException(status_code=404, detail="Organization not found")
-
+    platform_org_id = get_platform_org_id(db_session)
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:read", org_id)
+    checker.require(current_user.id, "organization:read", platform_org_id)
 
     # Get payment user
-    statement = select(PaymentsUser).where(
-        PaymentsUser.id == payment_user_id, PaymentsUser.org_id == org_id
-    )
+    statement = select(PaymentsUser).where(PaymentsUser.id == payment_user_id)
     payment_user = db_session.exec(statement).first()
     if not payment_user:
         raise HTTPException(status_code=404, detail="Payment user not found")
@@ -117,26 +99,18 @@ async def get_payment_user(
 
 async def update_payment_user_status(
     request: Request,
-    org_id: int,
     payment_user_id: int,
     status: PaymentStatusEnum,
     current_user: PublicUser | AnonymousUser | InternalUser,
     db_session: Session,
 ) -> PaymentsUser:
-    # Check if organization exists
-    statement = select(Organization).where(Organization.id == org_id)
-    org = db_session.exec(statement).first()
-    if not org:
-        raise HTTPException(status_code=404, detail="Organization not found")
-
+    platform_org_id = get_platform_org_id(db_session)
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:update", org_id)
+    checker.require(current_user.id, "organization:update", platform_org_id)
 
     # Get existing payment user
-    statement = select(PaymentsUser).where(
-        PaymentsUser.id == payment_user_id, PaymentsUser.org_id == org_id
-    )
+    statement = select(PaymentsUser).where(PaymentsUser.id == payment_user_id)
     payment_user = db_session.exec(statement).first()
     if not payment_user:
         raise HTTPException(status_code=404, detail="Payment user not found")
@@ -154,50 +128,32 @@ async def update_payment_user_status(
 
 async def list_payment_users(
     request: Request,
-    org_id: int,
     current_user: PublicUser | AnonymousUser | InternalUser,
     db_session: Session,
 ) -> list[PaymentsUser]:
-    # Check if organization exists
-    statement = select(Organization).where(Organization.id == org_id)
-    org = db_session.exec(statement).first()
-    if not org:
-        raise HTTPException(status_code=404, detail="Organization not found")
-
+    platform_org_id = get_platform_org_id(db_session)
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:read", org_id)
+    checker.require(current_user.id, "organization:read", platform_org_id)
 
     # Get all payment users for org ordered by id
-    statement = (
-        select(PaymentsUser)
-        .where(PaymentsUser.org_id == org_id)
-        .order_by(PaymentsUser.id.desc())
-    )
+    statement = select(PaymentsUser).order_by(PaymentsUser.id.desc())
     return list(db_session.exec(statement).all())  # Convert to list
 
 
 async def delete_payment_user(
     request: Request,
-    org_id: int,
     payment_user_id: int,
     current_user: PublicUser | AnonymousUser | InternalUser,
     db_session: Session,
 ) -> None:
-    # Check if organization exists
-    statement = select(Organization).where(Organization.id == org_id)
-    org = db_session.exec(statement).first()
-    if not org:
-        raise HTTPException(status_code=404, detail="Organization not found")
-
+    platform_org_id = get_platform_org_id(db_session)
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:delete", org_id)
+    checker.require(current_user.id, "organization:delete", platform_org_id)
 
     # Get existing payment user
-    statement = select(PaymentsUser).where(
-        PaymentsUser.id == payment_user_id, PaymentsUser.org_id == org_id
-    )
+    statement = select(PaymentsUser).where(PaymentsUser.id == payment_user_id)
     payment_user = db_session.exec(statement).first()
     if not payment_user:
         raise HTTPException(status_code=404, detail="Payment user not found")

@@ -11,11 +11,6 @@ class ChapterBase(SQLModelStrictBaseModel):
     name: str
     description: str | None = ""
     thumbnail_image: str | None = ""
-    org_id: int = Field(
-        sa_column=Column(
-            "org_id", Integer, ForeignKey("organization.id", ondelete="CASCADE")
-        )
-    )
     course_id: int = Field(
         sa_column=Column(
             "course_id", Integer, ForeignKey("course.id", ondelete="CASCADE")
@@ -56,7 +51,6 @@ class ChapterUpdate(SQLModelStrictBaseModel):
     name: str | None = None
     description: str | None = None
     thumbnail_image: str | None = None
-    org_id: int | None = None
     course_id: int | None = None
     last_known_update_date: datetime | None = None
 

@@ -18,8 +18,5 @@ class PaymentsCourse(PaymentsCourseBase, table=True):
             BigInteger, ForeignKey("paymentsproduct.id", ondelete="CASCADE")
         )
     )
-    org_id: int = Field(
-        sa_column=Column(BigInteger, ForeignKey("organization.id", ondelete="CASCADE"))
-    )
     creation_date: datetime = Field(default=datetime.now())
     update_date: datetime = Field(default=datetime.now())

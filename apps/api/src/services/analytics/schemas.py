@@ -72,7 +72,6 @@ class AtRiskLearnerRow(PydanticStrictBaseModel):
 
 
 class TeacherOverviewScope(PydanticStrictBaseModel):
-    org_id: int
     teacher_user_id: int
     course_ids: list[int]
     cohort_ids: list[int]

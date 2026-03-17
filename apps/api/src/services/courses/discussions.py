@@ -18,9 +18,9 @@ from src.db.courses.discussions import (
     DiscussionStatusEnum,
     DiscussionType,
 )
-from src.db.organizations import Organization
 from src.db.users import AnonymousUser, PublicUser, User
 from src.security.rbac import PermissionChecker
+from src.services.platform import get_platform_org_id
 
 
 async def create_discussion(
@@ -37,17 +37,6 @@ async def create_discussion(
             detail="Authentication required to create discussions",
         )
 
-    # Check if org exists
-    statement_org = select(Organization).where(
-        Organization.id == discussion_object.org_id
-    )
-    org = db_session.exec(statement_org).first()
-
-    if not org or org.id is None:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT, detail="Organization does not exist"
-        )
-
     # Check if course exists
     statement = select(Course).where(Course.course_uuid == course_uuid)
     course = db_session.exec(statement).first()
@@ -59,7 +48,8 @@ async def create_discussion(
 
     # RBAC check - users need read access to participate in discussions
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "course:read", org.id)
+    platform_org_id = get_platform_org_id(db_session)
+    checker.require(current_user.id, "course:read", platform_org_id)
 
     # If it's a reply, check if parent discussion exists
     if discussion_object.parent_discussion_id:
@@ -127,11 +117,12 @@ async def get_discussions_by_course_uuid(
 
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "course:read", course.org_id)
+    platform_org_id = get_platform_org_id(db_session)
+    checker.require(current_user.id, "course:read", platform_org_id)
 
     is_authenticated = not isinstance(current_user, AnonymousUser)
     can_moderate = is_authenticated and checker.check(
-        current_user.id, "discussion:moderate", course.org_id
+        current_user.id, "discussion:moderate", platform_org_id
     )
 
     # Get main discussions (posts, not replies)
@@ -317,7 +308,11 @@ async def update_discussion(
     # Author can edit own discussion; moderators can edit any
     if discussion.user_id != current_user.id:
         checker = PermissionChecker(db_session)
-        checker.require(current_user.id, "discussion:moderate", discussion.org_id)
+        checker.require(
+            current_user.id,
+            "discussion:moderate",
+            get_platform_org_id(db_session),
+        )
 
     # Update fields
     for key, value in discussion_object.model_dump(exclude_unset=True).items():
@@ -358,7 +353,11 @@ async def delete_discussion(
     # Author can delete own discussion; moderators can delete any
     if discussion.user_id != current_user.id:
         checker = PermissionChecker(db_session)
-        checker.require(current_user.id, "discussion:moderate", discussion.org_id)
+        checker.require(
+            current_user.id,
+            "discussion:moderate",
+            get_platform_org_id(db_session),
+        )
 
     # Soft delete
     discussion.status = DiscussionStatusEnum.DELETED
@@ -653,7 +652,7 @@ async def get_discussion_replies(
 
     if course:
         checker = PermissionChecker(db_session)
-        checker.require(current_user.id, "course:read", course.org_id)
+        checker.require(current_user.id, "course:read", get_platform_org_id(db_session))
 
     # Get replies
     replies_query = (

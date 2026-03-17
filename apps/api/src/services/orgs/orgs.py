@@ -15,6 +15,7 @@ from src.db.permission_enums import ADMIN_ROLE_SLUGS, RoleSlug
 from src.db.permissions import Role, UserRole
 from src.db.users import AnonymousUser, InternalUser, PublicUser
 from src.security.rbac import PermissionChecker
+from src.services.platform import get_platform_organization
 from src.services.orgs.uploads import (
     upload_org_landing_content,
     upload_org_logo,
@@ -25,24 +26,11 @@ from src.services.orgs.uploads import (
 
 async def get_organization(
     request: Request,
-    org_id: int,
     db_session: Session,
     current_user: PublicUser | AnonymousUser,
     checker: PermissionChecker | None = None,
 ) -> OrganizationRead:
-    # Convert org_id to int for proper type matching with database
-    org_id_int = int(org_id)
-
-    statement = select(Organization).where(Organization.id == org_id_int)
-    result = db_session.exec(statement)
-
-    org = result.first()
-
-    if not org:
-        raise HTTPException(
-            status_code=404,
-            detail="Organization not found",
-        )
+    org = get_platform_organization(db_session)
 
     # RBAC check
     if checker is None:
@@ -57,21 +45,11 @@ async def get_organization(
 async def update_org(
     request: Request,
     org_object: OrganizationUpdate,
-    org_id: int,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
     checker: PermissionChecker | None = None,
 ):
-    statement = select(Organization).where(Organization.id == org_id)
-    result = db_session.exec(statement)
-
-    org = result.first()
-
-    if not org:
-        raise HTTPException(
-            status_code=404,
-            detail="Organization slug not found",
-        )
+    org = get_platform_organization(db_session)
 
     # RBAC check
     if checker is None:
@@ -100,24 +78,11 @@ async def update_org(
 async def update_org_logo(
     request: Request,
     logo_file: UploadFile,
-    org_id: int,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
     checker: PermissionChecker | None = None,
 ):
-    # Convert org_id to int for proper type matching with database
-    org_id_int = int(org_id)
-
-    statement = select(Organization).where(Organization.id == org_id_int)
-    result = db_session.exec(statement)
-
-    org = result.first()
-
-    if not org:
-        raise HTTPException(
-            status_code=404,
-            detail="Organization not found",
-        )
+    org = get_platform_organization(db_session)
 
     # RBAC check
     if checker is None:
@@ -145,24 +110,11 @@ async def update_org_logo(
 async def update_org_thumbnail(
     request: Request,
     thumbnail_file: UploadFile,
-    org_id: int,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
     checker: PermissionChecker | None = None,
 ):
-    # Convert org_id to int for proper type matching with database
-    org_id_int = int(org_id)
-
-    statement = select(Organization).where(Organization.id == org_id_int)
-    result = db_session.exec(statement)
-
-    org = result.first()
-
-    if not org:
-        raise HTTPException(
-            status_code=404,
-            detail="Organization not found",
-        )
+    org = get_platform_organization(db_session)
 
     # RBAC check
     if checker is None:
@@ -190,24 +142,11 @@ async def update_org_thumbnail(
 async def update_org_preview(
     request: Request,
     preview_file: UploadFile,
-    org_id: int,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
     checker: PermissionChecker | None = None,
 ):
-    # Convert org_id to int for proper type matching with database
-    org_id_int = int(org_id)
-
-    statement = select(Organization).where(Organization.id == org_id_int)
-    result = db_session.exec(statement)
-
-    org = result.first()
-
-    if not org:
-        raise HTTPException(
-            status_code=404,
-            detail="Organization not found",
-        )
+    org = get_platform_organization(db_session)
 
     # RBAC check
     if checker is None:
@@ -224,21 +163,11 @@ async def update_org_preview(
 
 async def delete_org(
     request: Request,
-    org_id: int,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
     checker: PermissionChecker | None = None,
 ):
-    statement = select(Organization).where(Organization.id == org_id)
-    result = db_session.exec(statement)
-
-    org = result.first()
-
-    if not org:
-        raise HTTPException(
-            status_code=404,
-            detail="Organization not found",
-        )
+    org = get_platform_organization(db_session)
 
     # RBAC check
     if checker is None:
@@ -251,7 +180,7 @@ async def delete_org(
     db_session.commit()
 
     # Delete all user roles linked to this org
-    statement = select(UserRole).where(UserRole.org_id == org_id)
+    statement = select(UserRole)
     result = db_session.exec(statement)
 
     user_roles = result.all()
@@ -272,42 +201,22 @@ async def get_orgs_by_user_admin(
     page: int = 1,
     limit: int = 10,
 ) -> list[OrganizationRead]:
-    # Convert user_id to int for proper type matching with database
-    user_id_int = int(user_id)
-
     # Resolve the admin role id by slug (new RBAC system)
     admin_role = db_session.exec(
         select(Role).where(Role.slug.in_(list(ADMIN_ROLE_SLUGS)))
     ).first()
     admin_role_id = admin_role.id if admin_role else 1
 
-    # First get distinct org IDs where the user has admin role
-    org_id_query = (
-        select(UserRole.org_id)
-        .where(
-            UserRole.user_id == user_id_int,
+    has_admin_role = db_session.exec(
+        select(UserRole).where(
+            UserRole.user_id == int(user_id),
             UserRole.role_id == admin_role_id,
         )
-        .distinct()
-        .offset((page - 1) * limit)
-        .limit(limit)
-    )
+    ).first()
+    if not has_admin_role or page != 1 or limit < 1:
+        return []
 
-    org_ids = db_session.exec(org_id_query).all()
-
-    orgsWithConfig = []
-    if org_ids:
-        statement = select(Organization).where(Organization.id.in_(org_ids))
-        result = db_session.exec(statement).all()
-        org_map: dict[int, Organization] = {org.id: org for org in result if org.id}
-        for oid in org_ids:
-            org = org_map.get(oid)
-            if not org:
-                continue
-            org_read = OrganizationRead.model_validate(org)
-            orgsWithConfig.append(org_read)
-
-    return orgsWithConfig
+    return [OrganizationRead.model_validate(get_platform_organization(db_session))]
 
 
 async def get_orgs_by_user(
@@ -317,33 +226,11 @@ async def get_orgs_by_user(
     page: int = 1,
     limit: int = 10,
 ) -> list[OrganizationRead]:
-    # Convert user_id to int for proper type matching with database
-    user_id_int = int(user_id)
+    has_role = db_session.exec(select(UserRole).where(UserRole.user_id == int(user_id))).first()
+    if not has_role or page != 1 or limit < 1:
+        return []
 
-    # First get distinct org IDs for this user
-    org_id_query = (
-        select(UserRole.org_id)
-        .where(UserRole.user_id == user_id_int)
-        .distinct()
-        .offset((page - 1) * limit)
-        .limit(limit)
-    )
-
-    org_ids = db_session.exec(org_id_query).all()
-
-    orgsWithConfig = []
-    if org_ids:
-        statement = select(Organization).where(Organization.id.in_(org_ids))
-        result = db_session.exec(statement).all()
-        org_map: dict[int, Organization] = {org.id: org for org in result if org.id}
-        for oid in org_ids:
-            org = org_map.get(oid)
-            if not org:
-                continue
-            org_read = OrganizationRead.model_validate(org)
-            orgsWithConfig.append(org_read)
-
-    return orgsWithConfig
+    return [OrganizationRead.model_validate(get_platform_organization(db_session))]
 
 
 async def upload_org_preview_service(
@@ -361,21 +248,11 @@ async def upload_org_preview_service(
 async def update_org_landing(
     request: Request,
     landing_object: dict,
-    org_id: int,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
     checker: PermissionChecker | None = None,
 ):
-    statement = select(Organization).where(Organization.id == org_id)
-    result = db_session.exec(statement)
-
-    org = result.first()
-
-    if not org:
-        raise HTTPException(
-            status_code=404,
-            detail="Organization not found",
-        )
+    org = get_platform_organization(db_session)
 
     # RBAC check
     if checker is None:
@@ -397,21 +274,11 @@ async def update_org_landing(
 async def upload_org_landing_content_service(
     request: Request,
     content_file: UploadFile,
-    org_id: int,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
     checker: PermissionChecker | None = None,
 ) -> dict:
-    statement = select(Organization).where(Organization.id == org_id)
-    result = db_session.exec(statement)
-
-    org = result.first()
-
-    if not org:
-        raise HTTPException(
-            status_code=404,
-            detail="Organization not found",
-        )
+    org = get_platform_organization(db_session)
 
     # RBAC check
     if checker is None:

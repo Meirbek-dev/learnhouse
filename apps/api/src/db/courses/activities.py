@@ -65,9 +65,6 @@ class Activity(ActivityBase, table=True):
     model_config = ConfigDict(from_attributes=True)
 
     id: int | None = Field(default=None, primary_key=True)
-    org_id: int = Field(
-        sa_column=Column(Integer, ForeignKey("organization.id", ondelete="CASCADE"))
-    )
     course_id: int | None = Field(
         default=None,
         sa_column=Column(Integer, ForeignKey("course.id", ondelete="CASCADE")),
@@ -137,7 +134,6 @@ class ActivityRead(ActivityBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
-    org_id: int
     course_id: int | None
     activity_uuid: str
     creation_date: datetime

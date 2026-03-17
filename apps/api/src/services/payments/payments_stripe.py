@@ -22,20 +22,18 @@ from src.services.payments.payments_users import (
     create_payment_user,
     delete_payment_user,
 )
+from src.services.platform import get_platform_org_id
 
 logger = logging.getLogger(__name__)
 
 
 async def get_stripe_connected_account_id(
     request: Request,
-    org_id: int,
     current_user: PublicUser | AnonymousUser | InternalUser,
     db_session: Session,
 ):
     # Get payments config
-    payments_config = await get_payments_config(
-        request, org_id, current_user, db_session
-    )
+    payments_config = await get_payments_config(request, current_user, db_session)
 
     return payments_config[0].provider_specific_id
 
@@ -62,7 +60,6 @@ async def get_stripe_internal_credentials():
 
 async def create_stripe_product(
     request: Request,
-    org_id: int,
     product_data: PaymentsProduct,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
@@ -91,7 +88,7 @@ async def create_stripe_product(
         default_price_data["recurring"] = {"interval": "month"}
 
     stripe_acc_id = await get_stripe_connected_account_id(
-        request, org_id, current_user, db_session
+        request, current_user, db_session
     )
 
     return stripe.Product.create(
@@ -109,7 +106,6 @@ async def create_stripe_product(
 
 async def archive_stripe_product(
     request: Request,
-    org_id: int,
     product_id: str,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
@@ -120,7 +116,7 @@ async def archive_stripe_product(
     stripe.api_key = creds.get("stripe_secret_key")
 
     stripe_acc_id = await get_stripe_connected_account_id(
-        request, org_id, current_user, db_session
+        request, current_user, db_session
     )
 
     try:
@@ -138,7 +134,6 @@ async def archive_stripe_product(
 
 async def update_stripe_product(
     request: Request,
-    org_id: int,
     product_id: str,
     product_data: PaymentsProduct,
     current_user: PublicUser | AnonymousUser,
@@ -150,7 +145,7 @@ async def update_stripe_product(
     stripe.api_key = creds.get("stripe_secret_key")
 
     stripe_acc_id = await get_stripe_connected_account_id(
-        request, org_id, current_user, db_session
+        request, current_user, db_session
     )
 
     try:
@@ -211,24 +206,22 @@ async def update_stripe_product(
 
 async def create_checkout_session(
     request: Request,
-    org_id: int,
     product_id: int,
     redirect_uri: str,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
 ):
+    platform_org_id = get_platform_org_id(db_session)
     # Get Stripe credentials
     creds = await get_stripe_internal_credentials()
     stripe.api_key = creds.get("stripe_secret_key")
 
     stripe_acc_id = await get_stripe_connected_account_id(
-        request, org_id, current_user, db_session
+        request, current_user, db_session
     )
 
     # Get product details
-    statement = select(PaymentsProduct).where(
-        PaymentsProduct.id == product_id, PaymentsProduct.org_id == org_id
-    )
+    statement = select(PaymentsProduct).where(PaymentsProduct.id == product_id)
     product = db_session.exec(statement).first()
 
     if not product:
@@ -255,7 +248,7 @@ async def create_checkout_session(
                 email=current_user.email,
                 metadata={
                     "user_id": str(current_user.id),
-                    "org_id": str(org_id),
+                    "org_id": str(platform_org_id),
                 },
                 stripe_account=stripe_acc_id,
             )
@@ -263,7 +256,6 @@ async def create_checkout_session(
         # Create initial payment user with pending status
         payment_user = await create_payment_user(
             request=request,
-            org_id=org_id,
             user_id=current_user.id,
             product_id=product_id,
             status=PaymentStatusEnum.PENDING,
@@ -279,7 +271,7 @@ async def create_checkout_session(
         # Clean up payment user if customer creation fails
         if payment_user and payment_user.id:
             await delete_payment_user(
-                request, org_id, payment_user.id, InternalUser(), db_session
+                request, payment_user.id, InternalUser(), db_session
             )
         raise HTTPException(
             status_code=400, detail=f"Error creating/retrieving customer: {e!s}"
@@ -330,7 +322,7 @@ async def create_checkout_session(
         # Clean up payment user if checkout session creation fails
         if payment_user and payment_user.id:
             await delete_payment_user(
-                request, org_id, payment_user.id, InternalUser(), db_session
+                request, payment_user.id, InternalUser(), db_session
             )
         logger.exception(f"Error creating checkout session: {e!s}")
         raise HTTPException(status_code=400, detail=str(e))
@@ -338,7 +330,6 @@ async def create_checkout_session(
 
 async def generate_stripe_connect_link(
     request: Request,
-    org_id: int,
     redirect_uri: str,
     current_user: PublicUser | AnonymousUser | InternalUser,
     db_session: Session,
@@ -367,7 +358,6 @@ async def generate_stripe_connect_link(
 
 async def create_stripe_account(
     request: Request,
-    org_id: int,
     type: Literal[
         "standard"
     ],  # Only standard is supported for now, we'll see if we need express later
@@ -379,7 +369,7 @@ async def create_stripe_account(
     stripe.api_key = creds.get("stripe_secret_key")
 
     # Get existing payments config
-    statement = select(PaymentsConfig).where(PaymentsConfig.org_id == org_id)
+    statement = select(PaymentsConfig)
     existing_config = db_session.exec(statement).first()
 
     if existing_config and existing_config.provider_specific_id:
@@ -409,7 +399,6 @@ async def create_stripe_account(
     # Update payments config for the org
     await update_payments_config(
         request,
-        org_id,
         PaymentsConfigUpdate(**config_data),
         current_user,
         db_session,
@@ -420,7 +409,6 @@ async def create_stripe_account(
 
 async def update_stripe_account_id(
     request: Request,
-    org_id: int,
     stripe_account_id: str,
     current_user: PublicUser | AnonymousUser | InternalUser,
     db_session: Session,
@@ -429,7 +417,7 @@ async def update_stripe_account_id(
     Update the Stripe account ID for an organization
     """
     # Get existing payments config
-    statement = select(PaymentsConfig).where(PaymentsConfig.org_id == org_id)
+    statement = select(PaymentsConfig)
     existing_config = db_session.exec(statement).first()
 
     if not existing_config:
@@ -445,7 +433,6 @@ async def update_stripe_account_id(
     # Update payments config
     await update_payments_config(
         request,
-        org_id,
         PaymentsConfigUpdate(**config_data),
         current_user,
         db_session,
@@ -456,7 +443,6 @@ async def update_stripe_account_id(
 
 async def handle_stripe_oauth_callback(
     request: Request,
-    org_id: int,
     code: str,
     current_user: PublicUser | AnonymousUser | InternalUser,
     db_session: Session,
@@ -483,7 +469,6 @@ async def handle_stripe_oauth_callback(
         # Now connected_account_id is guaranteed to be a string
         await update_stripe_account_id(
             request,
-            org_id,
             connected_account_id,
             current_user,
             db_session,

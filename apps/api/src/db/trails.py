@@ -8,9 +8,6 @@ from src.db.trail_runs import TrailRunRead
 
 
 class TrailBase(SQLModelStrictBaseModel):
-    org_id: int = Field(
-        sa_column=Column(Integer, ForeignKey("organization.id", ondelete="CASCADE"))
-    )
     user_id: int = Field(
         sa_column=Column(Integer, ForeignKey("user.id", ondelete="CASCADE"))
     )
@@ -18,9 +15,6 @@ class TrailBase(SQLModelStrictBaseModel):
 
 class Trail(TrailBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
-    org_id: int = Field(
-        sa_column=Column(Integer, ForeignKey("organization.id", ondelete="CASCADE"))
-    )
     user_id: int = Field(
         sa_column=Column(Integer, ForeignKey("user.id", ondelete="CASCADE"))
     )
@@ -36,7 +30,6 @@ class TrailCreate(TrailBase):
 class TrailRead(PydanticStrictBaseModel):
     id: int | None = PydanticField(default=None)
     trail_uuid: str | None = None
-    org_id: int
     user_id: int
     creation_date: str | None = None
     update_date: str | None = None

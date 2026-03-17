@@ -15,6 +15,7 @@ from src.db.collections_courses import CollectionCourse
 from src.db.courses.courses import Course
 from src.db.users import AnonymousUser, PublicUser
 from src.security.rbac import PermissionChecker
+from src.services.platform import get_platform_org_id, require_platform_org_id
 
 ####################################################
 # CRUD
@@ -39,10 +40,11 @@ async def get_collection(
     if checker is None:
         checker = PermissionChecker(db_session)
     if not collection.public:
+        platform_org_id = get_platform_org_id(db_session)
         checker.require(
             current_user.id,
             "collection:read",
-            org_id=collection.org_id,
+            org_id=platform_org_id,
             resource_owner_id=collection.creator_id,
         )
 
@@ -50,21 +52,14 @@ async def get_collection(
     statement_all = (
         select(Course)
         .join(CollectionCourse)
-        .where(
-            CollectionCourse.collection_id == collection.id,
-            CollectionCourse.org_id == collection.org_id,
-        )
+        .where(CollectionCourse.collection_id == collection.id)
         .distinct()
     )
 
     statement_public = (
         select(Course)
         .join(CollectionCourse)
-        .where(
-            CollectionCourse.collection_id == collection.id,
-            CollectionCourse.org_id == collection.org_id,
-            Course.public,
-        )
+        .where(CollectionCourse.collection_id == collection.id, Course.public)
         .distinct()
     )
     if current_user.user_uuid == "user_anonymous":
@@ -78,7 +73,7 @@ async def get_collection(
         checker.check(
             current_user.id,
             "collection:update",
-            collection.org_id,
+            get_platform_org_id(db_session),
             resource_owner_id=collection.creator_id,
         )
         if current_user.id
@@ -88,7 +83,7 @@ async def get_collection(
         checker.check(
             current_user.id,
             "collection:delete",
-            collection.org_id,
+            get_platform_org_id(db_session),
             resource_owner_id=collection.creator_id,
         )
         if current_user.id
@@ -119,8 +114,9 @@ async def create_collection(
     # For now, we'll use the existing RBAC check but with proper organization context
     if checker is None:
         checker = PermissionChecker(db_session)
+    platform_org_id = get_platform_org_id(db_session)
     checker.require(
-        current_user.id, "collection:create", org_id=collection_object.org_id
+        current_user.id, "collection:create", org_id=platform_org_id
     )
 
     # Complete the collection object
@@ -144,9 +140,7 @@ async def create_collection(
         if found_courses:
             # Permission check uses the same org_id for every course — run it once
             try:
-                checker.require(
-                    current_user.id, "course:read", org_id=collection.org_id
-                )
+                checker.require(current_user.id, "course:read", org_id=platform_org_id)
             except HTTPException:
                 raise HTTPException(
                     status_code=403,
@@ -157,7 +151,6 @@ async def create_collection(
                 collection_course = CollectionCourse(
                     collection_id=int(collection.id),
                     course_id=course.id,
-                    org_id=int(collection_object.org_id),
                     creation_date=str(datetime.now()),
                     update_date=str(datetime.now()),
                 )
@@ -199,10 +192,11 @@ async def update_collection(
     # RBAC check
     if checker is None:
         checker = PermissionChecker(db_session)
+    platform_org_id = get_platform_org_id(db_session)
     checker.require(
         current_user.id,
         "collection:update",
-        org_id=collection.org_id,
+        org_id=platform_org_id,
         resource_owner_id=collection.creator_id,
     )
 
@@ -232,7 +226,6 @@ async def update_collection(
         collection_course = CollectionCourse(
             collection_id=int(collection.id),
             course_id=int(course),
-            org_id=int(collection.org_id),
             creation_date=str(datetime.now()),
             update_date=str(datetime.now()),
         )
@@ -273,10 +266,11 @@ async def delete_collection(
     # RBAC check
     if checker is None:
         checker = PermissionChecker(db_session)
+    platform_org_id = get_platform_org_id(db_session)
     checker.require(
         current_user.id,
         "collection:delete",
-        org_id=collection.org_id,
+        org_id=platform_org_id,
         resource_owner_id=collection.creator_id,
     )
 
@@ -301,14 +295,10 @@ async def get_collections(
     limit: int = 10,
     checker: PermissionChecker | None = None,
 ) -> list[CollectionReadWithPermissions]:
-    # Convert org_id to int for proper type matching with database
+    platform_org_id = require_platform_org_id(db_session, org_id)
 
-    statement_public = select(Collection).where(
-        Collection.org_id == org_id, Collection.public
-    )
-    statement_all = (
-        select(Collection).where(Collection.org_id == org_id).distinct(Collection.id)
-    )
+    statement_public = select(Collection).where(Collection.public)
+    statement_all = select(Collection).distinct(Collection.id)
 
     statement = statement_public if current_user.id == 0 else statement_all
 
@@ -326,21 +316,14 @@ async def get_collections(
         batch_stmt = (
             select(CollectionCourse, Course)
             .join(Course, CollectionCourse.course_id == Course.id)
-            .where(
-                CollectionCourse.collection_id.in_(collection_ids),
-                CollectionCourse.org_id == org_id,
-                Course.public,
-            )
+            .where(CollectionCourse.collection_id.in_(collection_ids), Course.public)
             .distinct()
         )
     else:
         batch_stmt = (
             select(CollectionCourse, Course)
             .join(Course, CollectionCourse.course_id == Course.id)
-            .where(
-                CollectionCourse.collection_id.in_(collection_ids),
-                CollectionCourse.org_id == org_id,
-            )
+            .where(CollectionCourse.collection_id.in_(collection_ids))
             .distinct()
         )
 
@@ -355,7 +338,7 @@ async def get_collections(
             checker.check(
                 current_user.id,
                 "collection:update",
-                collection.org_id,
+                platform_org_id,
                 resource_owner_id=collection.creator_id,
             )
             if current_user.id
@@ -365,7 +348,7 @@ async def get_collections(
             checker.check(
                 current_user.id,
                 "collection:delete",
-                collection.org_id,
+                platform_org_id,
                 resource_owner_id=collection.creator_id,
             )
             if current_user.id

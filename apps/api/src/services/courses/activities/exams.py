@@ -36,7 +36,6 @@ from src.db.courses.exams import (
     QuestionTypeEnum,
     QuestionUpdate,
 )
-from src.db.organizations import Organization
 from src.db.resource_authors import (
     ResourceAuthor,
     ResourceAuthorshipEnum,
@@ -50,6 +49,7 @@ from src.security.rbac import (
     PermissionDenied,
     ResourceAccessDenied,
 )
+from src.services.platform import get_platform_org_id
 
 logger = logging.getLogger(__name__)
 
@@ -103,11 +103,6 @@ async def create_exam(
 ) -> ExamRead:
     """Create a new exam"""
 
-    # Verify org, course, chapter, activity exist
-    org = db_session.get(Organization, exam_object.org_id)
-    if not org:
-        raise HTTPException(status_code=404, detail="Организация не найдена")
-
     course = db_session.get(Course, exam_object.course_id)
     if not course:
         raise HTTPException(status_code=404, detail="Курс не найден")
@@ -124,7 +119,7 @@ async def create_exam(
     checker.require(
         current_user.id,
         "exam:create",
-        course.org_id,
+        get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 
@@ -144,7 +139,6 @@ async def create_exam(
         title=exam_object.title,
         description=exam_object.description,
         published=exam_object.published,
-        org_id=exam_object.org_id,
         course_id=exam_object.course_id,
         chapter_id=exam_object.chapter_id,
         activity_id=exam_object.activity_id,
@@ -181,7 +175,7 @@ async def read_exam(
     checker.require(
         current_user.id,
         "exam:read",
-        course.org_id,
+        get_platform_org_id(db_session),
         is_assigned=True,
         resource_owner_id=course.creator_id,
     )
@@ -216,7 +210,7 @@ async def read_exam_from_activity_uuid(
     checker.require(
         current_user.id,
         "exam:read",
-        course.org_id,
+        get_platform_org_id(db_session),
         is_assigned=True,
         resource_owner_id=course.creator_id,
     )
@@ -247,7 +241,7 @@ async def update_exam(
     checker.require(
         current_user.id,
         "exam:update",
-        course.org_id,
+        get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 
@@ -298,7 +292,7 @@ async def delete_exam(
     checker.require(
         current_user.id,
         "exam:delete",
-        course.org_id,
+        get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 
@@ -332,7 +326,7 @@ async def create_exam_with_activity(
     checker.require(
         current_user.id,
         "exam:create",
-        course.org_id,
+        get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 
@@ -355,7 +349,6 @@ async def create_exam_with_activity(
         content={},
         details={},
         published=False,
-        org_id=course.org_id,
         course_id=course.id,
         creation_date=now,
         update_date=now,
@@ -383,7 +376,6 @@ async def create_exam_with_activity(
         chapter_id=chapter.id,
         activity_id=activity.id,
         course_id=course.id,
-        org_id=course.org_id,
         order=next_order,
         creation_date=now,
         update_date=now,
@@ -399,7 +391,6 @@ async def create_exam_with_activity(
         title=exam_object.exam_title,
         description=exam_object.exam_description,
         published=False,
-        org_id=course.org_id,
         course_id=course.id,
         chapter_id=chapter.id,
         activity_id=activity.id,
@@ -445,7 +436,7 @@ async def create_question(
     checker.require(
         current_user.id,
         "exam:create",
-        course.org_id,
+        get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 
@@ -505,7 +496,6 @@ async def create_question(
         order_index=question_object.order_index,
         answer_options=question_object.answer_options,
         exam_id=exam.id,
-        org_id=exam.org_id,
         creation_date=now,
         update_date=now,
     )
@@ -542,7 +532,7 @@ async def read_questions(
     checker.require(
         current_user.id,
         "exam:read",
-        course.org_id,
+        get_platform_org_id(db_session),
         is_assigned=True,
         resource_owner_id=course.creator_id,
     )
@@ -597,7 +587,7 @@ async def update_question(
     checker.require(
         current_user.id,
         "exam:update",
-        course.org_id,
+        get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 
@@ -641,7 +631,7 @@ async def delete_question(
     checker.require(
         current_user.id,
         "exam:delete",
-        course.org_id,
+        get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 
@@ -764,7 +754,6 @@ async def start_exam_attempt(
         attempt_uuid=attempt_uuid,
         exam_id=exam.id,
         user_id=current_user.id,
-        org_id=exam.org_id,
         status=AttemptStatusEnum.IN_PROGRESS,
         question_order=question_order,
         answers={},
@@ -849,7 +838,7 @@ async def _grade_and_finalize_attempt(
             award_xp(
                 db=db_session,
                 user_id=user_id,
-                org_id=attempt.org_id,
+                org_id=get_platform_org_id(db_session),
                 source="exam_completion",
                 source_id=f"exam_{attempt.attempt_uuid}",
                 idempotency_key=f"exam_completion_{attempt.attempt_uuid}",
@@ -859,7 +848,7 @@ async def _grade_and_finalize_attempt(
                 award_xp(
                     db=db_session,
                     user_id=user_id,
-                    org_id=attempt.org_id,
+                    org_id=get_platform_org_id(db_session),
                     source="streak_bonus",
                     source_id=f"exam_perfect_{attempt.attempt_uuid}",
                     idempotency_key=f"exam_perfect_{attempt.attempt_uuid}",
@@ -1280,7 +1269,10 @@ async def get_all_exam_attempts(
 
     checker = PermissionChecker(db_session)
     has_rbac_access = checker.check(
-        current_user.id, "exam:read", course.org_id, resource_owner_id=course.creator_id
+        current_user.id,
+        "exam:read",
+        get_platform_org_id(db_session),
+        resource_owner_id=course.creator_id,
     )
     is_contributor = await is_course_contributor_or_admin(
         current_user.id, course, db_session
@@ -1376,7 +1368,7 @@ async def export_questions_csv(
     if not course:
         raise HTTPException(status_code=404, detail="Курс не найден")
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "exam:read", course.org_id)
+    checker.require(current_user.id, "exam:read", get_platform_org_id(db_session))
 
     # Get questions
     questions_statement = (
@@ -1450,7 +1442,7 @@ async def import_questions_csv(
     if not course:
         raise HTTPException(status_code=404, detail="Курс не найден")
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "exam:create", course.org_id)
+    checker.require(current_user.id, "exam:create", get_platform_org_id(db_session))
 
     # Parse CSV
     import csv
@@ -1514,7 +1506,6 @@ async def import_questions_csv(
             now = _utc_now_iso()
             new_question = Question(
                 exam_id=exam.id,
-                org_id=exam.org_id,
                 question_uuid=str(ULID()),
                 question_text=question_text,
                 question_type=question_type,
@@ -1564,7 +1555,7 @@ async def reorder_questions(
     checker.require(
         current_user.id,
         "exam:update",
-        course.org_id,
+        get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 

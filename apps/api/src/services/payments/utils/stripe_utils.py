@@ -4,7 +4,6 @@ import stripe
 from fastapi import HTTPException
 from sqlmodel import Session, select
 
-from src.db.payments.payments import PaymentsConfig
 from src.db.payments.payments_products import PaymentsProduct
 from src.db.users import User
 
@@ -40,22 +39,3 @@ async def get_product_from_stripe_id(
     if not product:
         raise HTTPException(status_code=404, detail=f"Product not found: {product_id}")
     return product
-
-
-async def get_org_id_from_stripe_account(
-    stripe_account_id: str,
-    db_session: Session,
-) -> int:
-    """Get organization ID from Stripe account ID"""
-    statement = select(PaymentsConfig).where(
-        PaymentsConfig.provider_specific_id == stripe_account_id
-    )
-    config = db_session.exec(statement).first()
-
-    if not config:
-        raise HTTPException(
-            status_code=404,
-            detail=f"No organization found for Stripe account {stripe_account_id}",
-        )
-
-    return config.org_id

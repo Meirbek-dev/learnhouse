@@ -35,9 +35,7 @@ def get_org_policy(db: Session, org_id: int) -> tuple[dict[str, int], int]:
     if cached and now - cached[2] < _TTL:
         return cached[0], cached[1]
 
-    cfg = db.exec(
-        select(OrgGamificationConfig).where(OrgGamificationConfig.org_id == org_id)
-    ).first()
+    cfg = db.exec(select(OrgGamificationConfig)).first()
 
     rewards: dict[str, int] = dict(XP_REWARDS)
     daily_limit: int = DAILY_XP_LIMIT

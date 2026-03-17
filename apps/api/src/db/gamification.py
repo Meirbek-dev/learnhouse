@@ -76,7 +76,6 @@ class GamificationProfile(SQLModel, table=True):
 
     id: int = Field(primary_key=True)
     user_id: int = Field(foreign_key="user.id", index=True)
-    org_id: int = Field(foreign_key="organization.id", index=True)
 
     # Core progression
     total_xp: int = Field(default=0, ge=0)
@@ -105,10 +104,10 @@ class GamificationProfile(SQLModel, table=True):
 
     # Database constraints
     __table_args__ = (
-        UniqueConstraint("user_id", "org_id", name="uq_gamification_profile_user_org"),
+        UniqueConstraint("user_id", name="uq_gamification_profile_user"),
         CheckConstraint("total_xp >= 0", name="ck_total_xp_positive"),
         CheckConstraint("level >= 1 AND level <= 100", name="ck_level_range"),
-        Index("idx_profile_org_xp", "org_id", "total_xp"),
+        Index("idx_profile_total_xp", "total_xp"),
     )
 
     # Computed properties
@@ -146,7 +145,6 @@ class XPTransaction(SQLModel, table=True):
 
     id: int = Field(primary_key=True)
     user_id: int = Field(foreign_key="user.id", index=True)
-    org_id: int = Field(foreign_key="organization.id", index=True)
 
     # Transaction data
     amount: int = Field(gt=0)
@@ -165,15 +163,14 @@ class XPTransaction(SQLModel, table=True):
     idempotency_key: str | None = Field(default=None, unique=True)
 
     __table_args__ = (
-        Index("idx_transaction_user_org", "user_id", "org_id"),
+        Index("idx_transaction_user", "user_id"),
         Index("idx_transaction_source", "source", "source_id"),
-        # Prevent duplicate awards for the same (user, org, source, source_id). NULL source_id allowed multiple times.
+        # Prevent duplicate awards for the same (user, source, source_id). NULL source_id allowed multiple times.
         UniqueConstraint(
             "user_id",
-            "org_id",
             "source",
             "source_id",
-            name="uq_xp_tx_user_org_source_once",
+            name="uq_xp_tx_user_source_once",
         ),
     )
 
@@ -187,7 +184,6 @@ class OrgGamificationConfig(SQLModel, table=True):
     __tablename__ = "org_gamification_config"
 
     id: int = Field(primary_key=True)
-    org_id: int = Field(foreign_key="organization.id", unique=True, index=True)
     # Optional overrides
     daily_xp_limit: int | None = Field(default=None, ge=0)
     rewards: dict | None = Field(default=None, sa_column=Column(JSON))
@@ -204,7 +200,6 @@ class ProfileRead(PydanticStrictBaseModel):
 
     # NOTE: Aren't there too many fields? Maybe clean up normalize this model or something?
     user_id: int
-    org_id: int
     total_xp: int
     level: int
     xp_in_current_level: int
@@ -230,7 +225,6 @@ class TransactionRead(PydanticStrictBaseModel):
 
     id: int
     user_id: int
-    org_id: int
     amount: int
     source: XPSource
     source_id: str | None = None
@@ -259,7 +253,6 @@ class LeaderboardEntryRead(PydanticStrictBaseModel):
 class LeaderboardRead(PydanticStrictBaseModel):
     """Organization leaderboard."""
 
-    org_id: int
     entries: list[LeaderboardEntryRead]
     total_participants: int
 

@@ -24,6 +24,7 @@ from src.db.courses.courses import Course
 from src.db.users import AnonymousUser, PublicUser
 from src.security.rbac import PermissionChecker
 from src.services.courses.courses import _ensure_course_is_current
+from src.services.platform import get_platform_org_id
 
 ####################################################
 # CRUD
@@ -44,10 +45,11 @@ async def create_chapter(
 
     # RBAC check
     checker = PermissionChecker(db_session)
+    platform_org_id = get_platform_org_id(db_session)
     checker.require(
         current_user.id,
         "chapter:create",
-        course.org_id,
+        platform_org_id,
         resource_owner_id=course.creator_id,
     )
 
@@ -58,7 +60,6 @@ async def create_chapter(
     chapter.chapter_uuid = f"chapter_{ULID()}"
     chapter.creation_date = str(datetime.now())
     chapter.update_date = str(datetime.now())
-    chapter.org_id = course.org_id
     chapter.creator_id = current_user.id
 
     # Find the last chapter in the course and add it to the list
@@ -94,7 +95,6 @@ async def create_chapter(
         course_chapter = CourseChapter(
             course_id=chapter.course_id,
             chapter_id=chapter.id,
-            org_id=chapter.org_id,
             creation_date=str(datetime.now()),
             update_date=str(datetime.now()),
             order=to_be_used_order,
@@ -132,7 +132,7 @@ async def get_chapter(
 
     # RBAC check (use parent Course for read access so public courses allow anonymous reads)
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "course:read", course.org_id)
+    checker.require(current_user.id, "course:read", get_platform_org_id(db_session))
 
     # Get activities for this chapter
     statement = (
@@ -171,10 +171,11 @@ async def update_chapter(
 
     # RBAC check
     checker = PermissionChecker(db_session)
+    platform_org_id = get_platform_org_id(db_session)
     checker.require(
         current_user.id,
         "chapter:update",
-        chapter.org_id,
+        platform_org_id,
         resource_owner_id=chapter.creator_id,
     )
 
@@ -219,10 +220,11 @@ async def delete_chapter(
 
     # RBAC check
     checker = PermissionChecker(db_session)
+    platform_org_id = get_platform_org_id(db_session)
     checker.require(
         current_user.id,
         "chapter:delete",
-        chapter.org_id,
+        platform_org_id,
         resource_owner_id=chapter.creator_id,
     )
 
@@ -270,7 +272,7 @@ async def get_course_chapters(
     # RBAC check (rights are determined by parent Course for read access)
     checker = PermissionChecker(db_session)
     if not course.public:
-        checker.require(current_user.id, "course:read", course.org_id)
+        checker.require(current_user.id, "course:read", get_platform_org_id(db_session))
 
     statement = (
         select(Chapter)
@@ -317,13 +319,13 @@ async def get_course_chapters(
                 can_update = checker.check(
                     current_user.id,
                     "activity:update",
-                    activity.org_id,
+                    get_platform_org_id(db_session),
                     resource_owner_id=activity.creator_id,
                 )
                 can_delete = checker.check(
                     current_user.id,
                     "activity:delete",
-                    activity.org_id,
+                    get_platform_org_id(db_session),
                     resource_owner_id=activity.creator_id,
                 )
                 is_owner = activity.creator_id == current_user.id
@@ -365,10 +367,11 @@ async def reorder_chapters_and_activities(
 
     # RBAC check
     checker = PermissionChecker(db_session)
+    platform_org_id = get_platform_org_id(db_session)
     checker.require(
         current_user.id,
         "chapter:update",
-        course.org_id,
+        platform_org_id,
         resource_owner_id=course.creator_id,
     )
 
@@ -379,9 +382,7 @@ async def reorder_chapters_and_activities(
     ###########
 
     # Get all existing course chapters
-    statement = select(CourseChapter).where(
-        CourseChapter.course_id == course.id, CourseChapter.org_id == course.org_id
-    )
+    statement = select(CourseChapter).where(CourseChapter.course_id == course.id)
     existing_course_chapters = db_session.exec(statement).all()
 
     # Create a map of existing chapters for faster lookup
@@ -401,7 +402,6 @@ async def reorder_chapters_and_activities(
             new_chapter = CourseChapter(
                 course_id=course.id,
                 chapter_id=chapter_order.chapter_id,
-                org_id=course.org_id,
                 order=new_order,
                 creation_date=str(datetime.now()),
                 update_date=str(datetime.now()),
@@ -425,9 +425,7 @@ async def reorder_chapters_and_activities(
     ###########
 
     # Get all existing chapter activities
-    statement = select(ChapterActivity).where(
-        ChapterActivity.course_id == course.id, ChapterActivity.org_id == course.org_id
-    )
+    statement = select(ChapterActivity).where(ChapterActivity.course_id == course.id)
     existing_chapter_activities = db_session.exec(statement).all()
 
     # Create a map for faster lookup
@@ -456,7 +454,6 @@ async def reorder_chapters_and_activities(
                     chapter_id=chapter_order.chapter_id,
                     activity_id=activity_order.activity_id,
                     course_id=course.id,
-                    org_id=course.org_id,
                     order=new_order,
                     creation_date=str(datetime.now()),
                     update_date=str(datetime.now()),

@@ -66,7 +66,7 @@ async def create_user(
     user = await _create_and_validate_user(db_session, user_object)
 
     # Link user and organization
-    await _link_user_to_organization(db_session, user.id, org_id)
+    await _link_user_to_organization(db_session, user.id)
     db_session.commit()
 
     user_read = UserRead.model_validate(user)
@@ -102,7 +102,7 @@ async def create_user_without_org(
 
     # Automatically join the platform organization in single-org mode.
     platform_org = await _get_platform_organization(db_session)
-    await _link_user_to_organization(db_session, user.id, platform_org.id)
+    await _link_user_to_organization(db_session, user.id)
     db_session.commit()
 
     user_read = UserRead.model_validate(user)
@@ -304,7 +304,6 @@ async def get_user_session(
     request: Request,
     db_session: Session,
     current_user: PublicUser | AnonymousUser,
-    org_id: int | None = None,
 ) -> UserSession:
     from datetime import UTC, datetime
 
@@ -465,7 +464,6 @@ def _safe_role_read(role: Role) -> RoleRead:
             name=role.name,
             slug=role.slug,
             description=role.description,
-            org_id=role.org_id,
             is_system=role.is_system,
             priority=role.priority,
             created_at=role.created_at,
@@ -497,7 +495,7 @@ def _safe_organization_read(org: Organization) -> OrganizationRead:
 
 
 async def _link_user_to_organization(
-    db_session: Session, user_id: int | None, org_id: int
+    db_session: Session, user_id: int | None
 ) -> None:
     """Link user to organization with default 'user' role using new RBAC system."""
     from src.db.permissions import Role
@@ -512,7 +510,6 @@ async def _link_user_to_organization(
     checker.assign_role(
         user_id=user_id or 0,
         role_id=user_role.id,
-        org_id=org_id,
     )
 
 
@@ -614,7 +611,7 @@ async def _get_platform_organization(db_session: Session) -> Organization:
 async def ensure_user_in_platform_org(db_session: Session, user_id: int) -> None:
     """Ensure a user is a member of the platform organization (idempotent)."""
     platform_org = await _get_platform_organization(db_session)
-    await _link_user_to_organization(db_session, user_id, platform_org.id)
+    await _link_user_to_organization(db_session, user_id)
     db_session.commit()
 
 

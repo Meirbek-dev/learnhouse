@@ -18,6 +18,7 @@ from src.security.rbac import (
     PermissionDenied,
 )
 from src.services.analytics.filters import AnalyticsFilters
+from src.services.platform import require_platform_org_id
 
 
 @dataclass(slots=True)
@@ -71,7 +72,6 @@ def resolve_teacher_scope(
     db_session: Session,
     checker: PermissionChecker,
     current_user: PublicUser | AnonymousUser,
-    org_id: int,
     filters: AnalyticsFilters,
     *,
     action: str,
@@ -79,9 +79,11 @@ def resolve_teacher_scope(
     if isinstance(current_user, AnonymousUser):
         raise AuthenticationRequired
 
-    ensure_analytics_access(checker, current_user.id, org_id, action)
+    platform_org_id = require_platform_org_id(db_session)
+
+    ensure_analytics_access(checker, current_user.id, platform_org_id, action)
     has_org_scope = any(
-        _has_analytics_scope(checker, current_user.id, org_id, action, scope)
+        _has_analytics_scope(checker, current_user.id, platform_org_id, action, scope)
         for scope in ("org", "all")
     )
 
@@ -94,7 +96,6 @@ def resolve_teacher_scope(
             .outerjoin(
                 ResourceAuthor, ResourceAuthor.resource_uuid == Course.course_uuid
             )
-            .where(Course.org_id == org_id)
             .where(
                 or_(
                     Course.creator_id == target_user_id,
@@ -107,16 +108,13 @@ def resolve_teacher_scope(
             )
         ).all()
     elif has_org_scope:
-        course_ids = db_session.exec(
-            select(Course.id).where(Course.org_id == org_id)
-        ).all()
+        course_ids = db_session.exec(select(Course.id)).all()
     else:
         course_ids = db_session.exec(
             select(Course.id)
             .outerjoin(
                 ResourceAuthor, ResourceAuthor.resource_uuid == Course.course_uuid
             )
-            .where(Course.org_id == org_id)
             .where(
                 or_(
                     Course.creator_id == current_user.id,
@@ -148,7 +146,7 @@ def resolve_teacher_scope(
         normalized_course_ids = sorted(requested)
 
     return TeacherAnalyticsScope(
-        org_id=org_id,
+        org_id=platform_org_id,
         teacher_user_id=target_user_id,
         course_ids=normalized_course_ids,
         cohort_ids=filters.cohort_ids,

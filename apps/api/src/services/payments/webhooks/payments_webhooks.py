@@ -11,7 +11,6 @@ from src.db.users import InternalUser
 from src.services.payments.payments_config import update_payments_config
 from src.services.payments.payments_stripe import get_stripe_internal_credentials
 from src.services.payments.payments_users import update_payment_user_status
-from src.services.payments.utils.stripe_utils import get_org_id_from_stripe_account
 
 logger = logging.getLogger(__name__)
 
@@ -50,17 +49,14 @@ async def handle_stripe_webhook(
         event_type = event.type
         event_data = event.data.object
 
-        # Get organization ID based on the event type
         stripe_account_id = event.account
         if not stripe_account_id:
             logger.error("Stripe account ID not found")
             raise HTTPException(status_code=400, detail="Stripe account ID not found")
 
-        org_id = await get_org_id_from_stripe_account(stripe_account_id, db_session)
-
         # Handle internal account events
         if event_type == "account.application.authorized":
-            statement = select(PaymentsConfig).where(PaymentsConfig.org_id == org_id)
+            statement = select(PaymentsConfig)
             config = db_session.exec(statement).first()
 
             if not config:
@@ -82,7 +78,6 @@ async def handle_stripe_webhook(
             )
             await update_payments_config(
                 request,
-                org_id,
                 PaymentsConfigUpdate(**config_data),
                 InternalUser(),
                 db_session,
@@ -92,7 +87,7 @@ async def handle_stripe_webhook(
             return {"status": "success", "message": "Account authorized successfully"}
 
         if event_type == "account.application.deauthorized":
-            statement = select(PaymentsConfig).where(PaymentsConfig.org_id == org_id)
+            statement = select(PaymentsConfig)
             config = db_session.exec(statement).first()
 
             if not config:
@@ -114,7 +109,6 @@ async def handle_stripe_webhook(
             )
             await update_payments_config(
                 request,
-                org_id,
                 PaymentsConfigUpdate(**config_data),
                 InternalUser(),
                 db_session,
@@ -132,7 +126,6 @@ async def handle_stripe_webhook(
                 if session.get("subscription"):
                     await update_payment_user_status(
                         request=request,
-                        org_id=org_id,
                         payment_user_id=payment_user_id,
                         status=PaymentStatusEnum.ACTIVE,
                         current_user=InternalUser(),
@@ -141,7 +134,6 @@ async def handle_stripe_webhook(
             elif session.get("payment_status") == "paid":
                 await update_payment_user_status(
                     request=request,
-                    org_id=org_id,
                     payment_user_id=payment_user_id,
                     status=PaymentStatusEnum.COMPLETED,
                     current_user=InternalUser(),
@@ -156,7 +148,6 @@ async def handle_stripe_webhook(
 
             await update_payment_user_status(
                 request=request,
-                org_id=org_id,
                 payment_user_id=payment_user_id,
                 status=PaymentStatusEnum.CANCELLED,
                 current_user=InternalUser(),
@@ -171,7 +162,6 @@ async def handle_stripe_webhook(
 
             await update_payment_user_status(
                 request=request,
-                org_id=org_id,
                 payment_user_id=payment_user_id,
                 status=PaymentStatusEnum.FAILED,
                 current_user=InternalUser(),

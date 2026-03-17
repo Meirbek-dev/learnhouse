@@ -54,9 +54,7 @@ def _unwrap_scalar_date(value: Any) -> date | None:
 def _latest_metric_date(
     db_session: Session, model: type, date_column: object, org_id: int
 ) -> date | None:
-    value = db_session.exec(
-        select(func.max(date_column)).where(model.org_id == org_id)
-    ).one_or_none()
+    value = db_session.exec(select(func.max(date_column))).one_or_none()
     return _unwrap_scalar_date(value)
 
 
@@ -73,7 +71,6 @@ def get_latest_teacher_rollup(
         return None
     return db_session.exec(
         select(DailyTeacherMetrics).where(
-            DailyTeacherMetrics.org_id == org_id,
             DailyTeacherMetrics.metric_date == metric_date,
             DailyTeacherMetrics.teacher_user_id == teacher_user_id,
         )
@@ -93,7 +90,6 @@ def list_latest_course_rollups(
     if metric_date is None or not course_ids:
         return []
     statement = select(DailyCourseMetrics).where(
-        DailyCourseMetrics.org_id == org_id,
         DailyCourseMetrics.metric_date == metric_date,
         DailyCourseMetrics.course_id.in_(course_ids),
     )
@@ -118,7 +114,6 @@ def list_latest_assessment_rollups(
     return list(
         db_session.exec(
             select(DailyAssessmentMetrics).where(
-                DailyAssessmentMetrics.org_id == org_id,
                 DailyAssessmentMetrics.metric_date == metric_date,
                 DailyAssessmentMetrics.course_id.in_(course_ids),
             )
@@ -164,7 +159,6 @@ def _merge_teacher_metrics(
     db_session.merge(
         DailyTeacherMetrics(
             metric_date=target_date,
-            org_id=current_org_id,
             teacher_user_id=teacher_user_id,
             managed_course_count=len(teacher_course_ids),
             active_learners_7d=len(
@@ -226,11 +220,7 @@ def refresh_teacher_analytics_rollups(
         window="28d", compare="previous_period", bucket="day", timezone="UTC"
     )
 
-    org_ids = (
-        [org_id]
-        if org_id is not None
-        else list(db_session.exec(select(distinct(Course.org_id))).all())
-    )
+    org_ids = [org_id] if org_id is not None else [None]
     refreshed_orgs: list[dict[str, object]] = []
 
     logger.info(
@@ -244,13 +234,9 @@ def refresh_teacher_analytics_rollups(
 
     for current_org_id in org_ids:
         if current_org_id is None:
-            continue
+            current_org_id = 0
 
-        course_ids = list(
-            db_session.exec(
-                select(Course.id).where(Course.org_id == current_org_id)
-            ).all()
-        )
+        course_ids = list(db_session.exec(select(Course.id)).all())
         if not course_ids:
             continue
 
@@ -281,37 +267,31 @@ def refresh_teacher_analytics_rollups(
 
         db_session.exec(
             delete(DailyTeacherMetrics).where(
-                DailyTeacherMetrics.org_id == current_org_id,
                 DailyTeacherMetrics.metric_date == target_date,
             )
         )
         db_session.exec(
             delete(DailyCourseMetrics).where(
-                DailyCourseMetrics.org_id == current_org_id,
                 DailyCourseMetrics.metric_date == target_date,
             )
         )
         db_session.exec(
             delete(DailyCourseEngagement).where(
-                DailyCourseEngagement.org_id == current_org_id,
                 DailyCourseEngagement.metric_date == target_date,
             )
         )
         db_session.exec(
             delete(DailyAssessmentMetrics).where(
-                DailyAssessmentMetrics.org_id == current_org_id,
                 DailyAssessmentMetrics.metric_date == target_date,
             )
         )
         db_session.exec(
             delete(DailyUserCourseProgress).where(
-                DailyUserCourseProgress.org_id == current_org_id,
                 DailyUserCourseProgress.metric_date == target_date,
             )
         )
         db_session.exec(
             delete(LearnerRiskSnapshot).where(
-                LearnerRiskSnapshot.org_id == current_org_id,
                 LearnerRiskSnapshot.snapshot_date == target_date,
             )
         )
@@ -320,7 +300,6 @@ def refresh_teacher_analytics_rollups(
             db_session.merge(
                 DailyUserCourseProgress(
                     metric_date=target_date,
-                    org_id=current_org_id,
                     course_id=snapshot.course_id,
                     user_id=snapshot.user_id,
                     trailrun_id=snapshot.trailrun_id,
@@ -338,7 +317,6 @@ def refresh_teacher_analytics_rollups(
             db_session.merge(
                 LearnerRiskSnapshot(
                     snapshot_date=target_date,
-                    org_id=current_org_id,
                     course_id=row.course_id,
                     teacher_user_id=context.courses_by_id[row.course_id].creator_id,
                     user_id=row.user_id,
@@ -364,7 +342,6 @@ def refresh_teacher_analytics_rollups(
             db_session.merge(
                 DailyCourseMetrics(
                     metric_date=target_date,
-                    org_id=current_org_id,
                     course_id=row.course_id,
                     teacher_user_id=context.courses_by_id[row.course_id].creator_id,
                     enrolled_learners=len(course_snapshots),
@@ -518,7 +495,6 @@ def refresh_teacher_analytics_rollups(
                 db_session.merge(
                     DailyCourseEngagement(
                         metric_date=target_date,
-                        org_id=current_org_id,
                         course_id=course_id,
                         chapter_id=next(
                             (
@@ -545,7 +521,6 @@ def refresh_teacher_analytics_rollups(
             db_session.merge(
                 DailyAssessmentMetrics(
                     metric_date=target_date,
-                    org_id=current_org_id,
                     course_id=row.course_id,
                     activity_id=row.activity_id,
                     assessment_type=row.assessment_type,

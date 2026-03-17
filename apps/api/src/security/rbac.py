@@ -250,8 +250,6 @@ class PermissionChecker:
             .join(UserRole, UserRole.role_id == Role.id)
             .where(UserRole.user_id == user_id)
         )
-        if org_id is not None:
-            query = query.where(or_(UserRole.org_id == org_id, Role.org_id.is_(None)))
         results = self.db.exec(query).all()
         return [
             {
@@ -261,7 +259,6 @@ class PermissionChecker:
                 "description": role.description,
                 "is_system": role.is_system,
                 "priority": role.priority,
-                "org_id": user_role.org_id,
                 "created_at": role.created_at,
                 "updated_at": role.updated_at,
             }
@@ -296,10 +293,6 @@ class PermissionChecker:
         if not role:
             raise HTTPException(404, detail=f"Role not found: ID {role_id}")
 
-        # Ensure org_id is set for org-scoped role validation
-        if org_id is None:
-            org_id = role.org_id
-
         # Escalation prevention: assigner cannot grant a role with higher
         # priority than their own highest role in this org.
         if assigned_by is not None:
@@ -317,7 +310,6 @@ class PermissionChecker:
             select(UserRole)
             .where(UserRole.user_id == user_id)
             .where(UserRole.role_id == role.id)
-            .where(UserRole.org_id == org_id)
         ).first()
         if existing:
             return  # idempotent
@@ -326,7 +318,6 @@ class PermissionChecker:
             UserRole(
                 user_id=user_id,
                 role_id=role.id,
-                org_id=org_id,
                 assigned_by=assigned_by,
             )
         )
@@ -354,15 +345,10 @@ class PermissionChecker:
         if not role:
             raise HTTPException(404, detail=f"Role not found: ID {role_id}")
 
-        # Ensure org_id is set
-        if org_id is None:
-            org_id = role.org_id
-
         user_role = self.db.exec(
             select(UserRole)
             .where(UserRole.user_id == user_id)
             .where(UserRole.role_id == role.id)
-            .where(UserRole.org_id == org_id)
         ).first()
         if not user_role:
             raise HTTPException(404, detail=f"Role not assigned: ID {role_id}")
@@ -384,9 +370,7 @@ class PermissionChecker:
 
         for slug, role_def in SYSTEM_ROLES.items():
             # Upsert role
-            role = self.db.exec(
-                select(Role).where(Role.slug == slug).where(Role.org_id.is_(None))
-            ).first()
+            role = self.db.exec(select(Role).where(Role.slug == slug)).first()
             if not role:
                 role = Role(
                     slug=slug,
@@ -394,7 +378,6 @@ class PermissionChecker:
                     description=role_def["description"],
                     is_system=True,
                     priority=role_def["priority"],
-                    org_id=None,
                 )
                 self.db.add(role)
                 self.db.flush()
@@ -456,7 +439,6 @@ class PermissionChecker:
             .join(RolePermission, RolePermission.permission_id == Permission.id)
             .join(Role, Role.id == RolePermission.role_id)
             .where(Role.slug == "guest")
-            .where(Role.org_id.is_(None))
             .distinct()
         )
         return set(self.db.exec(query).all())
@@ -473,8 +455,6 @@ class PermissionChecker:
             .where(UserRole.user_id == user_id)
             .distinct()
         )
-        if org_id is not None:
-            query = query.where(or_(UserRole.org_id == org_id, Role.org_id.is_(None)))
 
         return set(self.db.exec(query).all())
 

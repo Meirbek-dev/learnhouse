@@ -3,7 +3,6 @@ from typing import Literal
 from fastapi import HTTPException, Request
 from sqlmodel import Session, select
 
-from src.db.organizations import Organization
 from src.db.payments.payments import (
     PaymentProviderEnum,
     PaymentsConfig,
@@ -12,28 +11,22 @@ from src.db.payments.payments import (
 )
 from src.db.users import AnonymousUser, InternalUser, PublicUser
 from src.security.rbac import PermissionChecker
+from src.services.platform import get_platform_org_id
 
 
 async def init_payments_config(
     request: Request,
-    org_id: int,
     provider: Literal["stripe"],
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
 ) -> PaymentsConfig:
-    # Validate organization exists
-    org = db_session.exec(select(Organization).where(Organization.id == org_id)).first()
-    if not org:
-        raise HTTPException(status_code=404, detail="Organization not found")
-
+    platform_org_id = get_platform_org_id(db_session)
     # Verify permissions
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:create", org_id)
+    checker.require(current_user.id, "organization:create", platform_org_id)
 
     # Check for existing config
-    existing_config = db_session.exec(
-        select(PaymentsConfig).where(PaymentsConfig.org_id == org_id)
-    ).first()
+    existing_config = db_session.exec(select(PaymentsConfig)).first()
 
     if existing_config:
         raise HTTPException(
@@ -43,7 +36,6 @@ async def init_payments_config(
 
     # Initialize new config
     new_config = PaymentsConfig(
-        org_id=org_id,
         provider=PaymentProviderEnum.STRIPE,
         provider_config={
             "onboarding_completed": False,
@@ -61,18 +53,11 @@ async def init_payments_config(
 
 async def get_payments_config(
     request: Request,
-    org_id: int,
     current_user: PublicUser | AnonymousUser | InternalUser,
     db_session: Session,
 ) -> list[PaymentsConfigRead]:
-    # Check if organization exists
-    statement = select(Organization).where(Organization.id == org_id)
-    org = db_session.exec(statement).first()
-    if not org:
-        raise HTTPException(status_code=404, detail="Organization not found")
-
     # Get payments config
-    statement = select(PaymentsConfig).where(PaymentsConfig.org_id == org_id)
+    statement = select(PaymentsConfig)
     configs = db_session.exec(statement).all()
 
     return [PaymentsConfigRead.model_validate(config) for config in configs]
@@ -80,23 +65,17 @@ async def get_payments_config(
 
 async def update_payments_config(
     request: Request,
-    org_id: int,
     payments_config: PaymentsConfigUpdate,
     current_user: PublicUser | AnonymousUser | InternalUser,
     db_session: Session,
 ) -> PaymentsConfig:
-    # Check if organization exists
-    statement = select(Organization).where(Organization.id == org_id)
-    org = db_session.exec(statement).first()
-    if not org:
-        raise HTTPException(status_code=404, detail="Organization not found")
-
+    platform_org_id = get_platform_org_id(db_session)
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:update", org_id)
+    checker.require(current_user.id, "organization:update", platform_org_id)
 
     # Get existing payments config
-    statement = select(PaymentsConfig).where(PaymentsConfig.org_id == org_id)
+    statement = select(PaymentsConfig)
     config = db_session.exec(statement).first()
     if not config:
         raise HTTPException(status_code=404, detail="Payments config not found")
@@ -114,22 +93,16 @@ async def update_payments_config(
 
 async def delete_payments_config(
     request: Request,
-    org_id: int,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
 ) -> None:
-    # Check if organization exists
-    statement = select(Organization).where(Organization.id == org_id)
-    org = db_session.exec(statement).first()
-    if not org:
-        raise HTTPException(status_code=404, detail="Organization not found")
-
+    platform_org_id = get_platform_org_id(db_session)
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:delete", org_id)
+    checker.require(current_user.id, "organization:delete", platform_org_id)
 
     # Get existing payments config
-    statement = select(PaymentsConfig).where(PaymentsConfig.org_id == org_id)
+    statement = select(PaymentsConfig)
     config = db_session.exec(statement).first()
     if not config:
         raise HTTPException(status_code=404, detail="Payments config not found")

@@ -3,32 +3,26 @@ import asyncio
 from fastapi import HTTPException, Request
 from sqlmodel import Session, select
 
-from src.db.organizations import Organization
 from src.db.payments.payments_users import PaymentsUser
 from src.db.users import AnonymousUser, PublicUser
 from src.security.rbac import PermissionChecker
 from src.services.payments.payments_products import get_payments_product
+from src.services.platform import get_platform_org_id
 from src.services.users.users import read_user_by_id
 
 
 async def get_customers(
     request: Request,
-    org_id: int,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
 ):
-    # Check if organization exists
-    statement = select(Organization).where(Organization.id == org_id)
-    org = db_session.exec(statement).first()
-    if not org:
-        raise HTTPException(status_code=404, detail="Organization not found")
-
+    platform_org_id = get_platform_org_id(db_session)
     # RBAC check
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "organization:read", org_id)
+    checker.require(current_user.id, "organization:read", platform_org_id)
 
-    # Get all payment users for the organization
-    statement = select(PaymentsUser).where(PaymentsUser.org_id == org_id)
+    # Get all payment users for the platform
+    statement = select(PaymentsUser)
     payment_users = db_session.exec(statement).all()
 
     if not payment_users:
@@ -44,7 +38,7 @@ async def get_customers(
     all_products = await asyncio.gather(
         *[
             get_payments_product(
-                request, org.id, pu.payment_product_id, current_user, db_session
+                request, pu.payment_product_id, current_user, db_session
             )
             for pu in payment_users
         ]

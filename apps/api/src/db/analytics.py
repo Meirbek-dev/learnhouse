@@ -9,7 +9,6 @@ class AnalyticsEvent(SQLModel, table=True):
 
     id: int | None = Field(default=None, primary_key=True)
     event_type: str
-    org_id: int
     course_id: int | None = None
     chapter_id: int | None = None
     activity_id: int | None = None
@@ -33,7 +32,6 @@ class DailyTeacherMetrics(SQLModel, table=True):
     __tablename__ = "daily_teacher_metrics"
 
     metric_date: date = Field(primary_key=True)
-    org_id: int = Field(primary_key=True)
     teacher_user_id: int = Field(primary_key=True)
     managed_course_count: int = 0
     active_learners_7d: int = 0
@@ -60,7 +58,6 @@ class DailyCourseMetrics(SQLModel, table=True):
     __tablename__ = "daily_course_metrics"
 
     metric_date: date = Field(primary_key=True)
-    org_id: int = Field(primary_key=True)
     course_id: int = Field(primary_key=True)
     teacher_user_id: int | None = None
     enrolled_learners: int = 0
@@ -95,7 +92,6 @@ class DailyCourseEngagement(SQLModel, table=True):
     course_id: int = Field(primary_key=True)
     chapter_id: int | None = Field(default=None, primary_key=True)
     activity_id: int | None = Field(default=None, primary_key=True)
-    org_id: int
     step_order: int | None = None
     started_learners: int = 0
     completed_learners: int = 0
@@ -116,7 +112,6 @@ class DailyAssessmentMetrics(SQLModel, table=True):
     metric_date: date = Field(primary_key=True)
     assessment_type: str = Field(primary_key=True)
     assessment_id: int = Field(primary_key=True)
-    org_id: int
     course_id: int
     activity_id: int | None = None
     eligible_learners: int = 0
@@ -150,7 +145,6 @@ class DailyUserCourseProgress(SQLModel, table=True):
     metric_date: date = Field(primary_key=True)
     user_id: int = Field(primary_key=True)
     course_id: int = Field(primary_key=True)
-    org_id: int
     trailrun_id: int | None = None
     progress_pct: float = Field(
         default=0, sa_column=Column(Numeric(5, 2), nullable=False)
@@ -174,7 +168,6 @@ class LearnerRiskSnapshot(SQLModel, table=True):
     snapshot_date: date = Field(primary_key=True)
     user_id: int = Field(primary_key=True)
     course_id: int = Field(primary_key=True)
-    org_id: int
     teacher_user_id: int | None = None
     progress_pct: float = Field(
         default=0, sa_column=Column(Numeric(5, 2), nullable=False)

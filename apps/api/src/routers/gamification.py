@@ -52,7 +52,6 @@ def _platform_org_id(db: Session = Depends(get_db_session)) -> int:
 def _profile_to_read(p: GamificationProfile) -> ProfileRead:
     return ProfileRead(
         user_id=p.user_id,
-        org_id=p.org_id,
         total_xp=p.total_xp,
         level=p.level,
         xp_in_current_level=p.xp_in_current_level,
@@ -78,7 +77,6 @@ def _transaction_to_read(tx: XPTransaction) -> TransactionRead:
     return TransactionRead(
         id=tx.id,
         user_id=tx.user_id,
-        org_id=tx.org_id,
         amount=tx.amount,
         source=tx.source,
         source_id=tx.source_id,
@@ -102,7 +100,6 @@ async def get_unified_dashboard(
             TransactionRead(
                 id=tx.id,
                 user_id=tx.user_id,
-                org_id=tx.org_id,
                 amount=tx.amount,
                 source=tx.source,
                 source_id=tx.source_id,

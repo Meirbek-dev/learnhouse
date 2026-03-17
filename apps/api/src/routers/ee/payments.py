@@ -60,12 +60,10 @@ async def api_create_payments_config(
 
     **Required Permission**: `organization:manage:org` (admin only)
     """
-    org_id = get_platform_org_id(db_session)
-    checker.require(current_user.id, "organization:manage", org_id)
+    platform_org_id = get_platform_org_id(db_session)
+    checker.require(current_user.id, "organization:manage", platform_org_id)
 
-    return await init_payments_config(
-        request, org_id, provider, current_user, db_session
-    )
+    return await init_payments_config(request, provider, current_user, db_session)
 
 
 @router.get("/config")
@@ -74,8 +72,7 @@ async def api_get_payments_config(
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session: Annotated[Session, Depends(get_db_session)],
 ) -> list[PaymentsConfigRead]:
-    org_id = get_platform_org_id(db_session)
-    return await get_payments_config(request, org_id, current_user, db_session)
+    return await get_payments_config(request, current_user, db_session)
 
 
 @router.put("/config")
@@ -92,17 +89,15 @@ async def api_update_payments_config(
 
     **Required Permission**: `organization:manage:org` (admin only)
     """
-    org_id = get_platform_org_id(db_session)
-    checker.require(current_user.id, "organization:manage", org_id)
+    platform_org_id = get_platform_org_id(db_session)
+    checker.require(current_user.id, "organization:manage", platform_org_id)
 
     if id is not None:
-        configs = await get_payments_config(request, org_id, current_user, db_session)
+        configs = await get_payments_config(request, current_user, db_session)
         if not any(config.id == id for config in configs):
             raise ValueError("Payments config not found")
 
-    return await update_payments_config(
-        request, org_id, payments_config, current_user, db_session
-    )
+    return await update_payments_config(request, payments_config, current_user, db_session)
 
 
 @router.delete("/config")
@@ -118,15 +113,15 @@ async def api_delete_payments_config(
 
     **Required Permission**: `organization:manage:org` (admin only)
     """
-    org_id = get_platform_org_id(db_session)
-    checker.require(current_user.id, "organization:manage", org_id)
+    platform_org_id = get_platform_org_id(db_session)
+    checker.require(current_user.id, "organization:manage", platform_org_id)
 
     if id is not None:
-        configs = await get_payments_config(request, org_id, current_user, db_session)
+        configs = await get_payments_config(request, current_user, db_session)
         if not any(config.id == id for config in configs):
             raise ValueError("Payments config not found")
 
-    await delete_payments_config(request, org_id, current_user, db_session)
+    await delete_payments_config(request, current_user, db_session)
     return {"message": "Payments config deleted successfully"}
 
 
@@ -143,12 +138,10 @@ async def api_create_payments_product(
 
     **Required Permission**: `organization:manage:org`
     """
-    org_id = get_platform_org_id(db_session)
-    checker.require(current_user.id, "organization:manage", org_id)
+    platform_org_id = get_platform_org_id(db_session)
+    checker.require(current_user.id, "organization:manage", platform_org_id)
 
-    return await create_payments_product(
-        request, org_id, payments_product, current_user, db_session
-    )
+    return await create_payments_product(request, payments_product, current_user, db_session)
 
 
 @router.get("/products")
@@ -157,8 +150,7 @@ async def api_get_payments_products(
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session: Annotated[Session, Depends(get_db_session)],
 ) -> list[PaymentsProductRead]:
-    org_id = get_platform_org_id(db_session)
-    return await list_payments_products(request, org_id, current_user, db_session)
+    return await list_payments_products(request, current_user, db_session)
 
 
 @router.get("/products/{product_id}")
@@ -168,10 +160,7 @@ async def api_get_payments_product(
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session: Annotated[Session, Depends(get_db_session)],
 ) -> PaymentsProductRead:
-    org_id = get_platform_org_id(db_session)
-    return await get_payments_product(
-        request, org_id, product_id, current_user, db_session
-    )
+    return await get_payments_product(request, product_id, current_user, db_session)
 
 
 @router.put("/products/{product_id}")
@@ -188,11 +177,11 @@ async def api_update_payments_product(
 
     **Required Permission**: `organization:manage:org`
     """
-    org_id = get_platform_org_id(db_session)
-    checker.require(current_user.id, "organization:manage", org_id)
+    platform_org_id = get_platform_org_id(db_session)
+    checker.require(current_user.id, "organization:manage", platform_org_id)
 
     return await update_payments_product(
-        request, org_id, product_id, payments_product, current_user, db_session
+        request, product_id, payments_product, current_user, db_session
     )
 
 
@@ -209,10 +198,10 @@ async def api_delete_payments_product(
 
     **Required Permission**: `organization:manage:org`
     """
-    org_id = get_platform_org_id(db_session)
-    checker.require(current_user.id, "organization:manage", org_id)
+    platform_org_id = get_platform_org_id(db_session)
+    checker.require(current_user.id, "organization:manage", platform_org_id)
 
-    await delete_payments_product(request, org_id, product_id, current_user, db_session)
+    await delete_payments_product(request, product_id, current_user, db_session)
     return {"message": "Payments product deleted successfully"}
 
 
@@ -224,9 +213,8 @@ async def api_link_course_to_product(
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
-    org_id = get_platform_org_id(db_session)
     return await link_course_to_product(
-        request, org_id, course_id, product_id, current_user, db_session
+        request, course_id, product_id, current_user, db_session
     )
 
 
@@ -238,9 +226,8 @@ async def api_unlink_course_from_product(
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
-    org_id = get_platform_org_id(db_session)
     return await unlink_course_from_product(
-        request, org_id, course_id, current_user, db_session
+        request, course_id, current_user, db_session
     )
 
 
@@ -251,9 +238,8 @@ async def api_get_courses_by_product(
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
-    org_id = get_platform_org_id(db_session)
     return await get_courses_by_product(
-        request, org_id, product_id, current_user, db_session
+        request, product_id, current_user, db_session
     )
 
 
@@ -264,9 +250,8 @@ async def api_get_products_by_course(
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
-    org_id = get_platform_org_id(db_session)
     return await get_products_by_course(
-        request, org_id, course_id, current_user, db_session
+        request, course_id, current_user, db_session
     )
 
 
@@ -300,9 +285,8 @@ async def api_create_checkout_session(
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
-    org_id = get_platform_org_id(db_session)
     return await create_checkout_session(
-        request, org_id, product_id, redirect_uri, current_user, db_session
+        request, product_id, redirect_uri, current_user, db_session
     )
 
 
@@ -332,8 +316,7 @@ async def api_get_customers(
     """
     Get list of customers and their subscriptions for an organization
     """
-    org_id = get_platform_org_id(db_session)
-    return await get_customers(request, org_id, current_user, db_session)
+    return await get_customers(request, current_user, db_session)
 
 
 @router.get("/courses/owned")
@@ -352,9 +335,8 @@ async def api_update_stripe_account_id(
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
-    org_id = get_platform_org_id(db_session)
     return await update_stripe_account_id(
-        request, org_id, stripe_account_id, current_user, db_session
+        request, stripe_account_id, current_user, db_session
     )
 
 
@@ -368,9 +350,8 @@ async def api_generate_stripe_connect_link(
     """
     Generate a Stripe OAuth link for connecting a Stripe account
     """
-    org_id = get_platform_org_id(db_session)
     return await generate_stripe_connect_link(
-        request, org_id, redirect_uri, current_user, db_session
+        request, redirect_uri, current_user, db_session
     )
 
 
@@ -381,7 +362,6 @@ async def stripe_oauth_callback(
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
-    org_id = get_platform_org_id(db_session)
     return await handle_stripe_oauth_callback(
-        request, org_id, code, current_user, db_session
+        request, code, current_user, db_session
     )

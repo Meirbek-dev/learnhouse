@@ -92,7 +92,6 @@ class UserRoleSummary(BaseModel):
     name: str
     slug: str
     description: str | None = None
-    org_id: int | None = None
     is_system: bool
     priority: int
 
@@ -110,7 +109,6 @@ class UserSummary(BaseModel):
 class UserRoleAssignmentResponse(BaseModel):
     user_id: int
     role_id: int
-    org_id: int | None
     assigned_at: str
     assigned_by: int | None = None
     user: UserSummary
@@ -168,12 +166,14 @@ async def get_my_permissions(
     current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user)],
     checker: PermissionCheckerDep,
 ):
-    org_id = get_platform_org_id(checker.db)
+    platform_org_id = get_platform_org_id(checker.db)
     if isinstance(current_user, AnonymousUser):
         return UserPermissionsResponse(roles=[], permissions=[])
 
-    roles = checker.get_user_roles(current_user.id, org_id)
-    permissions = sorted(checker.get_expanded_permissions(current_user.id, org_id))
+    roles = checker.get_user_roles(current_user.id, platform_org_id)
+    permissions = sorted(
+        checker.get_expanded_permissions(current_user.id, platform_org_id)
+    )
 
     return UserPermissionsResponse(
         roles=roles,
@@ -193,14 +193,13 @@ async def list_org_user_roles(
     checker: PermissionCheckerDep = None,
 ):
     """List user↔role assignments for a given organization."""
-    org_id = get_platform_org_id(db_session)
-    checker.require(current_user.id, "role:read", org_id)
+    platform_org_id = get_platform_org_id(db_session)
+    checker.require(current_user.id, "role:read", platform_org_id)
 
     rows = db_session.exec(
         select(UserRole, UserModel, Role)
         .join(UserModel, UserModel.id == UserRole.user_id)
         .join(Role, Role.id == UserRole.role_id)
-        .where(UserRole.org_id == org_id)
         .order_by(UserRole.assigned_at.desc())
     ).all()
 
@@ -208,7 +207,6 @@ async def list_org_user_roles(
         UserRoleAssignmentResponse(
             user_id=user_role.user_id,
             role_id=user_role.role_id,
-            org_id=user_role.org_id,
             assigned_at=user_role.assigned_at.isoformat(),
             assigned_by=user_role.assigned_by,
             user=UserSummary(
@@ -225,7 +223,6 @@ async def list_org_user_roles(
                 name=role.name,
                 slug=role.slug,
                 description=role.description,
-                org_id=role.org_id,
                 is_system=role.is_system,
                 priority=role.priority,
             ),
@@ -246,12 +243,12 @@ async def assign_role(
 
     **Required Permission**: `role:create`
     """
-    checker.require(current_user.id, "role:create", request.org_id)
+    platform_org_id = get_platform_org_id(db_session)
+    checker.require(current_user.id, "role:create", platform_org_id)
 
     checker.assign_role(
         user_id=request.user_id,
         role_id=request.role_id,
-        org_id=request.org_id,
         assigned_by=current_user.id,
     )
     db_session.commit()
@@ -261,7 +258,7 @@ async def assign_role(
             "actor_id": current_user.id,
             "target_user_id": request.user_id,
             "role_id": request.role_id,
-            "org_id": request.org_id,
+            "org_id": platform_org_id,
         },
     )
     return {"message": "Role assigned"}
@@ -279,12 +276,12 @@ async def revoke_role(
 
     **Required Permission**: `role:delete`
     """
-    checker.require(current_user.id, "role:delete", request.org_id)
+    platform_org_id = get_platform_org_id(db_session)
+    checker.require(current_user.id, "role:delete", platform_org_id)
 
     checker.revoke_role(
         user_id=request.user_id,
         role_id=request.role_id,
-        org_id=request.org_id,
     )
     db_session.commit()
     audit_log.info(
@@ -293,7 +290,7 @@ async def revoke_role(
             "actor_id": current_user.id,
             "target_user_id": request.user_id,
             "role_id": request.role_id,
-            "org_id": request.org_id,
+            "org_id": platform_org_id,
         },
     )
     return {"message": "Role revoked"}

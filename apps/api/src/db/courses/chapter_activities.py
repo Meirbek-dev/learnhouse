@@ -16,8 +16,5 @@ class ChapterActivity(SQLModelStrictBaseModel, table=True):
     course_id: int = Field(
         sa_column=Column(BigInteger, ForeignKey("course.id", ondelete="CASCADE"))
     )
-    org_id: int = Field(
-        sa_column=Column(Integer, ForeignKey("organization.id", ondelete="CASCADE"))
-    )
     creation_date: str
     update_date: str

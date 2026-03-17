@@ -25,7 +25,6 @@ class AssignmentBase(SQLModelStrictBaseModel):
     published: bool | None = False
     grading_type: GradingTypeEnum
 
-    org_id: int
     course_id: int
     chapter_id: int
     activity_id: int
@@ -63,7 +62,6 @@ class AssignmentUpdate(SQLModelStrictBaseModel):
     due_date: str | None = None
     published: bool | None = None
     grading_type: GradingTypeEnum | None = None
-    org_id: int | None = None
     course_id: int | None = None
     chapter_id: int | None = None
     activity_id: int | None = None
@@ -85,9 +83,6 @@ class Assignment(AssignmentBase, table=True):
     update_date: str | None = None
     assignment_uuid: str
 
-    org_id: int = Field(
-        sa_column=Column("org_id", ForeignKey("organization.id", ondelete="CASCADE"))
-    )
     course_id: int = Field(
         sa_column=Column("course_id", ForeignKey("course.id", ondelete="CASCADE"))
     )
@@ -179,9 +174,6 @@ class AssignmentTask(AssignmentTaskBase, table=True):
         sa_column=Column(
             "assignment_id", ForeignKey("assignment.id", ondelete="CASCADE")
         )
-    )
-    org_id: int = Field(
-        sa_column=Column("org_id", ForeignKey("organization.id", ondelete="CASCADE"))
     )
     course_id: int = Field(
         sa_column=Column("course_id", ForeignKey("course.id", ondelete="CASCADE"))
@@ -393,7 +385,6 @@ class AssignmentCreateWithActivity(SQLModelStrictBaseModel):
     due_date: str
     published: bool = False
     grading_type: GradingTypeEnum
-    org_id: int
     course_id: int
     chapter_id: int
 

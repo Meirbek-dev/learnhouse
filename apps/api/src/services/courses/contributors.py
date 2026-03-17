@@ -11,17 +11,19 @@ from src.db.resource_authors import (
 )
 from src.db.users import AnonymousUser, PublicUser, User, UserRead
 from src.security.rbac import PermissionChecker
+from src.services.platform import get_platform_org_id
 
 
 def _require_contributor_management(
     checker: PermissionChecker,
     current_user_id: int,
     course: Course,
+    db_session: Session,
 ):
     checker.require(
         current_user_id,
         "course:update",
-        course.org_id,
+        get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 
@@ -130,7 +132,7 @@ async def update_course_contributor(
     # SECURITY: Require the same contributor-management capability exposed by
     # the workspace rights endpoint.
     checker = PermissionChecker(db_session)
-    _require_contributor_management(checker, current_user.id, course)
+    _require_contributor_management(checker, current_user.id, course, db_session)
 
     # Check if the contributor exists for this course
     existing_authorship = db_session.exec(
@@ -192,7 +194,7 @@ async def get_course_contributors(
 
     # SECURITY: Require read access to the course
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "course:read", course.org_id)
+    checker.require(current_user.id, "course:read", get_platform_org_id(db_session))
 
     # Get all contributors for this course with user information
     statement = (

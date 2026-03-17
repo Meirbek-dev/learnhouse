@@ -9,5 +9,4 @@ class Block(PydanticStrictBaseModel):
     block_id: str
     activity_id: int
     course_id: int
-    org_id: int
     block_type: BlockType

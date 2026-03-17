@@ -6,11 +6,11 @@ from src.db.payments.payments_courses import PaymentsCourse
 from src.db.payments.payments_products import PaymentsProduct
 from src.db.users import AnonymousUser, PublicUser
 from src.security.rbac import PermissionChecker
+from src.services.platform import get_platform_org_id
 
 
 async def link_course_to_product(
     request: Request,
-    org_id: int,
     course_id: int,
     product_id: int,
     current_user: PublicUser | AnonymousUser,
@@ -26,13 +26,14 @@ async def link_course_to_product(
     # RBAC check
     checker = PermissionChecker(db_session)
     checker.require(
-        current_user.id, "course:update", org_id, resource_owner_id=course.creator_id
+        current_user.id,
+        "course:update",
+        get_platform_org_id(db_session),
+        resource_owner_id=course.creator_id,
     )
 
     # Check if product exists
-    statement = select(PaymentsProduct).where(
-        PaymentsProduct.id == product_id, PaymentsProduct.org_id == org_id
-    )
+    statement = select(PaymentsProduct).where(PaymentsProduct.id == product_id)
     product = db_session.exec(statement).first()
 
     if not product:
@@ -51,7 +52,6 @@ async def link_course_to_product(
     payment_course = PaymentsCourse(
         course_id=course.id,
         payment_product_id=product_id,
-        org_id=org_id,
     )
 
     db_session.add(payment_course)
@@ -62,7 +62,6 @@ async def link_course_to_product(
 
 async def unlink_course_from_product(
     request: Request,
-    org_id: int,
     course_id: int,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
@@ -77,13 +76,14 @@ async def unlink_course_from_product(
     # RBAC check
     checker = PermissionChecker(db_session)
     checker.require(
-        current_user.id, "course:update", org_id, resource_owner_id=course.creator_id
+        current_user.id,
+        "course:update",
+        get_platform_org_id(db_session),
+        resource_owner_id=course.creator_id,
     )
 
     # Find and delete the payment course link
-    statement = select(PaymentsCourse).where(
-        PaymentsCourse.course_id == course.id, PaymentsCourse.org_id == org_id
-    )
+    statement = select(PaymentsCourse).where(PaymentsCourse.course_id == course.id)
     payment_course = db_session.exec(statement).first()
 
     if not payment_course:
@@ -99,15 +99,12 @@ async def unlink_course_from_product(
 
 async def get_courses_by_product(
     request: Request,
-    org_id: int,
     product_id: int,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
 ):
     # Check if product exists
-    statement = select(PaymentsProduct).where(
-        PaymentsProduct.id == product_id, PaymentsProduct.org_id == org_id
-    )
+    statement = select(PaymentsProduct).where(PaymentsProduct.id == product_id)
     product = db_session.exec(statement).first()
 
     if not product:
@@ -118,9 +115,6 @@ async def get_courses_by_product(
         select(Course)
         .select_from(Course)
         .join(PaymentsCourse, Course.id == PaymentsCourse.course_id)
-        .where(
-            PaymentsCourse.payment_product_id == product_id,
-            PaymentsCourse.org_id == org_id,
-        )
+        .where(PaymentsCourse.payment_product_id == product_id)
     )
     return db_session.exec(statement).all()

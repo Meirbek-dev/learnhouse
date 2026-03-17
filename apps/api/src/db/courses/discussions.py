@@ -37,9 +37,6 @@ class CourseDiscussion(SQLModelStrictBaseModel, table=True):
             Integer, ForeignKey("coursediscussion.id", ondelete="CASCADE")
         ),
     )
-    org_id: int = Field(
-        sa_column=Column(Integer, ForeignKey("organization.id", ondelete="CASCADE"))
-    )
     likes_count: int = Field(default=0)
     dislikes_count: int = Field(default=0)
     replies_count: int = Field(default=0)
@@ -65,7 +62,6 @@ class CourseDiscussionCreate(SQLModelStrictBaseModel):
     content: str
     type: DiscussionType = DiscussionType.POST
     parent_discussion_id: int | None = None
-    org_id: int
 
     @field_validator("type", mode="before")
     @classmethod
@@ -94,15 +90,6 @@ class CourseDiscussionCreate(SQLModelStrictBaseModel):
 
         return v
 
-    @field_validator("org_id")
-    @classmethod
-    def validate_org_id(cls, v):
-        if v is None or v <= 0:
-            msg = "Valid organization ID is required"
-            raise ValueError(msg)
-        return v
-
-
 class CourseDiscussionRead(SQLModelStrictBaseModel):
     id: int
     discussion_uuid: str
@@ -112,7 +99,6 @@ class CourseDiscussionRead(SQLModelStrictBaseModel):
     course_id: int
     user_id: int
     parent_discussion_id: int | None
-    org_id: int
     likes_count: int
     dislikes_count: int
     replies_count: int

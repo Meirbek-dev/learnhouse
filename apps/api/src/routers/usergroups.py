@@ -89,7 +89,6 @@ async def api_get_usergroups(
         request,
         db_session,
         current_user,
-        get_platform_org_id(db_session),
     )
 
 

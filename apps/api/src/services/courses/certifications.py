@@ -24,6 +24,7 @@ from src.security.rbac import PermissionChecker
 from src.services.courses.courses import _ensure_course_is_current
 from src.services.gamification import StreakType, XPSource
 from src.services.gamification import service as gamification_service
+from src.services.platform import get_platform_org_id
 
 logger = logging.getLogger(__name__)
 
@@ -55,7 +56,7 @@ async def create_certification(
     checker.require(
         current_user.id,
         "certificate:create",
-        org_id=course.org_id,
+        org_id=get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 
@@ -117,7 +118,7 @@ async def get_certification(
     checker.require(
         current_user.id,
         "certificate:read",
-        org_id=course.org_id,
+        org_id=get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 
@@ -147,7 +148,7 @@ async def get_certifications_by_course(
     checker.require(
         current_user.id,
         "certificate:read",
-        org_id=course.org_id,
+        org_id=get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 
@@ -196,7 +197,7 @@ async def update_certification(
     checker.require(
         current_user.id,
         "certificate:update",
-        org_id=course.org_id,
+        org_id=get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 
@@ -258,7 +259,7 @@ async def delete_certification(
     checker.require(
         current_user.id,
         "certificate:delete",
-        org_id=course.org_id,
+        org_id=get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 
@@ -336,7 +337,7 @@ async def create_certificate_user(
         checker.require(
             current_user.id,
             "certificate:create",
-            org_id=course.org_id,
+            org_id=get_platform_org_id(db_session),
             resource_owner_id=course.creator_id,
         )
 
@@ -478,7 +479,7 @@ async def get_user_certificates_for_course(
         checker.require(
             current_user.id,
             "certificate:read",
-            org_id=course.org_id,
+            org_id=get_platform_org_id(db_session),
             resource_owner_id=current_user.id,
         )
     except HTTPException as exc:
@@ -630,7 +631,7 @@ async def check_course_completion_and_create_certificate(
             gamification_service.on_course_completed(
                 db=db_session,
                 user_id=user_id,
-                org_id=course.org_id,
+                org_id=get_platform_org_id(db_session),
                 course_id=course_id,
                 source_id=str(course_id),
                 idempotency_key=f"course_{course_id}_{user_id}",

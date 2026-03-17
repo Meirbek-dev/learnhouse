@@ -7,8 +7,8 @@ from ulid import ULID
 from src.db.courses.activities import Activity
 from src.db.courses.blocks import Block, BlockRead, BlockTypeEnum
 from src.db.courses.courses import Course
-from src.db.organizations import Organization
 from src.services.blocks.utils.upload_files import upload_file_and_return_file_object
+from src.services.platform import get_platform_organization
 from src.services.users.users import PublicUser
 
 
@@ -25,9 +25,7 @@ async def create_video_block(
 
     block_type = "videoBlock"
 
-    # get org_uuid
-    statement = select(Organization).where(Organization.id == activity.org_id)
-    org = db_session.exec(statement).first()
+    org = get_platform_organization(db_session)
 
     if not org:
         raise HTTPException(
@@ -62,7 +60,6 @@ async def create_video_block(
         activity_id=activity.id or 0,
         block_type=BlockTypeEnum.BLOCK_VIDEO,
         content=block_data.model_dump(),
-        org_id=org.id or 0,
         course_id=course.id or 0,
         block_uuid=block_uuid,
         creation_date=str(datetime.now()),

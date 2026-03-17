@@ -79,7 +79,6 @@ def _query_previous_at_risk_count(
     """Return the at-risk learner count from the most recent LearnerRiskSnapshot before *before_date*."""
     latest_date_result = db_session.exec(
         select(func.max(LearnerRiskSnapshot.snapshot_date)).where(
-            LearnerRiskSnapshot.org_id == org_id,
             LearnerRiskSnapshot.snapshot_date < before_date,
         )
     ).one_or_none()
@@ -87,7 +86,6 @@ def _query_previous_at_risk_count(
     if latest_date is None:
         return None
     filter_clause = [
-        LearnerRiskSnapshot.org_id == org_id,
         LearnerRiskSnapshot.snapshot_date == latest_date,
         LearnerRiskSnapshot.risk_level.in_(["medium", "high"]),
     ]
@@ -106,7 +104,6 @@ def _query_previous_negative_engagement(
     stmt = (
         select(DailyTeacherMetrics)
         .where(
-            DailyTeacherMetrics.org_id == org_id,
             DailyTeacherMetrics.teacher_user_id == teacher_user_id,
             DailyTeacherMetrics.metric_date < before_date,
         )
@@ -123,7 +120,6 @@ def _query_previous_teacher_metrics(
     stmt = (
         select(DailyTeacherMetrics)
         .where(
-            DailyTeacherMetrics.org_id == org_id,
             DailyTeacherMetrics.teacher_user_id == teacher_user_id,
             DailyTeacherMetrics.metric_date < before_date,
         )

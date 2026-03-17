@@ -65,7 +65,6 @@ async def api_get_current_user_session(
         request,
         db_session,
         current_user,
-        org_id=get_platform_org_id(db_session),
     )
 
 
@@ -250,7 +249,6 @@ async def api_change_password_with_reset_code(
         db_session,
         current_user,
         new_password,
-        get_platform_org_id(db_session),
         email,
         reset_code,
     )
@@ -271,7 +269,6 @@ async def api_send_password_reset_email(
         request,
         db_session,
         current_user,
-        get_platform_org_id(db_session),
         email,
     )
 

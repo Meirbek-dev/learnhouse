@@ -145,9 +145,6 @@ class CourseBase(SQLModelStrictBaseModel):
 
 class Course(CourseBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
-    org_id: int = Field(
-        sa_column=Column(Integer, ForeignKey("organization.id", ondelete="CASCADE"))
-    )
     creator_id: int | None = Field(
         default=None,
         sa_column=Column(BigInteger, ForeignKey("user.id", ondelete="SET NULL")),
@@ -257,7 +254,6 @@ class CourseAccessUpdate(PydanticStrictBaseModel):
 
 class CourseRead(PydanticStrictBaseModel):
     id: int
-    org_id: int = PydanticField(default=None)
     authors: list[AuthorWithRole] = PydanticField(default_factory=list)
     course_uuid: str
     creation_date: datetime
@@ -298,7 +294,6 @@ class CourseRead(PydanticStrictBaseModel):
 
 class FullCourseRead(PydanticStrictBaseModel):
     id: int
-    org_id: int
     course_uuid: str | None = None
     creation_date: str | None = None
     update_date: str | None = None
@@ -341,7 +336,6 @@ class FullCourseReadWithTrail(PydanticStrictBaseModel):
     course_uuid: str | None = None
     creation_date: str | None = None
     update_date: str | None = None
-    org_id: int = PydanticField(default=None)
     authors: list[AuthorWithRole]
     chapters: list[ChapterRead]
     trail: TrailRead | None = None

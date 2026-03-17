@@ -59,7 +59,6 @@ async def api_get_platform_org_users(
     """
     return await get_organization_users(
         request,
-        get_platform_org_id(db_session),
         db_session,
         current_user,
         checker,
@@ -86,7 +85,6 @@ async def api_update_platform_user_role(
     """
     return await update_user_role(
         request,
-        get_platform_org_id(db_session),
         user_id,
         role_id,
         db_session,
@@ -108,7 +106,6 @@ async def api_remove_user_from_platform_org(
     """
     return await remove_user_from_org(
         request,
-        get_platform_org_id(db_session),
         user_id,
         db_session,
         current_user,
@@ -129,12 +126,11 @@ async def api_update_org_logo(
 
     **Required Permission**: `organization:update`
     """
-    org_id = get_platform_org_id(db_session)
-    checker.require(current_user.id, "organization:update", org_id)
+    platform_org_id = get_platform_org_id(db_session)
+    checker.require(current_user.id, "organization:update", platform_org_id)
     return await update_org_logo(
         request=request,
         logo_file=logo_file,
-        org_id=org_id,
         current_user=current_user,
         db_session=db_session,
     )
@@ -153,12 +149,11 @@ async def api_update_org_thumbnail(
 
     **Required Permission**: `organization:update`
     """
-    org_id = get_platform_org_id(db_session)
-    checker.require(current_user.id, "organization:update", org_id)
+    platform_org_id = get_platform_org_id(db_session)
+    checker.require(current_user.id, "organization:update", platform_org_id)
     return await update_org_thumbnail(
         request=request,
         thumbnail_file=thumbnail_file,
-        org_id=org_id,
         current_user=current_user,
         db_session=db_session,
     )
@@ -177,12 +172,11 @@ async def api_update_org_preview(
 
     **Required Permission**: `organization:update`
     """
-    org_id = get_platform_org_id(db_session)
-    checker.require(current_user.id, "organization:update", org_id)
+    platform_org_id = get_platform_org_id(db_session)
+    checker.require(current_user.id, "organization:update", platform_org_id)
     return await update_org_preview(
         request=request,
         preview_file=preview_file,
-        org_id=org_id,
         current_user=current_user,
         db_session=db_session,
     )
@@ -201,9 +195,9 @@ async def api_update_org(
 
     **Required Permission**: `organization:update`
     """
-    org_id = get_platform_org_id(db_session)
-    checker.require(current_user.id, "organization:update", org_id)
-    return await update_org(request, org_object, org_id, current_user, db_session)
+    platform_org_id = get_platform_org_id(db_session)
+    checker.require(current_user.id, "organization:update", platform_org_id)
+    return await update_org(request, org_object, current_user, db_session)
 
 
 @router.put("/landing")
@@ -219,11 +213,9 @@ async def api_update_org_landing(
 
     **Required Permission**: `organization:update`
     """
-    org_id = get_platform_org_id(db_session)
-    checker.require(current_user.id, "organization:update", org_id)
-    return await update_org_landing(
-        request, landing_object, org_id, current_user, db_session
-    )
+    platform_org_id = get_platform_org_id(db_session)
+    checker.require(current_user.id, "organization:update", platform_org_id)
+    return await update_org_landing(request, landing_object, current_user, db_session)
 
 
 @router.post("/landing/content")
@@ -239,12 +231,11 @@ async def api_upload_org_landing_content(
 
     **Required Permission**: `organization:update`
     """
-    org_id = get_platform_org_id(db_session)
-    checker.require(current_user.id, "organization:update", org_id)
+    platform_org_id = get_platform_org_id(db_session)
+    checker.require(current_user.id, "organization:update", platform_org_id)
     return await upload_org_landing_content_service(
         request=request,
         content_file=content_file,
-        org_id=org_id,
         current_user=current_user,
         db_session=db_session,
     )

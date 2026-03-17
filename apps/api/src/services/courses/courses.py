@@ -30,7 +30,7 @@ from src.db.usergroup_resources import UserGroupResource
 from src.db.usergroup_user import UserGroupUser
 from src.db.users import AnonymousUser, PublicUser, User, UserRead
 from src.security.rbac import PermissionChecker
-from src.services.platform import get_platform_org_id
+from src.services.platform import get_platform_org_id, get_platform_organization
 from src.services.courses.thumbnails import upload_thumbnail
 
 
@@ -284,7 +284,7 @@ async def get_course(
         checker.require(
             current_user.id,
             "course:read",
-            course.org_id,
+            get_platform_org_id(db_session),
             resource_owner_id=course.creator_id,
         )
 
@@ -332,7 +332,7 @@ async def get_course_by_id(
         checker.require(
             current_user.id,
             "course:read",
-            course.org_id,
+            get_platform_org_id(db_session),
             resource_owner_id=course.creator_id,
         )
 
@@ -401,21 +401,22 @@ async def get_course_meta(
         checker.require(
             current_user.id,
             "course:read",
-            course.org_id,
+            get_platform_org_id(db_session),
             resource_owner_id=course.creator_id,
         )
 
     can_view_unpublished = False
     if with_unpublished_activities:
+        platform_org_id = get_platform_org_id(db_session)
         can_view_unpublished = checker.check(
             current_user.id,
             "course:update",
-            course.org_id,
+            platform_org_id,
             resource_owner_id=course.creator_id,
         ) or checker.check(
             current_user.id,
             "course:update_content",
-            course.org_id,
+            platform_org_id,
             resource_owner_id=course.creator_id,
         )
 
@@ -453,9 +454,8 @@ async def count_courses(
     db_session: Session,
 ) -> int:
     """Count total courses for the platform organization with proper access filtering."""
-    platform_org_id = get_platform_org_id(db_session)
     # Base count query
-    query = select(func.count(Course.id.distinct())).where(Course.org_id == platform_org_id)
+    query = select(func.count(Course.id.distinct()))
 
     if isinstance(current_user, AnonymousUser):
         # For anonymous users, only count public courses
@@ -528,11 +528,9 @@ async def get_courses(
     from sqlalchemy.orm import aliased
 
     offset = (page - 1) * limit
-    platform_org_id = get_platform_org_id(db_session)
-
     # Step 1: Build a subquery that selects the paginated course IDs
     # with proper access filtering
-    id_query = select(Course.id).where(Course.org_id == platform_org_id)
+    id_query = select(Course.id)
 
     if isinstance(current_user, AnonymousUser):
         id_query = id_query.where(Course.public)
@@ -606,7 +604,7 @@ async def get_courses(
     if not isinstance(current_user, AnonymousUser) and current_user.id and courses_map:
         first_course = next(iter(courses_map.values()))[0]
         checker = PermissionChecker(db_session)
-        granted = checker._get_or_load(current_user.id, first_course.org_id)
+        granted = checker._get_or_load(current_user.id, get_platform_org_id(db_session))
         has_broad_update = PermissionChecker._has_perm(
             granted, "course", "update", "all"
         ) or PermissionChecker._has_perm(granted, "course", "update", "org")
@@ -631,7 +629,6 @@ async def get_courses(
         course_read = CourseReadWithPermissions.model_validate(
             {
                 "id": course.id or 0,
-                "org_id": course.org_id,
                 "name": course.name,
                 "description": course.description or "",
                 "about": course.about or "",
@@ -679,10 +676,9 @@ async def search_courses(
 ) -> list[CourseRead]:
     offset = (page - 1) * limit
     search_filter = _course_search_filter(search_query)
-    platform_org_id = get_platform_org_id(db_session)
 
     # Base query
-    query = select(Course).where(Course.org_id == platform_org_id)
+    query = select(Course)
     if search_filter is not None:
         query = query.where(search_filter)
 
@@ -759,7 +755,6 @@ async def search_courses(
     for course in courses:
         course_dict = {
             "id": course.id or 0,  # Ensure id is never None
-            "org_id": course.org_id,
             "name": course.name,
             "description": course.description or "",
             "about": course.about or "",
@@ -910,15 +905,14 @@ async def update_course_thumbnail(
     checker.require(
         current_user.id,
         "course:update",
-        course.org_id,
+        get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 
     _ensure_course_is_current(course, last_known_update_date)
 
-    # Get org uuid
-    org_statement = select(Organization).where(Organization.id == course.org_id)
-    org = db_session.exec(org_statement).first()
+    # Get platform org uuid
+    org = get_platform_organization(db_session)
 
     if not org:
         raise HTTPException(
@@ -1023,7 +1017,7 @@ async def update_course(
     checker.require(
         current_user.id,
         "course:update",
-        course.org_id,
+        get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 
@@ -1058,7 +1052,7 @@ async def update_course(
 
         # Check if user has admin or maintainer role via permission service
         admin_or_maintainer = checker.check(
-            current_user.id, "course:manage", course.org_id
+            current_user.id, "course:manage", get_platform_org_id(db_session)
         )
 
         # SECURITY: Only course owners (CREATOR, MAINTAINER) or admins can change access settings
@@ -1103,7 +1097,7 @@ async def update_course_metadata(
     checker.require(
         current_user.id,
         "course:update",
-        course.org_id,
+        get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 
@@ -1149,7 +1143,7 @@ async def update_course_access(
         checker.require(
             current_user.id,
             "course:manage",
-            course.org_id,
+            get_platform_org_id(db_session),
             resource_owner_id=course.creator_id,
         )
 
@@ -1157,7 +1151,7 @@ async def update_course_access(
         checker.require(
             current_user.id,
             "course:update",
-            course.org_id,
+            get_platform_org_id(db_session),
             resource_owner_id=course.creator_id,
         )
 
@@ -1194,7 +1188,7 @@ async def delete_course(
     checker.require(
         current_user.id,
         "course:delete",
-        course.org_id,
+        get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 
@@ -1268,7 +1262,6 @@ async def get_user_courses(
         course_read = CourseRead.model_validate(
             {
                 "id": course.id or 0,  # Ensure id is never None
-                "org_id": course.org_id,
                 "name": course.name,
                 "description": course.description or "",
                 "about": course.about or "",
@@ -1327,7 +1320,7 @@ async def get_editable_courses(
     offset = (page - 1) * limit
 
     if has_broad_update:
-        id_query = select(Course.id).where(Course.org_id == platform_org_id)
+        id_query = select(Course.id)
         if search_filter is not None:
             id_query = id_query.where(search_filter)
         id_query = _apply_course_sort(id_query, sort_by)
@@ -1348,7 +1341,7 @@ async def get_editable_courses(
 
         id_query = (
             select(Course.id)
-            .where(Course.org_id == platform_org_id, is_active_author)
+            .where(is_active_author)
         )
         if search_filter is not None:
             id_query = id_query.where(search_filter)
@@ -1410,7 +1403,6 @@ async def get_editable_courses(
         course_read = CourseReadWithPermissions.model_validate(
             {
                 "id": course.id or 0,
-                "org_id": course.org_id,
                 "name": course.name,
                 "description": course.description or "",
                 "about": course.about or "",
@@ -1453,7 +1445,7 @@ async def count_editable_courses(
     search_filter = _course_search_filter(search_query)
 
     if has_broad_update:
-        query = select(func.count(Course.id.distinct())).where(Course.org_id == platform_org_id)
+        query = select(func.count(Course.id.distinct()))
     else:
         has_own_update = PermissionChecker._has_perm(granted, "course", "update", "own")
         if not has_own_update:
@@ -1463,7 +1455,6 @@ async def count_editable_courses(
             select(func.count(Course.id.distinct()))
             .join(ResourceAuthor, ResourceAuthor.resource_uuid == Course.course_uuid)
             .where(
-                Course.org_id == platform_org_id,
                 ResourceAuthor.user_id == current_user.id,
                 ResourceAuthor.authorship_status == ResourceAuthorshipStatusEnum.ACTIVE,
             )
@@ -1571,7 +1562,7 @@ async def get_course_user_rights(
 
     # Check admin/maintainer role (organization-level update/management)
     user_is_admin_or_maintainer = checker.check(
-        current_user.id, "course:manage", course.org_id
+        current_user.id, "course:manage", get_platform_org_id(db_session)
     )
 
     if user_is_admin_or_maintainer:
@@ -1582,7 +1573,7 @@ async def get_course_user_rights(
     user_has_instructor_role = checker.check(
         current_user.id,
         "course:update",
-        course.org_id,
+        get_platform_org_id(db_session),
         resource_owner_id=course.creator_id,
     )
 

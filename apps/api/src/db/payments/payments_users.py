@@ -38,9 +38,6 @@ class PaymentsUser(PaymentsUserBase, table=True):
     user_id: int = Field(
         sa_column=Column(BigInteger, ForeignKey("user.id", ondelete="CASCADE"))
     )
-    org_id: int = Field(
-        sa_column=Column(BigInteger, ForeignKey("organization.id", ondelete="CASCADE"))
-    )
     payment_product_id: int = Field(
         sa_column=Column(
             BigInteger, ForeignKey("paymentsproduct.id", ondelete="CASCADE")

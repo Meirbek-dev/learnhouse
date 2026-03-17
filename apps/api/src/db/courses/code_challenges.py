@@ -235,9 +235,6 @@ class CodeSubmission(CodeSubmissionBase, table=True):
     user_id: int = Field(
         sa_column=Column(BigInteger, ForeignKey("user.id", ondelete="CASCADE"))
     )
-    org_id: int = Field(
-        sa_column=Column(BigInteger, ForeignKey("organization.id", ondelete="CASCADE"))
-    )
 
     # Test results stored as JSON
     test_results: dict = Field(default_factory=dict, sa_column=Column(JSON))
@@ -275,7 +272,6 @@ class CodeSubmissionRead(CodeSubmissionBase):
     submission_uuid: str
     activity_id: int
     user_id: int
-    org_id: int
     test_results: dict
     created_at: str
     updated_at: str
@@ -309,9 +305,6 @@ class HintUsage(HintUsageBase, table=True):
     )
     user_id: int = Field(
         sa_column=Column(BigInteger, ForeignKey("user.id", ondelete="CASCADE"))
-    )
-    org_id: int = Field(
-        sa_column=Column(BigInteger, ForeignKey("organization.id", ondelete="CASCADE"))
     )
     unlocked_at: str = ""
 
