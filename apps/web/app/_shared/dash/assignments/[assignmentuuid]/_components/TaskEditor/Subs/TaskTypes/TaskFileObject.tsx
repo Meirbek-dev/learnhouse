@@ -50,10 +50,6 @@ interface TaskFileObjectProps {
   user_id?: number;
 }
 
-interface Org {
-  org_uuid: string;
-}
-
 interface Assignment {
   assignment_object: { assignment_uuid: string };
   course_object: { course_uuid: string };
@@ -79,7 +75,7 @@ const formatUUID = (uuid: string): string => `${uuid.slice(0, UUID_PREVIEW_START
 export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: TaskFileObjectProps) {
   const t = useTranslations('DashPage.Assignments.TaskFileObject');
   const session = usePlatformSession();
-  const org = usePlatform() as Org | null;
+  usePlatform();
   const assignment = useAssignments() as Assignment | null;
   const assignmentTaskDispatch = useAssignmentsTaskDispatch();
 
@@ -99,7 +95,6 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
   const assignmentUUID = assignment?.assignment_object?.assignment_uuid;
   const courseUUID = assignment?.course_object?.course_uuid;
   const activityUUID = assignment?.activity_object?.activity_uuid;
-  const orgUUID = org?.org_uuid;
 
   // ================= Handlers =================
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -317,17 +312,16 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
 
   const renderGradingView = () => {
     if (!userSubmissions.fileUUID || isLoading || !assignmentTaskUUID) return null;
-    if (!orgUUID || !courseUUID || !activityUUID || !assignmentUUID) {
+    if (!courseUUID || !activityUUID || !assignmentUUID) {
       return (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{t('missingOrgCourseInfo')}</AlertDescription>
+          <AlertDescription>{t('missingCourseInfo')}</AlertDescription>
         </Alert>
       );
     }
 
     const fileUrl = getTaskFileSubmissionDir(
-      orgUUID,
       courseUUID,
       activityUUID,
       assignmentUUID,

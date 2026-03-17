@@ -551,9 +551,9 @@ const CourseThumbnail: FC<CourseThumbnailProps> = ({
 
   const thumbnailUrl = useMemo(() => {
     return course.thumbnail_image
-      ? getCourseThumbnailMediaDirectory(org?.org_uuid, course.course_uuid, course.thumbnail_image)
+      ? getCourseThumbnailMediaDirectory(course.course_uuid, course.thumbnail_image)
       : '../empty_thumbnail.webp';
-  }, [course.thumbnail_image, course.course_uuid, org?.org_uuid]);
+  }, [course.thumbnail_image, course.course_uuid]);
 
   const courseUrl = useMemo(
     () => customLink || getAbsoluteUrl(`/course/${cleanCourseUuid}`),

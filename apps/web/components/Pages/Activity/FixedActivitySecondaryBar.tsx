@@ -112,7 +112,7 @@ const CourseInfo = ({
       className="h-[20px] w-[35px] shrink-0 rounded-md object-cover sm:h-[26px] sm:w-[45px]"
       src={
         course.thumbnail_image
-          ? `${getCourseThumbnailMediaDirectory(org?.org_uuid, course.course_uuid, course.thumbnail_image)}`
+          ? `${getCourseThumbnailMediaDirectory(course.course_uuid, course.thumbnail_image)}`
           : '/empty_thumbnail.webp'
       }
       alt=""

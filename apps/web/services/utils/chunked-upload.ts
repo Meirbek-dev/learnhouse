@@ -13,8 +13,8 @@ const DEFAULT_CHUNK_SIZE = 2 * 1024 * 1024;
 export interface ChunkedUploadOptions {
   file: File;
   directory: string;
-  typeOfDir: 'orgs' | 'users';
-  uuid: string;
+  typeOfDir: 'platform' | 'users';
+  uuid?: string;
   filename: string;
   accessToken: string;
   chunkSize?: number;
@@ -74,8 +74,8 @@ export async function uploadFileChunked(options: ChunkedUploadOptions): Promise<
       throw new Error('accessToken is required for chunked uploads');
     }
 
-    if (typeOfDir === 'orgs' && !uuid) {
-      throw new Error('uuid (org_uuid) is required when typeOfDir is "orgs"');
+    if (typeOfDir === 'users' && !uuid) {
+      throw new Error('uuid is required when typeOfDir is "users"');
     }
 
     // Split file into chunks
@@ -89,7 +89,7 @@ export async function uploadFileChunked(options: ChunkedUploadOptions): Promise<
     const initiateFormData = new FormData();
     initiateFormData.append('directory', directory);
     initiateFormData.append('type_of_dir', typeOfDir);
-    initiateFormData.append('uuid', uuid);
+    initiateFormData.append('uuid', uuid ?? '');
     initiateFormData.append('filename', filename);
     initiateFormData.append('total_chunks', totalChunks.toString());
     initiateFormData.append('file_size', file.size.toString());

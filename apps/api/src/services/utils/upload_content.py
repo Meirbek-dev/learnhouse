@@ -14,8 +14,8 @@ def ensure_directory_exists(directory: str) -> None:
 async def upload_file(
     file: UploadFile,
     directory: str,
-    type_of_dir: Literal["orgs", "users"],
-    uuid: str,
+    type_of_dir: Literal["platform", "users"],
+    uuid: str | None,
     allowed_types: list[str],
     filename_prefix: str,
     max_size: int | None = None,
@@ -26,8 +26,8 @@ async def upload_file(
     Args:
         file: The uploaded file
         directory: Target directory (e.g., "logos", "avatars")
-        type_of_dir: "orgs" or "users"
-        uuid: Organization or user UUID
+        type_of_dir: "platform" or "users"
+        uuid: User UUID for user-scoped uploads; omitted for platform uploads
         allowed_types: List of allowed file types ('image', 'video', 'document')
         filename_prefix: Prefix for the generated filename
         max_size: Maximum file size in bytes (optional)
@@ -60,8 +60,8 @@ async def upload_file(
 
 async def upload_content(
     directory: str,
-    type_of_dir: Literal["orgs", "users"],
-    uuid: str,  # org_uuid or user_uuid
+    type_of_dir: Literal["platform", "users"],
+    uuid: str | None,
     file_binary: bytes,
     file_and_format: str,
     allowed_formats: list[str] | None = None,
@@ -75,10 +75,17 @@ async def upload_content(
             detail=f"File format {file_format} not allowed",
         )
 
-    ensure_directory_exists(f"content/{type_of_dir}/{uuid}/{directory}")
+    if type_of_dir == "users":
+        if not uuid:
+            raise HTTPException(status_code=400, detail="user uuid is required")
+        storage_root = f"content/users/{uuid}"
+    else:
+        storage_root = "content/platform"
+
+    ensure_directory_exists(f"{storage_root}/{directory}")
 
     with open(
-        f"content/{type_of_dir}/{uuid}/{directory}/{file_and_format}",
+        f"{storage_root}/{directory}/{file_and_format}",
         "wb",
     ) as f:
         f.write(file_binary)

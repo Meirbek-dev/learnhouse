@@ -67,7 +67,7 @@ export default async function PlatformCollectionPage(props: { params: Promise<{ 
                 className="relative inset-0 h-[131px] w-[249px] rounded-lg bg-cover shadow-xl ring-1 ring-black/10 ring-inset"
                 style={{
                   backgroundImage: course.thumbnail_image
-                    ? `url(${getCourseThumbnailMediaDirectory(org.org_uuid, course.course_uuid, course.thumbnail_image)})`
+                    ? `url(${getCourseThumbnailMediaDirectory(course.course_uuid, course.thumbnail_image)})`
                     : `url('/empty_thumbnail.webp')`,
                 }}
               />

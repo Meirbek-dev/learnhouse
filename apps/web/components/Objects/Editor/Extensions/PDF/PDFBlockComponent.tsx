@@ -48,7 +48,6 @@ const PDFBlockComponent = (props: any) => {
     if (!fileId) return;
 
     const pdfUrl = getActivityBlockMediaDirectory(
-      org?.org_uuid,
       course?.courseStructure.course_uuid,
       props.extension.options.activity.activity_uuid,
       blockObject.block_uuid,
@@ -73,7 +72,6 @@ const PDFBlockComponent = (props: any) => {
 
   const pdfUrl = blockObject
     ? getActivityBlockMediaDirectory(
-        org?.org_uuid,
         course?.courseStructure.course_uuid,
         props.extension.options.activity.activity_uuid,
         blockObject.block_uuid,

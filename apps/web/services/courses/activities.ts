@@ -181,11 +181,10 @@ async function createVideoActivityChunked(
   options?: ActivityInvalidationOptions,
   onProgress?: (progress: UploadProgress) => void,
 ): Promise<any> {
-  const orgUuid = data.org_uuid;
   const courseUuid = data.course_uuid;
 
-  if (!orgUuid || !courseUuid) {
-    throw new Error('Missing org_uuid or course_uuid for chunked upload');
+  if (!courseUuid) {
+    throw new Error('Missing course_uuid for chunked upload');
   }
 
   const tempActivityUuid = `activity_temp_${Date.now()}`;
@@ -195,8 +194,7 @@ async function createVideoActivityChunked(
   await uploadFileChunked({
     file,
     directory: `courses/${courseUuid}/activities/${tempActivityUuid}/video`,
-    typeOfDir: 'orgs',
-    uuid: orgUuid,
+    typeOfDir: 'platform',
     filename: `video.${videoFormat}`,
     accessToken,
     onProgress: (progress) => {

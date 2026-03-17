@@ -37,7 +37,7 @@ export async function generateMetadata(_props: MetadataProps): Promise<Metadata>
       type: 'website',
       images: [
         {
-          url: getThumbnailMediaDirectory(org?.org_uuid, org?.thumbnail_image),
+          url: getThumbnailMediaDirectory(org?.thumbnail_image),
           width: 800,
           height: 600,
           alt: org.name,

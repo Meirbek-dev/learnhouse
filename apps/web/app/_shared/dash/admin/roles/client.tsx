@@ -810,7 +810,7 @@ export default function RBACAdminClient() {
               storageKey="rbac-roles"
               enableColumnVisibility
               enableCsvExport
-              csvFileName={`${org?.slug ?? 'organization'}-roles.csv`}
+              csvFileName="platform-roles.csv"
               labels={{
                 searchPlaceholder: t('searchRolesPlaceholder'),
                 emptyMessage: t('loadFailed'),
@@ -842,7 +842,7 @@ export default function RBACAdminClient() {
                 storageKey="rbac-permissions"
                 enableColumnVisibility
                 enableCsvExport
-                csvFileName={`${org?.slug ?? 'organization'}-permissions.csv`}
+                csvFileName="platform-permissions.csv"
                 labels={{
                   searchPlaceholder: t('permissionSearchPlaceholder'),
                   emptyMessage: t('noPermissions'),

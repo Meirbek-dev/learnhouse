@@ -129,7 +129,6 @@ async def create_documentpdf_activity(
         await upload_pdf(
             pdf_file,
             activity.activity_uuid,
-            organization.org_uuid,
             course.course_uuid,
         )
 

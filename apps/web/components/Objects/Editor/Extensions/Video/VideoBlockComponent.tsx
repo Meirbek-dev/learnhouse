@@ -39,10 +39,6 @@ const sizeButtonCn = (isActive: boolean) =>
       : 'text-gray-600 bg-transparent border-gray-200 hover:bg-gray-50',
   );
 
-interface Organization {
-  org_uuid: string;
-}
-
 interface Course {
   courseStructure: {
     course_uuid: string;
@@ -77,7 +73,7 @@ const VideoBlockComponent = (props: ExtendedNodeViewProps) => {
   const fullLocale = useLocale();
   const locale = fullLocale.split('-')[0];
   const { node, extension, updateAttributes } = props;
-  const org = usePlatform() as Organization | null;
+  usePlatform();
   const course = useCourse() as Course | null;
 
   const subtitleEntries = [
@@ -186,7 +182,6 @@ const VideoBlockComponent = (props: ExtendedNodeViewProps) => {
         file,
         extension.options.activity.activity_uuid,
         access_token,
-        org?.org_uuid,
         course?.courseStructure.course_uuid,
         tempBlockUuid,
       );
@@ -258,9 +253,8 @@ const VideoBlockComponent = (props: ExtendedNodeViewProps) => {
   }, []);
 
   const videoUrl =
-    blockObject && org?.org_uuid && course?.courseStructure.course_uuid
+    blockObject && course?.courseStructure.course_uuid
       ? getActivityBlockMediaDirectory(
-          org.org_uuid,
           course.courseStructure.course_uuid,
           extension.options.activity.activity_uuid,
           blockObject.block_uuid,

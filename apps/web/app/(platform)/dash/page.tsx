@@ -5,7 +5,7 @@ import { getTranslations } from 'next-intl/server';
 import type { ReactNode } from 'react';
 import Image from 'next/image';
 
-import platformLogoFull from '../../../../../public/platform_logo_full.svg';
+import platformLogoFull from '../../../public/platform_logo_full.svg';
 
 export default async function PlatformDashHomePage() {
   const t = await getTranslations('DashPage.Card');

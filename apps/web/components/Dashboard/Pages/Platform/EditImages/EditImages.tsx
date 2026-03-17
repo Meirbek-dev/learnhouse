@@ -97,7 +97,7 @@ export default function EditImages() {
       .filter((item: any) => item?.filename) // Filter out empty filenames
       .map((item: any, index: number) => ({
         id: item.filename,
-        url: getThumbnailMediaDirectory(org?.org_uuid, item.filename),
+        url: getThumbnailMediaDirectory(item.filename),
         filename: item.filename,
         type: 'image' as const,
         order: item.order ?? index, // Use existing order or fallback to index
@@ -435,7 +435,7 @@ export default function EditImages() {
                   <img
                     src={
                       org?.logo_image
-                        ? localLogo || getLogoMediaDirectory(org?.org_uuid, org?.logo_image)
+                        ? localLogo || getLogoMediaDirectory(org?.logo_image)
                         : '/empty_thumbnail.webp'
                     }
                     alt="Лого организации"
@@ -501,7 +501,7 @@ export default function EditImages() {
                   <img
                     src={
                       org?.thumbnail_image
-                        ? localThumbnail || getThumbnailMediaDirectory(org?.org_uuid, org?.thumbnail_image)
+                        ? localThumbnail || getThumbnailMediaDirectory(org?.thumbnail_image)
                         : '/empty_thumbnail.webp'
                     }
                     alt="Organization thumbnail"
@@ -617,7 +617,7 @@ export default function EditImages() {
                                 </div>
                                 {preview.type === 'image' ? (
                                   <img
-                                    src={getPreviewMediaDirectory(org?.org_uuid, preview.id)}
+                                    src={getPreviewMediaDirectory(preview.id)}
                                     alt={`Preview ${preview.id}`}
                                     className={cn(
                                       'size-auto max-h-28 max-w-48 rounded-xl bg-white object-contain',

@@ -5,11 +5,11 @@ import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
 import { createContext, useContext } from 'react';
-import type { Org } from '@/types/org';
+import type { Platform } from '@/types/org';
 import type { ReactNode } from 'react';
 import useSWR from 'swr';
 
-export const PlatformContext = createContext<Org | null>(null);
+export const PlatformContext = createContext<Platform | null>(null);
 
 export const PlatformContextProvider = ({ children, initialOrg }: { children: ReactNode; initialOrg?: any }) => {
   const session = usePlatformSession();
@@ -30,6 +30,6 @@ export const PlatformContextProvider = ({ children, initialOrg }: { children: Re
   return <PlatformContext.Provider value={org}>{children}</PlatformContext.Provider>;
 };
 
-export function usePlatform(): Org | null {
+export function usePlatform(): Platform | null {
   return useContext(PlatformContext);
 }

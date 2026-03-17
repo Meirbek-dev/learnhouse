@@ -59,7 +59,6 @@ const VideoActivity = ({ activity, course }: VideoActivityProps) => {
   const subtitleEntries: SubtitleEntry[] = (activity?.details?.subtitles || [])
     .map((subtitle) => {
       const url = getActivityMediaDirectory(
-        org?.org_uuid,
         course?.course_uuid,
         activity.activity_uuid,
         subtitle.filename,
@@ -75,7 +74,6 @@ const VideoActivity = ({ activity, course }: VideoActivityProps) => {
     const defaultSubtitle = subtitles.find((s) => s.language === locale);
     if (defaultSubtitle) {
       return getActivityMediaDirectory(
-        org?.org_uuid,
         course?.course_uuid,
         activity.activity_uuid,
         defaultSubtitle.filename,
@@ -88,7 +86,6 @@ const VideoActivity = ({ activity, course }: VideoActivityProps) => {
   const getVideoSrc = () => {
     if (!activity.content?.filename) return '';
     return getActivityMediaDirectory(
-      org?.org_uuid,
       course?.course_uuid,
       activity.activity_uuid,
       activity.content.filename,

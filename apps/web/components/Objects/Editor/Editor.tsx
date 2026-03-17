@@ -208,7 +208,6 @@ const Editor = (props: EditorProps) => {
                     src={`${
                       props.course.thumbnail_image
                         ? getCourseThumbnailMediaDirectory(
-                            props.org?.org_uuid,
                             props.course.course_uuid,
                             props.course.thumbnail_image,
                           )

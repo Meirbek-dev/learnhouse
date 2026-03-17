@@ -144,7 +144,7 @@ export const AssignmentRow = ({ assignment, org }: any) => {
 export const CourseThumbnail = ({ course, org, courseId }: any) => {
   const t = useTranslations('DashPage.Assignments.HomePage');
   const thumbnailUrl = course.thumbnail_image
-    ? getCourseThumbnailMediaDirectory(org?.org_uuid, course.course_uuid, course.thumbnail_image)
+    ? getCourseThumbnailMediaDirectory(course.course_uuid, course.thumbnail_image)
     : '/empty_thumbnail.webp';
 
   return (

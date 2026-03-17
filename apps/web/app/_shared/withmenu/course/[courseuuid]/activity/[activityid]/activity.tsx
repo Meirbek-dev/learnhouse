@@ -640,11 +640,7 @@ const ActivityClient = (props: ActivityClientProps) => {
                               className="h-[34px] w-[60px] rounded-md drop-shadow-md"
                               src={
                                 course.thumbnail_image
-                                  ? `${getCourseThumbnailMediaDirectory(
-                                      org?.org_uuid ?? '',
-                                      course.course_uuid,
-                                      course.thumbnail_image,
-                                    )}`
+                                  ? `${getCourseThumbnailMediaDirectory(course.course_uuid, course.thumbnail_image)}`
                                   : '/empty_thumbnail.webp'
                               }
                               alt=""
@@ -827,11 +823,7 @@ const ActivityClient = (props: ActivityClientProps) => {
                                 className="h-[57px] w-[100px] rounded-md drop-shadow-md"
                                 src={
                                   course.thumbnail_image
-                                    ? `${getCourseThumbnailMediaDirectory(
-                                        org?.org_uuid ?? '',
-                                        course.course_uuid,
-                                        course.thumbnail_image,
-                                      )}`
+                                    ? `${getCourseThumbnailMediaDirectory(course.course_uuid, course.thumbnail_image)}`
                                     : '/empty_thumbnail.webp'
                                 }
                                 alt=""

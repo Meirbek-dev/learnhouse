@@ -41,10 +41,6 @@ interface ActivityObject {
   activity_uuid: string;
 }
 
-interface OrgData {
-  org_uuid: string;
-}
-
 interface AssignmentsData {
   assignment_object?: AssignmentObject | null;
   assignment_tasks?: AssignmentTask[] | null;
@@ -55,7 +51,6 @@ interface AssignmentsData {
 const AssignmentStudentActivity = () => {
   const t = useTranslations('Activities.AssignmentStudentActivity');
   const assignments = useAssignments() as AssignmentsData | null;
-  const org = usePlatform() as OrgData | null;
 
   // Early returns for loading/error states
   if (!assignments) {
@@ -140,7 +135,6 @@ const AssignmentStudentActivity = () => {
               key={task.assignment_task_uuid}
               task={task}
               index={index}
-              org={org}
               assignments={assignments}
               t={t}
             />
@@ -155,19 +149,17 @@ const AssignmentStudentActivity = () => {
 interface TaskCardProps {
   task: AssignmentTask;
   index: number;
-  org: OrgData | null;
   assignments: AssignmentsData;
   t: ReturnType<typeof useTranslations>;
 }
 
-const TaskCard = ({ task, index, org, assignments, t }: TaskCardProps) => {
+const TaskCard = ({ task, index, assignments, t }: TaskCardProps) => {
   const hasHint = Boolean(task.hint);
   const hasReferenceFile = Boolean(task.reference_file);
 
   const referenceFileUrl = useMemo(() => {
     if (
       !hasReferenceFile ||
-      !org ||
       !assignments.course_object ||
       !assignments.activity_object ||
       !assignments.assignment_object
@@ -176,14 +168,13 @@ const TaskCard = ({ task, index, org, assignments, t }: TaskCardProps) => {
     }
 
     return getTaskRefFileDir(
-      org.org_uuid,
       assignments.course_object.course_uuid,
       assignments.activity_object.activity_uuid,
       assignments.assignment_object.assignment_uuid,
       task.assignment_task_uuid,
       task.reference_file!,
     );
-  }, [hasReferenceFile, org, assignments, task]);
+  }, [hasReferenceFile, assignments, task]);
 
   return (
     <Card>

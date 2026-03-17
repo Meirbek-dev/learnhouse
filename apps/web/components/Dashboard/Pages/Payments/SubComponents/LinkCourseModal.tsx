@@ -36,7 +36,7 @@ const CoursePreview = ({ course, onLink, isLinked }: CoursePreviewProps) => {
   const t = useTranslations('Payments.LinkCourseModal');
 
   const thumbnailImage = course.thumbnail_image
-    ? getCourseThumbnailMediaDirectory(org?.org_uuid, course.course_uuid, course.thumbnail_image)
+    ? getCourseThumbnailMediaDirectory(course.course_uuid, course.thumbnail_image)
     : '../empty_thumbnail.webp';
 
   return (

@@ -51,7 +51,6 @@ async def create_video_block(
         block_uuid,
         ["mkv", "mp4", "webm", "ogg"],
         block_type,
-        org.org_uuid,
         str(course.course_uuid),
     )
 

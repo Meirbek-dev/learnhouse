@@ -169,7 +169,6 @@ async def create_video_activity(
         await upload_video(
             video_file,
             activity.activity_uuid,
-            organization.org_uuid,
             course.course_uuid,
         )
     elif video_uploaded_path and organization and course:
@@ -178,9 +177,9 @@ async def create_video_activity(
         from pathlib import Path
 
         # Parse the temp path
-        temp_path = Path(f"content/orgs/{organization.org_uuid}/{video_uploaded_path}")
+        temp_path = Path(f"content/platform/{video_uploaded_path}")
         final_path = Path(
-            f"content/orgs/{organization.org_uuid}/courses/{course.course_uuid}/activities/{activity.activity_uuid}/video/video.{video_format}"
+            f"content/platform/courses/{course.course_uuid}/activities/{activity.activity_uuid}/video/video.{video_format}"
         )
 
         # Create target directory
@@ -224,7 +223,6 @@ async def create_video_activity(
                     upload_subtitle(
                         subtitle_file,
                         activity.activity_uuid,
-                        organization.org_uuid,
                         course.course_uuid,
                         language,
                         None,  # subtitle_id not needed anymore
@@ -242,7 +240,7 @@ async def create_video_activity(
                             "language": language,
                             "filename": upload_result.get("filename"),
                             "label": _get_language_label(language),
-                            "url": f"/content/orgs/{organization.org_uuid}/courses/{course.course_uuid}/activities/{activity.activity_uuid}/video/{upload_result.get('filename')}",
+                            "url": f"/content/platform/courses/{course.course_uuid}/activities/{activity.activity_uuid}/video/{upload_result.get('filename')}",
                         }
                     )
 

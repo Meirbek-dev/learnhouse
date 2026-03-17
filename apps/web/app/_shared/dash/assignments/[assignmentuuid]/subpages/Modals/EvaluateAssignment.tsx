@@ -96,7 +96,6 @@ const EvaluateAssignment = ({ user_id }: any) => {
                   {task.reference_file ? (
                     <Link
                       href={getTaskRefFileDir(
-                        org?.org_uuid,
                         assignments?.course_object.course_uuid,
                         assignments?.activity_object.activity_uuid,
                         assignments?.assignment_object.assignment_uuid,

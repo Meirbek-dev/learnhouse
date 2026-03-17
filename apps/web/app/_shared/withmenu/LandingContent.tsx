@@ -27,7 +27,7 @@ export async function LandingContent() {
 
     // Only fetch gamification data if user is authenticated
     const gamificationPromise = access_token
-      ? getServerGamificationDashboard().catch((error: unknown) => {
+      ? getServerGamificationDashboard(access_token).catch((error: unknown) => {
           console.error('[LandingContent] Gamification fetch failed:', {
             message: error instanceof Error ? error.message : 'Unknown error',
           });

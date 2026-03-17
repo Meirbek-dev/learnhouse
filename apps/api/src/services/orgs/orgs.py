@@ -92,7 +92,7 @@ async def update_org_logo(
     )
 
     # Upload logo
-    name_in_disk = await upload_org_logo(logo_file, org.org_uuid)
+    name_in_disk = await upload_org_logo(logo_file)
 
     # Update org
     org.logo_image = name_in_disk
@@ -124,7 +124,7 @@ async def update_org_thumbnail(
     )
 
     # Upload logo
-    name_in_disk = await upload_org_thumbnail(thumbnail_file, org.org_uuid)
+    name_in_disk = await upload_org_thumbnail(thumbnail_file)
 
     # Update org
     org.thumbnail_image = name_in_disk
@@ -156,7 +156,7 @@ async def update_org_preview(
     )
 
     # Upload logo
-    name_in_disk = await upload_org_preview(preview_file, org.org_uuid)
+    name_in_disk = await upload_org_preview(preview_file)
 
     return {"name_in_disk": name_in_disk}
 
@@ -237,12 +237,11 @@ async def get_orgs_by_user(
 
 async def upload_org_preview_service(
     preview_file: UploadFile,
-    org_uuid: str,
 ) -> dict:
     # No need for request or current_user since we're not doing RBAC checks for previews
 
     # Upload preview
-    name_in_disk = await upload_org_preview(preview_file, org_uuid)
+    name_in_disk = await upload_org_preview(preview_file)
 
     return {"detail": "Preview uploaded successfully", "filename": name_in_disk}
 
@@ -290,6 +289,6 @@ async def upload_org_landing_content_service(
     )
 
     # Upload content
-    name_in_disk = await upload_org_landing_content(content_file, org.org_uuid)
+    name_in_disk = await upload_org_landing_content(content_file)
 
     return {"detail": "Landing content uploaded successfully", "filename": name_in_disk}

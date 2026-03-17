@@ -818,7 +818,6 @@ const VideoModal = ({ submitFileActivity, submitExternalVideo, chapterId, course
     console.log('VideoModal - Context data:', {
       org,
       hasOrg: Boolean(org),
-      orgUuid: org?.org_uuid,
       courseProp: course,
       courseData: course?.courseStructure || course,
     });
@@ -898,13 +897,6 @@ const VideoModal = ({ submitFileActivity, submitExternalVideo, chapterId, course
       return;
     }
 
-    // Validate org data is available
-    if (!org?.org_uuid) {
-      console.error('Organization data not available:', org);
-      toast.error(t('organizationDataNotLoaded'));
-      return;
-    }
-
     // Handle course data structure (it might be the context object or the course object directly)
     const courseData = course?.courseStructure || course;
 
@@ -930,7 +922,6 @@ const VideoModal = ({ submitFileActivity, submitExternalVideo, chapterId, course
             version: 1,
             course_id: courseData.id,
             course_uuid: courseData.course_uuid,
-            org_uuid: org.org_uuid,
             details: videoDetails,
           },
           chapterId,

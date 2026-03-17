@@ -456,14 +456,13 @@ def _safe_organization_read(org: Organization) -> OrganizationRead:
     except ValidationError as exc:  # pragma: no cover - defensive path
         _logger.warning(
             "Organization validation failed for org=%s. Using best-effort fallback. Error: %s",
-            getattr(org, "id", None),
+            getattr(org, "name", None),
             exc,
         )
 
         return OrganizationRead.model_construct(
             **org.model_dump(),
             config=build_default_org_config(
-                platform_id=org.id or 0,
                 landing=org.landing,
                 creation_date=org.creation_date,
                 update_date=org.update_date,

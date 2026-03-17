@@ -269,7 +269,6 @@ const UpdateTaskRef = () => {
   const getTaskRefDirUI = () => {
     if (!fileName) return '';
     return getTaskRefFileDir(
-      org?.org_uuid || '',
       assignment.course_object.course_uuid,
       assignment.activity_object.activity_uuid,
       assignment.assignment_object.assignment_uuid,

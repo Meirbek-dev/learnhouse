@@ -29,7 +29,6 @@ def install_create_organization(org_object: OrganizationCreate, db_session: Sess
     org = Organization.model_validate(org_object)
 
     # Complete the org object
-    org.org_uuid = f"org_{ULID()}"
     org.creation_date = str(datetime.now())
     org.update_date = str(datetime.now())
 

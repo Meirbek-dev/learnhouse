@@ -76,7 +76,7 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
       siteName: org.name,
       images: [
         {
-          url: getThumbnailMediaDirectory(org?.org_uuid, org?.thumbnail_image),
+          url: getThumbnailMediaDirectory(org?.thumbnail_image),
           width: 800,
           height: 600,
           alt: `${org.name} - ${t('search')}`,
@@ -87,7 +87,7 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
       card: 'summary_large_image',
       title,
       description,
-      images: [getThumbnailMediaDirectory(org?.org_uuid, org?.thumbnail_image)],
+      images: [getThumbnailMediaDirectory(org?.thumbnail_image)],
     },
     alternates: {
       canonical: searchQuery ? `/search?q=${encodeURIComponent(searchQuery)}` : `/search`,

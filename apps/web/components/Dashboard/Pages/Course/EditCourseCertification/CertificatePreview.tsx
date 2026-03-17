@@ -179,7 +179,7 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
                 <div className="flex items-center justify-center">
                   {org?.logo_image ? (
                     <img
-                      src={`${getLogoMediaDirectory(org.org_uuid, org.logo_image)}`}
+                      src={`${getLogoMediaDirectory(org.logo_image)}`}
                       alt={t('organizationLogoAlt')}
                       className="h-10 w-10 object-contain"
                     />

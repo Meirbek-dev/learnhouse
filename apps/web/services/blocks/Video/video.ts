@@ -6,7 +6,6 @@ export async function uploadNewVideoFile(
   file: File,
   activity_uuid: string,
   access_token: string,
-  org_uuid?: string,
   course_uuid?: string,
   block_uuid?: string,
   onProgress?: (progress: { percentage: number; currentChunk: number; totalChunks: number }) => void,
@@ -14,10 +13,6 @@ export async function uploadNewVideoFile(
   // For large files, use chunked upload
   if (shouldUseChunkedUpload(file.size)) {
     console.log('Using chunked upload for large file');
-
-    if (!org_uuid) {
-      throw new Error('org_uuid is required for chunked uploads. Please provide organization uuid');
-    }
 
     if (!course_uuid) {
       throw new Error('course_uuid is required for chunked uploads');
@@ -32,8 +27,7 @@ export async function uploadNewVideoFile(
         file,
         // Use full courses path and include the block folder so the saved file is where the editor expects it
         directory: `courses/${course_uuid}/activities/${activity_uuid}/dynamic/blocks/videoBlock/${block_uuid}`,
-        typeOfDir: 'orgs',
-        uuid: org_uuid,
+        typeOfDir: 'platform',
         filename: `block_${Date.now()}.${file.name.split('.').pop()}`,
         accessToken: access_token,
         onProgress: onProgress

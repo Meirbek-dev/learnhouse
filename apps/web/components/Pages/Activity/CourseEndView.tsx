@@ -820,7 +820,7 @@ const CourseEndView: FC<CourseEndViewProps> = ({ courseName, courseUuid, thumbna
             {thumbnailImage ? (
               <img
                 className="h-[114px] w-[200px] rounded-lg object-cover shadow-md"
-                src={`${getCourseThumbnailMediaDirectory(org?.org_uuid, courseUuid, thumbnailImage)}`}
+                src={`${getCourseThumbnailMediaDirectory(courseUuid, thumbnailImage)}`}
                 alt={courseName}
               />
             ) : null}
@@ -960,7 +960,7 @@ const CourseEndView: FC<CourseEndViewProps> = ({ courseName, courseUuid, thumbna
           {thumbnailImage ? (
             <img
               className="h-[114px] w-[200px] rounded-lg object-cover shadow-md"
-              src={`${getCourseThumbnailMediaDirectory(org?.org_uuid, courseUuid, thumbnailImage)}`}
+              src={`${getCourseThumbnailMediaDirectory(courseUuid, thumbnailImage)}`}
               alt={courseName}
             />
           ) : null}

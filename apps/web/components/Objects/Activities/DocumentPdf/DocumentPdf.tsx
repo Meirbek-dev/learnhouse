@@ -12,7 +12,6 @@ const DocumentPdfActivity = ({ activity, course }: { activity: any; course: any 
         className="h-[900px] w-full rounded-lg"
         title={t('viewerTitle')}
         src={getActivityMediaDirectory(
-          org?.org_uuid,
           course?.course_uuid,
           activity.activity_uuid,
           activity.content.filename,

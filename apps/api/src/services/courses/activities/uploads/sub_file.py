@@ -5,7 +5,6 @@ async def upload_submission_file(
     file,
     name_in_disk,
     activity_uuid,
-    org_uuid,
     course_uuid,
     assignment_uuid,
     assignment_task_uuid,
@@ -15,8 +14,8 @@ async def upload_submission_file(
 
     await upload_content(
         f"courses/{course_uuid}/activities/{activity_uuid}/assignments/{assignment_uuid}/tasks/{assignment_task_uuid}/subs",
-        "orgs",
-        org_uuid,
+        "platform",
+        None,
         contents,
         f"{name_in_disk}",
         ["pdf", "docx", "mkv", "mp4", "jpg", "jpeg", "png", "pptx", "zip"],

@@ -176,7 +176,7 @@ class XPTransaction(SQLModel, table=True):
 
 
 class OrgGamificationConfig(SQLModel, table=True):
-    """Per-organization gamification policy overrides.
+    """Gamification policy overrides.
 
     Safe optional overrides with sane defaults applied in service if fields are null.
     """
@@ -251,7 +251,7 @@ class LeaderboardEntryRead(PydanticStrictBaseModel):
 
 
 class LeaderboardRead(PydanticStrictBaseModel):
-    """Organization leaderboard."""
+    """Leaderboard."""
 
     entries: list[LeaderboardEntryRead]
     total_participants: int

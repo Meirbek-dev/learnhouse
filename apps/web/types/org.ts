@@ -55,20 +55,16 @@ export interface ConfigData {
 }
 
 export interface Config {
-  id: number;
   config: ConfigData;
   creation_date: string | null;
   update_date: string | null;
 }
 
 // ============================================================================
-// Organization
+// Platform
 // ============================================================================
 
-export interface Org {
-  id: number;
-  org_uuid: string;
-  slug: string;
+export interface Platform {
   name: string;
   description: string | null;
   about: string | null;

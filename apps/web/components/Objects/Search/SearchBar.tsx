@@ -301,7 +301,7 @@ export const SearchBar: FC<SearchBarProps> = ({ className = '', isMobile = false
                 <div className="relative">
                   {course.thumbnail_image ? (
                     <img
-                      src={getCourseThumbnailMediaDirectory(org?.org_uuid ?? '', course.course_uuid, course.thumbnail_image)}
+                      src={getCourseThumbnailMediaDirectory(course.course_uuid, course.thumbnail_image)}
                       alt={course.name}
                       className="h-10 w-10 rounded-lg object-cover"
                     />

@@ -1,15 +1,15 @@
 from src.services.utils.upload_content import upload_content
 
 
-async def upload_pdf(pdf_file, activity_uuid, org_uuid, course_uuid):
+async def upload_pdf(pdf_file, activity_uuid, course_uuid):
     contents = pdf_file.file.read()
     pdf_format = pdf_file.filename.split(".")[-1]
 
     try:
         await upload_content(
             f"courses/{course_uuid}/activities/{activity_uuid}/documentpdf",
-            "orgs",
-            org_uuid,
+            "platform",
+            None,
             contents,
             f"documentpdf.{pdf_format}",
         )

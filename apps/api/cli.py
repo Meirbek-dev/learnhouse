@@ -68,13 +68,12 @@ def install(
             name=PLATFORM_BRAND_NAME,
             description=PLATFORM_BRAND_NAME,
             about=f"{PLATFORM_BRAND_NAME} - Образовательная платформа для онлайн-обучения",
-            slug="platform",
             email=settings.contact_email,
             logo_image="",
             thumbnail_image="",
             label=PLATFORM_BRAND_NAME,
         )
-        created_org = install_create_organization(org, db_session)
+        install_create_organization(org, db_session)
         print(f"{PLATFORM_BRAND_NAME} created ✅")
 
         # Create Organization User
@@ -110,12 +109,11 @@ def install(
         org = OrganizationCreate(
             name=orgname,
             description=PLATFORM_BRAND_NAME,
-            slug="platform",
             email="",
             logo_image="",
             thumbnail_image="",
         )
-        created_org = install_create_organization(org, db_session)
+        install_create_organization(org, db_session)
         print(orgname + " Organization created ✅")
 
         # Create Organization User
@@ -155,9 +153,8 @@ def refresh_analytics(
     )
     db_session = Session(engine)
     parsed_snapshot = date.fromisoformat(snapshot_date) if snapshot_date else None
-    platform_org = get_platform_organization(db_session)
     result = refresh_teacher_analytics_rollups(
-        db_session, platform_org.id, parsed_snapshot
+        db_session, snapshot_date=parsed_snapshot
     )
     print(result)
 
@@ -192,9 +189,7 @@ def migrate_users_to_default_org() -> None:
         )
         raise typer.Exit(code=1)
 
-    print(
-        f"✅ Found platform organization: {platform_org.name} (ID: {platform_org.id})"
-    )
+    print(f"✅ Found platform organization: {platform_org.name}")
 
     # Get the default 'user' role
     user_role = db_session.exec(select(Role).where(Role.slug == RoleSlug.USER)).first()

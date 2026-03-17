@@ -809,7 +809,6 @@ async def create_course(
         await upload_thumbnail(
             thumbnail_file,
             name_in_disk,
-            org.org_uuid,
             course.course_uuid,
         )
         if thumbnail_type == ThumbnailType.IMAGE:
@@ -913,7 +912,6 @@ async def update_course_thumbnail(
         await upload_thumbnail(
             thumbnail_file,
             name_in_disk,
-            org.org_uuid,
             course.course_uuid,
         )
 

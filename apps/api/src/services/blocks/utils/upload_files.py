@@ -12,7 +12,6 @@ async def upload_file_and_return_file_object(
     block_id: str,
     list_of_allowed_file_formats: list,
     type_of_block: str,
-    org_uuid: str,
     course_uuid: str,
 ):
     """Upload file for blocks."""
@@ -37,8 +36,8 @@ async def upload_file_and_return_file_object(
     filename = await upload_file(
         file=file,
         directory=f"courses/{course_uuid}/activities/{activity_uuid}/dynamic/blocks/{type_of_block}/{block_id}",
-        type_of_dir="orgs",
-        uuid=org_uuid,
+        type_of_dir="platform",
+        uuid=None,
         allowed_types=allowed_types,
         filename_prefix=f"block_{file_id}",
         max_size=50 * 1024 * 1024,  # 50MB

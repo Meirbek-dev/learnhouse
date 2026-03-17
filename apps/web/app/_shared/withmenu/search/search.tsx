@@ -405,11 +405,7 @@ const SearchPage = () => {
                           <img
                             src={
                               course.thumbnail_image
-                                ? getCourseThumbnailMediaDirectory(
-                                    org?.org_uuid,
-                                    course.course_uuid,
-                                    course.thumbnail_image,
-                                  )
+                                ? getCourseThumbnailMediaDirectory(course.course_uuid, course.thumbnail_image)
                                 : '/empty_thumbnail.webp'
                             }
                             alt={course.name}

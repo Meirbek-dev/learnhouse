@@ -203,6 +203,15 @@ async function getUnifiedServerData(): Promise<RawDashboardResponse | null> {
   return fetchGamificationData(accessToken);
 }
 
+async function getUnifiedServerDataWithToken(accessToken?: string | null): Promise<RawDashboardResponse | null> {
+  const resolvedAccessToken = accessToken ?? (await getAccessToken());
+  if (!resolvedAccessToken) {
+    return null;
+  }
+
+  return fetchGamificationData(resolvedAccessToken);
+}
+
 export async function getServerGamificationProfile(): Promise<UserGamificationProfile | null> {
   const json = await getUnifiedServerData();
 
@@ -214,8 +223,8 @@ export async function getServerGamificationProfile(): Promise<UserGamificationPr
   return normalizeProfile((json.profile ?? json) as Record<string, unknown> | undefined);
 }
 
-export async function getServerGamificationDashboard(): Promise<DashboardData | null> {
-  const json = await getUnifiedServerData();
+export async function getServerGamificationDashboard(accessToken?: string | null): Promise<DashboardData | null> {
+  const json = await getUnifiedServerDataWithToken(accessToken);
 
   // Return null if no data (unauthorized or error)
   if (!json) {
@@ -244,15 +253,17 @@ export async function getServerGamificationDashboard(): Promise<DashboardData | 
  * Fetch platform leaderboard
  * Returns null if user is not authenticated or if fetch fails
  */
-export async function getServerLeaderboard(limit = 20): Promise<PlatformLeaderboard | null> {
-  // Check if user is authenticated first
-  const accessToken = await getAccessToken();
-  if (!accessToken) {
+export async function getServerLeaderboard(
+  limit = 20,
+  accessToken?: string | null,
+): Promise<PlatformLeaderboard | null> {
+  const resolvedAccessToken = accessToken ?? (await getAccessToken());
+  if (!resolvedAccessToken) {
     return null; // Expected: user not authenticated
   }
 
   // Use the cached fetcher
-  const json = await fetchLeaderboardData(limit, accessToken);
+  const json = await fetchLeaderboardData(limit, resolvedAccessToken);
   return normalizeLeaderboard(json);
 }
 

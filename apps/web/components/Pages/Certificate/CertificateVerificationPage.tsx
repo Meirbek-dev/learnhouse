@@ -230,11 +230,10 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
                   <div className="h-12 w-20 overflow-hidden rounded-lg bg-gray-100 ring-1 ring-black/10 ring-inset">
                     {certificateData.course.thumbnail_image ? (
                       <img
-                        src={getCourseThumbnailMediaDirectory(
-                          org?.org_uuid,
-                          certificateData.course.course_uuid,
-                          certificateData.course.thumbnail_image,
-                        )}
+                          src={getCourseThumbnailMediaDirectory(
+                            certificateData.course.course_uuid,
+                            certificateData.course.thumbnail_image,
+                          )}
                         alt={`${certificateData.course.name} ${t('courseThumbnailAlt')}`}
                         className="h-full w-full object-cover"
                       />

@@ -167,7 +167,6 @@ const ThumbnailUpdate = ({ thumbnailType, disabled = false, disabledReason }: Th
       if (type === 'image') {
         return course.courseStructure.thumbnail_image
           ? getCourseThumbnailMediaDirectory(
-              org?.org_uuid,
               course.courseStructure.course_uuid,
               course.courseStructure.thumbnail_image,
             )
@@ -175,7 +174,6 @@ const ThumbnailUpdate = ({ thumbnailType, disabled = false, disabledReason }: Th
       }
       return course.courseStructure.thumbnail_video
         ? getCourseThumbnailMediaDirectory(
-            org?.org_uuid,
             course.courseStructure.course_uuid,
             course.courseStructure.thumbnail_video,
           )

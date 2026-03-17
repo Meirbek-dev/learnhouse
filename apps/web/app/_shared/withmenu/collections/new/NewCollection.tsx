@@ -7,7 +7,7 @@ import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { usePlatform } from '@/components/Contexts/PlatformContext';
 import { createCollection } from '@services/courses/collections';
-import { useCourseList } from '@/hooks/useCourseListByOrg';
+import { useCourseList } from '@/hooks/useCourseList';
 import { revalidateTags } from '@services/utils/ts/requests';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { getAbsoluteUrl } from '@services/config/config';
@@ -336,11 +336,7 @@ const NewCollection = () => {
                             <div className="bg-muted relative h-20 w-32 shrink-0 overflow-hidden rounded-md border">
                               {course.thumbnail_image ? (
                                 <img
-                                  src={getCourseThumbnailMediaDirectory(
-                                    org.org_uuid,
-                                    course.course_uuid,
-                                    course.thumbnail_image,
-                                  )}
+                                  src={getCourseThumbnailMediaDirectory(course.course_uuid, course.thumbnail_image)}
                                   alt={course.name}
                                   className="h-full w-full object-cover"
                                 />

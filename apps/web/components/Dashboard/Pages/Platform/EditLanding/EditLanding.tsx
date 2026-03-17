@@ -1537,7 +1537,7 @@ const ImageUploader: FC<ImageUploaderProps> = ({ t, onImageUploaded, className, 
     try {
       const response = await uploadLandingContent(file, access_token);
       if (response.status === 200) {
-        const imageUrl = getOrgLandingMediaDirectory(org.org_uuid, response.data.filename);
+        const imageUrl = getOrgLandingMediaDirectory(response.data.filename);
         onImageUploaded(imageUrl);
         toast.success(tNotify('imageUploadSuccess'), { id: loadingToast });
       } else {

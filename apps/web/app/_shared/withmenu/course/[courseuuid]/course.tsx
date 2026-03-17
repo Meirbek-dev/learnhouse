@@ -273,11 +273,7 @@ const CourseClient = (props: any) => {
                           </div>
                         )}
                         <video
-                          src={getCourseThumbnailMediaDirectory(
-                            org?.org_uuid,
-                            course?.course_uuid,
-                            course?.thumbnail_video,
-                          )}
+                          src={getCourseThumbnailMediaDirectory(course?.course_uuid, course?.thumbnail_video)}
                           className="h-auto w-full rounded-lg bg-black object-contain"
                           controls
                           autoPlay
@@ -292,11 +288,7 @@ const CourseClient = (props: any) => {
                     return (
                       <div className="relative max-h-192 w-full overflow-hidden rounded-lg shadow-xl ring-1 ring-black/10 ring-inset">
                         <img
-                          src={getCourseThumbnailMediaDirectory(
-                            org?.org_uuid,
-                            course?.course_uuid,
-                            course?.thumbnail_image,
-                          )}
+                          src={getCourseThumbnailMediaDirectory(course?.course_uuid, course?.thumbnail_image)}
                           alt={t('courseThumbnailAlt')}
                           className="h-auto w-full object-contain"
                         />

@@ -70,7 +70,7 @@ export default function DiscussionReply({
 
   // Helper to check if a given user is admin for the org
   const isAuthorAdmin = (username: string) => {
-    if (!(org?.id && reply?.username)) return false;
+    if (!reply?.username) return false;
     // If current user is admin and is the author, show badge
     return canModerateDiscussion && username === currentUser?.username;
   };

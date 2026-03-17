@@ -51,7 +51,6 @@ async def create_pdf_block(
         block_uuid,
         ["pdf"],
         block_type,
-        org.org_uuid,
         str(course.course_uuid),
     )
 

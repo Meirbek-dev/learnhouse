@@ -411,7 +411,7 @@ function ViewerControls({ onExpand, onDownload, t }: ViewerControlsProps) {
 
 export default function ImageBlockComponent({ node, updateAttributes, extension }: ImageBlockProps) {
   const t = useTranslations('DashPage.Editor.ImageBlock');
-  const org = usePlatform() as { org_uuid: string } | null;
+  usePlatform();
   const course = useCourse();
   const { isEditable } = useEditorProvider();
   const session = usePlatformSession() as {
@@ -428,18 +428,17 @@ export default function ImageBlockComponent({ node, updateAttributes, extension 
 
   // Image URL computation
   const imageUrl = useMemo(() => {
-    if (!blockObject || !org || !course) return null;
+    if (!blockObject || !course) return null;
 
     const fileId = `${blockObject.content.file_id}.${blockObject.content.file_format}`;
     return getActivityBlockMediaDirectory(
-      org.org_uuid,
       course.courseStructure.course_uuid,
       activityUuid,
       blockObject.block_uuid,
       fileId,
       'imageBlock',
     );
-  }, [blockObject, org, course, activityUuid]);
+  }, [blockObject, course, activityUuid]);
 
   // Upload handling
   const { file, preview, isUploading, error, handleFileSelect, handleUpload, reset } = useImageUpload({

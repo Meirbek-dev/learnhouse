@@ -7,7 +7,7 @@ from src.db.organizations import Organization
 
 def get_platform_organization(db_session: Session) -> Organization:
     platform_org = db_session.exec(
-        select(Organization).order_by(Organization.id.asc())
+        select(Organization).order_by(Organization.creation_date.asc())
     ).first()
     if not platform_org:
         raise RuntimeError(

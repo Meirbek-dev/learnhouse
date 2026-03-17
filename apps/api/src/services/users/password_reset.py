@@ -64,11 +64,10 @@ async def send_reset_password_code(
         "reset_code_type": "signup",
         "created_at": datetime.now().isoformat(),
         "created_by": user.user_uuid,
-        "org_uuid": org.org_uuid,
     }
 
     r.set(
-        f"{reset_email_invite_uuid}:user:{user.user_uuid}:org:{org.org_uuid}:code:{generated_reset_code}",
+        f"{reset_email_invite_uuid}:user:{user.user_uuid}:platform:code:{generated_reset_code}",
         orjson.dumps(resetCodeObject),
         ex=ttl,
     )
@@ -133,7 +132,7 @@ async def change_password_with_reset_code(
         )
 
     # Get reset code
-    reset_code_key = f"*:user:{user.user_uuid}:org:{org.org_uuid}:code:{reset_code}"
+    reset_code_key = f"*:user:{user.user_uuid}:platform:code:{reset_code}"
     keys = r.keys(reset_code_key)
 
     if not keys:

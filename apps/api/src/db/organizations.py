@@ -62,7 +62,6 @@ class OrgConfigData(PydanticStrictBaseModel):
 
 
 class OrgConfig(PydanticStrictBaseModel):
-    id: int
     config: OrgConfigData = Field(default_factory=OrgConfigData)
     creation_date: str | None = None
     update_date: str | None = None
@@ -70,13 +69,11 @@ class OrgConfig(PydanticStrictBaseModel):
 
 def build_default_org_config(
     *,
-    platform_id: int,
     landing: dict | None = None,
     creation_date: str | None = None,
     update_date: str | None = None,
 ) -> OrgConfig:
     return OrgConfig(
-        id=platform_id,
         config=OrgConfigData(landing=landing or {}),
         creation_date=creation_date,
         update_date=update_date,
@@ -97,7 +94,6 @@ class OrganizationBase(SQLModelStrictBaseModel):
     thumbnail_image: str | None = None
     previews: dict | None = Field(default_factory=dict, sa_column=Column(JSON))
     label: str | None = None
-    slug: str
     email: str
 
 
@@ -105,7 +101,6 @@ class Organization(OrganizationBase, table=True):
     """Database table model for Organization."""
 
     id: int | None = Field(default=None, primary_key=True)
-    org_uuid: str = ""
     creation_date: str = ""
     update_date: str = ""
     landing: dict | None = Field(default_factory=dict, sa_column=Column(JSON))
@@ -127,7 +122,6 @@ class OrganizationUpdate(SQLModelStrictBaseModel):
     thumbnail_image: str | None = None
     previews: dict | None = None
     label: str | None = None
-    slug: str | None = None
     email: str | None = None
     update_date: str | None = None
 
@@ -139,8 +133,6 @@ class OrganizationCreate(OrganizationBase):
 class OrganizationRead(OrganizationBase):
     """Model for reading an organization with all related data."""
 
-    id: int
-    org_uuid: str
     config: OrgConfig
     creation_date: str
     update_date: str
@@ -155,9 +147,8 @@ class OrganizationRead(OrganizationBase):
         else:
             return value
 
-        if data.get("config") is None and data.get("id") is not None:
+        if data.get("config") is None:
             data["config"] = build_default_org_config(
-                platform_id=data["id"],
                 landing=data.get("landing"),
                 creation_date=data.get("creation_date"),
                 update_date=data.get("update_date"),

@@ -3,15 +3,15 @@ from fastapi import UploadFile
 from src.services.utils.upload_content import upload_content
 
 
-async def upload_video(video_file, activity_uuid, org_uuid, course_uuid):
+async def upload_video(video_file, activity_uuid, course_uuid):
     contents = video_file.file.read()
     video_format = video_file.filename.split(".")[-1]
 
     try:
         await upload_content(
             f"courses/{course_uuid}/activities/{activity_uuid}/video",
-            "orgs",
-            org_uuid,
+            "platform",
+            None,
             contents,
             f"video.{video_format}",
         )
@@ -23,7 +23,6 @@ async def upload_video(video_file, activity_uuid, org_uuid, course_uuid):
 async def upload_subtitle(
     subtitle_file: UploadFile,
     activity_uuid: str,
-    org_uuid: str,
     course_uuid: str,
     language: str,
     subtitle_id: str | None = None,
@@ -35,8 +34,8 @@ async def upload_subtitle(
     try:
         await upload_content(
             f"courses/{course_uuid}/activities/{activity_uuid}/video",
-            "orgs",
-            org_uuid,
+            "platform",
+            None,
             contents,
             f"subtitle.{language}.{subtitle_format}",
         )
