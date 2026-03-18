@@ -70,7 +70,7 @@ export function useSaveSection(options?: SaveSectionOptions) {
           await refreshCourseMeta();
         }
 
-        const successMessage = invocationOptions?.successMessage || options?.successMessage || 'Changes saved';
+        const successMessage = invocationOptions?.successMessage || options?.successMessage || 'Изменения сохранены';
         if (successMessage) {
           toast.success(successMessage);
         }

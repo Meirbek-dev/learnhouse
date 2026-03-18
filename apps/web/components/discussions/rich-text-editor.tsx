@@ -225,7 +225,7 @@ export default function RichTextEditor({
   }
 
   // TipTap v3 doesn't expose extension commands on ChainedCommands without generic editor typing
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const ed = editor as any;
 
   return (
