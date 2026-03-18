@@ -13,7 +13,6 @@ import { Badge } from '@/components/ui/badge';
 import dynamic from 'next/dynamic';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
-import type React from 'react';
 
 const RichTextEditor = dynamic(() => import('./rich-text-editor'), {
   ssr: false,
@@ -86,28 +85,29 @@ export default function DiscussionPost({
     return `${first} ${last}`.trim() || post.username;
   };
 
-  const handleSubmitReply = (e: React.FormEvent) => {
-    e.preventDefault();
+  const hasMeaningfulText = (value: string) => {
     // Check if content has meaningful text (not just empty HTML tags)
     const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = replyContent;
+    tempDiv.innerHTML = value;
     const textContent = tempDiv.textContent || tempDiv.textContent || '';
 
-    if (!textContent.trim()) return;
-    onSubmitReply(post.id, replyContent);
+    return textContent.trim().length > 0;
+  };
+
+  const handleSubmitReply = (formData: FormData) => {
+    const nextReplyContent = String(formData.get('replyContent') ?? '');
+
+    if (!hasMeaningfulText(nextReplyContent)) return;
+    onSubmitReply(post.id, nextReplyContent);
     setReplyContent('');
     setReplyingTo(false);
   };
 
-  const handleEditSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Check if content has meaningful text (not just empty HTML tags)
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = editContent;
-    const textContent = tempDiv.textContent || tempDiv.textContent || '';
+  const handleEditSubmit = (formData: FormData) => {
+    const nextEditContent = String(formData.get('editContent') ?? '');
 
-    if (!textContent.trim()) return;
-    onEditPost(post.id, editContent);
+    if (!hasMeaningfulText(nextEditContent)) return;
+    onEditPost(post.id, nextEditContent);
     setEditingPost(false);
   };
 
@@ -190,9 +190,14 @@ export default function DiscussionPost({
 
             {editingPost ? (
               <form
-                onSubmit={handleEditSubmit}
+                action={handleEditSubmit}
                 className="mt-3"
               >
+                <input
+                  type="hidden"
+                  name="editContent"
+                  value={editContent}
+                />
                 <RichTextEditor
                   content={editContent}
                   onChange={setEditContent}
@@ -213,7 +218,7 @@ export default function DiscussionPost({
                   <Button
                     type="submit"
                     size="sm"
-                    disabled={!editContent.trim()}
+                    disabled={!hasMeaningfulText(editContent)}
                   >
                     {t('save')}
                   </Button>
@@ -305,9 +310,14 @@ export default function DiscussionPost({
 
             {replyingTo ? (
               <form
-                onSubmit={handleSubmitReply}
+                action={handleSubmitReply}
                 className="mt-4"
               >
+                <input
+                  type="hidden"
+                  name="replyContent"
+                  value={replyContent}
+                />
                 <div className="flex items-start gap-3">
                   <UserAvatar
                     size="xs"
@@ -336,7 +346,7 @@ export default function DiscussionPost({
                       <Button
                         type="submit"
                         size="sm"
-                        disabled={!replyContent.trim()}
+                        disabled={!hasMeaningfulText(replyContent)}
                         className="flex items-center gap-1"
                       >
                         <Send size={14} />

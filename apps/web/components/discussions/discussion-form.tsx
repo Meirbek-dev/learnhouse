@@ -6,7 +6,6 @@ import { useTranslations } from 'next-intl';
 import { Send } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useState } from 'react';
-// TODO: Migration from FormEvent
 
 const RichTextEditor = dynamic(() => import('./rich-text-editor'), {
   ssr: false,
@@ -22,33 +21,36 @@ export default function DiscussionForm({ currentUser, onSubmit }: DiscussionForm
   const t = useTranslations('CoursePage');
   const [content, setContent] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const hasMeaningfulText = (value: string) => {
     // Check if content has meaningful text (not just empty HTML tags)
     const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = content;
+    tempDiv.innerHTML = value;
     const textContent = tempDiv.textContent || tempDiv.textContent || '';
 
-    if (!textContent.trim()) return;
-    onSubmit(content);
+    return textContent.trim().length > 0;
+  };
+
+  const handleSubmit = (formData: FormData) => {
+    const nextContent = String(formData.get('content') ?? '');
+
+    if (!hasMeaningfulText(nextContent)) return;
+    onSubmit(nextContent);
     setContent('');
   };
 
-  // Helper function to check if content is empty
-  const isContentEmpty = () => {
-    if (!content) return true;
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = content;
-    const textContent = tempDiv.textContent || tempDiv.textContent || '';
-    return !textContent.trim();
-  };
+  const isContentEmpty = !hasMeaningfulText(content);
 
   return (
     <div className="bg-card text-card-foreground rounded-lg border p-5 shadow-sm">
       <form
-        onSubmit={handleSubmit}
+        action={handleSubmit}
         className="space-y-4"
       >
+        <input
+          type="hidden"
+          name="content"
+          value={content}
+        />
         <div className="flex items-start gap-4">
           <UserAvatar
             size="md"
@@ -67,7 +69,7 @@ export default function DiscussionForm({ currentUser, onSubmit }: DiscussionForm
         <div className="flex justify-end">
           <Button
             type="submit"
-            disabled={isContentEmpty()}
+            disabled={isContentEmpty}
             className="flex items-center gap-2"
           >
             <Send size={16} />

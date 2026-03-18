@@ -1143,18 +1143,22 @@ function RoleEditForm({
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (formData: FormData) => {
     setIsSubmitting(true);
     try {
-      await onSubmit({ name, slug, description, priority });
+      await onSubmit({
+        name: String(formData.get('name') ?? name).trim(),
+        slug: String(formData.get('slug') ?? slug).trim(),
+        description: String(formData.get('description') ?? description).trim(),
+        priority: Number(formData.get('priority') ?? priority),
+      });
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form action={handleSubmit}>
       <DialogHeader>
         <DialogTitle>
           {mode === 'edit' ? t('editRoleTitle') : mode === 'clone' ? t('cloneRoleTitle') : t('createRoleTitle')}
@@ -1173,6 +1177,7 @@ function RoleEditForm({
           <Label htmlFor="name">{t('fieldName')}</Label>
           <Input
             id="name"
+            name="name"
             value={name}
             onChange={(e) => handleNameChange(e.target.value)}
             placeholder={t('namePlaceholder')}
@@ -1182,8 +1187,16 @@ function RoleEditForm({
 
         <div className="grid gap-2">
           <Label htmlFor="slug">{t('fieldSlug')}</Label>
+          {isEditMode && (
+            <input
+              type="hidden"
+              name="slug"
+              value={slug}
+            />
+          )}
           <Input
             id="slug"
+            name="slug"
             value={slug}
             onChange={(e) => setSlug(e.target.value)}
             placeholder={t('slugPlaceholder')}
@@ -1197,6 +1210,7 @@ function RoleEditForm({
           <Label htmlFor="priority">{t('tableHead.priority')}</Label>
           <Input
             id="priority"
+            name="priority"
             type="number"
             min={0}
             max={isSuperAdmin ? undefined : maxPriority}
@@ -1213,6 +1227,7 @@ function RoleEditForm({
           <Label htmlFor="description">{t('fieldDescription')}</Label>
           <Input
             id="description"
+            name="description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder={t('descriptionPlaceholder')}

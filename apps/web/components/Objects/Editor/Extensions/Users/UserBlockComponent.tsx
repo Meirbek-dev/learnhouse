@@ -29,7 +29,6 @@ import { Badge } from '@components/ui/badge';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
-import type { FormEvent } from 'react';
 
 interface UserData {
   id: number;
@@ -150,10 +149,11 @@ const UserBlockComponent = (props: any) => {
     }
   };
 
-  const handleUsernameSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!username.trim()) return;
-    await fetchUserByUsername(username);
+  const handleUsernameSubmit = async (formData: FormData) => {
+    const submittedUsername = String(formData.get('username') ?? '').trim();
+
+    if (!submittedUsername) return;
+    await fetchUserByUsername(submittedUsername);
   };
 
   if (isEditable && !userData) {
@@ -161,7 +161,7 @@ const UserBlockComponent = (props: any) => {
       <NodeViewWrapper className="block-user">
         <div className="rounded-lg border border-dashed border-gray-200 bg-gray-50 p-6">
           <form
-            onSubmit={handleUsernameSubmit}
+            action={handleUsernameSubmit}
             className="space-y-4"
           >
             <div>
@@ -169,6 +169,7 @@ const UserBlockComponent = (props: any) => {
               <div className="mt-2 flex gap-2">
                 <Input
                   id="username"
+                  name="username"
                   value={username}
                   onChange={(e) => {
                     setUsername(e.target.value);

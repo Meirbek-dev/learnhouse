@@ -1,7 +1,7 @@
 import { useTranslations } from 'next-intl';
 import { Check, X } from 'lucide-react';
 import { useState } from 'react';
-import type React from 'react';
+import type { KeyboardEvent } from 'react';
 
 interface LinkInputTooltipProps {
   onSave: (url: string) => void;
@@ -9,20 +9,22 @@ interface LinkInputTooltipProps {
   currentUrl?: string;
 }
 
-const LinkInputTooltip: React.FC<LinkInputTooltipProps> = ({ onSave, onCancel, currentUrl = '' }) => {
+const LinkInputTooltip = ({ onSave, onCancel, currentUrl = '' }: LinkInputTooltipProps) => {
   const [url, setUrl] = useState(currentUrl);
   const t = useTranslations('DashPage.Editor.LinkInputTooltip');
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (url.trim()) {
+  const handleSubmit = (formData: FormData) => {
+    const nextUrl = String(formData.get('url') ?? '').trim();
+
+    if (nextUrl) {
       // Ensure the URL has a protocol
-      const formattedUrl = url.startsWith('http://') || url.startsWith('https://') ? url : `https://${url}`;
+      const formattedUrl =
+        nextUrl.startsWith('http://') || nextUrl.startsWith('https://') ? nextUrl : `https://${nextUrl}`;
       onSave(formattedUrl);
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Escape') {
       onCancel();
     }
@@ -31,10 +33,11 @@ const LinkInputTooltip: React.FC<LinkInputTooltipProps> = ({ onSave, onCancel, c
   return (
     <div className="absolute top-full left-0 z-1000 mt-1 rounded-md border border-gray-300/50 bg-white p-2 shadow-md">
       <form
-        onSubmit={handleSubmit}
+        action={handleSubmit}
         className="flex items-center gap-1"
       >
         <input
+          name="url"
           type="text"
           placeholder={t('enterUrl')}
           value={url}

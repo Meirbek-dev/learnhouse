@@ -23,7 +23,7 @@ import {
   Trash2,
   X,
 } from 'lucide-react';
-import type { CSSProperties, ChangeEvent, FormEvent, KeyboardEvent, MouseEvent as ReactMouseEvent } from 'react';
+import type { CSSProperties, ChangeEvent, KeyboardEvent, MouseEvent as ReactMouseEvent } from 'react';
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Textarea } from '@components/ui/textarea';
@@ -324,7 +324,7 @@ const InputModal = ({
   onClose: () => void;
   onUrlChange: (e: ChangeEvent<HTMLInputElement>) => void;
   onCodeChange: (e: ChangeEvent<HTMLTextAreaElement>) => void;
-  onSubmit: (e: FormEvent) => void;
+  onSubmit: (formData: FormData) => void;
   onOpenDocs: () => void;
   t: any;
 }) => {
@@ -353,7 +353,7 @@ const InputModal = ({
   return (
     <div className="absolute inset-0 z-10 flex items-center justify-center bg-gray-900/20 p-4 backdrop-blur-sm">
       <form
-        onSubmit={onSubmit}
+        action={onSubmit}
         onKeyDown={handleKeyDown}
         className="w-full max-w-lg rounded-2xl bg-white p-5 shadow-xl"
       >
@@ -398,6 +398,7 @@ const InputModal = ({
               />
               <input
                 ref={urlInputRef}
+                name="embedUrl"
                 type="text"
                 value={embedUrl}
                 onChange={onUrlChange}
@@ -414,6 +415,7 @@ const InputModal = ({
           <div className="mb-3">
             <Textarea
               ref={codeInputRef}
+              name="embedCode"
               value={embedCode}
               onChange={onCodeChange}
               className="min-h-[140px] w-full rounded-xl border-2 border-gray-200 bg-gray-50 font-mono text-sm transition-all focus:border-blue-500 focus:bg-white"
@@ -582,10 +584,28 @@ const EmbedObjectsComponent = (props: any) => {
     updateAttributes({ embedUrl: '', embedCode: '' });
   }, [updateAttributes]);
 
-  const handleInputSubmit = useCallback((e: FormEvent) => {
-    e.preventDefault();
-    setActiveInput('none');
-  }, []);
+  const handleInputSubmit = useCallback(
+    (formData: FormData) => {
+      if (activeInput === 'url') {
+        const nextUrl = sanitizeUrl(String(formData.get('embedUrl') ?? ''));
+        setEmbedType('url');
+        setEmbedUrl(nextUrl);
+        updateAttributes({ embedUrl: nextUrl, embedType: 'url' });
+      }
+
+      if (activeInput === 'code') {
+        const nextCode = String(formData.get('embedCode') ?? '');
+        if (nextCode === '' || nextCode.trim()) {
+          setEmbedType('code');
+          setEmbedCode(nextCode);
+          updateAttributes({ embedCode: nextCode, embedType: 'code' });
+        }
+      }
+
+      setActiveInput('none');
+    },
+    [activeInput, updateAttributes],
+  );
 
   const handleOpenDocs = useCallback(() => {
     if (selectedProduct) {

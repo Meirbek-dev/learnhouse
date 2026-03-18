@@ -13,7 +13,6 @@ import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import Link from '@components/ui/AppLink';
-import type { FormEvent } from 'react';
 
 // Types from SearchBar component
 interface User {
@@ -202,10 +201,11 @@ const SearchPage = () => {
     router.push(`?${current.toString()}`);
   };
 
-  const handleSearch = (e: FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      updateSearchParams({ q: searchQuery, page: '1' });
+  const handleSearch = (formData: FormData) => {
+    const submittedQuery = String(formData.get('q') ?? '').trim();
+
+    if (submittedQuery) {
+      updateSearchParams({ q: submittedQuery, page: '1' });
     }
   };
 
@@ -278,10 +278,11 @@ const SearchPage = () => {
 
             {/* Search Input */}
             <form
-              onSubmit={handleSearch}
+              action={handleSearch}
               className="group relative mb-6"
             >
               <Input
+                name="q"
                 type="text"
                 value={searchQuery}
                 onChange={(e) => {

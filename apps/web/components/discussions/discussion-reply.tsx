@@ -12,7 +12,6 @@ import { useState, useTransition } from 'react';
 import { Badge } from '@/components/ui/badge';
 import dynamic from 'next/dynamic';
 import { cn } from '@/lib/utils';
-import type React from 'react';
 
 const RichTextEditor = dynamic(() => import('./rich-text-editor'), {
   ssr: false,
@@ -54,16 +53,22 @@ export default function DiscussionReply({
     const last = lastName || '';
     return `${first} ${last}`.trim() || reply.username;
   };
-  const handleEditSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+
+  const hasMeaningfulText = (value: string) => {
     // Check if content has meaningful text (not just empty HTML tags)
     const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = editContent;
+    tempDiv.innerHTML = value;
     const textContent = tempDiv.textContent || tempDiv.textContent || '';
 
-    if (!textContent.trim()) return;
+    return textContent.trim().length > 0;
+  };
+
+  const handleEditSubmit = (formData: FormData) => {
+    const nextEditContent = String(formData.get('editContent') ?? '');
+
+    if (!hasMeaningfulText(nextEditContent)) return;
     startTransition(() => {
-      onEditReply(postId, reply.id, editContent);
+      onEditReply(postId, reply.id, nextEditContent);
       setEditing(false);
     });
   };
@@ -146,9 +151,14 @@ export default function DiscussionReply({
           {/* Content */}
           {editing ? (
             <form
-              onSubmit={handleEditSubmit}
+              action={handleEditSubmit}
               className="space-y-3"
             >
+              <input
+                type="hidden"
+                name="editContent"
+                value={editContent}
+              />
               <RichTextEditor
                 content={editContent}
                 onChange={setEditContent}
@@ -168,7 +178,7 @@ export default function DiscussionReply({
                 <Button
                   type="submit"
                   size="sm"
-                  disabled={!editContent.trim()}
+                  disabled={!hasMeaningfulText(editContent)}
                   className="h-8 px-3 text-sm"
                 >
                   {t('save')}

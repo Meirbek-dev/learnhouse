@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@components/ui/dropdown-menu';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import type { ChangeEvent, ComponentType, DragEvent, FormEvent } from 'react';
+import type { ChangeEvent, ComponentType, DragEvent } from 'react';
 import { usePlatform } from '@/components/Contexts/PlatformContext';
 import { constructAcceptValue } from '@/lib/constants';
 import { AnimatePresence, motion } from 'motion/react';
@@ -825,22 +825,36 @@ const VideoModal = ({ submitFileActivity, submitExternalVideo, chapterId, course
 
   const isYouTubeUrlValid = youtubeUrl ? /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+/.test(youtubeUrl) : false;
 
-  const validateForm = () => {
+  const validateForm = ({
+    activityName,
+    sourceType,
+    selectedVideo,
+    submittedYoutubeUrl,
+  }: {
+    activityName: string;
+    sourceType: 'file' | 'youtube';
+    selectedVideo: File | null;
+    submittedYoutubeUrl: string;
+  }) => {
     const newErrors: Record<string, string> = {};
 
-    if (!name.trim()) {
+    const youtubeUrlIsValid = submittedYoutubeUrl
+      ? /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+/.test(submittedYoutubeUrl)
+      : false;
+
+    if (!activityName.trim()) {
       newErrors.name = t('errorActivityNameRequired');
     }
 
-    if (selectedView === 'file' && !video) {
+    if (sourceType === 'file' && !selectedVideo) {
       newErrors.video = t('errorPleaseSelectVideoFile');
     }
 
-    if (selectedView === 'youtube' && !youtubeUrl.trim()) {
+    if (sourceType === 'youtube' && !submittedYoutubeUrl.trim()) {
       newErrors.youtubeUrl = t('errorYouTubeUrlRequired');
     }
 
-    if (selectedView === 'youtube' && youtubeUrl && !isYouTubeUrlValid) {
+    if (sourceType === 'youtube' && submittedYoutubeUrl && !youtubeUrlIsValid) {
       newErrors.youtubeUrl = t('errorValidYouTubeUrl');
     }
 
@@ -889,10 +903,20 @@ const VideoModal = ({ submitFileActivity, submitExternalVideo, chapterId, course
     return false;
   })();
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (formData: FormData) => {
+    const submittedName = String(formData.get('name') ?? '').trim();
+    const submittedYoutubeUrl = String(formData.get('youtubeUrl') ?? '').trim();
+    const submittedVideo = formData.get('videoFile');
+    const selectedVideo = submittedVideo instanceof File && submittedVideo.size > 0 ? submittedVideo : video;
 
-    if (!validateForm()) {
+    if (
+      !validateForm({
+        activityName: submittedName,
+        sourceType: selectedView,
+        selectedVideo,
+        submittedYoutubeUrl,
+      })
+    ) {
       toast.error(t('errorFixErrorsBeforeSubmitting'));
       return;
     }
@@ -909,12 +933,12 @@ const VideoModal = ({ submitFileActivity, submitExternalVideo, chapterId, course
     setIsSubmitting(true);
 
     try {
-      if (selectedView === 'file' && video) {
+      if (selectedView === 'file' && selectedVideo) {
         await submitFileActivity(
-          video,
+          selectedVideo,
           'video',
           {
-            name: name.trim(),
+            name: submittedName,
             chapter_id: chapterId,
             activity_type: 'TYPE_VIDEO',
             activity_sub_type: 'SUBTYPE_VIDEO_HOSTED',
@@ -931,9 +955,9 @@ const VideoModal = ({ submitFileActivity, submitExternalVideo, chapterId, course
 
       if (selectedView === 'youtube') {
         const external_video_object: ExternalVideoObject = {
-          name: name.trim(),
+          name: submittedName,
           type: 'youtube',
-          uri: youtubeUrl,
+          uri: submittedYoutubeUrl,
           chapter_id: chapterId,
           details: videoDetails,
         };
@@ -954,7 +978,7 @@ const VideoModal = ({ submitFileActivity, submitExternalVideo, chapterId, course
   return (
     <div className="mx-auto max-w-4xl">
       <form
-        onSubmit={handleSubmit}
+        action={handleSubmit}
         className="space-y-6"
       >
         {/* Header */}
@@ -978,6 +1002,7 @@ const VideoModal = ({ submitFileActivity, submitExternalVideo, chapterId, course
           </Label>
           <Input
             id="video-activity-name"
+            name="name"
             value={name}
             onChange={(e) => {
               setName(e.target.value);
@@ -1079,6 +1104,7 @@ const VideoModal = ({ submitFileActivity, submitExternalVideo, chapterId, course
                     </Label>
                     <input
                       id={fileInputId}
+                      name="videoFile"
                       type="file"
                       accept={SUPPORTED_VIDEO_FILES}
                       onChange={handleVideoChange}
@@ -1147,6 +1173,7 @@ const VideoModal = ({ submitFileActivity, submitExternalVideo, chapterId, course
                     </Label>
                     <Input
                       id="youtube-url"
+                      name="youtubeUrl"
                       value={youtubeUrl}
                       onChange={(e) => {
                         setYoutubeUrl(e.target.value);
