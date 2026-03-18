@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import { Send } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useState } from 'react';
+// TODO: Migration from FormEvent
 
 const RichTextEditor = dynamic(() => import('./rich-text-editor'), {
   ssr: false,
