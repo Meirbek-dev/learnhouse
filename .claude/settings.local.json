@@ -10,7 +10,8 @@
       "Bash(bun tsc:*)",
       "Bash(grep:*)",
       "Bash(ls:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "mcp__Claude_Preview__preview_start"
     ]
   }
 }
