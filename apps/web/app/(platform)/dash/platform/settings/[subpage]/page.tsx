@@ -2,7 +2,6 @@
 
 import EditSocials from '@/components/Dashboard/Pages/Platform/EditSocials/EditSocials';
 import EditLanding from '@/components/Dashboard/Pages/Platform/EditLanding/EditLanding';
-import EditGeneral from '@/components/Dashboard/Pages/Platform/EditGeneral/EditGeneral';
 import EditImages from '@/components/Dashboard/Pages/Platform/EditImages/EditImages';
 import { ImageIcon, LayoutDashboardIcon, Share2Icon, TextIcon } from 'lucide-react';
 import SettingsHeader from '@components/Dashboard/Misc/SettingsHeader';
@@ -27,7 +26,6 @@ interface TabItem {
 }
 
 const SETTING_TABS: TabItem[] = [
-  { id: 'general', label: 'general', icon: TextIcon, titleKey: 'generalTitle', descriptionKey: 'generalDescription' },
   {
     id: 'landing',
     label: 'landing',
@@ -85,9 +83,6 @@ export default function PlatformSettingsPage(props: { params: Promise<{ subpage:
 const ContentRenderer = ({ subpage }: { subpage: string }) => {
   const content = useMemo(() => {
     switch (subpage) {
-      case 'general': {
-        return <EditGeneral />;
-      }
       case 'previews': {
         return <EditImages />;
       }

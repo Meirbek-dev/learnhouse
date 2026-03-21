@@ -90,7 +90,7 @@ const BreadCrumbs = (props: BreadCrumbsProps) => {
         return '/dash/users/settings/users';
       }
       case 'platform': {
-        return '/dash/platform/settings/general';
+        return '/dash/platform/settings/landing';
       }
       case 'payments': {
         return '/dash/payments';

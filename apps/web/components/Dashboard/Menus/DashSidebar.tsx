@@ -175,7 +175,7 @@ const useNavigationItems = () => {
       ? [
           {
             title: t('tooltips.platform'),
-            href: '/dash/platform/settings/general',
+            href: '/dash/platform/settings/landing',
             icon: School,
             tooltip: t('tooltips.platform'),
             isActive: pathname.startsWith('/dash/platform'),

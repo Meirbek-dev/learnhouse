@@ -35,7 +35,7 @@ export default async function PlatformDashHomePage() {
           description={t('Courses.description')}
         />
         <DashboardCard
-          href="/dash/platform/settings/general"
+          href="/dash/platform/settings/landing"
           icon={
             <School
               className="mx-auto text-gray-500/100"

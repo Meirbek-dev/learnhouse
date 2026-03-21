@@ -141,7 +141,7 @@ const DashMobileMenu = () => {
             side="top"
           >
             <AppLink
-              href="/dash/platform/settings/general"
+              href="/dash/platform/settings/landing"
               className="flex flex-col items-center p-2"
               aria-label={t('ariaLabels.platformSettings')}
             >
