@@ -1,8 +1,8 @@
 import {
+  exchangeGoogleCode,
   getNewAccessTokenUsingRefreshTokenServer,
   getUserSession,
   loginAndGetToken,
-  loginWithOAuthToken,
 } from '@/services/auth/auth';
 import { SESSION_CACHE_TTL_MS, TOKEN_REFRESH_BUFFER_MS } from '@/lib/constants';
 import type { NextAuthConfig, NextAuthResult, Session } from 'next-auth';
@@ -10,7 +10,6 @@ import { getResponseMetadata } from '@/services/utils/ts/requests';
 import Credentials from 'next-auth/providers/credentials';
 import { getAbsoluteUrl } from '@/services/config/config';
 import { getServerConfig } from '@/services/config/env';
-import Google from 'next-auth/providers/google';
 import type { JWT } from 'next-auth/jwt';
 import { createHash } from 'node:crypto';
 import NextAuth from 'next-auth';
@@ -119,7 +118,9 @@ const createAuthConfig = (): NextAuthConfig => {
     debug: isDevEnv,
 
     providers: [
+      // ── Credentials (email + password) ────────────────────────────────────
       Credentials({
+        id: 'credentials',
         name: 'Credentials',
         credentials: {
           email: { label: 'Email', type: 'text', placeholder: 'user@example.com' },
@@ -170,10 +171,45 @@ const createAuthConfig = (): NextAuthConfig => {
         },
       }),
 
-      Google({
-        clientId: serverConfig.googleClientId,
-        clientSecret: serverConfig.googleClientSecret,
-        authorization: { params: { scope: 'openid email profile' } },
+      // ── Google OAuth (backend Authorization Code flow) ─────────────────────
+      //
+      // Google credentials live only in the backend.  After the backend
+      // completes the OAuth dance it redirects to /auth/google with a
+      // short-lived exchange code.  That page calls signIn('google-exchange')
+      // which triggers this provider, which exchanges the code for user+tokens.
+      Credentials({
+        id: 'google-exchange',
+        name: 'Google (backend OAuth)',
+        credentials: {
+          exchange_code: { label: 'Exchange Code', type: 'text' },
+        },
+        async authorize(credentials): Promise<any> {
+          const code = (credentials as Record<string, unknown>)?.exchange_code;
+          if (typeof code !== 'string' || !code.trim()) {
+            console.warn('Missing Google OAuth exchange code');
+            return null;
+          }
+
+          try {
+            const res = await getResponseMetadata(await exchangeGoogleCode(code.trim()));
+
+            if (!res.success || !res.data) {
+              console.error('Google exchange failed:', res);
+              return null;
+            }
+
+            const userData = res.data as UserWithTokens;
+            if (!userData.tokens?.access_token || !userData.tokens?.refresh_token) {
+              console.error('Missing tokens in Google exchange response');
+              return null;
+            }
+
+            return userData as any;
+          } catch (error) {
+            console.error('Google exchange error:', error);
+            return null;
+          }
+        },
       }),
     ],
 
@@ -208,43 +244,16 @@ const createAuthConfig = (): NextAuthConfig => {
       // ── jwt ──────────────────────────────────────────────────────────────
       async jwt({ token, user, account }): Promise<JWT | null> {
         try {
-          // Credentials sign-in
-          if (account?.provider === 'credentials' && user) {
+          // Sign-in via credentials or google-exchange provider
+          if (account?.provider === 'credentials' || account?.provider === 'google-exchange') {
             const u = user as unknown as UserWithTokens;
             if (!u.tokens?.access_token || !u.tokens?.refresh_token) {
-              console.error('Invalid token data from credentials provider');
+              console.error('Invalid token data from provider');
               return null;
             }
             assertValidTokenExpiry(u.tokens.expiry);
             token.user = u;
             return token;
-          }
-
-          // Google OAuth sign-in
-          if (account?.provider === 'google' && user?.email && account.access_token) {
-            try {
-              const res = await getResponseMetadata(
-                await loginWithOAuthToken(user.email.toLowerCase().trim(), 'google', account.access_token),
-              );
-
-              if (!res.success || !res.data) {
-                console.error('OAuth authentication failed:', res);
-                return null;
-              }
-
-              const userData = res.data as UserWithTokens;
-              if (!userData.tokens?.access_token || !userData.tokens?.refresh_token) {
-                console.error('Invalid token data from OAuth provider');
-                return null;
-              }
-              assertValidTokenExpiry(userData.tokens.expiry);
-
-              token.user = userData;
-              return token;
-            } catch (error) {
-              console.error('OAuth authentication error:', error);
-              return null;
-            }
           }
 
           // Subsequent requests — refresh access token when nearing expiry

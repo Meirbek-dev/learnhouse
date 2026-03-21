@@ -6,7 +6,7 @@ import PasswordInput from '@components/ui/custom/password-input';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { useEffect, useState, useTransition } from 'react';
 import { SiGoogle } from '@icons-pack/react-simple-icons';
-import { getAbsoluteUrl } from '@services/config/config';
+import { getAbsoluteUrl, getPublicAPIUrl } from '@services/config/config';
 import { AlertTriangle, Loader2 } from 'lucide-react';
 import { Separator } from '@components/ui/separator';
 import { passwordSchema } from '@/lib/schemas/auth';
@@ -106,9 +106,10 @@ const SignUpClient = () => {
 
   const handleGoogleSignIn = () => {
     startTransition(() => {
-      signIn('google', {
-        callbackUrl: '/redirect_from_auth',
-      });
+      const frontendCallback = getAbsoluteUrl('/auth/google');
+      const authorizeUrl = new URL(`${getPublicAPIUrl()}auth/google/authorize`);
+      authorizeUrl.searchParams.set('callback', frontendCallback);
+      globalThis.location.href = authorizeUrl.toString();
     });
   };
 

@@ -1,10 +1,12 @@
+import base64
+import json
 import logging
 from datetime import datetime, timedelta
-from typing import Annotated, Literal
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
+from fastapi.responses import RedirectResponse
 from fastapi.security import OAuth2PasswordRequestForm
-from pydantic import ConfigDict, EmailStr
 from sqlmodel import Session
 
 from config.config import get_settings
@@ -21,7 +23,13 @@ from src.security.auth import (
     get_current_user_optional,
     oauth2_scheme_optional,
 )
-from src.services.auth.utils import signWithGoogle
+from src.services.auth.google_oauth import (
+    consume_exchange_code,
+    create_exchange_code,
+    exchange_google_code,
+    get_google_authorize_url,
+)
+from src.services.auth.utils import find_or_create_google_user
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -234,87 +242,6 @@ async def login(
     }
 
 
-class ThirdPartyLogin(PydanticStrictBaseModel):
-    email: EmailStr
-    provider: Literal["google"]
-    access_token: str
-    model_config = ConfigDict(arbitrary_types_allowed=True)
-
-
-@router.post("/oauth", response_model=LoginResponse)
-async def third_party_login(
-    request: Request,
-    response: Response,
-    body: ThirdPartyLogin,
-    current_user: Annotated[
-        PublicUser | AnonymousUser, Depends(get_current_user_optional)
-    ] = None,
-    db_session=Depends(get_db_session),
-):
-    # Extract client info for security logging
-    client_ip = request.client.host if request.client else "unknown"
-    user_agent = request.headers.get("user-agent", "unknown")
-
-    # Google
-    if body.provider == "google":
-        user = await signWithGoogle(
-            request, body.access_token, body.email, current_user, db_session
-        )
-
-    if not user:
-        # Log failed OAuth attempt
-        logger.warning(
-            "Failed OAuth login",
-            extra={
-                "provider": body.provider,
-                "email": body.email,
-                "ip_address": client_ip,
-                "user_agent": user_agent,
-                "reason": "oauth_authentication_failed",
-            },
-        )
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect Email or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    access_token = create_access_token({"sub": user.email})
-    refresh_token = create_refresh_token({"sub": user.email})
-    _set_refresh_cookie(response, refresh_token)
-
-    # set cookies using fastapi
-    _set_access_cookie(response, access_token)
-
-    user_read = UserRead.model_validate(user)
-
-    # Calculate token expiry timestamp (8 hours from now in milliseconds)
-    expiry_timestamp = int(
-        (datetime.now().timestamp() + timedelta(hours=8).total_seconds()) * 1000
-    )
-
-    # Log successful OAuth authentication
-    logger.info(
-        "Successful OAuth login",
-        extra={
-            "user_id": user.id,
-            "email": user.email,
-            "provider": body.provider,
-            "ip_address": client_ip,
-            "user_agent": user_agent,
-        },
-    )
-
-    return {
-        "user": user_read,
-        "tokens": {
-            "access_token": access_token,
-            "refresh_token": refresh_token,
-            "expiry": expiry_timestamp,
-        },
-    }
-
-
 @router.delete("/logout")
 def logout(
     request: Request,
@@ -350,3 +277,190 @@ def logout(
 
     _clear_auth_cookies(response)
     return {"msg": "Successfully logout"}
+
+
+# ── Backend-driven Google OAuth (Authorization Code flow) ─────────────────────
+#
+# Flow:
+#   1. Frontend  →  GET /auth/google/authorize?callback=<frontend-url>
+#      Backend builds a Google OAuth URL (includes the callback in state) and
+#      redirects the browser to Google's consent screen.
+#
+#   2. Google    →  GET /auth/google/callback?code=...&state=...
+#      Backend exchanges the code for a Google access token, fetches user info,
+#      finds or creates the local user, issues our JWT pair, stores them under a
+#      short-lived exchange code, and redirects the browser back to the frontend.
+#
+#   3. Frontend  →  POST /auth/google/exchange  { "code": "<exchange-code>" }
+#      NextAuth's credentials provider calls this to trade the exchange code for
+#      the user + token payload, which NextAuth then stores in its session JWT.
+#
+# The Google client ID and secret live exclusively in the backend
+# (PLATFORM_GOOGLE_CLIENT_ID / PLATFORM_GOOGLE_CLIENT_SECRET).  The Next.js
+# layer no longer needs GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET.
+
+
+def _get_backend_callback_url() -> str:
+    """Return the redirect_uri that must be registered in Google Cloud Console.
+
+    Prefers the explicit PLATFORM_GOOGLE_REDIRECT_URI env var, which must match
+    the URI registered in Google Cloud Console exactly.  Falls back to
+    constructing the URL from PLATFORM_DOMAIN / PLATFORM_PORT / PLATFORM_SSL
+    for simpler deployments.
+    """
+    settings = get_settings()
+    if settings.google_oauth.redirect_uri:
+        return settings.google_oauth.redirect_uri
+
+    hosting = settings.hosting_config
+    protocol = "https" if hosting.ssl else "http"
+    port = hosting.port
+    domain = hosting.domain
+    if (protocol == "http" and port == 80) or (protocol == "https" and port == 443):
+        base = f"{protocol}://{domain}"
+    else:
+        base = f"{protocol}://{domain}:{port}"
+    return f"{base}/api/v1/auth/google/callback"
+
+
+@router.get("/google/authorize")
+async def google_authorize(callback: str) -> RedirectResponse:
+    """
+    Redirect the browser to Google's OAuth consent screen.
+
+    `callback` is the frontend URL that the backend will redirect to after a
+    successful OAuth exchange (e.g. https://app.example.com/auth/google).
+    It is carried through the OAuth `state` parameter.
+    """
+    settings = get_settings()
+    google_cfg = settings.google_oauth
+
+    if not google_cfg.client_id or not google_cfg.client_secret:
+        raise HTTPException(
+            status_code=503,
+            detail="Google OAuth is not configured on this server",
+        )
+
+    state = base64.urlsafe_b64encode(json.dumps({"callback": callback}).encode()).decode()
+    url = get_google_authorize_url(
+        client_id=google_cfg.client_id,
+        redirect_uri=_get_backend_callback_url(),
+        state=state,
+    )
+    return RedirectResponse(url)
+
+
+@router.get("/google/callback")
+async def google_callback(
+    request: Request,
+    response: Response,
+    code: str | None = None,
+    state: str | None = None,
+    error: str | None = None,
+    current_user: Annotated[
+        PublicUser | AnonymousUser, Depends(get_current_user_optional)
+    ] = None,
+    db_session: Session = Depends(get_db_session),
+) -> RedirectResponse:
+    """
+    Handle Google's redirect after the user consents.
+
+    Exchanges the authorization code for user info, finds/creates the local
+    user, issues our JWT pair, and redirects the browser back to the frontend
+    with a short-lived exchange code.
+    """
+    # Decode state to get the frontend callback URL
+    frontend_callback = "/"
+    if state:
+        try:
+            state_data = json.loads(base64.urlsafe_b64decode(state + "=="))
+            frontend_callback = state_data.get("callback", "/")
+        except Exception:
+            pass
+
+    if error or not code:
+        logger.warning("Google OAuth error or missing code", extra={"error": error})
+        return RedirectResponse(f"{frontend_callback}?error=oauth_failed")
+
+    settings = get_settings()
+    google_cfg = settings.google_oauth
+
+    if not google_cfg.client_id or not google_cfg.client_secret:
+        return RedirectResponse(f"{frontend_callback}?error=not_configured")
+
+    try:
+        google_user = await exchange_google_code(
+            client_id=google_cfg.client_id,
+            client_secret=google_cfg.client_secret,
+            code=code,
+            redirect_uri=_get_backend_callback_url(),
+        )
+    except HTTPException:
+        return RedirectResponse(f"{frontend_callback}?error=oauth_failed")
+
+    client_ip = request.client.host if request.client else "unknown"
+
+    try:
+        user = await find_or_create_google_user(request, google_user, current_user, db_session)
+    except HTTPException:
+        logger.warning(
+            "Google OAuth user lookup/creation failed",
+            extra={"ip_address": client_ip},
+        )
+        return RedirectResponse(f"{frontend_callback}?error=user_error")
+
+    access_token = create_access_token({"sub": user.email})
+    refresh_token = create_refresh_token({"sub": user.email})
+
+    expiry_timestamp = int(
+        (datetime.now().timestamp() + timedelta(hours=8).total_seconds()) * 1000
+    )
+
+    exchange_code = create_exchange_code(
+        user_data=user.model_dump(),
+        access_token=access_token,
+        refresh_token=refresh_token,
+        expiry=expiry_timestamp,
+    )
+
+    logger.info(
+        "Google OAuth login successful",
+        extra={"user_id": user.id, "email": user.email, "ip_address": client_ip},
+    )
+
+    return RedirectResponse(f"{frontend_callback}?code={exchange_code}")
+
+
+class GoogleExchangeRequest(PydanticStrictBaseModel):
+    code: str
+
+
+@router.post("/google/exchange", response_model=LoginResponse)
+async def google_exchange(
+    body: GoogleExchangeRequest,
+    response: Response,
+) -> dict:
+    """
+    Exchange a short-lived OAuth exchange code for a full login response.
+
+    Called by the Next.js callback page (via a NextAuth credentials provider).
+    Each code is single-use and expires after 5 minutes.
+    """
+    entry = consume_exchange_code(body.code)
+    if not entry:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired exchange code",
+        )
+
+    _set_access_cookie(response, entry["access_token"])
+    _set_refresh_cookie(response, entry["refresh_token"])
+
+    return {
+        "user": entry["user"],
+        "tokens": {
+            "access_token": entry["access_token"],
+            "refresh_token": entry["refresh_token"],
+            "expiry": entry["expiry"],
+        },
+    }

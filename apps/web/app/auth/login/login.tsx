@@ -4,7 +4,7 @@ import { Field, FieldContent, FieldError, FieldLabel } from '@components/ui/fiel
 import PasswordInput from '@components/ui/custom/password-input';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { SiGoogle } from '@icons-pack/react-simple-icons';
-import { getAbsoluteUrl } from '@services/config/config';
+import { getAbsoluteUrl, getPublicAPIUrl } from '@services/config/config';
 import { AlertTriangle, Loader2 } from 'lucide-react';
 import { Separator } from '@components/ui/separator';
 import { useState, useTransition } from 'react';
@@ -67,9 +67,14 @@ const LoginClient = () => {
 
   const handleGoogleSignIn = () => {
     startTransition(() => {
-      signIn('google', {
-        callbackUrl: '/redirect_from_auth',
-      });
+      // The backend handles the full Google Authorization Code flow.
+      // We redirect the browser to the backend's authorize endpoint, which in
+      // turn redirects to Google. After Google consent, the backend redirects
+      // back to /auth/google on this site to finalize the NextAuth session.
+      const frontendCallback = getAbsoluteUrl('/auth/google');
+      const authorizeUrl = new URL(`${getPublicAPIUrl()}auth/google/authorize`);
+      authorizeUrl.searchParams.set('callback', frontendCallback);
+      globalThis.location.href = authorizeUrl.toString();
     });
   };
 

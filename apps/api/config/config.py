@@ -117,7 +117,6 @@ class SecurityConfig(PlatformSectionSettings):
         return stripped
 
 
-
 class ChromaDBConfig(PlatformSectionSettings):
     separate_db_enabled: bool = Field(
         default=False,
@@ -358,6 +357,30 @@ class InternalPaymentsConfig(PydanticStrictBaseModel):
     stripe: InternalStripeConfig = Field(default_factory=InternalStripeConfig)
 
 
+class GoogleOAuthConfig(PlatformSectionSettings):
+    client_id: str | None = Field(
+        default=None,
+        validation_alias="PLATFORM_GOOGLE_CLIENT_ID",
+    )
+    client_secret: str | None = Field(
+        default=None,
+        validation_alias="PLATFORM_GOOGLE_CLIENT_SECRET",
+    )
+    # Explicit redirect URI registered in Google Cloud Console.
+    # Must be set to the exact URL Google will redirect to after consent,
+    # e.g. "http://localhost:1338/api/v1/auth/google/callback".
+    # When omitted the backend tries to construct it from PLATFORM_DOMAIN /
+    # PLATFORM_PORT / PLATFORM_SSL, but an explicit value is more reliable.
+    redirect_uri: str | None = Field(
+        default=None,
+        validation_alias="PLATFORM_GOOGLE_REDIRECT_URI",
+    )
+
+    @field_validator("client_id", "client_secret", "redirect_uri", mode="before")
+    @classmethod
+    def normalize_optional_strings(cls, value: str | None) -> str | None:
+        return _strip_optional_string(value)
+
 
 class BootstrapConfig(PlatformSectionSettings):
     initial_admin_email: EmailStr | None = Field(
@@ -426,6 +449,7 @@ class IntegrationsConfig(PydanticStrictBaseModel):
 class AppSettings(PlatformConfig):
     bootstrap: BootstrapConfig = Field(default_factory=BootstrapConfig)
     integrations: IntegrationsConfig = Field(default_factory=IntegrationsConfig)
+    google_oauth: GoogleOAuthConfig = Field(default_factory=GoogleOAuthConfig)
 
 
 @lru_cache(maxsize=1)
@@ -448,6 +472,7 @@ def get_settings() -> AppSettings:
         payments_config=InternalPaymentsConfig(stripe=InternalStripeConfig()),
         bootstrap=BootstrapConfig(),
         integrations=IntegrationsConfig(judge0=Judge0Config()),
+        google_oauth=GoogleOAuthConfig(),
     )
 
 

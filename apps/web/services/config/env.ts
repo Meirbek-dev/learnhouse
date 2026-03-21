@@ -13,8 +13,6 @@ const ServerEnvSchema = v.object({
   INTERNAL_API_URL: v.optional(UrlSchema),
   NEXTAUTH_SECRET: NonEmptyStringSchema,
   NEXTAUTH_URL: UrlSchema,
-  GOOGLE_CLIENT_ID: NonEmptyStringSchema,
-  GOOGLE_CLIENT_SECRET: NonEmptyStringSchema,
   COOKIE_DOMAIN: v.optional(NonEmptyStringSchema),
 });
 
@@ -39,8 +37,6 @@ export interface ServerConfig {
   nextAuthOrigin: string;
   nextAuthHost: string;
   nextAuthSecret: string;
-  googleClientId: string;
-  googleClientSecret: string;
   cookieDomain?: string;
   cookieSecure: boolean;
 }
@@ -121,8 +117,6 @@ const readServerEnvInput = () => ({
   INTERNAL_API_URL: getOptionalEnvValue(process.env.INTERNAL_API_URL),
   NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
   NEXTAUTH_URL: process.env.NEXTAUTH_URL,
-  GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
-  GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
   COOKIE_DOMAIN: getOptionalEnvValue(process.env.COOKIE_DOMAIN),
 });
 
@@ -150,8 +144,6 @@ const buildServerConfig = (env: ServerEnv): ServerConfig => {
     nextAuthOrigin: nextAuth.origin,
     nextAuthHost: nextAuth.host,
     nextAuthSecret: env.NEXTAUTH_SECRET,
-    googleClientId: env.GOOGLE_CLIENT_ID,
-    googleClientSecret: env.GOOGLE_CLIENT_SECRET,
     cookieDomain: deriveCookieDomain(nextAuthUrl, env.COOKIE_DOMAIN),
     cookieSecure: nextAuth.protocol === 'https:',
   };
@@ -267,8 +259,6 @@ export const getServerEnv = () => {
     INTERNAL_API_URL: serverConfig.internalApiUrl,
     NEXTAUTH_SECRET: serverConfig.nextAuthSecret,
     NEXTAUTH_URL: serverConfig.nextAuthUrl,
-    GOOGLE_CLIENT_ID: serverConfig.googleClientId,
-    GOOGLE_CLIENT_SECRET: serverConfig.googleClientSecret,
     COOKIE_DOMAIN: serverConfig.cookieDomain,
   };
 };

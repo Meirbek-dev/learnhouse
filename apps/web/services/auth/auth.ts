@@ -34,7 +34,8 @@ interface NewAccountBody {
 // Auth API configuration
 const AUTH_ENDPOINTS = {
   login: 'auth/login',
-  oauth: 'auth/oauth',
+  googleAuthorize: 'auth/google/authorize',
+  googleExchange: 'auth/google/exchange',
   logout: 'auth/logout',
   refresh: 'auth/refresh',
   userProfile: 'users/profile',
@@ -136,33 +137,21 @@ export async function loginAndGetToken(username: any, password: any): Promise<Re
 }
 
 /**
- * OAuth login with validation
- * @param email - User email from OAuth provider
- * @param provider - OAuth provider name
- * @param accessToken - OAuth access token
+ * Exchange a backend-issued OAuth exchange code for a full login response.
+ * Called by the NextAuth google-exchange credentials provider after the backend
+ * Authorization Code flow completes.
+ *
+ * @param exchangeCode - The short-lived UUID code from the backend OAuth callback
  * @returns Promise<Response> - Raw response for compatibility
  */
-export async function loginWithOAuthToken(email: string, provider: string, accessToken: string): Promise<Response> {
-  // Input validation
-  if (!(email?.trim() && validateEmail(email))) {
-    throw createAuthError('Valid email is required', 400, 'INVALID_EMAIL');
-  }
-
-  if (!provider?.trim()) {
-    throw createAuthError('OAuth provider is required', 400, 'INVALID_PROVIDER');
-  }
-
-  if (!accessToken?.trim()) {
-    throw createAuthError('OAuth access token is required', 400, 'INVALID_TOKEN');
+export async function exchangeGoogleCode(exchangeCode: string): Promise<Response> {
+  if (!exchangeCode?.trim()) {
+    throw createAuthError('Exchange code is required', 400, 'MISSING_EXCHANGE_CODE');
   }
 
   try {
     const headers = createHeaders('application/json');
-    const body = {
-      email: sanitizeStringInput(email),
-      provider: provider.toLowerCase().trim(),
-      access_token: accessToken,
-    };
+    const body = { code: exchangeCode.trim() };
 
     const requestOptions: RequestInit = {
       method: 'POST',
@@ -172,13 +161,26 @@ export async function loginWithOAuthToken(email: string, provider: string, acces
       credentials: 'include',
     };
 
-    return await fetchWithRetry(`${getAPIUrl()}${AUTH_ENDPOINTS.oauth}`, requestOptions);
+    return await fetchWithRetry(`${getAPIUrl()}${AUTH_ENDPOINTS.googleExchange}`, requestOptions);
   } catch (error) {
     if (error instanceof Error) {
-      throw createAuthError(`OAuth login failed: ${error.message}`, undefined, 'OAUTH_ERROR');
+      throw createAuthError(`Google code exchange failed: ${error.message}`, undefined, 'GOOGLE_EXCHANGE_ERROR');
     }
-    throw createAuthError('Unknown OAuth error', undefined, 'UNKNOWN_ERROR');
+    throw createAuthError('Unknown Google exchange error', undefined, 'UNKNOWN_ERROR');
   }
+}
+
+/**
+ * Get the backend Google OAuth authorization URL for a given frontend callback.
+ * The returned URL can be used to redirect the user to Google's consent screen.
+ *
+ * @param frontendCallback - The frontend URL the backend should redirect to after OAuth
+ * @returns Promise<string> - The Google OAuth authorization URL
+ */
+export async function getGoogleAuthorizeUrl(frontendCallback: string): Promise<string> {
+  const url = new URL(`${getAPIUrl()}${AUTH_ENDPOINTS.googleAuthorize}`);
+  url.searchParams.set('callback', frontendCallback);
+  return url.toString();
 }
 
 /**

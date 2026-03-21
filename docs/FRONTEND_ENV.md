@@ -21,8 +21,6 @@ These values are used only by the Node.js server runtime.
   `http://localhost:9000/api/v1/`
 - `NEXTAUTH_URL`: NextAuth canonical URL
 - `NEXTAUTH_SECRET`: NextAuth secret
-- `GOOGLE_CLIENT_ID`: Google OAuth client id
-- `GOOGLE_CLIENT_SECRET`: Google OAuth client secret
 - `COOKIE_DOMAIN`: Optional override for unusual cookie-domain deployments. In common cases this is
   derived automatically from `NEXTAUTH_URL`
 
