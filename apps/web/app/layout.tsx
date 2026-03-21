@@ -3,10 +3,11 @@ import { IntlProvider } from '@/components/providers/IntlProvider';
 import DevScriptLoader from '@/components/DevScriptLoader';
 import { inter, jetBrainsMono } from '@/lib/fonts';
 import ClientLayout from './client-layout';
-import { isDevEnv } from '@/auth';
 import { Suspense } from 'react';
 
 import '@styles/globals.css';
+
+const isDevEnv = process.env.NODE_ENV !== 'production';
 
 async function LocalizedLayout({ children }: { children: React.ReactNode }) {
   const locale = await getLocale();

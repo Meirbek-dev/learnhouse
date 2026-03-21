@@ -1,17 +1,14 @@
 import PlatformProvider from '@/components/Contexts/PlatformProvider';
-import { getPlatformContextInfo } from '@/services/platform/platform';
 import { Spinner } from '@components/ui/spinner';
 import { useTranslations } from 'next-intl';
 import { Suspense } from 'react';
 
-function AuthContent({ children, initialPlatform }: { children: React.ReactNode; initialPlatform: unknown }) {
+function AuthContent({ children }: { children: React.ReactNode }) {
   useTranslations('Auth.Layout');
-  return <PlatformProvider initialPlatform={initialPlatform}>{children}</PlatformProvider>;
+  return <PlatformProvider>{children}</PlatformProvider>;
 }
 
-export default async function AuthLayout({ children }: { children: React.ReactNode }) {
-  const initialPlatform = await getPlatformContextInfo();
-
+export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
     <Suspense
       fallback={
@@ -20,7 +17,7 @@ export default async function AuthLayout({ children }: { children: React.ReactNo
         </div>
       }
     >
-      <AuthContent initialPlatform={initialPlatform}>{children}</AuthContent>
+      <AuthContent>{children}</AuthContent>
     </Suspense>
   );
 }

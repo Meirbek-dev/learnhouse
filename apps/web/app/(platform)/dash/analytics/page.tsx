@@ -14,9 +14,9 @@ export default function PlatformAnalyticsPage(props: {
 async function PlatformAnalyticsPageInner(props: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const platform = await getPlatformContextInfo();
   const session = await auth();
   const accessToken = session?.tokens?.access_token;
+  const platform = await getPlatformContextInfo();
   const query = normalizeAnalyticsQuery(await props.searchParams);
   const analyticsEnabled = platform?.config?.config?.features?.analytics?.enabled ?? true;
   const t = await getTranslations('TeacherAnalytics');

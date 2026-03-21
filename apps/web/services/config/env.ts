@@ -11,10 +11,10 @@ const PublicEnvSchema = v.object({
 
 const ServerEnvSchema = v.object({
   INTERNAL_API_URL: v.optional(UrlSchema),
-  NEXTAUTH_SECRET: NonEmptyStringSchema,
-  NEXTAUTH_URL: UrlSchema,
-  GOOGLE_CLIENT_ID: NonEmptyStringSchema,
-  GOOGLE_CLIENT_SECRET: NonEmptyStringSchema,
+  NEXTAUTH_SECRET: v.optional(NonEmptyStringSchema),
+  NEXTAUTH_URL: v.optional(UrlSchema),
+  GOOGLE_CLIENT_ID: v.optional(NonEmptyStringSchema),
+  GOOGLE_CLIENT_SECRET: v.optional(NonEmptyStringSchema),
   COOKIE_DOMAIN: v.optional(NonEmptyStringSchema),
 });
 
@@ -35,6 +35,17 @@ export interface PublicConfig {
 
 export interface ServerConfig {
   internalApiUrl?: string;
+  nextAuthUrl?: string;
+  nextAuthOrigin?: string;
+  nextAuthHost?: string;
+  nextAuthSecret?: string;
+  googleClientId?: string;
+  googleClientSecret?: string;
+  cookieDomain?: string;
+  cookieSecure: boolean;
+}
+
+export interface AuthServerConfig {
   nextAuthUrl: string;
   nextAuthOrigin: string;
   nextAuthHost: string;
@@ -141,19 +152,76 @@ const buildPublicConfig = (env: PublicEnv): PublicConfig => {
 };
 
 const buildServerConfig = (env: ServerEnv): ServerConfig => {
-  const nextAuthUrl = new URL(env.NEXTAUTH_URL).toString();
-  const nextAuth = new URL(nextAuthUrl);
+  const nextAuthUrl = env.NEXTAUTH_URL ? new URL(env.NEXTAUTH_URL).toString() : undefined;
+  const nextAuth = nextAuthUrl ? new URL(nextAuthUrl) : null;
+  const explicitCookieDomain = getOptionalEnvValue(env.COOKIE_DOMAIN);
 
   return {
     internalApiUrl: env.INTERNAL_API_URL ? normalizePathUrl(env.INTERNAL_API_URL) : undefined,
     nextAuthUrl,
-    nextAuthOrigin: nextAuth.origin,
-    nextAuthHost: nextAuth.host,
+    nextAuthOrigin: nextAuth?.origin,
+    nextAuthHost: nextAuth?.host,
     nextAuthSecret: env.NEXTAUTH_SECRET,
     googleClientId: env.GOOGLE_CLIENT_ID,
     googleClientSecret: env.GOOGLE_CLIENT_SECRET,
-    cookieDomain: deriveCookieDomain(nextAuthUrl, env.COOKIE_DOMAIN),
-    cookieSecure: nextAuth.protocol === 'https:',
+    cookieDomain: nextAuthUrl ? deriveCookieDomain(nextAuthUrl, env.COOKIE_DOMAIN) : explicitCookieDomain,
+    cookieSecure: nextAuth?.protocol === 'https:',
+  };
+};
+
+const resolveAuthServerConfig = (): ResolutionResult<AuthServerConfig> => {
+  const serverResult = resolveServerConfig();
+  if (!serverResult.success) {
+    return serverResult;
+  }
+
+  const serverConfig = serverResult.config;
+  const errors: ConfigIssue[] = [];
+
+  if (!serverConfig.nextAuthSecret) {
+    errors.push({ scope: 'server', key: 'NEXTAUTH_SECRET', message: 'Missing required auth environment value' });
+  }
+
+  if (!serverConfig.nextAuthUrl) {
+    errors.push({ scope: 'server', key: 'NEXTAUTH_URL', message: 'Missing required auth environment value' });
+  }
+
+  if (!serverConfig.googleClientId) {
+    errors.push({ scope: 'server', key: 'GOOGLE_CLIENT_ID', message: 'Missing required auth environment value' });
+  }
+
+  if (!serverConfig.googleClientSecret) {
+    errors.push({ scope: 'server', key: 'GOOGLE_CLIENT_SECRET', message: 'Missing required auth environment value' });
+  }
+
+  if (errors.length > 0) {
+    return {
+      success: false,
+      config: null,
+      errors,
+    };
+  }
+
+  const nextAuthUrl = serverConfig.nextAuthUrl as string;
+  const nextAuthOrigin = serverConfig.nextAuthOrigin as string;
+  const nextAuthHost = serverConfig.nextAuthHost as string;
+  const nextAuthSecret = serverConfig.nextAuthSecret as string;
+  const googleClientId = serverConfig.googleClientId as string;
+  const googleClientSecret = serverConfig.googleClientSecret as string;
+
+  return {
+    success: true,
+    config: {
+      nextAuthUrl,
+      nextAuthOrigin,
+      nextAuthHost,
+      nextAuthSecret,
+      googleClientId,
+      googleClientSecret,
+      cookieDomain: serverConfig.cookieDomain,
+      cookieSecure: serverConfig.cookieSecure,
+    },
+    errors: [],
   };
 };
 
@@ -198,6 +266,8 @@ let appConfigCache: AppConfig | null = null;
 export const getPublicConfigResult = () => resolvePublicConfig();
 
 export const getServerConfigResult = () => resolveServerConfig();
+
+export const getAuthServerConfigResult = () => resolveAuthServerConfig();
 
 export const getAppConfigResult = (): ResolutionResult<AppConfig> => {
   const publicResult = resolvePublicConfig();
@@ -246,6 +316,15 @@ export const getServerConfig = (): ServerConfig => {
 
   serverConfigCache = result.config;
   return serverConfigCache;
+};
+
+export const getAuthServerConfig = (): AuthServerConfig => {
+  const result = resolveAuthServerConfig();
+  if (!result.success) {
+    throw new Error(result.errors.map((error) => `${error.key}: ${error.message}`).join('; '));
+  }
+
+  return result.config;
 };
 
 export const getAppConfig = (): AppConfig => {

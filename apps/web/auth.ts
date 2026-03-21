@@ -9,7 +9,7 @@ import type { NextAuthConfig, NextAuthResult, Session } from 'next-auth';
 import { getResponseMetadata } from '@/services/utils/ts/requests';
 import Credentials from 'next-auth/providers/credentials';
 import { getAbsoluteUrl } from '@/services/config/config';
-import { getServerConfig } from '@/services/config/env';
+import { getAuthServerConfig } from '@/services/config/env';
 import Google from 'next-auth/providers/google';
 import type { JWT } from 'next-auth/jwt';
 import { createHash } from 'node:crypto';
@@ -110,7 +110,7 @@ type AuthHandlers = NextAuthResult['handlers'];
 // ─── Auth Config ──────────────────────────────────────────────────────────────
 
 const createAuthConfig = (): NextAuthConfig => {
-  const serverConfig = getServerConfig();
+  const serverConfig = getAuthServerConfig();
   const cookieDomain = !isDevEnv ? serverConfig.cookieDomain : undefined;
   const cookieSecure = !isDevEnv && serverConfig.cookieSecure;
   const cookieNamePrefix = cookieSecure ? '__Secure-' : '';

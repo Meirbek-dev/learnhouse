@@ -27,6 +27,7 @@ services:
         NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL}
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
         NEXT_PUBLIC_MEDIA_URL: ${NEXT_PUBLIC_MEDIA_URL}
+        INTERNAL_API_URL: ${INTERNAL_API_URL}
     restart: unless-stopped
     expose:
       - "8000"
