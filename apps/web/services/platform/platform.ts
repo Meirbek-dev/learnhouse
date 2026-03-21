@@ -25,11 +25,17 @@ async function fetchPlatform(access_token?: string) {
     headers.Authorization = `Bearer ${access_token}`;
   }
 
-  const result = await fetch(`${getServerAPIUrl()}platform`, {
-    method: 'GET',
-    headers,
-  });
-  return await errorHandling(result);
+  try {
+    const result = await fetch(`${getServerAPIUrl()}platform`, {
+      method: 'GET',
+      headers,
+    });
+    return await errorHandling(result);
+  } catch {
+    // Backend is unavailable (e.g. during build time) – return null so
+    // the layout renders a shell that hydrates with real data at runtime.
+    return null;
+  }
 }
 
 export async function getPlatform(access_token?: string) {

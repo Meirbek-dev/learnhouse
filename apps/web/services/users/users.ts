@@ -7,13 +7,13 @@ import {
   errorHandling,
   getResponseMetadata,
 } from '@services/utils/ts/requests';
+import { getOptionalSession } from '@/lib/get-optional-session';
 import { getAPIUrl } from '@services/config/config';
 import { tags } from '@/lib/cacheTags';
-import { auth } from '@/auth';
 
 async function resolveToken(access_token?: string): Promise<string | undefined> {
   if (access_token) return access_token;
-  const session = await auth();
+  const session = await getOptionalSession();
   return session?.tokens?.access_token ?? undefined;
 }
 
