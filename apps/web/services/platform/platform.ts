@@ -50,7 +50,7 @@ export async function getContextInfoNoAsync(next: unknown, access_token: string)
 
 export async function updateLanding(landing_object: any, access_token: string) {
   const result = await fetch(
-    `${getServerAPIUrl()}platform/landing`,
+    `${getServerAPIUrl()}landing`,
     RequestBodyWithAuthHeader('PUT', landing_object, null, access_token),
   );
   const metadata = await getResponseMetadata(result);
@@ -69,7 +69,7 @@ export async function uploadLandingContent(content_file: File, access_token: str
   formData.append('content_file', content_file);
 
   const result = await fetch(
-    `${getServerAPIUrl()}platform/landing/content`,
+    `${getServerAPIUrl()}landing/content`,
     RequestBodyFormWithAuthHeader('POST', formData, null, access_token),
   );
   return await getResponseMetadata(result);
@@ -77,7 +77,7 @@ export async function uploadLandingContent(content_file: File, access_token: str
 
 export async function removeUser(user_id: number, access_token: string) {
   const result = await fetch(
-    `${getServerAPIUrl()}platform/users/${user_id}`,
+    `${getServerAPIUrl()}members/${user_id}`,
     RequestBodyWithAuthHeader('DELETE', null, null, access_token),
   );
   const metadata = await getResponseMetadata(result);

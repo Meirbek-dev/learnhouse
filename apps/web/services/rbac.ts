@@ -145,7 +145,7 @@ export function removeRoleFromUser(token: string, userId: number, roleId: number
 
 export function listUsers(token: string, limit = 100): Promise<UserBasic[]> {
   // The endpoint may return { users: [...] } or a flat array.
-  return request<UserBasic[] | { users: UserBasic[] }>(api(`platform/users?limit=${limit}`), token).then((data) =>
+  return request<UserBasic[] | { users: UserBasic[] }>(api(`members?limit=${limit}`), token).then((data) =>
     Array.isArray(data) ? data : data.users,
   );
 }

@@ -30,7 +30,7 @@ from src.services.platform_users import (
 router = APIRouter()
 
 
-@router.get("")
+@router.get("/platform")
 async def api_get_platform(
     db_session: Annotated[Session, Depends(get_db_session)],
 ) -> PlatformRead:
@@ -45,7 +45,7 @@ async def api_get_platform(
     return PlatformRead.model_validate(platform_record)
 
 
-@router.get("/users")
+@router.get("/members")
 async def api_get_platform_users(
     request: Request,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
@@ -64,7 +64,7 @@ async def api_get_platform_users(
     )
 
 
-@router.put("/users/{user_id}/role/{role_id}")
+@router.put("/members/{user_id}/role/{role_id}")
 async def api_update_platform_user_role(
     request: Request,
     user_id: int,
@@ -90,7 +90,7 @@ async def api_update_platform_user_role(
     )
 
 
-@router.delete("/users/{user_id}")
+@router.delete("/members/{user_id}")
 async def api_remove_user_from_platform(
     request: Request,
     user_id: int,
@@ -176,7 +176,7 @@ async def api_update_platform_preview(
     )
 
 
-@router.put("")
+@router.put("/platform")
 async def api_update_platform(
     request: Request,
     platform_object: PlatformUpdate,

@@ -29,7 +29,7 @@ const ManageUsers = (props: ManageUsersProps) => {
   const t = useTranslations('Components.ManageUsers');
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
-  const { data: Users } = useSWR(`${getAPIUrl()}platform/users`, (url) => swrFetcher(url, access_token));
+  const { data: Users } = useSWR(`${getAPIUrl()}members`, (url) => swrFetcher(url, access_token));
   const { data: UGusers } = useSWR(`${getAPIUrl()}usergroups/${props.usergroup_id}/users`, (url) =>
     swrFetcher(url, access_token),
   );

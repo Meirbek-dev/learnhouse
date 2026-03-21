@@ -25,7 +25,7 @@ export async function uploadPlatformLogo(logo_file: any, access_token: string) {
   const formData = new FormData();
   formData.append('logo_file', logo_file);
   const result: any = await fetch(
-    `${getServerAPIUrl()}platform/logo`,
+    `${getServerAPIUrl()}logo`,
     RequestBodyFormWithAuthHeader('PUT', formData, null, access_token),
   );
   const response = await errorHandling(result);
@@ -39,7 +39,7 @@ export async function uploadPlatformThumbnail(thumbnail_file: any, access_token:
   const formData = new FormData();
   formData.append('thumbnail_file', thumbnail_file);
   const result: any = await fetch(
-    `${getServerAPIUrl()}platform/thumbnail`,
+    `${getServerAPIUrl()}thumbnail`,
     RequestBodyFormWithAuthHeader('PUT', formData, null, access_token),
   );
   const response = await errorHandling(result);
@@ -53,7 +53,7 @@ export const uploadPlatformPreview = async (file: File, access_token: string) =>
   formData.append('preview_file', file);
 
   const result: any = await fetch(
-    `${getServerAPIUrl()}platform/preview`,
+    `${getServerAPIUrl()}preview`,
     RequestBodyFormWithAuthHeader('PUT', formData, null, access_token),
   );
   const response = await errorHandling(result);
