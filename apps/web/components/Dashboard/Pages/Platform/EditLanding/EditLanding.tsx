@@ -308,8 +308,8 @@ const EditLanding = () => {
 
   // Initialize landing data from platform config
   useEffect(() => {
-    if (platform?.config?.config?.landing) {
-      const landingConfig = platform.config.config.landing;
+    if (platform?.landing) {
+      const landingConfig = platform.landing;
       setLandingData({
         sections: landingConfig.sections || [],
         enabled: Boolean(landingConfig.enabled),

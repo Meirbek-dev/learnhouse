@@ -117,22 +117,6 @@ class SecurityConfig(PlatformSectionSettings):
         return stripped
 
 
-class RBACConfig(PlatformSectionSettings):
-    """RBAC configuration."""
-
-    audit_logging_enabled: bool = Field(
-        default=True,
-        validation_alias="PLATFORM_RBAC_AUDIT_LOGGING_ENABLED",
-    )
-    cache_enabled: bool = Field(
-        default=True,
-        validation_alias="PLATFORM_RBAC_CACHE_ENABLED",
-    )
-    cache_ttl_seconds: int = Field(
-        default=300,
-        validation_alias="PLATFORM_RBAC_CACHE_TTL_SECONDS",
-    )
-
 
 class ChromaDBConfig(PlatformSectionSettings):
     separate_db_enabled: bool = Field(
@@ -374,21 +358,6 @@ class InternalPaymentsConfig(PydanticStrictBaseModel):
     stripe: InternalStripeConfig = Field(default_factory=InternalStripeConfig)
 
 
-class PlatformMetadataConfig(PlatformSectionSettings):
-    contact_email: EmailStr = Field(validation_alias="PLATFORM_CONTACT_EMAIL")
-
-
-class InternalConfig(PlatformSectionSettings):
-    cloud_internal_key: str | None = Field(
-        default=None,
-        validation_alias="CLOUD_INTERNAL_KEY",
-    )
-
-    @field_validator("cloud_internal_key", mode="before")
-    @classmethod
-    def normalize_cloud_internal_key(cls, value: str | None) -> str | None:
-        return _strip_optional_string(value)
-
 
 class BootstrapConfig(PlatformSectionSettings):
     initial_admin_email: EmailStr | None = Field(
@@ -426,13 +395,11 @@ class Judge0Config(PlatformSectionSettings):
 
 
 class PlatformConfig(PydanticStrictBaseModel):
-    contact_email: str
     general_config: GeneralConfig
     hosting_config: HostingConfig
     database_config: DatabaseConfig
     redis_config: RedisConfig
     security_config: SecurityConfig
-    rbac_config: RBACConfig
     ai_config: AIConfig
     mailing_config: MailingConfig
     payments_config: InternalPaymentsConfig
@@ -457,22 +424,18 @@ class IntegrationsConfig(PydanticStrictBaseModel):
 
 
 class AppSettings(PlatformConfig):
-    internal: InternalConfig = Field(default_factory=InternalConfig)
     bootstrap: BootstrapConfig = Field(default_factory=BootstrapConfig)
     integrations: IntegrationsConfig = Field(default_factory=IntegrationsConfig)
 
 
 @lru_cache(maxsize=1)
 def get_settings() -> AppSettings:
-    metadata = PlatformMetadataConfig()
     return AppSettings(
-        contact_email=str(metadata.contact_email),
         general_config=GeneralConfig(),
         hosting_config=HostingConfig(),
         database_config=DatabaseConfig(),
         redis_config=RedisConfig(),
         security_config=SecurityConfig(),
-        rbac_config=RBACConfig(),
         ai_config=AIConfig(
             openai_api_key=AIRootConfig().openai_api_key,
             chromadb_config=ChromaDBConfig(),
@@ -483,7 +446,6 @@ def get_settings() -> AppSettings:
         ),
         mailing_config=MailingConfig(),
         payments_config=InternalPaymentsConfig(stripe=InternalStripeConfig()),
-        internal=InternalConfig(),
         bootstrap=BootstrapConfig(),
         integrations=IntegrationsConfig(judge0=Judge0Config()),
     )

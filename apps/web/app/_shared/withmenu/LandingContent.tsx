@@ -51,7 +51,7 @@ export async function LandingContent() {
       });
     }
 
-    const hasCustomLanding = platform.config?.config?.landing?.enabled;
+    const hasCustomLanding = platform.landing?.enabled;
 
     // Only fetch gamification data if user is authenticated
     const gamificationPromise = access_token
@@ -66,7 +66,7 @@ export async function LandingContent() {
 
       return (
         <LandingCustom
-          landing={platform.config.config.landing}
+          landing={platform.landing as { sections: any[]; enabled: boolean }}
           gamificationData={gamificationData}
         />
       );

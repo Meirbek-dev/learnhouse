@@ -7,11 +7,9 @@ from config.config import (
     DatabaseConfig,
     GeneralConfig,
     HostingConfig,
-    InternalConfig,
     InternalPaymentsConfig,
     MailingConfig,
     PlatformConfig,
-    RBACConfig,
     RedisConfig,
     SecurityConfig,
 )
@@ -42,20 +40,9 @@ def test_hosting_config_parses_comma_separated_origins(
     assert cfg.cookie_config.domain == "example.com"
 
 
-def test_internal_config_ignores_empty_cloud_key(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    monkeypatch.setenv("CLOUD_INTERNAL_KEY", "")
-
-    cfg = InternalConfig(_env_file=None)
-
-    assert cfg.cloud_internal_key is None
-
-
 def test_platform_config_rejects_insecure_secret_outside_dev() -> None:
     with pytest.raises(ValueError, match="insecure default"):
         PlatformConfig(
-            contact_email="contact@example.com",
             general_config=GeneralConfig.model_construct(
                 development_mode=False,
                 logfire_enabled=False,
@@ -78,11 +65,6 @@ def test_platform_config_rejects_insecure_secret_outside_dev() -> None:
             ),
             security_config=SecurityConfig.model_construct(
                 auth_jwt_secret_key="secret"
-            ),
-            rbac_config=RBACConfig.model_construct(
-                audit_logging_enabled=True,
-                cache_enabled=True,
-                cache_ttl_seconds=300,
             ),
             ai_config=AIConfig(),
             mailing_config=MailingConfig.model_construct(

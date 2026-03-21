@@ -68,7 +68,7 @@ def install(
             name=PLATFORM_BRAND_NAME,
             description=PLATFORM_BRAND_NAME,
             about=f"{PLATFORM_BRAND_NAME} - Образовательная платформа для онлайн-обучения",
-            email=settings.contact_email,
+            email=str(admin_email),
             logo_image="",
             thumbnail_image="",
             label=PLATFORM_BRAND_NAME,

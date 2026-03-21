@@ -79,16 +79,6 @@ class ResourceAccessDenied(HTTPException):
         super().__init__(status_code=status.HTTP_403_FORBIDDEN, detail=detail)
 
 
-class InternalAuthFailed(HTTPException):
-    """401 - internal/service authentication failed."""
-
-    def __init__(self, reason: str | None = None) -> None:
-        detail = {
-            "error_code": "AUTHENTICATION_FAILED",
-            "message": reason or "Authentication failed",
-        }
-        super().__init__(status_code=status.HTTP_401_UNAUTHORIZED, detail=detail)
-
 
 # ============================================================================
 # Permission Checker

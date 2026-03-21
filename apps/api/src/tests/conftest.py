@@ -8,7 +8,6 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../.
 os.environ["TESTING"] = "true"
 
 # Provide an explicit settings baseline so tests do not rely on a local backend .env file.
-os.environ.setdefault("PLATFORM_CONTACT_EMAIL", "tests@example.com")
 os.environ.setdefault("PLATFORM_DOMAIN", "example.test")
 os.environ.setdefault("PLATFORM_ALLOWED_REGEXP", r"^https?://example\.test(:\d+)?$")
 os.environ.setdefault(
