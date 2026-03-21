@@ -40,15 +40,12 @@ class Platform(PlatformBase, table=True):
 class PlatformUpdate(SQLModelStrictBaseModel):
     """Model for updating the platform."""
 
-    name: str | None = None
-    description: str | None = None
     about: str | None = None
     socials: dict | None = None
     links: dict | None = None
     logo_image: str | None = None
     thumbnail_image: str | None = None
     previews: dict | None = None
-    label: str | None = None
     email: str | None = None
     update_date: str | None = None
 

@@ -3,7 +3,7 @@ import TypeOfContentTitle from '@/components/Objects/Elements/Titles/TypeOfConte
 import CollectionThumbnail from '@components/Objects/Thumbnails/CollectionThumbnail';
 import GeneralWrapper from '@/components/Objects/Elements/Wrappers/GeneralWrapper';
 import { PermissionGuard } from '@components/Security/PermissionGuard';
-import { getPlatformContextInfo } from '@/services/platform/platform';
+import { getPlatform } from '@/services/platform/platform';
 import ProtectedText from '@components/Objects/ContentPlaceHolder';
 import { getThumbnailMediaDirectory } from '@services/media/media';
 import { Actions, Resources, Scopes } from '@/types/permissions';
@@ -20,7 +20,7 @@ interface MetadataProps {
 
 export async function generateMetadata(_props: MetadataProps): Promise<Metadata> {
   const t = await getTranslations('HomePage.Collections');
-  const platform = await getPlatformContextInfo();
+  const platform = await getPlatform();
 
   return {
     title: `${t('title')} - Ashyq Bilim`,
@@ -55,7 +55,6 @@ export default async function PlatformCollectionsPage() {
   const t = await getTranslations('HomePage.Collections');
   const session = await getOptionalSession();
   const access_token = session?.tokens?.access_token;
-  const platform = await getPlatformContextInfo(access_token || undefined);
   const collections = await getCollections(access_token);
 
   return (

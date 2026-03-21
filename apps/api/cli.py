@@ -8,7 +8,11 @@ from sqlalchemy.engine.base import Engine
 from sqlmodel import Session, SQLModel, select
 
 from config.config import get_settings
-from src.core.platform import PLATFORM_BRAND_NAME
+from src.core.platform import (
+    PLATFORM_BRAND_NAME,
+    PLATFORM_DESCRIPTION,
+    PLATFORM_LABEL,
+)
 from src.db.platform import Platform, PlatformCreate
 from src.db.users import User, UserCreate
 from src.services.analytics.rollups import refresh_teacher_analytics_rollups
@@ -66,12 +70,12 @@ def install(
         print(f"Creating {PLATFORM_BRAND_NAME}...")
         platform_object = PlatformCreate(
             name=PLATFORM_BRAND_NAME,
-            description=PLATFORM_BRAND_NAME,
+            description=PLATFORM_DESCRIPTION,
             about=f"{PLATFORM_BRAND_NAME} - Образовательная платформа для онлайн-обучения",
             email=str(admin_email),
             logo_image="",
             thumbnail_image="",
-            label=PLATFORM_BRAND_NAME,
+            label=PLATFORM_LABEL,
         )
         install_create_platform(platform_object, db_session)
         print(f"{PLATFORM_BRAND_NAME} created ✅")
@@ -102,17 +106,17 @@ def install(
 
     else:
         # Create the Platform
-        print("Creating your platform...")
-        app_name = typer.prompt("What's shall we call your platform?")
+        print(f"Creating {PLATFORM_BRAND_NAME}...")
         platform_object = PlatformCreate(
-            name=app_name,
-            description=PLATFORM_BRAND_NAME,
+            name=PLATFORM_BRAND_NAME,
+            description=PLATFORM_DESCRIPTION,
             email="",
             logo_image="",
             thumbnail_image="",
+            label=PLATFORM_LABEL,
         )
         install_create_platform(platform_object, db_session)
-        print(app_name + " platform created ✅")
+        print(f"{PLATFORM_BRAND_NAME} platform created ✅")
 
         # Create Admin User
         print("Creating your admin user...")

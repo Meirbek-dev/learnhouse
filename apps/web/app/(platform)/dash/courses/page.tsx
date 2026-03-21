@@ -1,4 +1,4 @@
-import { getPlatformContextInfo } from '@/services/platform/platform';
+import { getPlatform } from '@/services/platform/platform';
 import { getEditableCourses } from '@services/courses/courses';
 import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
@@ -39,7 +39,7 @@ function parsePreset(value: string | string[] | undefined): string {
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('General');
-  const platform = await getPlatformContextInfo();
+  const platform = await getPlatform();
 
   return {
     title: `${t('courses')} - Ashyq Bilim`,

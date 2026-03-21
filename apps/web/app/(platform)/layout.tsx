@@ -1,6 +1,9 @@
-import PlatformClientProviders from './platform-client-providers';
+import { getPlatform } from '@/services/platform/platform';
 import '@styles/globals.css';
+import PlatformClientProviders from './platform-client-providers';
 
-export default function PlatformLayout({ children }: { children: React.ReactNode }) {
-  return <PlatformClientProviders>{children}</PlatformClientProviders>;
+export default async function PlatformLayout({ children }: { children: React.ReactNode }) {
+  const initialPlatform = await getPlatform();
+
+  return <PlatformClientProviders initialPlatform={initialPlatform}>{children}</PlatformClientProviders>;
 }

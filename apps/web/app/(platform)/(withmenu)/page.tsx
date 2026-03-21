@@ -1,5 +1,5 @@
 import { LandingContent } from '@/app/_shared/withmenu/LandingContent';
-import { getPlatformContextInfo } from '@/services/platform/platform';
+import { getPlatform } from '@/services/platform/platform';
 import { getThumbnailMediaDirectory } from '@services/media/media';
 import { PageSuspense } from '@components/Utils/PageSuspense';
 import { getTranslations } from 'next-intl/server';
@@ -47,7 +47,7 @@ interface MetadataProps {
 }
 
 export async function generateMetadata(_props: MetadataProps): Promise<Metadata> {
-  const platform = await getPlatformContextInfo();
+  const platform = await getPlatform();
   const t = await getTranslations('General');
 
   return {

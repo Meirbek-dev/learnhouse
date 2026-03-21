@@ -1,5 +1,5 @@
 import { getServerGamificationDashboard } from '@/services/gamification/server';
-import { getPlatformContextInfo } from '@/services/platform/platform';
+import { getPlatform } from '@/services/platform/platform';
 import LandingClassic from '@components/Landings/LandingClassic';
 import { getOptionalSession } from '@/lib/get-optional-session';
 import LandingCustom from '@components/Landings/LandingCustom';
@@ -40,7 +40,7 @@ export async function LandingContent() {
     // Fetch platform info with detailed error handling
     let platform;
     try {
-      platform = await getPlatformContextInfo(access_token || undefined);
+      platform = await getPlatform(access_token || undefined);
     } catch (error) {
       console.error('[LandingContent] Failed to fetch platform info:', {
         message: error instanceof Error ? error.message : 'Unknown error',

@@ -32,20 +32,8 @@ async function fetchPlatform(access_token?: string) {
   return await errorHandling(result);
 }
 
-export async function getContextInfo(_next?: unknown, access_token?: string) {
+export async function getPlatform(access_token?: string) {
   return fetchPlatform(access_token);
-}
-
-export async function getPlatformContextInfo(access_token?: string) {
-  return fetchPlatform(access_token);
-}
-
-export async function getContextInfoWithoutCredentials(_next?: unknown) {
-  return await fetchPlatform();
-}
-
-export async function getContextInfoNoAsync(next: unknown, access_token: string) {
-  return await fetch(`${getServerAPIUrl()}platform`, RequestBodyWithAuthHeader('GET', null, next, access_token));
 }
 
 export async function updateLanding(landing_object: any, access_token: string) {

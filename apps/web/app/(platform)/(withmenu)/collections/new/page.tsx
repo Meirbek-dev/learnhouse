@@ -1,11 +1,11 @@
 import NewCollection from '@/app/_shared/withmenu/collections/new/NewCollection';
-import { getPlatformContextInfo } from '@/services/platform/platform';
+import { getPlatform } from '@/services/platform/platform';
 import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('NewCollectionPage');
-  const platform = await getPlatformContextInfo();
+  const platform = await getPlatform();
 
   return {
     title: `${t('metaTitle')} - Ashyq Bilim`,

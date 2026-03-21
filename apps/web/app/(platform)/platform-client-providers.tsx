@@ -1,6 +1,6 @@
 'use client';
 
-import PlatformProvider from '@/components/Contexts/PlatformProvider';
+import { PlatformContextProvider } from '@/components/Contexts/PlatformContext';
 import { useTheme } from '@/components/providers/theme-provider';
 import NextTopLoader from 'nextjs-toploader';
 import type { ReactNode } from 'react';
@@ -26,9 +26,9 @@ export default function PlatformClientProviders({ children, initialPlatform }: P
   };
 
   return (
-    <PlatformProvider initialPlatform={initialPlatform}>
+    <PlatformContextProvider initialPlatform={initialPlatform}>
       <NextTopLoader {...topLoaderProps} />
       {children}
-    </PlatformProvider>
+    </PlatformContextProvider>
   );
 }

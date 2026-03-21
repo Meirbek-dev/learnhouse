@@ -2,7 +2,7 @@ import EditorOptionsProvider from '@components/Contexts/Editor/EditorContext';
 import { getActivityWithAuthHeader } from '@services/courses/activities';
 import AIEditorProvider from '@components/Contexts/AI/AIEditorContext';
 import EditorWrapper from '@components/Objects/Editor/EditorWrapper';
-import { getContextInfo } from '@/services/platform/platform';
+import { getPlatform } from '@/services/platform/platform';
 import { getCourseMetadata } from '@services/courses/courses';
 import { getTranslations } from 'next-intl/server';
 import { jetBrainsMono } from '@/lib/fonts';
@@ -42,7 +42,7 @@ const EditActivity = async (props: { params: Promise<{ courseid: string; activit
     getActivityWithAuthHeader(activityuuid, undefined, access_token),
   ]);
 
-  const platform = await getContextInfo(undefined, access_token || '');
+  const platform = await getPlatform(access_token || '');
 
   return (
     <div className={jetBrainsMono.variable}>

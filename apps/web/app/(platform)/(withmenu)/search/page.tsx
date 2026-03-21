@@ -1,4 +1,4 @@
-import { getPlatformContextInfo } from '@/services/platform/platform';
+import { getPlatform } from '@/services/platform/platform';
 import { getThumbnailMediaDirectory } from '@services/media/media';
 import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
@@ -12,7 +12,7 @@ interface MetadataProps {
 export async function generateMetadata(props: MetadataProps): Promise<Metadata> {
   const searchParams = await props.searchParams;
   const t = await getTranslations('General');
-  const platform = await getPlatformContextInfo();
+  const platform = await getPlatform();
   const searchQuery = Array.isArray(searchParams.q) ? searchParams.q[0] : searchParams.q || '';
   const searchType = Array.isArray(searchParams.type) ? searchParams.type[0] : searchParams.type || 'all';
 

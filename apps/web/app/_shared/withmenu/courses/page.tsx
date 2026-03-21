@@ -1,4 +1,4 @@
-import { getPlatformContextInfo } from '@/services/platform/platform';
+import { getPlatform } from '@/services/platform/platform';
 import { getThumbnailMediaDirectory } from '@services/media/media';
 import { getOptionalSession } from '@/lib/get-optional-session';
 import { getCourses } from '@services/courses/courses';
@@ -14,7 +14,7 @@ interface MetadataProps {
 export async function generateMetadata(_props: MetadataProps): Promise<Metadata> {
   const t = await getTranslations('General');
 
-  const platform = await getPlatformContextInfo();
+  const platform = await getPlatform();
 
   // SEO
   return {
