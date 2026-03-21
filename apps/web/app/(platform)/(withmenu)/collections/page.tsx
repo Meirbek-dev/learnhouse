@@ -3,9 +3,9 @@ import TypeOfContentTitle from '@/components/Objects/Elements/Titles/TypeOfConte
 import CollectionThumbnail from '@components/Objects/Thumbnails/CollectionThumbnail';
 import GeneralWrapper from '@/components/Objects/Elements/Wrappers/GeneralWrapper';
 import { PermissionGuard } from '@components/Security/PermissionGuard';
-import { getPlatform } from '@/services/platform/platform';
+import { PLATFORM_BRAND_NAME } from '@/lib/constants';
 import ProtectedText from '@components/Objects/ContentPlaceHolder';
-import { getThumbnailMediaDirectory } from '@services/media/media';
+import { getPlatformThumbnailImage } from '@services/media/media';
 import { Actions, Resources, Scopes } from '@/types/permissions';
 import { getOptionalSession } from '@/lib/get-optional-session';
 import { getCollections } from '@services/courses/collections';
@@ -20,11 +20,10 @@ interface MetadataProps {
 
 export async function generateMetadata(_props: MetadataProps): Promise<Metadata> {
   const t = await getTranslations('HomePage.Collections');
-  const platform = await getPlatform();
 
   return {
-    title: `${t('title')} - Ashyq Bilim`,
-    description: `${t('collectionOfCourses', { platformName: 'Ashyq Bilim' })}`,
+    title: `${t('title')} - ${PLATFORM_BRAND_NAME}`,
+    description: `${t('collectionOfCourses', { platformName: PLATFORM_BRAND_NAME })}`,
     robots: {
       index: true,
       follow: true,
@@ -36,15 +35,15 @@ export async function generateMetadata(_props: MetadataProps): Promise<Metadata>
       },
     },
     openGraph: {
-      title: `${t('title')} - Ashyq Bilim`,
-      description: `${t('collectionOfCourses', { platformName: 'Ashyq Bilim' })}`,
+      title: `${t('title')} - ${PLATFORM_BRAND_NAME}`,
+      description: `${t('collectionOfCourses', { platformName: PLATFORM_BRAND_NAME })}`,
       type: 'website',
       images: [
         {
-          url: getThumbnailMediaDirectory(platform?.thumbnail_image),
+          url: getPlatformThumbnailImage(),
           width: 800,
           height: 600,
-          alt: platform.name,
+          alt: PLATFORM_BRAND_NAME,
         },
       ],
     },

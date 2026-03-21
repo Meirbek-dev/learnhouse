@@ -5,7 +5,12 @@ import {
   uploadPlatformPreview,
   uploadPlatformThumbnail,
 } from '@/services/settings/platform';
-import { getLogoMediaDirectory, getPreviewMediaDirectory, getThumbnailMediaDirectory } from '@services/media/media';
+import {
+  getLogoMediaDirectory,
+  getPlatformThumbnailImage,
+  getPreviewMediaDirectory,
+  getThumbnailMediaDirectory,
+} from '@services/media/media';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@components/ui/dialog';
 import { GripVertical, ImageIcon, Images, Info, Plus, StarIcon, UploadCloud, X } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs';
@@ -497,7 +502,7 @@ export default function EditImages() {
                   <img
                     src={
                       platform?.thumbnail_image
-                        ? localThumbnail || getThumbnailMediaDirectory(platform?.thumbnail_image)
+                        ? localThumbnail || getPlatformThumbnailImage(platform.thumbnail_image)
                         : '/empty_thumbnail.webp'
                     }
                     alt="Platform thumbnail"

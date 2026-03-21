@@ -1,5 +1,4 @@
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
-import { getPlatform } from '@/services/platform/platform';
 import { getOptionalSession } from '@/lib/get-optional-session';
 import { getCourseMetadata } from '@services/courses/courses';
 import type { Metadata } from 'next';
@@ -16,8 +15,6 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
   const session = await getOptionalSession();
   const access_token = session?.tokens?.access_token;
 
-  // Get platform context information
-  const platform = await getPlatform();
   const course_meta = await getCourseMetadata(params.courseuuid, undefined, access_token || null);
 
   // SEO

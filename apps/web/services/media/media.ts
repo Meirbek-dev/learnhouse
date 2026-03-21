@@ -1,4 +1,5 @@
 import { getPublicConfig } from '@services/config/env';
+import { PLATFORM_THUMBNAIL_IMAGE_PATH } from '@/lib/constants';
 
 const getMediaUrl = () => getPublicConfig().mediaUrl;
 
@@ -65,6 +66,18 @@ export function getLogoMediaDirectory(fileId: string): string {
 
 export function getThumbnailMediaDirectory(fileId: string): string {
   return `${getMediaUrl()}content/platform/thumbnails/${fileId}`;
+}
+
+export function getPlatformThumbnailImage(fileId?: string | null): string {
+  if (fileId) {
+    return getThumbnailMediaDirectory(fileId);
+  }
+
+  const thumbnailPath = PLATFORM_THUMBNAIL_IMAGE_PATH.startsWith('/')
+    ? PLATFORM_THUMBNAIL_IMAGE_PATH.slice(1)
+    : PLATFORM_THUMBNAIL_IMAGE_PATH;
+
+  return `${getPublicConfig().siteUrl}${thumbnailPath}`;
 }
 
 export function getPreviewMediaDirectory(fileId: string): string {

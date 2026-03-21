@@ -1,6 +1,6 @@
 import GeneralWrapper from '@/components/Objects/Elements/Wrappers/GeneralWrapper';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
-import { getPlatform } from '@/services/platform/platform';
+import { PLATFORM_BRAND_NAME } from '@/lib/constants';
 import { getCollectionById } from '@services/courses/collections';
 import { getOptionalSession } from '@/lib/get-optional-session';
 import { getAbsoluteUrl } from '@services/config/config';
@@ -20,7 +20,7 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
   const col = await getCollectionById(params.collectionid, access_token || '');
 
   return {
-    title: `${t('collection')}: ${col.name} - Ashyq Bilim`,
+    title: `${t('collection')}: ${col.name} - ${PLATFORM_BRAND_NAME}`,
     description: `${col.description}`,
     robots: {
       index: true,
@@ -33,7 +33,7 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
       },
     },
     openGraph: {
-      title: `${t('collection')}: ${col.name} - Ashyq Bilim`,
+      title: `${t('collection')}: ${col.name} - ${PLATFORM_BRAND_NAME}`,
       description: `${col.description}`,
       type: 'website',
     },

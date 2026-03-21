@@ -1,4 +1,4 @@
-import { getPlatform } from '@/services/platform/platform';
+import { PLATFORM_BRAND_NAME, PLATFORM_DESCRIPTION } from '@/lib/constants';
 import { getEditableCourses } from '@services/courses/courses';
 import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
@@ -39,12 +39,11 @@ function parsePreset(value: string | string[] | undefined): string {
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('General');
-  const platform = await getPlatform();
 
   return {
-    title: `${t('courses')} - Ashyq Bilim`,
-    description: platform.description,
-    keywords: `${platform.name}, ${platform.description}, ${t('courses')}, learning, education, online learning, edu, online courses, ${platform.name} ${t('courses')}`,
+    title: `${t('courses')} - ${PLATFORM_BRAND_NAME}`,
+    description: PLATFORM_DESCRIPTION,
+    keywords: `${PLATFORM_BRAND_NAME}, ${PLATFORM_DESCRIPTION}, ${t('courses')}, learning, education, online learning, edu, online courses, ${PLATFORM_BRAND_NAME} ${t('courses')}`,
     robots: {
       index: true,
       follow: true,
@@ -56,8 +55,8 @@ export async function generateMetadata(): Promise<Metadata> {
       },
     },
     openGraph: {
-      title: `${t('courses')} - Ashyq Bilim`,
-      description: platform.description,
+      title: `${t('courses')} - ${PLATFORM_BRAND_NAME}`,
+      description: PLATFORM_DESCRIPTION,
       type: 'website',
     },
   };
