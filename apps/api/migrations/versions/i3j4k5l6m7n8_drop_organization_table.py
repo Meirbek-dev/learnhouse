@@ -11,7 +11,7 @@ the platform table when the platform table is empty, so no data is silently lost
 databases that were never re-installed from scratch.
 
 Revision ID: i3j4k5l6m7n8
-Revises: h2i3j4k5l6m7
+Revises: None
 Create Date: 2026-03-21 00:00:00.000000
 
 """
@@ -23,7 +23,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "i3j4k5l6m7n8"
-down_revision: str | None = "h2i3j4k5l6m7"
+down_revision: str | None = None
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
