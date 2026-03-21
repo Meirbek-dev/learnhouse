@@ -59,8 +59,97 @@ def _column_exists(conn: sa.Connection, table_name: str, column_name: str) -> bo
     )
 
 
+def _constraint_rows_for_column(
+    conn: sa.Connection, table_name: str, column_name: str
+) -> list[tuple[str, str]]:
+    rows = conn.execute(
+        sa.text(
+            """
+            SELECT DISTINCT tc.constraint_name, tc.constraint_type
+            FROM information_schema.table_constraints tc
+            JOIN information_schema.key_column_usage kcu
+              ON tc.constraint_schema = kcu.constraint_schema
+             AND tc.constraint_name = kcu.constraint_name
+             AND tc.table_name = kcu.table_name
+            WHERE tc.table_schema = 'public'
+              AND tc.table_name = :table_name
+              AND kcu.column_name = :column_name
+            """
+        ),
+        {"table_name": table_name, "column_name": column_name},
+    ).fetchall()
+    return [(row[0], row[1]) for row in rows]
+
+
+def _indexes_for_column(
+    conn: sa.Connection, table_name: str, column_name: str
+) -> list[str]:
+    rows = conn.execute(
+        sa.text(
+            """
+            SELECT DISTINCT indexname
+            FROM pg_indexes
+            WHERE schemaname = 'public'
+              AND tablename = :table_name
+              AND indexdef ILIKE :column_pattern
+            """
+        ),
+        {
+            "table_name": table_name,
+            "column_pattern": f'%({column_name})%',
+        },
+    ).fetchall()
+    return [row[0] for row in rows]
+
+
+def _drop_column_dependencies(
+    conn: sa.Connection, table_name: str, column_name: str
+) -> None:
+    constraint_type_map = {
+        "FOREIGN KEY": "foreignkey",
+        "UNIQUE": "unique",
+        "PRIMARY KEY": "primary",
+    }
+
+    for constraint_name, constraint_type in _constraint_rows_for_column(
+        conn, table_name, column_name
+    ):
+        mapped_type = constraint_type_map.get(constraint_type)
+        if mapped_type and constraint_name:
+            op.drop_constraint(constraint_name, table_name, type_=mapped_type)
+
+    for index_name in _indexes_for_column(conn, table_name, column_name):
+        op.execute(sa.text(f'DROP INDEX IF EXISTS "{index_name}"'))
+
+
+def _drop_column_if_present(
+    conn: sa.Connection, table_name: str, column_name: str
+) -> None:
+    if not _column_exists(conn, table_name, column_name):
+        return
+
+    _drop_column_dependencies(conn, table_name, column_name)
+    op.drop_column(table_name, column_name)
+
+
+def _drop_foreign_keys_referencing_table(
+    conn: sa.Connection, referred_table: str
+) -> None:
+    inspector = sa.inspect(conn)
+
+    for table_name in inspector.get_table_names():
+        for foreign_key in inspector.get_foreign_keys(table_name):
+            if foreign_key.get("referred_table") != referred_table:
+                continue
+
+            foreign_key_name = foreign_key.get("name")
+            if foreign_key_name:
+                op.drop_constraint(foreign_key_name, table_name, type_="foreignkey")
+
+
 def upgrade() -> None:
     conn = op.get_bind()
+    metadata = sa.MetaData()
 
     if not _table_exists(conn, "organization"):
         # Nothing to do — already cleaned up on this instance.
@@ -78,6 +167,8 @@ def upgrade() -> None:
             ).mappings().first()
 
             if org_row:
+                platform_table = sa.Table("platform", metadata, autoload_with=conn)
+
                 # Build the INSERT using only columns that exist in both tables.
                 org_columns = {
                     col["name"]
@@ -97,14 +188,23 @@ def upgrade() -> None:
                 values.setdefault("creation_date", now)
                 values.setdefault("update_date", now)
 
-                cols_sql = ", ".join(f'"{c}"' for c in values)
-                params_sql = ", ".join(f":{c}" for c in values)
-                conn.execute(
-                    sa.text(
-                        f'INSERT INTO platform ({cols_sql}) VALUES ({params_sql})'
-                    ),
-                    values,
-                )
+                conn.execute(platform_table.insert().values(**values))
+
+    # Defensive cleanup for legacy schema variants that may still retain
+    # organization foreign keys or tables despite earlier cleanup migrations.
+    for table_name in (
+        "role",
+        "roles",
+        "user_roles",
+        "permission_audit_log",
+        "role_audit_log",
+    ):
+        _drop_column_if_present(conn, table_name, "org_id")
+
+    if _table_exists(conn, "userorganization"):
+        conn.execute(sa.text('DROP TABLE IF EXISTS "userorganization" CASCADE'))
+
+    _drop_foreign_keys_referencing_table(conn, "organization")
 
     op.drop_table("organization")
 

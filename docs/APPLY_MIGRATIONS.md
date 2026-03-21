@@ -9,6 +9,11 @@ The migration container gets its backend settings from the `app` service environ
 repository is normally `extra/.env` via `docker-compose.yml`. There is no runtime fallback to
 `apps/api/config/config.yaml` or `apps/api/.env`.
 
+Docker Compose also interpolates `${...}` variables while loading `docker-compose.yml`, including the
+`app.build.args` values used by the frontend image. Because of that, run these commands with
+`--env-file ./extra/.env`; relying on the service-level `env_file` alone still produces missing-variable
+warnings before the one-off container starts.
+
 ## When To Use Which Command
 
 - Use `docker compose exec app ...` when the `app` container is already running.
@@ -23,7 +28,7 @@ SSH into the server and go to the repository root where `docker-compose.yml` is 
 
 ```bash
 cd /path/to/ashyq-bilim
-docker compose ps -a
+docker compose --env-file ./extra/.env ps -a
 ```
 
 ## 2. Confirm The Database Is Healthy
@@ -31,7 +36,7 @@ docker compose ps -a
 Before running migrations, make sure the PostgreSQL container is up and healthy.
 
 ```bash
-docker compose ps db
+docker compose --env-file ./extra/.env ps db
 ```
 
 Expected state: `Up` and `(healthy)`.
@@ -43,7 +48,7 @@ Expected state: `Up` and `(healthy)`.
 Run Alembic in a one-off container based on the `app` service:
 
 ```bash
-docker compose run --rm -w /app/api app uv run --no-sync alembic upgrade head
+docker compose --env-file ./extra/.env run --rm -w /app/api app uv run --no-sync alembic upgrade head
 ```
 
 ### Apply when `app` is already running
@@ -51,7 +56,7 @@ docker compose run --rm -w /app/api app uv run --no-sync alembic upgrade head
 Run the same migration command inside the running container:
 
 ```bash
-docker compose exec -w /app/api app uv run --no-sync alembic upgrade head
+docker compose --env-file ./extra/.env exec -w /app/api app uv run --no-sync alembic upgrade head
 ```
 
 ## 4. Verify The Current Revision
@@ -61,19 +66,19 @@ After the migration completes, confirm the database is at the expected head revi
 ### If `app` is not running
 
 ```bash
-docker compose run --rm -w /app/api app uv run --no-sync alembic current
+docker compose --env-file ./extra/.env run --rm -w /app/api app uv run --no-sync alembic current
 ```
 
 ### If `app` is already running
 
 ```bash
-docker compose exec -w /app/api app uv run --no-sync alembic current
+docker compose --env-file ./extra/.env exec -w /app/api app uv run --no-sync alembic current
 ```
 
 If you want to see the available latest revision from the code, run:
 
 ```bash
-docker compose run --rm -w /app/api app uv run --no-sync alembic heads
+docker compose --env-file ./extra/.env run --rm -w /app/api app uv run --no-sync alembic heads
 ```
 
 `current` should match `heads` after a successful upgrade.
@@ -83,13 +88,13 @@ docker compose run --rm -w /app/api app uv run --no-sync alembic heads
 If the API container is not running yet:
 
 ```bash
-docker compose up -d app
+docker compose --env-file ./extra/.env up -d app
 ```
 
 If the API container is already running and you want to restart it cleanly after migration:
 
 ```bash
-docker compose restart app
+docker compose --env-file ./extra/.env restart app
 ```
 
 ## 6. Check Logs
@@ -97,7 +102,7 @@ docker compose restart app
 Confirm the service starts without migration health check errors.
 
 ```bash
-docker compose logs -f app
+docker compose --env-file ./extra/.env logs -f app
 ```
 
 You should not see errors like:
@@ -111,10 +116,10 @@ If you are applying migrations on a live server, use this order:
 
 1. Take a database backup.
 2. Confirm `db` is healthy.
-3. Run `docker compose run --rm -w /app/api app uv run --no-sync alembic upgrade head`.
-4. Verify with `docker compose run --rm -w /app/api app uv run --no-sync alembic current`.
+3. Run `docker compose --env-file ./extra/.env run --rm -w /app/api app uv run --no-sync alembic upgrade head`.
+4. Verify with `docker compose --env-file ./extra/.env run --rm -w /app/api app uv run --no-sync alembic current`.
 5. Start or restart `app`.
-6. Check `docker compose logs -f app`.
+6. Check `docker compose --env-file ./extra/.env logs -f app`.
 
 ## Quick Copy/Paste
 
@@ -122,11 +127,11 @@ For the current server state you shared, this is the direct command sequence:
 
 ```bash
 cd /path/to/ashyq-bilim
-docker compose ps db
-docker compose run --rm -w /app/api app uv run --no-sync alembic upgrade head
-docker compose run --rm -w /app/api app uv run --no-sync alembic current
-docker compose up -d app
-docker compose logs --tail=100 app
+docker compose --env-file ./extra/.env ps db
+docker compose --env-file ./extra/.env run --rm -w /app/api app uv run --no-sync alembic upgrade head
+docker compose --env-file ./extra/.env run --rm -w /app/api app uv run --no-sync alembic current
+docker compose --env-file ./extra/.env up -d app
+docker compose --env-file ./extra/.env logs --tail=100 app
 ```
 
 ## Troubleshooting

@@ -24,8 +24,9 @@ const isUnsupportedCookieDomain = (host?: string | null) => {
 
 /**
  * Resolves the API base URL (always ending with a slash).
- * Client code should use getAPIUrl() / getPublicAPIUrl().
- * Server code should use getServerAPIUrl().
+ * Shared code should use getAPIUrl(). It resolves to the public browser URL
+ * on the client and the internal Docker/backend URL on the server.
+ * Server-only code can use getServerAPIUrl() explicitly when needed.
  */
 export const getPublicAPIUrl = () => getPublicConfig().apiUrl;
 
@@ -38,7 +39,13 @@ export const getServerAPIUrl = () => {
   return internalApiUrl;
 };
 
-export const getAPIUrl = () => getPublicAPIUrl();
+export const getAPIUrl = () => {
+  if (typeof window === 'undefined') {
+    return getServerAPIUrl();
+  }
+
+  return getPublicAPIUrl();
+};
 
 export const getSiteUrl = () => getPublicConfig().siteUrl;
 

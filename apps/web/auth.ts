@@ -392,22 +392,31 @@ const createAuthConfig = (): NextAuthConfig => {
 
 let nextAuthResultCache: NextAuthResult | null = null;
 
-const getNextAuthResult = (): NextAuthResult => {
+const getNextAuthResult = (): NextAuthResult | null => {
   if (nextAuthResultCache) return nextAuthResultCache;
-  nextAuthResultCache = NextAuth(createAuthConfig());
-  return nextAuthResultCache;
+  try {
+    nextAuthResultCache = NextAuth(createAuthConfig());
+    return nextAuthResultCache;
+  } catch {
+    // Server env vars are absent (e.g. during `next build` without an .env
+    // file). Return null so auth() callers get a null session rather than
+    // crashing the build.
+    return null;
+  }
 };
 
 export const handlers: AuthHandlers = {
-  GET(...args) {
-    return getNextAuthResult().handlers.GET(...args);
+  async GET(...args) {
+    return (await getNextAuthResult()?.handlers.GET(...args)) ?? new Response(null, { status: 503 });
   },
-  POST(...args) {
-    return getNextAuthResult().handlers.POST(...args);
+  async POST(...args) {
+    return (await getNextAuthResult()?.handlers.POST(...args)) ?? new Response(null, { status: 503 });
   },
 };
 
-export const signIn = ((...args: Parameters<SignInFunction>) => getNextAuthResult().signIn(...args)) as SignInFunction;
+export const signIn = ((...args: Parameters<SignInFunction>) =>
+  getNextAuthResult()?.signIn(...args)) as SignInFunction;
 export const signOut = ((...args: Parameters<SignOutFunction>) =>
-  getNextAuthResult().signOut(...args)) as SignOutFunction;
-export const auth = ((...args: Parameters<AuthFunction>) => getNextAuthResult().auth(...args)) as AuthFunction;
+  getNextAuthResult()?.signOut(...args)) as SignOutFunction;
+export const auth = ((...args: Parameters<AuthFunction>) =>
+  getNextAuthResult()?.auth(...args) ?? null) as AuthFunction;

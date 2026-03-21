@@ -3,6 +3,7 @@ import { getPlatformThumbnailImage } from '@services/media/media';
 import { getOptionalSession } from '@/lib/get-optional-session';
 import { getCourses } from '@services/courses/courses';
 import { getTranslations } from 'next-intl/server';
+import { connection } from 'next/server';
 import type { Metadata } from 'next';
 
 import Courses from './courses';
@@ -46,6 +47,7 @@ export async function generateMetadata(_props: MetadataProps): Promise<Metadata>
 }
 
 const CoursesPage = async () => {
+  await connection();
   const session = await getOptionalSession();
   const access_token = session?.tokens?.access_token;
 
