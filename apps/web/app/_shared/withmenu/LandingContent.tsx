@@ -1,9 +1,9 @@
 import { getServerGamificationDashboard } from '@/services/gamification/server';
-import { getPlatform } from '@/services/platform/platform';
 import LandingClassic from '@components/Landings/LandingClassic';
 import { getOptionalSession } from '@/lib/get-optional-session';
 import LandingCustom from '@components/Landings/LandingCustom';
 import { getCollections } from '@services/courses/collections';
+import { getPlatform } from '@/services/platform/platform';
 import { getCourses } from '@services/courses/courses';
 import { connection } from 'next/server';
 

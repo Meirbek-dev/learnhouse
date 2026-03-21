@@ -226,7 +226,7 @@ export default function RichTextEditor({
 
   // TipTap v3 doesn't expose extension commands on ChainedCommands without generic editor typing
 
-  const ed = editor as any;
+  const ed = editor;
 
   return (
     <div className="overflow-hidden rounded-lg border">

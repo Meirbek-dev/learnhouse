@@ -1,16 +1,16 @@
 'use client';
 import {
-  updatePlatform,
-  uploadPlatformLogo,
-  uploadPlatformPreview,
-  uploadPlatformThumbnail,
-} from '@/services/settings/platform';
-import {
   getLogoMediaDirectory,
   getPlatformThumbnailImage,
   getPreviewMediaDirectory,
   getThumbnailMediaDirectory,
 } from '@services/media/media';
+import {
+  updatePlatform,
+  uploadPlatformLogo,
+  uploadPlatformPreview,
+  uploadPlatformThumbnail,
+} from '@/services/settings/platform';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@components/ui/dialog';
 import { GripVertical, ImageIcon, Images, Info, Plus, StarIcon, UploadCloud, X } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs';

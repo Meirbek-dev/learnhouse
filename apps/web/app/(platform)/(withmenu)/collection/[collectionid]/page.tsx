@@ -1,9 +1,9 @@
 import GeneralWrapper from '@/components/Objects/Elements/Wrappers/GeneralWrapper';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
-import { PLATFORM_BRAND_NAME } from '@/lib/constants';
 import { getCollectionById } from '@services/courses/collections';
 import { getOptionalSession } from '@/lib/get-optional-session';
 import { getAbsoluteUrl } from '@services/config/config';
+import { PLATFORM_BRAND_NAME } from '@/lib/constants';
 import { getTranslations } from 'next-intl/server';
 import Link from '@/components/ui/ServerLink';
 import type { Metadata } from 'next';
@@ -44,7 +44,7 @@ export default async function PlatformCollectionPage(props: { params: Promise<{ 
   const t = await getTranslations('General');
   const session = await getOptionalSession();
   const access_token = session?.tokens?.access_token;
-  const { collectionid } = await props.params
+  const { collectionid } = await props.params;
   const col = await getCollectionById(collectionid, access_token || '');
 
   return (

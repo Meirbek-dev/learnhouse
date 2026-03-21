@@ -1,8 +1,5 @@
 const hasAuthRuntimeConfig = () => {
-  const requiredKeys = [
-    process.env.NEXTAUTH_SECRET,
-    process.env.NEXTAUTH_URL,
-  ];
+  const requiredKeys = [process.env.NEXTAUTH_SECRET, process.env.NEXTAUTH_URL];
 
   return requiredKeys.every((value) => typeof value === 'string' && value.trim().length > 0);
 };

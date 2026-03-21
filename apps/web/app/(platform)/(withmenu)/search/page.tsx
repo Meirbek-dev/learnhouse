@@ -1,5 +1,5 @@
-import { PLATFORM_BRAND_NAME } from '@/lib/constants';
 import { getPlatformThumbnailImage } from '@services/media/media';
+import { PLATFORM_BRAND_NAME } from '@/lib/constants';
 import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
 

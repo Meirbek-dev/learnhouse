@@ -20,9 +20,12 @@ export async function GET(request: NextRequest) {
     }
   } catch {
     // Backend unavailable — return an empty but valid sitemap
-    return new NextResponse(generateSitemap(getAbsoluteUrl('/'), [{ loc: getAbsoluteUrl('/'), priority: 1, changefreq: 'daily' }]), {
-      headers: { 'Content-Type': 'application/xml' },
-    });
+    return new NextResponse(
+      generateSitemap(getAbsoluteUrl('/'), [{ loc: getAbsoluteUrl('/'), priority: 1, changefreq: 'daily' }]),
+      {
+        headers: { 'Content-Type': 'application/xml' },
+      },
+    );
   }
 
   let collections: { collection_uuid: string }[] = [];

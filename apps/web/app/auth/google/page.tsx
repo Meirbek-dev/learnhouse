@@ -1,14 +1,14 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
-import { signIn } from 'next-auth/react';
-import { Loader2, AlertTriangle } from 'lucide-react';
-import AuthCard from '@components/auth/card';
-import AuthLogo from '@components/auth/logo';
 import { getAbsoluteUrl } from '@services/config/config';
+import { Loader2, AlertTriangle } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
+import AuthLogo from '@components/auth/logo';
+import AuthCard from '@components/auth/card';
 import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
 import Link from '@components/ui/AppLink';
+import { signIn } from 'next-auth/react';
 
 /**
  * Google OAuth callback page.
@@ -50,7 +50,10 @@ const GoogleCallbackPage = () => {
 
   return (
     <AuthCard>
-      <Link prefetch={false} href={getAbsoluteUrl('/')}>
+      <Link
+        prefetch={false}
+        href={getAbsoluteUrl('/')}
+      >
         <AuthLogo />
       </Link>
 

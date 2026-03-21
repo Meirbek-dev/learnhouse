@@ -1,5 +1,5 @@
-import { LandingContent } from '@/app/_shared/withmenu/LandingContent';
 import { PLATFORM_BRAND_NAME, PLATFORM_DESCRIPTION } from '@/lib/constants';
+import { LandingContent } from '@/app/_shared/withmenu/LandingContent';
 import { getPlatformThumbnailImage } from '@services/media/media';
 import { PageSuspense } from '@components/Utils/PageSuspense';
 import { getTranslations } from 'next-intl/server';

@@ -3,13 +3,13 @@ import TypeOfContentTitle from '@/components/Objects/Elements/Titles/TypeOfConte
 import CollectionThumbnail from '@components/Objects/Thumbnails/CollectionThumbnail';
 import GeneralWrapper from '@/components/Objects/Elements/Wrappers/GeneralWrapper';
 import { PermissionGuard } from '@components/Security/PermissionGuard';
-import { PLATFORM_BRAND_NAME } from '@/lib/constants';
 import ProtectedText from '@components/Objects/ContentPlaceHolder';
 import { getPlatformThumbnailImage } from '@services/media/media';
 import { Actions, Resources, Scopes } from '@/types/permissions';
 import { getOptionalSession } from '@/lib/get-optional-session';
 import { getCollections } from '@services/courses/collections';
 import { getAbsoluteUrl } from '@services/config/config';
+import { PLATFORM_BRAND_NAME } from '@/lib/constants';
 import { getTranslations } from 'next-intl/server';
 import Link from '@components/ui/AppLink';
 import type { Metadata } from 'next';

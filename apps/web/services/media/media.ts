@@ -1,5 +1,5 @@
-import { getPublicConfig } from '@services/config/env';
 import { PLATFORM_THUMBNAIL_IMAGE_PATH } from '@/lib/constants';
+import { getPublicConfig } from '@services/config/env';
 
 const getMediaUrl = () => getPublicConfig().mediaUrl;
 

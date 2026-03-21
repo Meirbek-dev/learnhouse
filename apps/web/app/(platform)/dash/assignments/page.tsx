@@ -2,9 +2,9 @@ import { FileText } from 'lucide-react';
 
 import { getAssignmentsFromCourses } from '@services/courses/assignments';
 import { CourseCard } from '@/app/_shared/dash/assignments/ClientParts';
-import { getPlatform } from '@/services/platform/platform';
 import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
 import { getEditableCourses } from '@services/courses/courses';
+import { getPlatform } from '@/services/platform/platform';
 import { Card, CardContent } from '@/components/ui/card';
 import { getTranslations } from 'next-intl/server';
 import { Spinner } from '@components/ui/spinner';

@@ -130,7 +130,7 @@ export default function FixedActivitySecondaryBar(props: FixedActivitySecondaryB
   const [isScrolled, setIsScrolled] = useState(false);
   const [shouldShow, setShouldShow] = useState(false);
   const mainActivityInfoRef = useRef<HTMLDivElement | null>(null);
-  const platform = usePlatform() as any;
+  const platform = usePlatform();
 
   const { allActivities, currentIndex } = (() => {
     const allActivities: any[] = [];

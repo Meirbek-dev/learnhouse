@@ -1,5 +1,4 @@
 import ArtPlayer from '@components/Objects/Activities/Video/Artplayer';
-import { usePlatform } from '@/components/Contexts/PlatformContext';
 import { getActivityMediaDirectory } from '@services/media/media';
 import type ArtplayerType from 'artplayer';
 import { useLocale } from 'next-intl';
@@ -48,7 +47,6 @@ interface VideoActivityProps {
 }
 
 const VideoActivity = ({ activity, course }: VideoActivityProps) => {
-  const platform = usePlatform() as any;
   const fullLocale = useLocale();
   const locale = fullLocale.split('-')[0];
 

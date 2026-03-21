@@ -2,7 +2,6 @@
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { getUserCertificates } from '@services/courses/certifications';
-import { usePlatform } from '@/components/Contexts/PlatformContext';
 import { revalidateTags } from '@services/utils/ts/requests';
 import { Award, ExternalLink, Loader2 } from 'lucide-react';
 import { removeCourse } from '@services/courses/activity';
@@ -20,7 +19,6 @@ interface TrailCourseElementProps {
 }
 
 const TrailCourseElement = ({ course, run }: TrailCourseElementProps) => {
-  const platform = usePlatform() as any;
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const courseid = course.course_uuid.replace('course_', '');

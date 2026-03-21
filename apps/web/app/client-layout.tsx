@@ -16,7 +16,7 @@ interface ClientLayoutProps {
 }
 
 function ThemeSync() {
-  const session = usePlatformSession() as any;
+  const session = usePlatformSession();
   const sessionRef = useRef(session);
 
   // Keep a ref to the latest session so the event listener doesn't need to be

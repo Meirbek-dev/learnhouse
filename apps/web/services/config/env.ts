@@ -41,7 +41,7 @@ export interface ServerConfig {
   cookieSecure: boolean;
 }
 
-export interface AppConfig extends PublicConfig, ServerConfig { }
+export interface AppConfig extends PublicConfig, ServerConfig {}
 
 type PublicEnv = v.InferOutput<typeof PublicEnvSchema>;
 type ServerEnv = v.InferOutput<typeof ServerEnvSchema>;

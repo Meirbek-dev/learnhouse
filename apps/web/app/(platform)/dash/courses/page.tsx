@@ -79,8 +79,14 @@ async function PlatformDashCoursesPageInner(props: {
 
   const session = await auth();
   const access_token = session?.tokens?.access_token;
-  const { courses, total, summary } = await
-    getEditableCourses(access_token || undefined, currentPage, COURSES_PER_PAGE, query, sortBy, preset);
+  const { courses, total, summary } = await getEditableCourses(
+    access_token || undefined,
+    currentPage,
+    COURSES_PER_PAGE,
+    query,
+    sortBy,
+    preset,
+  );
 
   return (
     <CoursesHome

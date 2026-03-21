@@ -423,9 +423,7 @@ export const handlers: AuthHandlers = {
   },
 };
 
-export const signIn = ((...args: Parameters<SignInFunction>) =>
-  getNextAuthResult()?.signIn(...args)) as SignInFunction;
+export const signIn = ((...args: Parameters<SignInFunction>) => getNextAuthResult()?.signIn(...args)) as SignInFunction;
 export const signOut = ((...args: Parameters<SignOutFunction>) =>
   getNextAuthResult()?.signOut(...args)) as SignOutFunction;
-export const auth = ((...args: Parameters<AuthFunction>) =>
-  getNextAuthResult()?.auth(...args) ?? null) as AuthFunction;
+export const auth = ((...args: Parameters<AuthFunction>) => getNextAuthResult()?.auth(...args) ?? null) as AuthFunction;

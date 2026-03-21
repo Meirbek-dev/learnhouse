@@ -3,7 +3,7 @@
 import EditSocials from '@/components/Dashboard/Pages/Platform/EditSocials/EditSocials';
 import EditLanding from '@/components/Dashboard/Pages/Platform/EditLanding/EditLanding';
 import EditImages from '@/components/Dashboard/Pages/Platform/EditImages/EditImages';
-import { ImageIcon, LayoutDashboardIcon, Share2Icon, TextIcon } from 'lucide-react';
+import { ImageIcon, LayoutDashboardIcon, Share2Icon } from 'lucide-react';
 import SettingsHeader from '@components/Dashboard/Misc/SettingsHeader';
 import SettingsTabs from '@components/Dashboard/Misc/SettingsTabs';
 import { getAbsoluteUrl } from '@services/config/config';

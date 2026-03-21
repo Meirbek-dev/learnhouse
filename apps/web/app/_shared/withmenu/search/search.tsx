@@ -3,7 +3,6 @@
 import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media';
 import { removeCoursePrefix } from '@components/Objects/Thumbnails/CourseThumbnail';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
-import { usePlatform } from '@/components/Contexts/PlatformContext';
 import { Book, GraduationCap, Search, Users } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { getAbsoluteUrl } from '@services/config/config';
@@ -165,7 +164,6 @@ const SearchPage = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const session = usePlatformSession();
-  const platform = usePlatform() as any;
   const t = useTranslations('SearchPage');
 
   // Search state
