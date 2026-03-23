@@ -42,7 +42,7 @@ import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
 import { Badge } from '@components/ui/badge';
 import { useTranslations } from 'next-intl';
-import currencyCodes from 'currency-codes';
+import currencyCodes from '@/lib/currencies';
 import { useForm } from 'react-hook-form';
 import useSWR, { mutate } from 'swr';
 import { toast } from 'sonner';

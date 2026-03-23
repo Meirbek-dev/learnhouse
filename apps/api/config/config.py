@@ -147,51 +147,43 @@ class ChromaDBConfig(PlatformSectionSettings):
         return stripped
 
 
-class AIPerformanceConfig(PlatformSectionSettings):
-    streaming_enabled: bool = True
-    cache_enabled: bool = True
-    max_concurrent_requests: int = 50
-    request_timeout: int = 60
+class AIConfig(PlatformSectionSettings):
+    """All AI-related configuration in one flat class.
 
+    Fields with no ``validation_alias`` use hardcoded defaults and are not
+    configurable via environment variables (intentional — they are tuning
+    knobs that rarely need to change per deployment).
+    """
 
-class AICacheConfig(PlatformSectionSettings):
-    vector_store_ttl: int = 3600
-    response_cache_ttl: int = 1800
-    embedding_cache_ttl: int = 7200
-    semantic_similarity_threshold: float = 0.95
-
-
-class AIVectorStoreConfig(PlatformSectionSettings):
-    chromadb_pool_size: int = 10
-    collection_retention: int = 86400
-    embedding_batch_size: int = 8191
-
-
-class AIChatConfig(PlatformSectionSettings):
-    history_window_size: int = 10
-    max_history_length: int = 100
-    message_retention: int = 86400
-
-
-class AIRootConfig(PlatformSectionSettings):
     openai_api_key: str | None = Field(
         default=None,
         validation_alias="PLATFORM_OPENAI_API_KEY",
     )
+    chromadb_config: ChromaDBConfig = Field(default_factory=ChromaDBConfig)
+
+    # Performance
+    streaming_enabled: bool = True
+    max_concurrent_requests: int = 50
+    request_timeout: int = 60
+
+    # Cache TTLs (seconds)
+    vector_store_ttl: int = 3600
+    response_cache_ttl: int = 1800
+    embedding_cache_ttl: int = 7200
+
+    # Vector store
+    collection_retention: int = 86400
+    embedding_batch_size: int = 8191
+
+    # Chat history
+    history_window_size: int = 10
+    max_history_length: int = 100
+    message_retention: int = 86400
 
     @field_validator("openai_api_key", mode="before")
     @classmethod
     def normalize_openai_api_key(cls, value: str | None) -> str | None:
         return _strip_optional_string(value)
-
-
-class AIConfig(PydanticStrictBaseModel):
-    openai_api_key: str | None = None
-    chromadb_config: ChromaDBConfig = Field(default_factory=ChromaDBConfig)
-    performance: AIPerformanceConfig = Field(default_factory=AIPerformanceConfig)
-    cache: AICacheConfig = Field(default_factory=AICacheConfig)
-    vector_store: AIVectorStoreConfig = Field(default_factory=AIVectorStoreConfig)
-    chat: AIChatConfig = Field(default_factory=AIChatConfig)
 
 
 class HostingConfig(PlatformSectionSettings):
@@ -460,14 +452,7 @@ def get_settings() -> AppSettings:
         database_config=DatabaseConfig(),
         redis_config=RedisConfig(),
         security_config=SecurityConfig(),
-        ai_config=AIConfig(
-            openai_api_key=AIRootConfig().openai_api_key,
-            chromadb_config=ChromaDBConfig(),
-            performance=AIPerformanceConfig(),
-            cache=AICacheConfig(),
-            vector_store=AIVectorStoreConfig(),
-            chat=AIChatConfig(),
-        ),
+        ai_config=AIConfig(chromadb_config=ChromaDBConfig()),
         mailing_config=MailingConfig(),
         payments_config=InternalPaymentsConfig(stripe=InternalStripeConfig()),
         bootstrap=BootstrapConfig(),

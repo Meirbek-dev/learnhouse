@@ -6,7 +6,7 @@ import {
   getCourseEditorBundleKey,
   getCourseMetadataKey,
 } from '@services/courses/editor';
-import { createContext, use, useEffect, useMemo, useReducer } from 'react';
+import { createContext, use, useCallback, useEffect, useMemo, useReducer } from 'react';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { getCourseReadinessSummary } from '@/lib/course-management';
 import type { CourseEditorBundle } from '@services/courses/editor';
@@ -177,18 +177,17 @@ export const CourseProvider = ({
 
   const isLoading = isSWRLoading || state.isLoading;
 
-  const refreshCourseMeta = async () => mutateCourseMeta();
-  const refreshEditorData = async () => mutateEditorBundle();
-  const refreshCourseEditor = async () => {
-    await Promise.all([mutateCourseMeta(), mutateEditorBundle()]);
-  };
-  const showConflict = (message?: string) => {
-    dispatch({
-      type: 'setConflict',
-      payload: { message: message?.trim() || '' },
-    });
-  };
-  const dismissConflict = () => dispatch({ type: 'clearConflict' });
+  const refreshCourseMeta = useCallback(async () => mutateCourseMeta(), [mutateCourseMeta]);
+  const refreshEditorData = useCallback(async () => mutateEditorBundle(), [mutateEditorBundle]);
+  const refreshCourseEditor = useCallback(
+    async () => void (await Promise.all([mutateCourseMeta(), mutateEditorBundle()])),
+    [mutateCourseMeta, mutateEditorBundle],
+  );
+  const showConflict = useCallback(
+    (message?: string) => dispatch({ type: 'setConflict', payload: { message: message?.trim() || '' } }),
+    [dispatch],
+  );
+  const dismissConflict = useCallback(() => dispatch({ type: 'clearConflict' }), [dispatch]);
 
   const readiness = useMemo(
     () => getCourseReadinessSummary(state.courseStructure, state.editorData),

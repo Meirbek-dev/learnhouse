@@ -1,5 +1,6 @@
 import logfire
 import uvicorn
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
@@ -34,12 +35,22 @@ class CachedStaticFiles(StaticFiles):
 
 def create_app() -> FastAPI:
     settings = get_settings()
+
+    @asynccontextmanager
+    async def lifespan(app: FastAPI):
+        await startup_app(app)()
+        try:
+            yield
+        finally:
+            await shutdown_app(app)()
+
     app = FastAPI(
         title="Ashyq Bilim",
         description="Образовательная платформа Ashyq Bilim",
         docs_url="/docs" if settings.general_config.development_mode else None,
         redoc_url="/redoc" if settings.general_config.development_mode else None,
         version="0.1.0",
+        lifespan=lifespan,
     )
 
     app.add_middleware(
@@ -61,8 +72,6 @@ def create_app() -> FastAPI:
         logfire.instrument_sqlalchemy(engine=engine)
 
     app.add_middleware(GZipMiddleware, minimum_size=1000)
-    app.add_event_handler("startup", startup_app(app))
-    app.add_event_handler("shutdown", shutdown_app(app))
     app.mount("/content", CachedStaticFiles(directory="content"), name="content")
     app.include_router(v1_router)
     return app

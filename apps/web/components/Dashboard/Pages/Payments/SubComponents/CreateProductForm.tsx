@@ -11,7 +11,7 @@ import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
-import currencyCodes from 'currency-codes';
+import currencyCodes from '@/lib/currencies';
 import { useForm } from 'react-hook-form';
 import type { FC } from 'react';
 import { toast } from 'sonner';

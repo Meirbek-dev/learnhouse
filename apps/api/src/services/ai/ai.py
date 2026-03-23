@@ -21,6 +21,7 @@ from src.services.ai.exceptions import (
     ChatSessionError,
     VectorStoreError,
 )
+
 from src.services.ai.schemas.ai import (
     ActivityAIChatSessionResponse,
     SendActivityAIChatMessage,

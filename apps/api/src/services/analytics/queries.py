@@ -542,29 +542,33 @@ def load_analytics_context(
 
     usergroup_names_by_id: dict[int, str] = {}
     cohort_ids_by_user: dict[int, set[int]] = defaultdict(set)
-    if courses:
-        usergroups = [
-            _unwrap_model(usergroup, UserGroup)
-            for usergroup in db_session.exec(select(UserGroup)).all()
+    if user_ids:
+        # Scope to memberships for the users we already know — avoids loading every cohort
+        # in the entire database, which becomes expensive on large platforms.
+        membership_rows = [
+            _unwrap_model(row, UserGroupUser)
+            for row in db_session.exec(
+                select(UserGroupUser).where(
+                    UserGroupUser.user_id.in_(sorted(user_ids))
+                )
+            ).all()
         ]
-        usergroup_names_by_id = {
-            usergroup.id: usergroup.name
-            for usergroup in usergroups
-            if usergroup.id is not None
-        }
-        if usergroup_names_by_id:
-            membership_rows = [
-                _unwrap_model(row, UserGroupUser)
-                for row in db_session.exec(
-                    select(UserGroupUser).where(
-                        UserGroupUser.usergroup_id.in_(
-                            sorted(usergroup_names_by_id.keys())
-                        )
-                    )
+        for membership in membership_rows:
+            cohort_ids_by_user[membership.user_id].add(membership.usergroup_id)
+        # Only load the usergroup names that actually appear in those memberships.
+        relevant_group_ids = {m.usergroup_id for m in membership_rows}
+        if relevant_group_ids:
+            usergroups = [
+                _unwrap_model(usergroup, UserGroup)
+                for usergroup in db_session.exec(
+                    select(UserGroup).where(UserGroup.id.in_(sorted(relevant_group_ids)))
                 ).all()
             ]
-            for membership in membership_rows:
-                cohort_ids_by_user[membership.user_id].add(membership.usergroup_id)
+            usergroup_names_by_id = {
+                usergroup.id: usergroup.name
+                for usergroup in usergroups
+                if usergroup.id is not None
+            }
 
     return AnalyticsContext(
         generated_at=now_utc(),
@@ -803,5 +807,5 @@ def assessment_pass_threshold(settings: dict | None) -> float:
     raw = (settings or {}).get("passing_score", 60)
     try:
         return float(raw)
-    except TypeError, ValueError:
+    except (TypeError, ValueError):
         return 60.0

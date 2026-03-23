@@ -1,6 +1,5 @@
 import { twMerge } from 'tailwind-merge';
 import type { ClassValue } from 'clsx';
-import { nanoid } from 'nanoid';
 import { clsx } from 'clsx';
 
 export function cn(...inputs: ClassValue[]) {
@@ -18,14 +17,16 @@ export function debounce<T extends (...args: any[]) => void>(func: T, delay: num
 }
 
 /**
- * Generates a UUID that works in both client and server environments
- * Falls back to a nanoid if crypto.randomUUID is not available
+ * Generates a UUID. Uses the Web Crypto API (available in all modern browsers
+ * and Node.js 14.17+). Falls back to a simple time-based id for ancient envs.
  */
 export function generateUUID(): string {
-  // Try to use native crypto.randomUUID if available
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
     return crypto.randomUUID();
   }
-
-  return nanoid();
+  // Minimal fallback (RFC 4122 v4 shape) — no external dependency needed.
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16);
+  });
 }

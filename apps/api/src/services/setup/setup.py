@@ -8,6 +8,7 @@ from ulid import ULID
 from src.db.permission_enums import RoleSlug
 from src.db.platform import Platform, PlatformCreate
 from src.db.users import User, UserCreate, UserRead
+from src.repositories.role_repository import RoleRepository
 from src.security.rbac import PermissionChecker
 from src.security.security import security_hash_password
 
@@ -17,9 +18,7 @@ def install_default_elements(db_session: Session) -> bool:
     """
     Install default elements including system roles and permissions.
     """
-    checker = PermissionChecker(db_session)
-    created_roles = checker.seed_default_roles()
-
+    created_roles = RoleRepository(db_session).seed_default_roles()
     return len(created_roles) > 0
 
 

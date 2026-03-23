@@ -78,13 +78,11 @@ const fetchUserSession = cache(async (accessToken: string): Promise<Awaited<Retu
 
 // ─── Token Helpers ────────────────────────────────────────────────────────────
 
-const assertValidTokenExpiry = (expiry: unknown): number => {
+const getTokenExpiry = (expiry: unknown): number | null => {
   if (typeof expiry !== 'number' || !Number.isFinite(expiry) || expiry <= 0) {
-    throw new Error('Token expiry claim is missing or invalid');
+    return null;
   }
-  if (expiry <= Date.now()) {
-    throw new Error('Token is already expired');
-  }
+
   return expiry;
 };
 
@@ -251,7 +249,15 @@ const createAuthConfig = (): NextAuthConfig => {
               console.error('Invalid token data from provider');
               return null;
             }
-            assertValidTokenExpiry(u.tokens.expiry);
+            const tokenExpiry = getTokenExpiry(u.tokens.expiry);
+            if (!tokenExpiry) {
+              console.error('Token expiry claim is missing or invalid');
+              return null;
+            }
+            if (tokenExpiry <= Date.now()) {
+              console.error('Token from provider is already expired');
+              return null;
+            }
             token.user = u;
             return token;
           }
@@ -264,7 +270,12 @@ const createAuthConfig = (): NextAuthConfig => {
           }
 
           const { tokens } = userWithTokens;
-          const tokenExpiry = assertValidTokenExpiry(tokens.expiry);
+          const tokenExpiry = getTokenExpiry(tokens.expiry);
+
+          if (!tokenExpiry) {
+            console.warn('Token expiry claim is missing or invalid');
+            return null;
+          }
 
           if (!isTokenExpiringSoon(tokenExpiry)) return token;
 
@@ -283,7 +294,11 @@ const createAuthConfig = (): NextAuthConfig => {
               return null;
             }
 
-            const refreshedExpiry = assertValidTokenExpiry(refreshed.expiry);
+            const refreshedExpiry = getTokenExpiry(refreshed.expiry);
+            if (!refreshedExpiry) {
+              console.error('Refresh response did not include a valid expiry');
+              return null;
+            }
 
             token.user = {
               ...userWithTokens,

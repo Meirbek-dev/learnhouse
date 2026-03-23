@@ -19,11 +19,7 @@ def get_embedding_function(model_name: str) -> OpenAIEmbeddings | None:
             logger.warning("OpenAI API key not configured")
             return None
 
-        batch_size = getattr(
-            getattr(config.ai_config, "vector_store", None),
-            "embedding_batch_size",
-            2048,
-        )
+        batch_size = config.ai_config.embedding_batch_size
 
         logger.info(
             "Creating embedding function: model=%s batch_size=%d",

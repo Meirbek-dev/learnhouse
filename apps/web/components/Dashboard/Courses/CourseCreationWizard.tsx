@@ -7,7 +7,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { CourseChoiceCard, courseWorkflowSummaryCardClass } from './courseWorkflowUi';
 import { createNewCourse, getCourseMetadata } from '@services/courses/courses';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
-import { useQueryState, useQueryStates, parseAsString } from 'nuqs';
+import { useQueryParam, useClearQueryParams } from '@/hooks/useQueryParam';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createChapter } from '@services/courses/chapters';
 import { useEffect, useMemo, useTransition } from 'react';
@@ -35,31 +35,17 @@ export default function CourseCreationWizard({ sourceCourses }: CourseCreationWi
   const session = usePlatformSession() as any;
   const accessToken = session?.data?.tokens?.access_token;
 
-  const [step, setStep] = useQueryState('step', { defaultValue: '0', shallow: true });
+  const [step, setStep] = useQueryParam('step', '0');
   const currentStep = Math.min(2, Math.max(0, Number(step)));
 
   // Persist form state in URL params so back navigation restores choices.
-  const [name, setName] = useQueryState('name', { defaultValue: '', shallow: true });
-  const [description, setDescription] = useQueryState('desc', { defaultValue: '', shallow: true });
-  const [visibility, setVisibility] = useQueryState('vis', { defaultValue: 'private', shallow: true });
-  const [template, setTemplate] = useQueryState('tpl', { defaultValue: 'blank', shallow: true });
-  const [sourceCourseUuid, setSourceCourseUuid] = useQueryState('src', { defaultValue: '', shallow: true });
-  const [launchDestination, setLaunchDestination] = useQueryState('dest', {
-    defaultValue: 'curriculum',
-    shallow: true,
-  });
-  const [, setAllWizardParams] = useQueryStates(
-    {
-      step: parseAsString.withDefault('0'),
-      name: parseAsString.withDefault(''),
-      desc: parseAsString.withDefault(''),
-      vis: parseAsString.withDefault('private'),
-      tpl: parseAsString.withDefault('blank'),
-      src: parseAsString.withDefault(''),
-      dest: parseAsString.withDefault('curriculum'),
-    },
-    { shallow: true },
-  );
+  const [name, setName] = useQueryParam('name', '');
+  const [description, setDescription] = useQueryParam('desc', '');
+  const [visibility, setVisibility] = useQueryParam('vis', 'private');
+  const [template, setTemplate] = useQueryParam('tpl', 'blank');
+  const [sourceCourseUuid, setSourceCourseUuid] = useQueryParam('src', '');
+  const [launchDestination, setLaunchDestination] = useQueryParam('dest', 'curriculum');
+  const clearWizardParams = useClearQueryParams(['step', 'name', 'desc', 'vis', 'tpl', 'src', 'dest']);
   const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
@@ -184,17 +170,8 @@ export default function CourseCreationWizard({ sourceCourses }: CourseCreationWi
           }
 
           toast.success(t('toasts.created'));
-          // Clear all wizard params in a single history entry so the back button
-          // does not re-enter the wizard, then replace (not push) to the workspace.
-          await setAllWizardParams({
-            step: '0',
-            name: '',
-            desc: '',
-            vis: 'private',
-            tpl: 'blank',
-            src: '',
-            dest: 'curriculum',
-          });
+          // Clear all wizard params so the back button does not re-enter the wizard.
+          clearWizardParams();
           router.replace(buildCourseWorkspacePath(result.data.course_uuid, launchDestination as LaunchDestination));
           router.refresh();
         } catch (error: any) {

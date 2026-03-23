@@ -337,63 +337,6 @@ class PermissionChecker:
         self._cache.pop(user_id, None)
 
     # ------------------------------------------------------------------
-    # Seeding
-    # ------------------------------------------------------------------
-
-    def seed_default_roles(self) -> list[str]:
-        """Create system roles & permissions from SYSTEM_ROLES. Idempotent."""
-        from src.db.permission_enums import SYSTEM_ROLES
-        from src.db.permissions import Permission, Role, RolePermission
-
-        created: list[str] = []
-
-        for slug, role_def in SYSTEM_ROLES.items():
-            # Upsert role
-            role = self.db.exec(select(Role).where(Role.slug == slug)).first()
-            if not role:
-                role = Role(
-                    slug=slug,
-                    name=role_def["name"],
-                    description=role_def["description"],
-                    is_system=True,
-                    priority=role_def["priority"],
-                )
-                self.db.add(role)
-                self.db.flush()
-                created.append(slug)
-
-            # Upsert permissions for this role
-            for perm_str in role_def["permissions"]:
-                parts = perm_str.split(":")
-                if len(parts) != 3:
-                    continue
-                resource, action, scope = parts
-
-                perm = self.db.exec(
-                    select(Permission).where(Permission.name == perm_str)
-                ).first()
-                if not perm:
-                    perm = Permission(
-                        name=perm_str,
-                        resource_type=resource,
-                        action=action,
-                        scope=scope,
-                    )
-                    self.db.add(perm)
-                    self.db.flush()
-
-                existing_rp = self.db.exec(
-                    select(RolePermission)
-                    .where(RolePermission.role_id == role.id)
-                    .where(RolePermission.permission_id == perm.id)
-                ).first()
-                if not existing_rp:
-                    self.db.add(RolePermission(role_id=role.id, permission_id=perm.id))
-
-        self.db.commit()
-        return created
-
-    # ------------------------------------------------------------------
     # Internal
     # ------------------------------------------------------------------
 
