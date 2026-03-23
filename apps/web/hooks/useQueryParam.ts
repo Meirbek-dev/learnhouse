@@ -10,10 +10,7 @@
 import { usePathname, useSearchParams } from 'next/navigation';
 import { useCallback } from 'react';
 
-export function useQueryParam(
-  key: string,
-  defaultValue = ''
-): [string, (value: string) => void] {
+export function useQueryParam(key: string, defaultValue = ''): [string, (value: string) => void] {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const value = searchParams.get(key) ?? defaultValue;
@@ -29,7 +26,7 @@ export function useQueryParam(
       const query = params.toString();
       window.history.pushState(null, '', query ? `${pathname}?${query}` : pathname);
     },
-    [key, defaultValue, searchParams, pathname]
+    [key, defaultValue, searchParams, pathname],
   );
 
   return [value, setValue];

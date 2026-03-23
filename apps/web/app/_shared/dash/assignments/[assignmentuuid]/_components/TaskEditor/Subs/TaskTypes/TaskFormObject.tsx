@@ -12,10 +12,7 @@ import {
   handleAssignmentTaskSubmission,
   updateAssignmentTask,
 } from '@services/courses/assignments';
-import {
-  useAssignmentsTask,
-  useAssignmentsTaskDispatch,
-} from '@components/Contexts/Assignments/AssignmentsTaskContext';
+import { useAssignmentsTaskStore } from '@components/Contexts/Assignments/AssignmentsTaskContext';
 import AssignmentBoxUI from '@components/Objects/Activities/Assignment/AssignmentBoxUI';
 import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
@@ -570,8 +567,9 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
     data?: { tokens?: { access_token?: string } };
   };
   const access_token = session?.data?.tokens?.access_token;
-  const assignmentTaskState = useAssignmentsTask();
-  const assignmentTaskStateHook = useAssignmentsTaskDispatch();
+  const assignmentTask = useAssignmentsTaskStore((s) => s.assignmentTask);
+  const reload = useAssignmentsTaskStore((s) => s.reload);
+  const setSelectedTaskUUID = useAssignmentsTaskStore((s) => s.setSelectedTaskUUID);
   const assignment = useAssignments();
 
   // Loading states
@@ -582,7 +580,7 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
   // Form state
   const [questions, setQuestions] = useState<FormSchema[]>(() => {
     if (view === 'teacher') {
-      const savedQuestions = assignmentTaskState.assignmentTask.contents?.questions;
+      const savedQuestions = assignmentTask.contents?.questions;
       if (savedQuestions) {
         return normalizeQuestions(savedQuestions);
       }
@@ -714,7 +712,7 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
       toast.error(t('authRequired') || 'Authentication required');
       return;
     }
-    if (!assignmentTaskState.assignmentTask.assignment_task_uuid || !assignment.assignment_object.assignment_uuid) {
+    if (!assignmentTask.assignment_task_uuid || !assignment.assignment_object.assignment_uuid) {
       console.error('Missing assignment task or assignment UUID for save');
       toast.error(t('saveError'));
       return;
@@ -723,12 +721,12 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
     try {
       const res = await updateAssignmentTask(
         { contents: { questions } },
-        assignmentTaskState.assignmentTask.assignment_task_uuid,
+        assignmentTask.assignment_task_uuid,
         assignment.assignment_object.assignment_uuid,
         access_token,
       );
       if (res) {
-        assignmentTaskStateHook({ type: 'reload' });
+        reload();
         toast.success(t('savedSuccessfully'));
       } else {
         toast.error(t('saveError'));
@@ -836,12 +834,9 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
   // Effects
   useEffect(() => {
     if (view === 'teacher' && assignmentTaskUUID) {
-      assignmentTaskStateHook({
-        type: 'setSelectedAssignmentTaskUUID',
-        payload: assignmentTaskUUID,
-      });
+      setSelectedTaskUUID(assignmentTaskUUID);
     }
-  }, [view, assignmentTaskUUID, assignmentTaskStateHook]);
+  }, [view, assignmentTaskUUID, setSelectedTaskUUID]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -907,7 +902,7 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
         };
 
         if (view === 'teacher') {
-          if (!assignmentTaskState.assignmentTask.contents?.questions) {
+          if (!assignmentTask.contents?.questions) {
             await fetchAssignmentTask();
           }
         } else if (view === 'student') {
@@ -923,7 +918,7 @@ function TaskFormObject({ view, assignmentTaskUUID, user_id }: TaskFormObjectPro
     void loadData();
   }, [
     view,
-    assignmentTaskState.assignmentTask.contents?.questions,
+    assignmentTask.contents?.questions,
     assignmentTaskUUID,
     access_token,
     assignment.assignment_object.assignment_uuid,

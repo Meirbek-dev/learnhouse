@@ -1,8 +1,5 @@
 'use client';
-import {
-  useAssignmentsTask,
-  useAssignmentsTaskDispatch,
-} from '@components/Contexts/Assignments/AssignmentsTaskContext';
+import { useAssignmentsTaskStore } from '@components/Contexts/Assignments/AssignmentsTaskContext';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { AlertCircle, Cloud, Download, File, Info, Loader2, UploadCloud } from 'lucide-react';
 import { updateAssignmentTask, updateReferenceFile } from '@services/courses/assignments';
@@ -46,17 +43,18 @@ export const AssignmentTaskGeneralEdit = () => {
   const t = useTranslations('DashPage.Assignments.TaskGeneralEdit');
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
-  const assignmentTaskState = useAssignmentsTask();
-  const assignmentTaskStateHook = useAssignmentsTaskDispatch();
+  const assignmentTask = useAssignmentsTaskStore((s) => s.assignmentTask);
+  const selectedAssignmentTaskUUID = useAssignmentsTaskStore((s) => s.selectedAssignmentTaskUUID);
+  const reload = useAssignmentsTaskStore((s) => s.reload);
   const assignment = useAssignments();
   const validationSchema = createValidationSchema(t);
 
   // Check if assignment task data is loaded and task is selected
-  const isTaskSelected = assignmentTaskState?.selectedAssignmentTaskUUID !== null;
+  const isTaskSelected = selectedAssignmentTaskUUID !== null;
   const isTaskLoaded =
-    assignmentTaskState?.assignmentTask &&
-    Object.keys(assignmentTaskState.assignmentTask).length > 0 &&
-    assignmentTaskState.selectedAssignmentTaskUUID === assignmentTaskState.assignmentTask.assignment_task_uuid;
+    assignmentTask &&
+    Object.keys(assignmentTask).length > 0 &&
+    selectedAssignmentTaskUUID === assignmentTask.assignment_task_uuid;
 
   const form = useForm<TaskFormData>({
     resolver: valibotResolver(validationSchema),
@@ -82,12 +80,12 @@ export const AssignmentTaskGeneralEdit = () => {
         try {
           const res = await updateAssignmentTask(
             values,
-            assignmentTaskState.assignmentTask.assignment_task_uuid,
+            assignmentTask.assignment_task_uuid,
             assignment.assignment_object.assignment_uuid,
             access_token,
           );
           if (res.success) {
-            assignmentTaskStateHook({ type: 'reload' });
+            reload();
             toast.success(t('saveSuccess'));
           } else {
             toast.error(t('saveError'));
@@ -104,13 +102,13 @@ export const AssignmentTaskGeneralEdit = () => {
   useEffect(() => {
     console.log('Form data update:', {
       isTaskLoaded,
-      selectedTaskUUID: assignmentTaskState?.selectedAssignmentTaskUUID,
-      taskUUID: assignmentTaskState?.assignmentTask?.assignment_task_uuid,
-      taskData: assignmentTaskState?.assignmentTask,
+      selectedTaskUUID: selectedAssignmentTaskUUID,
+      taskUUID: assignmentTask?.assignment_task_uuid,
+      taskData: assignmentTask,
     });
 
     if (isTaskLoaded) {
-      const taskData = assignmentTaskState.assignmentTask;
+      const taskData = assignmentTask;
       form.reset({
         title: taskData.title || '',
         description: taskData.description || '',
@@ -118,7 +116,7 @@ export const AssignmentTaskGeneralEdit = () => {
         max_grade_value: taskData.max_grade_value || 20,
       });
     }
-  }, [assignmentTaskState.assignmentTask, form, isTaskLoaded, assignmentTaskState.selectedAssignmentTaskUUID]);
+  }, [assignmentTask, form, isTaskLoaded, selectedAssignmentTaskUUID]);
 
   // Show message if no task is selected
   if (!isTaskSelected) {
@@ -250,8 +248,8 @@ const UpdateTaskRef = () => {
   const session = usePlatformSession();
   const platform = usePlatform() as any;
   const access_token = session?.data?.tokens?.access_token;
-  const assignmentTaskState = useAssignmentsTask();
-  const assignmentTaskStateHook = useAssignmentsTaskDispatch();
+  const assignmentTask = useAssignmentsTaskStore((s) => s.assignmentTask);
+  const reload = useAssignmentsTaskStore((s) => s.reload);
   const assignment = useAssignments();
 
   const [isLoading, setIsLoading] = useState(false);
@@ -259,8 +257,8 @@ const UpdateTaskRef = () => {
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  const hasReferenceFile = Boolean(assignmentTaskState.assignmentTask?.reference_file);
-  const fileName = assignmentTaskState.assignmentTask?.reference_file;
+  const hasReferenceFile = Boolean(assignmentTask?.reference_file);
+  const fileName = assignmentTask?.reference_file;
   const fileExtension = fileName?.split('.').pop()?.toUpperCase();
 
   const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
@@ -272,7 +270,7 @@ const UpdateTaskRef = () => {
       assignment.course_object.course_uuid,
       assignment.activity_object.activity_uuid,
       assignment.assignment_object.assignment_uuid,
-      assignmentTaskState.assignmentTask.assignment_task_uuid,
+      assignmentTask.assignment_task_uuid,
       fileName,
     );
   };
@@ -289,7 +287,7 @@ const UpdateTaskRef = () => {
       setError(t('authRequiredUpload'));
       return;
     }
-    if (!assignmentTaskState.assignmentTask || !assignment) {
+    if (!assignmentTask || !assignment) {
       setError(t('missingAssignmentInfo'));
       return;
     }
@@ -306,7 +304,7 @@ const UpdateTaskRef = () => {
     try {
       const res = await updateReferenceFile(
         file,
-        assignmentTaskState.assignmentTask.assignment_task_uuid,
+        assignmentTask.assignment_task_uuid,
         assignment.assignment_object.assignment_uuid,
         access_token,
       );
@@ -316,7 +314,7 @@ const UpdateTaskRef = () => {
         return;
       }
 
-      assignmentTaskStateHook({ type: 'reload' });
+      reload();
       toast.success(t('fileUploadSuccess'));
     } catch (error) {
       console.error(error);

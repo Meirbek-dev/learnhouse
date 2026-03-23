@@ -1,4 +1,4 @@
-import { useAssignmentsTaskDispatch } from '@components/Contexts/Assignments/AssignmentsTaskContext';
+import { useAssignmentsTaskStore } from '@components/Contexts/Assignments/AssignmentsTaskContext';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { createAssignmentTask } from '@services/courses/assignments';
 import { AArrowUp, FileUp, ListTodo } from 'lucide-react';
@@ -11,7 +11,7 @@ const NewTaskModal = ({ closeModal, assignment_uuid }: any) => {
   const t = useTranslations('DashPage.Assignments.NewTaskModal');
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
-  const assignmentTaskStateHook = useAssignmentsTaskDispatch();
+  const setSelectedTaskUUID = useAssignmentsTaskStore((s) => s.setSelectedTaskUUID);
 
   function showReminderToast() {
     // Check if the reminder has already been shown using sessionStorage
@@ -42,10 +42,7 @@ const NewTaskModal = ({ closeModal, assignment_uuid }: any) => {
     toast.success(t('createSuccess'));
     showReminderToast();
     mutate(`${getAPIUrl()}assignments/${assignment_uuid}/tasks`);
-    assignmentTaskStateHook({
-      type: 'setSelectedAssignmentTaskUUID',
-      payload: res.data.assignment_task_uuid,
-    });
+    setSelectedTaskUUID(res.data.assignment_task_uuid);
     closeModal(false);
   }
 

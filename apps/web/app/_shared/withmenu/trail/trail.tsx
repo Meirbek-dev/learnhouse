@@ -12,7 +12,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { RecentActivityFeed } from '@/components/Dashboard/Gamification/recent-activity-feed';
-import { useOptionalGamificationContext } from '@/components/Contexts/GamificationContext';
+import { useGamificationStore } from '@/stores/gamification';
 import TypeOfContentTitle from '@/components/Objects/Elements/Titles/TypeOfContentTitle';
 import GeneralWrapper from '@/components/Objects/Elements/Wrappers/GeneralWrapper';
 import { Leaderboard } from '@/components/Dashboard/Gamification/leaderboard';
@@ -47,14 +47,11 @@ const Trail = () => {
     mutate,
   } = useSWR(TRAIL_KEY && access_token ? [TRAIL_KEY, access_token] : null, ([url, token]) => swrFetcher(url, token));
 
-  // Use gamification context (already available from parent layout)
-  const gamificationContext = useOptionalGamificationContext();
-  const gamificationData = {
-    profile: gamificationContext?.profile,
-    recent_transactions: gamificationContext?.dashboard?.recent_transactions || [],
-    user_rank: gamificationContext?.dashboard?.user_rank,
-  };
-  const isGamificationLoading = gamificationContext?.isLoading || false;
+  const gamificationProfile = useGamificationStore((s) => s.profile);
+  const recentTransactions = useGamificationStore((s) => s.dashboard?.recent_transactions ?? []);
+  const userRank = useGamificationStore((s) => s.dashboard?.user_rank);
+  const isGamificationLoading = useGamificationStore((s) => s.isLoading);
+  const gamificationData = { profile: gamificationProfile, recent_transactions: recentTransactions, user_rank: userRank };
 
   const { data: leaderboardData, isLoading: isLeaderboardLoading } = useSWR(
     access_token ? `${getAPIUrl()}gamification/leaderboard?limit=10` : null,

@@ -51,10 +51,7 @@ import {
   handleAssignmentTaskSubmission,
   updateAssignmentTask,
 } from '@services/courses/assignments';
-import {
-  useAssignmentsTask,
-  useAssignmentsTaskDispatch,
-} from '@components/Contexts/Assignments/AssignmentsTaskContext';
+import { useAssignmentsTaskStore } from '@components/Contexts/Assignments/AssignmentsTaskContext';
 import AssignmentBoxUI from '@components/Objects/Activities/Assignment/AssignmentBoxUI';
 import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
@@ -566,26 +563,27 @@ const TaskQuizObject = ({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
   const t = useTranslations('DashPage.Assignments.TaskQuizObject');
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
-  const assignmentTaskState = useAssignmentsTask();
-  const assignmentTaskStateHook = useAssignmentsTaskDispatch();
+  const assignmentTask = useAssignmentsTaskStore((s) => s.assignmentTask);
+  const reload = useAssignmentsTaskStore((s) => s.reload);
+  const setSelectedTaskUUID = useAssignmentsTaskStore((s) => s.setSelectedTaskUUID);
   const assignment = useAssignments();
   const submissionContext = useAssignmentSubmission();
 
   // Initialize questions based on view
   const initialQuestions = useMemo(() => {
-    if (view === 'teacher' && assignmentTaskState.assignmentTask.contents?.questions) {
-      return assignmentTaskState.assignmentTask.contents.questions;
+    if (view === 'teacher' && assignmentTask.contents?.questions) {
+      return assignmentTask.contents.questions;
     }
     return view === 'teacher' ? [createQuestion()] : [];
-  }, [view, assignmentTaskState.assignmentTask.contents?.questions]);
+  }, [view, assignmentTask.contents?.questions]);
 
   // Initialize settings
   const initialSettings = useMemo(() => {
-    if (view === 'teacher' && assignmentTaskState.assignmentTask.contents?.settings) {
-      return { ...DEFAULT_QUIZ_SETTINGS, ...assignmentTaskState.assignmentTask.contents.settings };
+    if (view === 'teacher' && assignmentTask.contents?.settings) {
+      return { ...DEFAULT_QUIZ_SETTINGS, ...assignmentTask.contents.settings };
     }
     return DEFAULT_QUIZ_SETTINGS;
-  }, [view, assignmentTaskState.assignmentTask.contents?.settings]);
+  }, [view, assignmentTask.contents?.settings]);
 
   // State
   const [isLoading, setIsLoading] = useState(view !== 'teacher');
@@ -789,13 +787,13 @@ const TaskQuizObject = ({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
     try {
       const res = await updateAssignmentTask(
         { contents: { questions, settings: quizSettings } },
-        assignmentTaskState.assignmentTask.assignment_task_uuid,
+        assignmentTask.assignment_task_uuid,
         assignment.assignment_object.assignment_uuid,
         access_token,
       );
 
       if (res) {
-        assignmentTaskStateHook({ type: 'reload' });
+        reload();
         toast.success(t('saveSuccess'));
       } else {
         toast.error(t('saveError'));
@@ -806,10 +804,10 @@ const TaskQuizObject = ({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
   }, [
     questions,
     quizSettings,
-    assignmentTaskState.assignmentTask.assignment_task_uuid,
+    assignmentTask.assignment_task_uuid,
     assignment.assignment_object.assignment_uuid,
     access_token,
-    assignmentTaskStateHook,
+    reload,
     t,
   ]);
 
@@ -857,7 +855,7 @@ const TaskQuizObject = ({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
         );
 
         if (res) {
-          assignmentTaskStateHook({ type: 'reload' });
+          reload();
           toast.success(t('saveSuccess'));
 
           const finalSubmissions = {
@@ -880,7 +878,7 @@ const TaskQuizObject = ({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
     assignmentTaskUUID,
     assignment.assignment_object.assignment_uuid,
     access_token,
-    assignmentTaskStateHook,
+    reload,
     t,
   ]);
 
@@ -1087,12 +1085,9 @@ const TaskQuizObject = ({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
   // Set selected task UUID
   useEffect(() => {
     if (view === 'teacher' && assignmentTaskUUID) {
-      assignmentTaskStateHook({
-        type: 'setSelectedAssignmentTaskUUID',
-        payload: assignmentTaskUUID,
-      });
+      setSelectedTaskUUID(assignmentTaskUUID);
     }
-  }, [view, assignmentTaskUUID, assignmentTaskStateHook]);
+  }, [view, assignmentTaskUUID, setSelectedTaskUUID]);
 
   // Render loading state
   if (isLoading) {

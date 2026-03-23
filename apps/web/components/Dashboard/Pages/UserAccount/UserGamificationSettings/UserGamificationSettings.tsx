@@ -1,7 +1,7 @@
 'use client';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useOptionalGamificationContext } from '@/components/Contexts/GamificationContext';
+import { useGamificationStore } from '@/stores/gamification';
 import { GamificationProfileSection } from '@/components/Dashboard/Gamification';
 import { updatePreferencesAction } from '@/app/actions/gamification';
 import { Check, Loader2, Save } from 'lucide-react';
@@ -35,8 +35,7 @@ const DEFAULT_PREFERENCES: GamificationPreferences = {
 
 export default function UserGamificationSettings() {
   const t = useTranslations('DashPage.UserAccountSettings.Gamification');
-  const ctx = useOptionalGamificationContext();
-  const profile = ctx?.profile;
+  const profile = useGamificationStore((s) => s.profile);
 
   const [preferences, setPreferences] = useState<GamificationPreferences>(DEFAULT_PREFERENCES);
   const [isSaving, setIsSaving] = useState(false);

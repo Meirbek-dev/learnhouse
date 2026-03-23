@@ -1,6 +1,6 @@
 'use client';
 
-import { useGamificationContext } from '@/components/Contexts/GamificationContext';
+import { useGamificationStore } from '@/stores/gamification';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
@@ -8,7 +8,9 @@ const TODAY_KEY = `gamification:lastLoginAward:${new Date().toISOString().slice(
 
 export function LoginBonusHandler() {
   const t = useTranslations('DashPage.UserAccountSettings.Gamification');
-  const { profile, updateStreak, awardXP } = useGamificationContext();
+  const profile = useGamificationStore((s) => s.profile);
+  const updateStreak = useGamificationStore((s) => s.updateStreak);
+  const awardXP = useGamificationStore((s) => s.awardXP);
   const [showBadge, setShowBadge] = useState(false);
 
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);

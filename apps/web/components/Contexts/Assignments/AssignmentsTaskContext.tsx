@@ -2,107 +2,82 @@
 
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { getAssignmentTask } from '@services/courses/assignments';
-import { createContext, use, useEffect, useReducer } from 'react';
+import { createContext, use, useEffect, useRef } from 'react';
 import { getAPIUrl } from '@services/config/config';
+import { createStore } from 'zustand/vanilla';
 import type { ReactNode } from 'react';
+import { useStore } from 'zustand';
 import { mutate } from 'swr';
 
 import { useAssignments } from './AssignmentContext';
 
-interface State {
+// ── Store shape ───────────────────────────────────────────────────────────────
+
+interface AssignmentsTaskState {
   selectedAssignmentTaskUUID: string | null;
   assignmentTask: Record<string, any>;
   reloadTrigger: number;
 }
 
-interface Action {
-  type: 'setSelectedAssignmentTaskUUID' | 'setAssignmentTask' | 'reload' | 'SET_MULTIPLE_STATES';
-  payload?: any;
+interface AssignmentsTaskActions {
+  setSelectedTaskUUID: (uuid: string | null) => void;
+  setAssignmentTask: (task: Record<string, any>) => void;
+  reload: () => void;
 }
 
-const initialState: State = {
-  selectedAssignmentTaskUUID: null,
-  assignmentTask: {},
-  reloadTrigger: 0,
-};
+export type AssignmentsTaskStore = AssignmentsTaskState & AssignmentsTaskActions;
 
-export const AssignmentsTaskContext = createContext<State | undefined>(undefined);
-export const AssignmentsTaskDispatchContext = createContext<React.Dispatch<Action> | undefined>(undefined);
+function makeAssignmentsTaskStore() {
+  return createStore<AssignmentsTaskStore>((set) => ({
+    selectedAssignmentTaskUUID: null,
+    assignmentTask: {},
+    reloadTrigger: 0,
+    setSelectedTaskUUID: (uuid) => set({ selectedAssignmentTaskUUID: uuid }),
+    setAssignmentTask: (task) => set({ assignmentTask: task }),
+    reload: () => set((s) => ({ reloadTrigger: s.reloadTrigger + 1 })),
+  }));
+}
 
-export const AssignmentsTaskProvider = ({ children }: { children: ReactNode }) => {
+// ── Context ───────────────────────────────────────────────────────────────────
+
+type StoreInstance = ReturnType<typeof makeAssignmentsTaskStore>;
+
+const AssignmentsTaskStoreContext = createContext<StoreInstance | null>(null);
+
+// ── Provider ──────────────────────────────────────────────────────────────────
+
+export function AssignmentsTaskProvider({ children }: { children: ReactNode }) {
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const assignment = useAssignments();
 
-  const [state, dispatch] = useReducer(assignmentsTaskReducer, initialState);
+  const storeRef = useRef<StoreInstance>(null);
+  if (!storeRef.current) storeRef.current = makeAssignmentsTaskStore();
+  const store = storeRef.current;
 
-  async function fetchAssignmentTask(assignmentTaskUUID: string) {
-    const res = await getAssignmentTask(assignmentTaskUUID, access_token);
-
-    if (res.success) {
-      dispatch({ type: 'setAssignmentTask', payload: res.data });
-    }
-  }
+  const selectedUUID = useStore(store, (s) => s.selectedAssignmentTaskUUID);
+  const reloadTrigger = useStore(store, (s) => s.reloadTrigger);
 
   useEffect(() => {
-    const loadIfNeeded = async () => {
-      if (state.selectedAssignmentTaskUUID) {
-        const res = await getAssignmentTask(state.selectedAssignmentTaskUUID, access_token);
-        if (res.success) dispatch({ type: 'setAssignmentTask', payload: res.data });
-        mutate(`${getAPIUrl()}assignments/${assignment.assignment_object?.assignment_uuid}/tasks`);
+    if (!selectedUUID) return;
+
+    const assignmentUUID = assignment.assignment_object?.assignment_uuid;
+    void (async () => {
+      const res = await getAssignmentTask(selectedUUID, access_token);
+      if (res.success) {
+        store.getState().setAssignmentTask(res.data);
+        void mutate(`${getAPIUrl()}assignments/${assignmentUUID}/tasks`);
       }
-    };
+    })();
+  }, [selectedUUID, reloadTrigger, assignment.assignment_object?.assignment_uuid, access_token, store]);
 
-    void loadIfNeeded();
-  }, [
-    state.selectedAssignmentTaskUUID,
-    state.reloadTrigger,
-    assignment.assignment_object?.assignment_uuid,
-    access_token,
-  ]);
-
-  return (
-    <AssignmentsTaskContext.Provider value={state}>
-      <AssignmentsTaskDispatchContext.Provider value={dispatch}>{children}</AssignmentsTaskDispatchContext.Provider>
-    </AssignmentsTaskContext.Provider>
-  );
-};
-
-export function useAssignmentsTask() {
-  const context = use(AssignmentsTaskContext);
-  if (context === undefined) {
-    throw new Error('useAssignmentsTask must be used within an AssignmentsTaskProvider');
-  }
-  return context;
+  return <AssignmentsTaskStoreContext.Provider value={store}>{children}</AssignmentsTaskStoreContext.Provider>;
 }
 
-export function useAssignmentsTaskDispatch() {
-  const context = use(AssignmentsTaskDispatchContext);
-  if (context === undefined) {
-    throw new Error('useAssignmentsTaskDispatch must be used within an AssignmentsTaskProvider');
-  }
-  return context;
-}
+// ── Hook ──────────────────────────────────────────────────────────────────────
 
-function assignmentsTaskReducer(state: State, action: Action): State {
-  switch (action.type) {
-    case 'setSelectedAssignmentTaskUUID': {
-      return { ...state, selectedAssignmentTaskUUID: action.payload };
-    }
-    case 'setAssignmentTask': {
-      return { ...state, assignmentTask: action.payload };
-    }
-    case 'reload': {
-      return { ...state, reloadTrigger: state.reloadTrigger + 1 };
-    }
-    case 'SET_MULTIPLE_STATES': {
-      return {
-        ...state,
-        ...action.payload,
-      };
-    }
-    default: {
-      return state;
-    }
-  }
+export function useAssignmentsTaskStore<T>(selector: (s: AssignmentsTaskStore) => T): T {
+  const store = use(AssignmentsTaskStoreContext);
+  if (!store) throw new Error('useAssignmentsTaskStore must be used within an AssignmentsTaskProvider');
+  return useStore(store, selector);
 }

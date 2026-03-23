@@ -1,7 +1,7 @@
 import CertificatePreview from '@components/Dashboard/Pages/Course/EditCourseCertification/CertificatePreview';
 import { Document, Font, Image, Page, StyleSheet, Text, View, pdf } from '@react-pdf/renderer';
 import { ArrowLeft, BookOpen, Download, Loader2, Shield, Target, Trophy } from 'lucide-react';
-import { useOptionalGamificationContext } from '@/components/Contexts/GamificationContext';
+import { useGamificationStore } from '@/stores/gamification';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { getUserCertificates } from '@services/courses/certifications';
@@ -39,10 +39,8 @@ const CourseEndView: FC<CourseEndViewProps> = ({ courseName, courseUuid, thumbna
     `/certificates/${userCertificate?.certificate_user.user_certification_uuid}/verify`,
   );
 
-  // Gamification state via unified context
-  const gamificationContext = useOptionalGamificationContext();
-  const gamificationProfile = gamificationContext?.profile ?? null;
-  const gamificationRefetch = gamificationContext?.refetch;
+  const gamificationProfile = useGamificationStore((s) => s.profile);
+  const gamificationRefetch = useGamificationStore((s) => s.refetch);
 
   // Refs to prevent repeated runs that may trigger network loops
   const fetchedCertificateRef = useRef(false);

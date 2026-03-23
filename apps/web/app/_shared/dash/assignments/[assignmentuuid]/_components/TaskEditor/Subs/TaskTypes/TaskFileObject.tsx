@@ -5,7 +5,7 @@ import {
   handleAssignmentTaskSubmission,
   updateSubFile,
 } from '@services/courses/assignments';
-import { useAssignmentsTaskDispatch } from '@components/Contexts/Assignments/AssignmentsTaskContext';
+import { useAssignmentsTaskStore } from '@components/Contexts/Assignments/AssignmentsTaskContext';
 import { AlertCircle, Cloud, Download, File, Info, Loader2, UploadCloud } from 'lucide-react';
 import AssignmentBoxUI from '@components/Objects/Activities/Assignment/AssignmentBoxUI';
 import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
@@ -77,7 +77,7 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
   const session = usePlatformSession();
   usePlatform();
   const assignment = useAssignments() as Assignment | null;
-  const assignmentTaskDispatch = useAssignmentsTaskDispatch();
+  const reload = useAssignmentsTaskStore((s) => s.reload);
 
   const accessToken = session?.data?.tokens?.access_token;
   const username = session?.data?.user?.username;
@@ -123,7 +123,7 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
         return;
       }
 
-      assignmentTaskDispatch({ type: 'reload' });
+      reload();
       setUserSubmissions({
         fileUUID: res.data.file_uuid,
         assignment_task_submission_uuid: res.data.assignment_task_submission_uuid,
@@ -160,7 +160,7 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
         return;
       }
 
-      assignmentTaskDispatch({ type: 'reload' });
+      reload();
       toast.success(t('saveSuccess'));
 
       const updated = {

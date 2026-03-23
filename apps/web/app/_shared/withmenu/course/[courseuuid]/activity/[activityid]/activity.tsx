@@ -38,7 +38,7 @@ import { AssignmentsTaskProvider } from '@components/Contexts/Assignments/Assign
 import { markActivityAsComplete, unmarkActivityAsComplete } from '@services/courses/activity';
 import FixedActivitySecondaryBar from '@components/Pages/Activity/FixedActivitySecondaryBar';
 import type { Activity, Chapter, CourseStructure } from '@components/Contexts/CourseContext';
-import { useOptionalGamificationContext } from '@/components/Contexts/GamificationContext';
+import { useGamificationStore } from '@/stores/gamification';
 import ActivityChapterDropdown from '@components/Pages/Activity/ActivityChapterDropdown';
 import { AssignmentProvider } from '@components/Contexts/Assignments/AssignmentContext';
 import GeneralWrapper from '@/components/Objects/Elements/Wrappers/GeneralWrapper';
@@ -1100,9 +1100,7 @@ export const MarkStatus = (props: {
   const session = usePlatformSession() as any;
   const [isLoading, setIsLoading] = useState(false);
 
-  // Gamification state via unified context
-  const gamificationContext = useOptionalGamificationContext();
-  const refetchGamification = gamificationContext?.refetch ?? (async () => {});
+  const refetchGamification = useGamificationStore((s) => s.refetch);
 
   // Track completed activities to prevent duplicate XP toasts
   const completedActivitiesRef = useRef<Set<string>>(new Set());
@@ -1139,15 +1137,13 @@ export const MarkStatus = (props: {
       await mutate([getTrailSwrKey(), session.data?.tokens?.access_token]);
 
       // Show XP feedback and update profile
-      if (gamificationContext) {
+      if (useGamificationStore.getState().profile) {
         // Only show XP toast if we haven't already shown it for this activity
         const activityKey = `${props.activity.id}`;
         if (!completedActivitiesRef.current.has(activityKey)) {
           completedActivitiesRef.current.add(activityKey);
-          // Show XP toast immediately (backend already awarded XP, this is just UI feedback)
-          gamificationContext.showXPToast(25, 'activity_completion', false);
+          useGamificationStore.getState().showXPToast(25, 'activity_completion');
         }
-
         // Refetch in background to update profile with actual XP from backend
         refetchGamification().catch((error: unknown) => console.error('Failed to refetch gamification:', error));
       } else {

@@ -1,7 +1,4 @@
-import {
-  useAssignmentsTask,
-  useAssignmentsTaskDispatch,
-} from '@components/Contexts/Assignments/AssignmentsTaskContext';
+import { useAssignmentsTaskStore } from '@components/Contexts/Assignments/AssignmentsTaskContext';
 import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
 import { FileUp, ListTodo, PanelLeftOpen, Plus, Type } from 'lucide-react';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
@@ -13,16 +10,9 @@ import NewTaskModal from './Modals/NewTaskModal';
 const AssignmentTasks = ({ assignment_uuid }: any) => {
   const t = useTranslations('DashPage.Assignments.Tasks');
   const assignments = useAssignments();
-  const assignmentTask = useAssignmentsTask();
-  const assignmentTaskHook = useAssignmentsTaskDispatch();
+  const selectedAssignmentTaskUUID = useAssignmentsTaskStore((s) => s.selectedAssignmentTaskUUID);
+  const setSelectedTaskUUID = useAssignmentsTaskStore((s) => s.setSelectedTaskUUID);
   const [isNewTaskModalOpen, setIsNewTaskModalOpen] = useState(false);
-
-  async function setSelectTask(task_uuid: string) {
-    assignmentTaskHook({
-      type: 'setSelectedAssignmentTaskUUID',
-      payload: task_uuid,
-    });
-  }
 
   return (
     <div className="flex h-full w-full overflow-auto">
@@ -54,7 +44,7 @@ const AssignmentTasks = ({ assignment_uuid }: any) => {
             <div
               key={task.id}
               className="soft-shadow flex w-[250px] cursor-pointer flex-col rounded-md bg-white p-3 shadow-[0px_4px_16px_rgba(0,0,0,0.06)]"
-              onClick={() => setSelectTask(task.assignment_task_uuid)}
+              onClick={() => setSelectedTaskUUID(task.assignment_task_uuid)}
             >
               <div className="flex items-center justify-between px-2">
                 <div className="flex items-center space-x-3">
@@ -66,7 +56,7 @@ const AssignmentTasks = ({ assignment_uuid }: any) => {
                   <div className="text-sm font-semibold">{task.title}</div>
                 </div>
                 <button
-                  className={`outline-gray-200 ${task.assignment_task_uuid === assignmentTask.selectedAssignmentTaskUUID ? 'bg-slate-100' : ''} rounded-md px-3 py-2 font-bold text-gray-500 transition-all ease-linear hover:bg-slate-100/50`}
+                  className={`outline-gray-200 ${task.assignment_task_uuid === selectedAssignmentTaskUUID ? 'bg-slate-100' : ''} rounded-md px-3 py-2 font-bold text-gray-500 transition-all ease-linear hover:bg-slate-100/50`}
                 >
                   <PanelLeftOpen size={16} />
                 </button>
