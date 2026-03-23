@@ -108,6 +108,22 @@ const SummaryCard = ({
   </div>
 );
 
+const SummaryList = ({ title, items }: { title: string; items: string[] }) => (
+  <div className="space-y-3 rounded-lg border bg-background p-4">
+    <div className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">{title}</div>
+    <ul className="space-y-2 text-sm text-foreground">
+      {items.map((item) => (
+        <li
+          key={item}
+          className="rounded-md bg-muted/40 px-3 py-2"
+        >
+          {item}
+        </li>
+      ))}
+    </ul>
+  </div>
+);
+
 export default function ConflictResolutionModal() {
   const t = useTranslations('CourseEdit.Conflict');
   const generalT = useTranslations('CourseEdit.General');
@@ -216,7 +232,7 @@ export default function ConflictResolutionModal() {
         const activityDraft = draftValue as any;
 
         return {
-          sectionLabel: activityDraft?.activity_type || 'Activity',
+          sectionLabel: activityDraft?.name || activityDraft?.activity_type || 'Activity',
           rows: buildRows(
             { label: generalT('name.label'), value: formatString(activityDraft?.name) },
             {
@@ -227,6 +243,24 @@ export default function ConflictResolutionModal() {
             {
               label: 'Content blocks',
               value: String(Array.isArray(activityDraft?.content?.content) ? activityDraft.content.content.length : 0),
+            },
+          ),
+        };
+      }
+      case 'content': {
+        return {
+          sectionLabel: courseStructure?.name || undefined,
+          rows: buildRows(
+            { label: 'Course', value: formatString(courseStructure?.name) },
+            { label: 'Chapters', value: String(courseStructure?.chapters?.length ?? 0) },
+            {
+              label: 'Activities',
+              value: String(
+                (courseStructure?.chapters ?? []).reduce(
+                  (count: number, chapter: any) => count + (chapter.activities?.length ?? 0),
+                  0,
+                ),
+              ),
             },
           ),
         };
@@ -304,10 +338,33 @@ export default function ConflictResolutionModal() {
         };
       case 'activity':
         return {
+          sectionLabel: (draftValue as any)?.name || courseStructure?.name || undefined,
+          rows: buildRows(
+            { label: generalT('name.label'), value: formatString((draftValue as any)?.name || courseStructure?.name) },
+            {
+              label: 'Published',
+              value:
+                (draftValue as any)?.published === true || courseStructure?.public
+                  ? accessT('publicLabel')
+                  : accessT('usersOnlyLabel'),
+            },
+          ),
+        };
+      case 'content':
+        return {
           sectionLabel: courseStructure?.name || undefined,
           rows: buildRows(
-            { label: generalT('name.label'), value: formatString(courseStructure?.name) },
-            { label: accessT('accessToTheCourse'), value: courseStructure?.public ? accessT('publicLabel') : accessT('usersOnlyLabel') },
+            { label: 'Course', value: formatString(courseStructure?.name) },
+            { label: 'Chapters', value: String(courseStructure?.chapters?.length ?? 0) },
+            {
+              label: 'Activities',
+              value: String(
+                (courseStructure?.chapters ?? []).reduce(
+                  (count: number, chapter: any) => count + (chapter.activities?.length ?? 0),
+                  0,
+                ),
+              ),
+            },
           ),
         };
       default:
@@ -341,6 +398,13 @@ export default function ConflictResolutionModal() {
           <AlertDialogTitle>{t('title')}</AlertDialogTitle>
           <AlertDialogDescription>{conflict.message || t('description')}</AlertDialogDescription>
         </AlertDialogHeader>
+
+        {conflict.summary.length > 0 ? (
+          <SummaryList
+            title={t('draftSummaryTitle')}
+            items={conflict.summary}
+          />
+        ) : null}
 
         <div className="grid gap-4 rounded-xl border bg-muted/30 p-4 md:grid-cols-2">
           <SummaryCard

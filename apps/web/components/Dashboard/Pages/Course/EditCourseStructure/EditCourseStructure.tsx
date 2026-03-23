@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/dialog';
 import { useChapterMutations } from '@/hooks/mutations/useChapterMutations';
 import { useCourse } from '@components/Contexts/CourseContext';
+import { useCourseEditorStore } from '@/stores/courses';
 import { useCourseStructureStore } from '@/stores/courses';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import NewChapterModal from '@components/Objects/Modals/Chapters/NewChapter';
@@ -44,7 +45,7 @@ const EditCourseStructure = () => {
 
   const course = useCourse();
   const course_structure = course.courseStructure;
-  const { showConflict } = course;
+  const setConflict = useCourseEditorStore((state) => state.setConflict);
   const course_uuid = course ? course.courseStructure.course_uuid : '';
   const { createChapter, reorderStructure } = useChapterMutations(course_uuid, true);
   const expandedChapterIds = useCourseStructureStore((state) => state.expandedChapterIds);
@@ -90,7 +91,21 @@ const EditCourseStructure = () => {
       toast.success(t('chapterCreatedSuccess'));
     } catch (error: any) {
       if (error?.status === 409) {
-        showConflict(error?.detail || error?.message);
+        setConflict({
+          section: 'content',
+          message: error?.detail || error?.message,
+          summary: [
+            t('title'),
+            `${t('addChapterButton')}: ${chapter?.name || t('creatingChapter')}`,
+            `${t('title')}: ${course_structure.name || ''}`,
+          ],
+          pendingSave: async () => {
+            await createChapter(chapter, {
+              accessToken: access_token,
+              lastKnownUpdateDate: course_structure.update_date,
+            });
+          },
+        });
         return;
       }
       setStructureStatus('error');
@@ -147,7 +162,22 @@ const EditCourseStructure = () => {
       setStructureStatus('saved');
     } catch (error: any) {
       if (error?.status === 409) {
-        showConflict(error?.detail || error?.message);
+        setConflict({
+          section: 'content',
+          message: error?.detail || error?.message,
+          summary: [
+            t('savingOrder'),
+            `${t('title')}: ${course_structure.name || ''}`,
+            `${course_structure.chapters.length} chapters`,
+            `${course_structure.chapters.reduce((count: number, chapter: any) => count + (chapter.activities?.length ?? 0), 0)} activities`,
+          ],
+          pendingSave: async () => {
+            await reorderStructure(newCourseStructure, payload, {
+              accessToken: access_token,
+              lastKnownUpdateDate: course_structure.update_date,
+            });
+          },
+        });
         return;
       }
       setStructureStatus('error');

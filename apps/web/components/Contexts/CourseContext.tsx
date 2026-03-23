@@ -79,7 +79,6 @@ interface CourseContextValue extends CourseState {
   refreshCourseMeta: () => Promise<CourseStructure | undefined>;
   refreshEditorData: () => Promise<CourseEditorBundle | undefined>;
   refreshCourseEditor: () => Promise<void>;
-  showConflict: (message?: string) => void;
   dismissConflict: () => void;
 }
 
@@ -101,7 +100,6 @@ export const CourseProvider = ({
 }: CourseProviderProps) => {
   const t = useTranslations('Contexts.Course');
   const openEditor = useCourseEditorStore((state) => state.openEditor);
-  const setConflict = useCourseEditorStore((state) => state.setConflict);
   const dismissConflict = useCourseEditorStore((state) => state.dismissConflict);
   const dirtySections = useCourseEditorStore((state) => state.dirtySections);
   const conflict = useCourseEditorStore((state) => state.conflict);
@@ -137,10 +135,6 @@ export const CourseProvider = ({
     async () => void (await Promise.all([mutateCourseMeta(), mutateEditorBundle()])),
     [mutateCourseMeta, mutateEditorBundle],
   );
-  const showConflict = useCallback(
-    (message?: string) => setConflict({ message: message?.trim() || '' }),
-    [setConflict],
-  );
   const dismissConflictHandler = useCallback(() => dismissConflict(), [dismissConflict]);
 
   const readiness = useMemo(
@@ -173,7 +167,6 @@ export const CourseProvider = ({
       refreshCourseMeta,
       refreshEditorData,
       refreshCourseEditor,
-      showConflict,
       dismissConflict: dismissConflictHandler,
     };
 

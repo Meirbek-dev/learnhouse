@@ -19,6 +19,7 @@ import { useChapterMutations } from '@/hooks/mutations/useChapterMutations';
 import { AlertTriangle, ChevronDown, ChevronRight, GripVertical, Hexagon, Loader2, MoreHorizontal, Pencil, Save, Trash2, X } from 'lucide-react';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { useCourse } from '@components/Contexts/CourseContext';
+import { useCourseEditorStore } from '@/stores/courses';
 import { useCourseStructureStore } from '@/stores/courses';
 import { Draggable, Droppable } from '@hello-pangea/dnd';
 import { Button } from '@/components/ui/button';
@@ -81,7 +82,7 @@ const ChapterElement = ({ chapter, chapterIndex, course_uuid }: ChapterElementPr
   const session = usePlatformSession() as PlatformSession;
   const access_token = session?.data?.tokens?.access_token;
   const course = useCourse();
-  const { showConflict } = course;
+  const setConflict = useCourseEditorStore((state) => state.setConflict);
   const { deleteChapter, updateChapter } = useChapterMutations(course_uuid, true);
   const expandedChapterIds = useCourseStructureStore((state) => state.expandedChapterIds);
   const toggleChapter = useCourseStructureStore((state) => state.toggleChapter);
@@ -130,7 +131,21 @@ const ChapterElement = ({ chapter, chapterIndex, course_uuid }: ChapterElementPr
       setIsEditing(false);
     } catch (error: any) {
       if (error?.status === 409) {
-        showConflict(error?.detail || error?.message);
+        setConflict({
+          section: 'content',
+          message: error?.detail || error?.message,
+          summary: [
+            `${t('edit')}: ${chapter.name}`,
+            `${t('chapterNamePlaceholder')}: ${trimmedName}`,
+            `${t('title')}: ${course.courseStructure.name || ''}`,
+          ],
+          pendingSave: async () => {
+            await updateChapter(chapter.id, { name: trimmedName }, {
+              accessToken: access_token,
+              lastKnownUpdateDate: course.courseStructure.update_date,
+            });
+          },
+        });
         return;
       }
       toast.error(error?.message || t('chapterUpdateFailed'));
@@ -155,7 +170,21 @@ const ChapterElement = ({ chapter, chapterIndex, course_uuid }: ChapterElementPr
       setIsDeleteDialogOpen(false);
     } catch (error: any) {
       if (error?.status === 409) {
-        showConflict(error?.detail || error?.message);
+        setConflict({
+          section: 'content',
+          message: error?.detail || error?.message,
+          summary: [
+            `${t('deleteChapter')}: ${chapter.name}`,
+            `${t('title')}: ${course.courseStructure.name || ''}`,
+            `${activities.length} ${t('noActivities') ? t('noActivities') : 'activities'}`,
+          ],
+          pendingSave: async () => {
+            await deleteChapter(chapter.id, {
+              accessToken: access_token,
+              lastKnownUpdateDate: course.courseStructure.update_date,
+            });
+          },
+        });
         return;
       }
       toast.error(error?.message || t('chapterDeleteFailed'));

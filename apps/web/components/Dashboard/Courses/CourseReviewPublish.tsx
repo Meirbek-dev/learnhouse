@@ -11,6 +11,7 @@ import type { CourseWorkspaceCapabilities } from '@/lib/course-management-server
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { buildCourseWorkspacePath } from '@/lib/course-management';
 import { useCourse } from '@components/Contexts/CourseContext';
+import { useCourseEditorStore } from '@/stores/courses';
 import { getAbsoluteUrl } from '@services/config/config';
 import { ExternalLink, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -32,6 +33,7 @@ export default function CourseReviewPublish({
   const accessToken = session?.data?.tokens?.access_token;
   const course = useCourse();
   const { updateAccess } = useCoursesMutations(course.courseStructure.course_uuid, true);
+  const setConflict = useCourseEditorStore((state) => state.setConflict);
   const { readiness } = course;
   const [isPending, startTransition] = useTransition();
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -61,7 +63,25 @@ export default function CourseReviewPublish({
           toast.success(wasPublic ? t('toasts.movedPrivate') : t('toasts.published'));
         } catch (error: any) {
           if (error?.status === 409) {
-            course.showConflict(error?.detail || error?.message);
+            setConflict({
+              section: 'access',
+              serverVersion: course.courseStructure,
+              message: error?.detail || error?.message,
+              summary: [
+                `${course.courseStructure.public ? t('movePrivate') : t('publishCourse')}`,
+                `${t('launchState')}: ${course.courseStructure.public ? t('launchStates.live') : t('launchStates.private')}`,
+                `${tReadiness('checklist.details.title')}: ${criticalReady ? tReadiness('checklist.details.description') : t('description')}`,
+              ],
+              pendingSave: async () => {
+                await updateAccess(
+                  { public: !wasPublic },
+                  {
+                    accessToken,
+                    lastKnownUpdateDate: course.courseStructure.update_date,
+                  },
+                );
+              },
+            });
             return;
           }
           toast.error(error?.message || t('errors.visibilityUpdate'));

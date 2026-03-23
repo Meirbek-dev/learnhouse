@@ -42,6 +42,7 @@ import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import ToolTip from '@/components/Objects/Elements/Tooltip/Tooltip';
 import { getAbsoluteUrl } from '@services/config/config';
 import { useCourse } from '@components/Contexts/CourseContext';
+import { useCourseEditorStore } from '@/stores/courses';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -139,6 +140,7 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
   const courseContext = useCourse();
   const course = courseContext as Course;
   const { deleteActivity, updateActivity } = useActivityMutations(course_uuid, true);
+  const setConflict = useCourseEditorStore((state) => state.setConflict);
   const isMobile = useIsMobile();
   const t = useTranslations('CourseEdit.ActivityElement');
 
@@ -203,7 +205,22 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
       setIsEditing(false);
     } catch (error: any) {
       if (error?.status === 409) {
-        courseContext.showConflict(error?.detail || error?.message);
+        setConflict({
+          section: 'activity',
+          serverVersion: activity,
+          message: error?.detail || error?.message,
+          summary: [
+            `${t('edit')}: ${activity.name}`,
+            `${t('activityNamePlaceholder')}: ${trimmedName}`,
+            `${t('activityUpdateSuccess')}`,
+          ],
+          pendingSave: async () => {
+            await updateActivity(activity.activity_uuid, { ...activity, name: trimmedName }, {
+              accessToken: access_token,
+              lastKnownUpdateDate: courseContext.courseStructure.update_date,
+            });
+          },
+        });
         return;
       }
       console.error('Failed to update activity name:', error);
@@ -236,7 +253,26 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
     } catch (error: any) {
       toast.dismiss(toastId);
       if (error?.status === 409) {
-        courseContext.showConflict(error?.detail || error?.message);
+        setConflict({
+          section: 'activity',
+          serverVersion: activity,
+          message: error?.detail || error?.message,
+          summary: [
+            `${t('activityUpdateSuccess')}: ${activity.name}`,
+            `${t('activityTypes')}: ${activity.activity_type}`,
+            `${activity.published ? t('activityUpdateSuccess') : t('updateFailed')}`,
+          ],
+          pendingSave: async () => {
+            await updateActivity(
+              activity.activity_uuid,
+              { ...activity, published: !activity.published },
+              {
+                accessToken: access_token,
+                lastKnownUpdateDate: courseContext.courseStructure.update_date,
+              },
+            );
+          },
+        });
         setIsUpdatingPublish(false);
         return;
       }
@@ -271,7 +307,22 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
       setIsDeleteDialogOpen(false);
     } catch (error: any) {
       if (error?.status === 409) {
-        courseContext.showConflict(error?.detail || error?.message);
+        setConflict({
+          section: 'activity',
+          serverVersion: activity,
+          message: error?.detail || error?.message,
+          summary: [
+            `${t('deleteActivityButton')}: ${activity.name}`,
+            `${t('activityTypes')}: ${activity.activity_type}`,
+            `${t('activityDeletedSuccess')}`,
+          ],
+          pendingSave: async () => {
+            await deleteActivity(activity.activity_uuid, {
+              accessToken: access_token,
+              lastKnownUpdateDate: courseContext.courseStructure.update_date,
+            });
+          },
+        });
         return;
       }
       console.error('Failed to delete activity:', error);

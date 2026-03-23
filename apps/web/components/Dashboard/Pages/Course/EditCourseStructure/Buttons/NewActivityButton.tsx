@@ -12,6 +12,7 @@ import { useActivityMutations } from '@/hooks/mutations/useActivityMutations';
 import NewActivityModal from '@components/Objects/Modals/Activities/Create/NewActivity';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { useCourse } from '@components/Contexts/CourseContext';
+import { useCourseEditorStore } from '@/stores/courses';
 import { Button } from '@/components/ui/button';
 import { useTranslations } from 'next-intl';
 import { Layers } from 'lucide-react';
@@ -27,7 +28,7 @@ const NewActivityButton = (props: NewActivityButtonProps) => {
   const course = useCourse();
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
-  const { showConflict } = course;
+  const setConflict = useCourseEditorStore((state) => state.setConflict);
   const activityMutations = useActivityMutations(course.courseStructure.course_uuid, true);
   const t = useTranslations('CourseEdit.NewActivityModal');
   const tNotify = useTranslations('DashPage.Notifications');
@@ -48,7 +49,22 @@ const NewActivityButton = (props: NewActivityButtonProps) => {
       setNewActivityModal(false);
     } catch (error: any) {
       if (error?.status === 409) {
-        showConflict(error?.detail || error?.message);
+        setConflict({
+          section: 'content',
+          serverVersion: course.courseStructure,
+          message: error?.detail || error?.message,
+          summary: [
+            `${t('title')}: ${props.chapterId}`,
+            `${tNotify('creatingActivity')}`,
+            `${course.courseStructure.name || ''}`,
+          ],
+          pendingSave: async () => {
+            await activityMutations.createActivity(activity, props.chapterId, {
+              accessToken: access_token,
+              lastKnownUpdateDate: course.courseStructure.update_date,
+            });
+          },
+        });
         return;
       }
       toast.error(error?.message || tNotify('uploadFailed'));
@@ -85,7 +101,28 @@ const NewActivityButton = (props: NewActivityButtonProps) => {
     } catch (error: any) {
       toast.dismiss(toast_loading);
       if (error?.status === 409) {
-        showConflict(error?.detail || error?.message);
+        setConflict({
+          section: 'content',
+          serverVersion: course.courseStructure,
+          message: error?.detail || error?.message,
+          summary: [
+            `${t('title')}: ${props.chapterId}`,
+            `${tNotify('uploadingAndCreating')}`,
+            `${course.courseStructure.name || ''}`,
+          ],
+          pendingSave: async () => {
+            await activityMutations.createFileActivity(
+              file,
+              type,
+              activity,
+              chapterId,
+              {
+                accessToken: access_token,
+                lastKnownUpdateDate: course.courseStructure.update_date,
+              },
+            );
+          },
+        });
         return;
       }
       toast.error(error?.message || tNotify('uploadFailed'));
@@ -104,7 +141,22 @@ const NewActivityButton = (props: NewActivityButtonProps) => {
       toast.success(tNotify('activityCreatedSuccess'));
     } catch (error: any) {
       if (error?.status === 409) {
-        showConflict(error?.detail || error?.message);
+        setConflict({
+          section: 'content',
+          serverVersion: course.courseStructure,
+          message: error?.detail || error?.message,
+          summary: [
+            `${t('title')}: ${props.chapterId}`,
+            `${tNotify('creatingActivity')}`,
+            `${course.courseStructure.name || ''}`,
+          ],
+          pendingSave: async () => {
+            await activityMutations.createExternalVideo(external_video_data, activity, props.chapterId, {
+              accessToken: access_token,
+              lastKnownUpdateDate: course.courseStructure.update_date,
+            });
+          },
+        });
         return;
       }
       toast.error(error?.message || tNotify('uploadFailed'));

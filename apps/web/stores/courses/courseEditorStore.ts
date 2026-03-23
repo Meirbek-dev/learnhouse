@@ -2,7 +2,7 @@
 
 import { create } from 'zustand';
 
-export type CourseDraftSection = 'general' | 'access' | 'contributors' | 'certification' | 'activity';
+export type CourseDraftSection = 'general' | 'access' | 'contributors' | 'certification' | 'activity' | 'content';
 export type CourseDirtySection = 'general' | 'access' | 'contributors' | 'certification' | 'content';
 export type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 
@@ -11,6 +11,7 @@ interface ConflictState {
   serverVersion: any | null;
   draftSection: CourseDraftSection | null;
   message: string;
+  summary: string[];
   pendingSave: (() => Promise<unknown>) | null;
 }
 
@@ -36,6 +37,7 @@ interface CourseEditorActions {
     serverVersion?: any | null;
     section?: CourseDraftSection | null;
     message?: string;
+    summary?: string[];
     pendingSave?: (() => Promise<unknown>) | null;
   }) => void;
   dismissConflict: () => void;
@@ -48,6 +50,7 @@ const createInitialConflictState = (): ConflictState => ({
   serverVersion: null,
   draftSection: null,
   message: '',
+  summary: [],
   pendingSave: null,
 });
 
@@ -116,13 +119,14 @@ export const useCourseEditorStore = create<CourseEditorState & CourseEditorActio
 
   clearDirtySections: () => set({ dirtySections: {} }),
 
-  setConflict: ({ serverVersion = null, section = null, message = '', pendingSave = null }) =>
+  setConflict: ({ serverVersion = null, section = null, message = '', summary = [], pendingSave = null }) =>
     set({
       conflict: {
         isOpen: true,
         serverVersion,
         draftSection: section,
         message: message.trim(),
+        summary,
         pendingSave,
       },
     }),

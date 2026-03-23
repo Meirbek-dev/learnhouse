@@ -36,7 +36,7 @@ function normalizeResponse(response: SaveResponse) {
  * Wraps the common pattern of:
  *  - setting isSaving state
  *  - calling the API
- *  - handling 409 conflict via CourseContext.showConflict
+ *  - handling 409 conflict via the course editor store
  *  - showing a toast on success or error
  *  - calling onSuccess (e.g. markClean)
  *  - refreshing SWR when the caller is not already using an optimistic mutation flow
