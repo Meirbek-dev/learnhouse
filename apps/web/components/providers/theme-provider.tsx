@@ -83,8 +83,10 @@ export function ThemeProvider({ children, defaultThemeName = 'default', userThem
   }, []);
 
   const setTheme = async (newThemeName: string, syncToServer = true) => {
+    setIsLoading(true);
     // Lazy load theme (uses cache for core themes like 'default' and 'black')
     const newTheme = await loadTheme(newThemeName);
+    setIsLoading(false);
 
     if (newTheme) {
       setThemeName(newThemeName);

@@ -144,7 +144,7 @@ export const CourseProvider = ({
     getCourseEditorBundle(courseuuid, access_token!),
   );
 
-  const initialState: CourseState = {
+  const [state, dispatch] = useReducer(courseReducer, null, () => ({
     courseStructure: {
       ...initialCourse,
       course_uuid: initialCourse?.course_uuid || courseuuid,
@@ -158,9 +158,7 @@ export const CourseProvider = ({
       isOpen: false,
       message: '',
     },
-  };
-
-  const [state, dispatch] = useReducer(courseReducer, initialState);
+  }));
 
   useEffect(() => {
     if (courseStructureData) {

@@ -333,6 +333,14 @@ class AssignmentUserSubmissionRead(AssignmentUserSubmissionBase):
     submitted_at: datetime | None = None
     graded_at: datetime | None = None
 
+    @field_validator("submitted_at", "graded_at", mode="before")
+    @classmethod
+    def normalize_tz_offset(cls, v: object) -> object:
+        # SQLite/Postgres may return '+00' instead of the ISO 8601 '+00:00'
+        if isinstance(v, str) and (v.endswith("+00") or v.endswith("-00")):
+            v = v + ":00"
+        return v
+
 
 class AssignmentUserSubmissionUpdate(SQLModelStrictBaseModel):
     """Model for updating an assignment user submission."""

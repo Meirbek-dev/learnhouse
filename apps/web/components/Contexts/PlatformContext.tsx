@@ -4,7 +4,7 @@ import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
-import { createContext, useContext } from 'react';
+import { createContext, use } from 'react';
 import type { Platform } from '@/types/platform';
 import type { ReactNode } from 'react';
 import useSWR from 'swr';
@@ -41,5 +41,5 @@ export const PlatformContextProvider = ({
 };
 
 export function usePlatform(): Platform | null {
-  return useContext(PlatformContext);
+  return use(PlatformContext);
 }

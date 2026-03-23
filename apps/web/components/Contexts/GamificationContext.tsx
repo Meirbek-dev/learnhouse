@@ -1,10 +1,10 @@
 'use client';
 
-import { useGamificationStore } from '@/stores/gamification';
-import React, { lazy, useEffect } from 'react';
 import { useXPToast } from '@/lib/gamification/components/xp-toast';
-import { AnimatePresence } from 'motion/react';
 import type { UserGamificationProfile } from '@/types/gamification';
+import { useGamificationStore } from '@/stores/gamification';
+import { AnimatePresence } from 'motion/react';
+import React, { lazy, useEffect } from 'react';
 
 const LevelUpCelebration = lazy(() =>
   import('@/components/Dashboard/Gamification/xp-toast').then((mod) => ({ default: mod.LevelUpCelebration })),

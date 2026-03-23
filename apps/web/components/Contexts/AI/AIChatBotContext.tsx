@@ -1,6 +1,6 @@
 'use client';
 
-import type { BaseChatState, BaseChatAction } from '@components/Contexts/AI/createAIChatContext';
+import type { BaseChatState, BaseChatAction, ExtraReducer } from '@components/Contexts/AI/createAIChatContext';
 import { createAIChatContext } from '@components/Contexts/AI/createAIChatContext';
 
 // ── Extra state & actions specific to the chat-bot UI ────────────────────────
@@ -15,7 +15,7 @@ interface AIChatBotExtraState {
   statusMessage: string | null;
 }
 
-function chatBotExtraReducer(state: AIChatBotExtraState, action: AIChatBotExtraAction): AIChatBotExtraState {
+const chatBotExtraReducer: ExtraReducer<AIChatBotExtraState, AIChatBotExtraAction> = (state, action) => {
   switch (action.type) {
     case 'setStreamingMessage': {
       return { ...state, streamingMessage: action.payload };
@@ -30,7 +30,7 @@ function chatBotExtraReducer(state: AIChatBotExtraState, action: AIChatBotExtraA
       return state;
     }
   }
-}
+};
 
 // ── Build context from factory ────────────────────────────────────────────────
 
