@@ -212,25 +212,6 @@ export default function ConflictResolutionModal() {
           ),
         };
       }
-      case 'activity': {
-        const activityDraft = draftValue as any;
-
-        return {
-          sectionLabel: activityDraft?.name || activityDraft?.activity_type || 'Activity',
-          rows: buildRows(
-            { label: generalT('name.label'), value: formatString(activityDraft?.name) },
-            {
-              label: 'Published',
-              value:
-                activityDraft?.published === true ? accessT('publicLabel') : activityDraft?.published === false ? accessT('usersOnlyLabel') : fallbackValue,
-            },
-            {
-              label: 'Content blocks',
-              value: String(Array.isArray(activityDraft?.content?.content) ? activityDraft.content.content.length : 0),
-            },
-          ),
-        };
-      }
       case 'content': {
         return {
           sectionLabel: courseStructure?.name || undefined,
@@ -317,20 +298,6 @@ export default function ConflictResolutionModal() {
             {
               label: certificationT('certificateInstructor'),
               value: formatString(certificationConfig?.certificate_instructor),
-            },
-          ),
-        };
-      case 'activity':
-        return {
-          sectionLabel: (draftValue as any)?.name || courseStructure?.name || undefined,
-          rows: buildRows(
-            { label: generalT('name.label'), value: formatString((draftValue as any)?.name || courseStructure?.name) },
-            {
-              label: 'Published',
-              value:
-                (draftValue as any)?.published === true || courseStructure?.public
-                  ? accessT('publicLabel')
-                  : accessT('usersOnlyLabel'),
             },
           ),
         };

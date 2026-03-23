@@ -52,6 +52,7 @@ import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import useSWR from 'swr';
+import type { ActivityUpdateValues } from '@/schemas/activitySchemas';
 
 // Types
 type ActivityType =
@@ -61,6 +62,8 @@ type ActivityType =
   | 'TYPE_DYNAMIC'
   | 'TYPE_EXAM'
   | 'TYPE_CODE_CHALLENGE';
+
+type ActivityApiType = ActivityUpdateValues['activity_type'];
 
 interface Activity {
   id: string;
@@ -133,6 +136,15 @@ const ACTIVITY_CONFIG = {
   },
 } as const;
 
+const ACTIVITY_TYPE_MAP: Record<ActivityType, ActivityApiType> = {
+  TYPE_VIDEO: 'VIDEO',
+  TYPE_DOCUMENT: 'DOCUMENT',
+  TYPE_ASSIGNMENT: 'ASSIGNMENT',
+  TYPE_DYNAMIC: 'DYNAMIC',
+  TYPE_EXAM: 'EXAM',
+  TYPE_CODE_CHALLENGE: 'CODE_CHALLENGE',
+};
+
 const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityElementProps) => {
   // Hooks
   const session = usePlatformSession() as PlatformSession;
@@ -171,6 +183,7 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
   const canDelete = activity.can_delete ?? false;
   const isOwner = activity.is_owner ?? false;
   const availableActions = activity.available_actions ?? [];
+  const apiActivityType = ACTIVITY_TYPE_MAP[activity.activity_type];
 
   // Handlers
   const handleStartEdit = () => {
@@ -197,7 +210,7 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
 
     setIsSavingEdit(true);
     try {
-      await updateActivity(activity.activity_uuid, { ...activity, name: trimmedName }, {
+      await updateActivity(activity.activity_uuid, { name: trimmedName, activity_type: apiActivityType }, {
         accessToken: access_token,
         lastKnownUpdateDate: courseContext.courseStructure.update_date,
       });
@@ -210,7 +223,7 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
           serverVersion: activity,
           message: error?.detail || error?.message,
           pendingSave: async () => {
-            await updateActivity(activity.activity_uuid, { ...activity, name: trimmedName }, {
+            await updateActivity(activity.activity_uuid, { name: trimmedName, activity_type: apiActivityType }, {
               accessToken: access_token,
               lastKnownUpdateDate: courseContext.courseStructure.update_date,
             });
@@ -238,7 +251,7 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
     try {
       await updateActivity(
         activity.activity_uuid,
-        { ...activity, published: !activity.published },
+        { published: !activity.published, activity_type: apiActivityType },
         {
           accessToken: access_token,
           lastKnownUpdateDate: courseContext.courseStructure.update_date,
@@ -255,7 +268,7 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
           pendingSave: async () => {
             await updateActivity(
               activity.activity_uuid,
-              { ...activity, published: !activity.published },
+              { published: !activity.published, activity_type: apiActivityType },
               {
                 accessToken: access_token,
                 lastKnownUpdateDate: courseContext.courseStructure.update_date,

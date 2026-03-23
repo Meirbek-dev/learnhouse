@@ -63,8 +63,8 @@ export function useCoursesMutations(courseUuid: string, withUnpublishedActivitie
   const detailKey = courseKeys.detail(courseUuid);
 
   // Read current SWR cache value synchronously — no identity-mutate hack needed.
-  const captureSnapshot = <T,>(key: string): T | undefined =>
-    (cache.get(key) as any)?.data as T | undefined;
+  const captureSnapshot = <T,>(key: string | readonly unknown[]): T | undefined =>
+    (cache.get(key as any) as any)?.data as T | undefined;
 
   const refreshCourse = async () => {
     await Promise.all([mutate(structureKey), mutate(detailKey)]);
@@ -73,7 +73,7 @@ export function useCoursesMutations(courseUuid: string, withUnpublishedActivitie
   const refreshEditorBundle = async () => {
     const editorBundleKey = courseKeys.editorBundle(courseUuid);
     if (!editorBundleKey) return;
-    await mutate(editorBundleKey);
+    await mutate(editorBundleKey as any);
   };
 
   const updateMetadata = async (payload: Partial<CourseGeneralValues>, options: MutationOptions) => {
@@ -141,7 +141,7 @@ export function useCoursesMutations(courseUuid: string, withUnpublishedActivitie
 
     if (editorBundleKey && users.length > 0) {
       await mutate(
-        editorBundleKey,
+        editorBundleKey as any,
         (current: CourseEditorBundle | undefined) => {
           if (!current) return current;
           const existingContributors = current.contributors.data ?? [];
@@ -163,7 +163,7 @@ export function useCoursesMutations(courseUuid: string, withUnpublishedActivitie
       await Promise.all([refreshCourse(), refreshEditorBundle()]);
       return response;
     } catch (error) {
-      if (editorBundleKey) await mutate(editorBundleKey, previousEditorBundle, { revalidate: false });
+      if (editorBundleKey) await mutate(editorBundleKey as any, previousEditorBundle, { revalidate: false });
       throw error;
     }
   };
@@ -178,7 +178,7 @@ export function useCoursesMutations(courseUuid: string, withUnpublishedActivitie
 
     if (editorBundleKey) {
       await mutate(
-        editorBundleKey,
+        editorBundleKey as any,
         (current: CourseEditorBundle | undefined) => {
           if (!current) return current;
           return {
@@ -202,7 +202,7 @@ export function useCoursesMutations(courseUuid: string, withUnpublishedActivitie
       await Promise.all([refreshCourse(), refreshEditorBundle()]);
       return response;
     } catch (error) {
-      if (editorBundleKey) await mutate(editorBundleKey, previousEditorBundle, { revalidate: false });
+      if (editorBundleKey) await mutate(editorBundleKey as any, previousEditorBundle, { revalidate: false });
       throw error;
     }
   };
@@ -215,7 +215,7 @@ export function useCoursesMutations(courseUuid: string, withUnpublishedActivitie
       const usernameSet = new Set(usernames);
       const userIdSet = new Set(userIds);
       await mutate(
-        editorBundleKey,
+        editorBundleKey as any,
         (current: CourseEditorBundle | undefined) => {
           if (!current) return current;
           return {
@@ -237,7 +237,7 @@ export function useCoursesMutations(courseUuid: string, withUnpublishedActivitie
       await Promise.all([refreshCourse(), refreshEditorBundle()]);
       return response;
     } catch (error) {
-      if (editorBundleKey) await mutate(editorBundleKey, previousEditorBundle, { revalidate: false });
+      if (editorBundleKey) await mutate(editorBundleKey as any, previousEditorBundle, { revalidate: false });
       throw error;
     }
   };
