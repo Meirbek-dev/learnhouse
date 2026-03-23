@@ -1,6 +1,6 @@
 'use server';
 
-import type { OrderPayload } from '@components/Dashboard/Pages/Course/EditCourseStructure/EditCourseStructure';
+import type { CourseOrderPayload } from '@/schemas/chapterSchemas';
 import { RequestBodyWithAuthHeader, errorHandling } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
 
@@ -9,27 +9,19 @@ import { getAPIUrl } from '@services/config/config';
  GET requests are called from the frontend using SWR (https://swr.vercel.app/)
 */
 
-export async function updateChaptersMetadata(course_uuid: string, data: any, access_token: string) {
-  const result: any = await fetch(
-    `${getAPIUrl()}chapters/course/course_${course_uuid}/order`,
-    RequestBodyWithAuthHeader('PUT', data, null, access_token),
-  );
-  return errorHandling(result);
-}
-
 interface ChapterInvalidationOptions {
   courseUuid?: string;
   lastKnownUpdateDate?: string | null;
 }
 
 export async function updateChapter(
-  coursechapter_id: number,
+  chapterUuid: string,
   data: any,
   access_token: string,
   options?: ChapterInvalidationOptions,
 ) {
   const result: any = await fetch(
-    `${getAPIUrl()}chapters/${coursechapter_id}`,
+    `${getAPIUrl()}chapters/${chapterUuid}`,
     RequestBodyWithAuthHeader(
       'PUT',
       {
@@ -45,7 +37,7 @@ export async function updateChapter(
 
 export async function updateCourseOrderStructure(
   course_uuid: string,
-  data: OrderPayload,
+  data: CourseOrderPayload,
   access_token: string,
   options?: ChapterInvalidationOptions,
 ) {
@@ -73,18 +65,18 @@ export async function createChapter(data: any, access_token: string, options?: C
 }
 
 export async function deleteChapter(
-  coursechapter_id: number,
+  chapterUuid: string,
   access_token: string,
   options?: ChapterInvalidationOptions,
 ) {
-  const query = new URLSearchParams();
-  if (options?.lastKnownUpdateDate) {
-    query.set('last_known_update_date', options.lastKnownUpdateDate);
-  }
-
   const result: any = await fetch(
-    `${getAPIUrl()}chapters/${coursechapter_id}${query.size > 0 ? `?${query.toString()}` : ''}`,
-    RequestBodyWithAuthHeader('DELETE', null, null, access_token),
+    `${getAPIUrl()}chapters/${chapterUuid}`,
+    RequestBodyWithAuthHeader(
+      'DELETE',
+      { last_known_update_date: options?.lastKnownUpdateDate ?? undefined },
+      null,
+      access_token,
+    ),
   );
   return errorHandling(result);
 }

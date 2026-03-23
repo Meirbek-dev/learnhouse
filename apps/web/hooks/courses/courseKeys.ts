@@ -16,10 +16,7 @@ const buildQueryString = (params: Record<string, string | number | undefined>) =
   const searchParams = new URLSearchParams();
 
   Object.entries(params).forEach(([key, value]) => {
-    if (value === undefined || value === '') {
-      return;
-    }
-
+    if (value === undefined || value === '') return;
     searchParams.set(key, String(value));
   });
 
@@ -30,16 +27,25 @@ const buildQueryString = (params: Record<string, string | number | undefined>) =
 export const courseKeys = {
   list: ({ page = 1, limit = 20, query, sortBy, preset }: CourseListKeyOptions = {}) =>
     `${getAPIUrl()}courses/page/${page}/limit/${limit}${buildQueryString({ query, sort_by: sortBy, preset })}`,
+
   editable: ({ page = 1, limit = 20, query, sortBy = 'updated', preset }: CourseListKeyOptions = {}) =>
     `${getAPIUrl()}courses/editable/page/${page}/limit/${limit}${buildQueryString({ query, sort_by: sortBy, preset })}`,
+
   detail: (courseUuid: string) => `${getAPIUrl()}courses/${normalizeCourseUuid(courseUuid)}`,
+
   structure: (courseUuid: string, withUnpublishedActivities = false) =>
     `${getAPIUrl()}courses/${normalizeCourseUuid(courseUuid)}/meta?with_unpublished_activities=${withUnpublishedActivities}`,
+
   rights: (courseUuid: string) => `${getAPIUrl()}courses/${normalizeCourseUuid(courseUuid)}/rights`,
+
   contributors: (courseUuid: string) => `${getAPIUrl()}courses/${normalizeCourseUuid(courseUuid)}/contributors`,
-  editorBundle: (courseUuid?: string | null, accessToken?: string | null) =>
-    courseUuid && accessToken ? (['course-editor-bundle', normalizeCourseUuid(courseUuid), accessToken] as const) : null,
-  chapter: (chapterId: string | number) => `${getAPIUrl()}chapters/${chapterId}`,
+
+  // Token removed from key — fetcher injects it via global SWRConfig.
+  editorBundle: (courseUuid?: string | null) =>
+    courseUuid ? (['course-editor-bundle', normalizeCourseUuid(courseUuid)] as const) : null,
+
+  chapter: (chapterUuid: string) => `${getAPIUrl()}chapters/${chapterUuid}`,
+
   activity: (activityUuid: string) => `${getAPIUrl()}activities/${activityUuid}`,
 };
 

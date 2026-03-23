@@ -1,7 +1,8 @@
 'use client';
 
 import { useCourse } from '@components/Contexts/CourseContext';
-import { type CourseDraftSection, useCourseEditorStore } from '@/stores/courses';
+import type { CourseDirtySection } from '@/stores/courses/courseEditorStore';
+import { useCourseEditorStore } from '@/stores/courses';
 import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -12,7 +13,13 @@ interface SaveSectionOptions {
   onError?: (message: string) => void;
   successMessage?: string;
   errorMessage?: string;
-  section?: CourseDraftSection;
+  section?: CourseDirtySection;
+  /** Called when a 409 conflict is detected to capture a snapshot of the
+   *  current unsaved values for display in the conflict dialog. */
+  getDraftSnapshot?: () => unknown;
+  /** Called when the user resolves a conflict by choosing "use theirs" —
+   *  typically resets the form to server values. */
+  onUseTheirs?: () => void;
 }
 
 interface SaveInvocationOptions {
@@ -26,7 +33,6 @@ function normalizeResponse(response: SaveResponse) {
   if (response && typeof response === 'object' && 'success' in response) {
     return response;
   }
-
   return { success: true, data: response };
 }
 
@@ -55,13 +61,15 @@ export function useSaveSection(options?: SaveSectionOptions) {
 
         if (!response.success) {
           if (response.status === 409) {
-            const detail = response.data?.detail;
             setConflict({
               section: options?.section,
-              message: typeof detail === 'string' ? detail : undefined,
+              draftSnapshot: options?.getDraftSnapshot?.() ?? null,
+              serverVersion: response.data,
+              message: typeof response.data?.detail === 'string' ? response.data.detail : undefined,
               pendingSave: async () => {
                 await runSave(saveFn, invocationOptions);
               },
+              resetForm: options?.onUseTheirs ?? null,
             });
             return;
           }
@@ -75,7 +83,6 @@ export function useSaveSection(options?: SaveSectionOptions) {
         }
 
         const refreshMode = invocationOptions?.refresh || 'meta';
-
         if (refreshMode === 'editor') {
           await refreshCourseEditor();
         } else if (refreshMode === 'meta') {
@@ -85,9 +92,7 @@ export function useSaveSection(options?: SaveSectionOptions) {
         syncLastKnownUpdateDate(response.data?.update_date);
 
         const successMessage = invocationOptions?.successMessage || options?.successMessage || 'Изменения сохранены';
-        if (successMessage) {
-          toast.success(successMessage);
-        }
+        if (successMessage) toast.success(successMessage);
 
         invocationOptions?.onSuccess?.();
         options?.onSuccess?.();
@@ -95,10 +100,13 @@ export function useSaveSection(options?: SaveSectionOptions) {
         if (error?.status === 409) {
           setConflict({
             section: options?.section,
+            draftSnapshot: options?.getDraftSnapshot?.() ?? null,
+            serverVersion: error?.data,
             message: error?.detail || error?.message,
             pendingSave: async () => {
               await runSave(saveFn, invocationOptions);
             },
+            resetForm: options?.onUseTheirs ?? null,
           });
           return;
         }
@@ -113,6 +121,7 @@ export function useSaveSection(options?: SaveSectionOptions) {
         setIsSaving(false);
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [options, refreshCourseEditor, refreshCourseMeta, setConflict, syncLastKnownUpdateDate],
   );
 

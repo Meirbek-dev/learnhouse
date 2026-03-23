@@ -1,7 +1,5 @@
 'use client';
 
-import { swrFetcher } from '@services/utils/ts/requests';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { courseKeys } from './courseKeys';
 import useSWR from 'swr';
 
@@ -10,31 +8,32 @@ interface UseCourseStructureOptions<TCourseStructure> {
   fallbackData?: TCourseStructure;
 }
 
+/**
+ * Fetches the course structure (meta + chapters + activities).
+ *
+ * The auth token is NOT included in the SWR key.  It is injected automatically
+ * by the global SWRTokenProvider fetcher in client-layout.tsx.  This keeps
+ * cache entries stable across token refreshes.
+ */
 export function useCourseStructure<TCourseStructure = any>(
   courseUuid: string,
   options?: UseCourseStructureOptions<TCourseStructure>,
 ) {
-  const session = usePlatformSession();
-  const accessToken = session?.data?.tokens?.access_token;
   const withUnpublishedActivities = options?.withUnpublishedActivities ?? false;
-  const key = [courseKeys.structure(courseUuid, withUnpublishedActivities), accessToken ?? 'anonymous'] as const;
+  const key = courseKeys.structure(courseUuid, withUnpublishedActivities);
 
-  const swr = useSWR<TCourseStructure>(
-    key,
-    ([url, token]: readonly [string, string]) => swrFetcher(url, token === 'anonymous' ? undefined : token),
-    {
-      fallbackData: options?.fallbackData,
-      revalidateOnMount: options?.fallbackData ? false : undefined,
-      revalidateIfStale: options?.fallbackData ? false : undefined,
-      revalidateOnFocus: false,
-      dedupingInterval: 5_000,
-    },
-  );
+  const swr = useSWR<TCourseStructure>(key, {
+    fallbackData: options?.fallbackData,
+    revalidateOnMount: options?.fallbackData ? false : undefined,
+    revalidateIfStale: options?.fallbackData ? false : undefined,
+    revalidateOnFocus: false,
+    dedupingInterval: 5_000,
+  });
 
   return {
     ...swr,
     courseStructure: swr.data,
-    key: key[0],
+    key,
   };
 }
 
@@ -54,12 +53,10 @@ export function useChapter<TChapter = any>(courseUuid: string, chapterUuid: stri
     withUnpublishedActivities,
   });
 
-  const chapter = courseStructure?.chapters?.find((currentChapter: any) => currentChapter.chapter_uuid === chapterUuid) ?? null;
+  const chapter =
+    courseStructure?.chapters?.find((currentChapter: any) => currentChapter.chapter_uuid === chapterUuid) ?? null;
 
-  return {
-    ...rest,
-    chapter,
-  };
+  return { ...rest, chapter };
 }
 
 export function useChapterActivities<TActivity = any>(

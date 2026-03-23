@@ -19,10 +19,10 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { Check, ChevronDown, Search, UserPen, Users } from 'lucide-react';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
+import { useSyncDirtySection } from '@/hooks/useSyncDirtySection';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { useCourseEditorStore } from '@/stores/courses';
 import { useCoursesMutations } from '@/hooks/mutations/useCoursesMutations';
-import { useDirtySection } from '@/hooks/useDirtySection';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { RadioGroup } from '@/components/ui/radio-group';
 import UserAvatar from '@components/Objects/UserAvatar';
@@ -72,10 +72,6 @@ interface Contributor {
 interface BulkAddResponse {
   successful: Array<{ username: string; user_id: number }>;
   failed: { username: string; reason: string }[];
-}
-
-interface ContributorsDraft {
-  open_to_contributors: boolean;
 }
 
 const formatDate = (dateString: string, locale: Locale) => {
@@ -177,11 +173,6 @@ const EditCourseContributors = () => {
   const { courseStructure, editorData } = course;
   const contributors = (editorData.contributors.data ?? []) as Contributor[];
   const isContributorsLoading = course.isEditorDataLoading && editorData.contributors.data === null;
-  const contributorsDraft = useCourseEditorStore(
-    (state) => state.drafts.contributors as ContributorsDraft | undefined,
-  );
-  const setDraft = useCourseEditorStore((state) => state.setDraft);
-  const clearDraft = useCourseEditorStore((state) => state.clearDraft);
   const setConflict = useCourseEditorStore((state) => state.setConflict);
   const { addContributors, removeContributors, updateAccess, updateContributor: updateContributorMutation } =
     useCoursesMutations(courseStructure?.course_uuid ?? '');
@@ -197,32 +188,27 @@ const EditCourseContributors = () => {
   const [isAdding, setIsAdding] = useState(false);
   const debouncedSearch = useDebouncedValue(searchQuery, 300);
   const [selectedContributors, setSelectedContributors] = useState<number[]>([]);
-  const initialRef = useRef<boolean | undefined>(courseStructure?.open_to_contributors);
 
-  const { isDirty, isDirtyRef, markDirty, markClean } = useDirtySection('contributors');
-  const { isSaving, saveWithoutRefresh } = useSaveSection({ onSuccess: markClean, section: 'contributors' });
+  const isDirtyRef = useRef(false);
+  isDirtyRef.current = isOpenToContributors !== undefined && isOpenToContributors !== courseStructure?.open_to_contributors;
+  const isDirty = isDirtyRef.current;
 
+  const handleDiscard = () => setIsOpenToContributors(courseStructure?.open_to_contributors);
+
+  useSyncDirtySection('contributors', isDirty);
+
+  const { isSaving, save } = useSaveSection({
+    section: 'contributors',
+    getDraftSnapshot: () => ({ open_to_contributors: isOpenToContributors }),
+    onUseTheirs: handleDiscard,
+  });
+
+  // Rehydrate from server when not dirty
   useEffect(() => {
-    initialRef.current = courseStructure?.open_to_contributors;
-    const nextValue = contributorsDraft?.open_to_contributors ?? courseStructure?.open_to_contributors;
-    setIsOpenToContributors((current) => (current === nextValue ? current : nextValue));
-
-    if (!contributorsDraft && !isDirtyRef.current) {
-      markClean();
+    if (!isDirtyRef.current) {
+      setIsOpenToContributors(courseStructure?.open_to_contributors);
     }
-  }, [contributorsDraft, courseStructure?.open_to_contributors, isDirtyRef, markClean]);
-
-  useEffect(() => {
-    const dirty = isOpenToContributors !== undefined && isOpenToContributors !== initialRef.current;
-    if (dirty) {
-      setDraft('contributors', { open_to_contributors: isOpenToContributors });
-      markDirty();
-      return;
-    }
-
-    clearDraft('contributors');
-    markClean();
-  }, [clearDraft, courseStructure?.open_to_contributors, isOpenToContributors, markDirty, markClean, setDraft]);
+  }, [courseStructure?.open_to_contributors]);
 
   // Debounced user search
   useEffect(() => {
@@ -457,15 +443,9 @@ const EditCourseContributors = () => {
     }
   };
 
-  const handleDiscard = () => {
-    clearDraft('contributors');
-    setIsOpenToContributors(initialRef.current);
-    markClean();
-  };
-
   const handleContributorAccessSave = async () => {
     if (!(access_token && isOpenToContributors !== undefined) || !isDirty) return;
-    await saveWithoutRefresh(
+    await save(
       async () =>
         updateAccess(
           { open_to_contributors: isOpenToContributors },
@@ -474,12 +454,6 @@ const EditCourseContributors = () => {
             lastKnownUpdateDate: courseStructure.update_date,
           },
         ),
-      {
-        onSuccess: () => {
-          initialRef.current = isOpenToContributors;
-          clearDraft('contributors');
-        },
-      },
     );
   };
 

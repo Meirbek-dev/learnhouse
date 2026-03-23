@@ -9,6 +9,8 @@ import {
   updateCourseThumbnail,
 } from '@services/courses/courses';
 import type { CourseEditorBundle } from '@services/courses/editor';
+import type { CourseGeneralValues, CourseAccessValues } from '@/schemas/courseSchemas';
+import { assertSuccess } from '@/lib/api/assertSuccess';
 import { useCourseEditorStore } from '@/stores/courses';
 import { courseKeys } from '@/hooks/courses/courseKeys';
 import { useSWRConfig } from 'swr';
@@ -34,21 +36,8 @@ interface ContributorMutationPayload {
   authorship_status?: string;
 }
 
-const ensureMutationSuccess = (response: any) => {
-  if (response?.success) {
-    return response;
-  }
-
-  const error: any = new Error(response?.data?.detail || response?.HTTPmessage || 'Request failed');
-  error.status = response?.status ?? 500;
-  error.detail = response?.data?.detail;
-  error.data = response?.data;
-  throw error;
-};
-
 const buildOptimisticContributor = (user: ContributorDraftUser) => {
   const now = new Date().toISOString();
-
   return {
     id: `temp-${user.user_uuid ?? user.id}`,
     user_id: user.id,
@@ -69,55 +58,35 @@ const buildOptimisticContributor = (user: ContributorDraftUser) => {
 };
 
 export function useCoursesMutations(courseUuid: string, withUnpublishedActivities = true) {
-  const { mutate } = useSWRConfig();
+  const { mutate, cache } = useSWRConfig();
   const structureKey = courseKeys.structure(courseUuid, withUnpublishedActivities);
   const detailKey = courseKeys.detail(courseUuid);
 
-  const captureCurrentValue = async <T,>(key: string | readonly unknown[]) => {
-    let snapshot: T | undefined;
-
-    await mutate(
-      key,
-      (current: T | undefined) => {
-        snapshot = current;
-        return current;
-      },
-      { revalidate: false },
-    );
-
-    return snapshot;
-  };
+  // Read current SWR cache value synchronously — no identity-mutate hack needed.
+  const captureSnapshot = <T,>(key: string): T | undefined =>
+    (cache.get(key) as any)?.data as T | undefined;
 
   const refreshCourse = async () => {
     await Promise.all([mutate(structureKey), mutate(detailKey)]);
   };
 
-  const refreshEditorBundle = async (accessToken: string) => {
-    const editorBundleKey = courseKeys.editorBundle(courseUuid, accessToken);
-    if (!editorBundleKey) {
-      return;
-    }
-
+  const refreshEditorBundle = async () => {
+    const editorBundleKey = courseKeys.editorBundle(courseUuid);
+    if (!editorBundleKey) return;
     await mutate(editorBundleKey);
   };
 
-  const updateMetadata = async (payload: any, options: MutationOptions) => {
-    const previousStructure = await mutate(structureKey);
+  const updateMetadata = async (payload: Partial<CourseGeneralValues>, options: MutationOptions) => {
+    const previousStructure = captureSnapshot(structureKey);
 
     await mutate(
       structureKey,
-      (current: any) =>
-        current
-          ? {
-              ...current,
-              ...payload,
-            }
-          : current,
+      (current: any) => (current ? { ...current, ...payload } : current),
       { revalidate: false },
     );
 
     try {
-      const response = ensureMutationSuccess(
+      const response = assertSuccess(
         await updateCourseMetadata(courseUuid, payload, options.accessToken, {
           lastKnownUpdateDate: options.lastKnownUpdateDate,
         }),
@@ -131,23 +100,17 @@ export function useCoursesMutations(courseUuid: string, withUnpublishedActivitie
     }
   };
 
-  const updateAccess = async (payload: any, options: MutationOptions) => {
-    const previousStructure = await mutate(structureKey);
+  const updateAccess = async (payload: Partial<CourseAccessValues & { open_to_contributors?: boolean }>, options: MutationOptions) => {
+    const previousStructure = captureSnapshot(structureKey);
 
     await mutate(
       structureKey,
-      (current: any) =>
-        current
-          ? {
-              ...current,
-              ...payload,
-            }
-          : current,
+      (current: any) => (current ? { ...current, ...payload } : current),
       { revalidate: false },
     );
 
     try {
-      const response = ensureMutationSuccess(
+      const response = assertSuccess(
         await updateCourseAccess(courseUuid, payload, options.accessToken, {
           lastKnownUpdateDate: options.lastKnownUpdateDate,
         }),
@@ -162,7 +125,7 @@ export function useCoursesMutations(courseUuid: string, withUnpublishedActivitie
   };
 
   const updateThumbnail = async (formData: FormData, options: MutationOptions) => {
-    const response = ensureMutationSuccess(
+    const response = assertSuccess(
       await updateCourseThumbnail(courseUuid, formData, options.accessToken, {
         lastKnownUpdateDate: options.lastKnownUpdateDate,
       }),
@@ -173,33 +136,22 @@ export function useCoursesMutations(courseUuid: string, withUnpublishedActivitie
   };
 
   const addContributors = async (usernames: string[], users: ContributorDraftUser[], options: MutationOptions) => {
-    const editorBundleKey = courseKeys.editorBundle(courseUuid, options.accessToken);
-    const previousEditorBundle = editorBundleKey
-      ? await captureCurrentValue<CourseEditorBundle>(editorBundleKey)
-      : undefined;
+    const editorBundleKey = courseKeys.editorBundle(courseUuid);
+    const previousEditorBundle = editorBundleKey ? captureSnapshot<CourseEditorBundle>(editorBundleKey) : undefined;
 
     if (editorBundleKey && users.length > 0) {
       await mutate(
         editorBundleKey,
         (current: CourseEditorBundle | undefined) => {
-          if (!current) {
-            return current;
-          }
-
+          if (!current) return current;
           const existingContributors = current.contributors.data ?? [];
           const existingUsernames = new Set(existingContributors.map((contributor: any) => contributor.user?.username));
           const optimisticContributors = users
             .filter((user) => !existingUsernames.has(user.username))
             .map((user) => buildOptimisticContributor(user));
-
           return {
             ...current,
-            contributors: {
-              ...current.contributors,
-              data: [...existingContributors, ...optimisticContributors],
-              error: null,
-              available: true,
-            },
+            contributors: { ...current.contributors, data: [...existingContributors, ...optimisticContributors], error: null, available: true },
           };
         },
         { revalidate: false },
@@ -207,13 +159,11 @@ export function useCoursesMutations(courseUuid: string, withUnpublishedActivitie
     }
 
     try {
-      const response = ensureMutationSuccess(await bulkAddContributors(courseUuid, usernames, options.accessToken));
-      await Promise.all([refreshCourse(), refreshEditorBundle(options.accessToken)]);
+      const response = assertSuccess(await bulkAddContributors(courseUuid, usernames, options.accessToken));
+      await Promise.all([refreshCourse(), refreshEditorBundle()]);
       return response;
     } catch (error) {
-      if (editorBundleKey) {
-        await mutate(editorBundleKey, previousEditorBundle, { revalidate: false });
-      }
+      if (editorBundleKey) await mutate(editorBundleKey, previousEditorBundle, { revalidate: false });
       throw error;
     }
   };
@@ -223,30 +173,20 @@ export function useCoursesMutations(courseUuid: string, withUnpublishedActivitie
     payload: ContributorMutationPayload,
     options: MutationOptions,
   ) => {
-    const editorBundleKey = courseKeys.editorBundle(courseUuid, options.accessToken);
-    const previousEditorBundle = editorBundleKey
-      ? await captureCurrentValue<CourseEditorBundle>(editorBundleKey)
-      : undefined;
+    const editorBundleKey = courseKeys.editorBundle(courseUuid);
+    const previousEditorBundle = editorBundleKey ? captureSnapshot<CourseEditorBundle>(editorBundleKey) : undefined;
 
     if (editorBundleKey) {
       await mutate(
         editorBundleKey,
         (current: CourseEditorBundle | undefined) => {
-          if (!current) {
-            return current;
-          }
-
+          if (!current) return current;
           return {
             ...current,
             contributors: {
               ...current.contributors,
               data: (current.contributors.data ?? []).map((contributor: any) =>
-                contributor.user_id === contributorUserId
-                  ? {
-                      ...contributor,
-                      ...payload,
-                    }
-                  : contributor,
+                contributor.user_id === contributorUserId ? { ...contributor, ...payload } : contributor,
               ),
             },
           };
@@ -256,45 +196,34 @@ export function useCoursesMutations(courseUuid: string, withUnpublishedActivitie
     }
 
     try {
-      const nextAuthorship = payload.authorship;
-      const nextStatus = payload.authorship_status;
-      const response = ensureMutationSuccess(
-        await editContributor(courseUuid, contributorUserId, nextAuthorship, nextStatus, options.accessToken),
+      const response = assertSuccess(
+        await editContributor(courseUuid, contributorUserId, payload.authorship, payload.authorship_status, options.accessToken),
       );
-      await Promise.all([refreshCourse(), refreshEditorBundle(options.accessToken)]);
+      await Promise.all([refreshCourse(), refreshEditorBundle()]);
       return response;
     } catch (error) {
-      if (editorBundleKey) {
-        await mutate(editorBundleKey, previousEditorBundle, { revalidate: false });
-      }
+      if (editorBundleKey) await mutate(editorBundleKey, previousEditorBundle, { revalidate: false });
       throw error;
     }
   };
 
   const removeContributors = async (usernames: string[], userIds: number[], options: MutationOptions) => {
-    const editorBundleKey = courseKeys.editorBundle(courseUuid, options.accessToken);
-    const previousEditorBundle = editorBundleKey
-      ? await captureCurrentValue<CourseEditorBundle>(editorBundleKey)
-      : undefined;
+    const editorBundleKey = courseKeys.editorBundle(courseUuid);
+    const previousEditorBundle = editorBundleKey ? captureSnapshot<CourseEditorBundle>(editorBundleKey) : undefined;
 
     if (editorBundleKey) {
       const usernameSet = new Set(usernames);
       const userIdSet = new Set(userIds);
-
       await mutate(
         editorBundleKey,
         (current: CourseEditorBundle | undefined) => {
-          if (!current) {
-            return current;
-          }
-
+          if (!current) return current;
           return {
             ...current,
             contributors: {
               ...current.contributors,
               data: (current.contributors.data ?? []).filter(
-                (contributor: any) =>
-                  !userIdSet.has(contributor.user_id) && !usernameSet.has(contributor.user?.username),
+                (contributor: any) => !userIdSet.has(contributor.user_id) && !usernameSet.has(contributor.user?.username),
               ),
             },
           };
@@ -304,13 +233,11 @@ export function useCoursesMutations(courseUuid: string, withUnpublishedActivitie
     }
 
     try {
-      const response = ensureMutationSuccess(await bulkRemoveContributors(courseUuid, usernames, options.accessToken));
-      await Promise.all([refreshCourse(), refreshEditorBundle(options.accessToken)]);
+      const response = assertSuccess(await bulkRemoveContributors(courseUuid, usernames, options.accessToken));
+      await Promise.all([refreshCourse(), refreshEditorBundle()]);
       return response;
     } catch (error) {
-      if (editorBundleKey) {
-        await mutate(editorBundleKey, previousEditorBundle, { revalidate: false });
-      }
+      if (editorBundleKey) await mutate(editorBundleKey, previousEditorBundle, { revalidate: false });
       throw error;
     }
   };

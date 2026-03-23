@@ -24,19 +24,8 @@ import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
+import type { CourseOrderPayload } from '@/schemas/chapterSchemas';
 import ChapterElement from './DraggableElements/ChapterElement';
-
-export type OrderPayload =
-  | {
-      last_known_update_date?: string | null;
-      chapter_order_by_ids?: {
-        chapter_id: number;
-        activities_order_by_ids: {
-          activity_id: number;
-        }[];
-      }[];
-    }
-  | undefined;
 
 const EditCourseStructure = () => {
   const session = usePlatformSession() as any;
@@ -94,11 +83,6 @@ const EditCourseStructure = () => {
         setConflict({
           section: 'content',
           message: error?.detail || error?.message,
-          summary: [
-            t('title'),
-            `${t('addChapterButton')}: ${chapter?.name || t('creatingChapter')}`,
-            `${t('title')}: ${course_structure.name || ''}`,
-          ],
           pendingSave: async () => {
             await createChapter(chapter, {
               accessToken: access_token,
@@ -145,11 +129,10 @@ const EditCourseStructure = () => {
       newCourseStructure.chapters = newChapterOrder;
     }
 
-    const payload: OrderPayload = {
-      last_known_update_date: course_structure.update_date,
-      chapter_order_by_ids: newCourseStructure.chapters.map((chapter: any) => ({
-        chapter_id: chapter.id,
-        activities_order_by_ids: (chapter.activities || []).map((activity: any) => ({ activity_id: activity.id })),
+    const payload: CourseOrderPayload = {
+      chapter_order_by_uuids: newCourseStructure.chapters.map((chapter: any) => ({
+        chapter_uuid: chapter.chapter_uuid,
+        activities_order_by_uuids: (chapter.activities || []).map((activity: any) => activity.activity_uuid),
       })),
     };
 
@@ -165,12 +148,6 @@ const EditCourseStructure = () => {
         setConflict({
           section: 'content',
           message: error?.detail || error?.message,
-          summary: [
-            t('savingOrder'),
-            `${t('title')}: ${course_structure.name || ''}`,
-            `${course_structure.chapters.length} chapters`,
-            `${course_structure.chapters.reduce((count: number, chapter: any) => count + (chapter.activities?.length ?? 0), 0)} activities`,
-          ],
           pendingSave: async () => {
             await reorderStructure(newCourseStructure, payload, {
               accessToken: access_token,

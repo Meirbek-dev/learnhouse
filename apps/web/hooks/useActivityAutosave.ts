@@ -3,7 +3,7 @@
 import { useActivityMutations } from '@/hooks/mutations/useActivityMutations';
 import { useCourseEditorStore } from '@/stores/courses';
 import { useDebouncedCallback } from '@/hooks/useDebounce';
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 
 interface ActivityAutosaveOptions {
   activityUuid: string;
@@ -17,10 +17,11 @@ export function useActivityAutosave(options: ActivityAutosaveOptions) {
   const { updateActivity } = useActivityMutations(options.courseUuid, true);
   const activitySaveStatus = useCourseEditorStore((state) => state.activitySaveStatus);
   const lastActivitySavedAt = useCourseEditorStore((state) => state.lastActivitySavedAt);
-  const setDraft = useCourseEditorStore((state) => state.setDraft);
-  const clearDraft = useCourseEditorStore((state) => state.clearDraft);
   const setConflict = useCourseEditorStore((state) => state.setConflict);
   const setActivitySaveStatus = useCourseEditorStore((state) => state.setActivitySaveStatus);
+
+  // Track the latest payload locally for draftSnapshot on 409
+  const latestPayloadRef = useRef<any>(null);
 
   const persistDraft = useCallback(
     async (payload: any) => {
@@ -31,20 +32,19 @@ export function useActivityAutosave(options: ActivityAutosaveOptions) {
           accessToken: options.accessToken,
           lastKnownUpdateDate: useCourseEditorStore.getState().lastKnownUpdateDate ?? options.lastKnownUpdateDate,
         });
-        clearDraft('activity');
         setActivitySaveStatus('saved');
       } catch (error: any) {
         setActivitySaveStatus('error');
         if (error?.status === 409) {
           setConflict({
             message: error?.detail || error?.message,
-            section: 'activity',
+            section: 'content',
+            draftSnapshot: latestPayloadRef.current,
             pendingSave: async () => {
               await updateActivity(options.activityUuid, payload, {
                 accessToken: options.accessToken,
                 lastKnownUpdateDate: useCourseEditorStore.getState().lastKnownUpdateDate,
               });
-              clearDraft('activity');
               setActivitySaveStatus('saved');
             },
           });
@@ -52,7 +52,7 @@ export function useActivityAutosave(options: ActivityAutosaveOptions) {
         throw error;
       }
     },
-    [clearDraft, options.accessToken, options.activityUuid, options.lastKnownUpdateDate, setActivitySaveStatus, setConflict, updateActivity],
+    [options.accessToken, options.activityUuid, options.lastKnownUpdateDate, setActivitySaveStatus, setConflict, updateActivity],
   );
 
   const debouncedSave = useDebouncedCallback((payload: any) => {
@@ -61,19 +61,19 @@ export function useActivityAutosave(options: ActivityAutosaveOptions) {
 
   const onChange = useCallback(
     (payload: any) => {
-      setDraft('activity', payload);
+      latestPayloadRef.current = payload;
       setActivitySaveStatus('saving');
       debouncedSave(payload);
     },
-    [debouncedSave, setActivitySaveStatus, setDraft],
+    [debouncedSave, setActivitySaveStatus],
   );
 
   const flush = useCallback(
     async (payload: any) => {
-      setDraft('activity', payload);
+      latestPayloadRef.current = payload;
       await persistDraft(payload);
     },
-    [persistDraft, setDraft],
+    [persistDraft],
   );
 
   return {

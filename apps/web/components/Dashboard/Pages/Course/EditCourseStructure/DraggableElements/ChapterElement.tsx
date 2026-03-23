@@ -124,7 +124,7 @@ const ChapterElement = ({ chapter, chapterIndex, course_uuid }: ChapterElementPr
 
     setIsSavingEdit(true);
     try {
-      await updateChapter(chapter.id, { name: trimmedName }, {
+      await updateChapter(chapter.chapter_uuid, { name: trimmedName }, {
         accessToken: access_token,
         lastKnownUpdateDate: course.courseStructure.update_date,
       });
@@ -134,13 +134,8 @@ const ChapterElement = ({ chapter, chapterIndex, course_uuid }: ChapterElementPr
         setConflict({
           section: 'content',
           message: error?.detail || error?.message,
-          summary: [
-            `${t('edit')}: ${chapter.name}`,
-            `${t('chapterNamePlaceholder')}: ${trimmedName}`,
-            `${t('title')}: ${course.courseStructure.name || ''}`,
-          ],
           pendingSave: async () => {
-            await updateChapter(chapter.id, { name: trimmedName }, {
+            await updateChapter(chapter.chapter_uuid, { name: trimmedName }, {
               accessToken: access_token,
               lastKnownUpdateDate: course.courseStructure.update_date,
             });
@@ -163,7 +158,7 @@ const ChapterElement = ({ chapter, chapterIndex, course_uuid }: ChapterElementPr
 
     setIsDeletingChapter(true);
     try {
-      await deleteChapter(chapter.id, {
+      await deleteChapter(chapter.chapter_uuid, {
         accessToken: access_token,
         lastKnownUpdateDate: course.courseStructure.update_date,
       });
@@ -173,13 +168,8 @@ const ChapterElement = ({ chapter, chapterIndex, course_uuid }: ChapterElementPr
         setConflict({
           section: 'content',
           message: error?.detail || error?.message,
-          summary: [
-            `${t('deleteChapter')}: ${chapter.name}`,
-            `${t('title')}: ${course.courseStructure.name || ''}`,
-            `${activities.length} ${t('noActivities') ? t('noActivities') : 'activities'}`,
-          ],
           pendingSave: async () => {
-            await deleteChapter(chapter.id, {
+            await deleteChapter(chapter.chapter_uuid, {
               accessToken: access_token,
               lastKnownUpdateDate: course.courseStructure.update_date,
             });

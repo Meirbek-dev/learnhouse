@@ -53,11 +53,6 @@ const NewActivityButton = (props: NewActivityButtonProps) => {
           section: 'content',
           serverVersion: course.courseStructure,
           message: error?.detail || error?.message,
-          summary: [
-            `${t('title')}: ${props.chapterId}`,
-            `${tNotify('creatingActivity')}`,
-            `${course.courseStructure.name || ''}`,
-          ],
           pendingSave: async () => {
             await activityMutations.createActivity(activity, props.chapterId, {
               accessToken: access_token,
@@ -105,11 +100,6 @@ const NewActivityButton = (props: NewActivityButtonProps) => {
           section: 'content',
           serverVersion: course.courseStructure,
           message: error?.detail || error?.message,
-          summary: [
-            `${t('title')}: ${props.chapterId}`,
-            `${tNotify('uploadingAndCreating')}`,
-            `${course.courseStructure.name || ''}`,
-          ],
           pendingSave: async () => {
             await activityMutations.createFileActivity(
               file,
@@ -145,11 +135,6 @@ const NewActivityButton = (props: NewActivityButtonProps) => {
           section: 'content',
           serverVersion: course.courseStructure,
           message: error?.detail || error?.message,
-          summary: [
-            `${t('title')}: ${props.chapterId}`,
-            `${tNotify('creatingActivity')}`,
-            `${course.courseStructure.name || ''}`,
-          ],
           pendingSave: async () => {
             await activityMutations.createExternalVideo(external_video_data, activity, props.chapterId, {
               accessToken: access_token,

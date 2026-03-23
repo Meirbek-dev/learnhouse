@@ -67,11 +67,6 @@ export default function CourseReviewPublish({
               section: 'access',
               serverVersion: course.courseStructure,
               message: error?.detail || error?.message,
-              summary: [
-                `${course.courseStructure.public ? t('movePrivate') : t('publishCourse')}`,
-                `${t('launchState')}: ${course.courseStructure.public ? t('launchStates.live') : t('launchStates.private')}`,
-                `${tReadiness('checklist.details.title')}: ${criticalReady ? tReadiness('checklist.details.description') : t('description')}`,
-              ],
               pendingSave: async () => {
                 await updateAccess(
                   { public: !wasPublic },

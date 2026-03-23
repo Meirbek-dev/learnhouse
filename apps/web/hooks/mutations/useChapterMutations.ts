@@ -1,6 +1,8 @@
 'use client';
 
 import { createChapter, deleteChapter, updateChapter, updateCourseOrderStructure } from '@services/courses/chapters';
+import type { ChapterCreateValues, ChapterUpdateValues, CourseOrderPayload } from '@/schemas/chapterSchemas';
+import { assertSuccess } from '@/lib/api/assertSuccess';
 import { useCourseStructureStore } from '@/stores/courses';
 import { courseKeys } from '@/hooks/courses/courseKeys';
 import { useSWRConfig } from 'swr';
@@ -9,17 +11,6 @@ interface ChapterMutationOptions {
   accessToken: string;
   lastKnownUpdateDate?: string | null;
 }
-
-const ensureSuccess = (response: any) => {
-  if (response?.status === 409) {
-    const error: any = new Error(response?.data?.detail || 'Conflict');
-    error.status = 409;
-    error.detail = response?.data?.detail;
-    throw error;
-  }
-
-  return response;
-};
 
 const buildOrderSnapshot = (chapters: any[]) =>
   chapters.map((chapter) => ({
@@ -32,35 +23,30 @@ const buildOrderSnapshot = (chapters: any[]) =>
   }));
 
 export function useChapterMutations(courseUuid: string, withUnpublishedActivities = true) {
-  const { mutate } = useSWRConfig();
+  const { mutate, cache } = useSWRConfig();
   const structureKey = courseKeys.structure(courseUuid, withUnpublishedActivities);
 
-  const createChapterMutation = async (payload: any, options: ChapterMutationOptions) => {
+  const captureSnapshot = <T,>(key: string): T | undefined =>
+    (cache.get(key) as any)?.data as T | undefined;
+
+  const createChapterMutation = async (payload: ChapterCreateValues, options: ChapterMutationOptions) => {
     const tempId = `temp_chapter_${Date.now()}`;
-    const optimisticChapter = {
-      ...payload,
-      id: tempId,
-      chapter_uuid: tempId,
-      activities: [],
-    };
+    const optimisticChapter = { ...payload, id: tempId, chapter_uuid: tempId, activities: [] };
 
     await mutate(
       structureKey,
       (current: any) =>
-        current
-          ? {
-              ...current,
-              chapters: [...(current.chapters ?? []), optimisticChapter],
-            }
-          : current,
+        current ? { ...current, chapters: [...(current.chapters ?? []), optimisticChapter] } : current,
       { revalidate: false },
     );
 
     try {
-      const createdChapter = await createChapter(payload, options.accessToken, {
-        courseUuid,
-        lastKnownUpdateDate: options.lastKnownUpdateDate,
-      });
+      const createdChapter = assertSuccess(
+        await createChapter(payload, options.accessToken, {
+          courseUuid,
+          lastKnownUpdateDate: options.lastKnownUpdateDate,
+        }),
+      );
 
       await mutate(
         structureKey,
@@ -83,10 +69,7 @@ export function useChapterMutations(courseUuid: string, withUnpublishedActivitie
         structureKey,
         (current: any) =>
           current
-            ? {
-                ...current,
-                chapters: (current.chapters ?? []).filter((chapter: any) => chapter.chapter_uuid !== tempId),
-              }
+            ? { ...current, chapters: (current.chapters ?? []).filter((chapter: any) => chapter.chapter_uuid !== tempId) }
             : current,
         { revalidate: false },
       );
@@ -94,8 +77,8 @@ export function useChapterMutations(courseUuid: string, withUnpublishedActivitie
     }
   };
 
-  const updateChapterMutation = async (chapterId: number, payload: any, options: ChapterMutationOptions) => {
-    const previous = await mutate(structureKey);
+  const updateChapterMutation = async (chapterUuid: string, payload: ChapterUpdateValues, options: ChapterMutationOptions) => {
+    const previous = captureSnapshot(structureKey);
 
     await mutate(
       structureKey,
@@ -104,12 +87,7 @@ export function useChapterMutations(courseUuid: string, withUnpublishedActivitie
           ? {
               ...current,
               chapters: (current.chapters ?? []).map((chapter: any) =>
-                chapter.id === chapterId
-                  ? {
-                      ...chapter,
-                      ...payload,
-                    }
-                  : chapter,
+                chapter.chapter_uuid === chapterUuid ? { ...chapter, ...payload } : chapter,
               ),
             }
           : current,
@@ -117,11 +95,12 @@ export function useChapterMutations(courseUuid: string, withUnpublishedActivitie
     );
 
     try {
-      const response = await updateChapter(chapterId, payload, options.accessToken, {
-        courseUuid,
-        lastKnownUpdateDate: options.lastKnownUpdateDate,
-      });
-      ensureSuccess(response);
+      const response = assertSuccess(
+        await updateChapter(chapterUuid, payload, options.accessToken, {
+          courseUuid,
+          lastKnownUpdateDate: options.lastKnownUpdateDate,
+        }),
+      );
       await mutate(structureKey);
       return response;
     } catch (error) {
@@ -130,27 +109,25 @@ export function useChapterMutations(courseUuid: string, withUnpublishedActivitie
     }
   };
 
-  const deleteChapterMutation = async (chapterId: number, options: ChapterMutationOptions) => {
-    const previous = await mutate(structureKey);
+  const deleteChapterMutation = async (chapterUuid: string, options: ChapterMutationOptions) => {
+    const previous = captureSnapshot(structureKey);
 
     await mutate(
       structureKey,
       (current: any) =>
         current
-          ? {
-              ...current,
-              chapters: (current.chapters ?? []).filter((chapter: any) => chapter.id !== chapterId),
-            }
+          ? { ...current, chapters: (current.chapters ?? []).filter((chapter: any) => chapter.chapter_uuid !== chapterUuid) }
           : current,
       { revalidate: false },
     );
 
     try {
-      const response = await deleteChapter(chapterId, options.accessToken, {
-        courseUuid,
-        lastKnownUpdateDate: options.lastKnownUpdateDate,
-      });
-      ensureSuccess(response);
+      const response = assertSuccess(
+        await deleteChapter(chapterUuid, options.accessToken, {
+          courseUuid,
+          lastKnownUpdateDate: options.lastKnownUpdateDate,
+        }),
+      );
       await mutate(structureKey);
       return response;
     } catch (error) {
@@ -159,8 +136,8 @@ export function useChapterMutations(courseUuid: string, withUnpublishedActivitie
     }
   };
 
-  const reorderStructure = async (nextStructure: any, payload: any, options: ChapterMutationOptions) => {
-    const previousStructure = await mutate(structureKey);
+  const reorderStructure = async (nextStructure: any, payload: CourseOrderPayload, options: ChapterMutationOptions) => {
+    const previousStructure = captureSnapshot<any>(structureKey);
     const dragStore = useCourseStructureStore.getState();
     const nextSnapshot = buildOrderSnapshot(nextStructure.chapters ?? []);
 
@@ -171,9 +148,7 @@ export function useChapterMutations(courseUuid: string, withUnpublishedActivitie
     dragStore.markDragSaving();
 
     try {
-      await updateCourseOrderStructure(courseUuid, payload, options.accessToken, {
-        courseUuid,
-      });
+      await updateCourseOrderStructure(courseUuid, payload, options.accessToken, { courseUuid });
       dragStore.commitDrag();
       await mutate(structureKey);
     } catch (error) {

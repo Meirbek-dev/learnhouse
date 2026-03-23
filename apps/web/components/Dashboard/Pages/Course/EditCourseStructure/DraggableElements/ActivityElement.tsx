@@ -206,14 +206,9 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
     } catch (error: any) {
       if (error?.status === 409) {
         setConflict({
-          section: 'activity',
+          section: 'content',
           serverVersion: activity,
           message: error?.detail || error?.message,
-          summary: [
-            `${t('edit')}: ${activity.name}`,
-            `${t('activityNamePlaceholder')}: ${trimmedName}`,
-            `${t('activityUpdateSuccess')}`,
-          ],
           pendingSave: async () => {
             await updateActivity(activity.activity_uuid, { ...activity, name: trimmedName }, {
               accessToken: access_token,
@@ -254,14 +249,9 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
       toast.dismiss(toastId);
       if (error?.status === 409) {
         setConflict({
-          section: 'activity',
+          section: 'content',
           serverVersion: activity,
           message: error?.detail || error?.message,
-          summary: [
-            `${t('activityUpdateSuccess')}: ${activity.name}`,
-            `${t('activityTypes')}: ${activity.activity_type}`,
-            `${activity.published ? t('activityUpdateSuccess') : t('updateFailed')}`,
-          ],
           pendingSave: async () => {
             await updateActivity(
               activity.activity_uuid,
@@ -308,14 +298,9 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
     } catch (error: any) {
       if (error?.status === 409) {
         setConflict({
-          section: 'activity',
+          section: 'content',
           serverVersion: activity,
           message: error?.detail || error?.message,
-          summary: [
-            `${t('deleteActivityButton')}: ${activity.name}`,
-            `${t('activityTypes')}: ${activity.activity_type}`,
-            `${t('activityDeletedSuccess')}`,
-          ],
           pendingSave: async () => {
             await deleteActivity(activity.activity_uuid, {
               accessToken: access_token,

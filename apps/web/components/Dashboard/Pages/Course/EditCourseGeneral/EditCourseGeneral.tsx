@@ -2,17 +2,18 @@
 
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
+import { courseGeneralSchema, type CourseGeneralValues } from '@/schemas/courseSchemas';
 import { AlertTriangle, Image as ImageIcon, Loader2, Tag, Video } from 'lucide-react';
 import { SectionHeader } from '@components/Dashboard/Courses/SectionHeader';
+import { useCoursesMutations } from '@/hooks/mutations/useCoursesMutations';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { Card, CardContent, CardHeader } from '@components/ui/card';
+import { useSyncDirtySection } from '@/hooks/useSyncDirtySection';
 import { useCourse } from '@components/Contexts/CourseContext';
+import { valibotResolver } from '@hookform/resolvers/valibot';
 import { TagsInput } from '@components/ui/custom/tags-input';
-import { useEffect, useId, useMemo, useRef, useState } from 'react';
-import { useCourseEditorStore } from '@/stores/courses';
-import { useCoursesMutations } from '@/hooks/mutations/useCoursesMutations';
-import { useDirtySection } from '@/hooks/useDirtySection';
+import { useEffect, useId, useMemo, useState } from 'react';
 import { useSaveSection } from '@/hooks/useSaveSection';
 import { Separator } from '@components/ui/separator';
 import LearningItemsList from './LearningItemsList';
@@ -56,7 +57,7 @@ function parseTags(raw: any): string[] {
   return [];
 }
 
-function buildFormValues(courseStructure: any): FormValues {
+function buildFormValues(courseStructure: any): CourseGeneralValues {
   return {
     name: courseStructure?.name || '',
     description: courseStructure?.description || '',
@@ -67,54 +68,6 @@ function buildFormValues(courseStructure: any): FormValues {
     thumbnail_type: courseStructure?.thumbnail_type || 'image',
   };
 }
-
-interface FormValues {
-  name: string;
-  description: string;
-  about: string;
-  learnings: string;
-  tags: string[];
-  public: boolean;
-  thumbnail_type: 'image' | 'video' | 'both';
-}
-
-const validateValues = (values: FormValues, t: any) => {
-  const errors: Partial<Record<keyof FormValues, string>> = {};
-  const errT = (key: string, params?: any) => t(`errors.${key}`, params);
-
-  if (!values.name?.trim()) {
-    errors.name = errT('required', { fieldName: t('name.label') });
-  } else if (values.name.length > 100) {
-    errors.name = errT('maxLength', { count: 100 });
-  }
-
-  if (!values.description?.trim()) {
-    errors.description = errT('required', { fieldName: t('description.label') });
-  } else if (values.description.length > 1000) {
-    errors.description = errT('maxLength', { count: 1000 });
-  }
-
-  if (!values.learnings) {
-    errors.learnings = errT('required', { fieldName: t('learnings.label') });
-  } else {
-    try {
-      const arr = JSON.parse(values.learnings);
-      if (!Array.isArray(arr)) {
-        errors.learnings = errT('invalidFormat');
-      } else if (arr.length === 0) {
-        errors.learnings = errT('atLeastOneLearningItem');
-      } else if (arr.some((i: any) => !i.text?.trim())) {
-        errors.learnings = errT('allLearningItemsMustHaveText');
-      }
-    } catch {
-      errors.learnings = errT('invalidJsonFormat');
-    }
-  }
-
-  return errors;
-};
-
-const serializeValues = (values: FormValues) => JSON.stringify(values);
 
 function EditCourseGeneral() {
   const t = useTranslations('CourseEdit.General');
@@ -163,86 +116,49 @@ function EditCourseGeneral() {
       ),
     },
   ];
+
   const course = useCourse();
   const { isLoading, courseStructure } = course;
   const formId = useId();
   const session = usePlatformSession();
   const accessToken = session?.data?.tokens?.access_token;
-  const generalDraft = useCourseEditorStore((state) => state.drafts.general as FormValues | undefined);
-  const setDraft = useCourseEditorStore((state) => state.setDraft);
-  const clearDraft = useCourseEditorStore((state) => state.clearDraft);
   const { updateMetadata } = useCoursesMutations(courseStructure?.course_uuid ?? '');
 
-  const { isDirty, isDirtyRef, markDirty, markClean } = useDirtySection('general');
+  const serverValues = useMemo(() => buildFormValues(courseStructure), [courseStructure]);
+
+  const form = useForm<CourseGeneralValues>({
+    resolver: valibotResolver(courseGeneralSchema),
+    defaultValues: serverValues,
+    mode: 'onChange',
+  });
+
+  const { isDirty } = form.formState;
+
+  // Keep the global store's dirty map in sync — no separate state needed.
+  useSyncDirtySection('general', isDirty);
+
   const { isSaving, saveWithoutRefresh } = useSaveSection({
     section: 'general',
     errorMessage: t('errors.saveFailed'),
     successMessage: tCommon('saved'),
     onError: setError,
+    getDraftSnapshot: () => form.getValues(),
   });
 
-  const form = useForm<FormValues>({
-    defaultValues: buildFormValues(courseStructure),
-    mode: 'onChange',
-  });
-
-  const initialRef = useRef<FormValues>(form.getValues());
-  const serverValues = useMemo(() => buildFormValues(courseStructure), [courseStructure]);
-  const serverValuesKey = useMemo(() => serializeValues(serverValues), [serverValues]);
-
+  // Hydrate form from server data on mount / when server data changes.
+  // RHF's `reset` only runs when values actually differ, so it's cheap.
   useEffect(() => {
     if (!isLoading && courseStructure) {
-      initialRef.current = serverValues;
-      const nextValues = generalDraft ?? serverValues;
-
-      if (serializeValues(form.getValues()) !== serializeValues(nextValues)) {
-        form.reset(nextValues);
-      }
-
-      if (!generalDraft && !isDirtyRef.current) {
-        markClean();
-        setError('');
-      }
+      form.reset(serverValues, { keepDirtyValues: true });
     }
-  }, [courseStructure, form, generalDraft, isDirtyRef, isLoading, markClean, serverValues, serverValuesKey]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [courseStructure, isLoading]);
 
-  useEffect(() => {
-    const sub = form.watch((values) => {
-      if (isLoading) return;
-      const currentValues = values as FormValues;
-      const errors = validateValues(currentValues, t);
-      (Object.keys(currentValues) as (keyof FormValues)[]).forEach((k) => {
-        if (errors[k]) form.setError(k, { message: errors[k] });
-        else form.clearErrors(k);
-      });
-
-      const changed = serializeValues(currentValues) !== serializeValues(initialRef.current);
-      if (changed) {
-        setDraft('general', currentValues);
-        markDirty();
-        return;
-      }
-
-      clearDraft('general');
-      markClean();
-    });
-    return () => sub.unsubscribe();
-  }, [clearDraft, form, isLoading, markDirty, markClean, serverValuesKey, setDraft, t]);
-
-  const handleSubmit = async (values: FormValues) => {
-    const errors = validateValues(values, t);
-    if (Object.keys(errors).length > 0) {
-      setError(t('errors.saveFailed'));
-      const firstErrorField = Object.keys(errors)[0] as keyof FormValues;
-      form.setFocus(firstErrorField);
-      return;
-    }
-
+  const handleSubmit = async (values: CourseGeneralValues) => {
     if (!accessToken) {
       setError(t('errors.saveFailed'));
       return;
     }
-
     setError('');
 
     await saveWithoutRefresh(
@@ -253,9 +169,7 @@ function EditCourseGeneral() {
         }),
       {
         onSuccess: () => {
-          initialRef.current = values;
-          clearDraft('general');
-          markClean();
+          form.reset(values);
           setError('');
         },
       },
@@ -263,9 +177,7 @@ function EditCourseGeneral() {
   };
 
   const handleDiscard = () => {
-    clearDraft('general');
-    form.reset(initialRef.current);
-    markClean();
+    form.reset(serverValues);
     setError('');
   };
 

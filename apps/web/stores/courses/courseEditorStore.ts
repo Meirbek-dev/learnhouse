@@ -2,24 +2,25 @@
 
 import { create } from 'zustand';
 
-export type CourseDraftSection = 'general' | 'access' | 'contributors' | 'certification' | 'activity' | 'content';
 export type CourseDirtySection = 'general' | 'access' | 'contributors' | 'certification' | 'content';
 export type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 
 interface ConflictState {
   isOpen: boolean;
   serverVersion: any | null;
-  draftSection: CourseDraftSection | null;
+  /** Point-in-time snapshot of the user's unsaved values — for display in the conflict dialog only. */
+  draftSnapshot: unknown | null;
+  draftSection: CourseDirtySection | null;
   message: string;
-  summary: string[];
   pendingSave: (() => Promise<unknown>) | null;
+  /** Called when the user chooses "use theirs" to reset the relevant form to server state. */
+  resetForm: (() => void) | null;
 }
 
 interface CourseEditorState {
   activeCourseUuid: string | null;
-  drafts: Partial<Record<CourseDraftSection, unknown>>;
-  dirtySections: Partial<Record<CourseDirtySection, boolean>>;
   lastKnownUpdateDate: string | null;
+  dirtySections: Partial<Record<CourseDirtySection, boolean>>;
   conflict: ConflictState;
   activitySaveStatus: SaveStatus;
   lastActivitySavedAt: number | null;
@@ -28,37 +29,35 @@ interface CourseEditorState {
 interface CourseEditorActions {
   openEditor: (courseUuid: string, lastKnownUpdateDate?: string | null) => void;
   syncLastKnownUpdateDate: (lastKnownUpdateDate?: string | null) => void;
-  setDraft: <T>(section: CourseDraftSection, data: T) => void;
-  clearDraft: (section: CourseDraftSection) => void;
-  discardAllDrafts: () => void;
   setSectionDirty: (section: CourseDirtySection, dirty: boolean) => void;
   clearDirtySections: () => void;
   setConflict: (input: {
     serverVersion?: any | null;
-    section?: CourseDraftSection | null;
+    draftSnapshot?: unknown | null;
+    section?: CourseDirtySection | null;
     message?: string;
-    summary?: string[];
     pendingSave?: (() => Promise<unknown>) | null;
+    resetForm?: (() => void) | null;
   }) => void;
   dismissConflict: () => void;
-  resolveConflict: (resolution: 'use-mine' | 'use-theirs') => Promise<void>;
+  resolveConflict: (resolution: 'use-mine' | 'use-theirs', resetForm?: () => void) => Promise<void>;
   setActivitySaveStatus: (status: SaveStatus) => void;
 }
 
 const createInitialConflictState = (): ConflictState => ({
   isOpen: false,
   serverVersion: null,
+  draftSnapshot: null,
   draftSection: null,
   message: '',
-  summary: [],
   pendingSave: null,
+  resetForm: null,
 });
 
 const initialState: CourseEditorState = {
   activeCourseUuid: null,
-  drafts: {},
-  dirtySections: {},
   lastKnownUpdateDate: null,
+  dirtySections: {},
   conflict: createInitialConflictState(),
   activitySaveStatus: 'idle',
   lastActivitySavedAt: null,
@@ -75,7 +74,6 @@ export const useCourseEditorStore = create<CourseEditorState & CourseEditorActio
           lastKnownUpdateDate: lastKnownUpdateDate ?? state.lastKnownUpdateDate,
         };
       }
-
       return {
         ...initialState,
         activeCourseUuid: courseUuid,
@@ -84,88 +82,59 @@ export const useCourseEditorStore = create<CourseEditorState & CourseEditorActio
     }),
 
   syncLastKnownUpdateDate: (lastKnownUpdateDate) =>
-    set({
-      lastKnownUpdateDate: lastKnownUpdateDate ?? null,
-    }),
-
-  setDraft: (section, data) =>
-    set((state) => ({
-      drafts: {
-        ...state.drafts,
-        [section]: data,
-      },
-    })),
-
-  clearDraft: (section) =>
-    set((state) => {
-      const nextDrafts = { ...state.drafts };
-      delete nextDrafts[section];
-      return { drafts: nextDrafts };
-    }),
-
-  discardAllDrafts: () =>
-    set({
-      drafts: {},
-      activitySaveStatus: 'idle',
-    }),
+    set({ lastKnownUpdateDate: lastKnownUpdateDate ?? null }),
 
   setSectionDirty: (section, dirty) =>
     set((state) => ({
-      dirtySections: {
-        ...state.dirtySections,
-        [section]: dirty,
-      },
+      dirtySections: { ...state.dirtySections, [section]: dirty },
     })),
 
   clearDirtySections: () => set({ dirtySections: {} }),
 
-  setConflict: ({ serverVersion = null, section = null, message = '', summary = [], pendingSave = null }) =>
+  setConflict: ({ serverVersion = null, draftSnapshot = null, section = null, message = '', pendingSave = null, resetForm = null }) =>
     set({
       conflict: {
         isOpen: true,
         serverVersion,
+        draftSnapshot,
         draftSection: section,
         message: message.trim(),
-        summary,
         pendingSave,
+        resetForm,
       },
     }),
 
-  dismissConflict: () =>
-    set({
-      conflict: createInitialConflictState(),
-    }),
+  dismissConflict: () => set({ conflict: createInitialConflictState() }),
 
-  resolveConflict: async (resolution) => {
+  /**
+   * Resolve an optimistic-lock conflict.
+   *
+   * - 'use-mine'  → keep the user's unsaved changes; retry the save with the
+   *                 updated lastKnownUpdateDate from the server version.
+   * - 'use-theirs' → discard the user's changes; the caller must pass a
+   *                  `resetForm` callback that resets the relevant RHF form
+   *                  (or plain state) to the server version.
+   */
+  resolveConflict: async (resolution, resetForm) => {
     const { conflict } = get();
-
-    if (!conflict.isOpen) {
-      return;
-    }
+    if (!conflict.isOpen) return;
 
     if (resolution === 'use-theirs') {
-      set((state) => {
-        const nextDrafts = { ...state.drafts };
-        if (conflict.draftSection) {
-          delete nextDrafts[conflict.draftSection];
-        }
-
-        const nextDirtySections = { ...state.dirtySections };
-        if (conflict.draftSection && conflict.draftSection !== 'activity') {
-          delete nextDirtySections[conflict.draftSection];
-        }
-
-        return {
-          drafts: nextDrafts,
-          dirtySections: nextDirtySections,
-          lastKnownUpdateDate: conflict.serverVersion?.update_date ?? state.lastKnownUpdateDate,
-          conflict: createInitialConflictState(),
-          activitySaveStatus: conflict.draftSection === 'activity' ? 'idle' : state.activitySaveStatus,
-        };
-      });
+      const storedReset = conflict.resetForm;
+      set((state) => ({
+        lastKnownUpdateDate: conflict.serverVersion?.update_date ?? state.lastKnownUpdateDate,
+        dirtySections: conflict.draftSection
+          ? { ...state.dirtySections, [conflict.draftSection]: false }
+          : state.dirtySections,
+        conflict: createInitialConflictState(),
+        activitySaveStatus: conflict.draftSection === 'content' ? 'idle' : state.activitySaveStatus,
+      }));
+      storedReset?.();
+      resetForm?.();
       return;
     }
 
+    // 'use-mine': update lastKnownUpdateDate so the retry succeeds, then re-run the save.
     set((state) => ({
       lastKnownUpdateDate: conflict.serverVersion?.update_date ?? state.lastKnownUpdateDate,
       conflict: createInitialConflictState(),
@@ -183,5 +152,5 @@ export const useCourseEditorStore = create<CourseEditorState & CourseEditorActio
     }),
 }));
 
-export const selectHasDirtySections = (state: CourseEditorState) => Object.values(state.dirtySections).some(Boolean);
-export const selectHasDrafts = (state: CourseEditorState) => Object.keys(state.drafts).length > 0;
+export const selectHasDirtySections = (state: CourseEditorState) =>
+  Object.values(state.dirtySections).some(Boolean);

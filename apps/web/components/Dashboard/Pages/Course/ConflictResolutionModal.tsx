@@ -108,21 +108,6 @@ const SummaryCard = ({
   </div>
 );
 
-const SummaryList = ({ title, items }: { title: string; items: string[] }) => (
-  <div className="space-y-3 rounded-lg border bg-background p-4">
-    <div className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">{title}</div>
-    <ul className="space-y-2 text-sm text-foreground">
-      {items.map((item) => (
-        <li
-          key={item}
-          className="rounded-md bg-muted/40 px-3 py-2"
-        >
-          {item}
-        </li>
-      ))}
-    </ul>
-  </div>
-);
 
 export default function ConflictResolutionModal() {
   const t = useTranslations('CourseEdit.Conflict');
@@ -132,11 +117,10 @@ export default function ConflictResolutionModal() {
   const certificationT = useTranslations('Certificates.EditCourseCertification');
   const course = useCourse();
   const conflict = useCourseEditorStore((state) => state.conflict);
-  const drafts = useCourseEditorStore((state) => state.drafts);
   const dismissConflict = useCourseEditorStore((state) => state.dismissConflict);
   const resolveConflict = useCourseEditorStore((state) => state.resolveConflict);
 
-  const draftValue = conflict.draftSection ? drafts[conflict.draftSection] : null;
+  const draftValue = conflict.draftSnapshot;
   const courseStructure = course.courseStructure;
   const editorData = course.editorData;
 
@@ -399,13 +383,6 @@ export default function ConflictResolutionModal() {
           <AlertDialogDescription>{conflict.message || t('description')}</AlertDialogDescription>
         </AlertDialogHeader>
 
-        {conflict.summary.length > 0 ? (
-          <SummaryList
-            title={t('draftSummaryTitle')}
-            items={conflict.summary}
-          />
-        ) : null}
-
         <div className="grid gap-4 rounded-xl border bg-muted/30 p-4 md:grid-cols-2">
           <SummaryCard
             title={t('draftSummaryTitle')}
@@ -422,7 +399,7 @@ export default function ConflictResolutionModal() {
         </div>
 
         <AlertDialogFooter>
-          <AlertDialogCancel onClick={() => void resolveConflict('use-theirs')}>
+          <AlertDialogCancel onClick={() => void resolveConflict('use-theirs', conflict.resetForm ?? undefined)}>
             {t('useTheirsButton')}
           </AlertDialogCancel>
           <AlertDialogAction onClick={() => void resolveConflict('use-mine')}>

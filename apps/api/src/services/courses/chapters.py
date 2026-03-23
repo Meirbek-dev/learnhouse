@@ -25,6 +25,16 @@ from src.db.users import AnonymousUser, PublicUser
 from src.security.rbac import PermissionChecker
 from src.services.courses.courses import _ensure_course_is_current
 
+
+def _get_chapter_by_uuid(chapter_uuid: str, db_session) -> Chapter:
+    statement = select(Chapter).where(Chapter.chapter_uuid == chapter_uuid)
+    chapter = db_session.exec(statement).first()
+    if not chapter:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Chapter does not exist"
+        )
+    return chapter
+
 ####################################################
 # CRUD
 ####################################################
@@ -106,17 +116,11 @@ async def create_chapter(
 
 async def get_chapter(
     request: Request,
-    chapter_id: int,
+    chapter_uuid: str,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
 ) -> ChapterRead:
-    statement = select(Chapter).where(Chapter.id == chapter_id)
-    chapter = db_session.exec(statement).first()
-
-    if not chapter:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Chapter does not exist"
-        )
+    chapter = _get_chapter_by_uuid(chapter_uuid, db_session)
 
     # Get Course
     statement = select(Course).where(Course.id == chapter.course_id)
@@ -135,7 +139,7 @@ async def get_chapter(
     statement = (
         select(Activity)
         .join(ChapterActivity, Activity.id == ChapterActivity.activity_id)
-        .where(ChapterActivity.chapter_id == chapter_id)
+        .where(ChapterActivity.chapter_id == chapter.id)
         .distinct(Activity.id)
     )
 
@@ -154,17 +158,11 @@ async def get_chapter(
 async def update_chapter(
     request: Request,
     chapter_object: ChapterUpdate,
-    chapter_id: int,
+    chapter_uuid: str,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
 ) -> ChapterRead:
-    statement = select(Chapter).where(Chapter.id == chapter_id)
-    chapter = db_session.exec(statement).first()
-
-    if not chapter:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Chapter does not exist"
-        )
+    chapter = _get_chapter_by_uuid(chapter_uuid, db_session)
 
     # RBAC check
     checker = PermissionChecker(db_session)
@@ -195,23 +193,17 @@ async def update_chapter(
     db_session.commit()
     db_session.refresh(chapter)
 
-    return await get_chapter(request, chapter.id, current_user, db_session)
+    return await get_chapter(request, chapter.chapter_uuid, current_user, db_session)
 
 
 async def delete_chapter(
     request: Request,
-    chapter_id: int,
+    chapter_uuid: str,
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
     last_known_update_date: datetime | None = None,
 ):
-    statement = select(Chapter).where(Chapter.id == chapter_id)
-    chapter = db_session.exec(statement).first()
-
-    if not chapter:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Chapter does not exist"
-        )
+    chapter = _get_chapter_by_uuid(chapter_uuid, db_session)
 
     # RBAC check
     checker = PermissionChecker(db_session)
@@ -370,42 +362,48 @@ async def reorder_chapters_and_activities(
     # Chapters
     ###########
 
+    # Resolve chapter UUIDs → integer IDs in one batch query
+    all_chapter_uuids = [co.chapter_uuid for co in chapters_order.chapter_order_by_uuids]
+    chapters_by_uuid: dict[str, Chapter] = {}
+    if all_chapter_uuids:
+        result = db_session.exec(
+            select(Chapter).where(Chapter.chapter_uuid.in_(all_chapter_uuids))
+        ).all()
+        chapters_by_uuid = {c.chapter_uuid: c for c in result}
+
     # Get all existing course chapters
     statement = select(CourseChapter).where(CourseChapter.course_id == course.id)
     existing_course_chapters = db_session.exec(statement).all()
-
-    # Create a map of existing chapters for faster lookup
     existing_chapter_map = {cc.chapter_id: cc for cc in existing_course_chapters}
 
-    # Update or create course chapters based on new order
-    for index, chapter_order in enumerate(chapters_order.chapter_order_by_ids):
+    for index, chapter_order in enumerate(chapters_order.chapter_order_by_uuids):
+        chapter = chapters_by_uuid.get(chapter_order.chapter_uuid)
+        if not chapter:
+            continue
         new_order = index + 1
 
-        if chapter_order.chapter_id in existing_chapter_map:
-            # Update existing chapter order
-            existing_cc = existing_chapter_map[chapter_order.chapter_id]
+        if chapter.id in existing_chapter_map:
+            existing_cc = existing_chapter_map[chapter.id]
             existing_cc.order = new_order
             existing_cc.update_date = str(datetime.now())
         else:
-            # Create new course chapter
-            new_chapter = CourseChapter(
+            new_cc = CourseChapter(
                 course_id=course.id,
-                chapter_id=chapter_order.chapter_id,
+                chapter_id=chapter.id,
                 order=new_order,
                 creation_date=str(datetime.now()),
                 update_date=str(datetime.now()),
             )
-            db_session.add(new_chapter)
+            db_session.add(new_cc)
 
-    # Remove chapters that are no longer in the order
-    chapter_ids_to_keep = {co.chapter_id for co in chapters_order.chapter_order_by_ids}
-    chapters_to_remove = [
-        cc
-        for cc in existing_course_chapters
-        if cc.chapter_id not in chapter_ids_to_keep
-    ]
-    for cc in chapters_to_remove:
-        db_session.delete(cc)
+    chapter_ids_to_keep = {
+        chapters_by_uuid[co.chapter_uuid].id
+        for co in chapters_order.chapter_order_by_uuids
+        if co.chapter_uuid in chapters_by_uuid
+    }
+    for cc in existing_course_chapters:
+        if cc.chapter_id not in chapter_ids_to_keep:
+            db_session.delete(cc)
 
     db_session.commit()
 
@@ -413,50 +411,58 @@ async def reorder_chapters_and_activities(
     # Activities
     ###########
 
+    # Resolve activity UUIDs → integer IDs in one batch query
+    all_activity_uuids = [
+        uuid
+        for co in chapters_order.chapter_order_by_uuids
+        for uuid in co.activities_order_by_uuids
+    ]
+    activities_by_uuid: dict[str, Activity] = {}
+    if all_activity_uuids:
+        result = db_session.exec(
+            select(Activity).where(Activity.activity_uuid.in_(all_activity_uuids))
+        ).all()
+        activities_by_uuid = {a.activity_uuid: a for a in result}
+
     # Get all existing chapter activities
     statement = select(ChapterActivity).where(ChapterActivity.course_id == course.id)
     existing_chapter_activities = db_session.exec(statement).all()
-
-    # Create a map for faster lookup
     existing_activity_map = {
         (ca.chapter_id, ca.activity_id): ca for ca in existing_chapter_activities
     }
 
-    # Track which activities we want to keep
-    activities_to_keep = set()
+    activities_to_keep: set[tuple[int, int]] = set()
 
-    # Update or create chapter activities based on new order
-    for chapter_order in chapters_order.chapter_order_by_ids:
-        for index, activity_order in enumerate(chapter_order.activities_order_by_ids):
-            activity_key = (chapter_order.chapter_id, activity_order.activity_id)
+    for chapter_order in chapters_order.chapter_order_by_uuids:
+        chapter = chapters_by_uuid.get(chapter_order.chapter_uuid)
+        if not chapter:
+            continue
+        for index, activity_uuid in enumerate(chapter_order.activities_order_by_uuids):
+            activity = activities_by_uuid.get(activity_uuid)
+            if not activity:
+                continue
+            activity_key = (chapter.id, activity.id)
             activities_to_keep.add(activity_key)
             new_order = index + 1
 
             if activity_key in existing_activity_map:
-                # Update existing activity order
                 existing_ca = existing_activity_map[activity_key]
                 existing_ca.order = new_order
                 existing_ca.update_date = str(datetime.now())
             else:
-                # Create new chapter activity
-                new_activity = ChapterActivity(
-                    chapter_id=chapter_order.chapter_id,
-                    activity_id=activity_order.activity_id,
+                new_ca = ChapterActivity(
+                    chapter_id=chapter.id,
+                    activity_id=activity.id,
                     course_id=course.id,
                     order=new_order,
                     creation_date=str(datetime.now()),
                     update_date=str(datetime.now()),
                 )
-                db_session.add(new_activity)
+                db_session.add(new_ca)
 
-    # Remove activities that are no longer in any chapter
-    activities_to_remove = [
-        ca
-        for ca in existing_chapter_activities
-        if (ca.chapter_id, ca.activity_id) not in activities_to_keep
-    ]
-    for ca in activities_to_remove:
-        db_session.delete(ca)
+    for ca in existing_chapter_activities:
+        if (ca.chapter_id, ca.activity_id) not in activities_to_keep:
+            db_session.delete(ca)
 
     db_session.commit()
 

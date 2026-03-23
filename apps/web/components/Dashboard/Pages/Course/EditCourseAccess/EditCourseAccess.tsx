@@ -30,19 +30,14 @@ import { useCoursesMutations } from '@/hooks/mutations/useCoursesMutations';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { useEffect, useRef, useState, useTransition } from 'react';
+import { useSyncDirtySection } from '@/hooks/useSyncDirtySection';
 import { useCourse } from '@components/Contexts/CourseContext';
-import { useDirtySection } from '@/hooks/useDirtySection';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { RadioGroup } from '@/components/ui/radio-group';
 import { useSaveSection } from '@/hooks/useSaveSection';
-import { useCourseEditorStore } from '@/stores/courses';
 import { Button } from '@/components/ui/button';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-
-interface AccessDraft {
-  public: boolean;
-}
 
 const EditCourseAccess = () => {
   const session = usePlatformSession() as any;
@@ -50,49 +45,35 @@ const EditCourseAccess = () => {
   const course = useCourse();
   const { courseStructure, editorData } = course;
   const t = useTranslations('DashPage.Courses.Access');
-  const accessDraft = useCourseEditorStore((state) => state.drafts.access as AccessDraft | undefined);
-  const setDraft = useCourseEditorStore((state) => state.setDraft);
-  const clearDraft = useCourseEditorStore((state) => state.clearDraft);
   const { updateAccess } = useCoursesMutations(courseStructure?.course_uuid ?? '');
   const [draftPublic, setDraftPublic] = useState<boolean | undefined>(() => courseStructure?.public);
   const usergroups = editorData.linkedUserGroups.data ?? [];
   const isUserGroupsLoading = course.isEditorDataLoading && editorData.linkedUserGroups.data === null;
-  const initialRef = useRef<boolean | undefined>(courseStructure?.public);
 
-  const { isDirty, isDirtyRef, markDirty, markClean } = useDirtySection('access');
-  const { isSaving, saveWithoutRefresh } = useSaveSection({ onSuccess: markClean, section: 'access' });
+  const isDirtyRef = useRef(false);
+  isDirtyRef.current = draftPublic !== undefined && draftPublic !== courseStructure?.public;
+  const isDirty = isDirtyRef.current;
 
+  useSyncDirtySection('access', isDirty);
+
+  const handleDiscard = () => setDraftPublic(courseStructure?.public);
+
+  const { isSaving, save } = useSaveSection({
+    section: 'access',
+    getDraftSnapshot: () => ({ public: draftPublic }),
+    onUseTheirs: handleDiscard,
+  });
+
+  // Rehydrate from server when not dirty (e.g. initial load, external update)
   useEffect(() => {
-    initialRef.current = courseStructure?.public;
-    const nextPublic = accessDraft?.public ?? courseStructure?.public;
-    setDraftPublic((current) => (current === nextPublic ? current : nextPublic));
-
-    if (!accessDraft && !isDirtyRef.current) {
-      markClean();
+    if (!isDirtyRef.current) {
+      setDraftPublic(courseStructure?.public);
     }
-  }, [accessDraft, courseStructure?.public, isDirtyRef, markClean]);
-
-  useEffect(() => {
-    const dirty = draftPublic !== undefined && draftPublic !== initialRef.current;
-    if (dirty) {
-      setDraft('access', { public: draftPublic });
-      markDirty();
-      return;
-    }
-
-    clearDraft('access');
-    markClean();
-  }, [clearDraft, courseStructure?.public, draftPublic, markDirty, markClean, setDraft]);
-
-  const handleDiscard = () => {
-    clearDraft('access');
-    setDraftPublic(initialRef.current);
-    markClean();
-  };
+  }, [courseStructure?.public]);
 
   const handleAccessSave = async () => {
     if (!(access_token && draftPublic !== undefined) || !isDirty) return;
-    await saveWithoutRefresh(
+    await save(
       async () =>
         updateAccess(
           { public: draftPublic },
@@ -101,12 +82,6 @@ const EditCourseAccess = () => {
             lastKnownUpdateDate: courseStructure.update_date,
           },
         ),
-      {
-        onSuccess: () => {
-          initialRef.current = draftPublic;
-          clearDraft('access');
-        },
-      },
     );
   };
 

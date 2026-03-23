@@ -1,6 +1,8 @@
 'use client';
 
 import { createActivity, createExternalVideoActivity, createFileActivity, deleteActivity, updateActivity } from '@services/courses/activities';
+import type { ActivityCreateValues, ActivityUpdateValues } from '@/schemas/activitySchemas';
+import { assertSuccess } from '@/lib/api/assertSuccess';
 import { useCourseEditorStore } from '@/stores/courses';
 import { courseKeys } from '@/hooks/courses/courseKeys';
 import { useSWRConfig } from 'swr';
@@ -10,63 +12,43 @@ interface ActivityMutationOptions {
   lastKnownUpdateDate?: string | null;
 }
 
-const toError = (errorLike: any) => {
-  if (errorLike?.success) {
-    return errorLike;
-  }
-
-  const error: any = new Error(errorLike?.data?.detail || errorLike?.message || errorLike?.HTTPmessage || 'Request failed');
-  error.status = errorLike?.status ?? 500;
-  error.detail = errorLike?.data?.detail ?? errorLike?.detail;
-  error.data = errorLike?.data;
-  throw error;
-};
-
 export function useActivityMutations(courseUuid: string, withUnpublishedActivities = true) {
-  const { mutate } = useSWRConfig();
+  const { mutate, cache } = useSWRConfig();
   const structureKey = courseKeys.structure(courseUuid, withUnpublishedActivities);
 
-  const updateActivityMutation = async (activityUuid: string, payload: any, options: ActivityMutationOptions) => {
-    const previousStructure = await mutate(structureKey);
+  const captureSnapshot = <T,>(key: string): T | undefined =>
+    (cache.get(key) as any)?.data as T | undefined;
+
+  const updateActivityMutation = async (activityUuid: string, payload: Partial<ActivityUpdateValues>, options: ActivityMutationOptions) => {
+    const previousStructure = captureSnapshot(structureKey);
     const activityKey = courseKeys.activity(activityUuid);
-    const previousActivity = await mutate(activityKey);
+    const previousActivity = captureSnapshot(activityKey);
 
     await mutate(
       structureKey,
       (current: any) =>
         current
           ? {
-              ...current,
-              chapters: (current.chapters ?? []).map((chapter: any) => ({
-                ...chapter,
-                activities: (chapter.activities ?? []).map((activity: any) =>
-                  activity.activity_uuid === activityUuid
-                    ? {
-                        ...activity,
-                        ...payload,
-                      }
-                    : activity,
-                ),
-              })),
-            }
+            ...current,
+            chapters: (current.chapters ?? []).map((chapter: any) => ({
+              ...chapter,
+              activities: (chapter.activities ?? []).map((activity: any) =>
+                activity.activity_uuid === activityUuid ? { ...activity, ...payload } : activity,
+              ),
+            })),
+          }
           : current,
       { revalidate: false },
     );
 
     await mutate(
       activityKey,
-      (current: any) =>
-        current
-          ? {
-              ...current,
-              ...payload,
-            }
-          : current,
+      (current: any) => (current ? { ...current, ...payload } : current),
       { revalidate: false },
     );
 
     try {
-      const response = toError(
+      const response = assertSuccess(
         await updateActivity(payload, activityUuid, options.accessToken, {
           courseUuid,
           lastKnownUpdateDate: options.lastKnownUpdateDate,
@@ -85,25 +67,25 @@ export function useActivityMutations(courseUuid: string, withUnpublishedActiviti
   };
 
   const deleteActivityMutation = async (activityUuid: string, options: ActivityMutationOptions) => {
-    const previousStructure = await mutate(structureKey);
+    const previousStructure = captureSnapshot(structureKey);
 
     await mutate(
       structureKey,
       (current: any) =>
         current
           ? {
-              ...current,
-              chapters: (current.chapters ?? []).map((chapter: any) => ({
-                ...chapter,
-                activities: (chapter.activities ?? []).filter((activity: any) => activity.activity_uuid !== activityUuid),
-              })),
-            }
+            ...current,
+            chapters: (current.chapters ?? []).map((chapter: any) => ({
+              ...chapter,
+              activities: (chapter.activities ?? []).filter((activity: any) => activity.activity_uuid !== activityUuid),
+            })),
+          }
           : current,
       { revalidate: false },
     );
 
     try {
-      const response = toError(
+      const response = assertSuccess(
         await deleteActivity(activityUuid, options.accessToken, {
           courseUuid,
           lastKnownUpdateDate: options.lastKnownUpdateDate,
@@ -117,8 +99,8 @@ export function useActivityMutations(courseUuid: string, withUnpublishedActiviti
     }
   };
 
-  const createActivityMutation = async (payload: any, chapterId: number, options: ActivityMutationOptions) => {
-    const response = toError(
+  const createActivityMutation = async (payload: ActivityCreateValues, chapterId: number, options: ActivityMutationOptions) => {
+    const response = assertSuccess(
       await createActivity(payload, chapterId, options.accessToken, {
         courseUuid,
         lastKnownUpdateDate: options.lastKnownUpdateDate,
@@ -131,7 +113,7 @@ export function useActivityMutations(courseUuid: string, withUnpublishedActiviti
   const createFileActivityMutation = async (
     file: File,
     type: string,
-    payload: any,
+    payload: Partial<ActivityCreateValues>,
     chapterId: number,
     options: ActivityMutationOptions,
     onProgress?: (progress: { percentage: number }) => void,
@@ -145,12 +127,12 @@ export function useActivityMutations(courseUuid: string, withUnpublishedActiviti
   };
 
   const createExternalVideoMutation = async (
-    externalVideoData: any,
-    activityPayload: any,
+    externalVideoData: Record<string, unknown>,
+    activityPayload: Partial<ActivityCreateValues>,
     chapterId: number,
     options: ActivityMutationOptions,
   ) => {
-    const response = toError(
+    const response = assertSuccess(
       await createExternalVideoActivity(externalVideoData, activityPayload, chapterId, options.accessToken, {
         courseUuid,
         lastKnownUpdateDate: options.lastKnownUpdateDate,

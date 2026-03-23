@@ -87,18 +87,30 @@ class ChapterReadWithPermissions(ChapterBase):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
-class ActivityOrder(PydanticStrictBaseModel):
-    activity_id: int
+class ChapterDelete(PydanticStrictBaseModel):
+    last_known_update_date: datetime | None = None
+
+    @field_validator("last_known_update_date", mode="before")
+    @classmethod
+    def validate_last_known_update_date(cls, value):
+        if isinstance(value, datetime) or value is None:
+            return value
+        if isinstance(value, str):
+            normalized = value.strip()
+            if normalized.endswith("Z"):
+                normalized = f"{normalized[:-1]}+00:00"
+            return datetime.fromisoformat(normalized)
+        return value
 
 
-class ChapterOrder(PydanticStrictBaseModel):
-    chapter_id: int
-    activities_order_by_ids: list[ActivityOrder]
+class ChapterOrderByUuid(PydanticStrictBaseModel):
+    chapter_uuid: str
+    activities_order_by_uuids: list[str]
 
 
 class ChapterUpdateOrder(PydanticStrictBaseModel):
     last_known_update_date: datetime | None = None
-    chapter_order_by_ids: list[ChapterOrder]
+    chapter_order_by_uuids: list[ChapterOrderByUuid]
 
     @field_validator("last_known_update_date", mode="before")
     @classmethod

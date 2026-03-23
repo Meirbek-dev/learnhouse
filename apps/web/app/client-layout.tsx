@@ -7,20 +7,54 @@ import { swrFetcher } from '@services/utils/ts/requests';
 import { updateUserTheme } from '@services/users/users';
 import { SessionProvider } from 'next-auth/react';
 import { Toaster } from '@/components/ui/sonner';
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import type { ReactNode } from 'react';
-import { SWRConfig } from 'swr';
+import { SWRConfig, useSWRConfig } from 'swr';
 
 interface ClientLayoutProps {
   children: ReactNode;
+}
+
+/**
+ * Provides a token-injecting SWR fetcher WITHOUT including the token in cache
+ * keys.  URL-string keys stay stable across token rotations; when the token
+ * changes we broadcast a revalidation of all SWR entries so every hook
+ * transparently re-fetches with the new token.
+ */
+function SWRTokenProvider({ children }: { children: ReactNode }) {
+  const session = usePlatformSession();
+  const { mutate } = useSWRConfig();
+  const tokenRef = useRef(session?.data?.tokens?.access_token);
+
+  useEffect(() => {
+    const nextToken = session?.data?.tokens?.access_token;
+    if (nextToken !== tokenRef.current) {
+      tokenRef.current = nextToken;
+      // Revalidate all URL-string keys so hooks pick up the new token.
+      void mutate(
+        (key: unknown) => typeof key === 'string',
+        undefined,
+        { revalidate: true },
+      );
+    }
+  }, [session?.data?.tokens?.access_token, mutate]);
+
+  const fetcher = useCallback(
+    (url: string) => swrFetcher(url, tokenRef.current ?? undefined),
+    [],
+  );
+
+  return (
+    <SWRConfig value={{ fetcher }}>
+      {children}
+    </SWRConfig>
+  );
 }
 
 function ThemeSync() {
   const session = usePlatformSession();
   const sessionRef = useRef(session);
 
-  // Keep a ref to the latest session so the event listener doesn't need to be
-  // re-attached every time the session object identity changes.
   useEffect(() => {
     sessionRef.current = session;
   }, [session]);
@@ -34,7 +68,6 @@ function ThemeSync() {
       if (!theme) return;
       const s = sessionRef.current;
       if (s?.data?.user?.id && s?.data?.tokens?.access_token) {
-        // Fire-and-forget and surface failures to console to avoid unhandled rejections
         updateUserTheme(s.data.user.id, theme, s.data.tokens.access_token).catch((error: unknown) =>
           console.error('Failed to sync theme to server:', error),
         );
@@ -52,29 +85,28 @@ function ThemeSync() {
 
 export default function ClientLayout({ children }: ClientLayoutProps) {
   return (
-    // Lower frequency of session refetches to avoid unnecessary periodic calls that
-    // may contribute to being rate limited. Also disable refetch on window focus.
     <SessionProvider
-      refetchInterval={5 * 60_000} // 5 minutes
+      refetchInterval={5 * 60_000}
       refetchOnWindowFocus={false}
       refetchWhenOffline={false}
     >
       <PlatformSessionProvider>
         <PermissionProvider>
-          {/* Global SWR defaults to reduce frequent revalidation and dedupe identical requests. */}
+          {/* Outer SWRConfig provides global defaults. */}
           <SWRConfig
             value={{
-              // Use the central swrFetcher which accepts (url, token)
-              fetcher: (url: string, token?: string) => swrFetcher(url, token),
-              dedupingInterval: 60_000, // dedupe identical requests for 60s
-              focusThrottleInterval: 60_000, // throttle refetches on focus
+              dedupingInterval: 60_000,
+              focusThrottleInterval: 60_000,
               revalidateOnFocus: false,
               revalidateOnReconnect: false,
               shouldRetryOnError: true,
               errorRetryCount: 3,
             }}
           >
-            <ThemeProviderWrapper>{children}</ThemeProviderWrapper>
+            {/* Inner SWRTokenProvider overrides the fetcher with token injection. */}
+            <SWRTokenProvider>
+              <ThemeProviderWrapper>{children}</ThemeProviderWrapper>
+            </SWRTokenProvider>
           </SWRConfig>
         </PermissionProvider>
       </PlatformSessionProvider>

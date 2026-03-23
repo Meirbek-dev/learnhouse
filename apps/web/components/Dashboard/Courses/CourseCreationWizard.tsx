@@ -4,23 +4,23 @@ import { buildCourseWorkspacePath, cleanCourseUuid, prefixedCourseUuid } from '@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeft, ArrowRight, CheckCircle2, ChevronDown, Loader2, Sparkles } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { courseWizardSchema, type CourseWizardValues } from '@/schemas/courseSchemas';
 import { CourseChoiceCard, courseWorkflowSummaryCardClass } from './courseWorkflowUi';
 import { createNewCourse, getCourseMetadata } from '@services/courses/courses';
-import { useQueryParam, useClearQueryParams } from '@/hooks/useQueryParam';
+import { valibotResolver } from '@hookform/resolvers/valibot';
+import { useQueryParam } from '@/hooks/useQueryParam';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { createChapter } from '@services/courses/chapters';
-import { useEffect, useMemo, useTransition } from 'react';
+import { useMemo, useTransition } from 'react';
 import { RadioGroup } from '@/components/ui/radio-group';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useForm } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
-
-type TemplateType = 'blank' | 'starter' | 'outline';
-type LaunchDestination = 'overview' | 'curriculum';
 
 interface CourseCreationWizardProps {
   sourceCourses: { course_uuid: string; name: string; description?: string }[];
@@ -31,43 +31,30 @@ const STEPS = ['Basics', 'Template', 'Launch'] as const;
 export default function CourseCreationWizard({ sourceCourses }: CourseCreationWizardProps) {
   const t = useTranslations('DashPage.CourseManagement.Wizard');
   const router = useRouter();
-  const searchParams = useSearchParams();
   const session = usePlatformSession() as any;
   const accessToken = session?.data?.tokens?.access_token;
 
   const [step, setStep] = useQueryParam('step', '0');
   const currentStep = Math.min(2, Math.max(0, Number(step)));
 
-  // Persist form state in URL params so back navigation restores choices.
-  const [name, setName] = useQueryParam('name', '');
-  const [description, setDescription] = useQueryParam('desc', '');
-  const [visibility, setVisibility] = useQueryParam('vis', 'private');
-  const [template, setTemplate] = useQueryParam('tpl', 'blank');
-  const [sourceCourseUuid, setSourceCourseUuid] = useQueryParam('src', '');
-  const [launchDestination, setLaunchDestination] = useQueryParam('dest', 'curriculum');
-  const clearWizardParams = useClearQueryParams(['step', 'name', 'desc', 'vis', 'tpl', 'src', 'dest']);
+  const form = useForm<CourseWizardValues>({
+    resolver: valibotResolver(courseWizardSchema),
+    defaultValues: {
+      name: '',
+      description: '',
+      public: false,
+      template: 'blank',
+      sourceCourseUuid: '',
+      launchDest: 'curriculum',
+    },
+  });
+
+  const { name, description, template, sourceCourseUuid, launchDest, public: isPublic } = form.watch();
+
   const [isPending, startTransition] = useTransition();
 
-  useEffect(() => {
-    const hasCanonicalTemplate = searchParams.has('tpl');
-    const hasCanonicalSource = searchParams.has('src');
-    const legacyTemplate = searchParams.get('template');
-    const legacySource = searchParams.get('source');
-
-    if (!hasCanonicalTemplate && legacyTemplate === 'outline' && template !== 'outline') {
-      void setTemplate('outline');
-    }
-
-    if (!hasCanonicalSource && legacySource) {
-      const normalizedSource = cleanCourseUuid(legacySource);
-      if (normalizedSource && sourceCourseUuid !== normalizedSource) {
-        void setSourceCourseUuid(normalizedSource);
-      }
-    }
-  }, [searchParams, setSourceCourseUuid, setTemplate, sourceCourseUuid, template]);
-
   const sourceOptions = useMemo(
-    () => sourceCourses.map((course) => ({ ...course, cleanUuid: course.course_uuid.replace(/^course_/, '') })),
+    () => sourceCourses.map((course) => ({ ...course, cleanUuid: cleanCourseUuid(course.course_uuid) ?? course.course_uuid })),
     [sourceCourses],
   );
 
@@ -75,39 +62,23 @@ export default function CourseCreationWizard({ sourceCourses }: CourseCreationWi
 
   const starterChapters = useMemo(
     () => [
-      {
-        name: t('starterChapters.introduction.name'),
-        description: t('starterChapters.introduction.description'),
-      },
-      {
-        name: t('starterChapters.coreLessons.name'),
-        description: t('starterChapters.coreLessons.description'),
-      },
+      { name: t('starterChapters.introduction.name'), description: t('starterChapters.introduction.description') },
+      { name: t('starterChapters.coreLessons.name'), description: t('starterChapters.coreLessons.description') },
     ],
     [t],
   );
 
   const canContinue = (() => {
-    if (currentStep === 0) {
-      return name.trim().length > 0 && description.trim().length > 0;
-    }
-    if (currentStep === 1 && template === 'outline') {
-      return sourceCourseUuid.trim().length > 0;
-    }
+    if (currentStep === 0) return name.trim().length > 0 && description.trim().length > 0;
+    if (currentStep === 1 && template === 'outline') return !!sourceCourseUuid?.trim();
     return true;
   })();
 
   const createStarterOutline = async (createdCourse: any) => {
-    // Parallel chapter creation — no sequential awaiting.
     await Promise.all(
       starterChapters.map((chapter) =>
         createChapter(
-          {
-            name: chapter.name,
-            description: chapter.description,
-            thumbnail_image: '',
-            course_id: createdCourse.id,
-          },
+          { name: chapter.name, description: chapter.description, thumbnail_image: '', course_id: createdCourse.id },
           accessToken,
           { courseUuid: createdCourse.course_uuid },
         ),
@@ -117,11 +88,8 @@ export default function CourseCreationWizard({ sourceCourses }: CourseCreationWi
 
   const createOutlineFromSource = async (createdCourse: any) => {
     if (!sourceCourseUuid) return;
-
     const sourceMetadata = await getCourseMetadata(prefixedCourseUuid(sourceCourseUuid), null, accessToken, true);
     const chapters = Array.isArray(sourceMetadata?.chapters) ? sourceMetadata.chapters : [];
-
-    // Parallel chapter creation — much faster for large source courses.
     await Promise.all(
       chapters.map((chapter: any) =>
         createChapter(
@@ -138,7 +106,7 @@ export default function CourseCreationWizard({ sourceCourses }: CourseCreationWi
     );
   };
 
-  const handleCreate = () => {
+  const handleCreate = form.handleSubmit((values) => {
     if (!accessToken) {
       toast.error(t('errors.authRequired'));
       return;
@@ -149,11 +117,11 @@ export default function CourseCreationWizard({ sourceCourses }: CourseCreationWi
         try {
           const result = await createNewCourse(
             {
-              name: name.trim(),
-              description: description.trim(),
+              name: values.name.trim(),
+              description: values.description.trim(),
               learnings: JSON.stringify([]),
               tags: JSON.stringify([]),
-              visibility: visibility === 'public',
+              visibility: values.public,
             },
             null,
             accessToken,
@@ -163,23 +131,23 @@ export default function CourseCreationWizard({ sourceCourses }: CourseCreationWi
             throw new Error(result.data?.detail || t('errors.creationFailed'));
           }
 
-          if (template === 'starter') {
+          if (values.template === 'starter') {
             await createStarterOutline(result.data);
-          } else if (template === 'outline') {
+          } else if (values.template === 'outline') {
             await createOutlineFromSource(result.data);
           }
 
           toast.success(t('toasts.created'));
-          // Clear all wizard params so the back button does not re-enter the wizard.
-          clearWizardParams();
-          router.replace(buildCourseWorkspacePath(result.data.course_uuid, launchDestination as LaunchDestination));
+          router.replace(buildCourseWorkspacePath(result.data.course_uuid, values.launchDest));
           router.refresh();
         } catch (error: any) {
           toast.error(error?.message || t('errors.createWorkspace'));
         }
       })();
     });
-  };
+  });
+
+  const visibility = isPublic ? 'public' : 'private';
 
   const summaryContent = (
     <div className="space-y-4 text-sm text-muted-foreground">
@@ -190,7 +158,7 @@ export default function CourseCreationWizard({ sourceCourses }: CourseCreationWi
       <div>
         <div className="text-muted-foreground">{t('summary.visibility')}</div>
         <div className="mt-1">
-          {visibility === 'public' ? t('visibility.public.summary') : t('visibility.private.summary')}
+          {isPublic ? t('visibility.public.summary') : t('visibility.private.summary')}
         </div>
       </div>
       <div>
@@ -205,9 +173,7 @@ export default function CourseCreationWizard({ sourceCourses }: CourseCreationWi
       </div>
       <div>
         <div className="text-muted-foreground">{t('summary.launchDestination')}</div>
-        <div className="mt-1">
-          {launchDestination === 'overview' ? t('launch.overview.title') : t('launch.curriculum.title')}
-        </div>
+        <div className="mt-1">{launchDest === 'overview' ? t('launch.overview.title') : t('launch.curriculum.title')}</div>
       </div>
       {template === 'outline' && sourceCourseUuid ? (
         <div>
@@ -237,10 +203,7 @@ export default function CourseCreationWizard({ sourceCourses }: CourseCreationWi
               const done = index < currentStep;
               const active = index === currentStep;
               return (
-                <div
-                  key={label}
-                  className="flex items-center"
-                >
+                <div key={label} className="flex items-center">
                   <div className="flex items-center gap-2">
                     <div
                       className={cn(
@@ -296,30 +259,22 @@ export default function CourseCreationWizard({ sourceCourses }: CourseCreationWi
                   <div className="mt-1 text-sm text-muted-foreground">{t('basics.description')}</div>
                 </div>
                 <div className="space-y-2">
-                  <label
-                    htmlFor="course-title"
-                    className="text-sm font-medium text-foreground"
-                  >
+                  <label htmlFor="course-title" className="text-sm font-medium text-foreground">
                     {t('basics.courseTitle')}
                   </label>
                   <Input
                     id="course-title"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    {...form.register('name')}
                     placeholder={t('basics.courseTitlePlaceholder')}
                   />
                 </div>
                 <div className="space-y-2">
-                  <label
-                    htmlFor="course-description"
-                    className="text-sm font-medium text-foreground"
-                  >
+                  <label htmlFor="course-description" className="text-sm font-medium text-foreground">
                     {t('basics.shortDescription')}
                   </label>
                   <Textarea
                     id="course-description"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
+                    {...form.register('description')}
                     placeholder={t('basics.shortDescriptionPlaceholder')}
                     className="min-h-32"
                   />
@@ -329,22 +284,12 @@ export default function CourseCreationWizard({ sourceCourses }: CourseCreationWi
                   <legend className="text-sm font-medium text-foreground">{t('basics.audienceDefault')}</legend>
                   <RadioGroup
                     value={visibility}
-                    onValueChange={(val) => {
-                      void setVisibility(val);
-                    }}
+                    onValueChange={(val) => form.setValue('public', val === 'public')}
                     className="grid gap-3 md:grid-cols-2"
                   >
                     {[
-                      {
-                        value: 'private',
-                        title: t('visibility.private.title'),
-                        description: t('visibility.private.description'),
-                      },
-                      {
-                        value: 'public',
-                        title: t('visibility.public.title'),
-                        description: t('visibility.public.description'),
-                      },
+                      { value: 'private', title: t('visibility.private.title'), description: t('visibility.private.description') },
+                      { value: 'public', title: t('visibility.public.title'), description: t('visibility.public.description') },
                     ].map((option) => (
                       <CourseChoiceCard
                         key={option.value}
@@ -354,9 +299,7 @@ export default function CourseCreationWizard({ sourceCourses }: CourseCreationWi
                         title={option.title}
                         description={option.description}
                         icon={option.value === 'public' ? CheckCircle2 : ArrowLeft}
-                        onSelect={(value) => {
-                          void setVisibility(value);
-                        }}
+                        onSelect={(value) => form.setValue('public', value === 'public')}
                       />
                     ))}
                   </RadioGroup>
@@ -374,27 +317,13 @@ export default function CourseCreationWizard({ sourceCourses }: CourseCreationWi
 
                 <RadioGroup
                   value={template}
-                  onValueChange={(val) => {
-                    void setTemplate(val);
-                  }}
+                  onValueChange={(val) => form.setValue('template', val as CourseWizardValues['template'])}
                   className="grid gap-3"
                 >
                   {[
-                    {
-                      value: 'blank',
-                      title: t('template.blank.title'),
-                      description: t('template.blank.description'),
-                    },
-                    {
-                      value: 'starter',
-                      title: t('template.starter.title'),
-                      description: t('template.starter.description'),
-                    },
-                    {
-                      value: 'outline',
-                      title: t('template.outline.title'),
-                      description: t('template.outline.description'),
-                    },
+                    { value: 'blank', title: t('template.blank.title'), description: t('template.blank.description') },
+                    { value: 'starter', title: t('template.starter.title'), description: t('template.starter.description') },
+                    { value: 'outline', title: t('template.outline.title'), description: t('template.outline.description') },
                   ].map((option) => (
                     <CourseChoiceCard
                       key={option.value}
@@ -403,31 +332,20 @@ export default function CourseCreationWizard({ sourceCourses }: CourseCreationWi
                       checked={template === option.value}
                       title={option.title}
                       description={option.description}
-                      icon={
-                        option.value === 'outline' ? ChevronDown : option.value === 'starter' ? Sparkles : CheckCircle2
-                      }
-                      onSelect={(value) => {
-                        void setTemplate(value as TemplateType);
-                      }}
+                      icon={option.value === 'outline' ? ChevronDown : option.value === 'starter' ? Sparkles : CheckCircle2}
+                      onSelect={(value) => form.setValue('template', value as CourseWizardValues['template'])}
                     />
                   ))}
                 </RadioGroup>
 
                 {template === 'outline' ? (
                   <div className="space-y-2">
-                    <label
-                      htmlFor="source-course"
-                      className="text-sm font-medium text-foreground"
-                    >
+                    <label htmlFor="source-course" className="text-sm font-medium text-foreground">
                       {t('template.sourceCourse')}
                     </label>
                     <Select
                       value={sourceCourseUuid ?? undefined}
-                      onValueChange={(value) => {
-                        if (value) {
-                          void setSourceCourseUuid(value);
-                        }
-                      }}
+                      onValueChange={(value) => { if (value) form.setValue('sourceCourseUuid', value); }}
                       items={sourceOptions.map((course) => ({ value: course.cleanUuid, label: course.name }))}
                     >
                       <SelectTrigger id="source-course">
@@ -435,10 +353,7 @@ export default function CourseCreationWizard({ sourceCourses }: CourseCreationWi
                       </SelectTrigger>
                       <SelectContent>
                         {sourceOptions.map((course) => (
-                          <SelectItem
-                            key={course.course_uuid}
-                            value={course.cleanUuid}
-                          >
+                          <SelectItem key={course.course_uuid} value={course.cleanUuid}>
                             {course.name}
                           </SelectItem>
                         ))}
@@ -459,35 +374,23 @@ export default function CourseCreationWizard({ sourceCourses }: CourseCreationWi
                 </div>
 
                 <RadioGroup
-                  value={launchDestination}
-                  onValueChange={(val) => {
-                    void setLaunchDestination(val);
-                  }}
+                  value={launchDest}
+                  onValueChange={(val) => form.setValue('launchDest', val as CourseWizardValues['launchDest'])}
                   className="grid gap-3 md:grid-cols-2"
                 >
                   {[
-                    {
-                      value: 'overview',
-                      title: t('launch.overview.title'),
-                      description: t('launch.overview.description'),
-                    },
-                    {
-                      value: 'curriculum',
-                      title: t('launch.curriculum.title'),
-                      description: t('launch.curriculum.description'),
-                    },
+                    { value: 'overview', title: t('launch.overview.title'), description: t('launch.overview.description') },
+                    { value: 'curriculum', title: t('launch.curriculum.title'), description: t('launch.curriculum.description') },
                   ].map((option) => (
                     <CourseChoiceCard
                       key={option.value}
                       id={`dest-${option.value}`}
                       value={option.value}
-                      checked={launchDestination === option.value}
+                      checked={launchDest === option.value}
                       title={option.title}
                       description={option.description}
                       icon={option.value === 'curriculum' ? ArrowRight : CheckCircle2}
-                      onSelect={(value) => {
-                        void setLaunchDestination(value as LaunchDestination);
-                      }}
+                      onSelect={(value) => form.setValue('launchDest', value as CourseWizardValues['launchDest'])}
                     />
                   ))}
                 </RadioGroup>

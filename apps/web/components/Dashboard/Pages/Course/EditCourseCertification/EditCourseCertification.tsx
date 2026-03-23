@@ -6,14 +6,13 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { SectionHeader } from '@components/Dashboard/Courses/SectionHeader';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
-import { useCourseEditorStore } from '@/stores/courses';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { AlertTriangle, Award, FileText, Sparkles } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { useSyncDirtySection } from '@/hooks/useSyncDirtySection';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { valibotResolver } from '@hookform/resolvers/valibot';
-import { useDirtySection } from '@/hooks/useDirtySection';
 import { useSaveSection } from '@/hooks/useSaveSection';
 import { Separator } from '@/components/ui/separator';
 import CertificatePreview from './CertificatePreview';
@@ -74,11 +73,8 @@ const _certFormSchemaForTypes = v.object({
 
 type FormValues = v.InferOutput<typeof _certFormSchemaForTypes>;
 
-const serializeValues = (values: FormValues) => JSON.stringify(values);
-
 const EditCourseCertification = () => {
   const [error, setError] = useState('');
-  const [hasHydrated, setHasHydrated] = useState(false);
 
   const course = useCourse();
   const { isLoading, courseStructure, editorData } = course;
@@ -133,9 +129,6 @@ const EditCourseCertification = () => {
   const certificationsError = editorData.certifications.error;
   const existingCertification = certifications[0];
   const hasExistingCertification = Boolean(existingCertification);
-  const certificationDraft = useCourseEditorStore((state) => state.drafts.certification as FormValues | undefined);
-  const setDraft = useCourseEditorStore((state) => state.setDraft);
-  const clearDraft = useCourseEditorStore((state) => state.clearDraft);
 
   const form = useForm<FormValues>({
     resolver: valibotResolver(formSchema),
@@ -185,42 +178,35 @@ const EditCourseCertification = () => {
     };
   }, [courseStructure, existingCertification, hasExistingCertification]);
 
-  const initialValuesRef = useRef<FormValues>(form.getValues());
-
-  const { isDirty, isDirtyRef, markDirty, markClean } = useDirtySection('certification');
-  const { isSaving, saveWithEditorRefresh } = useSaveSection({
-    section: 'certification',
-    errorMessage: t('certificationError'),
-    onError: setError,
-  });
   const serverValues = useMemo(() => {
     if (editorData.certifications.data === null || isLoading) {
       return null;
     }
-
     return getInitialValues();
   }, [editorData.certifications.data, getInitialValues, isLoading]);
-  const serverValuesKey = useMemo(() => (serverValues ? serializeValues(serverValues) : null), [serverValues]);
 
+  const { isDirty } = form.formState;
+  useSyncDirtySection('certification', isDirty);
+
+  const handleDiscard = () => {
+    if (serverValues) form.reset(serverValues);
+    setError('');
+  };
+
+  const { isSaving, saveWithEditorRefresh } = useSaveSection({
+    section: 'certification',
+    errorMessage: t('certificationError'),
+    onError: setError,
+    getDraftSnapshot: () => form.getValues(),
+    onUseTheirs: handleDiscard,
+  });
+
+  // Hydrate form from server data on load / when server data changes.
   useEffect(() => {
-    if (!serverValues) {
-      return;
-    }
-
-    initialValuesRef.current = serverValues;
-    const nextValues = certificationDraft ?? serverValues;
-
-    if (serializeValues(form.getValues()) !== serializeValues(nextValues)) {
-      form.reset(nextValues);
-    }
-
-    if (!certificationDraft && !isDirtyRef.current) {
-      markClean();
-      setError('');
-    }
-
-    setHasHydrated(true);
-  }, [certificationDraft, form, isDirtyRef, markClean, serverValues, serverValuesKey]);
+    if (!serverValues) return;
+    form.reset(serverValues, { keepDirtyValues: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [serverValues]);
 
   // Subscribe to individual watched fields to avoid over-rendering
   const isEnabled = useWatch({ control: form.control, name: 'enable_certification' });
@@ -229,50 +215,6 @@ const EditCourseCertification = () => {
   const certificationType = useWatch({ control: form.control, name: 'certification_type' });
   const certificatePattern = useWatch({ control: form.control, name: 'certificate_pattern' });
   const certificateInstructor = useWatch({ control: form.control, name: 'certificate_instructor' });
-
-  useEffect(() => {
-    if (!isLoading && hasHydrated) {
-      const currentValues = {
-        enable_certification: isEnabled,
-        certification_name: certificationName,
-        certification_description: certificationDescription,
-        certification_type: certificationType,
-        certificate_pattern: certificatePattern,
-        certificate_instructor: certificateInstructor,
-      };
-
-      const dirty = serializeValues(initialValuesRef.current) !== serializeValues(currentValues);
-      if (dirty) {
-        setDraft('certification', currentValues);
-        markDirty();
-        return;
-      }
-
-      clearDraft('certification');
-      markClean();
-    }
-  }, [
-    clearDraft,
-    isEnabled,
-    certificationName,
-    certificationDescription,
-    certificationType,
-    certificatePattern,
-    certificateInstructor,
-    isLoading,
-    hasHydrated,
-    markDirty,
-    markClean,
-    serverValuesKey,
-    setDraft,
-  ]);
-
-  const handleDiscard = () => {
-    clearDraft('certification');
-    form.reset(initialValuesRef.current);
-    markClean();
-    setError('');
-  };
 
   const handleSaveCertification = form.handleSubmit(async (values) => {
     if (!(access_token && courseStructure) || !isDirty) return;
@@ -319,9 +261,7 @@ const EditCourseCertification = () => {
             : t('certificationCreated')
           : t('certificationRemoved'),
         onSuccess: () => {
-          initialValuesRef.current = values;
-          clearDraft('certification');
-          markClean();
+          form.reset(values);
           setError('');
         },
       },
