@@ -4,7 +4,7 @@ import { RequestBodyWithAuthHeader, getResponseMetadata } from '@services/utils/
 import { shouldUseChunkedUpload, uploadFileChunked } from '@services/utils/chunked-upload';
 import { CacheProfiles, cacheLife, cacheTag } from '@/lib/cache';
 import { getAPIUrl } from '@services/config/config';
-import { courseTag, tags } from '@/lib/cacheTags';
+import { tags } from '@/lib/cacheTags';
 
 interface UploadProgress {
   percentage: number;
@@ -15,12 +15,6 @@ interface UploadProgress {
 interface ActivityInvalidationOptions {
   courseUuid?: string;
   lastKnownUpdateDate?: string | null;
-}
-
-async function revalidateActivityCourseTags(options?: ActivityInvalidationOptions) {
-  const { revalidateTag } = await import('next/cache');
-  revalidateTag(tags.activities, 'max');
-  revalidateTag(options?.courseUuid ? courseTag.detail(options.courseUuid) : tags.courses, 'max');
 }
 
 export async function createActivity(
@@ -38,14 +32,7 @@ export async function createActivity(
   data.last_known_update_date = options?.lastKnownUpdateDate ?? data.last_known_update_date ?? undefined;
 
   const result = await fetch(`${getAPIUrl()}activities/`, RequestBodyWithAuthHeader('POST', data, null, access_token));
-  const metaData = await getResponseMetadata(result);
-
-  // Revalidate activities and courses cache after creating activity
-  if (metaData.success) {
-    await revalidateActivityCourseTags(options);
-  }
-
-  return metaData;
+  return getResponseMetadata(result);
 }
 
 /**
@@ -429,14 +416,7 @@ export async function deleteActivity(
     `${getAPIUrl()}activities/${activity_uuid}${query.size > 0 ? `?${query.toString()}` : ''}`,
     RequestBodyWithAuthHeader('DELETE', null, null, access_token),
   );
-  const data = await getResponseMetadata(result);
-
-  // Revalidate activities cache after deletion
-  if (result.ok) {
-    await revalidateActivityCourseTags(options);
-  }
-
-  return data;
+  return getResponseMetadata(result);
 }
 
 /**
@@ -481,14 +461,7 @@ export async function updateActivity(
       access_token,
     ),
   );
-  const metadata = await getResponseMetadata(result);
-
-  // Revalidate caches so updated content is visible to all users
-  if (metadata.success) {
-    await revalidateActivityCourseTags(options);
-  }
-
-  return metadata;
+  return getResponseMetadata(result);
 }
 
 export async function getUrlPreview(url: string) {

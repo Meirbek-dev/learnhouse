@@ -3,7 +3,6 @@
 import type { OrderPayload } from '@components/Dashboard/Pages/Course/EditCourseStructure/EditCourseStructure';
 import { RequestBodyWithAuthHeader, errorHandling } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
-import { courseTag, tags } from '@/lib/cacheTags';
 
 /*
  This file includes only POST, PUT, DELETE requests
@@ -15,25 +14,12 @@ export async function updateChaptersMetadata(course_uuid: string, data: any, acc
     `${getAPIUrl()}chapters/course/course_${course_uuid}/order`,
     RequestBodyWithAuthHeader('PUT', data, null, access_token),
   );
-  const data_result = await errorHandling(result);
-
-  // Revalidate course cache after updating chapter order
-  if (result.ok) {
-    const { revalidateTag } = await import('next/cache');
-    revalidateTag(tags.courses, 'max');
-  }
-
-  return data_result;
+  return errorHandling(result);
 }
 
 interface ChapterInvalidationOptions {
   courseUuid?: string;
   lastKnownUpdateDate?: string | null;
-}
-
-async function revalidateChapterTags(options?: ChapterInvalidationOptions) {
-  const { revalidateTag } = await import('next/cache');
-  revalidateTag(options?.courseUuid ? courseTag.detail(options.courseUuid) : tags.courses, 'max');
 }
 
 export async function updateChapter(
@@ -54,14 +40,7 @@ export async function updateChapter(
       access_token,
     ),
   );
-  const data_result = await errorHandling(result);
-
-  // Revalidate course cache after chapter update
-  if (result.ok) {
-    await revalidateChapterTags(options);
-  }
-
-  return data_result;
+  return errorHandling(result);
 }
 
 export async function updateCourseOrderStructure(
@@ -74,14 +53,7 @@ export async function updateCourseOrderStructure(
     `${getAPIUrl()}chapters/course/${course_uuid}/order`,
     RequestBodyWithAuthHeader('PUT', data, null, access_token),
   );
-  const data_result = await errorHandling(result);
-
-  // Revalidate course cache after reordering
-  if (result.ok) {
-    await revalidateChapterTags({ courseUuid: options?.courseUuid ?? course_uuid });
-  }
-
-  return data_result;
+  return errorHandling(result);
 }
 
 export async function createChapter(data: any, access_token: string, options?: ChapterInvalidationOptions) {
@@ -97,14 +69,7 @@ export async function createChapter(data: any, access_token: string, options?: C
       access_token,
     ),
   );
-  const data_result = await errorHandling(result);
-
-  // Revalidate course cache after creating chapter
-  if (result.ok) {
-    await revalidateChapterTags(options);
-  }
-
-  return data_result;
+  return errorHandling(result);
 }
 
 export async function deleteChapter(
@@ -121,12 +86,5 @@ export async function deleteChapter(
     `${getAPIUrl()}chapters/${coursechapter_id}${query.size > 0 ? `?${query.toString()}` : ''}`,
     RequestBodyWithAuthHeader('DELETE', null, null, access_token),
   );
-  const data_result = await errorHandling(result);
-
-  // Revalidate course cache after deleting chapter
-  if (result.ok) {
-    await revalidateChapterTags(options);
-  }
-
-  return data_result;
+  return errorHandling(result);
 }

@@ -1,6 +1,7 @@
 'use client';
 
 import { useCourse } from '@components/Contexts/CourseContext';
+import { type CourseDraftSection, useCourseEditorStore } from '@/stores/courses';
 import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -11,13 +12,14 @@ interface SaveSectionOptions {
   onError?: (message: string) => void;
   successMessage?: string;
   errorMessage?: string;
+  section?: CourseDraftSection;
 }
 
 interface SaveInvocationOptions {
   onSuccess?: () => void;
   successMessage?: string;
   errorMessage?: string;
-  refresh?: 'meta' | 'editor';
+  refresh?: 'meta' | 'editor' | 'none';
 }
 
 function normalizeResponse(response: SaveResponse) {
@@ -37,11 +39,13 @@ function normalizeResponse(response: SaveResponse) {
  *  - handling 409 conflict via CourseContext.showConflict
  *  - showing a toast on success or error
  *  - calling onSuccess (e.g. markClean)
- *  - refreshing SWR via refreshCourseMeta (single source of truth — no optimistic dispatch)
+ *  - refreshing SWR when the caller is not already using an optimistic mutation flow
  */
 export function useSaveSection(options?: SaveSectionOptions) {
   const [isSaving, setIsSaving] = useState(false);
-  const { showConflict, refreshCourseMeta, refreshCourseEditor } = useCourse();
+  const { refreshCourseMeta, refreshCourseEditor } = useCourse();
+  const setConflict = useCourseEditorStore((state) => state.setConflict);
+  const syncLastKnownUpdateDate = useCourseEditorStore((state) => state.syncLastKnownUpdateDate);
 
   const runSave = useCallback(
     async (saveFn: () => Promise<SaveResponse>, invocationOptions?: SaveInvocationOptions) => {
@@ -52,7 +56,13 @@ export function useSaveSection(options?: SaveSectionOptions) {
         if (!response.success) {
           if (response.status === 409) {
             const detail = response.data?.detail;
-            showConflict(typeof detail === 'string' ? detail : undefined);
+            setConflict({
+              section: options?.section,
+              message: typeof detail === 'string' ? detail : undefined,
+              pendingSave: async () => {
+                await runSave(saveFn, invocationOptions);
+              },
+            });
             return;
           }
           const message =
@@ -64,11 +74,15 @@ export function useSaveSection(options?: SaveSectionOptions) {
           return;
         }
 
-        if ((invocationOptions?.refresh || 'meta') === 'editor') {
+        const refreshMode = invocationOptions?.refresh || 'meta';
+
+        if (refreshMode === 'editor') {
           await refreshCourseEditor();
-        } else {
+        } else if (refreshMode === 'meta') {
           await refreshCourseMeta();
         }
+
+        syncLastKnownUpdateDate(response.data?.update_date);
 
         const successMessage = invocationOptions?.successMessage || options?.successMessage || 'Изменения сохранены';
         if (successMessage) {
@@ -79,7 +93,13 @@ export function useSaveSection(options?: SaveSectionOptions) {
         options?.onSuccess?.();
       } catch (error: any) {
         if (error?.status === 409) {
-          showConflict(error?.detail || error?.message);
+          setConflict({
+            section: options?.section,
+            message: error?.detail || error?.message,
+            pendingSave: async () => {
+              await runSave(saveFn, invocationOptions);
+            },
+          });
           return;
         }
         const message =
@@ -93,7 +113,7 @@ export function useSaveSection(options?: SaveSectionOptions) {
         setIsSaving(false);
       }
     },
-    [options, refreshCourseEditor, refreshCourseMeta, showConflict],
+    [options, refreshCourseEditor, refreshCourseMeta, setConflict, syncLastKnownUpdateDate],
   );
 
   const save = useCallback(
@@ -110,5 +130,12 @@ export function useSaveSection(options?: SaveSectionOptions) {
     [runSave],
   );
 
-  return { isSaving, save, saveWithEditorRefresh };
+  const saveWithoutRefresh = useCallback(
+    async (saveFn: () => Promise<SaveResponse>, invocationOptions?: Omit<SaveInvocationOptions, 'refresh'>) => {
+      await runSave(saveFn, { ...invocationOptions, refresh: 'none' });
+    },
+    [runSave],
+  );
+
+  return { isSaving, save, saveWithEditorRefresh, saveWithoutRefresh };
 }

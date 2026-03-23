@@ -26,18 +26,23 @@ import { CourseChoiceCard } from '@components/Dashboard/Courses/courseWorkflowUi
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { unLinkResourcesToUserGroup } from '@services/usergroups/usergroups';
 import { SectionHeader } from '@components/Dashboard/Courses/SectionHeader';
+import { useCoursesMutations } from '@/hooks/mutations/useCoursesMutations';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { useEffect, useRef, useState, useTransition } from 'react';
 import { useCourse } from '@components/Contexts/CourseContext';
-import { updateCourseAccess } from '@services/courses/courses';
 import { useDirtySection } from '@/hooks/useDirtySection';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { RadioGroup } from '@/components/ui/radio-group';
 import { useSaveSection } from '@/hooks/useSaveSection';
+import { useCourseEditorStore } from '@/stores/courses';
 import { Button } from '@/components/ui/button';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
+
+interface AccessDraft {
+  public: boolean;
+}
 
 const EditCourseAccess = () => {
   const session = usePlatformSession() as any;
@@ -45,45 +50,64 @@ const EditCourseAccess = () => {
   const course = useCourse();
   const { courseStructure, editorData } = course;
   const t = useTranslations('DashPage.Courses.Access');
+  const accessDraft = useCourseEditorStore((state) => state.drafts.access as AccessDraft | undefined);
+  const setDraft = useCourseEditorStore((state) => state.setDraft);
+  const clearDraft = useCourseEditorStore((state) => state.clearDraft);
+  const { updateAccess } = useCoursesMutations(courseStructure?.course_uuid ?? '');
   const [draftPublic, setDraftPublic] = useState<boolean | undefined>(() => courseStructure?.public);
   const usergroups = editorData.linkedUserGroups.data ?? [];
   const isUserGroupsLoading = course.isEditorDataLoading && editorData.linkedUserGroups.data === null;
   const initialRef = useRef<boolean | undefined>(courseStructure?.public);
 
   const { isDirty, isDirtyRef, markDirty, markClean } = useDirtySection('access');
-  const { isSaving, save } = useSaveSection({ onSuccess: markClean });
+  const { isSaving, saveWithoutRefresh } = useSaveSection({ onSuccess: markClean, section: 'access' });
 
-  // Sync external updates to draft when not dirty
   useEffect(() => {
-    if (isDirtyRef.current) return;
-    setDraftPublic(courseStructure?.public);
     initialRef.current = courseStructure?.public;
-    markClean();
-  }, [courseStructure?.public, isDirtyRef, markClean]);
+    const nextPublic = accessDraft?.public ?? courseStructure?.public;
+    setDraftPublic((current) => (current === nextPublic ? current : nextPublic));
 
-  // Compute dirty when draft changes
+    if (!accessDraft && !isDirtyRef.current) {
+      markClean();
+    }
+  }, [accessDraft, courseStructure?.public, isDirtyRef, markClean]);
+
   useEffect(() => {
     const dirty = draftPublic !== undefined && draftPublic !== initialRef.current;
-    if (dirty) markDirty();
-    else markClean();
-  }, [draftPublic, markDirty, markClean]);
+    if (dirty) {
+      setDraft('access', { public: draftPublic });
+      markDirty();
+      return;
+    }
+
+    clearDraft('access');
+    markClean();
+  }, [clearDraft, courseStructure?.public, draftPublic, markDirty, markClean, setDraft]);
 
   const handleDiscard = () => {
+    clearDraft('access');
     setDraftPublic(initialRef.current);
     markClean();
   };
 
   const handleAccessSave = async () => {
     if (!(access_token && draftPublic !== undefined) || !isDirty) return;
-    await save(async () => {
-      const response = await updateCourseAccess(courseStructure.course_uuid, { public: draftPublic }, access_token, {
-        lastKnownUpdateDate: courseStructure.update_date,
-      });
-      if (response.success) {
-        initialRef.current = draftPublic;
-      }
-      return response;
-    });
+    await saveWithoutRefresh(
+      async () =>
+        updateAccess(
+          { public: draftPublic },
+          {
+            accessToken: access_token,
+            lastKnownUpdateDate: courseStructure.update_date,
+          },
+        ),
+      {
+        onSuccess: () => {
+          initialRef.current = draftPublic;
+          clearDraft('access');
+        },
+      },
+    );
   };
 
   if (!courseStructure) return null;

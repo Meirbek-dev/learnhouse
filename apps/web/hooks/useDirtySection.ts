@@ -1,7 +1,7 @@
 'use client';
 
 import type { CourseSectionKey } from '@components/Contexts/CourseContext';
-import { useCourseDispatch } from '@components/Contexts/CourseContext';
+import { useCourseEditorStore } from '@/stores/courses';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 /**
@@ -14,20 +14,17 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 export function useDirtySection(sectionKey: CourseSectionKey) {
   const [isDirty, setIsDirty] = useState(false);
   const isDirtyRef = useRef(false);
-  const dispatchCourse = useCourseDispatch();
+  const setSectionDirty = useCourseEditorStore((state) => state.setSectionDirty);
 
-  // Sync dirty state to the global CourseContext so the shell can show the
-  // "Unsaved changes" badge and guard intercept navigation.
   useEffect(() => {
-    dispatchCourse({ type: 'setSectionDirty', payload: { section: sectionKey, dirty: isDirty } });
-  }, [isDirty, sectionKey, dispatchCourse]);
+    setSectionDirty(sectionKey, isDirty);
+  }, [isDirty, sectionKey, setSectionDirty]);
 
-  // Cleanup: clear dirty flag from context when the component unmounts.
   useEffect(() => {
     return () => {
-      dispatchCourse({ type: 'setSectionDirty', payload: { section: sectionKey, dirty: false } });
+      setSectionDirty(sectionKey, false);
     };
-  }, [sectionKey, dispatchCourse]);
+  }, [sectionKey, setSectionDirty]);
 
   const markDirty = useCallback(() => {
     isDirtyRef.current = true;

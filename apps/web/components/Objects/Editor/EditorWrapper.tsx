@@ -1,9 +1,9 @@
 'use client';
 
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
+import { useActivityAutosave } from '@/hooks/useActivityAutosave';
 
 import { PlatformContextProvider } from '@/components/Contexts/PlatformContext';
-import { updateActivity } from '@services/courses/activities';
 import { useTranslations } from 'next-intl';
 import type { JSX } from 'react';
 import { toast } from 'sonner';
@@ -22,22 +22,21 @@ const EditorWrapper = (props: EditorWrapperProps): JSX.Element => {
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const isReady = !session.isLoading;
+  const activityAutosave = useActivityAutosave({
+    activityUuid: props.activity.activity_uuid,
+    courseUuid: props.course.course_uuid,
+    accessToken: access_token,
+    lastKnownUpdateDate: props.course.update_date,
+  });
 
   async function setContent(content: any) {
     const { activity } = props;
 
-    // CRITICAL: Deep clone and ensure plain object before server action call
-    // Next.js server action serialization can corrupt Tiptap JSON if not plain
     const plainContent = structuredClone(content);
     const updatedActivity = { ...activity, content: plainContent };
 
     toast.promise(
-      updateActivity(updatedActivity, activity.activity_uuid, access_token).then((res) => {
-        if (!res.success) {
-          throw res;
-        }
-        return res;
-      }),
+      activityAutosave.flush(updatedActivity),
       {
         loading: t('saving'),
         success: () => <b>{t('saveSuccess')}</b>,
@@ -58,6 +57,12 @@ const EditorWrapper = (props: EditorWrapperProps): JSX.Element => {
           course={props.course}
           activity={props.activity}
           content={props.content}
+          onContentChange={(content) => {
+            const plainContent = structuredClone(content);
+            const updatedActivity = { ...props.activity, content: plainContent };
+            activityAutosave.onChange(updatedActivity);
+          }}
+          saveState={activityAutosave.saveStatus}
           setContent={setContent}
           session={session}
         />

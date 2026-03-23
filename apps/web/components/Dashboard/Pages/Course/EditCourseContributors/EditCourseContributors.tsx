@@ -5,12 +5,6 @@ import {
   getCourseWorkflowToneClass,
 } from '@components/Dashboard/Courses/courseWorkflowUi';
 import {
-  bulkAddContributors,
-  bulkRemoveContributors,
-  editContributor,
-  updateCourseAccess,
-} from '@services/courses/courses';
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -26,6 +20,8 @@ import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { Check, ChevronDown, Search, UserPen, Users } from 'lucide-react';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
 import { useCourse } from '@components/Contexts/CourseContext';
+import { useCourseEditorStore } from '@/stores/courses';
+import { useCoursesMutations } from '@/hooks/mutations/useCoursesMutations';
 import { useDirtySection } from '@/hooks/useDirtySection';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { RadioGroup } from '@/components/ui/radio-group';
@@ -74,8 +70,12 @@ interface Contributor {
 }
 
 interface BulkAddResponse {
-  successful: string[];
+  successful: Array<{ username: string; user_id: number }>;
   failed: { username: string; reason: string }[];
+}
+
+interface ContributorsDraft {
+  open_to_contributors: boolean;
 }
 
 const formatDate = (dateString: string, locale: Locale) => {
@@ -174,9 +174,17 @@ const EditCourseContributors = () => {
   const session = usePlatformSession();
   const access_token = session?.data?.tokens?.access_token;
   const course = useCourse();
-  const { courseStructure, editorData, refreshCourseEditor, showConflict } = course;
+  const { courseStructure, editorData } = course;
   const contributors = (editorData.contributors.data ?? []) as Contributor[];
   const isContributorsLoading = course.isEditorDataLoading && editorData.contributors.data === null;
+  const contributorsDraft = useCourseEditorStore(
+    (state) => state.drafts.contributors as ContributorsDraft | undefined,
+  );
+  const setDraft = useCourseEditorStore((state) => state.setDraft);
+  const clearDraft = useCourseEditorStore((state) => state.clearDraft);
+  const setConflict = useCourseEditorStore((state) => state.setConflict);
+  const { addContributors, removeContributors, updateAccess, updateContributor: updateContributorMutation } =
+    useCoursesMutations(courseStructure?.course_uuid ?? '');
 
   const [isOpenToContributors, setIsOpenToContributors] = useState<boolean | undefined>(
     () => courseStructure?.open_to_contributors,
@@ -192,22 +200,29 @@ const EditCourseContributors = () => {
   const initialRef = useRef<boolean | undefined>(courseStructure?.open_to_contributors);
 
   const { isDirty, isDirtyRef, markDirty, markClean } = useDirtySection('contributors');
-  const { isSaving, save } = useSaveSection({ onSuccess: markClean });
+  const { isSaving, saveWithoutRefresh } = useSaveSection({ onSuccess: markClean, section: 'contributors' });
 
-  // Sync external updates when not dirty
   useEffect(() => {
-    if (isDirtyRef.current) return;
-    setIsOpenToContributors(courseStructure?.open_to_contributors);
     initialRef.current = courseStructure?.open_to_contributors;
-    markClean();
-  }, [courseStructure?.open_to_contributors, isDirtyRef, markClean]);
+    const nextValue = contributorsDraft?.open_to_contributors ?? courseStructure?.open_to_contributors;
+    setIsOpenToContributors((current) => (current === nextValue ? current : nextValue));
 
-  // Track dirty state on toggle change
+    if (!contributorsDraft && !isDirtyRef.current) {
+      markClean();
+    }
+  }, [contributorsDraft, courseStructure?.open_to_contributors, isDirtyRef, markClean]);
+
   useEffect(() => {
     const dirty = isOpenToContributors !== undefined && isOpenToContributors !== initialRef.current;
-    if (dirty) markDirty();
-    else markClean();
-  }, [isOpenToContributors, markDirty, markClean]);
+    if (dirty) {
+      setDraft('contributors', { open_to_contributors: isOpenToContributors });
+      markDirty();
+      return;
+    }
+
+    clearDraft('contributors');
+    markClean();
+  }, [clearDraft, courseStructure?.open_to_contributors, isOpenToContributors, markDirty, markClean, setDraft]);
 
   // Debounced user search
   useEffect(() => {
@@ -253,29 +268,53 @@ const EditCourseContributors = () => {
     setSelectedUsers((prev) => (prev.includes(username) ? prev.filter((u) => u !== username) : [...prev, username]));
   };
 
+  const raiseContributorConflict = (message: string | undefined, pendingSave: () => Promise<unknown>) => {
+    setConflict({
+      section: 'contributors',
+      message: message || t('failedToUpdateContributor'),
+      pendingSave,
+    });
+  };
+
   const handleAddContributors = async () => {
     if (selectedUsers.length === 0 || isAdding) return;
+    if (!access_token) {
+      toast.error(t('failedToAddContributorsGeneral'));
+      return;
+    }
+
+    const selectedUserObjects = searchResults.filter((user) => selectedUsers.includes(user.username));
     setIsAdding(true);
     try {
-      const response = await bulkAddContributors(courseStructure.course_uuid, selectedUsers, access_token);
-      if (response.status === 409) {
-        showConflict(response.data?.detail);
+      const response = await addContributors(selectedUsers, selectedUserObjects, {
+        accessToken: access_token,
+        lastKnownUpdateDate: courseStructure.update_date,
+      });
+      const result = response.data as BulkAddResponse;
+
+      if (result.successful.length > 0) {
+        toast.success(t('successfullyAddedContributors', { count: result.successful.length }));
+      }
+
+      result.failed.forEach((failure) => {
+        toast.error(t('failedToAddContributor', { username: failure.username, reason: failure.reason }));
+      });
+
+      const failedUsernames = new Set(result.failed.map((failure) => failure.username));
+      setSelectedUsers(result.failed.map((failure) => failure.username));
+      setSearchQuery(result.failed.length > 0 ? searchQuery : '');
+      setSearchOpen(result.failed.length > 0);
+      setSearchResults((current) => current.filter((user) => failedUsernames.has(user.username)));
+    } catch (error: any) {
+      if (error?.status === 409) {
+        raiseContributorConflict(error?.detail || error?.message, async () => {
+          await addContributors(selectedUsers, selectedUserObjects, {
+            accessToken: access_token,
+            lastKnownUpdateDate: courseStructure.update_date,
+          });
+        });
         return;
       }
-      if (response.status === 200) {
-        const result = response.data as BulkAddResponse;
-        if (result.successful.length > 0) {
-          toast.success(t('successfullyAddedContributors', { count: result.successful.length }));
-        }
-        result.failed.forEach((failure) => {
-          toast.error(t('failedToAddContributor', { username: failure.username, reason: failure.reason }));
-        });
-        await refreshCourseEditor();
-        setSelectedUsers([]);
-        setSearchQuery('');
-        setSearchOpen(false);
-      }
-    } catch (error) {
       console.error(t('errorAddingContributors'), error);
       toast.error(t('failedToAddContributorsGeneral'));
     } finally {
@@ -288,6 +327,11 @@ const EditCourseContributors = () => {
     data: { authorship?: ContributorRole; authorship_status?: ContributorStatus },
   ) => {
     try {
+      if (!access_token) {
+        toast.error(t('errorUpdatingContributor'));
+        return;
+      }
+
       const currentContributor = contributors.find((c) => c.user_id === contributorId);
       if (!currentContributor) return;
       if (currentContributor.authorship === 'CREATOR') {
@@ -298,24 +342,38 @@ const EditCourseContributors = () => {
         authorship: data.authorship || currentContributor.authorship,
         authorship_status: data.authorship_status || currentContributor.authorship_status,
       };
-      const res = await editContributor(
-        courseStructure.course_uuid,
+      const res = await updateContributorMutation(
         contributorId,
-        updatedData.authorship,
-        updatedData.authorship_status,
-        access_token,
+        updatedData,
+        {
+          accessToken: access_token,
+          lastKnownUpdateDate: courseStructure.update_date,
+        },
       );
-      if (res.status === 409) {
-        showConflict(res.data?.detail);
-        return;
-      }
+
       if (res.status === 200 && res.data?.status === 'success') {
         toast.success(res.data.detail || t('successfullyUpdatedContributor'));
-        await refreshCourseEditor();
       } else {
         toast.error(res.data?.detail || t('failedToUpdateContributor'));
       }
-    } catch {
+    } catch (error: any) {
+      if (error?.status === 409) {
+        raiseContributorConflict(error?.detail || error?.message, async () => {
+          await updateContributorMutation(
+            contributorId,
+            {
+              authorship: data.authorship || contributors.find((contributor) => contributor.user_id === contributorId)?.authorship,
+              authorship_status:
+                data.authorship_status || contributors.find((contributor) => contributor.user_id === contributorId)?.authorship_status,
+            },
+            {
+              accessToken: access_token!,
+              lastKnownUpdateDate: courseStructure.update_date,
+            },
+          );
+        });
+        return;
+      }
       toast.error(t('errorUpdatingContributor'));
     }
   };
@@ -349,45 +407,80 @@ const EditCourseContributors = () => {
 
   const handleBulkRemove = async () => {
     if (selectedContributors.length === 0) return;
+    if (!access_token) {
+      toast.error(t('failedToRemoveContributorsGeneral'));
+      return;
+    }
+
     try {
-      const selectedUsernames = contributors
-        .filter((c) => selectedContributors.includes(c.user_id))
+      const selectedContributorRows = contributors.filter((c) => selectedContributors.includes(c.user_id));
+      const selectedUsernames = selectedContributorRows
         .map((c) => c.user.username);
-      const response = await bulkRemoveContributors(courseStructure.course_uuid, selectedUsernames, access_token);
-      if (response.status === 409) {
-        showConflict(response.data?.detail);
+      const selectedUserIds = selectedContributorRows
+        .filter((c) => selectedContributors.includes(c.user_id))
+        .map((c) => c.user_id);
+      const response = await removeContributors(selectedUsernames, selectedUserIds, {
+        accessToken: access_token,
+        lastKnownUpdateDate: courseStructure.update_date,
+      });
+      const result = response.data as BulkAddResponse;
+
+      if (result.successful.length > 0) {
+        toast.success(t('successfullyRemovedContributors', { count: result.successful.length }));
+      }
+
+      result.failed.forEach((failure) => {
+        toast.error(t('failedToRemoveContributor', { username: failure.username, reason: failure.reason }));
+      });
+
+      const failedUsernames = new Set(result.failed.map((failure) => failure.username));
+      setSelectedContributors(
+        contributors.filter((contributor) => failedUsernames.has(contributor.user.username)).map((contributor) => contributor.user_id),
+      );
+    } catch (error: any) {
+      if (error?.status === 409) {
+        raiseContributorConflict(error?.detail || error?.message, async () => {
+          const retryRows = contributors.filter((contributor) => selectedContributors.includes(contributor.user_id));
+          await removeContributors(
+            retryRows.map((contributor) => contributor.user.username),
+            retryRows.map((contributor) => contributor.user_id),
+            {
+              accessToken: access_token,
+              lastKnownUpdateDate: courseStructure.update_date,
+            },
+          );
+        });
         return;
       }
-      if (response.status === 200) {
-        toast.success(t('successfullyRemovedContributors', { count: selectedContributors.length }));
-        await refreshCourseEditor();
-        setSelectedContributors([]);
-      }
-    } catch (error) {
       console.error(t('errorRemovingContributors'), error);
       toast.error(t('failedToRemoveContributorsGeneral'));
     }
   };
 
   const handleDiscard = () => {
+    clearDraft('contributors');
     setIsOpenToContributors(initialRef.current);
     markClean();
   };
 
   const handleContributorAccessSave = async () => {
     if (!(access_token && isOpenToContributors !== undefined) || !isDirty) return;
-    await save(async () => {
-      const response = await updateCourseAccess(
-        courseStructure.course_uuid,
-        { open_to_contributors: isOpenToContributors },
-        access_token,
-        { lastKnownUpdateDate: courseStructure.update_date },
-      );
-      if (response.success) {
-        initialRef.current = isOpenToContributors;
-      }
-      return response;
-    });
+    await saveWithoutRefresh(
+      async () =>
+        updateAccess(
+          { open_to_contributors: isOpenToContributors },
+          {
+            accessToken: access_token,
+            lastKnownUpdateDate: courseStructure.update_date,
+          },
+        ),
+      {
+        onSuccess: () => {
+          initialRef.current = isOpenToContributors;
+          clearDraft('contributors');
+        },
+      },
+    );
   };
 
   if (!courseStructure) return null;

@@ -6,11 +6,11 @@ import {
   courseWorkflowMutedPanelClass,
   courseWorkflowSummaryCardClass,
 } from './courseWorkflowUi';
+import { useCoursesMutations } from '@/hooks/mutations/useCoursesMutations';
 import type { CourseWorkspaceCapabilities } from '@/lib/course-management-server';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { buildCourseWorkspacePath } from '@/lib/course-management';
 import { useCourse } from '@components/Contexts/CourseContext';
-import { updateCourseAccess } from '@services/courses/courses';
 import { getAbsoluteUrl } from '@services/config/config';
 import { ExternalLink, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -31,6 +31,7 @@ export default function CourseReviewPublish({
   const session = usePlatformSession();
   const accessToken = session?.data?.tokens?.access_token;
   const course = useCourse();
+  const { updateAccess } = useCoursesMutations(course.courseStructure.course_uuid, true);
   const { readiness } = course;
   const [isPending, startTransition] = useTransition();
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -50,23 +51,13 @@ export default function CourseReviewPublish({
       void (async () => {
         try {
           setIsRefreshing(true);
-          const response = await updateCourseAccess(
-            course.courseStructure.course_uuid,
+          await updateAccess(
             { public: !wasPublic },
-            accessToken,
             {
+              accessToken,
               lastKnownUpdateDate: course.courseStructure.update_date,
             },
           );
-
-          if (!response.success) {
-            const error: any = new Error(response.data?.detail || response.HTTPmessage || t('errors.accessUpdate'));
-            error.status = response.status;
-            error.detail = response.data?.detail;
-            throw error;
-          }
-
-          await course.refreshCourseMeta();
           toast.success(wasPublic ? t('toasts.movedPrivate') : t('toasts.published'));
         } catch (error: any) {
           if (error?.status === 409) {

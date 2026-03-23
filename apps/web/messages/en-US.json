@@ -2208,6 +2208,12 @@
       "title": "This course changed in another editor",
       "description": "Someone saved a newer version of this course while you were editing.",
       "reloadWarning": "Reload to get the latest course data before trying again. Reloading will discard unsaved changes on this page.",
+      "draftSummaryTitle": "Your pending changes",
+      "serverSummaryTitle": "Current course state",
+      "keepMineButton": "Retry with my changes",
+      "useTheirsButton": "Discard my changes",
+      "emptyDraftSummary": "No unsaved changes are stored for this section.",
+      "emptyServerSummary": "The latest course snapshot is not available yet.",
       "reloadButton": "Reload latest course",
       "reviewDraftButton": "Keep reviewing my draft"
     },

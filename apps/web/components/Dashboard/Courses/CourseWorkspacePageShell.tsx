@@ -25,10 +25,10 @@ import {
   Sparkles,
   Users,
 } from 'lucide-react';
-import CourseConflictDialog from '@components/Dashboard/Pages/Course/CourseConflictDialog';
+import ConflictResolutionModal from '@components/Dashboard/Pages/Course/ConflictResolutionModal';
 import type { CourseWorkspaceCapabilities } from '@/lib/course-management-server';
 import { CourseProvider, useCourse } from '@components/Contexts/CourseContext';
-import { useUnsavedChangesGuard } from '@/hooks/useUnsavedChangesGuard';
+import { useDirtyGuard } from '@/hooks/useDirtyGuard';
 import type { CourseWorkspaceStage } from '@/lib/course-management';
 import { buildCourseWorkspacePath } from '@/lib/course-management';
 import { getAbsoluteUrl } from '@services/config/config';
@@ -55,9 +55,8 @@ function CourseWorkspaceChrome({
 }: Omit<CourseWorkspacePageShellProps, 'initialCourse'>) {
   const t = useTranslations('DashPage.CourseManagement.Workspace');
   const course = useCourse();
-  const hasDirtySections = Object.values(course.dirtySections).some(Boolean);
   const { readiness } = course;
-  const unsavedChangesGuard = useUnsavedChangesGuard(hasDirtySections, {
+  const dirtyGuard = useDirtyGuard({
     interceptInAppNavigation: true,
     message: t('unsavedChangesWarning'),
   });
@@ -74,11 +73,11 @@ function CourseWorkspaceChrome({
 
   return (
     <div className="flex min-h-screen min-w-0 flex-1 flex-col bg-background">
-      <CourseConflictDialog />
+      <ConflictResolutionModal />
       <AlertDialog
-        open={unsavedChangesGuard.isPromptOpen}
+        open={dirtyGuard.isPromptOpen}
         onOpenChange={(open) => {
-          if (!open) unsavedChangesGuard.cancelNavigation();
+          if (!open) dirtyGuard.cancelNavigation();
         }}
       >
         <AlertDialogContent>
@@ -87,13 +86,13 @@ function CourseWorkspaceChrome({
               <AlertTriangle className="size-8" />
             </AlertDialogMedia>
             <AlertDialogTitle>{t('unsavedDialogTitle')}</AlertDialogTitle>
-            <AlertDialogDescription>{unsavedChangesGuard.promptMessage}</AlertDialogDescription>
+            <AlertDialogDescription>{dirtyGuard.promptMessage}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>{t('unsavedDialogStay')}</AlertDialogCancel>
             <AlertDialogAction
               variant="destructive"
-              onClick={unsavedChangesGuard.confirmNavigation}
+              onClick={dirtyGuard.confirmNavigation}
             >
               {t('unsavedDialogLeave')}
             </AlertDialogAction>
@@ -122,7 +121,7 @@ function CourseWorkspaceChrome({
           <div className="hidden shrink-0 items-center gap-2 sm:flex">
             <CourseStatusBadge status={course.courseStructure.public ? 'public' : 'private'} />
             <CourseStatusBadge status={readiness.readyToPublish ? 'ready' : 'needs-review'} />
-            {hasDirtySections ? <CourseStatusBadge status="unsaved" /> : null}
+            {dirtyGuard.hasDrafts ? <CourseStatusBadge status="unsaved" /> : null}
           </div>
 
           <div className="flex shrink-0 items-center gap-2">

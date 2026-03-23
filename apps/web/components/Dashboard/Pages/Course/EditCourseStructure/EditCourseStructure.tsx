@@ -8,8 +8,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { createChapter, updateCourseOrderStructure } from '@services/courses/chapters';
-import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
+import { useChapterMutations } from '@/hooks/mutations/useChapterMutations';
+import { useCourse } from '@components/Contexts/CourseContext';
+import { useCourseStructureStore } from '@/stores/courses';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import NewChapterModal from '@components/Objects/Modals/Chapters/NewChapter';
 import { AlertTriangle, CheckCircle2, Hexagon, Loader2 } from 'lucide-react';
@@ -41,11 +42,13 @@ const EditCourseStructure = () => {
   const access_token = session?.data?.tokens?.access_token;
   const t = useTranslations('CourseEdit.Structure');
 
-  const dispatchCourse = useCourseDispatch();
   const course = useCourse();
   const course_structure = course.courseStructure;
-  const { refreshCourseMeta, showConflict } = course;
+  const { showConflict } = course;
   const course_uuid = course ? course.courseStructure.course_uuid : '';
+  const { createChapter, reorderStructure } = useChapterMutations(course_uuid, true);
+  const expandedChapterIds = useCourseStructureStore((state) => state.expandedChapterIds);
+  const setExpanded = useCourseStructureStore((state) => state.setExpanded);
   // New Chapter creation
   const [newChapterModal, setNewChapterModal] = useState(false);
   const [structureStatus, setStructureStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
@@ -57,6 +60,19 @@ const EditCourseStructure = () => {
     return () => clearTimeout(timer);
   }, [structureStatus]);
 
+  useEffect(() => {
+    if (course_structure.chapters.length === 0 || expandedChapterIds.size > 0) {
+      return;
+    }
+
+    const firstChapter = course_structure.chapters[0];
+    if (!firstChapter) {
+      return;
+    }
+
+    setExpanded(firstChapter.chapter_uuid, true);
+  }, [course_structure.chapters, expandedChapterIds.size, setExpanded]);
+
   const closeNewChapterModal = async () => {
     setNewChapterModal(false);
   };
@@ -65,11 +81,10 @@ const EditCourseStructure = () => {
   const submitChapter = async (chapter: any) => {
     setStructureStatus('saving');
     try {
-      await createChapter(chapter, access_token, {
-        courseUuid: course_uuid,
+      await createChapter(chapter, {
+        accessToken: access_token,
         lastKnownUpdateDate: course_structure.update_date,
       });
-      await refreshCourseMeta();
       setNewChapterModal(false);
       setStructureStatus('saved');
       toast.success(t('chapterCreatedSuccess'));
@@ -115,8 +130,6 @@ const EditCourseStructure = () => {
       newCourseStructure.chapters = newChapterOrder;
     }
 
-    dispatchCourse({ type: 'setCourseStructure', payload: newCourseStructure });
-
     const payload: OrderPayload = {
       last_known_update_date: course_structure.update_date,
       chapter_order_by_ids: newCourseStructure.chapters.map((chapter: any) => ({
@@ -127,11 +140,12 @@ const EditCourseStructure = () => {
 
     try {
       setStructureStatus('saving');
-      await updateCourseOrderStructure(course_uuid, payload, access_token, { courseUuid: course_uuid });
-      await refreshCourseMeta();
+      await reorderStructure(newCourseStructure, payload, {
+        accessToken: access_token,
+        lastKnownUpdateDate: course_structure.update_date,
+      });
       setStructureStatus('saved');
     } catch (error: any) {
-      dispatchCourse({ type: 'setCourseStructure', payload: course_structure });
       if (error?.status === 409) {
         showConflict(error?.detail || error?.message);
         return;

@@ -422,9 +422,11 @@ export default function CourseCreationWizard({ sourceCourses }: CourseCreationWi
                       {t('template.sourceCourse')}
                     </label>
                     <Select
-                      value={sourceCourseUuid}
+                      value={sourceCourseUuid ?? undefined}
                       onValueChange={(value) => {
-                        void setSourceCourseUuid(value);
+                        if (value) {
+                          void setSourceCourseUuid(value);
+                        }
                       }}
                       items={sourceOptions.map((course) => ({ value: course.cleanUuid, label: course.name }))}
                     >

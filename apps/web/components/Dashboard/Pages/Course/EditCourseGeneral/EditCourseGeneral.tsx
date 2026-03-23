@@ -7,10 +7,11 @@ import { SectionHeader } from '@components/Dashboard/Courses/SectionHeader';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { Card, CardContent, CardHeader } from '@components/ui/card';
-import { updateCourseMetadata } from '@services/courses/courses';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { TagsInput } from '@components/ui/custom/tags-input';
-import { useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useId, useMemo, useRef, useState } from 'react';
+import { useCourseEditorStore } from '@/stores/courses';
+import { useCoursesMutations } from '@/hooks/mutations/useCoursesMutations';
 import { useDirtySection } from '@/hooks/useDirtySection';
 import { useSaveSection } from '@/hooks/useSaveSection';
 import { Separator } from '@components/ui/separator';
@@ -113,6 +114,8 @@ const validateValues = (values: FormValues, t: any) => {
   return errors;
 };
 
+const serializeValues = (values: FormValues) => JSON.stringify(values);
+
 function EditCourseGeneral() {
   const t = useTranslations('CourseEdit.General');
   const tCommon = useTranslations('Common');
@@ -165,9 +168,14 @@ function EditCourseGeneral() {
   const formId = useId();
   const session = usePlatformSession();
   const accessToken = session?.data?.tokens?.access_token;
+  const generalDraft = useCourseEditorStore((state) => state.drafts.general as FormValues | undefined);
+  const setDraft = useCourseEditorStore((state) => state.setDraft);
+  const clearDraft = useCourseEditorStore((state) => state.clearDraft);
+  const { updateMetadata } = useCoursesMutations(courseStructure?.course_uuid ?? '');
 
   const { isDirty, isDirtyRef, markDirty, markClean } = useDirtySection('general');
-  const { isSaving, save } = useSaveSection({
+  const { isSaving, saveWithoutRefresh } = useSaveSection({
+    section: 'general',
     errorMessage: t('errors.saveFailed'),
     successMessage: tCommon('saved'),
     onError: setError,
@@ -179,34 +187,47 @@ function EditCourseGeneral() {
   });
 
   const initialRef = useRef<FormValues>(form.getValues());
+  const serverValues = useMemo(() => buildFormValues(courseStructure), [courseStructure]);
+  const serverValuesKey = useMemo(() => serializeValues(serverValues), [serverValues]);
 
-  // Reset when backend data changes (skipped when user has unsaved edits)
   useEffect(() => {
     if (!isLoading && courseStructure) {
-      if (isDirtyRef.current) return;
-      const vals = buildFormValues(courseStructure);
-      form.reset(vals);
-      initialRef.current = vals;
-      markClean();
-      setError('');
-    }
-  }, [isLoading, courseStructure, form, isDirtyRef, markClean]);
+      initialRef.current = serverValues;
+      const nextValues = generalDraft ?? serverValues;
 
-  // Watch for unsaved changes
+      if (serializeValues(form.getValues()) !== serializeValues(nextValues)) {
+        form.reset(nextValues);
+      }
+
+      if (!generalDraft && !isDirtyRef.current) {
+        markClean();
+        setError('');
+      }
+    }
+  }, [courseStructure, form, generalDraft, isDirtyRef, isLoading, markClean, serverValues, serverValuesKey]);
+
   useEffect(() => {
     const sub = form.watch((values) => {
       if (isLoading) return;
-      const errors = validateValues(values as FormValues, t);
-      (Object.keys(values) as (keyof FormValues)[]).forEach((k) => {
+      const currentValues = values as FormValues;
+      const errors = validateValues(currentValues, t);
+      (Object.keys(currentValues) as (keyof FormValues)[]).forEach((k) => {
         if (errors[k]) form.setError(k, { message: errors[k] });
         else form.clearErrors(k);
       });
-      const changed = JSON.stringify(values) !== JSON.stringify(initialRef.current);
-      if (changed) markDirty();
-      else markClean();
+
+      const changed = serializeValues(currentValues) !== serializeValues(initialRef.current);
+      if (changed) {
+        setDraft('general', currentValues);
+        markDirty();
+        return;
+      }
+
+      clearDraft('general');
+      markClean();
     });
     return () => sub.unsubscribe();
-  }, [form, isLoading, markDirty, markClean, t]);
+  }, [clearDraft, form, isLoading, markDirty, markClean, serverValuesKey, setDraft, t]);
 
   const handleSubmit = async (values: FormValues) => {
     const errors = validateValues(values, t);
@@ -224,14 +245,16 @@ function EditCourseGeneral() {
 
     setError('');
 
-    await save(
+    await saveWithoutRefresh(
       async () =>
-        updateCourseMetadata(course.courseStructure.course_uuid, values, accessToken, {
+        updateMetadata(values, {
+          accessToken,
           lastKnownUpdateDate: course.courseStructure.update_date,
         }),
       {
         onSuccess: () => {
           initialRef.current = values;
+          clearDraft('general');
           markClean();
           setError('');
         },
@@ -240,6 +263,7 @@ function EditCourseGeneral() {
   };
 
   const handleDiscard = () => {
+    clearDraft('general');
     form.reset(initialRef.current);
     markClean();
     setError('');

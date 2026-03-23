@@ -81,6 +81,8 @@ interface EditorProps {
   course: any;
   platform: any;
   session: any;
+  onContentChange: (content: any) => void;
+  saveState: 'idle' | 'saving' | 'saved' | 'error';
   setContent: (content: any) => void;
 }
 
@@ -141,6 +143,9 @@ const Editor = (props: EditorProps) => {
     extensions,
     content: initialContent,
     immediatelyRender: false,
+    onUpdate: ({ editor: currentEditor }) => {
+      props.onContentChange(currentEditor.getJSON());
+    },
   });
 
   // Destructure setContent for stable reference
@@ -259,6 +264,15 @@ const Editor = (props: EditorProps) => {
                 }}
               />
               <div className="flex justify-center items-center space-x-2">
+                <div className="rounded-lg border border-border bg-muted px-3 py-2 text-xs font-semibold text-muted-foreground">
+                  {props.saveState === 'saving'
+                    ? t('saving')
+                    : props.saveState === 'saved'
+                      ? t('saveSuccess')
+                      : props.saveState === 'error'
+                        ? t('saveError')
+                        : t('save')}
+                </div>
                 <div
                   className="rounded-lg bg-sky-600 px-3 py-2 text-sm font-bold text-teal-100 shadow-sm transition-all ease-linear hover:cursor-pointer hover:bg-sky-700"
                   onClick={handleContentSave}

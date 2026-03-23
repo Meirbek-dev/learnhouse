@@ -37,10 +37,10 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { deleteAssignmentUsingActivityUUID, getAssignmentFromActivityUUID } from '@services/courses/assignments';
 import { CourseWorkflowBadge } from '@components/Dashboard/Courses/courseWorkflowUi';
-import { deleteActivity, updateActivity } from '@services/courses/activities';
+import { useActivityMutations } from '@/hooks/mutations/useActivityMutations';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import ToolTip from '@/components/Objects/Elements/Tooltip/Tooltip';
-import { getAPIUrl, getAbsoluteUrl } from '@services/config/config';
+import { getAbsoluteUrl } from '@services/config/config';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
@@ -50,7 +50,6 @@ import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { mutate } from 'swr';
 import useSWR from 'swr';
 
 // Types
@@ -91,7 +90,7 @@ interface PlatformSession {
 
 interface Course {
   courseStructure?: {
-    course_uuid: string;
+    course_uuid?: string;
   };
   withUnpublishedActivities?: boolean;
 }
@@ -139,6 +138,7 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
   const access_token = session?.data?.tokens?.access_token;
   const courseContext = useCourse();
   const course = courseContext as Course;
+  const { deleteActivity, updateActivity } = useActivityMutations(course_uuid, true);
   const isMobile = useIsMobile();
   const t = useTranslations('CourseEdit.ActivityElement');
 
@@ -170,10 +170,6 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
   const isOwner = activity.is_owner ?? false;
   const availableActions = activity.available_actions ?? [];
 
-  // Derived values
-  const withUnpublishedActivities = course?.withUnpublishedActivities ?? false;
-  const courseMetaUrl = `${getAPIUrl()}courses/${course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`;
-
   // Handlers
   const handleStartEdit = () => {
     setIsEditing(true);
@@ -199,17 +195,10 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
 
     setIsSavingEdit(true);
     try {
-      const response = await updateActivity({ ...activity, name: trimmedName }, activity.activity_uuid, access_token, {
-        courseUuid: course_uuid,
+      await updateActivity(activity.activity_uuid, { ...activity, name: trimmedName }, {
+        accessToken: access_token,
         lastKnownUpdateDate: courseContext.courseStructure.update_date,
       });
-      if (!response.success) {
-        throw Object.assign(new Error(response.data?.detail || t('failedToUpdateActivityName')), {
-          status: response.status,
-          detail: response.data?.detail,
-        });
-      }
-      await mutate(courseMetaUrl);
       toast.success(t('activityNameUpdatedSuccess'));
       setIsEditing(false);
     } catch (error: any) {
@@ -235,22 +224,14 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
     const toastId = toast.loading(t('updating'));
 
     try {
-      const response = await updateActivity(
-        { ...activity, published: !activity.published },
+      await updateActivity(
         activity.activity_uuid,
-        access_token,
+        { ...activity, published: !activity.published },
         {
-          courseUuid: course_uuid,
+          accessToken: access_token,
           lastKnownUpdateDate: courseContext.courseStructure.update_date,
         },
       );
-      if (!response.success) {
-        throw Object.assign(new Error(response.data?.detail || t('updateFailed')), {
-          status: response.status,
-          detail: response.data?.detail,
-        });
-      }
-      await mutate(courseMetaUrl);
       toast.success(t('activityUpdateSuccess'));
     } catch (error: any) {
       toast.dismiss(toastId);
@@ -282,17 +263,10 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
         await deleteAssignmentUsingActivityUUID(activity.activity_uuid, access_token);
       }
 
-      const response = await deleteActivity(activity.activity_uuid, access_token, {
-        courseUuid: course_uuid,
+      await deleteActivity(activity.activity_uuid, {
+        accessToken: access_token,
         lastKnownUpdateDate: courseContext.courseStructure.update_date,
       });
-      if (!response.success) {
-        throw Object.assign(new Error(response.data?.detail || 'Failed to delete activity'), {
-          status: response.status,
-          detail: response.data?.detail,
-        });
-      }
-      await mutate(courseMetaUrl);
       toast.success(t('activityDeletedSuccess'));
       setIsDeleteDialogOpen(false);
     } catch (error: any) {

@@ -194,29 +194,6 @@ interface CourseWriteOptions {
   includePublicList?: boolean;
 }
 
-async function revalidateCourseMutationTags(course_uuid: string | undefined, options?: CourseWriteOptions) {
-  const { revalidateTag } = await import('next/cache');
-  const tagsToRevalidate = new Set<string>();
-
-  if (course_uuid) {
-    tagsToRevalidate.add(courseTag.detail(course_uuid));
-  }
-
-  const includeEditableList = options?.includeEditableList ?? true;
-  const includePublicList = options?.includePublicList ?? true;
-
-  if (includeEditableList) {
-    tagsToRevalidate.add(tags.editableCourses);
-  }
-  if (includePublicList) {
-    tagsToRevalidate.add(tags.courses);
-  }
-
-  for (const tag of tagsToRevalidate) {
-    revalidateTag(tag, 'max');
-  }
-}
-
 const toCourseMetadataPayload = (data: any, options?: CourseWriteOptions) => ({
   name: data.name,
   description: data.description ?? '',
@@ -237,17 +214,7 @@ export async function updateCourseMetadata(
     `${getAPIUrl()}courses/${course_uuid}/metadata`,
     RequestBodyWithAuthHeader('PUT', toCourseMetadataPayload(data, options), null, access_token),
   );
-  const metadata = await getResponseMetadata(result);
-
-  if (metadata.success) {
-    await revalidateCourseMutationTags(course_uuid, {
-      ...options,
-      includeEditableList: true,
-      includePublicList: true,
-    });
-  }
-
-  return metadata;
+  return getResponseMetadata(result);
 }
 
 export async function updateCourseAccess(
@@ -268,19 +235,7 @@ export async function updateCourseAccess(
       access_token,
     ),
   );
-  const metadata = await getResponseMetadata(result);
-
-  if (metadata.success) {
-    const { revalidateTag } = await import('next/cache');
-    revalidateTag(courseTag.access(course_uuid), 'max');
-    await revalidateCourseMutationTags(course_uuid, {
-      ...options,
-      includeEditableList: true,
-      includePublicList: true,
-    });
-  }
-
-  return metadata;
+  return getResponseMetadata(result);
 }
 
 /**
@@ -348,18 +303,7 @@ export async function updateCourseThumbnail(
     `${getAPIUrl()}courses/${course_uuid}/thumbnail`,
     RequestBodyFormWithAuthHeader('PUT', formData, null, access_token),
   );
-  const metadata = await getResponseMetadata(result);
-
-  // Revalidate course cache after thumbnail update
-  if (metadata.success) {
-    await revalidateCourseMutationTags(course_uuid, {
-      ...options,
-      includeEditableList: true,
-      includePublicList: true,
-    });
-  }
-
-  return metadata;
+  return getResponseMetadata(result);
 }
 
 export async function createNewCourse(
@@ -385,17 +329,7 @@ export async function createNewCourse(
     `${getAPIUrl()}courses`,
     RequestBodyFormWithAuthHeader('POST', formData, null, access_token),
   );
-  const metadata = await getResponseMetadata(result);
-
-  // Revalidate course cache after creating new course
-  if (metadata.success) {
-    await revalidateCourseMutationTags(undefined, {
-      includeEditableList: options?.includeEditableList ?? true,
-      includePublicList: options?.includePublicList ?? true,
-    });
-  }
-
-  return metadata;
+  return getResponseMetadata(result);
 }
 
 export async function deleteCourseFromBackend(
@@ -407,17 +341,7 @@ export async function deleteCourseFromBackend(
     `${getAPIUrl()}courses/${course_uuid}`,
     RequestBodyWithAuthHeader('DELETE', null, null, access_token),
   );
-  const data_result = await errorHandling(result);
-
-  // Revalidate course cache after deletion
-  if (result.ok) {
-    await revalidateCourseMutationTags(course_uuid, {
-      includeEditableList: options?.includeEditableList ?? true,
-      includePublicList: options?.includePublicList ?? true,
-    });
-  }
-
-  return data_result;
+  return errorHandling(result);
 }
 
 export async function getCourseContributors(course_uuid: string, access_token: string | null | undefined) {
@@ -440,19 +364,7 @@ export async function editContributor(
     `${getAPIUrl()}courses/${course_uuid}/contributors/${contributor_id}?authorship=${authorship}&authorship_status=${authorship_status}`,
     RequestBodyWithAuthHeader('PUT', null, null, access_token || undefined),
   );
-  const metadata = await getResponseMetadata(result);
-
-  // Revalidate courses cache after editing contributor
-  if (metadata.success) {
-    const { revalidateTag } = await import('next/cache');
-    revalidateTag(courseTag.contributors(course_uuid), 'max');
-    await revalidateCourseMutationTags(course_uuid, {
-      includeEditableList: options?.includeEditableList ?? true,
-      includePublicList: options?.includePublicList ?? false,
-    });
-  }
-
-  return metadata;
+  return getResponseMetadata(result);
 }
 
 export async function applyForContributor(course_uuid: string, data: any, access_token: string | null | undefined) {
@@ -460,15 +372,7 @@ export async function applyForContributor(course_uuid: string, data: any, access
     `${getAPIUrl()}courses/${course_uuid}/apply-contributor`,
     RequestBodyWithAuthHeader('POST', data, null, access_token || undefined),
   );
-  const metadata = await getResponseMetadata(result);
-
-  // Revalidate courses cache after applying for contributor
-  if (metadata.success) {
-    const { revalidateTag } = await import('next/cache');
-    revalidateTag(tags.courses, 'max');
-  }
-
-  return metadata;
+  return getResponseMetadata(result);
 }
 
 export async function bulkAddContributors(
@@ -481,19 +385,7 @@ export async function bulkAddContributors(
     `${getAPIUrl()}courses/${course_uuid}/bulk-add-contributors`,
     RequestBodyWithAuthHeader('POST', data, null, access_token || undefined),
   );
-  const metadata = await getResponseMetadata(result);
-
-  // Revalidate courses cache after bulk adding contributors
-  if (metadata.success) {
-    const { revalidateTag } = await import('next/cache');
-    revalidateTag(courseTag.contributors(course_uuid), 'max');
-    await revalidateCourseMutationTags(course_uuid, {
-      includeEditableList: options?.includeEditableList ?? true,
-      includePublicList: options?.includePublicList ?? false,
-    });
-  }
-
-  return metadata;
+  return getResponseMetadata(result);
 }
 
 export async function bulkRemoveContributors(
@@ -506,19 +398,7 @@ export async function bulkRemoveContributors(
     `${getAPIUrl()}courses/${course_uuid}/bulk-remove-contributors`,
     RequestBodyWithAuthHeader('PUT', data, null, access_token || undefined),
   );
-  const metadata = await getResponseMetadata(result);
-
-  // Revalidate courses cache after bulk removing contributors
-  if (metadata.success) {
-    const { revalidateTag } = await import('next/cache');
-    revalidateTag(courseTag.contributors(course_uuid), 'max');
-    await revalidateCourseMutationTags(course_uuid, {
-      includeEditableList: options?.includeEditableList ?? true,
-      includePublicList: options?.includePublicList ?? false,
-    });
-  }
-
-  return metadata;
+  return getResponseMetadata(result);
 }
 
 export async function getCourseRights(course_uuid: string, access_token: string | null | undefined) {

@@ -1,10 +1,10 @@
 import { ArrowBigUpDash, Image as ImageIcon, UploadCloud, Video } from 'lucide-react';
-import { useCourse, useCourseDispatch } from '@components/Contexts/CourseContext';
+import { useCoursesMutations } from '@/hooks/mutations/useCoursesMutations';
+import { useCourse } from '@components/Contexts/CourseContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs';
 import { Alert, AlertDescription, AlertTitle } from '@components/ui/alert';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
-import { updateCourseThumbnail } from '@services/courses/courses';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Card, CardContent } from '@components/ui/card';
 import { Button } from '@components/ui/button';
@@ -39,7 +39,7 @@ const ThumbnailUpdate = ({ thumbnailType, disabled = false, disabledReason }: Th
   const videoInputRef = useRef<HTMLInputElement>(null);
 
   const course = useCourse();
-  const dispatchCourse = useCourseDispatch();
+  const { updateThumbnail: updateThumbnailMutation } = useCoursesMutations(course.courseStructure.course_uuid, true);
   const session = usePlatformSession() as any;
   const t = useTranslations('CourseEdit.General.Thumbnail');
 
@@ -107,36 +107,25 @@ const ThumbnailUpdate = ({ thumbnailType, disabled = false, disabledReason }: Th
         formData.append('thumbnail', file);
         formData.append('thumbnail_type', type);
 
-        const res = await updateCourseThumbnail(
-          course.courseStructure.course_uuid,
+        await updateThumbnailMutation(
           formData,
-          session.data?.tokens?.access_token,
           {
+            accessToken: session.data?.tokens?.access_token,
             lastKnownUpdateDate: course.courseStructure.update_date,
           },
         );
-
-        if (!res.success) {
-          showError(res.HTTPmessage);
-        } else {
-          if (res.data) {
-            dispatchCourse({ type: 'setCourseStructure', payload: res.data });
-          } else {
-            await course.refreshCourseMeta();
-          }
-          setLocalThumbnail(null);
-          toast.success(t('thumbnailUpdatedSuccessfully'), {
-            duration: 3000,
-            position: 'top-center',
-          });
-        }
+        setLocalThumbnail(null);
+        toast.success(t('thumbnailUpdatedSuccessfully'), {
+          duration: 3000,
+          position: 'top-center',
+        });
       } catch {
         showError(t('errors.updateFailed'));
       } finally {
         setIsLoading(false);
       }
     },
-    [course, dispatchCourse, session, showError, t],
+    [course, session, showError, t, updateThumbnailMutation],
   );
 
   const handleFileChange = useCallback(

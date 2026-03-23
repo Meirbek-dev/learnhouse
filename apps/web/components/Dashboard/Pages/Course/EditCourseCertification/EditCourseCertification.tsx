@@ -6,6 +6,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { SectionHeader } from '@components/Dashboard/Courses/SectionHeader';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
+import { useCourseEditorStore } from '@/stores/courses';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { AlertTriangle, Award, FileText, Sparkles } from 'lucide-react';
@@ -73,6 +74,8 @@ const _certFormSchemaForTypes = v.object({
 
 type FormValues = v.InferOutput<typeof _certFormSchemaForTypes>;
 
+const serializeValues = (values: FormValues) => JSON.stringify(values);
+
 const EditCourseCertification = () => {
   const [error, setError] = useState('');
   const [hasHydrated, setHasHydrated] = useState(false);
@@ -130,6 +133,9 @@ const EditCourseCertification = () => {
   const certificationsError = editorData.certifications.error;
   const existingCertification = certifications[0];
   const hasExistingCertification = Boolean(existingCertification);
+  const certificationDraft = useCourseEditorStore((state) => state.drafts.certification as FormValues | undefined);
+  const setDraft = useCourseEditorStore((state) => state.setDraft);
+  const clearDraft = useCourseEditorStore((state) => state.clearDraft);
 
   const form = useForm<FormValues>({
     resolver: valibotResolver(formSchema),
@@ -183,21 +189,38 @@ const EditCourseCertification = () => {
 
   const { isDirty, isDirtyRef, markDirty, markClean } = useDirtySection('certification');
   const { isSaving, saveWithEditorRefresh } = useSaveSection({
+    section: 'certification',
     errorMessage: t('certificationError'),
     onError: setError,
   });
-
-  // Initialize form when data is ready
-  useEffect(() => {
-    if (editorData.certifications.data !== null && !isLoading) {
-      if (isDirtyRef.current) return;
-      const newValues = getInitialValues();
-      form.reset(newValues);
-      initialValuesRef.current = newValues;
-      markClean();
-      setHasHydrated(true);
+  const serverValues = useMemo(() => {
+    if (editorData.certifications.data === null || isLoading) {
+      return null;
     }
-  }, [editorData.certifications.data, isLoading, form, getInitialValues, isDirtyRef, markClean]);
+
+    return getInitialValues();
+  }, [editorData.certifications.data, getInitialValues, isLoading]);
+  const serverValuesKey = useMemo(() => (serverValues ? serializeValues(serverValues) : null), [serverValues]);
+
+  useEffect(() => {
+    if (!serverValues) {
+      return;
+    }
+
+    initialValuesRef.current = serverValues;
+    const nextValues = certificationDraft ?? serverValues;
+
+    if (serializeValues(form.getValues()) !== serializeValues(nextValues)) {
+      form.reset(nextValues);
+    }
+
+    if (!certificationDraft && !isDirtyRef.current) {
+      markClean();
+      setError('');
+    }
+
+    setHasHydrated(true);
+  }, [certificationDraft, form, isDirtyRef, markClean, serverValues, serverValuesKey]);
 
   // Subscribe to individual watched fields to avoid over-rendering
   const isEnabled = useWatch({ control: form.control, name: 'enable_certification' });
@@ -207,7 +230,6 @@ const EditCourseCertification = () => {
   const certificatePattern = useWatch({ control: form.control, name: 'certificate_pattern' });
   const certificateInstructor = useWatch({ control: form.control, name: 'certificate_instructor' });
 
-  // Track dirty state on form value changes
   useEffect(() => {
     if (!isLoading && hasHydrated) {
       const currentValues = {
@@ -218,11 +240,19 @@ const EditCourseCertification = () => {
         certificate_pattern: certificatePattern,
         certificate_instructor: certificateInstructor,
       };
-      const dirty = JSON.stringify(initialValuesRef.current) !== JSON.stringify(currentValues);
-      if (dirty) markDirty();
-      else markClean();
+
+      const dirty = serializeValues(initialValuesRef.current) !== serializeValues(currentValues);
+      if (dirty) {
+        setDraft('certification', currentValues);
+        markDirty();
+        return;
+      }
+
+      clearDraft('certification');
+      markClean();
     }
   }, [
+    clearDraft,
     isEnabled,
     certificationName,
     certificationDescription,
@@ -233,9 +263,12 @@ const EditCourseCertification = () => {
     hasHydrated,
     markDirty,
     markClean,
+    serverValuesKey,
+    setDraft,
   ]);
 
   const handleDiscard = () => {
+    clearDraft('certification');
     form.reset(initialValuesRef.current);
     markClean();
     setError('');
@@ -287,6 +320,7 @@ const EditCourseCertification = () => {
           : t('certificationRemoved'),
         onSuccess: () => {
           initialValuesRef.current = values;
+          clearDraft('certification');
           markClean();
           setError('');
         },

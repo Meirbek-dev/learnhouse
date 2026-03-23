@@ -51,12 +51,6 @@ const toArrayResource = (response: {
   return createResource<any[]>(Array.isArray(response.data) ? response.data : [], response.status, null, true);
 };
 
-export const getCourseMetadataKey = (courseUuid: string, withUnpublishedActivities = false) =>
-  `${getAPIUrl()}courses/${courseUuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`;
-
-export const getCourseEditorBundleKey = (courseUuid?: string | null, accessToken?: string | null) =>
-  courseUuid && accessToken ? ['course-editor-bundle', courseUuid, accessToken] : null;
-
 export async function getCourseEditorBundle(courseUuid: string, accessToken: string): Promise<CourseEditorBundle> {
   const [contributors, linkedUserGroups, certifications] = await Promise.all([
     fetchResponseMetadata(`${getAPIUrl()}courses/${courseUuid}/contributors`, accessToken),

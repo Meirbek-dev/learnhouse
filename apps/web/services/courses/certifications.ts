@@ -2,7 +2,6 @@
 
 import { RequestBodyWithAuthHeader, errorHandling, getResponseMetadata } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
-import { courseTag, tags } from '@/lib/cacheTags';
 
 /*
  This file includes certification-related API calls
@@ -21,28 +20,6 @@ interface CertificationInvalidationOptions {
   courseUuid?: string;
   includeEditableList?: boolean;
   lastKnownUpdateDate?: string | null;
-}
-
-async function revalidateCertificationTags(options?: CertificationInvalidationOptions) {
-  const { revalidateTag } = await import('next/cache');
-  const tagsToRevalidate = new Set<string>();
-
-  if (options?.courseUuid) {
-    tagsToRevalidate.add(courseTag.detail(options.courseUuid));
-    tagsToRevalidate.add(courseTag.certifications(options.courseUuid));
-  }
-
-  if (options?.includeEditableList ?? true) {
-    tagsToRevalidate.add(tags.editableCourses);
-  }
-
-  if (tagsToRevalidate.size === 0) {
-    tagsToRevalidate.add(tags.courses);
-  }
-
-  for (const tag of tagsToRevalidate) {
-    revalidateTag(tag, 'max');
-  }
 }
 
 export async function createCertification(
@@ -64,14 +41,7 @@ export async function createCertification(
       access_token,
     ),
   );
-  const data = await errorHandling(result);
-
-  // Revalidate courses cache after creating certification
-  if (result.ok) {
-    await revalidateCertificationTags(options);
-  }
-
-  return data;
+  return errorHandling(result);
 }
 
 export async function updateCertification(
@@ -89,14 +59,7 @@ export async function updateCertification(
       access_token,
     ),
   );
-  const data = await errorHandling(result);
-
-  // Revalidate courses cache after updating certification
-  if (result.ok) {
-    await revalidateCertificationTags(options);
-  }
-
-  return data;
+  return errorHandling(result);
 }
 
 export async function deleteCertification(
@@ -113,14 +76,7 @@ export async function deleteCertification(
     `${getAPIUrl()}certifications/${certification_uuid}${query.size > 0 ? `?${query.toString()}` : ''}`,
     RequestBodyWithAuthHeader('DELETE', null, null, access_token),
   );
-  const data = await errorHandling(result);
-
-  // Revalidate courses cache after deleting certification
-  if (result.ok) {
-    await revalidateCertificationTags(options);
-  }
-
-  return data;
+  return errorHandling(result);
 }
 
 export async function getUserCertificates(course_uuid: string, access_token: string) {

@@ -8,7 +8,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { createActivity, createExternalVideoActivity, createFileActivity } from '@services/courses/activities';
+import { useActivityMutations } from '@/hooks/mutations/useActivityMutations';
 import NewActivityModal from '@components/Objects/Modals/Activities/Create/NewActivity';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { useCourse } from '@components/Contexts/CourseContext';
@@ -27,7 +27,8 @@ const NewActivityButton = (props: NewActivityButtonProps) => {
   const course = useCourse();
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
-  const { showConflict, refreshCourseMeta } = course;
+  const { showConflict } = course;
+  const activityMutations = useActivityMutations(course.courseStructure.course_uuid, true);
   const t = useTranslations('CourseEdit.NewActivityModal');
   const tNotify = useTranslations('DashPage.Notifications');
 
@@ -39,17 +40,10 @@ const NewActivityButton = (props: NewActivityButtonProps) => {
   const submitActivity = async (activity: any) => {
     const toast_loading = toast.loading(tNotify('creatingActivity'));
     try {
-      const response = await createActivity(activity, props.chapterId, access_token, {
-        courseUuid: course.courseStructure.course_uuid,
+      await activityMutations.createActivity(activity, props.chapterId, {
+        accessToken: access_token,
         lastKnownUpdateDate: course.courseStructure.update_date,
       });
-      if (!response.success) {
-        throw Object.assign(new Error(response.data?.detail || tNotify('uploadFailed')), {
-          status: response.status,
-          detail: response.data?.detail,
-        });
-      }
-      await refreshCourseMeta();
       toast.success(tNotify('activityCreatedSuccess'));
       setNewActivityModal(false);
     } catch (error: any) {
@@ -68,14 +62,13 @@ const NewActivityButton = (props: NewActivityButtonProps) => {
     const toast_loading = toast.loading(tNotify('uploadingAndCreating'));
 
     try {
-      await createFileActivity(
+      await activityMutations.createFileActivity(
         file,
         type,
         activity,
         chapterId,
-        access_token,
         {
-          courseUuid: course.courseStructure.course_uuid,
+          accessToken: access_token,
           lastKnownUpdateDate: course.courseStructure.update_date,
         },
         (progress) => {
@@ -85,7 +78,6 @@ const NewActivityButton = (props: NewActivityButtonProps) => {
         },
       );
 
-      await refreshCourseMeta();
       setNewActivityModal(false);
       toast.dismiss(toast_loading);
       toast.success(tNotify('fileUploadSuccess'));
@@ -104,17 +96,10 @@ const NewActivityButton = (props: NewActivityButtonProps) => {
   const submitExternalVideo = async (external_video_data: any, activity: any) => {
     const toast_loading = toast.loading(tNotify('creatingActivity'));
     try {
-      const response = await createExternalVideoActivity(external_video_data, activity, props.chapterId, access_token, {
-        courseUuid: course.courseStructure.course_uuid,
+      await activityMutations.createExternalVideo(external_video_data, activity, props.chapterId, {
+        accessToken: access_token,
         lastKnownUpdateDate: course.courseStructure.update_date,
       });
-      if (!response.success) {
-        throw Object.assign(new Error(response.data?.detail || tNotify('uploadFailed')), {
-          status: response.status,
-          detail: response.data?.detail,
-        });
-      }
-      await refreshCourseMeta();
       setNewActivityModal(false);
       toast.success(tNotify('activityCreatedSuccess'));
     } catch (error: any) {

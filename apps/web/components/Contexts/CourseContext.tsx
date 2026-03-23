@@ -2,20 +2,17 @@
 
 import {
   createEmptyCourseEditorBundle,
-  getCourseEditorBundle,
-  getCourseEditorBundleKey,
-  getCourseMetadataKey,
 } from '@services/courses/editor';
-import { createContext, use, useCallback, useEffect, useMemo, useReducer } from 'react';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
+import { createContext, use, useCallback, useEffect, useMemo } from 'react';
+import { useCourseEditorBundle } from '@/hooks/courses/useCourseEditorBundle';
+import { useCourseStructure } from '@/hooks/courses/useCourseStructure';
 import { getCourseReadinessSummary } from '@/lib/course-management';
+import { useCourseEditorStore } from '@/stores/courses';
 import type { CourseEditorBundle } from '@services/courses/editor';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import ErrorUI from '@/components/Objects/Elements/Error/Error';
-import { swrFetcher } from '@services/utils/ts/requests';
 import { useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
-import useSWR from 'swr';
 
 export interface Activity {
   id: number;
@@ -60,16 +57,6 @@ export interface CourseStructure {
   [key: string]: any;
 }
 
-// Action types for the reducer
-type CourseAction =
-  | { type: 'setCourseStructure'; payload: CourseStructure }
-  | { type: 'setIsLoaded' }
-  | { type: 'setEditorData'; payload: CourseEditorBundle }
-  | { type: 'setSectionDirty'; payload: { section: CourseSectionKey; dirty: boolean } }
-  | { type: 'clearDirtySections' }
-  | { type: 'setConflict'; payload: { message: string } }
-  | { type: 'clearConflict' };
-
 interface CourseConflictState {
   isOpen: boolean;
   message: string;
@@ -104,11 +91,7 @@ interface CourseProviderProps {
   initialCourse?: CourseStructure | null;
 }
 
-// Dispatch type
-type CourseDispatch = React.Dispatch<CourseAction>;
-
 export const CourseContext = createContext<CourseContextValue | null>(null);
-export const CourseDispatchContext = createContext<CourseDispatch | null>(null);
 
 export const CourseProvider = ({
   children,
@@ -116,64 +99,37 @@ export const CourseProvider = ({
   withUnpublishedActivities = false,
   initialCourse,
 }: CourseProviderProps) => {
-  const session = usePlatformSession();
-  const access_token = session?.data?.tokens?.access_token;
   const t = useTranslations('Contexts.Course');
-  const courseMetaUrl = getCourseMetadataKey(courseuuid, withUnpublishedActivities);
+  const openEditor = useCourseEditorStore((state) => state.openEditor);
+  const setConflict = useCourseEditorStore((state) => state.setConflict);
+  const dismissConflict = useCourseEditorStore((state) => state.dismissConflict);
+  const dirtySections = useCourseEditorStore((state) => state.dirtySections);
+  const conflict = useCourseEditorStore((state) => state.conflict);
+  const syncLastKnownUpdateDate = useCourseEditorStore((state) => state.syncLastKnownUpdateDate);
 
   const {
-    data: courseStructureData,
+    courseStructure: courseStructureData,
     error,
-    isLoading: isSWRLoading,
+    isLoading,
     mutate: mutateCourseMeta,
-  } = useSWR<CourseStructure>(
-    [courseMetaUrl, access_token ?? 'anonymous'],
-    ([url, token]: [string, string]) => swrFetcher(url, token === 'anonymous' ? undefined : token),
-    {
-      fallbackData: initialCourse || undefined,
-      revalidateOnMount: !initialCourse,
-      revalidateIfStale: !initialCourse,
-    },
-  );
+    key: courseMetaUrl,
+  } = useCourseStructure<CourseStructure>(courseuuid, {
+    withUnpublishedActivities,
+    fallbackData: initialCourse || undefined,
+  });
 
   const {
-    data: editorBundleData,
+    editorData: editorBundleData,
     isLoading: isEditorDataLoading,
     mutate: mutateEditorBundle,
-  } = useSWR<CourseEditorBundle>(getCourseEditorBundleKey(courseuuid, access_token), () =>
-    getCourseEditorBundle(courseuuid, access_token!),
-  );
-
-  const [state, dispatch] = useReducer(courseReducer, null, () => ({
-    courseStructure: {
-      ...initialCourse,
-      course_uuid: initialCourse?.course_uuid || courseuuid,
-      chapters: initialCourse?.chapters || [],
-    },
-    isLoading: !initialCourse,
-    withUnpublishedActivities,
-    dirtySections: {},
-    editorData: createEmptyCourseEditorBundle(),
-    conflict: {
-      isOpen: false,
-      message: '',
-    },
-  }));
+  } = useCourseEditorBundle(courseuuid);
 
   useEffect(() => {
     if (courseStructureData) {
-      dispatch({ type: 'setCourseStructure', payload: courseStructureData });
-      dispatch({ type: 'setIsLoaded' });
+      openEditor(courseuuid, courseStructureData.update_date);
+      syncLastKnownUpdateDate(courseStructureData.update_date);
     }
-  }, [courseStructureData]);
-
-  useEffect(() => {
-    if (editorBundleData) {
-      dispatch({ type: 'setEditorData', payload: editorBundleData });
-    }
-  }, [editorBundleData]);
-
-  const isLoading = isSWRLoading || state.isLoading;
+  }, [courseStructureData, courseuuid, openEditor, syncLastKnownUpdateDate]);
 
   const refreshCourseMeta = useCallback(async () => mutateCourseMeta(), [mutateCourseMeta]);
   const refreshEditorData = useCallback(async () => mutateEditorBundle(), [mutateEditorBundle]);
@@ -182,14 +138,22 @@ export const CourseProvider = ({
     [mutateCourseMeta, mutateEditorBundle],
   );
   const showConflict = useCallback(
-    (message?: string) => dispatch({ type: 'setConflict', payload: { message: message?.trim() || '' } }),
-    [dispatch],
+    (message?: string) => setConflict({ message: message?.trim() || '' }),
+    [setConflict],
   );
-  const dismissConflict = useCallback(() => dispatch({ type: 'clearConflict' }), [dispatch]);
+  const dismissConflictHandler = useCallback(() => dismissConflict(), [dismissConflict]);
 
   const readiness = useMemo(
-    () => getCourseReadinessSummary(state.courseStructure, state.editorData),
-    [state.courseStructure, state.editorData],
+    () =>
+      getCourseReadinessSummary(
+        courseStructureData || {
+          ...initialCourse,
+          course_uuid: initialCourse?.course_uuid || courseuuid,
+          chapters: initialCourse?.chapters || [],
+        },
+        editorBundleData || createEmptyCourseEditorBundle(),
+      ),
+    [courseStructureData, courseuuid, editorBundleData, initialCourse],
   );
 
   if (error) return <ErrorUI message={t('loadError')} />;
@@ -197,7 +161,12 @@ export const CourseProvider = ({
 
   if (courseStructureData) {
     const value: CourseContextValue = {
-      ...state,
+      courseStructure: courseStructureData,
+      isLoading: false,
+      withUnpublishedActivities,
+      dirtySections,
+      editorData: editorBundleData || createEmptyCourseEditorBundle(),
+      conflict,
       courseMetaUrl,
       isEditorDataLoading,
       readiness,
@@ -205,13 +174,11 @@ export const CourseProvider = ({
       refreshEditorData,
       refreshCourseEditor,
       showConflict,
-      dismissConflict,
+      dismissConflict: dismissConflictHandler,
     };
 
     return (
-      <CourseContext.Provider value={value}>
-        <CourseDispatchContext.Provider value={dispatch}>{children}</CourseDispatchContext.Provider>
-      </CourseContext.Provider>
+      <CourseContext.Provider value={value}>{children}</CourseContext.Provider>
     );
   }
 
@@ -224,60 +191,4 @@ export function useCourse(): CourseContextValue {
     throw new Error('useCourse must be used within a CourseProvider');
   }
   return context;
-}
-
-export function useCourseDispatch(): CourseDispatch {
-  const context = use(CourseDispatchContext);
-  if (!context) {
-    throw new Error('useCourseDispatch must be used within a CourseProvider');
-  }
-  return context;
-}
-
-function courseReducer(state: CourseState, action: CourseAction): CourseState {
-  switch (action.type) {
-    case 'setCourseStructure': {
-      return { ...state, courseStructure: action.payload };
-    }
-    case 'setIsLoaded': {
-      return { ...state, isLoading: false };
-    }
-    case 'setEditorData': {
-      return { ...state, editorData: action.payload };
-    }
-    case 'setSectionDirty': {
-      return {
-        ...state,
-        dirtySections: {
-          ...state.dirtySections,
-          [action.payload.section]: action.payload.dirty,
-        },
-      };
-    }
-    case 'clearDirtySections': {
-      return { ...state, dirtySections: {} };
-    }
-    case 'setConflict': {
-      return {
-        ...state,
-        conflict: {
-          isOpen: true,
-          message: action.payload.message,
-        },
-      };
-    }
-    case 'clearConflict': {
-      return {
-        ...state,
-        conflict: {
-          isOpen: false,
-          message: '',
-        },
-      };
-    }
-    default: {
-      const _exhaustiveCheck: never = action;
-      throw new Error(`Unhandled action type: ${_exhaustiveCheck}`);
-    }
-  }
 }

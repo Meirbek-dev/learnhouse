@@ -15,10 +15,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { AlertTriangle, GripVertical, Hexagon, Loader2, MoreHorizontal, Pencil, Save, Trash2, X } from 'lucide-react';
+import { useChapterMutations } from '@/hooks/mutations/useChapterMutations';
+import { AlertTriangle, ChevronDown, ChevronRight, GripVertical, Hexagon, Loader2, MoreHorizontal, Pencil, Save, Trash2, X } from 'lucide-react';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
-import { deleteChapter, updateChapter } from '@services/courses/chapters';
 import { useCourse } from '@components/Contexts/CourseContext';
+import { useCourseStructureStore } from '@/stores/courses';
 import { Draggable, Droppable } from '@hello-pangea/dnd';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -81,6 +82,9 @@ const ChapterElement = ({ chapter, chapterIndex, course_uuid }: ChapterElementPr
   const access_token = session?.data?.tokens?.access_token;
   const course = useCourse();
   const { showConflict } = course;
+  const { deleteChapter, updateChapter } = useChapterMutations(course_uuid, true);
+  const expandedChapterIds = useCourseStructureStore((state) => state.expandedChapterIds);
+  const toggleChapter = useCourseStructureStore((state) => state.toggleChapter);
   const t = useTranslations('CourseEdit');
 
   // State
@@ -92,6 +96,7 @@ const ChapterElement = ({ chapter, chapterIndex, course_uuid }: ChapterElementPr
 
   // Derived values
   const activities = chapter.activities ?? [];
+  const isExpanded = expandedChapterIds.has(chapter.chapter_uuid);
 
   // Handlers
   const handleStartEdit = () => {
@@ -118,11 +123,10 @@ const ChapterElement = ({ chapter, chapterIndex, course_uuid }: ChapterElementPr
 
     setIsSavingEdit(true);
     try {
-      await updateChapter(chapter.id, { name: trimmedName }, access_token, {
-        courseUuid: course_uuid,
+      await updateChapter(chapter.id, { name: trimmedName }, {
+        accessToken: access_token,
         lastKnownUpdateDate: course.courseStructure.update_date,
       });
-      await course.refreshCourseMeta();
       setIsEditing(false);
     } catch (error: any) {
       if (error?.status === 409) {
@@ -144,11 +148,10 @@ const ChapterElement = ({ chapter, chapterIndex, course_uuid }: ChapterElementPr
 
     setIsDeletingChapter(true);
     try {
-      await deleteChapter(chapter.id, access_token, {
-        courseUuid: course_uuid,
+      await deleteChapter(chapter.id, {
+        accessToken: access_token,
         lastKnownUpdateDate: course.courseStructure.update_date,
       });
-      await course.refreshCourseMeta();
       setIsDeleteDialogOpen(false);
     } catch (error: any) {
       if (error?.status === 409) {
@@ -245,7 +248,18 @@ const ChapterElement = ({ chapter, chapterIndex, course_uuid }: ChapterElementPr
                   </div>
                 ) : (
                   <div className="group flex items-center gap-2">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => toggleChapter(chapter.chapter_uuid)}
+                      className="h-7 w-7 p-0"
+                    >
+                      {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                    </Button>
                     <h3 className="truncate text-sm font-medium text-foreground sm:text-base">{chapter.name}</h3>
+                    <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                      {activities.length}
+                    </span>
                     <Button
                       size="sm"
                       variant="ghost"
@@ -324,42 +338,45 @@ const ChapterElement = ({ chapter, chapterIndex, course_uuid }: ChapterElementPr
               </AlertDialog>
             </div>
           </div>
-          <Droppable
-            droppableId={chapter.chapter_uuid}
-            type="activity"
-          >
-            {(provided, droppableSnapshot) => (
-              <div
-                ref={provided.innerRef}
-                {...provided.droppableProps}
-                className={cn(
-                  'min-h-[80px] rounded-lg px-4 py-3 transition-colors',
-                  droppableSnapshot.isDraggingOver && 'bg-muted/50',
-                )}
+          {isExpanded ? (
+            <>
+              <Droppable
+                droppableId={chapter.chapter_uuid}
+                type="activity"
               >
-                {activities.length > 0 ? (
-                  activities.map((activity, index) => (
-                    <ActivityElement
-                      key={activity.activity_uuid}
-                      course_uuid={course_uuid}
-                      activityIndex={index}
-                      activity={activity}
-                    />
-                  ))
-                ) : (
-                  <div className="flex min-h-[60px] items-center justify-center text-sm text-muted-foreground">
-                    {t('noActivities')}
+                {(provided, droppableSnapshot) => (
+                  <div
+                    ref={provided.innerRef}
+                    {...provided.droppableProps}
+                    className={cn(
+                      'min-h-[80px] rounded-lg px-4 py-3 transition-colors',
+                      droppableSnapshot.isDraggingOver && 'bg-muted/50',
+                    )}
+                  >
+                    {activities.length > 0 ? (
+                      activities.map((activity, index) => (
+                        <ActivityElement
+                          key={activity.activity_uuid}
+                          course_uuid={course_uuid}
+                          activityIndex={index}
+                          activity={activity}
+                        />
+                      ))
+                    ) : (
+                      <div className="flex min-h-[60px] items-center justify-center text-sm text-muted-foreground">
+                        {t('noActivities')}
+                      </div>
+                    )}
+                    {provided.placeholder}
                   </div>
                 )}
-                {provided.placeholder}
-              </div>
-            )}
-          </Droppable>
+              </Droppable>
 
-          {/* New Activity Button */}
-          <div className="px-4 pb-4">
-            <NewActivityButton chapterId={chapter.id} />
-          </div>
+              <div className="px-4 pb-4">
+                <NewActivityButton chapterId={chapter.id} />
+              </div>
+            </>
+          ) : null}
         </div>
       )}
     </Draggable>
