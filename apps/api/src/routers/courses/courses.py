@@ -72,6 +72,7 @@ async def api_create_course(
     about: Annotated[str | None, Form()] = None,
     thumbnail_type: Annotated[ThumbnailType, Form()] = ThumbnailType.IMAGE,
     thumbnail: UploadFile | None = None,
+    template: Annotated[str | None, Form()] = None,
     current_user: Annotated[PublicUser, Depends(get_current_user)] = None,
     checker: PermissionCheckerDep = None,
     db_session=Depends(get_db_session),
@@ -80,6 +81,8 @@ async def api_create_course(
     Create new Course
 
     **Required Permission**: `course:create:platform`
+
+    Pass ``template=starter`` to automatically seed two default chapters.
     """
     course = CourseCreate(
         name=name,
@@ -89,6 +92,7 @@ async def api_create_course(
         tags=tags,
         about=about,
         thumbnail_type=thumbnail_type,
+        template=template,
     )
     return await create_course(
         request,
@@ -148,6 +152,7 @@ async def api_get_course(
 @router.get("/{course_uuid}/meta")
 async def api_get_course_meta(
     request: Request,
+    response: Response,
     course_uuid: str,
     with_unpublished_activities: bool = False,
     current_user: Annotated[
@@ -157,9 +162,13 @@ async def api_get_course_meta(
     checker: PermissionCheckerDep = None,
 ) -> FullCourseRead:
     """
-    Get single Course Metadata (chapters, activities) by course_uuid
+    Get single Course Metadata (chapters, activities) by course_uuid.
+
+    Returns ``X-Structure-Version`` header (latest chapter update_date ISO string).
+    Clients should send this back as ``If-Match`` on reorder requests to detect
+    concurrent edits.
     """
-    return await get_course_meta(
+    result = await get_course_meta(
         request,
         course_uuid,
         with_unpublished_activities,
@@ -167,6 +176,30 @@ async def api_get_course_meta(
         db_session=db_session,
         checker=checker,
     )
+
+    # Emit the structure version so clients can detect concurrent edits
+    try:
+        from sqlmodel import select as _select
+        from src.db.courses.chapters import Chapter as _Chapter
+        from sqlalchemy import func as _func
+
+        latest_chapter_update = db_session.exec(
+            _select(_func.max(_Chapter.update_date)).where(
+                _Chapter.course_id == result.id
+            )
+        ).one_or_none()
+
+        if latest_chapter_update:
+            if hasattr(latest_chapter_update, "isoformat"):
+                version_str = latest_chapter_update.isoformat()
+            else:
+                version_str = str(latest_chapter_update)
+            response.headers["X-Structure-Version"] = version_str
+            response.headers["Access-Control-Expose-Headers"] = "X-Structure-Version"
+    except Exception:
+        pass
+
+    return result
 
 
 @router.get("/page/{page}/limit/{limit}")

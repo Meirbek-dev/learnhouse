@@ -44,9 +44,6 @@ const DynamicCanvaModal = ({ submitActivity, chapterId, course }: any) => {
           chapter_id: chapterId,
           activity_type: 'TYPE_DYNAMIC',
           activity_sub_type: 'SUBTYPE_DYNAMIC_PAGE',
-          published_version: 1,
-          version: 1,
-          course_id: course.id,
         });
       })();
     });

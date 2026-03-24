@@ -99,6 +99,8 @@ const ChapterElement = ({ chapter, chapterIndex, course_uuid, defaultExpanded = 
   const [isDeletingChapter, setIsDeletingChapter] = useState(false);
 
   const activities = chapter.activities ?? [];
+  const publishedCount = activities.filter((a) => a.published).length;
+  const draftCount = activities.length - publishedCount;
 
   const handleStartEdit = () => {
     setIsEditing(true);
@@ -285,7 +287,11 @@ const ChapterElement = ({ chapter, chapterIndex, course_uuid, defaultExpanded = 
                     <AlertDialogTitle>{t('deleteChapterTitle', { name: chapter.name })}</AlertDialogTitle>
                     <AlertDialogDescription>
                       {activities.length > 0
-                        ? t('deleteChapterConfirmationWithCount', { count: activities.length })
+                        ? t('deleteChapterConfirmationBreakdown', {
+                            count: activities.length,
+                            published: publishedCount,
+                            drafts: draftCount,
+                          })
                         : t('deleteChapterConfirmation')}
                     </AlertDialogDescription>
                   </AlertDialogHeader>
@@ -335,8 +341,9 @@ const ChapterElement = ({ chapter, chapterIndex, course_uuid, defaultExpanded = 
                         />
                       ))
                     ) : (
-                      <div className="flex min-h-[60px] items-center justify-center text-sm text-muted-foreground">
-                        {t('noActivities')}
+                      <div className="flex min-h-[60px] flex-col items-center justify-center gap-1 py-4 text-center">
+                        <p className="text-sm font-medium text-muted-foreground">{t('noActivities')}</p>
+                        <p className="text-xs text-muted-foreground/70">{t('noActivitiesHint')}</p>
                       </div>
                     )}
                     {provided.placeholder}

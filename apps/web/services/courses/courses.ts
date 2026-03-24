@@ -296,6 +296,11 @@ export async function createNewCourse(
   formData.append('tags', course_body.tags || '');
   formData.append('about', course_body.description || '');
 
+  // Pass template so the backend can seed starter chapters atomically
+  if (course_body.template && course_body.template !== 'outline') {
+    formData.append('template', course_body.template);
+  }
+
   if (thumbnail) {
     formData.append('thumbnail', thumbnail);
   }
@@ -305,6 +310,24 @@ export async function createNewCourse(
     RequestBodyFormWithAuthHeader('POST', formData, null, access_token),
   );
   return getResponseMetadata(result);
+}
+
+/**
+ * Search editable courses for the outline template combobox.
+ * Not cached — used for interactive search.
+ */
+export async function searchEditableCourses(query: string, access_token: string, limit = 20) {
+  const url = `${getAPIUrl()}courses/editable/page/1/limit/${limit}?query=${encodeURIComponent(query)}&sort_by=updated`;
+  const result = await fetch(url, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${access_token}`,
+    },
+  });
+  if (!result.ok) return [];
+  const courses = await result.json();
+  return Array.isArray(courses) ? courses : [];
 }
 
 export async function deleteCourseFromBackend(

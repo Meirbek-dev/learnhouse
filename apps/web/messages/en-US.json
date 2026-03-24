@@ -2082,7 +2082,9 @@
       "unpublishButton": "Unpublish",
       "updateFailed": "Failed to update activity",
       "updating": "Updating activity...",
-      "editButton": "Edit"
+      "editButton": "Edit",
+      "draftBadge": "Draft",
+      "liveBadge": "Live"
     },
     "ChapterElement": {
       "chapterNamePlaceholder": "Chapter name",
@@ -2212,7 +2214,10 @@
       "confirmChapter": "Confirm",
       "cancel": "Cancel",
       "selectItemHint": "Click + Add Activity under a chapter to get started",
-      "selectItemHintDescription": "Select an activity type and fill in the details. Changes are saved immediately."
+      "selectItemHintDescription": "Select an activity type and fill in the details. Changes are saved immediately.",
+      "emptyStateTitle": "Build your curriculum",
+      "emptyStateDescription": "Add your first chapter to organize lessons and activities.",
+      "emptyStateAction": "Add your first chapter"
     },
     "Conflict": {
       "title": "This course changed in another editor",
@@ -2248,7 +2253,9 @@
     "deleting": "Deleting...",
     "edit": "Edit",
     "editButton": "Edit",
-    "noActivities": "No activities yet"
+    "noActivities": "No activities yet",
+    "deleteChapterConfirmationBreakdown": "This will permanently delete the chapter and its {count, plural, =0 {0 activities} one {# activity} other {# activities}} ({published} published, {drafts} drafts).",
+    "noActivitiesHint": "Add your first activity below"
   },
   "CourseEndView": {
     "backToCourse": "Back to Course",
@@ -6510,7 +6517,7 @@
       "searchDefault": "Search...",
       "emptyDefault": "No rows found for the selected filters.",
       "visibleRows": "{count} visible rows",
-      "showingRows": "{from}\u2013{to} of {total}",
+      "showingRows": "{from}–{to} of {total}",
       "page": "Page {current} of {total}",
       "prev": "Previous",
       "next": "Next",

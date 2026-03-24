@@ -49,9 +49,6 @@ const DocumentPdfModal = ({ submitFileActivity, chapterId, course }: any) => {
             chapter_id: chapterId,
             activity_type: 'TYPE_DOCUMENT',
             activity_sub_type: 'SUBTYPE_DOCUMENT_PDF',
-            published_version: 1,
-            version: 1,
-            course_id: course.id,
           },
           chapterId,
         );

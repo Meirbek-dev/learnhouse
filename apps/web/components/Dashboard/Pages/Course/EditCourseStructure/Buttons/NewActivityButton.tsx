@@ -106,16 +106,12 @@ const NewActivityButton = (props: NewActivityButtonProps) => {
             chapter_id: props.chapterId,
             activity_type: 'TYPE_DYNAMIC',
             activity_sub_type: 'SUBTYPE_DYNAMIC_PAGE',
-            published_version: 1,
-            version: 1,
-            course_id: course.courseStructure.id,
           }
         : {
             name: t('quickCreate.codeChallengeName'),
             chapter_id: props.chapterId,
             activity_type: 'TYPE_CODE_CHALLENGE',
             activity_sub_type: 'SUBTYPE_CODE_GENERAL',
-            course_id: course.courseStructure.id,
             published: false,
             content: {
               description: '',

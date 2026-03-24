@@ -16,6 +16,7 @@ from src.db.courses.chapters import Chapter
 from src.db.courses.courses import Course
 from src.db.users import AnonymousUser, PublicUser
 from src.security.rbac import PermissionChecker
+from src.services.courses._auth import require_course_permission
 from src.services.payments.payments_access import check_activity_paid_access
 
 logger = logging.getLogger(__name__)
@@ -72,14 +73,13 @@ async def create_activity(
         raise HTTPException(status_code=404, detail="Course not found")
 
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "activity:create", resource_owner_id=course.creator_id)
+    require_course_permission("activity:create", current_user, course, checker)
 
     activity = Activity(**activity_object.model_dump())
     activity.activity_uuid = f"activity_{ULID()}"
     activity.creation_date = datetime.now()
     activity.update_date = datetime.now()
     activity.chapter_id = activity_object.chapter_id
-    activity.course_id = chapter.course_id  # keep legacy column in sync
     activity.creator_id = current_user.id
     activity.order = _next_activity_order(activity_object.chapter_id, db_session)
 

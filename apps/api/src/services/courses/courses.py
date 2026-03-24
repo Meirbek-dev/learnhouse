@@ -32,6 +32,45 @@ from src.security.rbac import PermissionChecker
 from src.services.courses.thumbnails import upload_thumbnail
 
 
+def _accessible_courses_filter(
+    query,
+    current_user: "PublicUser | AnonymousUser",
+):
+    """Apply the standard course-access filter to *query*.
+
+    Rules:
+    - Anonymous → public courses only.
+    - Authenticated → public OR not in any UserGroup OR user is member of
+      the UserGroup OR user is a resource author.
+
+    Returns the query with joins and WHERE clause applied.
+    """
+    if isinstance(current_user, AnonymousUser):
+        return query.where(Course.public)
+
+    return (
+        query.outerjoin(
+            UserGroupResource, UserGroupResource.resource_uuid == Course.course_uuid
+        )
+        .outerjoin(
+            UserGroupUser,
+            and_(
+                UserGroupUser.usergroup_id == UserGroupResource.usergroup_id,
+                UserGroupUser.user_id == current_user.id,
+            ),
+        )
+        .outerjoin(ResourceAuthor, ResourceAuthor.resource_uuid == Course.course_uuid)
+        .where(
+            or_(
+                Course.public,
+                UserGroupResource.resource_uuid.is_(None),
+                UserGroupUser.user_id == current_user.id,
+                ResourceAuthor.user_id == current_user.id,
+            )
+        )
+    )
+
+
 def _course_search_filter(search_query: str | None):
     if not search_query:
         return None
@@ -90,9 +129,10 @@ def _build_editable_course_insights(
     )
     activity_counts = dict(
         db_session.exec(
-            select(Activity.course_id, func.count(Activity.id.distinct()))
-            .where(Activity.course_id.in_(course_ids))
-            .group_by(Activity.course_id)
+            select(Chapter.course_id, func.count(Activity.id.distinct()))
+            .join(Activity, Activity.chapter_id == Chapter.id)
+            .where(Chapter.course_id.in_(course_ids))
+            .group_by(Chapter.course_id)
         ).all()
     )
     linked_usergroup_counts = dict(
@@ -436,46 +476,8 @@ async def count_courses(
     db_session: Session,
 ) -> int:
     """Count total courses for the platform with proper access filtering."""
-    # Base count query
     query = select(func.count(Course.id.distinct()))
-
-    if isinstance(current_user, AnonymousUser):
-        # For anonymous users, only count public courses
-        query = query.where(Course.public)
-    else:
-        # For authenticated users, count:
-        # 1. Public courses
-        # 2. Courses not in any UserGroup
-        # 3. Courses in UserGroups where the user is a member
-        # 4. Courses where the user is a resource author
-        query = (
-            query.outerjoin(
-                UserGroupResource, UserGroupResource.resource_uuid == Course.course_uuid
-            )
-            .outerjoin(
-                UserGroupUser,
-                and_(
-                    UserGroupUser.usergroup_id == UserGroupResource.usergroup_id,
-                    UserGroupUser.user_id == current_user.id,
-                ),
-            )
-            .outerjoin(
-                ResourceAuthor, ResourceAuthor.resource_uuid == Course.course_uuid
-            )
-            .where(
-                or_(
-                    Course.public,
-                    UserGroupResource.resource_uuid.is_(
-                        None
-                    ),  # Courses not in any UserGroup
-                    UserGroupUser.user_id
-                    == current_user.id,  # Courses in UserGroups where user is a member
-                    ResourceAuthor.user_id
-                    == current_user.id,  # Courses where user is a resource author
-                )
-            )
-        )
-
+    query = _accessible_courses_filter(query, current_user)
     return db_session.exec(query).one()
 
 
@@ -513,34 +515,7 @@ async def get_courses(
     # Step 1: Build a subquery that selects the paginated course IDs
     # with proper access filtering
     id_query = select(Course.id)
-
-    if isinstance(current_user, AnonymousUser):
-        id_query = id_query.where(Course.public)
-    else:
-        id_query = (
-            id_query.outerjoin(
-                UserGroupResource, UserGroupResource.resource_uuid == Course.course_uuid
-            )
-            .outerjoin(
-                UserGroupUser,
-                and_(
-                    UserGroupUser.usergroup_id == UserGroupResource.usergroup_id,
-                    UserGroupUser.user_id == current_user.id,
-                ),
-            )
-            .outerjoin(
-                ResourceAuthor, ResourceAuthor.resource_uuid == Course.course_uuid
-            )
-            .where(
-                or_(
-                    Course.public,
-                    UserGroupResource.resource_uuid.is_(None),
-                    UserGroupUser.user_id == current_user.id,
-                    ResourceAuthor.user_id == current_user.id,
-                )
-            )
-        )
-
+    id_query = _accessible_courses_filter(id_query, current_user)
     id_query = id_query.distinct().offset(offset).limit(limit)
     id_subquery = id_query.subquery()
 
@@ -756,6 +731,33 @@ async def search_courses(
     return course_reads
 
 
+_STARTER_CHAPTERS = [
+    {"name": "Introduction", "description": "Overview and course objectives"},
+    {"name": "Core Lessons", "description": "Main learning content"},
+]
+
+
+def _seed_starter_chapters(course: Course, creator_id: int, db_session: Session) -> None:
+    """Insert the two default chapters for the 'starter' template."""
+    from src.db.courses.chapters import Chapter
+    from ulid import ULID
+
+    for index, chapter_data in enumerate(_STARTER_CHAPTERS, start=1):
+        chapter = Chapter(
+            name=chapter_data["name"],
+            description=chapter_data["description"],
+            thumbnail_image="",
+            course_id=course.id,
+            chapter_uuid=f"chapter_{ULID()}",
+            creation_date=datetime.now(tz=UTC),
+            update_date=datetime.now(tz=UTC),
+            order=index,
+            creator_id=creator_id,
+        )
+        db_session.add(chapter)
+    db_session.commit()
+
+
 async def create_course(
     request: Request,
     course_object: CourseCreate,
@@ -823,6 +825,10 @@ async def create_course(
     db_session.add(resource_author)
     db_session.commit()
     db_session.refresh(resource_author)
+
+    # Seed starter chapters when template='starter'
+    if course_object.template == "starter" and course.id is not None:
+        _seed_starter_chapters(course, current_user.id, db_session)
 
     # Get course authors with their roles
     authors_statement = (

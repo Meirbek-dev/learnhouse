@@ -1,7 +1,7 @@
 from datetime import UTC, datetime, timezone
 from enum import Enum, StrEnum
 
-from pydantic import ConfigDict, field_validator
+from pydantic import ConfigDict, field_validator, model_validator
 from sqlalchemy import JSON, BigInteger, Column, DateTime, ForeignKey, Integer, func
 from sqlmodel import Field
 
@@ -69,13 +69,14 @@ class Activity(ActivityBase, table=True):
     chapter_id: int = Field(
         sa_column=Column(Integer, ForeignKey("chapter.id", ondelete="CASCADE"), nullable=False),
     )
-    # order within the chapter
-    order: int = Field(default=0)
-    # kept for backward compat with analytics / trail queries
+    # Denormalised FK kept for query performance; synced on create/move.
+    # The canonical source of truth is chapter_id → Chapter.course_id.
     course_id: int | None = Field(
         default=None,
         sa_column=Column(Integer, ForeignKey("course.id", ondelete="SET NULL")),
     )
+    # order within the chapter
+    order: int = Field(default=0)
     creator_id: int | None = Field(
         default=None,
         sa_column=Column(BigInteger, ForeignKey("user.id", ondelete="SET NULL")),
@@ -93,11 +94,42 @@ class Activity(ActivityBase, table=True):
     )
 
 
+_VALID_SUBTYPES: dict[ActivityTypeEnum, set[ActivitySubTypeEnum]] = {
+    ActivityTypeEnum.TYPE_VIDEO: {
+        ActivitySubTypeEnum.SUBTYPE_VIDEO_YOUTUBE,
+        ActivitySubTypeEnum.SUBTYPE_VIDEO_HOSTED,
+    },
+    ActivityTypeEnum.TYPE_DOCUMENT: {
+        ActivitySubTypeEnum.SUBTYPE_DOCUMENT_PDF,
+        ActivitySubTypeEnum.SUBTYPE_DOCUMENT_DOC,
+    },
+    ActivityTypeEnum.TYPE_DYNAMIC: {ActivitySubTypeEnum.SUBTYPE_DYNAMIC_PAGE},
+    ActivityTypeEnum.TYPE_ASSIGNMENT: {ActivitySubTypeEnum.SUBTYPE_ASSIGNMENT_ANY},
+    ActivityTypeEnum.TYPE_EXAM: {ActivitySubTypeEnum.SUBTYPE_EXAM_STANDARD},
+    ActivityTypeEnum.TYPE_CODE_CHALLENGE: {
+        ActivitySubTypeEnum.SUBTYPE_CODE_GENERAL,
+        ActivitySubTypeEnum.SUBTYPE_CODE_COMPETITIVE,
+    },
+    ActivityTypeEnum.TYPE_CUSTOM: {ActivitySubTypeEnum.SUBTYPE_CUSTOM},
+}
+
+
 class ActivityCreate(ActivityBase):
     chapter_id: int
     activity_type: ActivityTypeEnum = ActivityTypeEnum.TYPE_CUSTOM
     activity_sub_type: ActivitySubTypeEnum = ActivitySubTypeEnum.SUBTYPE_CUSTOM
     details: dict = Field(default_factory=dict, sa_column=Column(JSON))
+
+    @model_validator(mode="after")
+    def subtype_matches_type(self):
+        allowed = _VALID_SUBTYPES.get(self.activity_type, set())
+        if allowed and self.activity_sub_type not in allowed:
+            raise ValueError(
+                f"activity_sub_type {self.activity_sub_type!r} is not valid for "
+                f"activity_type {self.activity_type!r}. "
+                f"Allowed: {sorted(s.value for s in allowed)}"
+            )
+        return self
 
 
 class ActivityUpdate(ActivityBase):
@@ -107,8 +139,6 @@ class ActivityUpdate(ActivityBase):
     content: dict | None = None
     details: dict | None = None
     published: bool | None = None
-    published_version: int | None = None
-    version: int | None = None
 
 
 class ActivityRead(ActivityBase):

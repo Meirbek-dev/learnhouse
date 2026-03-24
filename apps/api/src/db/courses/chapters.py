@@ -1,6 +1,7 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 from pydantic import ConfigDict, field_validator
+from sqlalchemy import DateTime, func
 from sqlmodel import Column, Field, ForeignKey, Integer
 
 from src.db.courses.activities import ActivityRead, ActivityReadWithPermissions
@@ -21,8 +22,16 @@ class ChapterBase(SQLModelStrictBaseModel):
 class Chapter(ChapterBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
     chapter_uuid: str = ""
-    creation_date: str = ""
-    update_date: str = ""
+    creation_date: datetime = Field(
+        default_factory=lambda: datetime.now(tz=UTC),
+        sa_column=Column(DateTime(timezone=True), server_default=func.now()),
+    )
+    update_date: datetime = Field(
+        default_factory=lambda: datetime.now(tz=UTC),
+        sa_column=Column(
+            DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+        ),
+    )
     order: int = Field(default=0)
     creator_id: int | None = Field(
         default=None,
@@ -45,10 +54,22 @@ class ChapterRead(ChapterBase):
     id: int
     activities: list[ActivityRead]
     chapter_uuid: str
-    creation_date: str
-    update_date: str
+    creation_date: datetime
+    update_date: datetime
     order: int = 0
     model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    @field_validator("creation_date", "update_date", mode="before")
+    @classmethod
+    def validate_datetimes(cls, v):
+        if isinstance(v, datetime):
+            return v
+        if isinstance(v, str):
+            value = v.strip()
+            if value.endswith("Z"):
+                value = f"{value[:-1]}+00:00"
+            return datetime.fromisoformat(value)
+        return v
 
 
 class ChapterReadWithPermissions(ChapterBase):
@@ -57,10 +78,22 @@ class ChapterReadWithPermissions(ChapterBase):
     id: int
     activities: list[ActivityReadWithPermissions]
     chapter_uuid: str
-    creation_date: str
-    update_date: str
+    creation_date: datetime
+    update_date: datetime
     order: int = 0
     model_config = ConfigDict(arbitrary_types_allowed=True)
+
+    @field_validator("creation_date", "update_date", mode="before")
+    @classmethod
+    def validate_datetimes(cls, v):
+        if isinstance(v, datetime):
+            return v
+        if isinstance(v, str):
+            value = v.strip()
+            if value.endswith("Z"):
+                value = f"{value[:-1]}+00:00"
+            return datetime.fromisoformat(value)
+        return v
 
 
 class ChapterOrderPayload(PydanticStrictBaseModel):

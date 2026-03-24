@@ -2,6 +2,7 @@
 
 import {
   AlertTriangle,
+  BookOpen,
   CheckCircle2,
   Hexagon,
   Loader2,
@@ -167,32 +168,50 @@ const CurriculumEditor = () => {
           </Alert>
         )}
 
-        <DragDropContext onDragEnd={updateStructure}>
-          <Droppable
-            type="chapter"
-            droppableId="chapters"
-            direction="vertical"
-          >
-            {(provided, snapshot) => (
-              <div
-                className={cn('space-y-4', snapshot.isDraggingOver && 'bg-muted/40 rounded-xl')}
-                {...provided.droppableProps}
-                ref={provided.innerRef}
-              >
-                {course_structure.chapters.map((chapter: any, index: any) => (
-                  <ChapterElement
-                    key={chapter.chapter_uuid}
-                    chapterIndex={index}
-                    course_uuid={course_uuid}
-                    chapter={chapter}
-                    defaultExpanded={index === 0}
-                  />
-                ))}
-                {provided.placeholder}
-              </div>
-            )}
-          </Droppable>
-        </DragDropContext>
+        {course_structure.chapters.length === 0 && !showChapterInput ? (
+          <div className="mb-4 flex flex-col items-center rounded-xl border border-dashed bg-muted/20 px-6 py-12 text-center">
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-muted">
+              <BookOpen className="h-6 w-6 text-muted-foreground" />
+            </div>
+            <p className="mb-1 text-sm font-semibold text-foreground">{tStructure('emptyStateTitle')}</p>
+            <p className="mb-4 max-w-xs text-sm text-muted-foreground">{tStructure('emptyStateDescription')}</p>
+            <Button
+              variant="default"
+              size="sm"
+              onClick={handleStartNewChapter}
+            >
+              <Hexagon strokeWidth={3} className="mr-2 size-4" />
+              {tStructure('emptyStateAction')}
+            </Button>
+          </div>
+        ) : (
+          <DragDropContext onDragEnd={updateStructure}>
+            <Droppable
+              type="chapter"
+              droppableId="chapters"
+              direction="vertical"
+            >
+              {(provided, snapshot) => (
+                <div
+                  className={cn('space-y-4', snapshot.isDraggingOver && 'bg-muted/40 rounded-xl')}
+                  {...provided.droppableProps}
+                  ref={provided.innerRef}
+                >
+                  {course_structure.chapters.map((chapter: any, index: any) => (
+                    <ChapterElement
+                      key={chapter.chapter_uuid}
+                      chapterIndex={index}
+                      course_uuid={course_uuid}
+                      chapter={chapter}
+                      defaultExpanded={index === 0}
+                    />
+                  ))}
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
+          </DragDropContext>
+        )}
 
         {/* Inline chapter creation */}
         <div className="mt-4">

@@ -287,6 +287,7 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
           className={cn(
             'mb-2 flex items-center gap-3 rounded-lg border bg-card p-3 transition-all duration-200',
             snapshot.isDragging ? 'shadow-xl ring-2 ring-ring/30' : 'shadow-sm hover:shadow-md',
+            !activity.published && 'opacity-60',
           )}
         >
           {/* Drag Handle */}
@@ -325,6 +326,15 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
                 >
                   {activity.name}
                 </button>
+                {activity.published ? (
+                  <span className="shrink-0 rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400">
+                    {t('liveBadge')}
+                  </span>
+                ) : (
+                  <span className="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-900/40 dark:text-amber-400">
+                    {t('draftBadge')}
+                  </span>
+                )}
                 {canUpdate && (
                   <span className="text-xs text-muted-foreground">{t('editButton')}</span>
                 )}

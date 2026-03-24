@@ -1,5 +1,5 @@
 from collections import defaultdict
-from datetime import datetime
+from datetime import UTC, datetime
 
 from fastapi import HTTPException, Request, status
 from sqlmodel import Session, select
@@ -21,6 +21,7 @@ from src.db.courses.chapters import (
 from src.db.courses.courses import Course
 from src.db.users import AnonymousUser, PublicUser
 from src.security.rbac import PermissionChecker
+from src.services.courses._auth import require_course_permission
 
 
 def _get_chapter_by_uuid(chapter_uuid: str, db_session) -> Chapter:
@@ -70,12 +71,12 @@ async def create_chapter(
     course = db_session.exec(select(Course).where(Course.id == chapter_object.course_id)).one()
 
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "chapter:create", resource_owner_id=course.creator_id)
+    require_course_permission("chapter:create", current_user, course, checker)
 
     chapter = Chapter.model_validate(chapter_object)
     chapter.chapter_uuid = f"chapter_{ULID()}"
-    chapter.creation_date = str(datetime.now())
-    chapter.update_date = str(datetime.now())
+    chapter.creation_date = datetime.now(tz=UTC)
+    chapter.update_date = datetime.now(tz=UTC)
     chapter.creator_id = current_user.id
     chapter.order = _next_chapter_order(chapter_object.course_id, db_session)
 
@@ -119,14 +120,15 @@ async def update_chapter(
 ) -> ChapterRead:
     chapter = _get_chapter_by_uuid(chapter_uuid, db_session)
 
+    course = _get_course_for_chapter(chapter, db_session)
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "chapter:update", resource_owner_id=chapter.creator_id)
+    require_course_permission("chapter:update", current_user, course, checker)
 
     update_data = chapter_object.model_dump(exclude_unset=True)
     for field, value in update_data.items():
         setattr(chapter, field, value)
 
-    chapter.update_date = str(datetime.now())
+    chapter.update_date = datetime.now(tz=UTC)
     db_session.commit()
     db_session.refresh(chapter)
 
@@ -150,8 +152,9 @@ async def delete_chapter(
 ):
     chapter = _get_chapter_by_uuid(chapter_uuid, db_session)
 
+    course = _get_course_for_chapter(chapter, db_session)
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "chapter:delete", resource_owner_id=chapter.creator_id)
+    require_course_permission("chapter:delete", current_user, course, checker)
 
     # Activities cascade via FK (chapter_id → chapter.id ON DELETE CASCADE)
     db_session.delete(chapter)
@@ -172,7 +175,7 @@ async def move_chapter_to_order(
     course = _get_course_for_chapter(chapter, db_session)
 
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "chapter:update", resource_owner_id=course.creator_id)
+    require_course_permission("chapter:update", current_user, course, checker)
 
     old_order = chapter.order
     new_order = max(1, position)
@@ -344,7 +347,7 @@ async def reorder_chapters_and_activities(
         if not chapter:
             continue
         chapter.order = index + 1
-        chapter.update_date = str(datetime.now())
+        chapter.update_date = datetime.now(tz=UTC)
 
     # Batch-resolve activity UUIDs
     all_activity_uuids = [

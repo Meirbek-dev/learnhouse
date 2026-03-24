@@ -1,11 +1,10 @@
 'use client';
 
 import { buildCourseWorkspacePath, cleanCourseUuid, prefixedCourseUuid } from '@/lib/course-management';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { CheckCircle2, ChevronDown, Loader2, Sparkles } from 'lucide-react';
+import { CheckCircle2, ChevronDown, Loader2, Search, Sparkles } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { CourseChoiceCard, courseWorkflowSummaryCardClass } from './courseWorkflowUi';
-import { createNewCourse, getCourseMetadata } from '@services/courses/courses';
+import { createNewCourse, getCourseMetadata, searchEditableCourses } from '@services/courses/courses';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import type { CourseWizardValues } from '@/schemas/courseSchemas';
 import { valibotResolver } from '@hookform/resolvers/valibot';
@@ -14,7 +13,7 @@ import { createChapter } from '@services/courses/chapters';
 import { RadioGroup } from '@/components/ui/radio-group';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { useEffect, useMemo, useState, useTransition } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react';
 import { Input } from '@/components/ui/input';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -22,11 +21,7 @@ import { useForm } from 'react-hook-form';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
-interface CourseCreationWizardProps {
-  sourceCourses: { course_uuid: string; name: string; description?: string }[];
-}
-
-export default function CourseCreationWizard({ sourceCourses }: CourseCreationWizardProps) {
+export default function CourseCreationWizard() {
   const t = useTranslations('DashPage.CourseManagement.Wizard');
   const tCommon = useTranslations('Common');
   const router = useRouter();
@@ -50,22 +45,46 @@ export default function CourseCreationWizard({ sourceCourses }: CourseCreationWi
 
   const [isPending, startTransition] = useTransition();
 
-  const sourceOptions = useMemo(
-    () =>
-      sourceCourses.map((course) => ({
-        ...course,
-        cleanUuid: cleanCourseUuid(course.course_uuid) ?? course.course_uuid,
-      })),
-    [sourceCourses],
+  // ── Async source-course combobox ──────────────────────────────────────────
+  const [sourceQuery, setSourceQuery] = useState('');
+  const [sourceOptions, setSourceOptions] = useState<{ course_uuid: string; name: string; cleanUuid: string }[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [selectedSourceName, setSelectedSourceName] = useState('');
+  const searchDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleSourceSearch = useCallback(
+    (query: string) => {
+      setSourceQuery(query);
+      if (!accessToken) return;
+
+      if (searchDebounce.current) clearTimeout(searchDebounce.current);
+      searchDebounce.current = setTimeout(async () => {
+        setIsSearching(true);
+        try {
+          const results = await searchEditableCourses(query, accessToken, 20);
+          setSourceOptions(
+            results.map((c: any) => ({
+              course_uuid: c.course_uuid,
+              name: c.name,
+              cleanUuid: cleanCourseUuid(c.course_uuid) ?? c.course_uuid,
+            })),
+          );
+        } catch {
+          // ignore search errors
+        } finally {
+          setIsSearching(false);
+        }
+      }, 300);
+    },
+    [accessToken],
   );
 
-  const starterChapters = useMemo(
-    () => [
-      { name: t('starterChapters.introduction.name'), description: t('starterChapters.introduction.description') },
-      { name: t('starterChapters.coreLessons.name'), description: t('starterChapters.coreLessons.description') },
-    ],
-    [t],
-  );
+  // Trigger initial load when outline panel opens
+  useEffect(() => {
+    if (template === 'outline' && sourceOptions.length === 0 && accessToken) {
+      void handleSourceSearch('');
+    }
+  }, [template, sourceOptions.length, accessToken, handleSourceSearch]);
 
   useEffect(() => {
     const templateParam = searchParams.get('tpl');
@@ -83,16 +102,10 @@ export default function CourseCreationWizard({ sourceCourses }: CourseCreationWi
     }
   }, [form, searchParams]);
 
-  const canCreate = name.trim().length > 0 && description.trim().length > 0 && (template !== 'outline' || Boolean(sourceCourseUuid?.trim()));
-
-  const createStarterOutline = async (createdCourse: any) => {
-    for (const chapter of starterChapters) {
-      await createChapter(
-        { name: chapter.name, description: chapter.description, thumbnail_image: '', course_id: createdCourse.id },
-        accessToken,
-      );
-    }
-  };
+  const canCreate =
+    name.trim().length > 0 &&
+    description.trim().length > 0 &&
+    (template !== 'outline' || Boolean(sourceCourseUuid?.trim()));
 
   const createOutlineFromSource = async (createdCourse: any) => {
     if (!sourceCourseUuid) return;
@@ -127,6 +140,10 @@ export default function CourseCreationWizard({ sourceCourses }: CourseCreationWi
               learnings: JSON.stringify([]),
               tags: JSON.stringify([]),
               visibility: values.public,
+              // 'starter' template → backend seeds chapters atomically
+              // 'outline' → we copy from source after creation
+              // 'blank' → no seeding
+              template: values.template !== 'outline' ? values.template : undefined,
             },
             null,
             accessToken,
@@ -136,9 +153,9 @@ export default function CourseCreationWizard({ sourceCourses }: CourseCreationWi
             throw new Error(result.data?.detail || t('errors.creationFailed'));
           }
 
-          if (values.template === 'starter') {
-            await createStarterOutline(result.data);
-          } else if (values.template === 'outline') {
+          // 'outline' copies chapters from the source course client-side
+          // (backend doesn't know which source to copy from)
+          if (values.template === 'outline') {
             await createOutlineFromSource(result.data);
           }
 
@@ -151,8 +168,6 @@ export default function CourseCreationWizard({ sourceCourses }: CourseCreationWi
       })();
     });
   });
-
-  const visibility = isPublic ? 'public' : 'private';
 
   const summaryContent = (
     <div className="space-y-4 text-sm text-muted-foreground">
@@ -177,9 +192,7 @@ export default function CourseCreationWizard({ sourceCourses }: CourseCreationWi
       {template === 'outline' && sourceCourseUuid ? (
         <div>
           <div className="text-muted-foreground">{t('summary.sourceCourse')}</div>
-          <div className="mt-1">
-            {sourceOptions.find((c) => c.cleanUuid === sourceCourseUuid)?.name || t('summary.selectedOutlineCourse')}
-          </div>
+          <div className="mt-1">{selectedSourceName || t('summary.selectedOutlineCourse')}</div>
         </div>
       ) : null}
     </div>
@@ -336,33 +349,55 @@ export default function CourseCreationWizard({ sourceCourses }: CourseCreationWi
                   {template === 'outline' ? (
                     <div className="space-y-2">
                       <label
-                        htmlFor="source-course"
+                        htmlFor="source-course-search"
                         className="text-sm font-medium text-foreground"
                       >
                         {t('template.sourceCourse')}
                       </label>
-                      <Select
-                        value={sourceCourseUuid ?? undefined}
-                        onValueChange={(value) => {
-                          if (value) form.setValue('sourceCourseUuid', value);
-                        }}
-                        items={sourceOptions.map((course) => ({ value: course.cleanUuid, label: course.name }))}
-                      >
-                        <SelectTrigger id="source-course">
-                          <SelectValue placeholder={t('template.selectCourse')} />
-                        </SelectTrigger>
-                        <SelectContent>
+
+                      {/* Async search input */}
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                        <Input
+                          id="source-course-search"
+                          value={sourceQuery}
+                          onChange={(e) => handleSourceSearch(e.target.value)}
+                          placeholder={t('template.selectCourse')}
+                          className="pl-9"
+                        />
+                        {isSearching && (
+                          <Loader2 className="absolute right-3 top-1/2 size-4 -translate-y-1/2 animate-spin text-muted-foreground" />
+                        )}
+                      </div>
+
+                      {/* Results list */}
+                      {sourceOptions.length > 0 && (
+                        <div className="max-h-48 overflow-y-auto rounded-lg border bg-popover shadow-md">
                           {sourceOptions.map((course) => (
-                            <SelectItem
+                            <button
                               key={course.course_uuid}
-                              value={course.cleanUuid}
+                              type="button"
+                              className={cn(
+                                'w-full px-3 py-2 text-left text-sm transition-colors hover:bg-accent',
+                                sourceCourseUuid === course.cleanUuid && 'bg-accent font-medium',
+                              )}
+                              onClick={() => {
+                                form.setValue('sourceCourseUuid', course.cleanUuid);
+                                setSelectedSourceName(course.name);
+                                setSourceQuery(course.name);
+                              }}
                             >
                               {course.name}
-                            </SelectItem>
+                            </button>
                           ))}
-                        </SelectContent>
-                      </Select>
-                      <div className="text-sm text-muted-foreground">{t('template.sourceCourseHelp')}</div>
+                        </div>
+                      )}
+
+                      {sourceCourseUuid && (
+                        <p className="text-xs text-muted-foreground">
+                          {t('template.sourceCourseHelp')}
+                        </p>
+                      )}
                     </div>
                   ) : null}
                 </CollapsibleContent>

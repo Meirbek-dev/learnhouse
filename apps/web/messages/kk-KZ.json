@@ -2082,7 +2082,9 @@
       "unpublishButton": "Жариялаудан алу",
       "updateFailed": "Белсенділікті жаңарту мүмкін болмады",
       "updating": "Белсенділік жаңартылуда...",
-      "editButton": "Өңдеу"
+      "editButton": "Өңдеу",
+      "draftBadge": "Жоба",
+      "liveBadge": "Жарияланған"
     },
     "ChapterElement": {
       "chapterNamePlaceholder": "Тарау атауы",
@@ -2212,7 +2214,10 @@
       "confirmChapter": "Растау",
       "cancel": "Болдырмау",
       "selectItemHint": "Тарау астындағы + Белсенділік қосу батырмасын басыңыз",
-      "selectItemHintDescription": "Белсенділік түрін таңдап, мәліметтерді толтырыңыз. Өзгерістер бірден сақталады."
+      "selectItemHintDescription": "Белсенділік түрін таңдап, мәліметтерді толтырыңыз. Өзгерістер бірден сақталады.",
+      "emptyStateTitle": "Оқу бағдарламасын жасаңыз",
+      "emptyStateDescription": "Сабақтар мен тапсырмаларды ұйымдастыру үшін бірінші тарауды қосыңыз.",
+      "emptyStateAction": "Бірінші тарауды қосу"
     },
     "Conflict": {
       "title": "Бұл курс басқа редакторда өзгертілді",
@@ -2248,7 +2253,9 @@
     "deleting": "Жойылуда...",
     "edit": "Өңдеу",
     "editButton": "Өңдеу",
-    "noActivities": "Белсенділіктер әлі жоқ"
+    "noActivities": "Белсенділіктер әлі жоқ",
+    "deleteChapterConfirmationBreakdown": "Бұл тарауды және оның {count, plural, =0 {0 сабақты} one {# сабақты} other {# сабақты}} ({published} жарияланған, {drafts} жоба) біржола жояды.",
+    "noActivitiesHint": "Төменде бірінші тапсырманы қосыңыз"
   },
   "CourseEndView": {
     "backToCourse": "Курсқа оралу",
@@ -6525,7 +6532,7 @@
       "searchDefault": "Іздеу...",
       "emptyDefault": "Таңдалған фильтрлер бойынша жолдар табылмады.",
       "visibleRows": "{count} көрінетін жол",
-      "showingRows": "{total} ішіндегі {from}\u2013{to}",
+      "showingRows": "{total} ішіндегі {from}–{to}",
       "page": "{total} беттен {current} бет",
       "prev": "Алдыңғы",
       "next": "Келесі",

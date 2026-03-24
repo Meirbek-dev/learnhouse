@@ -61,7 +61,6 @@ export default function CodeChallengeActivityModal({
       activity_type: 'TYPE_CODE_CHALLENGE',
       activity_sub_type: values.subtype === 'competitive' ? 'SUBTYPE_CODE_COMPETITIVE' : 'SUBTYPE_CODE_GENERAL',
       chapter_id: chapterId,
-      course_id: course.id,
       published: false,
       content: {
         description: values.description,
