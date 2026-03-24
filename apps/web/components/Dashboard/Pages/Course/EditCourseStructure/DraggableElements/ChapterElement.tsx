@@ -277,13 +277,13 @@ const ChapterElement = ({ chapter, chapterIndex, course_uuid, defaultExpanded = 
                   <MoreHorizontal className="h-4 w-4" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem onSelect={handleStartEdit}>
+                  <DropdownMenuItem onClick={handleStartEdit}>
                     <Pencil className="mr-2 h-4 w-4" />
                     {t('edit')}
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     className="text-destructive focus:text-destructive"
-                    onSelect={() => setIsDeleteDialogOpen(true)}
+                    onClick={() => setIsDeleteDialogOpen(true)}
                   >
                     <Trash2 className="mr-2 h-4 w-4" />
                     {t('deleteChapterButton')}

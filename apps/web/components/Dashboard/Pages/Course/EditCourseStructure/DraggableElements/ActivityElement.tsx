@@ -393,13 +393,13 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 {canUpdate ? (
-                  <DropdownMenuItem onSelect={handleStartEdit}>
+                  <DropdownMenuItem onClick={handleStartEdit}>
                     <Pencil className="mr-2 h-4 w-4" />
                     {t('editButton')}
                   </DropdownMenuItem>
                 ) : null}
                 <DropdownMenuItem
-                  onSelect={() => {
+                  onClick={() => {
                     window.open(
                       `${getAbsoluteUrl('')}/course/${course_uuid.replace('course_', '')}/activity/${activity.activity_uuid.replace('activity_', '')}`,
                       '_blank',
@@ -412,7 +412,7 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
                 </DropdownMenuItem>
                 {canUpdate ? (
                   <DropdownMenuItem
-                    onSelect={handleTogglePublish}
+                    onClick={handleTogglePublish}
                     disabled={isUpdatingPublish}
                   >
                     {activity.published ? <Lock className="mr-2 h-4 w-4" /> : <Globe className="mr-2 h-4 w-4" />}
@@ -422,7 +422,7 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
                 {canDelete ? (
                   <DropdownMenuItem
                     className="text-destructive focus:text-destructive"
-                    onSelect={() => setIsDeleteDialogOpen(true)}
+                    onClick={() => setIsDeleteDialogOpen(true)}
                   >
                     <Trash2 className="mr-2 h-4 w-4" />
                     {t('deleteButton')}
