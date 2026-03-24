@@ -285,7 +285,7 @@ export default function ExamActivity({ activity, course }: ExamActivityProps) {
             >
               <ExamSettings
                 exam={exam}
-                courseId={course.id}
+                courseUuid={course.course_uuid}
                 accessToken={accessToken!}
                 onSettingsUpdated={() => mutateExam()}
               />

@@ -38,11 +38,6 @@ def _get_course_for_activity(activity: Activity, db_session: Session) -> Course:
             course = db_session.exec(select(Course).where(Course.id == chapter.course_id)).first()
             if course:
                 return course
-    # Fall back to course_id (legacy column)
-    if activity.course_id:
-        course = db_session.exec(select(Course).where(Course.id == activity.course_id)).first()
-        if course:
-            return course
     raise HTTPException(status_code=404, detail="Course not found")
 
 
@@ -128,24 +123,7 @@ async def get_activity(
         can_delete=can_delete,
         is_owner=is_owner,
         is_creator=is_owner,
-        available_actions=[a for a, ok in {"update": can_update, "delete": can_delete}.items() if ok],
     )
-
-
-async def get_activityby_id(
-    request: Request,
-    activity_id: int,
-    current_user: PublicUser,
-    db_session: Session,
-):
-    activity = db_session.exec(select(Activity).where(Activity.id == activity_id)).first()
-    if not activity:
-        raise HTTPException(status_code=404, detail="Activity not found")
-
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "activity:read", resource_owner_id=activity.creator_id)
-
-    return ActivityRead.model_validate(activity)
 
 
 async def update_activity(
@@ -210,30 +188,3 @@ async def delete_activity(
 ####################################################
 
 
-async def get_activities(
-    request: Request,
-    coursechapter_id: int,
-    current_user: PublicUser | AnonymousUser,
-    db_session: Session,
-) -> list[ActivityRead]:
-    chapter = db_session.exec(select(Chapter).where(Chapter.id == coursechapter_id)).first()
-    if not chapter:
-        raise HTTPException(status_code=404, detail="Chapter not found")
-
-    course = db_session.exec(select(Course).where(Course.id == chapter.course_id)).first()
-    if not course:
-        raise HTTPException(status_code=404, detail="Course not found")
-
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "activity:read")
-
-    activities = db_session.exec(
-        select(Activity)
-        .where(Activity.chapter_id == coursechapter_id, Activity.published)
-        .order_by(Activity.order)
-    ).all()
-
-    if not activities:
-        raise HTTPException(status_code=404, detail="No published activities found")
-
-    return [ActivityRead.model_validate(a) for a in activities]

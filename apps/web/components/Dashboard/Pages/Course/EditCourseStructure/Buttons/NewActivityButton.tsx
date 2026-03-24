@@ -8,11 +8,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import { cleanActivityUuid, cleanCourseUuid } from '@/lib/course-management';
 import NewActivityModal from '@components/Objects/Modals/Activities/Create/NewActivity';
 import { useActivityMutations } from '@/hooks/mutations/useActivityMutations';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { Button } from '@/components/ui/button';
+import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Layers } from 'lucide-react';
 import { useState } from 'react';
@@ -25,6 +27,7 @@ interface NewActivityButtonProps {
 const NewActivityButton = (props: NewActivityButtonProps) => {
   const [newActivityModal, setNewActivityModal] = useState(false);
   const course = useCourse();
+  const router = useRouter();
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const activityMutations = useActivityMutations(course.courseStructure.course_uuid, true);
@@ -38,11 +41,13 @@ const NewActivityButton = (props: NewActivityButtonProps) => {
   const submitActivity = async (activity: any) => {
     const toast_loading = toast.loading(tNotify('creatingActivity'));
     try {
-      await activityMutations.createActivity(activity, props.chapterId, access_token);
+      const response = await activityMutations.createActivity(activity, props.chapterId, access_token);
       toast.success(tNotify('activityCreatedSuccess'));
       setNewActivityModal(false);
+      return response;
     } catch (error: any) {
       toast.error(error?.message || tNotify('uploadFailed'));
+      throw error;
     } finally {
       toast.dismiss(toast_loading);
     }
@@ -88,6 +93,53 @@ const NewActivityButton = (props: NewActivityButtonProps) => {
     }
   };
 
+  const createAndOpenActivity = async (kind: 'dynamic' | 'codechallenge') => {
+    if (!access_token) {
+      toast.error(tNotify('uploadFailed'));
+      return;
+    }
+
+    const activityPayload =
+      kind === 'dynamic'
+        ? {
+            name: t('quickCreate.dynamicPageName'),
+            chapter_id: props.chapterId,
+            activity_type: 'TYPE_DYNAMIC',
+            activity_sub_type: 'SUBTYPE_DYNAMIC_PAGE',
+            published_version: 1,
+            version: 1,
+            course_id: course.courseStructure.id,
+          }
+        : {
+            name: t('quickCreate.codeChallengeName'),
+            chapter_id: props.chapterId,
+            activity_type: 'TYPE_CODE_CHALLENGE',
+            activity_sub_type: 'SUBTYPE_CODE_GENERAL',
+            course_id: course.courseStructure.id,
+            published: false,
+            content: {
+              description: '',
+              difficulty: 'medium',
+            },
+          };
+
+    const response = await submitActivity(activityPayload);
+    const createdActivityUuid = response?.data?.activity_uuid;
+
+    if (!createdActivityUuid) {
+      return;
+    }
+
+    const cleanCourse = cleanCourseUuid(course.courseStructure.course_uuid);
+    const cleanActivity = cleanActivityUuid(createdActivityUuid);
+    const destination =
+      kind === 'dynamic'
+        ? `/course/${cleanCourse}/activity/${cleanActivity}/edit`
+        : `/course/${cleanCourse}/activity/${cleanActivity}/editor`;
+
+    router.push(destination);
+  };
+
   return (
     <div className="flex justify-center">
       <Dialog
@@ -108,6 +160,7 @@ const NewActivityButton = (props: NewActivityButtonProps) => {
             submitFileActivity={submitFileActivity}
             submitExternalVideo={submitExternalVideo}
             submitActivity={submitActivity}
+            createAndOpenActivity={createAndOpenActivity}
             chapterId={props.chapterId}
             course={course}
           />

@@ -55,12 +55,12 @@ const createValidationSchema = (
 
 interface ExamSettingsProps {
   exam: any;
-  courseId: number;
+  courseUuid: string;
   accessToken: string;
   onSettingsUpdated: () => void;
 }
 
-export default function ExamSettings({ exam, courseId, accessToken, onSettingsUpdated }: ExamSettingsProps) {
+export default function ExamSettings({ exam, courseUuid, accessToken, onSettingsUpdated }: ExamSettingsProps) {
   const t = useTranslations('Components.ExamSettings');
   const [isPending, startTransition] = useTransition();
 
@@ -420,7 +420,7 @@ export default function ExamSettings({ exam, courseId, accessToken, onSettingsUp
               {form.watch('access_mode') === 'WHITELIST' && (
                 <WhitelistManagement
                   examUuid={exam.exam_uuid}
-                  courseId={courseId}
+                  courseUuid={courseUuid}
                   accessToken={accessToken}
                   currentWhitelist={settings.whitelist_user_ids || []}
                   onWhitelistUpdated={onSettingsUpdated}

@@ -18,9 +18,7 @@ import {
   Loader2,
   MoreHorizontal,
   Pencil,
-  Save,
   Trash2,
-  X,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -76,7 +74,6 @@ interface ChapterElementProps {
   chapterIndex: number;
   course_uuid: string;
   defaultExpanded?: boolean;
-  onAddActivity?: (chapterId: number) => void;
 }
 
 interface PlatformSession {
@@ -87,7 +84,7 @@ interface PlatformSession {
   };
 }
 
-const ChapterElement = ({ chapter, chapterIndex, course_uuid, defaultExpanded = false, onAddActivity }: ChapterElementProps) => {
+const ChapterElement = ({ chapter, chapterIndex, course_uuid, defaultExpanded = false }: ChapterElementProps) => {
   const session = usePlatformSession() as PlatformSession;
   const access_token = session?.data?.tokens?.access_token;
   const { deleteChapter, updateChapter } = useChapterMutations(course_uuid, true);
@@ -115,7 +112,7 @@ const ChapterElement = ({ chapter, chapterIndex, course_uuid, defaultExpanded = 
 
   const handleSaveEdit = async () => {
     if (!access_token) {
-      toast.error('Authentication required');
+      toast.error(t('authRequired'));
       return;
     }
 
@@ -139,7 +136,7 @@ const ChapterElement = ({ chapter, chapterIndex, course_uuid, defaultExpanded = 
 
   const handleDeleteChapter = async () => {
     if (!access_token) {
-      toast.error('Authentication required');
+      toast.error(t('authRequired'));
       return;
     }
 
@@ -158,11 +155,15 @@ const ChapterElement = ({ chapter, chapterIndex, course_uuid, defaultExpanded = 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       e.preventDefault();
-      handleSaveEdit();
+      void handleSaveEdit();
     } else if (e.key === 'Escape') {
       e.preventDefault();
       handleCancelEdit();
     }
+  };
+
+  const handleEditBlur = () => {
+    void handleSaveEdit();
   };
 
   if (!chapter?.chapter_uuid) {
@@ -212,31 +213,15 @@ const ChapterElement = ({ chapter, chapterIndex, course_uuid, defaultExpanded = 
                       value={editedName}
                       onChange={(e) => setEditedName(e.target.value)}
                       onKeyDown={handleKeyDown}
+                      onBlur={handleEditBlur}
                       placeholder={t('chapterNamePlaceholder')}
                       className="h-8 text-sm"
                       disabled={isSavingEdit}
                     />
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={handleSaveEdit}
-                      disabled={isSavingEdit || !editedName.trim()}
-                      className="h-8 w-8 p-0"
-                    >
-                      {isSavingEdit ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={handleCancelEdit}
-                      disabled={isSavingEdit}
-                      className="h-8 w-8 p-0"
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
+                    {isSavingEdit ? <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" /> : null}
                   </div>
                 ) : (
-                  <div className="group flex items-center gap-2">
+                  <div className="flex items-center gap-2">
                     <Button
                       size="sm"
                       variant="ghost"
@@ -245,18 +230,16 @@ const ChapterElement = ({ chapter, chapterIndex, course_uuid, defaultExpanded = 
                     >
                       {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
                     </Button>
-                    <h3 className="truncate text-sm font-medium text-foreground sm:text-base">{chapter.name}</h3>
+                    <button
+                      type="button"
+                      onClick={handleStartEdit}
+                      className="truncate rounded-sm border-b border-transparent text-left text-sm font-medium text-foreground transition-colors hover:border-border hover:text-foreground/80 sm:text-base"
+                    >
+                      {chapter.name}
+                    </button>
                     <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
                       {activities.length}
                     </span>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={handleStartEdit}
-                      className="h-7 w-7 p-0 opacity-0 transition-opacity group-hover:opacity-100"
-                    >
-                      <Pencil className="h-3.5 w-3.5 text-muted-foreground" />
-                    </Button>
                   </div>
                 )}
               </div>
@@ -362,18 +345,7 @@ const ChapterElement = ({ chapter, chapterIndex, course_uuid, defaultExpanded = 
               </Droppable>
 
               <div className="px-4 pb-4">
-                {onAddActivity ? (
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="w-full"
-                    onClick={() => onAddActivity(chapter.id)}
-                  >
-                    + {t('addActivityButton')}
-                  </Button>
-                ) : (
-                  <NewActivityButton chapterId={chapter.id} />
-                )}
+                <NewActivityButton chapterId={chapter.id} />
               </div>
             </>
           ) : null}

@@ -45,23 +45,23 @@ export const AssignmentProvider = ({
     (url) => swrFetcher(url, accessToken),
   );
 
-  const course_id = assignment?.course_id;
+  const course_uuid = assignment?.course_uuid;
 
   const { data: course_object, error: courseObjectError } = useSWR(
-    course_id ? `${getAPIUrl()}courses/id/${course_id}` : null,
+    course_uuid ? `${getAPIUrl()}courses/${course_uuid}` : null,
     (url) => swrFetcher(url, accessToken),
   );
 
-  const activity_id = assignment?.activity_id;
+  const activity_uuid = assignment?.activity_uuid;
 
   const { data: activity_object, error: activityObjectError } = useSWR(
-    activity_id ? `${getAPIUrl()}activities/id/${activity_id}` : null,
+    activity_uuid ? `${getAPIUrl()}activities/${activity_uuid}` : null,
     (url) => swrFetcher(url, accessToken),
   );
 
   // Derive assignmentsFull (no explicit memoization - cheap computation)
   const assignmentsFull: AssignmentContextType =
-    assignment && assignment_tasks && (!course_id || course_object) && (!activity_id || activity_object)
+    assignment && assignment_tasks && (!course_uuid || course_object) && (!activity_uuid || activity_object)
       ? {
           assignment_object: assignment,
           assignment_tasks,
@@ -76,7 +76,7 @@ export const AssignmentProvider = ({
         };
 
   const isLoading =
-    !(assignment && assignment_tasks) || (course_id && !course_object) || (activity_id && !activity_object);
+    !(assignment && assignment_tasks) || (course_uuid && !course_object) || (activity_uuid && !activity_object);
   const hasError = assignmentError || assignmentTasksError || courseObjectError || activityObjectError;
 
   if (hasError) return <ErrorUI message={t('loadError')} />;

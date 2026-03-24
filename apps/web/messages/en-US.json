@@ -880,6 +880,7 @@
   },
   "Common": {
     "close": "Close",
+    "cancel": "Cancel",
     "DataTable": {
       "searchPlaceholder": "Search table...",
       "emptyMessage": "No rows found.",
@@ -2073,8 +2074,8 @@
       "failedToUpdateActivityName": "Failed to update activity name",
       "noAccessToken": "Authentication required",
       "ownerLabel": "Owner",
-      "previewTooltip": "Preview Activity",
       "ownerBadge": "You created this activity",
+      "previewTooltip": "Preview Activity",
       "publish": "Publish",
       "publishButton": "Publish",
       "unpublish": "Unpublish",
@@ -2186,6 +2187,10 @@
     "NewActivityModal": {
       "buttonText": "Add Activity",
       "description": "Create a new activity for this chapter.",
+      "quickCreate": {
+        "codeChallengeName": "New Code Challenge",
+        "dynamicPageName": "New Dynamic Page"
+      },
       "title": "Add Activity"
     },
     "Structure": {
@@ -2197,6 +2202,7 @@
       "chapterCreateFailed": "Failed to create chapter",
       "chapterCreatedSuccess": "Chapted created successfully",
       "creatingChapter": "Creating...",
+      "chapterNamePlaceholder": "Chapter name",
       "saveOrderError": "Failed to save the new content order",
       "savingOrder": "Applying curriculum changes",
       "curriculumChangesApplyImmediately": "Curriculum changes apply immediately",
@@ -3496,12 +3502,10 @@
         },
         "steps": {
           "basics": "Basics",
-          "launch": "Launch",
           "template": "Template"
         },
         "summary": {
           "heading": "Setup summary",
-          "launchDestination": "Launch destination",
           "selectedOutlineCourse": "Selected outline course",
           "sourceCourse": "Source course",
           "template": "Template",
@@ -3560,13 +3564,11 @@
         "previewButton": "Preview",
         "reviewButton": "Review",
         "tabs": {
-          "access": "Access",
           "certificate": "Certificate",
-          "collaboration": "Collaboration",
-          "curriculum": "Curriculum",
+          "content": "Content",
           "details": "Details",
-          "overview": "Overview",
-          "reviewPublish": "Review & Publish"
+          "publish": "Review & Publish",
+          "settings": "Settings"
         },
         "untitledCourse": "Untitled course",
         "unsavedDialogLeave": "Leave workspace",

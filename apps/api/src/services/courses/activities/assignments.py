@@ -46,6 +46,21 @@ from src.services.trail.trail import check_trail_presence
 
 logger = logging.getLogger(__name__)
 
+
+def _build_assignment_read(
+    assignment: Assignment,
+    *,
+    course_uuid: str | None = None,
+    activity_uuid: str | None = None,
+) -> AssignmentRead:
+    return AssignmentRead.model_validate(
+        assignment,
+        update={
+            "course_uuid": course_uuid,
+            "activity_uuid": activity_uuid,
+        },
+    )
+
 ## > Assignments CRUD
 
 
@@ -87,7 +102,7 @@ async def create_assignment(
     db_session.refresh(assignment)
 
     # return assignment read
-    return AssignmentRead.model_validate(assignment)
+    return _build_assignment_read(assignment)
 
 
 async def read_assignment(
@@ -126,7 +141,12 @@ async def read_assignment(
     )
 
     # return assignment read
-    return AssignmentRead.model_validate(assignment)
+    activity = db_session.exec(select(Activity).where(Activity.id == assignment.activity_id)).first()
+    return _build_assignment_read(
+        assignment,
+        course_uuid=course.course_uuid,
+        activity_uuid=activity.activity_uuid if activity else None,
+    )
 
 
 async def read_assignment_from_activity_uuid(
@@ -175,7 +195,11 @@ async def read_assignment_from_activity_uuid(
     )
 
     # return assignment read
-    return AssignmentRead.model_validate(assignment)
+    return _build_assignment_read(
+        assignment,
+        course_uuid=course.course_uuid,
+        activity_uuid=activity.activity_uuid,
+    )
 
 
 async def update_assignment(
@@ -226,7 +250,12 @@ async def update_assignment(
     db_session.refresh(assignment)
 
     # return assignment read
-    return AssignmentRead.model_validate(assignment)
+    activity = db_session.exec(select(Activity).where(Activity.id == assignment.activity_id)).first()
+    return _build_assignment_read(
+        assignment,
+        course_uuid=course.course_uuid,
+        activity_uuid=activity.activity_uuid if activity else None,
+    )
 
 
 async def delete_assignment(

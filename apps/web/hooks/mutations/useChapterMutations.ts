@@ -3,7 +3,6 @@
 import { createChapter, deleteChapter, updateChapter, updateCourseOrderStructure } from '@services/courses/chapters';
 import type { ChapterCreateValues, ChapterUpdateValues, CourseOrderPayload } from '@/schemas/chapterSchemas';
 import { courseKeys } from '@/hooks/courses/courseKeys';
-import { assertSuccess } from '@/lib/api/assertSuccess';
 import { useSWRConfig } from 'swr';
 
 export function useChapterMutations(courseUuid: string, withUnpublishedActivities = true) {
@@ -24,7 +23,7 @@ export function useChapterMutations(courseUuid: string, withUnpublishedActivitie
     );
 
     try {
-      const createdChapter = assertSuccess(await createChapter(payload, accessToken));
+      const createdChapter = await createChapter(payload, accessToken);
 
       await mutate(
         structureKey,
@@ -80,7 +79,7 @@ export function useChapterMutations(courseUuid: string, withUnpublishedActivitie
     );
 
     try {
-      const response = assertSuccess(await updateChapter(chapterUuid, payload, accessToken));
+      const response = await updateChapter(chapterUuid, payload, accessToken);
       await mutate(structureKey);
       return response;
     } catch (error) {
@@ -105,7 +104,7 @@ export function useChapterMutations(courseUuid: string, withUnpublishedActivitie
     );
 
     try {
-      const response = assertSuccess(await deleteChapter(chapterUuid, accessToken));
+      const response = await deleteChapter(chapterUuid, accessToken);
       await mutate(structureKey);
       return response;
     } catch (error) {

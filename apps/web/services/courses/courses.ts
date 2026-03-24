@@ -264,31 +264,6 @@ export async function getCourse(course_uuid: string, _next?: any, access_token?:
   return fetchCourse(course_uuid, access_token);
 }
 
-/**
- * Cached fetch for course by ID
- */
-async function fetchCourseById(course_id: number, access_token: string) {
-  'use cache';
-  cacheTag(tags.courses);
-  cacheLife(CacheProfiles.courses);
-
-  const result = await fetch(`${getAPIUrl()}courses/id/${course_id}`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${access_token}`,
-    },
-  });
-  return await errorHandling(result);
-}
-
-export async function getCourseById(course_id: number, _next?: any, access_token?: string) {
-  if (!access_token) {
-    throw new Error('Access token required');
-  }
-  return fetchCourseById(course_id, access_token);
-}
-
 export async function updateCourseThumbnail(
   course_uuid: string,
   formData: FormData,

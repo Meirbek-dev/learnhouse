@@ -23,13 +23,17 @@ export function cleanCourseUuid(courseUuid: string): string {
   return courseUuid.replace(/^course_/, '');
 }
 
+export function cleanActivityUuid(activityUuid: string): string {
+  return activityUuid.replace(/^activity_/, '');
+}
+
 export function prefixedCourseUuid(courseUuid: string): string {
   return courseUuid.startsWith('course_') ? courseUuid : `course_${courseUuid}`;
 }
 
-export function buildCourseWorkspacePath(courseUuid: string, stage: CourseWorkspaceStage = 'overview'): string {
+export function buildCourseWorkspacePath(courseUuid: string, stage: CourseWorkspaceStage = 'curriculum'): string {
   const cleanUuid = cleanCourseUuid(courseUuid);
-  return stage === 'overview' ? `/dash/courses/${cleanUuid}` : `/dash/courses/${cleanUuid}/${stage}`;
+  return stage === 'overview' ? `/dash/courses/${cleanUuid}/curriculum` : `/dash/courses/${cleanUuid}/${stage}`;
 }
 
 export function buildCourseCreationPath(sourceCourseUuid?: string): string {

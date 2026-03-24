@@ -365,31 +365,6 @@ export async function getActivity(activity_uuid: string, _next?: any, access_tok
   return fetchActivity(activity_uuid, access_token);
 }
 
-/**
- * Cached fetch for activity by ID
- */
-async function fetchActivityById(activity_id: number, access_token: string) {
-  'use cache';
-  cacheTag(tags.activities);
-  cacheLife(CacheProfiles.activities);
-
-  const result = await fetch(`${getAPIUrl()}activities/id/${activity_id}`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${access_token}`,
-    },
-  });
-  return result.json();
-}
-
-export async function getActivityByID(activity_id: number, _next?: any, access_token?: string) {
-  if (!access_token) {
-    throw new Error('Access token required');
-  }
-  return fetchActivityById(activity_id, access_token);
-}
-
 export async function deleteActivity(activity_uuid: string, access_token: string) {
   const result = await fetch(
     `${getAPIUrl()}activities/${activity_uuid}`,

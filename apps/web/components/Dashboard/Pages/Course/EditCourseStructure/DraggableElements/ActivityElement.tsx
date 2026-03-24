@@ -23,11 +23,9 @@ import {
   Lock,
   MoreHorizontal,
   Pencil,
-  Save,
   Sparkles,
   Trash2,
   Video,
-  X,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -39,6 +37,7 @@ import { deleteAssignmentUsingActivityUUID, getAssignmentFromActivityUUID } from
 import { CourseWorkflowBadge } from '@components/Dashboard/Courses/courseWorkflowUi';
 import { useActivityMutations } from '@/hooks/mutations/useActivityMutations';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
+import { cleanActivityUuid, cleanCourseUuid } from '@/lib/course-management';
 import ToolTip from '@/components/Objects/Elements/Tooltip/Tooltip';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { getAbsoluteUrl } from '@services/config/config';
@@ -167,8 +166,6 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
   const canUpdate = activity.can_update ?? false;
   const canDelete = activity.can_delete ?? false;
   const isOwner = activity.is_owner ?? false;
-  const availableActions = activity.available_actions ?? [];
-
   // Handlers
   const handleStartEdit = () => {
     setIsEditing(true);
@@ -182,7 +179,7 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
 
   const handleSaveEdit = async () => {
     if (!access_token) {
-      toast.error('Authentication required');
+      toast.error(t('noAccessToken'));
       return;
     }
 
@@ -194,11 +191,7 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
 
     setIsSavingEdit(true);
     try {
-      await updateActivity(
-        activity.activity_uuid,
-        { name: trimmedName, activity_type: activity.activity_type },
-        access_token,
-      );
+      await updateActivity(activity.activity_uuid, { name: trimmedName }, access_token);
       toast.success(t('activityNameUpdatedSuccess'));
       setIsEditing(false);
     } catch (error: any) {
@@ -212,7 +205,7 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
 
   const handleTogglePublish = async () => {
     if (!access_token) {
-      toast.error('Authentication required');
+      toast.error(t('noAccessToken'));
       return;
     }
 
@@ -220,11 +213,7 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
     const toastId = toast.loading(t('updating'));
 
     try {
-      await updateActivity(
-        activity.activity_uuid,
-        { published: !activity.published, activity_type: activity.activity_type },
-        access_token,
-      );
+      await updateActivity(activity.activity_uuid, { published: !activity.published }, access_token);
       toast.success(t('activityUpdateSuccess'));
     } catch (error: any) {
       console.error('Failed to toggle publish status:', error);
@@ -237,7 +226,7 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
 
   const handleDeleteActivity = async () => {
     if (!access_token) {
-      toast.error('Authentication required');
+      toast.error(t('noAccessToken'));
       return;
     }
 
@@ -247,7 +236,11 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
     try {
       // Delete assignment if it's an assignment activity
       if (activity.activity_type === 'TYPE_ASSIGNMENT') {
-        await deleteAssignmentUsingActivityUUID(activity.activity_uuid, access_token);
+        try {
+          await deleteAssignmentUsingActivityUUID(activity.activity_uuid, access_token);
+        } catch (assignmentError) {
+          console.warn('Assignment delete failed, continuing with activity delete:', assignmentError);
+        }
       }
 
       await deleteActivity(activity.activity_uuid, access_token);
@@ -265,11 +258,15 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       e.preventDefault();
-      handleSaveEdit();
+      void handleSaveEdit();
     } else if (e.key === 'Escape') {
       e.preventDefault();
       handleCancelEdit();
     }
+  };
+
+  const handleEditBlur = () => {
+    void handleSaveEdit();
   };
 
   // Early validation (moved below hooks to satisfy Rules of Hooks)
@@ -312,44 +309,27 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
                   value={editedName}
                   onChange={(e) => setEditedName(e.target.value)}
                   onKeyDown={handleKeyDown}
+                  onBlur={handleEditBlur}
                   placeholder={t('activityNamePlaceholder')}
                   className="h-8 text-sm"
                   disabled={isSavingEdit}
                 />
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={handleSaveEdit}
-                  disabled={isSavingEdit || !editedName.trim()}
-                  className="h-8 w-8 p-0 hover:bg-muted"
-                >
-                  {isSavingEdit ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-                </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={handleCancelEdit}
-                  disabled={isSavingEdit}
-                  className="h-8 w-8 p-0 hover:bg-muted"
-                >
-                  <X className="h-4 w-4" />
-                </Button>
+                {isSavingEdit ? <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" /> : null}
               </div>
             ) : (
-              <div className="group flex items-center gap-2">
-                <p className="truncate text-sm font-medium text-foreground">{activity.name}</p>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleStartEdit}
+                  className="truncate rounded-sm border-b border-transparent text-left text-sm font-medium text-foreground transition-colors hover:border-border hover:text-foreground/80"
+                >
+                  {activity.name}
+                </button>
                 {canUpdate && (
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={handleStartEdit}
-                    className="h-6 w-6 p-0 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-muted"
-                  >
-                    <Pencil className="h-3 w-3" />
-                  </Button>
+                  <span className="text-xs text-muted-foreground">{t('editButton')}</span>
                 )}
                 {isOwner && (
-                  <ToolTip content="You created this activity">
+                  <ToolTip content={t('ownerBadge')}>
                     <CourseWorkflowBadge tone="info">{t('ownerLabel')}</CourseWorkflowBadge>
                   </ToolTip>
                 )}
@@ -388,7 +368,7 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
                 <DropdownMenuItem
                   onClick={() => {
                     window.open(
-                      `${getAbsoluteUrl('')}/course/${course_uuid.replace('course_', '')}/activity/${activity.activity_uuid.replace('activity_', '')}`,
+                      `${getAbsoluteUrl('')}/course/${cleanCourseUuid(course_uuid)}/activity/${cleanActivityUuid(activity.activity_uuid)}`,
                       '_blank',
                       'noopener,noreferrer',
                     );
@@ -494,10 +474,7 @@ const ActivityEditButton = ({
 
   // Dynamic page edit button
   if (activity.activity_type === 'TYPE_DYNAMIC') {
-    const editUrl = `${getAbsoluteUrl('')}/course/${course?.courseStructure?.course_uuid?.replace(
-      'course_',
-      '',
-    )}/activity/${activity.activity_uuid.replace('activity_', '')}/edit`;
+    const editUrl = `${getAbsoluteUrl('')}/course/${cleanCourseUuid(course?.courseStructure?.course_uuid ?? course_uuid)}/activity/${cleanActivityUuid(activity.activity_uuid)}/edit`;
 
     return (
       <Button
@@ -569,10 +546,7 @@ const ActivityEditButton = ({
 
   // Code challenge edit button
   if (activity.activity_type === 'TYPE_CODE_CHALLENGE') {
-    const editUrl = `${getAbsoluteUrl('')}/course/${course?.courseStructure?.course_uuid?.replace(
-      'course_',
-      '',
-    )}/activity/${activity.activity_uuid.replace('activity_', '')}/editor`;
+    const editUrl = `${getAbsoluteUrl('')}/course/${cleanCourseUuid(course?.courseStructure?.course_uuid ?? course_uuid)}/activity/${cleanActivityUuid(activity.activity_uuid)}/editor`;
 
     return (
       <Button

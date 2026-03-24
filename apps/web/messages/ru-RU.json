@@ -880,6 +880,7 @@
   },
   "Common": {
     "close": "Закрыть",
+    "cancel": "Отмена",
     "DataTable": {
       "searchPlaceholder": "Поиск по таблице...",
       "emptyMessage": "Строки не найдены.",
@@ -2073,8 +2074,8 @@
       "failedToUpdateActivityName": "Не удалось обновить название активности",
       "noAccessToken": "Требуется аутентификация",
       "ownerLabel": "Создатель",
-      "ownerBadge": "Вы создали эту активность",
       "previewTooltip": "Предварительный просмотр активности",
+      "ownerBadge": "Вы создали эту активность",
       "publish": "Опубликовать",
       "publishButton": "Опубликовать",
       "unpublish": "Снять с публикации",
@@ -2186,6 +2187,10 @@
     "NewActivityModal": {
       "buttonText": "Добавить активность",
       "description": "Создайте новую активность для этой главы.",
+      "quickCreate": {
+        "codeChallengeName": "Новый код-челлендж",
+        "dynamicPageName": "Новая динамическая страница"
+      },
       "title": "Добавить активность"
     },
     "Structure": {
@@ -2197,6 +2202,7 @@
       "chapterCreateFailed": "Не удалось создать главу",
       "chapterCreatedSuccess": "Глава успешно создана",
       "creatingChapter": "Создание...",
+      "chapterNamePlaceholder": "Название главы",
       "saveOrderError": "Не удалось сохранить новый порядок контента",
       "savingOrder": "Применяются изменения учебного плана",
       "curriculumChangesApplyImmediately": "Изменения учебного плана применяются немедленно",
@@ -3511,12 +3517,10 @@
         },
         "steps": {
           "basics": "Основы",
-          "launch": "Запуск",
           "template": "Шаблон"
         },
         "summary": {
           "heading": "Сводка настройки",
-          "launchDestination": "Точка входа",
           "selectedOutlineCourse": "Выбранный курс-структура",
           "sourceCourse": "Исходный курс",
           "template": "Шаблон",
@@ -3575,13 +3579,11 @@
         "previewButton": "Предпросмотр",
         "reviewButton": "Проверка",
         "tabs": {
-          "access": "Доступ",
           "certificate": "Сертификат",
-          "collaboration": "Совместная работа",
-          "curriculum": "Учебный план",
+          "content": "Контент",
           "details": "Детали",
-          "overview": "Обзор",
-          "reviewPublish": "Проверка и публикация"
+          "publish": "Проверка и публикация",
+          "settings": "Настройки"
         },
         "untitledCourse": "Курс без названия",
         "unsavedDialogLeave": "Покинуть рабочее пространство",
@@ -5961,7 +5963,7 @@
         "actionsHeader": "Действия",
         "activeUsersTitle": "Активные пользователи",
         "cannotEditSelf": "Вы не можете изменить свою роль",
-        "cannotManageHigherRole": "Вы не можете управлять пользователями с более высокой ролью, чем у вас",
+        "cannotManageHigherRole": "Вы не можете управлять пользователями с более высокой ролью или равной вашей",
         "description": "Управляйте пользователями, назначайте роли и разрешения",
         "editRoleButton": "Изменить роль",
         "errors": {

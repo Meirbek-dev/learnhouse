@@ -12,6 +12,7 @@ export interface CourseWorkspaceCapabilities {
   canEditCurriculum: boolean;
   canManageAccess: boolean;
   canManageCollaboration: boolean;
+  canManageSettings: boolean;
   canManageCertificate: boolean;
   canReviewCourse: boolean;
   canDeleteCourse: boolean;
@@ -38,17 +39,19 @@ function mapCourseRightsToCapabilities(session: any, rights: CourseRightsRespons
   const canEditCurriculum = Boolean(rights.permissions?.update_content ?? rights.permissions?.update);
   const canManageAccess = Boolean(rights.permissions?.manage_access);
   const canManageCollaboration = Boolean(rights.permissions?.manage_contributors);
+  const canManageSettings = canManageAccess || canManageCollaboration;
   const canManageCertificate = Boolean(rights.permissions?.create_certifications);
   const canDeleteCourse = Boolean(rights.permissions?.delete);
   const canReviewCourse = canEditDetails || canEditCurriculum || canManageAccess || canManageCertificate;
 
   return {
-    canViewWorkspace: canReviewCourse || canManageCollaboration,
+    canViewWorkspace: canReviewCourse || canManageSettings,
     canCreateCourse: hasCreateCoursePermission(session),
     canEditDetails,
     canEditCurriculum,
     canManageAccess,
     canManageCollaboration,
+    canManageSettings,
     canManageCertificate,
     canReviewCourse,
     canDeleteCourse,
@@ -87,7 +90,7 @@ export async function requireCourseWorkspaceStageAccess(
     overview: capabilities.canViewWorkspace,
     details: capabilities.canEditDetails,
     curriculum: capabilities.canEditCurriculum,
-    access: capabilities.canManageAccess,
+    access: capabilities.canManageSettings,
     collaboration: capabilities.canManageCollaboration,
     certificate: capabilities.canManageCertificate,
     review: capabilities.canReviewCourse,

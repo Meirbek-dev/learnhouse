@@ -15,7 +15,6 @@ from src.db.courses.courses import (
     CourseCreate,
     CourseMetadataUpdate,
     CourseRead,
-    CourseUpdate,
     FullCourseRead,
     ThumbnailType,
 )
@@ -37,14 +36,12 @@ from src.services.courses.courses import (
     create_course,
     delete_course,
     get_course,
-    get_course_by_id,
     get_course_meta,
     get_course_user_rights,
     get_courses,
     get_editable_courses,
     list_editable_courses,
     search_courses,
-    update_course,
     update_course_access,
     update_course_metadata,
     update_course_thumbnail,
@@ -142,28 +139,6 @@ async def api_get_course(
     return await get_course(
         request,
         course_uuid,
-        current_user=current_user,
-        db_session=db_session,
-        checker=checker,
-    )
-
-
-@router.get("/id/{course_id}")
-async def api_get_course_by_id(
-    request: Request,
-    course_id: int,
-    db_session: Annotated[Session, Depends(get_db_session)],
-    current_user: Annotated[
-        PublicUser | AnonymousUser, Depends(get_current_user_optional)
-    ],
-    checker: PermissionCheckerDep,
-) -> CourseRead:
-    """
-    Get single Course by id
-    """
-    return await get_course_by_id(
-        request,
-        course_id,
         current_user=current_user,
         db_session=db_session,
         checker=checker,
@@ -283,24 +258,6 @@ async def api_search_platform_courses(
     db_session=Depends(get_db_session),
 ) -> list[CourseRead]:
     return await search_courses(request, current_user, query, db_session, page, limit)
-
-
-@router.put("/{course_uuid}")
-async def api_update_course(
-    request: Request,
-    course_object: CourseUpdate,
-    course_uuid: str,
-    db_session: Annotated[Session, Depends(get_db_session)],
-    current_user: Annotated[PublicUser, Depends(get_current_user)],
-) -> CourseRead:
-    """
-    Update Course by course_uuid
-
-    **Required Permission**: `course:update:own` or `course:update:platform`
-    """
-    return await update_course(
-        request, course_object, course_uuid, current_user, db_session
-    )
 
 
 @router.put("/{course_uuid}/metadata")
@@ -478,7 +435,7 @@ async def api_add_bulk_course_contributors(
     )
 
 
-@router.put("/{course_uuid}/bulk-remove-contributors")
+@router.delete("/{course_uuid}/bulk-remove-contributors")
 async def api_remove_bulk_course_contributors(
     request: Request,
     course_uuid: str,

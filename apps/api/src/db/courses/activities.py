@@ -66,9 +66,8 @@ class Activity(ActivityBase, table=True):
 
     id: int | None = Field(default=None, primary_key=True)
     # Primary FK: activities belong to a chapter (cascades on chapter delete)
-    chapter_id: int | None = Field(
-        default=None,
-        sa_column=Column(Integer, ForeignKey("chapter.id", ondelete="CASCADE")),
+    chapter_id: int = Field(
+        sa_column=Column(Integer, ForeignKey("chapter.id", ondelete="CASCADE"), nullable=False),
     )
     # order within the chapter
     order: int = Field(default=0)
@@ -116,7 +115,7 @@ class ActivityRead(ActivityBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
-    chapter_id: int | None = None
+    chapter_id: int
     course_id: int | None = None
     order: int = 0
     activity_uuid: str
@@ -143,4 +142,3 @@ class ActivityReadWithPermissions(ActivityRead):
     can_delete: bool
     is_owner: bool
     is_creator: bool
-    available_actions: list[str]

@@ -64,7 +64,6 @@ export const courseWizardSchema = v.object({
   public: v.boolean(),
   template: v.picklist(['blank', 'starter', 'outline'] as const),
   sourceCourseUuid: v.optional(v.string()),
-  launchDest: v.picklist(['overview', 'curriculum'] as const),
 });
 
 export type CourseWizardValues = v.InferOutput<typeof courseWizardSchema>;

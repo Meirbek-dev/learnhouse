@@ -9,11 +9,11 @@ import {
 import type { CourseWorkspaceCapabilities } from '@/lib/course-management-server';
 import { useCoursesMutations } from '@/hooks/mutations/useCoursesMutations';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
-import { buildCourseWorkspacePath } from '@/lib/course-management';
+import { buildCourseWorkspacePath, getCourseContentStats } from '@/lib/course-management';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { getAbsoluteUrl } from '@services/config/config';
 import { useCourseEditorStore } from '@/stores/courses';
-import { ExternalLink, Loader2 } from 'lucide-react';
+import { ExternalLink, FileStack, Loader2, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState, useTransition } from 'react';
 import AppLink from '@/components/ui/AppLink';
@@ -29,12 +29,22 @@ export default function CourseReviewPublish({
 }) {
   const t = useTranslations('DashPage.CourseManagement.Review');
   const tReadiness = useTranslations('DashPage.CourseManagement.Readiness');
+  const tOverview = useTranslations('DashPage.CourseManagement.Overview');
   const session = usePlatformSession();
   const accessToken = session?.data?.tokens?.access_token;
   const course = useCourse();
   const { updateAccess } = useCoursesMutations(course.courseStructure.course_uuid, true);
   const setConflict = useCourseEditorStore((state) => state.setConflict);
   const { readiness } = course;
+  const stats = getCourseContentStats(course.courseStructure);
+  const contributors = course.editorData.contributors.data ?? [];
+  const contributorNames = contributors
+    .slice(0, 3)
+    .map((contributor: any) => {
+      const parts = [contributor?.user?.first_name, contributor?.user?.last_name].filter(Boolean);
+      return parts.join(' ') || contributor?.user?.username || contributor?.user?.email;
+    })
+    .filter(Boolean);
   const [isPending, startTransition] = useTransition();
   const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -174,6 +184,48 @@ export default function CourseReviewPublish({
             </div>
             <div className="mt-2 text-sm text-muted-foreground">
               {course.courseStructure.public ? t('launchStateDescriptions.live') : t('launchStateDescriptions.private')}
+            </div>
+          </div>
+
+          <div className={courseWorkflowSummaryCardClass}>
+            <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              {tOverview('workspacePulse')}
+            </div>
+            <div className="mt-4 grid gap-3">
+              <div className={courseWorkflowMutedPanelClass}>
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <FileStack className="size-4" />
+                  {tOverview('curriculumSnapshot')}
+                </div>
+                <div className="mt-2 text-2xl font-semibold text-foreground">
+                  {tOverview('chapterCount', { count: stats.chapters })}
+                </div>
+                <div className="mt-1 text-sm text-muted-foreground">
+                  {tOverview('activityCountDescription', { count: stats.activities })}
+                </div>
+              </div>
+              <div className={courseWorkflowMutedPanelClass}>
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Users className="size-4" />
+                  {tOverview('sections.collaboration')}
+                </div>
+                <div className="mt-2 text-2xl font-semibold text-foreground">{contributors.length}</div>
+                <div className="mt-1 text-sm text-muted-foreground">
+                  {tOverview('collaboration.loadedRecords', { count: contributors.length })}
+                </div>
+                {contributorNames.length > 0 ? (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {contributorNames.map((name) => (
+                      <span
+                        key={name}
+                        className="rounded-full border bg-background px-2.5 py-1 text-xs text-foreground"
+                      >
+                        {name}
+                      </span>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
             </div>
           </div>
 

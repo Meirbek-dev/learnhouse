@@ -4,15 +4,11 @@ import {
   AlertTriangle,
   CheckCircle2,
   Hexagon,
-  LayoutList,
   Loader2,
-  PlusCircle,
 } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { useActivityMutations } from '@/hooks/mutations/useActivityMutations';
 import { useChapterMutations } from '@/hooks/mutations/useChapterMutations';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
-import NewActivityModal from '@components/Objects/Modals/Activities/Create/NewActivity';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { DragDropContext, Droppable } from '@hello-pangea/dnd';
 import { Button } from '@/components/ui/button';
@@ -25,10 +21,6 @@ import { cn } from '@/lib/utils';
 import type { CourseOrderPayload } from '@/schemas/chapterSchemas';
 import ChapterElement from './DraggableElements/ChapterElement';
 
-interface SelectedPanel {
-  chapterId: number;
-}
-
 const CurriculumEditor = () => {
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
@@ -39,10 +31,6 @@ const CurriculumEditor = () => {
   const course_structure = course.courseStructure;
   const course_uuid = course_structure.course_uuid;
   const { createChapter, reorderStructure } = useChapterMutations(course_uuid, true);
-  const activityMutations = useActivityMutations(course_uuid, true);
-
-  // Panel state — which chapter is active in the right panel
-  const [selectedPanel, setSelectedPanel] = useState<SelectedPanel | null>(null);
 
   // Inline chapter creation state
   const [showChapterInput, setShowChapterInput] = useState(false);
@@ -153,70 +141,10 @@ const CurriculumEditor = () => {
     }
   };
 
-  // --- Activity creation callbacks (passed to right panel) ---
-  const handleClosePanel = () => setSelectedPanel(null);
-
-  const submitActivity = async (activity: any) => {
-    if (!selectedPanel) return;
-    const toastId = toast.loading(tNotify('creatingActivity'));
-    try {
-      await activityMutations.createActivity(activity, selectedPanel.chapterId, access_token);
-      toast.success(tNotify('activityCreatedSuccess'));
-      setSelectedPanel(null);
-    } catch (error: any) {
-      toast.error(error?.message || tNotify('uploadFailed'));
-    } finally {
-      toast.dismiss(toastId);
-    }
-  };
-
-  const submitFileActivity = async (file: any, type: any, activity: any, chapterId: number) => {
-    const toastId = toast.loading(tNotify('uploadingAndCreating'));
-    try {
-      await activityMutations.createFileActivity(
-        file,
-        type,
-        activity,
-        chapterId,
-        access_token,
-        (progress) => {
-          toast.loading(`${tNotify('uploadingAndCreating')} ${progress.percentage}%`, { id: toastId });
-        },
-      );
-      setSelectedPanel(null);
-      toast.success(tNotify('activityCreatedSuccess'));
-    } catch (error: any) {
-      toast.error(error?.message || tNotify('uploadFailed'));
-    } finally {
-      toast.dismiss(toastId);
-    }
-  };
-
-  const submitExternalVideo = async (external_video_data: any, activity: any) => {
-    if (!selectedPanel) return;
-    const toastId = toast.loading(tNotify('creatingActivity'));
-    try {
-      await activityMutations.createExternalVideo(
-        external_video_data,
-        activity,
-        selectedPanel.chapterId,
-        access_token,
-      );
-      setSelectedPanel(null);
-      toast.success(tNotify('activityCreatedSuccess'));
-    } catch (error: any) {
-      toast.error(error?.message || tNotify('uploadFailed'));
-    } finally {
-      toast.dismiss(toastId);
-    }
-  };
-
   if (!course) return null;
 
   return (
-    <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)]">
-      {/* ── Left: Outline ── */}
-      <div className="min-w-0">
+    <div className="min-w-0">
         {structureStatus !== 'idle' && (
           <Alert className="mb-4 border-border bg-muted/40">
             {structureStatus === 'saving' ? (
@@ -258,7 +186,6 @@ const CurriculumEditor = () => {
                     course_uuid={course_uuid}
                     chapter={chapter}
                     defaultExpanded={index === 0}
-                    onAddActivity={(chapterId) => setSelectedPanel({ chapterId })}
                   />
                 ))}
                 {provided.placeholder}
@@ -316,46 +243,6 @@ const CurriculumEditor = () => {
             </Button>
           )}
         </div>
-      </div>
-
-      {/* ── Right: Content Panel ── */}
-      <div className="min-w-0">
-        {selectedPanel ? (
-          <div className="rounded-xl border bg-card p-6 shadow-sm">
-            <NewActivityModal
-              closeModal={handleClosePanel}
-              submitFileActivity={submitFileActivity}
-              submitExternalVideo={submitExternalVideo}
-              submitActivity={submitActivity}
-              chapterId={selectedPanel.chapterId}
-              course={course}
-            />
-          </div>
-        ) : (
-          <div className="flex min-h-[300px] flex-col items-center justify-center gap-3 rounded-xl border border-dashed bg-muted/20 p-8 text-center">
-            <div className="rounded-full bg-muted p-3">
-              <LayoutList className="size-5 text-muted-foreground" />
-            </div>
-            <p className="text-sm font-medium text-muted-foreground">
-              {tStructure('selectItemHint')}
-            </p>
-            <p className="max-w-xs text-xs text-muted-foreground/70">
-              {tStructure('selectItemHintDescription')}
-            </p>
-            {course_structure.chapters.length === 0 ? (
-              <Button
-                size="sm"
-                variant="outline"
-                className="mt-2"
-                onClick={handleStartNewChapter}
-              >
-                <PlusCircle className="mr-2 size-4" />
-                {tStructure('addChapterButton')}
-              </Button>
-            ) : null}
-          </div>
-        )}
-      </div>
     </div>
   );
 };

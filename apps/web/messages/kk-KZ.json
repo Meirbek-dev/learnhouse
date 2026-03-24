@@ -880,6 +880,7 @@
   },
   "Common": {
     "close": "Жабу",
+    "cancel": "Болдырмау",
     "DataTable": {
       "searchPlaceholder": "Кестеден іздеу...",
       "emptyMessage": "Жолдар табылмады.",
@@ -2073,8 +2074,8 @@
       "failedToUpdateActivityName": "Белсенділік атауын жаңарту мүмкін болмады",
       "noAccessToken": "Аутентификация қажет",
       "ownerLabel": "Иесі",
-      "ownerBadge": "Сіз бұл белсенділікті жасадыңыз",
       "previewTooltip": "Белсенділікті алдын ала қарау",
+      "ownerBadge": "Сіз бұл белсенділікті жасадыңыз",
       "publish": "Жариялау",
       "publishButton": "Жариялау",
       "unpublish": "Жариялаудан алу",
@@ -2186,6 +2187,10 @@
     "NewActivityModal": {
       "buttonText": "Белсенділік қосу",
       "description": "Осы тарау үшін жаңа белсенділік жасаңыз.",
+      "quickCreate": {
+        "codeChallengeName": "Жаңа код тапсырмасы",
+        "dynamicPageName": "Жаңа динамикалық бет"
+      },
       "title": "Белсенділік қосу"
     },
     "Structure": {
@@ -2197,6 +2202,7 @@
       "chapterCreateFailed": "Тарауды жасау мүмкін болмады",
       "chapterCreatedSuccess": "Тарау сәтті жасалды",
       "creatingChapter": "Жасалуда...",
+      "chapterNamePlaceholder": "Тарау атауы",
       "saveOrderError": "Жаңа мазмұн ретін сақтау мүмкін болмады",
       "savingOrder": "Оқу жоспары өзгертулері қолданылуда",
       "curriculumChangesApplyImmediately": "Оқу жоспары өзгертулері бірден қолданылады",
@@ -3511,12 +3517,10 @@
         },
         "steps": {
           "basics": "Негізгісі",
-          "launch": "Іске қосу",
           "template": "Үлгі"
         },
         "summary": {
           "heading": "Баптау қысқаша мазмұны",
-          "launchDestination": "Іске қосу бағыты",
           "selectedOutlineCourse": "Таңдалған құрылым курсы",
           "sourceCourse": "Бастапқы курс",
           "template": "Үлгі",
@@ -3575,13 +3579,11 @@
         "previewButton": "Алдын ала қарау",
         "reviewButton": "Тексеру",
         "tabs": {
-          "access": "Қолжетімділік",
           "certificate": "Сертификат",
-          "collaboration": "Ынтымақтастық",
-          "curriculum": "Оқу жоспары",
+          "content": "Мазмұн",
           "details": "Мәліметтер",
-          "overview": "Шолу",
-          "reviewPublish": "Тексеру және жариялау"
+          "publish": "Тексеру және жариялау",
+          "settings": "Баптаулар"
         },
         "untitledCourse": "Атаусыз курс",
         "unsavedDialogLeave": "Жұмыс кеңістігінен шығу",

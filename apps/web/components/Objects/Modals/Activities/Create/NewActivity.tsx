@@ -25,9 +25,10 @@ interface ActivityType {
 
 interface NewActivityModalProps {
   closeModal: () => void;
-  submitActivity: (data?: any) => Promise<void>;
+  submitActivity: (data?: any) => Promise<any>;
   submitFileActivity: (file: any, type: any, activity: any, chapterId: number) => Promise<void>;
   submitExternalVideo: (external_video_data: any, activity: any, chapterId: number) => Promise<void>;
+  createAndOpenActivity: (kind: 'dynamic' | 'codechallenge') => Promise<void>;
   chapterId: number;
   course: unknown;
 }
@@ -88,13 +89,32 @@ export default function NewActivityModal({
   submitActivity,
   submitFileActivity,
   submitExternalVideo,
+  createAndOpenActivity,
   chapterId,
   course,
 }: NewActivityModalProps) {
   const t = useTranslations('Components.NewActivity');
   const [selectedView, setSelectedView] = useState<ViewType>('home');
+  const [isQuickCreating, setIsQuickCreating] = useState<ViewType | null>(null);
 
   const handleBack = useCallback(() => setSelectedView('home'), []);
+
+  const handleTypeSelect = useCallback(
+    async (view: ViewType) => {
+      if (view !== 'dynamic' && view !== 'codechallenge') {
+        setSelectedView(view);
+        return;
+      }
+
+      setIsQuickCreating(view);
+      try {
+        await createAndOpenActivity(view);
+      } finally {
+        setIsQuickCreating(null);
+      }
+    },
+    [createAndOpenActivity],
+  );
 
   const sharedProps = { chapterId, course, closeModal };
 
@@ -112,7 +132,8 @@ export default function NewActivityModal({
               activity={activity}
               label={t(activity.labelKey)}
               description={t(activity.descriptionKey)}
-              onClick={() => setSelectedView(activity.id)}
+              onClick={() => void handleTypeSelect(activity.id)}
+              isLoading={isQuickCreating === activity.id}
             />
           ))}
         </div>
@@ -178,19 +199,21 @@ interface ActivityCardProps {
   label: string;
   description: string;
   onClick: () => void;
+  isLoading?: boolean;
 }
 
-function ActivityCard({ activity, label, description, onClick }: ActivityCardProps) {
+function ActivityCard({ activity, label, description, onClick, isLoading = false }: ActivityCardProps) {
   const Icon = activity.icon;
 
   return (
     <button
       type="button"
       onClick={onClick}
+      disabled={isLoading}
       className="group flex w-full items-start gap-3.5 rounded-lg border border-gray-200 bg-white px-4 py-4 text-left transition-all duration-150 hover:border-gray-300 hover:bg-gray-50 focus:ring-2 focus:ring-gray-200 focus:outline-none"
     >
       <div className={`mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg ${activity.iconBg}`}>
-        <Icon className={`h-[17px] w-[17px] ${activity.iconColor}`} />
+        {isLoading ? <span className="h-[17px] w-[17px] animate-spin rounded-full border-2 border-current border-t-transparent" /> : <Icon className={`h-[17px] w-[17px] ${activity.iconColor}`} />}
       </div>
 
       <div className="flex flex-col gap-1">

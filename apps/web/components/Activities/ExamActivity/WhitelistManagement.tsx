@@ -21,7 +21,7 @@ interface Student {
 
 interface WhitelistManagementProps {
   examUuid: string;
-  courseId: number;
+  courseUuid: string;
   accessToken: string;
   currentWhitelist: number[];
   onWhitelistUpdated: () => void;
@@ -29,7 +29,7 @@ interface WhitelistManagementProps {
 
 export default function WhitelistManagement({
   examUuid,
-  courseId,
+  courseUuid,
   accessToken,
   currentWhitelist,
   onWhitelistUpdated,
@@ -45,19 +45,7 @@ export default function WhitelistManagement({
     try {
       setIsLoading(true);
 
-      // First, get course_uuid from course_id
-      const courseResponse = await fetch(`${getAPIUrl()}courses/id/${courseId}`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
-
-      if (!courseResponse.ok) throw new Error('Failed to fetch course');
-
-      const courseData = await courseResponse.json();
-
-      // Then get contributors (enrolled users) using course_uuid
-      const response = await fetch(`${getAPIUrl()}courses/${courseData.course_uuid}/contributors`, {
+      const response = await fetch(`${getAPIUrl()}courses/${courseUuid}/contributors`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
@@ -91,7 +79,7 @@ export default function WhitelistManagement({
 
   useEffect(() => {
     fetchEnrolledStudents();
-  }, [courseId]);
+  }, [courseUuid]);
 
   useEffect(() => {
     setSelectedUserIds(new Set(currentWhitelist));

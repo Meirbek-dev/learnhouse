@@ -14,8 +14,6 @@ from src.services.courses.chapters import (
     create_chapter,
     delete_chapter,
     get_chapter,
-    move_activity_to_order,
-    move_chapter_to_order,
     reorder_chapters_and_activities,
     update_chapter,
 )
@@ -54,33 +52,6 @@ async def api_reorder_chapters_and_activities(
 ) -> dict:
     return await reorder_chapters_and_activities(
         request, course_uuid, order, current_user, db_session
-    )
-
-
-@router.patch("/{chapter_uuid}/order")
-async def api_move_chapter_to_order(
-    request: Request,
-    chapter_uuid: str,
-    position: int,
-    current_user: Annotated[PublicUser, Depends(get_current_user)],
-    db_session=Depends(get_db_session),
-) -> ChapterRead:
-    return await move_chapter_to_order(
-        request, chapter_uuid, position, current_user, db_session
-    )
-
-
-@router.patch("/activity/{activity_uuid}/order")
-async def api_move_activity_to_order(
-    request: Request,
-    activity_uuid: str,
-    position: int,
-    target_chapter_uuid: str | None = None,
-    current_user: Annotated[PublicUser, Depends(get_current_user)] = None,
-    db_session=Depends(get_db_session),
-) -> dict:
-    return await move_activity_to_order(
-        request, activity_uuid, position, target_chapter_uuid, current_user, db_session
     )
 
 

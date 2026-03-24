@@ -20,16 +20,14 @@ import {
   FileCog,
   FileStack,
   Globe,
-  LayoutDashboard,
   ShieldCheck,
   Sparkles,
-  Users,
 } from 'lucide-react';
 import ConflictAlert from '@components/Dashboard/Pages/Course/ConflictResolutionModal';
 import type { CourseWorkspaceCapabilities } from '@/lib/course-management-server';
 import { CourseProvider, useCourse } from '@components/Contexts/CourseContext';
 import type { CourseWorkspaceStage } from '@/lib/course-management';
-import { buildCourseWorkspacePath } from '@/lib/course-management';
+import { buildCourseWorkspacePath, prefixedCourseUuid } from '@/lib/course-management';
 import { getAbsoluteUrl } from '@services/config/config';
 import { CourseStatusBadge } from './courseWorkflowUi';
 import { useDirtyGuard } from '@/hooks/useDirtyGuard';
@@ -61,13 +59,11 @@ function CourseWorkspaceChrome({
     message: t('unsavedChangesWarning'),
   });
   const stageConfig = [
-    { key: 'overview', label: t('tabs.overview'), icon: LayoutDashboard, capability: 'canViewWorkspace' },
     { key: 'details', label: t('tabs.details'), icon: FileCog, capability: 'canEditDetails' },
-    { key: 'curriculum', label: t('tabs.curriculum'), icon: FileStack, capability: 'canEditCurriculum' },
-    { key: 'access', label: t('tabs.access'), icon: Globe, capability: 'canManageAccess' },
-    { key: 'collaboration', label: t('tabs.collaboration'), icon: Users, capability: 'canManageCollaboration' },
+    { key: 'curriculum', label: t('tabs.content'), icon: FileStack, capability: 'canEditCurriculum' },
+    { key: 'access', label: t('tabs.settings'), icon: Globe, capability: 'canManageSettings' },
     { key: 'certificate', label: t('tabs.certificate'), icon: Sparkles, capability: 'canManageCertificate' },
-    { key: 'review', label: t('tabs.reviewPublish'), icon: CheckCircle2, capability: 'canReviewCourse' },
+    { key: 'review', label: t('tabs.publish'), icon: CheckCircle2, capability: 'canReviewCourse' },
   ] as const;
   const visibleStages = stageConfig.filter((stage) => capabilities[stage.capability]);
 
@@ -133,7 +129,7 @@ function CourseWorkspaceChrome({
                 className="gap-2"
               >
                 <ShieldCheck className="size-4" />
-                <span className="hidden sm:inline">{t('reviewButton')}</span>
+                <span className="hidden sm:inline">{t('tabs.publish')}</span>
               </Button>
             ) : null}
             <Button
@@ -196,7 +192,7 @@ export default function CourseWorkspacePageShell({
 }: CourseWorkspacePageShellProps) {
   return (
     <CourseProvider
-      courseuuid={`course_${courseuuid}`}
+      courseuuid={prefixedCourseUuid(courseuuid)}
       withUnpublishedActivities
       initialCourse={initialCourse}
     >

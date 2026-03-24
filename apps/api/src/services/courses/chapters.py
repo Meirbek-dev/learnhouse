@@ -130,7 +130,16 @@ async def update_chapter(
     db_session.commit()
     db_session.refresh(chapter)
 
-    return await get_chapter(request, chapter.chapter_uuid, current_user, db_session)
+    activities = db_session.exec(
+        select(Activity)
+        .where(Activity.chapter_id == chapter.id)
+        .order_by(Activity.order)
+    ).all()
+
+    return ChapterRead.model_validate(
+        chapter,
+        update={"activities": [ActivityRead.model_validate(a) for a in activities]},
+    )
 
 
 async def delete_chapter(
@@ -207,12 +216,12 @@ async def move_activity_to_order(
     if not activity:
         raise HTTPException(status_code=404, detail="Activity not found")
 
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "activity:update", resource_owner_id=activity.creator_id)
+
     if target_chapter_uuid:
         target_chapter = _get_chapter_by_uuid(target_chapter_uuid, db_session)
         activity.chapter_id = target_chapter.id
-
-    checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "activity:update", resource_owner_id=activity.creator_id)
 
     new_order = max(1, position)
     activity.order = new_order
@@ -299,9 +308,6 @@ async def get_course_chapters(
                     can_delete=can_delete,
                     is_owner=is_owner,
                     is_creator=is_owner,
-                    available_actions=[
-                        a for a, ok in {"update": can_update, "delete": can_delete}.items() if ok
-                    ],
                 )
             )
 
@@ -339,8 +345,6 @@ async def reorder_chapters_and_activities(
             continue
         chapter.order = index + 1
         chapter.update_date = str(datetime.now())
-
-    db_session.commit()
 
     # Batch-resolve activity UUIDs
     all_activity_uuids = [

@@ -48,6 +48,8 @@ class AssignmentRead(AssignmentBase):
 
     id: int
     assignment_uuid: str
+    course_uuid: str | None = None
+    activity_uuid: str | None = None
     creation_date: str | None = None
     update_date: str | None = None
 
