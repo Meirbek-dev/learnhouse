@@ -6283,6 +6283,11 @@
     "searchTitle": "Іздеу",
     "users": "Пайдаланушылар"
   },
+  "UnauthorizedPage": {
+    "button": "Басты бетке оралу",
+    "message": "Сізде бұл бетке кіру рұқсаты жоқ.",
+    "title": "Рұқсат жоқ"
+  },
   "Security": {
     "unauthorizedAccessMessage": "Сізде бұл бетке кіру рұқсаты жоқ"
   },

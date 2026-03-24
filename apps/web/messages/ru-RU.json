@@ -6283,6 +6283,11 @@
     "searchTitle": "Поиск",
     "users": "Пользователи"
   },
+  "UnauthorizedPage": {
+    "button": "Вернуться на главную",
+    "message": "У вас нет прав доступа к этой странице.",
+    "title": "Нет доступа"
+  },
   "Security": {
     "unauthorizedAccessMessage": "У вас нет прав доступа к этой странице"
   },

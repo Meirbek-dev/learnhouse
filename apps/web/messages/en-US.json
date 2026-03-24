@@ -6268,6 +6268,11 @@
     "searchTitle": "Search",
     "users": "Users"
   },
+  "UnauthorizedPage": {
+    "button": "Return home",
+    "message": "You do not have permission to access this page.",
+    "title": "Unauthorized"
+  },
   "Security": {
     "unauthorizedAccessMessage": "You do not have permissions to access this page"
   },
