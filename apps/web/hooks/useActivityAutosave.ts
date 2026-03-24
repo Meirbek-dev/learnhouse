@@ -1,8 +1,8 @@
 'use client';
 
 import { useActivityMutations } from '@/hooks/mutations/useActivityMutations';
-import { useCourseEditorStore } from '@/stores/courses';
 import { useDebouncedCallback } from '@/hooks/useDebounce';
+import { useCourseEditorStore } from '@/stores/courses';
 import { useCallback, useRef } from 'react';
 
 interface ActivityAutosaveOptions {
@@ -52,12 +52,19 @@ export function useActivityAutosave(options: ActivityAutosaveOptions) {
         throw error;
       }
     },
-    [options.accessToken, options.activityUuid, options.lastKnownUpdateDate, setActivitySaveStatus, setConflict, updateActivity],
+    [
+      options.accessToken,
+      options.activityUuid,
+      options.lastKnownUpdateDate,
+      setActivitySaveStatus,
+      setConflict,
+      updateActivity,
+    ],
   );
 
   const debouncedSave = useDebouncedCallback((payload: any) => {
     void persistDraft(payload);
-  }, options.delay ?? 1_500);
+  }, options.delay ?? 1500);
 
   const onChange = useCallback(
     (payload: any) => {

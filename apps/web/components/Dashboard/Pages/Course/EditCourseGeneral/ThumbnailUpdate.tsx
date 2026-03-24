@@ -1,11 +1,11 @@
 import { ArrowBigUpDash, Image as ImageIcon, UploadCloud, Video } from 'lucide-react';
-import { useCoursesMutations } from '@/hooks/mutations/useCoursesMutations';
-import { useCourse } from '@components/Contexts/CourseContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs';
+import { useCoursesMutations } from '@/hooks/mutations/useCoursesMutations';
 import { Alert, AlertDescription, AlertTitle } from '@components/ui/alert';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCourse } from '@components/Contexts/CourseContext';
 import { Card, CardContent } from '@components/ui/card';
 import { Button } from '@components/ui/button';
 import { useTranslations } from 'next-intl';
@@ -107,13 +107,10 @@ const ThumbnailUpdate = ({ thumbnailType, disabled = false, disabledReason }: Th
         formData.append('thumbnail', file);
         formData.append('thumbnail_type', type);
 
-        await updateThumbnailMutation(
-          formData,
-          {
-            accessToken: session.data?.tokens?.access_token,
-            lastKnownUpdateDate: course.courseStructure.update_date,
-          },
-        );
+        await updateThumbnailMutation(formData, {
+          accessToken: session.data?.tokens?.access_token,
+          lastKnownUpdateDate: course.courseStructure.update_date,
+        });
         setLocalThumbnail(null);
         toast.success(t('thumbnailUpdatedSuccessfully'), {
           duration: 3000,

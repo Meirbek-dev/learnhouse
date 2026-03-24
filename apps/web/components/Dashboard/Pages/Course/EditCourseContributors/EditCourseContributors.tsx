@@ -15,20 +15,20 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { SectionHeader } from '@components/Dashboard/Courses/SectionHeader';
+import { useCoursesMutations } from '@/hooks/mutations/useCoursesMutations';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { Check, ChevronDown, Search, UserPen, Users } from 'lucide-react';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
 import { useSyncDirtySection } from '@/hooks/useSyncDirtySection';
 import { useCourse } from '@components/Contexts/CourseContext';
-import { useCourseEditorStore } from '@/stores/courses';
-import { useCoursesMutations } from '@/hooks/mutations/useCoursesMutations';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { RadioGroup } from '@/components/ui/radio-group';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { searchContent } from '@services/search/search';
 import { useSaveSection } from '@/hooks/useSaveSection';
 import { useDebouncedValue } from '@/hooks/useDebounce';
+import { useCourseEditorStore } from '@/stores/courses';
 import { useLocale, useTranslations } from 'next-intl';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useEffect, useRef, useState } from 'react';
@@ -70,7 +70,7 @@ interface Contributor {
 }
 
 interface BulkAddResponse {
-  successful: Array<{ username: string; user_id: number }>;
+  successful: { username: string; user_id: number }[];
   failed: { username: string; reason: string }[];
 }
 
@@ -174,8 +174,12 @@ const EditCourseContributors = () => {
   const contributors = (editorData.contributors.data ?? []) as Contributor[];
   const isContributorsLoading = course.isEditorDataLoading && editorData.contributors.data === null;
   const setConflict = useCourseEditorStore((state) => state.setConflict);
-  const { addContributors, removeContributors, updateAccess, updateContributor: updateContributorMutation } =
-    useCoursesMutations(courseStructure?.course_uuid ?? '');
+  const {
+    addContributors,
+    removeContributors,
+    updateAccess,
+    updateContributor: updateContributorMutation,
+  } = useCoursesMutations(courseStructure?.course_uuid ?? '');
 
   const [isOpenToContributors, setIsOpenToContributors] = useState<boolean | undefined>(
     () => courseStructure?.open_to_contributors,
@@ -190,7 +194,8 @@ const EditCourseContributors = () => {
   const [selectedContributors, setSelectedContributors] = useState<number[]>([]);
 
   const isDirtyRef = useRef(false);
-  isDirtyRef.current = isOpenToContributors !== undefined && isOpenToContributors !== courseStructure?.open_to_contributors;
+  isDirtyRef.current =
+    isOpenToContributors !== undefined && isOpenToContributors !== courseStructure?.open_to_contributors;
   const isDirty = isDirtyRef.current;
 
   const handleDiscard = () => setIsOpenToContributors(courseStructure?.open_to_contributors);
@@ -328,14 +333,10 @@ const EditCourseContributors = () => {
         authorship: data.authorship || currentContributor.authorship,
         authorship_status: data.authorship_status || currentContributor.authorship_status,
       };
-      const res = await updateContributorMutation(
-        contributorId,
-        updatedData,
-        {
-          accessToken: access_token,
-          lastKnownUpdateDate: courseStructure.update_date,
-        },
-      );
+      const res = await updateContributorMutation(contributorId, updatedData, {
+        accessToken: access_token,
+        lastKnownUpdateDate: courseStructure.update_date,
+      });
 
       if (res.status === 200 && res.data?.status === 'success') {
         toast.success(res.data.detail || t('successfullyUpdatedContributor'));
@@ -348,9 +349,12 @@ const EditCourseContributors = () => {
           await updateContributorMutation(
             contributorId,
             {
-              authorship: data.authorship || contributors.find((contributor) => contributor.user_id === contributorId)?.authorship,
+              authorship:
+                data.authorship ||
+                contributors.find((contributor) => contributor.user_id === contributorId)?.authorship,
               authorship_status:
-                data.authorship_status || contributors.find((contributor) => contributor.user_id === contributorId)?.authorship_status,
+                data.authorship_status ||
+                contributors.find((contributor) => contributor.user_id === contributorId)?.authorship_status,
             },
             {
               accessToken: access_token!,
@@ -400,8 +404,7 @@ const EditCourseContributors = () => {
 
     try {
       const selectedContributorRows = contributors.filter((c) => selectedContributors.includes(c.user_id));
-      const selectedUsernames = selectedContributorRows
-        .map((c) => c.user.username);
+      const selectedUsernames = selectedContributorRows.map((c) => c.user.username);
       const selectedUserIds = selectedContributorRows
         .filter((c) => selectedContributors.includes(c.user_id))
         .map((c) => c.user_id);
@@ -421,7 +424,9 @@ const EditCourseContributors = () => {
 
       const failedUsernames = new Set(result.failed.map((failure) => failure.username));
       setSelectedContributors(
-        contributors.filter((contributor) => failedUsernames.has(contributor.user.username)).map((contributor) => contributor.user_id),
+        contributors
+          .filter((contributor) => failedUsernames.has(contributor.user.username))
+          .map((contributor) => contributor.user_id),
       );
     } catch (error: any) {
       if (error?.status === 409) {
@@ -445,15 +450,14 @@ const EditCourseContributors = () => {
 
   const handleContributorAccessSave = async () => {
     if (!(access_token && isOpenToContributors !== undefined) || !isDirty) return;
-    await save(
-      async () =>
-        updateAccess(
-          { open_to_contributors: isOpenToContributors },
-          {
-            accessToken: access_token,
-            lastKnownUpdateDate: courseStructure.update_date,
-          },
-        ),
+    await save(async () =>
+      updateAccess(
+        { open_to_contributors: isOpenToContributors },
+        {
+          accessToken: access_token,
+          lastKnownUpdateDate: courseStructure.update_date,
+        },
+      ),
     );
   };
 

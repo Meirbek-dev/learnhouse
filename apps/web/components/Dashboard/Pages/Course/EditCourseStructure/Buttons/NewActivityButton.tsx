@@ -8,8 +8,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { useActivityMutations } from '@/hooks/mutations/useActivityMutations';
 import NewActivityModal from '@components/Objects/Modals/Activities/Create/NewActivity';
+import { useActivityMutations } from '@/hooks/mutations/useActivityMutations';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { useCourseEditorStore } from '@/stores/courses';
@@ -101,16 +101,10 @@ const NewActivityButton = (props: NewActivityButtonProps) => {
           serverVersion: course.courseStructure,
           message: error?.detail || error?.message,
           pendingSave: async () => {
-            await activityMutations.createFileActivity(
-              file,
-              type,
-              activity,
-              chapterId,
-              {
-                accessToken: access_token,
-                lastKnownUpdateDate: course.courseStructure.update_date,
-              },
-            );
+            await activityMutations.createFileActivity(file, type, activity, chapterId, {
+              accessToken: access_token,
+              lastKnownUpdateDate: course.courseStructure.update_date,
+            });
           },
         });
         return;

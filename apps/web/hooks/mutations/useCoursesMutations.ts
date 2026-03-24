@@ -8,11 +8,11 @@ import {
   updateCourseMetadata,
   updateCourseThumbnail,
 } from '@services/courses/courses';
-import type { CourseEditorBundle } from '@services/courses/editor';
 import type { CourseGeneralValues, CourseAccessValues } from '@/schemas/courseSchemas';
+import type { CourseEditorBundle } from '@services/courses/editor';
+import { courseKeys } from '@/hooks/courses/courseKeys';
 import { assertSuccess } from '@/lib/api/assertSuccess';
 import { useCourseEditorStore } from '@/stores/courses';
-import { courseKeys } from '@/hooks/courses/courseKeys';
 import { useSWRConfig } from 'swr';
 
 interface MutationOptions {
@@ -63,7 +63,7 @@ export function useCoursesMutations(courseUuid: string, withUnpublishedActivitie
   const detailKey = courseKeys.detail(courseUuid);
 
   // Read current SWR cache value synchronously — no identity-mutate hack needed.
-  const captureSnapshot = <T,>(key: string | readonly unknown[]): T | undefined =>
+  const captureSnapshot = <T>(key: string | readonly unknown[]): T | undefined =>
     (cache.get(key as any) as any)?.data as T | undefined;
 
   const refreshCourse = async () => {
@@ -79,11 +79,9 @@ export function useCoursesMutations(courseUuid: string, withUnpublishedActivitie
   const updateMetadata = async (payload: Partial<CourseGeneralValues>, options: MutationOptions) => {
     const previousStructure = captureSnapshot(structureKey);
 
-    await mutate(
-      structureKey,
-      (current: any) => (current ? { ...current, ...payload } : current),
-      { revalidate: false },
-    );
+    await mutate(structureKey, (current: any) => (current ? { ...current, ...payload } : current), {
+      revalidate: false,
+    });
 
     try {
       const response = assertSuccess(
@@ -100,14 +98,15 @@ export function useCoursesMutations(courseUuid: string, withUnpublishedActivitie
     }
   };
 
-  const updateAccess = async (payload: Partial<CourseAccessValues & { open_to_contributors?: boolean }>, options: MutationOptions) => {
+  const updateAccess = async (
+    payload: Partial<CourseAccessValues & { open_to_contributors?: boolean }>,
+    options: MutationOptions,
+  ) => {
     const previousStructure = captureSnapshot(structureKey);
 
-    await mutate(
-      structureKey,
-      (current: any) => (current ? { ...current, ...payload } : current),
-      { revalidate: false },
-    );
+    await mutate(structureKey, (current: any) => (current ? { ...current, ...payload } : current), {
+      revalidate: false,
+    });
 
     try {
       const response = assertSuccess(
@@ -151,7 +150,12 @@ export function useCoursesMutations(courseUuid: string, withUnpublishedActivitie
             .map((user) => buildOptimisticContributor(user));
           return {
             ...current,
-            contributors: { ...current.contributors, data: [...existingContributors, ...optimisticContributors], error: null, available: true },
+            contributors: {
+              ...current.contributors,
+              data: [...existingContributors, ...optimisticContributors],
+              error: null,
+              available: true,
+            },
           };
         },
         { revalidate: false },
@@ -186,7 +190,7 @@ export function useCoursesMutations(courseUuid: string, withUnpublishedActivitie
             contributors: {
               ...current.contributors,
               data: (current.contributors.data ?? []).map((contributor: any) =>
-                contributor.user_id === contributorUserId ? { ...contributor, ...payload } : contributor,
+                contributor.user_id === contributorUserId ? Object.assign(contributor, payload) : contributor,
               ),
             },
           };
@@ -197,7 +201,13 @@ export function useCoursesMutations(courseUuid: string, withUnpublishedActivitie
 
     try {
       const response = assertSuccess(
-        await editContributor(courseUuid, contributorUserId, payload.authorship, payload.authorship_status, options.accessToken),
+        await editContributor(
+          courseUuid,
+          contributorUserId,
+          payload.authorship,
+          payload.authorship_status,
+          options.accessToken,
+        ),
       );
       await Promise.all([refreshCourse(), refreshEditorBundle()]);
       return response;
@@ -223,7 +233,8 @@ export function useCoursesMutations(courseUuid: string, withUnpublishedActivitie
             contributors: {
               ...current.contributors,
               data: (current.contributors.data ?? []).filter(
-                (contributor: any) => !userIdSet.has(contributor.user_id) && !usernameSet.has(contributor.user?.username),
+                (contributor: any) =>
+                  !userIdSet.has(contributor.user_id) && !usernameSet.has(contributor.user?.username),
               ),
             },
           };

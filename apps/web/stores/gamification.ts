@@ -105,8 +105,8 @@ export const useGamificationStore = create<GamificationState & GamificationActio
         set((s) => ({ fetchAttempts: s.fetchAttempts + 1 }));
       }
       if (leaderboardData) set({ leaderboard: leaderboardData });
-    } catch (err) {
-      console.error('Failed to fetch initial gamification data:', err);
+    } catch (error) {
+      console.error('Failed to fetch initial gamification data:', error);
       set((s) => ({ fetchAttempts: s.fetchAttempts + 1 }));
     } finally {
       set({ isLoading: false });
@@ -119,8 +119,8 @@ export const useGamificationStore = create<GamificationState & GamificationActio
       const [dashboardData, leaderboardData] = await Promise.all([getDashboardDataAction(), getLeaderboardAction()]);
       if (dashboardData) set({ profile: dashboardData.profile, dashboard: dashboardData });
       if (leaderboardData) set({ leaderboard: leaderboardData });
-    } catch (err) {
-      console.error('Failed to refetch gamification data:', err);
+    } catch (error) {
+      console.error('Failed to refetch gamification data:', error);
     } finally {
       set({ isLoading: false });
     }

@@ -79,7 +79,6 @@ class ResourceAccessDenied(HTTPException):
         super().__init__(status_code=status.HTTP_403_FORBIDDEN, detail=detail)
 
 
-
 # ============================================================================
 # Permission Checker
 # ============================================================================

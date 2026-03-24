@@ -39,9 +39,10 @@ import { deleteAssignmentUsingActivityUUID, getAssignmentFromActivityUUID } from
 import { CourseWorkflowBadge } from '@components/Dashboard/Courses/courseWorkflowUi';
 import { useActivityMutations } from '@/hooks/mutations/useActivityMutations';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
+import type { ActivityUpdateValues } from '@/schemas/activitySchemas';
 import ToolTip from '@/components/Objects/Elements/Tooltip/Tooltip';
-import { getAbsoluteUrl } from '@services/config/config';
 import { useCourse } from '@components/Contexts/CourseContext';
+import { getAbsoluteUrl } from '@services/config/config';
 import { useCourseEditorStore } from '@/stores/courses';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
@@ -52,7 +53,6 @@ import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import useSWR from 'swr';
-import type { ActivityUpdateValues } from '@/schemas/activitySchemas';
 
 // Types
 type ActivityType =
@@ -210,10 +210,14 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
 
     setIsSavingEdit(true);
     try {
-      await updateActivity(activity.activity_uuid, { name: trimmedName, activity_type: apiActivityType }, {
-        accessToken: access_token,
-        lastKnownUpdateDate: courseContext.courseStructure.update_date,
-      });
+      await updateActivity(
+        activity.activity_uuid,
+        { name: trimmedName, activity_type: apiActivityType },
+        {
+          accessToken: access_token,
+          lastKnownUpdateDate: courseContext.courseStructure.update_date,
+        },
+      );
       toast.success(t('activityNameUpdatedSuccess'));
       setIsEditing(false);
     } catch (error: any) {
@@ -223,10 +227,14 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
           serverVersion: activity,
           message: error?.detail || error?.message,
           pendingSave: async () => {
-            await updateActivity(activity.activity_uuid, { name: trimmedName, activity_type: apiActivityType }, {
-              accessToken: access_token,
-              lastKnownUpdateDate: courseContext.courseStructure.update_date,
-            });
+            await updateActivity(
+              activity.activity_uuid,
+              { name: trimmedName, activity_type: apiActivityType },
+              {
+                accessToken: access_token,
+                lastKnownUpdateDate: courseContext.courseStructure.update_date,
+              },
+            );
           },
         });
         return;

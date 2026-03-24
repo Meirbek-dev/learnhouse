@@ -1,7 +1,7 @@
 'use server';
 
-import type { CourseOrderPayload } from '@/schemas/chapterSchemas';
 import { RequestBodyWithAuthHeader, errorHandling } from '@services/utils/ts/requests';
+import type { CourseOrderPayload } from '@/schemas/chapterSchemas';
 import { getAPIUrl } from '@services/config/config';
 
 /*
@@ -64,11 +64,7 @@ export async function createChapter(data: any, access_token: string, options?: C
   return errorHandling(result);
 }
 
-export async function deleteChapter(
-  chapterUuid: string,
-  access_token: string,
-  options?: ChapterInvalidationOptions,
-) {
+export async function deleteChapter(chapterUuid: string, access_token: string, options?: ChapterInvalidationOptions) {
   const result: any = await fetch(
     `${getAPIUrl()}chapters/${chapterUuid}`,
     RequestBodyWithAuthHeader(

@@ -2,16 +2,17 @@
 
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
-import { courseGeneralSchema, type CourseGeneralValues } from '@/schemas/courseSchemas';
 import { AlertTriangle, Image as ImageIcon, Loader2, Tag, Video } from 'lucide-react';
 import { SectionHeader } from '@components/Dashboard/Courses/SectionHeader';
 import { useCoursesMutations } from '@/hooks/mutations/useCoursesMutations';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { Card, CardContent, CardHeader } from '@components/ui/card';
+import type { CourseGeneralValues } from '@/schemas/courseSchemas';
 import { useSyncDirtySection } from '@/hooks/useSyncDirtySection';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { valibotResolver } from '@hookform/resolvers/valibot';
+import { courseGeneralSchema } from '@/schemas/courseSchemas';
 import { TagsInput } from '@components/ui/custom/tags-input';
 import { useEffect, useId, useMemo, useState } from 'react';
 import { useSaveSection } from '@/hooks/useSaveSection';

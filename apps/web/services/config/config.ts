@@ -40,7 +40,7 @@ export const getServerAPIUrl = () => {
 };
 
 export const getAPIUrl = () => {
-  if (typeof window === 'undefined') {
+  if (typeof globalThis.window === 'undefined') {
     return getServerAPIUrl();
   }
 

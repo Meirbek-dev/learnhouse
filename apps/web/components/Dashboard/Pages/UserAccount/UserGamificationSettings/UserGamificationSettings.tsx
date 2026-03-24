@@ -1,9 +1,9 @@
 'use client';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useGamificationStore } from '@/stores/gamification';
 import { GamificationProfileSection } from '@/components/Dashboard/Gamification';
 import { updatePreferencesAction } from '@/app/actions/gamification';
+import { useGamificationStore } from '@/stores/gamification';
 import { Check, Loader2, Save } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Switch } from '@/components/ui/switch';

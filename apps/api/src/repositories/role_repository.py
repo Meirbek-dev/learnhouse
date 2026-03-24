@@ -58,9 +58,7 @@ class RoleRepository:
             .where(RolePermission.role_id == role_id)
         ).all()
 
-    def bulk_counts(
-        self, role_ids: list[int]
-    ) -> tuple[dict[int, int], dict[int, int]]:
+    def bulk_counts(self, role_ids: list[int]) -> tuple[dict[int, int], dict[int, int]]:
         """Return (permission_count_map, user_count_map) for a list of role IDs."""
         perm_rows = self.db.exec(
             select(RolePermission.role_id, func.count(RolePermission.permission_id))
@@ -86,9 +84,7 @@ class RoleRepository:
         )
         user_count = (
             self.db.exec(
-                select(func.count(UserRole.user_id)).where(
-                    UserRole.role_id == role_id
-                )
+                select(func.count(UserRole.user_id)).where(UserRole.role_id == role_id)
             ).one()
             or 0
         )
@@ -97,9 +93,7 @@ class RoleRepository:
     def get_user_count(self, role_id: int) -> int:
         return (
             self.db.exec(
-                select(func.count(UserRole.user_id)).where(
-                    UserRole.role_id == role_id
-                )
+                select(func.count(UserRole.user_id)).where(UserRole.role_id == role_id)
             ).one()
             or 0
         )
@@ -208,9 +202,7 @@ class RoleRepository:
                     .where(RolePermission.permission_id == perm.id)
                 ).first()
                 if not existing_rp:
-                    self.db.add(
-                        RolePermission(role_id=role.id, permission_id=perm.id)
-                    )
+                    self.db.add(RolePermission(role_id=role.id, permission_id=perm.id))
 
         self.db.commit()
         return created

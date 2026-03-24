@@ -12,9 +12,9 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { useCourse } from '@components/Contexts/CourseContext';
+import { AlertTriangle, RefreshCcw } from 'lucide-react';
 import { useCourseEditorStore } from '@/stores/courses';
 import { Badge } from '@/components/ui/badge';
-import { AlertTriangle, RefreshCcw } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 interface SummaryRow {
@@ -72,7 +72,7 @@ const formatString = (value: unknown) => {
   return fallbackValue;
 };
 
-const buildRows = (...rows: Array<SummaryRow | null>) => rows.filter((row): row is SummaryRow => Boolean(row));
+const buildRows = (...rows: (SummaryRow | null)[]) => rows.filter((row): row is SummaryRow => Boolean(row));
 
 const SummaryCard = ({
   title,
@@ -108,7 +108,6 @@ const SummaryCard = ({
   </div>
 );
 
-
 export default function ConflictResolutionModal() {
   const t = useTranslations('CourseEdit.Conflict');
   const generalT = useTranslations('CourseEdit.General');
@@ -121,8 +120,8 @@ export default function ConflictResolutionModal() {
   const resolveConflict = useCourseEditorStore((state) => state.resolveConflict);
 
   const draftValue = conflict.draftSnapshot;
-  const courseStructure = course.courseStructure;
-  const editorData = course.editorData;
+  const { courseStructure } = course;
+  const { editorData } = course;
 
   const contributorList = editorData.contributors.data ?? [];
   const certificationConfig = editorData.certifications.data?.[0]?.config ?? null;
@@ -192,7 +191,9 @@ export default function ConflictResolutionModal() {
           rows: buildRows(
             {
               label: certificationT('courseCertification'),
-              value: certificationDraft?.enable_certification ? certificationT('enableCertificationButton') : fallbackValue,
+              value: certificationDraft?.enable_certification
+                ? certificationT('enableCertificationButton')
+                : fallbackValue,
             },
             { label: certificationT('certificationName'), value: formatString(certificationDraft?.certification_name) },
             {
@@ -230,17 +231,18 @@ export default function ConflictResolutionModal() {
           ),
         };
       }
-      default:
+      default: {
         return {
           sectionLabel: undefined,
           rows: [],
         };
+      }
     }
   };
 
   const buildServerSummary = () => {
     switch (conflict.draftSection) {
-      case 'general':
+      case 'general': {
         return {
           sectionLabel: generalT('title', { courseName: courseStructure?.name || '' }),
           rows: buildRows(
@@ -252,7 +254,8 @@ export default function ConflictResolutionModal() {
             { label: generalT('thumbnailType'), value: formatString(courseStructure?.thumbnail_type) },
           ),
         };
-      case 'access':
+      }
+      case 'access': {
         return {
           sectionLabel: accessT('accessToTheCourse'),
           rows: buildRows({
@@ -260,7 +263,8 @@ export default function ConflictResolutionModal() {
             value: courseStructure?.public ? accessT('publicLabel') : accessT('usersOnlyLabel'),
           }),
         };
-      case 'contributors':
+      }
+      case 'contributors': {
         return {
           sectionLabel: contributorsT('courseContributorsTitle'),
           rows: buildRows(
@@ -276,7 +280,8 @@ export default function ConflictResolutionModal() {
             },
           ),
         };
-      case 'certification':
+      }
+      case 'certification': {
         return {
           sectionLabel: certificationT('courseCertification'),
           rows: buildRows(
@@ -284,7 +289,10 @@ export default function ConflictResolutionModal() {
               label: certificationT('courseCertification'),
               value: certificationConfig ? certificationT('enableCertificationButton') : fallbackValue,
             },
-            { label: certificationT('certificationName'), value: formatString(certificationConfig?.certification_name) },
+            {
+              label: certificationT('certificationName'),
+              value: formatString(certificationConfig?.certification_name),
+            },
             {
               label: certificationT('certificationType'),
               value: certificationConfig?.certification_type
@@ -301,7 +309,8 @@ export default function ConflictResolutionModal() {
             },
           ),
         };
-      case 'content':
+      }
+      case 'content': {
         return {
           sectionLabel: courseStructure?.name || undefined,
           rows: buildRows(
@@ -318,7 +327,8 @@ export default function ConflictResolutionModal() {
             },
           ),
         };
-      default:
+      }
+      default: {
         return {
           sectionLabel: courseStructure?.name || undefined,
           rows: buildRows(
@@ -326,6 +336,7 @@ export default function ConflictResolutionModal() {
             { label: generalT('description.label'), value: formatString(courseStructure?.description) },
           ),
         };
+      }
     }
   };
 

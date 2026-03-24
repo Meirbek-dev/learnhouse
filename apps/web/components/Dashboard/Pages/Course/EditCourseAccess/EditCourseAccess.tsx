@@ -73,15 +73,14 @@ const EditCourseAccess = () => {
 
   const handleAccessSave = async () => {
     if (!(access_token && draftPublic !== undefined) || !isDirty) return;
-    await save(
-      async () =>
-        updateAccess(
-          { public: draftPublic },
-          {
-            accessToken: access_token,
-            lastKnownUpdateDate: courseStructure.update_date,
-          },
-        ),
+    await save(async () =>
+      updateAccess(
+        { public: draftPublic },
+        {
+          accessToken: access_token,
+          lastKnownUpdateDate: courseStructure.update_date,
+        },
+      ),
     );
   };
 

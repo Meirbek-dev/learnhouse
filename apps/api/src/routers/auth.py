@@ -341,7 +341,9 @@ async def google_authorize(callback: str) -> RedirectResponse:
             detail="Google OAuth is not configured on this server",
         )
 
-    state = base64.urlsafe_b64encode(json.dumps({"callback": callback}).encode()).decode()
+    state = base64.urlsafe_b64encode(
+        json.dumps({"callback": callback}).encode()
+    ).decode()
     url = get_google_authorize_url(
         client_id=google_cfg.client_id,
         redirect_uri=_get_backend_callback_url(),
@@ -401,7 +403,9 @@ async def google_callback(
     client_ip = request.client.host if request.client else "unknown"
 
     try:
-        user = await find_or_create_google_user(request, google_user, current_user, db_session)
+        user = await find_or_create_google_user(
+            request, google_user, current_user, db_session
+        )
     except HTTPException:
         logger.warning(
             "Google OAuth user lookup/creation failed",

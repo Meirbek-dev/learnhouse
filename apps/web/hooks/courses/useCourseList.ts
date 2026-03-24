@@ -1,7 +1,7 @@
 'use client';
 
-import { swrFetcherWithHeaders } from '@services/utils/ts/requests';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
+import { swrFetcherWithHeaders } from '@services/utils/ts/requests';
 import type { CourseListKeyOptions } from './courseKeys';
 import { courseKeys } from './courseKeys';
 import useSWR from 'swr';

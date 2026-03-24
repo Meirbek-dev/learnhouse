@@ -2,9 +2,9 @@
 
 import { createChapter, deleteChapter, updateChapter, updateCourseOrderStructure } from '@services/courses/chapters';
 import type { ChapterCreateValues, ChapterUpdateValues, CourseOrderPayload } from '@/schemas/chapterSchemas';
-import { assertSuccess } from '@/lib/api/assertSuccess';
 import { useCourseStructureStore } from '@/stores/courses';
 import { courseKeys } from '@/hooks/courses/courseKeys';
+import { assertSuccess } from '@/lib/api/assertSuccess';
 import { useSWRConfig } from 'swr';
 
 interface ChapterMutationOptions {
@@ -26,8 +26,7 @@ export function useChapterMutations(courseUuid: string, withUnpublishedActivitie
   const { mutate, cache } = useSWRConfig();
   const structureKey = courseKeys.structure(courseUuid, withUnpublishedActivities);
 
-  const captureSnapshot = <T,>(key: string): T | undefined =>
-    (cache.get(key) as any)?.data as T | undefined;
+  const captureSnapshot = <T>(key: string): T | undefined => (cache.get(key) as any)?.data as T | undefined;
 
   const createChapterMutation = async (payload: ChapterCreateValues, options: ChapterMutationOptions) => {
     const tempId = `temp_chapter_${Date.now()}`;
@@ -69,7 +68,10 @@ export function useChapterMutations(courseUuid: string, withUnpublishedActivitie
         structureKey,
         (current: any) =>
           current
-            ? { ...current, chapters: (current.chapters ?? []).filter((chapter: any) => chapter.chapter_uuid !== tempId) }
+            ? {
+                ...current,
+                chapters: (current.chapters ?? []).filter((chapter: any) => chapter.chapter_uuid !== tempId),
+              }
             : current,
         { revalidate: false },
       );
@@ -77,7 +79,11 @@ export function useChapterMutations(courseUuid: string, withUnpublishedActivitie
     }
   };
 
-  const updateChapterMutation = async (chapterUuid: string, payload: ChapterUpdateValues, options: ChapterMutationOptions) => {
+  const updateChapterMutation = async (
+    chapterUuid: string,
+    payload: ChapterUpdateValues,
+    options: ChapterMutationOptions,
+  ) => {
     const previous = captureSnapshot(structureKey);
 
     await mutate(
@@ -87,7 +93,7 @@ export function useChapterMutations(courseUuid: string, withUnpublishedActivitie
           ? {
               ...current,
               chapters: (current.chapters ?? []).map((chapter: any) =>
-                chapter.chapter_uuid === chapterUuid ? { ...chapter, ...payload } : chapter,
+                chapter.chapter_uuid === chapterUuid ? Object.assign(chapter, payload) : chapter,
               ),
             }
           : current,
@@ -116,7 +122,10 @@ export function useChapterMutations(courseUuid: string, withUnpublishedActivitie
       structureKey,
       (current: any) =>
         current
-          ? { ...current, chapters: (current.chapters ?? []).filter((chapter: any) => chapter.chapter_uuid !== chapterUuid) }
+          ? {
+              ...current,
+              chapters: (current.chapters ?? []).filter((chapter: any) => chapter.chapter_uuid !== chapterUuid),
+            }
           : current,
       { revalidate: false },
     );
@@ -137,7 +146,7 @@ export function useChapterMutations(courseUuid: string, withUnpublishedActivitie
   };
 
   const reorderStructure = async (nextStructure: any, payload: CourseOrderPayload, options: ChapterMutationOptions) => {
-    const previousStructure = captureSnapshot<any>(structureKey);
+    const previousStructure = captureSnapshot<{ chapters?: any[] }>(structureKey);
     const dragStore = useCourseStructureStore.getState();
     const nextSnapshot = buildOrderSnapshot(nextStructure.chapters ?? []);
 

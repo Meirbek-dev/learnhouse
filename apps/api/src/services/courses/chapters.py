@@ -35,6 +35,7 @@ def _get_chapter_by_uuid(chapter_uuid: str, db_session) -> Chapter:
         )
     return chapter
 
+
 ####################################################
 # CRUD
 ####################################################
@@ -363,7 +364,9 @@ async def reorder_chapters_and_activities(
     ###########
 
     # Resolve chapter UUIDs → integer IDs in one batch query
-    all_chapter_uuids = [co.chapter_uuid for co in chapters_order.chapter_order_by_uuids]
+    all_chapter_uuids = [
+        co.chapter_uuid for co in chapters_order.chapter_order_by_uuids
+    ]
     chapters_by_uuid: dict[str, Chapter] = {}
     if all_chapter_uuids:
         result = db_session.exec(

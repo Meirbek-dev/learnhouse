@@ -2,7 +2,8 @@
 
 import { getAPIUrl } from '@services/config/config';
 
-const normalizeCourseUuid = (courseUuid: string) => (courseUuid.startsWith('course_') ? courseUuid : `course_${courseUuid}`);
+const normalizeCourseUuid = (courseUuid: string) =>
+  courseUuid.startsWith('course_') ? courseUuid : `course_${courseUuid}`;
 
 export interface CourseListKeyOptions {
   page?: number;

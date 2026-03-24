@@ -17,7 +17,6 @@ from src.services.ai.exceptions import (
     AITimeoutError,
     VectorStoreError,
 )
-
 from src.services.ai.message_utils import convert_history_to_messages
 
 logger = logging.getLogger(__name__)
@@ -239,7 +238,7 @@ async def ask_ai_stream(
             )
             raise AITimeoutError(60, details={"question_length": len(question)}) from e
 
-    except (AIProcessingError, VectorStoreError, AITimeoutError):
+    except AIProcessingError, VectorStoreError, AITimeoutError:
         raise
     except Exception as e:
         # Log full details server-side; send only a generic message to the client

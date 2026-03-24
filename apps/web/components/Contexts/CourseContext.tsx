@@ -1,16 +1,14 @@
 'use client';
 
-import {
-  createEmptyCourseEditorBundle,
-} from '@services/courses/editor';
-import { createContext, use, useCallback, useEffect, useMemo } from 'react';
 import { useCourseEditorBundle } from '@/hooks/courses/useCourseEditorBundle';
+import { createEmptyCourseEditorBundle } from '@services/courses/editor';
+import { createContext, use, useCallback, useEffect, useMemo } from 'react';
 import { useCourseStructure } from '@/hooks/courses/useCourseStructure';
 import { getCourseReadinessSummary } from '@/lib/course-management';
-import { useCourseEditorStore } from '@/stores/courses';
 import type { CourseEditorBundle } from '@services/courses/editor';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import ErrorUI from '@/components/Objects/Elements/Error/Error';
+import { useCourseEditorStore } from '@/stores/courses';
 import { useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
 
@@ -170,9 +168,7 @@ export const CourseProvider = ({
       dismissConflict: dismissConflictHandler,
     };
 
-    return (
-      <CourseContext.Provider value={value}>{children}</CourseContext.Provider>
-    );
+    return <CourseContext.Provider value={value}>{children}</CourseContext.Provider>;
   }
 
   return null;

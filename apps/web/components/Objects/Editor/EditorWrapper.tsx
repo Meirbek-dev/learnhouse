@@ -35,18 +35,15 @@ const EditorWrapper = (props: EditorWrapperProps): JSX.Element => {
     const plainContent = structuredClone(content);
     const updatedActivity = { ...activity, content: plainContent };
 
-    toast.promise(
-      activityAutosave.flush(updatedActivity),
-      {
-        loading: t('saving'),
-        success: () => <b>{t('saveSuccess')}</b>,
-        error: (err) => {
-          const errorMessage = err?.data?.detail || err?.data?.message || t('saveError');
-          const status = err?.status;
-          return <b>{status ? t('detailedSaveError', { status, message: errorMessage }) : errorMessage}</b>;
-        },
+    toast.promise(activityAutosave.flush(updatedActivity), {
+      loading: t('saving'),
+      success: () => <b>{t('saveSuccess')}</b>,
+      error: (err) => {
+        const errorMessage = err?.data?.detail || err?.data?.message || t('saveError');
+        const status = err?.status;
+        return <b>{status ? t('detailedSaveError', { status, message: errorMessage }) : errorMessage}</b>;
       },
-    );
+    });
   }
 
   return (

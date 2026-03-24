@@ -15,10 +15,7 @@ export class APIError extends Error {
   constructor(response: unknown) {
     const r = response as Record<string, any> | null | undefined;
     const message: string =
-      (typeof r?.data?.detail === 'string' ? r.data.detail : null) ??
-      r?.HTTPmessage ??
-      r?.message ??
-      'Request failed';
+      (typeof r?.data?.detail === 'string' ? r.data.detail : null) ?? r?.HTTPmessage ?? r?.message ?? 'Request failed';
 
     super(message);
     this.name = 'APIError';

@@ -27,7 +27,7 @@ export function useCourseStructure<TCourseStructure = any>(
     revalidateOnMount: options?.fallbackData ? false : undefined,
     revalidateIfStale: options?.fallbackData ? false : undefined,
     revalidateOnFocus: false,
-    dedupingInterval: 5_000,
+    dedupingInterval: 5000,
   });
 
   return {
@@ -65,11 +65,15 @@ export function useChapterActivities<TActivity = any>(
   enabled: boolean,
   withUnpublishedActivities = false,
 ) {
-  const { chapter, ...rest } = useChapter<{ activities?: TActivity[] }>(courseUuid, chapterUuid, withUnpublishedActivities);
+  const { chapter, ...rest } = useChapter<{ activities?: TActivity[] }>(
+    courseUuid,
+    chapterUuid,
+    withUnpublishedActivities,
+  );
 
   return {
     ...rest,
-    activities: enabled ? chapter?.activities ?? [] : [],
+    activities: enabled ? (chapter?.activities ?? []) : [],
     isLoading: enabled ? rest.isLoading : false,
   };
 }

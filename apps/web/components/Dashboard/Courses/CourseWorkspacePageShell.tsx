@@ -28,11 +28,11 @@ import {
 import ConflictResolutionModal from '@components/Dashboard/Pages/Course/ConflictResolutionModal';
 import type { CourseWorkspaceCapabilities } from '@/lib/course-management-server';
 import { CourseProvider, useCourse } from '@components/Contexts/CourseContext';
-import { useDirtyGuard } from '@/hooks/useDirtyGuard';
 import type { CourseWorkspaceStage } from '@/lib/course-management';
 import { buildCourseWorkspacePath } from '@/lib/course-management';
 import { getAbsoluteUrl } from '@services/config/config';
 import { CourseStatusBadge } from './courseWorkflowUi';
+import { useDirtyGuard } from '@/hooks/useDirtyGuard';
 import { Button } from '@/components/ui/button';
 import AppLink from '@/components/ui/AppLink';
 import { useTranslations } from 'next-intl';

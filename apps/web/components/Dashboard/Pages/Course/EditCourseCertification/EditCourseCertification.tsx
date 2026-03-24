@@ -6,11 +6,11 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { SectionHeader } from '@components/Dashboard/Courses/SectionHeader';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
-import { useCallback, useEffect, useMemo, useState } from 'react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { AlertTriangle, Award, FileText, Sparkles } from 'lucide-react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useSyncDirtySection } from '@/hooks/useSyncDirtySection';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { useSaveSection } from '@/hooks/useSaveSection';

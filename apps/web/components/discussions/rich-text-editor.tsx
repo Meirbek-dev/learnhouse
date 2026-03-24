@@ -12,7 +12,6 @@ import {
   Redo,
   Undo,
   Upload,
-  YoutubeIcon,
 } from 'lucide-react';
 import {
   Dialog,
@@ -23,6 +22,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import { SiYoutube } from '@icons-pack/react-simple-icons';
 import { useEffect, useState, useTransition } from 'react';
 import { EditorContent, useEditor } from '@tiptap/react';
 import Youtube from '@tiptap/extension-youtube';
@@ -435,7 +435,7 @@ export default function RichTextEditor({
               />
             }
           >
-            <YoutubeIcon size={16} />
+            <SiYoutube size={16} />
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>

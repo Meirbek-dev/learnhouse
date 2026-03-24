@@ -38,7 +38,6 @@ import { AssignmentsTaskProvider } from '@components/Contexts/Assignments/Assign
 import { markActivityAsComplete, unmarkActivityAsComplete } from '@services/courses/activity';
 import FixedActivitySecondaryBar from '@components/Pages/Activity/FixedActivitySecondaryBar';
 import type { Activity, Chapter, CourseStructure } from '@components/Contexts/CourseContext';
-import { useGamificationStore } from '@/stores/gamification';
 import ActivityChapterDropdown from '@components/Pages/Activity/ActivityChapterDropdown';
 import { AssignmentProvider } from '@components/Contexts/Assignments/AssignmentContext';
 import GeneralWrapper from '@/components/Objects/Elements/Wrappers/GeneralWrapper';
@@ -54,6 +53,7 @@ import { usePlatform } from '@/components/Contexts/PlatformContext';
 import { CourseProvider } from '@components/Contexts/CourseContext';
 import { useContributorStatus } from '@/hooks/useContributorStatus';
 import { getAPIUrl, getAbsoluteUrl } from '@services/config/config';
+import { useGamificationStore } from '@/stores/gamification';
 import { swrFetcher } from '@services/utils/ts/requests';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { getTrailSwrKey } from '@services/courses/keys';

@@ -548,9 +548,7 @@ def load_analytics_context(
         membership_rows = [
             _unwrap_model(row, UserGroupUser)
             for row in db_session.exec(
-                select(UserGroupUser).where(
-                    UserGroupUser.user_id.in_(sorted(user_ids))
-                )
+                select(UserGroupUser).where(UserGroupUser.user_id.in_(sorted(user_ids)))
             ).all()
         ]
         for membership in membership_rows:
@@ -561,7 +559,9 @@ def load_analytics_context(
             usergroups = [
                 _unwrap_model(usergroup, UserGroup)
                 for usergroup in db_session.exec(
-                    select(UserGroup).where(UserGroup.id.in_(sorted(relevant_group_ids)))
+                    select(UserGroup).where(
+                        UserGroup.id.in_(sorted(relevant_group_ids))
+                    )
                 ).all()
             ]
             usergroup_names_by_id = {
@@ -807,5 +807,5 @@ def assessment_pass_threshold(settings: dict | None) -> float:
     raw = (settings or {}).get("passing_score", 60)
     try:
         return float(raw)
-    except (TypeError, ValueError):
+    except TypeError, ValueError:
         return 60.0

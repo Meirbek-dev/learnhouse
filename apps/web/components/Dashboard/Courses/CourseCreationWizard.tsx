@@ -4,21 +4,22 @@ import { buildCourseWorkspacePath, cleanCourseUuid, prefixedCourseUuid } from '@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeft, ArrowRight, CheckCircle2, ChevronDown, Loader2, Sparkles } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { courseWizardSchema, type CourseWizardValues } from '@/schemas/courseSchemas';
 import { CourseChoiceCard, courseWorkflowSummaryCardClass } from './courseWorkflowUi';
 import { createNewCourse, getCourseMetadata } from '@services/courses/courses';
-import { valibotResolver } from '@hookform/resolvers/valibot';
-import { useQueryParam } from '@/hooks/useQueryParam';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
-import { useRouter } from 'next/navigation';
+import type { CourseWizardValues } from '@/schemas/courseSchemas';
+import { valibotResolver } from '@hookform/resolvers/valibot';
+import { courseWizardSchema } from '@/schemas/courseSchemas';
 import { createChapter } from '@services/courses/chapters';
-import { useMemo, useTransition } from 'react';
 import { RadioGroup } from '@/components/ui/radio-group';
+import { useQueryParam } from '@/hooks/useQueryParam';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
+import { useMemo, useTransition } from 'react';
 import { Input } from '@/components/ui/input';
-import { useForm } from 'react-hook-form';
+import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { useForm } from 'react-hook-form';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 
@@ -54,7 +55,11 @@ export default function CourseCreationWizard({ sourceCourses }: CourseCreationWi
   const [isPending, startTransition] = useTransition();
 
   const sourceOptions = useMemo(
-    () => sourceCourses.map((course) => ({ ...course, cleanUuid: cleanCourseUuid(course.course_uuid) ?? course.course_uuid })),
+    () =>
+      sourceCourses.map((course) => ({
+        ...course,
+        cleanUuid: cleanCourseUuid(course.course_uuid) ?? course.course_uuid,
+      })),
     [sourceCourses],
   );
 
@@ -70,7 +75,7 @@ export default function CourseCreationWizard({ sourceCourses }: CourseCreationWi
 
   const canContinue = (() => {
     if (currentStep === 0) return name.trim().length > 0 && description.trim().length > 0;
-    if (currentStep === 1 && template === 'outline') return !!sourceCourseUuid?.trim();
+    if (currentStep === 1 && template === 'outline') return Boolean(sourceCourseUuid?.trim());
     return true;
   })();
 
@@ -157,9 +162,7 @@ export default function CourseCreationWizard({ sourceCourses }: CourseCreationWi
       </div>
       <div>
         <div className="text-muted-foreground">{t('summary.visibility')}</div>
-        <div className="mt-1">
-          {isPublic ? t('visibility.public.summary') : t('visibility.private.summary')}
-        </div>
+        <div className="mt-1">{isPublic ? t('visibility.public.summary') : t('visibility.private.summary')}</div>
       </div>
       <div>
         <div className="text-muted-foreground">{t('summary.template')}</div>
@@ -173,7 +176,9 @@ export default function CourseCreationWizard({ sourceCourses }: CourseCreationWi
       </div>
       <div>
         <div className="text-muted-foreground">{t('summary.launchDestination')}</div>
-        <div className="mt-1">{launchDest === 'overview' ? t('launch.overview.title') : t('launch.curriculum.title')}</div>
+        <div className="mt-1">
+          {launchDest === 'overview' ? t('launch.overview.title') : t('launch.curriculum.title')}
+        </div>
       </div>
       {template === 'outline' && sourceCourseUuid ? (
         <div>
@@ -203,7 +208,10 @@ export default function CourseCreationWizard({ sourceCourses }: CourseCreationWi
               const done = index < currentStep;
               const active = index === currentStep;
               return (
-                <div key={label} className="flex items-center">
+                <div
+                  key={label}
+                  className="flex items-center"
+                >
                   <div className="flex items-center gap-2">
                     <div
                       className={cn(
@@ -259,7 +267,10 @@ export default function CourseCreationWizard({ sourceCourses }: CourseCreationWi
                   <div className="mt-1 text-sm text-muted-foreground">{t('basics.description')}</div>
                 </div>
                 <div className="space-y-2">
-                  <label htmlFor="course-title" className="text-sm font-medium text-foreground">
+                  <label
+                    htmlFor="course-title"
+                    className="text-sm font-medium text-foreground"
+                  >
                     {t('basics.courseTitle')}
                   </label>
                   <Input
@@ -269,7 +280,10 @@ export default function CourseCreationWizard({ sourceCourses }: CourseCreationWi
                   />
                 </div>
                 <div className="space-y-2">
-                  <label htmlFor="course-description" className="text-sm font-medium text-foreground">
+                  <label
+                    htmlFor="course-description"
+                    className="text-sm font-medium text-foreground"
+                  >
                     {t('basics.shortDescription')}
                   </label>
                   <Textarea
@@ -288,8 +302,16 @@ export default function CourseCreationWizard({ sourceCourses }: CourseCreationWi
                     className="grid gap-3 md:grid-cols-2"
                   >
                     {[
-                      { value: 'private', title: t('visibility.private.title'), description: t('visibility.private.description') },
-                      { value: 'public', title: t('visibility.public.title'), description: t('visibility.public.description') },
+                      {
+                        value: 'private',
+                        title: t('visibility.private.title'),
+                        description: t('visibility.private.description'),
+                      },
+                      {
+                        value: 'public',
+                        title: t('visibility.public.title'),
+                        description: t('visibility.public.description'),
+                      },
                     ].map((option) => (
                       <CourseChoiceCard
                         key={option.value}
@@ -322,8 +344,16 @@ export default function CourseCreationWizard({ sourceCourses }: CourseCreationWi
                 >
                   {[
                     { value: 'blank', title: t('template.blank.title'), description: t('template.blank.description') },
-                    { value: 'starter', title: t('template.starter.title'), description: t('template.starter.description') },
-                    { value: 'outline', title: t('template.outline.title'), description: t('template.outline.description') },
+                    {
+                      value: 'starter',
+                      title: t('template.starter.title'),
+                      description: t('template.starter.description'),
+                    },
+                    {
+                      value: 'outline',
+                      title: t('template.outline.title'),
+                      description: t('template.outline.description'),
+                    },
                   ].map((option) => (
                     <CourseChoiceCard
                       key={option.value}
@@ -332,7 +362,9 @@ export default function CourseCreationWizard({ sourceCourses }: CourseCreationWi
                       checked={template === option.value}
                       title={option.title}
                       description={option.description}
-                      icon={option.value === 'outline' ? ChevronDown : option.value === 'starter' ? Sparkles : CheckCircle2}
+                      icon={
+                        option.value === 'outline' ? ChevronDown : option.value === 'starter' ? Sparkles : CheckCircle2
+                      }
                       onSelect={(value) => form.setValue('template', value as CourseWizardValues['template'])}
                     />
                   ))}
@@ -340,12 +372,17 @@ export default function CourseCreationWizard({ sourceCourses }: CourseCreationWi
 
                 {template === 'outline' ? (
                   <div className="space-y-2">
-                    <label htmlFor="source-course" className="text-sm font-medium text-foreground">
+                    <label
+                      htmlFor="source-course"
+                      className="text-sm font-medium text-foreground"
+                    >
                       {t('template.sourceCourse')}
                     </label>
                     <Select
                       value={sourceCourseUuid ?? undefined}
-                      onValueChange={(value) => { if (value) form.setValue('sourceCourseUuid', value); }}
+                      onValueChange={(value) => {
+                        if (value) form.setValue('sourceCourseUuid', value);
+                      }}
                       items={sourceOptions.map((course) => ({ value: course.cleanUuid, label: course.name }))}
                     >
                       <SelectTrigger id="source-course">
@@ -353,7 +390,10 @@ export default function CourseCreationWizard({ sourceCourses }: CourseCreationWi
                       </SelectTrigger>
                       <SelectContent>
                         {sourceOptions.map((course) => (
-                          <SelectItem key={course.course_uuid} value={course.cleanUuid}>
+                          <SelectItem
+                            key={course.course_uuid}
+                            value={course.cleanUuid}
+                          >
                             {course.name}
                           </SelectItem>
                         ))}
@@ -379,8 +419,16 @@ export default function CourseCreationWizard({ sourceCourses }: CourseCreationWi
                   className="grid gap-3 md:grid-cols-2"
                 >
                   {[
-                    { value: 'overview', title: t('launch.overview.title'), description: t('launch.overview.description') },
-                    { value: 'curriculum', title: t('launch.curriculum.title'), description: t('launch.curriculum.description') },
+                    {
+                      value: 'overview',
+                      title: t('launch.overview.title'),
+                      description: t('launch.overview.description'),
+                    },
+                    {
+                      value: 'curriculum',
+                      title: t('launch.curriculum.title'),
+                      description: t('launch.curriculum.description'),
+                    },
                   ].map((option) => (
                     <CourseChoiceCard
                       key={option.value}

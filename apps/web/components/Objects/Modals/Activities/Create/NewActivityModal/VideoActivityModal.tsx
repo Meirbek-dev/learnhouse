@@ -17,12 +17,12 @@ import {
   Upload,
   UploadCloud,
   VolumeX,
-  Youtube,
 } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@components/ui/dropdown-menu';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { usePlatform } from '@/components/Contexts/PlatformContext';
 import type { ChangeEvent, ComponentType, DragEvent } from 'react';
+import { SiYoutube } from '@icons-pack/react-simple-icons';
 import { constructAcceptValue } from '@/lib/constants';
 import { AnimatePresence, motion } from 'motion/react';
 import { Separator } from '@components/ui/separator';
@@ -1070,7 +1070,7 @@ const VideoModal = ({ submitFileActivity, submitExternalVideo, chapterId, course
               whileHover={{ scale: selectedView !== 'youtube' ? 1.02 : 1 }}
               whileTap={{ scale: 0.98 }}
             >
-              <Youtube size={20} />
+              <SiYoutube size={20} />
               <span className="font-medium">{t('youtubeVideo')}</span>
               {selectedView === 'youtube' && (
                 <motion.div

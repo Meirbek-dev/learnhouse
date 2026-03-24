@@ -337,7 +337,7 @@ class AssignmentUserSubmissionRead(AssignmentUserSubmissionBase):
     @classmethod
     def normalize_tz_offset(cls, v: object) -> object:
         # SQLite/Postgres may return '+00' instead of the ISO 8601 '+00:00'
-        if isinstance(v, str) and (v.endswith("+00") or v.endswith("-00")):
+        if isinstance(v, str) and (v.endswith(("+00", "-00"))):
             v = v + ":00"
         return v
 

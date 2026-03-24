@@ -4,8 +4,8 @@ import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
-import { createContext, use } from 'react';
 import type { Platform } from '@/types/platform';
+import { createContext, use } from 'react';
 import type { ReactNode } from 'react';
 import useSWR from 'swr';
 

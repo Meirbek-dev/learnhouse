@@ -24,7 +24,7 @@ export function useQueryParam(key: string, defaultValue = ''): [string, (value: 
         params.set(key, newValue);
       }
       const query = params.toString();
-      window.history.pushState(null, '', query ? `${pathname}?${query}` : pathname);
+      globalThis.history.pushState(null, '', query ? `${pathname}?${query}` : pathname);
     },
     [key, defaultValue, searchParams, pathname],
   );
@@ -43,6 +43,6 @@ export function useClearQueryParams(keys: string[]): () => void {
     const params = new URLSearchParams(searchParams.toString());
     keys.forEach((k) => params.delete(k));
     const query = params.toString();
-    window.history.pushState(null, '', query ? `${pathname}?${query}` : pathname);
+    globalThis.history.pushState(null, '', query ? `${pathname}?${query}` : pathname);
   }, [keys, pathname, searchParams]);
 }

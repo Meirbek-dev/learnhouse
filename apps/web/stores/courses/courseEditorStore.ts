@@ -81,8 +81,7 @@ export const useCourseEditorStore = create<CourseEditorState & CourseEditorActio
       };
     }),
 
-  syncLastKnownUpdateDate: (lastKnownUpdateDate) =>
-    set({ lastKnownUpdateDate: lastKnownUpdateDate ?? null }),
+  syncLastKnownUpdateDate: (lastKnownUpdateDate) => set({ lastKnownUpdateDate: lastKnownUpdateDate ?? null }),
 
   setSectionDirty: (section, dirty) =>
     set((state) => ({
@@ -91,7 +90,14 @@ export const useCourseEditorStore = create<CourseEditorState & CourseEditorActio
 
   clearDirtySections: () => set({ dirtySections: {} }),
 
-  setConflict: ({ serverVersion = null, draftSnapshot = null, section = null, message = '', pendingSave = null, resetForm = null }) =>
+  setConflict: ({
+    serverVersion = null,
+    draftSnapshot = null,
+    section = null,
+    message = '',
+    pendingSave = null,
+    resetForm = null,
+  }) =>
     set({
       conflict: {
         isOpen: true,
@@ -152,5 +158,4 @@ export const useCourseEditorStore = create<CourseEditorState & CourseEditorActio
     }),
 }));
 
-export const selectHasDirtySections = (state: CourseEditorState) =>
-  Object.values(state.dirtySections).some(Boolean);
+export const selectHasDirtySections = (state: CourseEditorState) => Object.values(state.dirtySections).some(Boolean);

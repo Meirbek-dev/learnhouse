@@ -54,8 +54,8 @@ class AICacheManager:
         settings = get_settings()
         vector_ttl = settings.ai_config.collection_retention
         self.vector_store_cache = _Cache(maxsize=100, ttl=vector_ttl)
-        self.agent_cache = _Cache(maxsize=100, ttl=1800)   # 30 min
-        self.db_cache = _Cache(maxsize=200, ttl=300)        # 5 min
+        self.agent_cache = _Cache(maxsize=100, ttl=1800)  # 30 min
+        self.db_cache = _Cache(maxsize=200, ttl=300)  # 5 min
 
         # Secondary index: activity_uuid → set of cache keys for targeted invalidation
         self._vector_key_index: dict[str, set[str]] = {}

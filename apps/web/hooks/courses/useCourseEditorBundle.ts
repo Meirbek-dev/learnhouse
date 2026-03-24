@@ -1,7 +1,8 @@
 'use client';
 
-import { getCourseEditorBundle, type CourseEditorBundle } from '@services/courses/editor';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
+import type { CourseEditorBundle } from '@services/courses/editor';
+import { getCourseEditorBundle } from '@services/courses/editor';
 import { courseKeys } from './courseKeys';
 import { useEffect, useRef } from 'react';
 import useSWR from 'swr';
@@ -26,11 +27,9 @@ export function useCourseEditorBundle(courseUuid?: string | null) {
 
   const key = courseKeys.editorBundle(courseUuid);
 
-  const swr = useSWR<CourseEditorBundle>(
-    key,
-    () => getCourseEditorBundle(courseUuid!, accessTokenRef.current!),
-    { revalidateOnFocus: false },
-  );
+  const swr = useSWR<CourseEditorBundle>(key, () => getCourseEditorBundle(courseUuid!, accessTokenRef.current!), {
+    revalidateOnFocus: false,
+  });
 
   return {
     ...swr,

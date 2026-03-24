@@ -8,7 +8,11 @@ const isValidLearningsJson = (value: string): boolean => {
   if (!value) return false;
   try {
     const parsed = JSON.parse(value);
-    return Array.isArray(parsed) && parsed.length > 0 && parsed.every((i: unknown) => typeof (i as any)?.text === 'string' && (i as any).text.trim().length > 0);
+    return (
+      Array.isArray(parsed) &&
+      parsed.length > 0 &&
+      parsed.every((i: unknown) => typeof (i as any)?.text === 'string' && (i as any).text.trim().length > 0)
+    );
   } catch {
     return false;
   }
@@ -19,12 +23,12 @@ const isValidLearningsJson = (value: string): boolean => {
 // ---------------------------------------------------------------------------
 
 export const courseGeneralSchema = v.object({
-  name:           v.pipe(v.string(), v.minLength(1), v.maxLength(100)),
-  description:    v.pipe(v.string(), v.minLength(1), v.maxLength(1000)),
-  about:          v.optional(v.string()),
-  learnings:      v.pipe(v.string(), v.check(isValidLearningsJson, 'learnings_invalid')),
-  tags:           v.array(v.string()),
-  public:         v.boolean(),
+  name: v.pipe(v.string(), v.minLength(1), v.maxLength(100)),
+  description: v.pipe(v.string(), v.minLength(1), v.maxLength(1000)),
+  about: v.optional(v.string()),
+  learnings: v.pipe(v.string(), v.check(isValidLearningsJson, 'learnings_invalid')),
+  tags: v.array(v.string()),
+  public: v.boolean(),
   thumbnail_type: v.picklist(['image', 'video', 'both'] as const),
 });
 
@@ -55,12 +59,12 @@ export type CourseContributorsValues = v.InferOutput<typeof courseContributorsSc
 // ---------------------------------------------------------------------------
 
 export const courseWizardSchema = v.object({
-  name:             v.pipe(v.string(), v.minLength(1, 'name_required'), v.maxLength(100)),
-  description:      v.pipe(v.string(), v.minLength(1, 'description_required'), v.maxLength(500)),
-  public:           v.boolean(),
-  template:         v.picklist(['blank', 'starter', 'outline'] as const),
+  name: v.pipe(v.string(), v.minLength(1, 'name_required'), v.maxLength(100)),
+  description: v.pipe(v.string(), v.minLength(1, 'description_required'), v.maxLength(500)),
+  public: v.boolean(),
+  template: v.picklist(['blank', 'starter', 'outline'] as const),
   sourceCourseUuid: v.optional(v.string()),
-  launchDest:       v.picklist(['overview', 'curriculum'] as const),
+  launchDest: v.picklist(['overview', 'curriculum'] as const),
 });
 
 export type CourseWizardValues = v.InferOutput<typeof courseWizardSchema>;

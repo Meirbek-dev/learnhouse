@@ -1,12 +1,12 @@
 'use client';
 
-import { useGamificationStore } from '@/stores/gamification';
 import { Activity, Crown, Flame, Star, Target, Trophy, Zap } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import GamifiedUserAvatar from '@/components/Objects/GamifiedUserAvatar';
 import { AVATAR_UNLOCKS, getLevelInfo } from '@/lib/gamification/levels';
 import { GlowingLevelBadge, LevelProgress } from '@/lib/gamification';
 import type { UserGamificationProfile } from '@/types/gamification';
+import { useGamificationStore } from '@/stores/gamification';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { useTranslations } from 'next-intl';

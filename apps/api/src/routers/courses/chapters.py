@@ -93,6 +93,9 @@ async def api_delete_coursechapter(
     Delete CourseChapter by chapter_uuid
     """
     return await delete_chapter(
-        request, chapter_uuid, current_user, db_session,
+        request,
+        chapter_uuid,
+        current_user,
+        db_session,
         delete_body.last_known_update_date,
     )

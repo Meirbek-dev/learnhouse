@@ -54,8 +54,7 @@ def _column_exists(conn: sa.Connection, table_name: str, column_name: str) -> bo
     if not _table_exists(conn, table_name):
         return False
     return any(
-        col["name"] == column_name
-        for col in sa.inspect(conn).get_columns(table_name)
+        col["name"] == column_name for col in sa.inspect(conn).get_columns(table_name)
     )
 
 
@@ -96,7 +95,7 @@ def _indexes_for_column(
         ),
         {
             "table_name": table_name,
-            "column_pattern": f'%({column_name})%',
+            "column_pattern": f"%({column_name})%",
         },
     ).fetchall()
     return [row[0] for row in rows]
@@ -157,29 +156,32 @@ def upgrade() -> None:
 
     # Migrate data: if platform has no rows yet, seed it from organization.
     if _table_exists(conn, "platform"):
-        platform_count = conn.execute(
-            sa.text("SELECT COUNT(*) FROM platform")
-        ).scalar() or 0
+        platform_count = (
+            conn.execute(sa.text("SELECT COUNT(*) FROM platform")).scalar() or 0
+        )
 
         if platform_count == 0:
-            org_row = conn.execute(
-                sa.text("SELECT * FROM organization ORDER BY id ASC LIMIT 1")
-            ).mappings().first()
+            org_row = (
+                conn.execute(
+                    sa.text("SELECT * FROM organization ORDER BY id ASC LIMIT 1")
+                )
+                .mappings()
+                .first()
+            )
 
             if org_row:
                 platform_table = sa.Table("platform", metadata, autoload_with=conn)
 
                 # Build the INSERT using only columns that exist in both tables.
                 org_columns = {
-                    col["name"]
-                    for col in sa.inspect(conn).get_columns("organization")
+                    col["name"] for col in sa.inspect(conn).get_columns("organization")
                 }
                 platform_columns = {
-                    col["name"]
-                    for col in sa.inspect(conn).get_columns("platform")
+                    col["name"] for col in sa.inspect(conn).get_columns("platform")
                 }
                 transferable = [
-                    c for c in _SHARED_COLUMNS
+                    c
+                    for c in _SHARED_COLUMNS
                     if c in org_columns and c in platform_columns
                 ]
 

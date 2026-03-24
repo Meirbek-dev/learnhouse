@@ -1,17 +1,17 @@
 import * as v from 'valibot';
 
 export const chapterCreateSchema = v.object({
-  name:            v.pipe(v.string(), v.minLength(1), v.maxLength(200)),
-  description:     v.optional(v.string()),
+  name: v.pipe(v.string(), v.minLength(1), v.maxLength(200)),
+  description: v.optional(v.string()),
   thumbnail_image: v.optional(v.string()),
-  course_id:       v.number(),
+  course_id: v.number(),
 });
 
 export type ChapterCreateValues = v.InferOutput<typeof chapterCreateSchema>;
 
 export const chapterUpdateSchema = v.object({
-  name:            v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(200))),
-  description:     v.optional(v.string()),
+  name: v.optional(v.pipe(v.string(), v.minLength(1), v.maxLength(200))),
+  description: v.optional(v.string()),
   thumbnail_image: v.optional(v.string()),
 });
 
@@ -22,7 +22,7 @@ const activityOrderSchema = v.object({
 });
 
 const chapterOrderItemSchema = v.object({
-  chapter_uuid:              v.string(),
+  chapter_uuid: v.string(),
   activities_order_by_uuids: v.array(v.string()),
 });
 

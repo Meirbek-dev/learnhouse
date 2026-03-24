@@ -8,17 +8,17 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { useChapterMutations } from '@/hooks/mutations/useChapterMutations';
-import { useCourse } from '@components/Contexts/CourseContext';
-import { useCourseEditorStore } from '@/stores/courses';
-import { useCourseStructureStore } from '@/stores/courses';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import NewChapterModal from '@components/Objects/Modals/Chapters/NewChapter';
 import { AlertTriangle, CheckCircle2, Hexagon, Loader2 } from 'lucide-react';
+import { useChapterMutations } from '@/hooks/mutations/useChapterMutations';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
+import { useCourse } from '@components/Contexts/CourseContext';
 import { DragDropContext, Droppable } from '@hello-pangea/dnd';
+import { useCourseStructureStore } from '@/stores/courses';
+import { useCourseEditorStore } from '@/stores/courses';
 import { Button } from '@/components/ui/button';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';

@@ -150,7 +150,9 @@ async def update_role(
     if role.is_system and not is_admin:
         raise HTTPException(403, detail="System roles cannot be modified")
     requested_priority = body.priority if body.priority is not None else role.priority
-    if not is_admin and requested_priority > _caller_max_priority(checker, current_user.id):
+    if not is_admin and requested_priority > _caller_max_priority(
+        checker, current_user.id
+    ):
         raise HTTPException(
             403, detail="Cannot set a role priority higher than your own"
         )
@@ -229,7 +231,9 @@ async def get_role_permissions(
     """Get all permissions assigned to a role."""
     checker.require(current_user.id, "role:read")
     repo.get_or_404(role_id)
-    return [PermissionRead.model_validate(p) for p in repo.get_role_permissions(role_id)]
+    return [
+        PermissionRead.model_validate(p) for p in repo.get_role_permissions(role_id)
+    ]
 
 
 @router.post("/{role_id}/permissions")
@@ -247,7 +251,9 @@ async def add_permission_to_role(
     if role.is_system and not is_admin:
         raise HTTPException(403, detail="System roles cannot be modified")
     perm = repo.get_permission_or_404(body.permission_id)
-    if not is_admin and perm.name not in checker.get_expanded_permissions(current_user.id):
+    if not is_admin and perm.name not in checker.get_expanded_permissions(
+        current_user.id
+    ):
         raise HTTPException(
             403,
             detail=f"Cannot grant permission '{perm.name}' that you do not have",

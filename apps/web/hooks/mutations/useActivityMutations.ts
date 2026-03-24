@@ -1,10 +1,16 @@
 'use client';
 
-import { createActivity, createExternalVideoActivity, createFileActivity, deleteActivity, updateActivity } from '@services/courses/activities';
+import {
+  createActivity,
+  createExternalVideoActivity,
+  createFileActivity,
+  deleteActivity,
+  updateActivity,
+} from '@services/courses/activities';
 import type { ActivityCreateValues, ActivityUpdateValues } from '@/schemas/activitySchemas';
+import { courseKeys } from '@/hooks/courses/courseKeys';
 import { assertSuccess } from '@/lib/api/assertSuccess';
 import { useCourseEditorStore } from '@/stores/courses';
-import { courseKeys } from '@/hooks/courses/courseKeys';
 import { useSWRConfig } from 'swr';
 
 interface ActivityMutationOptions {
@@ -16,10 +22,13 @@ export function useActivityMutations(courseUuid: string, withUnpublishedActiviti
   const { mutate, cache } = useSWRConfig();
   const structureKey = courseKeys.structure(courseUuid, withUnpublishedActivities);
 
-  const captureSnapshot = <T,>(key: string): T | undefined =>
-    (cache.get(key) as any)?.data as T | undefined;
+  const captureSnapshot = (key: string): unknown | undefined => (cache.get(key) as any)?.data as unknown | undefined;
 
-  const updateActivityMutation = async (activityUuid: string, payload: Partial<ActivityUpdateValues>, options: ActivityMutationOptions) => {
+  const updateActivityMutation = async (
+    activityUuid: string,
+    payload: Partial<ActivityUpdateValues>,
+    options: ActivityMutationOptions,
+  ) => {
     const previousStructure = captureSnapshot(structureKey);
     const activityKey = courseKeys.activity(activityUuid);
     const previousActivity = captureSnapshot(activityKey);
@@ -29,23 +38,22 @@ export function useActivityMutations(courseUuid: string, withUnpublishedActiviti
       (current: any) =>
         current
           ? {
-            ...current,
-            chapters: (current.chapters ?? []).map((chapter: any) => ({
-              ...chapter,
-              activities: (chapter.activities ?? []).map((activity: any) =>
-                activity.activity_uuid === activityUuid ? { ...activity, ...payload } : activity,
+              ...current,
+              chapters: (current.chapters ?? []).map((chapter: any) =>
+                Object.assign(chapter, {
+                  activities: (chapter.activities ?? []).map((activity: any) =>
+                    activity.activity_uuid === activityUuid ? { ...activity, ...payload } : activity,
+                  ),
+                }),
               ),
-            })),
-          }
+            }
           : current,
       { revalidate: false },
     );
 
-    await mutate(
-      activityKey,
-      (current: any) => (current ? { ...current, ...payload } : current),
-      { revalidate: false },
-    );
+    await mutate(activityKey, (current: any) => (current ? { ...current, ...payload } : current), {
+      revalidate: false,
+    });
 
     try {
       const response = assertSuccess(
@@ -74,12 +82,15 @@ export function useActivityMutations(courseUuid: string, withUnpublishedActiviti
       (current: any) =>
         current
           ? {
-            ...current,
-            chapters: (current.chapters ?? []).map((chapter: any) => ({
-              ...chapter,
-              activities: (chapter.activities ?? []).filter((activity: any) => activity.activity_uuid !== activityUuid),
-            })),
-          }
+              ...current,
+              chapters: (current.chapters ?? []).map((chapter: any) =>
+                Object.assign(chapter, {
+                  activities: (chapter.activities ?? []).filter(
+                    (activity: any) => activity.activity_uuid !== activityUuid,
+                  ),
+                }),
+              ),
+            }
           : current,
       { revalidate: false },
     );
@@ -99,7 +110,11 @@ export function useActivityMutations(courseUuid: string, withUnpublishedActiviti
     }
   };
 
-  const createActivityMutation = async (payload: ActivityCreateValues, chapterId: number, options: ActivityMutationOptions) => {
+  const createActivityMutation = async (
+    payload: ActivityCreateValues,
+    chapterId: number,
+    options: ActivityMutationOptions,
+  ) => {
     const response = assertSuccess(
       await createActivity(payload, chapterId, options.accessToken, {
         courseUuid,
@@ -118,10 +133,18 @@ export function useActivityMutations(courseUuid: string, withUnpublishedActiviti
     options: ActivityMutationOptions,
     onProgress?: (progress: { percentage: number }) => void,
   ) => {
-    const response = await createFileActivity(file, type, payload, chapterId, options.accessToken, {
-      courseUuid,
-      lastKnownUpdateDate: options.lastKnownUpdateDate,
-    }, onProgress);
+    const response = await createFileActivity(
+      file,
+      type,
+      payload,
+      chapterId,
+      options.accessToken,
+      {
+        courseUuid,
+        lastKnownUpdateDate: options.lastKnownUpdateDate,
+      },
+      onProgress,
+    );
     await mutate(structureKey);
     return response;
   };

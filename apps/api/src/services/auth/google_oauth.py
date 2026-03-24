@@ -73,7 +73,9 @@ def get_google_authorize_url(
     }
     if state:
         params["state"] = state
-    return "https://accounts.google.com/o/oauth2/v2/auth?" + urllib.parse.urlencode(params)
+    return "https://accounts.google.com/o/oauth2/v2/auth?" + urllib.parse.urlencode(
+        params
+    )
 
 
 async def exchange_google_code(

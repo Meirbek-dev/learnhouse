@@ -5,11 +5,11 @@ import { PermissionProvider } from '@/components/Security/PermissionProvider';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { updateUserTheme } from '@services/users/users';
+import { useCallback, useEffect, useRef } from 'react';
 import { SessionProvider } from 'next-auth/react';
 import { Toaster } from '@/components/ui/sonner';
-import { useCallback, useEffect, useRef } from 'react';
-import type { ReactNode } from 'react';
 import { SWRConfig, useSWRConfig } from 'swr';
+import type { ReactNode } from 'react';
 
 interface ClientLayoutProps {
   children: ReactNode;
@@ -31,24 +31,13 @@ function SWRTokenProvider({ children }: { children: ReactNode }) {
     if (nextToken !== tokenRef.current) {
       tokenRef.current = nextToken;
       // Revalidate all URL-string keys so hooks pick up the new token.
-      void mutate(
-        (key: unknown) => typeof key === 'string',
-        undefined,
-        { revalidate: true },
-      );
+      void mutate((key: unknown) => typeof key === 'string', undefined, { revalidate: true });
     }
   }, [session?.data?.tokens?.access_token, mutate]);
 
-  const fetcher = useCallback(
-    (url: string) => swrFetcher(url, tokenRef.current ?? undefined),
-    [],
-  );
+  const fetcher = useCallback((url: string) => swrFetcher(url, tokenRef.current ?? undefined), []);
 
-  return (
-    <SWRConfig value={{ fetcher }}>
-      {children}
-    </SWRConfig>
-  );
+  return <SWRConfig value={{ fetcher }}>{children}</SWRConfig>;
 }
 
 function ThemeSync() {

@@ -10,18 +10,30 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import {
+  AlertTriangle,
+  ChevronDown,
+  ChevronRight,
+  GripVertical,
+  Hexagon,
+  Loader2,
+  MoreHorizontal,
+  Pencil,
+  Save,
+  Trash2,
+  X,
+} from 'lucide-react';
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useChapterMutations } from '@/hooks/mutations/useChapterMutations';
-import { AlertTriangle, ChevronDown, ChevronRight, GripVertical, Hexagon, Loader2, MoreHorizontal, Pencil, Save, Trash2, X } from 'lucide-react';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { useCourse } from '@components/Contexts/CourseContext';
-import { useCourseEditorStore } from '@/stores/courses';
 import { useCourseStructureStore } from '@/stores/courses';
 import { Draggable, Droppable } from '@hello-pangea/dnd';
+import { useCourseEditorStore } from '@/stores/courses';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useTranslations } from 'next-intl';
@@ -124,10 +136,14 @@ const ChapterElement = ({ chapter, chapterIndex, course_uuid }: ChapterElementPr
 
     setIsSavingEdit(true);
     try {
-      await updateChapter(chapter.chapter_uuid, { name: trimmedName }, {
-        accessToken: access_token,
-        lastKnownUpdateDate: course.courseStructure.update_date,
-      });
+      await updateChapter(
+        chapter.chapter_uuid,
+        { name: trimmedName },
+        {
+          accessToken: access_token,
+          lastKnownUpdateDate: course.courseStructure.update_date,
+        },
+      );
       setIsEditing(false);
     } catch (error: any) {
       if (error?.status === 409) {
@@ -135,10 +151,14 @@ const ChapterElement = ({ chapter, chapterIndex, course_uuid }: ChapterElementPr
           section: 'content',
           message: error?.detail || error?.message,
           pendingSave: async () => {
-            await updateChapter(chapter.chapter_uuid, { name: trimmedName }, {
-              accessToken: access_token,
-              lastKnownUpdateDate: course.courseStructure.update_date,
-            });
+            await updateChapter(
+              chapter.chapter_uuid,
+              { name: trimmedName },
+              {
+                accessToken: access_token,
+                lastKnownUpdateDate: course.courseStructure.update_date,
+              },
+            );
           },
         });
         return;

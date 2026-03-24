@@ -18,12 +18,12 @@ export const activitySubTypeEnum = v.picklist([
 ] as const);
 
 export const activityCreateSchema = v.object({
-  name:               v.pipe(v.string(), v.minLength(1), v.maxLength(200)),
-  activity_type:      activityTypeEnum,
-  activity_sub_type:  v.optional(activitySubTypeEnum),
-  published:          v.optional(v.boolean()),
-  content:            v.optional(v.unknown()),
-  details:            v.optional(v.unknown()),
+  name: v.pipe(v.string(), v.minLength(1), v.maxLength(200)),
+  activity_type: activityTypeEnum,
+  activity_sub_type: v.optional(activitySubTypeEnum),
+  published: v.optional(v.boolean()),
+  content: v.optional(v.unknown()),
+  details: v.optional(v.unknown()),
 });
 
 export type ActivityCreateValues = v.InferOutput<typeof activityCreateSchema>;

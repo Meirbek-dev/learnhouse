@@ -12,7 +12,6 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { RecentActivityFeed } from '@/components/Dashboard/Gamification/recent-activity-feed';
-import { useGamificationStore } from '@/stores/gamification';
 import TypeOfContentTitle from '@/components/Objects/Elements/Titles/TypeOfContentTitle';
 import GeneralWrapper from '@/components/Objects/Elements/Wrappers/GeneralWrapper';
 import { Leaderboard } from '@/components/Dashboard/Gamification/leaderboard';
@@ -22,6 +21,7 @@ import { revalidateTags, swrFetcher } from '@services/utils/ts/requests';
 import UserCertificates from '@components/Pages/Trail/UserCertificates';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { AlertTriangle, BookOpen, Loader2 } from 'lucide-react';
+import { useGamificationStore } from '@/stores/gamification';
 import { removeCourse } from '@services/courses/activity';
 import { getTrailSwrKey } from '@services/courses/keys';
 import { getAPIUrl } from '@services/config/config';
@@ -51,7 +51,11 @@ const Trail = () => {
   const recentTransactions = useGamificationStore((s) => s.dashboard?.recent_transactions ?? []);
   const userRank = useGamificationStore((s) => s.dashboard?.user_rank);
   const isGamificationLoading = useGamificationStore((s) => s.isLoading);
-  const gamificationData = { profile: gamificationProfile, recent_transactions: recentTransactions, user_rank: userRank };
+  const gamificationData = {
+    profile: gamificationProfile,
+    recent_transactions: recentTransactions,
+    user_rank: userRank,
+  };
 
   const { data: leaderboardData, isLoading: isLeaderboardLoading } = useSWR(
     access_token ? `${getAPIUrl()}gamification/leaderboard?limit=10` : null,

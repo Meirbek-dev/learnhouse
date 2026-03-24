@@ -1,7 +1,7 @@
 'use client';
 
-import { useCourse } from '@components/Contexts/CourseContext';
 import type { CourseDirtySection } from '@/stores/courses/courseEditorStore';
+import { useCourse } from '@components/Contexts/CourseContext';
 import { useCourseEditorStore } from '@/stores/courses';
 import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
@@ -121,7 +121,7 @@ export function useSaveSection(options?: SaveSectionOptions) {
         setIsSaving(false);
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
     [options, refreshCourseEditor, refreshCourseMeta, setConflict, syncLastKnownUpdateDate],
   );
 
