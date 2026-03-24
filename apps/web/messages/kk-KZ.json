@@ -2084,7 +2084,9 @@
       "updating": "Белсенділік жаңартылуда...",
       "editButton": "Өңдеу",
       "draftBadge": "Жоба",
-      "liveBadge": "Жарияланған"
+      "liveBadge": "Жарияланған",
+      "save": "Сақтау",
+      "cancel": "Болдырмау"
     },
     "ChapterElement": {
       "chapterNamePlaceholder": "Тарау атауы",
@@ -2255,7 +2257,9 @@
     "editButton": "Өңдеу",
     "noActivities": "Белсенділіктер әлі жоқ",
     "deleteChapterConfirmationBreakdown": "Бұл тарауды және оның {count, plural, =0 {0 сабақты} one {# сабақты} other {# сабақты}} ({published} жарияланған, {drafts} жоба) біржола жояды.",
-    "noActivitiesHint": "Төменде бірінші тапсырманы қосыңыз"
+    "noActivitiesHint": "Төменде бірінші тапсырманы қосыңыз",
+    "save": "Сақтау",
+    "cancel": "Болдырмау"
   },
   "CourseEndView": {
     "backToCourse": "Курсқа оралу",

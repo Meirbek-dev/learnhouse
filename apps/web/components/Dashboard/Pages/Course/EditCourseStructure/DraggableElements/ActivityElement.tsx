@@ -12,6 +12,7 @@ import {
 import {
   AlertTriangle,
   Backpack,
+  Check,
   ClipboardList,
   Code2,
   Eye,
@@ -21,27 +22,20 @@ import {
   GripVertical,
   Loader2,
   Lock,
-  MoreHorizontal,
   Pencil,
   Sparkles,
   Trash2,
   Video,
+  X as XIcon,
 } from 'lucide-react';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { deleteAssignmentUsingActivityUUID, getAssignmentFromActivityUUID } from '@services/courses/assignments';
 import { CourseWorkflowBadge } from '@components/Dashboard/Courses/courseWorkflowUi';
 import { useActivityMutations } from '@/hooks/mutations/useActivityMutations';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { cleanActivityUuid, cleanCourseUuid } from '@/lib/course-management';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import ToolTip from '@/components/Objects/Elements/Tooltip/Tooltip';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { getAbsoluteUrl } from '@services/config/config';
-import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Draggable } from '@hello-pangea/dnd';
@@ -51,7 +45,6 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import useSWR from 'swr';
 
-// Types
 type ActivityType =
   | 'TYPE_VIDEO'
   | 'TYPE_DOCUMENT'
@@ -80,21 +73,13 @@ interface ActivityElementProps {
 }
 
 interface PlatformSession {
-  data?: {
-    tokens?: {
-      access_token?: string;
-    };
-  };
+  data?: { tokens?: { access_token?: string } };
 }
 
 interface Course {
-  courseStructure?: {
-    course_uuid?: string;
-  };
-  withUnpublishedActivities?: boolean;
+  courseStructure?: { course_uuid?: string };
 }
 
-// Activity type configuration
 const ACTIVITY_CONFIG = {
   TYPE_VIDEO: {
     Icon: Video,
@@ -132,26 +117,19 @@ const ACTIVITY_CONFIG = {
 } as const;
 
 const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityElementProps) => {
-  // Hooks
   const session = usePlatformSession() as PlatformSession;
   const access_token = session?.data?.tokens?.access_token;
-  const courseContext = useCourse();
   const { deleteActivity, updateActivity } = useActivityMutations(course_uuid, true);
-  const isMobile = useIsMobile();
   const t = useTranslations('CourseEdit.ActivityElement');
 
-  // State
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState(activity?.name ?? '');
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isUpdatingPublish, setIsUpdatingPublish] = useState(false);
   const [isSavingEdit, setIsSavingEdit] = useState(false);
   const [isDeletingActivity, setIsDeletingActivity] = useState(false);
-  // Lazy: only fetch assignment UUID when the user first interacts with the edit button
   const [fetchAssignment, setFetchAssignment] = useState(false);
 
-  // Fetch assignment UUID lazily — only after the user explicitly requests it
-  // (hover / click on the edit button), instead of eagerly on every mount.
   const { data: assignmentUUID, isLoading: isAssignmentLoading } = useSWR(
     activity.activity_type === 'TYPE_ASSIGNMENT' && access_token && fetchAssignment
       ? [`assignment-${activity.activity_uuid}`, access_token]
@@ -162,14 +140,13 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
     },
   );
 
-  // Permission checks from backend metadata
   const canUpdate = activity.can_update ?? false;
   const canDelete = activity.can_delete ?? false;
   const isOwner = activity.is_owner ?? false;
-  // Handlers
+
   const handleStartEdit = () => {
-    setIsEditing(true);
     setEditedName(activity.name);
+    setIsEditing(true);
   };
 
   const handleCancelEdit = () => {
@@ -182,20 +159,17 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
       toast.error(t('noAccessToken'));
       return;
     }
-
     const trimmedName = editedName.trim();
     if (!trimmedName || trimmedName === activity.name) {
       handleCancelEdit();
       return;
     }
-
     setIsSavingEdit(true);
     try {
       await updateActivity(activity.activity_uuid, { name: trimmedName }, access_token);
       toast.success(t('activityNameUpdatedSuccess'));
       setIsEditing(false);
     } catch (error: any) {
-      console.error('Failed to update activity name:', error);
       toast.error(error?.message || t('failedToUpdateActivityName'));
       setEditedName(activity.name);
     } finally {
@@ -208,15 +182,12 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
       toast.error(t('noAccessToken'));
       return;
     }
-
     setIsUpdatingPublish(true);
     const toastId = toast.loading(t('updating'));
-
     try {
       await updateActivity(activity.activity_uuid, { published: !activity.published }, access_token);
       toast.success(t('activityUpdateSuccess'));
     } catch (error: any) {
-      console.error('Failed to toggle publish status:', error);
       toast.error(error?.message || t('updateFailed'));
     } finally {
       toast.dismiss(toastId);
@@ -229,25 +200,20 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
       toast.error(t('noAccessToken'));
       return;
     }
-
     setIsDeletingActivity(true);
     const toastId = toast.loading(t('deletingActivity'));
-
     try {
-      // Delete assignment if it's an assignment activity
       if (activity.activity_type === 'TYPE_ASSIGNMENT') {
         try {
           await deleteAssignmentUsingActivityUUID(activity.activity_uuid, access_token);
-        } catch (assignmentError) {
-          console.warn('Assignment delete failed, continuing with activity delete:', assignmentError);
+        } catch {
+          /* continue */
         }
       }
-
       await deleteActivity(activity.activity_uuid, access_token);
       toast.success(t('activityDeletedSuccess'));
       setIsDeleteDialogOpen(false);
     } catch (error: any) {
-      console.error('Failed to delete activity:', error);
       toast.error(error?.message || t('deleteFailed'));
     } finally {
       toast.dismiss(toastId);
@@ -265,15 +231,7 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
     }
   };
 
-  const handleEditBlur = () => {
-    void handleSaveEdit();
-  };
-
-  // Early validation (moved below hooks to satisfy Rules of Hooks)
-  if (!activity?.activity_uuid) {
-    console.error('ActivityElement: Invalid activity data', activity);
-    return null;
-  }
+  if (!activity?.activity_uuid) return null;
 
   return (
     <Draggable
@@ -287,45 +245,65 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
           className={cn(
             'mb-2 flex items-center gap-3 rounded-lg border bg-card p-3 transition-all duration-200',
             snapshot.isDragging ? 'shadow-xl ring-2 ring-ring/30' : 'shadow-sm hover:shadow-md',
-            !activity.published && 'opacity-60',
           )}
         >
           {/* Drag Handle */}
           <div
             {...provided.dragHandleProps}
-            className="cursor-grab text-muted-foreground hover:text-foreground active:cursor-grabbing"
+            className="flex-shrink-0 cursor-grab text-muted-foreground hover:text-foreground active:cursor-grabbing"
           >
             <GripVertical className="h-5 w-5" />
           </div>
 
-          {/* Activity Type Badge */}
+          {/* Type Badge */}
           <ActivityTypeBadge activityType={activity.activity_type} />
 
-          {/* Activity Name (Editable) */}
+          {/* Name */}
           <div className="min-w-0 flex-1">
             {isEditing ? (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 <Input
+                  autoFocus
                   type="text"
                   value={editedName}
                   onChange={(e) => setEditedName(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  onBlur={handleEditBlur}
                   placeholder={t('activityNamePlaceholder')}
                   className="h-8 text-sm"
                   disabled={isSavingEdit}
                 />
-                {isSavingEdit ? <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" /> : null}
+                <ToolTip
+                  content={t('save')}
+                  side="top"
+                >
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-8 w-8 flex-shrink-0 p-0 text-emerald-600 hover:text-emerald-700"
+                    onClick={() => void handleSaveEdit()}
+                    disabled={isSavingEdit}
+                  >
+                    {isSavingEdit ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+                  </Button>
+                </ToolTip>
+                <ToolTip
+                  content={t('cancel')}
+                  side="top"
+                >
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-8 w-8 flex-shrink-0 p-0"
+                    onClick={handleCancelEdit}
+                    disabled={isSavingEdit}
+                  >
+                    <XIcon className="h-4 w-4" />
+                  </Button>
+                </ToolTip>
               </div>
             ) : (
               <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={handleStartEdit}
-                  className="truncate rounded-sm border-b border-transparent text-left text-sm font-medium text-foreground transition-colors hover:border-border hover:text-foreground/80"
-                >
-                  {activity.name}
-                </button>
+                <span className="truncate text-sm font-medium text-foreground">{activity.name}</span>
                 {activity.published ? (
                   <span className="shrink-0 rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400">
                     {t('liveBadge')}
@@ -335,132 +313,152 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
                     {t('draftBadge')}
                   </span>
                 )}
-                {canUpdate && (
-                  <span className="text-xs text-muted-foreground">{t('editButton')}</span>
-                )}
                 {isOwner && (
                   <ToolTip content={t('ownerBadge')}>
                     <CourseWorkflowBadge tone="info">{t('ownerLabel')}</CourseWorkflowBadge>
+                  </ToolTip>
+                )}
+                {canUpdate && (
+                  <ToolTip
+                    content={t('editButton')}
+                    side="top"
+                  >
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-7 w-7 flex-shrink-0 p-0 text-muted-foreground hover:text-foreground"
+                      onClick={handleStartEdit}
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                    </Button>
                   </ToolTip>
                 )}
               </div>
             )}
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex flex-shrink-0 items-center gap-2">
-            <ActivityEditButton
-              activity={activity}
-              course_uuid={course_uuid}
-              assignmentUUID={assignmentUUID ?? null}
-              isAssignmentLoading={isAssignmentLoading}
-              onRequestAssignment={() => setFetchAssignment(true)}
-            />
-            <DropdownMenu>
-              <DropdownMenuTrigger
-                render={
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="h-8 w-8 p-0"
-                  />
-                }
+          {/* Action icons */}
+          {!isEditing && (
+            <div className="flex flex-shrink-0 items-center gap-1">
+              {/* Open content editor */}
+              <ActivityEditButton
+                activity={activity}
+                course_uuid={course_uuid}
+                assignmentUUID={assignmentUUID ?? null}
+                isAssignmentLoading={isAssignmentLoading}
+                onRequestAssignment={() => setFetchAssignment(true)}
+              />
+
+              {/* Preview */}
+              <ToolTip
+                content={t('previewTooltip')}
+                side="top"
               >
-                <MoreHorizontal className="h-4 w-4" />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                {canUpdate ? (
-                  <DropdownMenuItem onClick={handleStartEdit}>
-                    <Pencil className="mr-2 h-4 w-4" />
-                    {t('editButton')}
-                  </DropdownMenuItem>
-                ) : null}
-                <DropdownMenuItem
-                  onClick={() => {
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+                  onClick={() =>
                     window.open(
                       `${getAbsoluteUrl('')}/course/${cleanCourseUuid(course_uuid)}/activity/${cleanActivityUuid(activity.activity_uuid)}`,
                       '_blank',
                       'noopener,noreferrer',
-                    );
-                  }}
+                    )
+                  }
                 >
-                  <Eye className="mr-2 h-4 w-4" />
-                  {t('previewTooltip')}
-                </DropdownMenuItem>
-                {canUpdate ? (
-                  <DropdownMenuItem
+                  <Eye className="h-4 w-4" />
+                </Button>
+              </ToolTip>
+
+              {/* Publish toggle */}
+              {canUpdate && (
+                <ToolTip
+                  content={activity.published ? t('unpublish') : t('publish')}
+                  side="top"
+                >
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
                     onClick={handleTogglePublish}
                     disabled={isUpdatingPublish}
                   >
-                    {activity.published ? <Lock className="mr-2 h-4 w-4" /> : <Globe className="mr-2 h-4 w-4" />}
-                    {activity.published ? t('unpublish') : t('publish')}
-                  </DropdownMenuItem>
-                ) : null}
-                {canDelete ? (
-                  <DropdownMenuItem
-                    className="text-destructive focus:text-destructive"
+                    {isUpdatingPublish ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : activity.published ? (
+                      <Lock className="h-4 w-4" />
+                    ) : (
+                      <Globe className="h-4 w-4" />
+                    )}
+                  </Button>
+                </ToolTip>
+              )}
+
+              {/* Delete */}
+              {canDelete && (
+                <ToolTip
+                  content={t('deleteButton')}
+                  side="top"
+                >
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
                     onClick={() => setIsDeleteDialogOpen(true)}
                   >
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    {t('deleteButton')}
-                  </DropdownMenuItem>
-                ) : null}
-              </DropdownMenuContent>
-            </DropdownMenu>
-            <AlertDialog
-              open={isDeleteDialogOpen}
-              onOpenChange={setIsDeleteDialogOpen}
-            >
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogMedia className="bg-muted text-foreground">
-                    <AlertTriangle className="size-8" />
-                  </AlertDialogMedia>
-                  <AlertDialogTitle>{t('deleteTitle', { name: activity.name })}</AlertDialogTitle>
-                  <AlertDialogDescription>{t('deleteConfirmation')}</AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel disabled={isDeletingActivity} />
-                  <AlertDialogAction
-                    variant="destructive"
-                    onClick={handleDeleteActivity}
-                    disabled={isDeletingActivity}
-                  >
-                    {isDeletingActivity ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        {t('deleting')}
-                      </>
-                    ) : (
-                      t('deleteButton')
-                    )}
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </div>
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </ToolTip>
+              )}
+            </div>
+          )}
+
+          <AlertDialog
+            open={isDeleteDialogOpen}
+            onOpenChange={setIsDeleteDialogOpen}
+          >
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogMedia className="bg-muted text-foreground">
+                  <AlertTriangle className="size-8" />
+                </AlertDialogMedia>
+                <AlertDialogTitle>{t('deleteTitle', { name: activity.name })}</AlertDialogTitle>
+                <AlertDialogDescription>{t('deleteConfirmation')}</AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel disabled={isDeletingActivity} />
+                <AlertDialogAction
+                  variant="destructive"
+                  onClick={handleDeleteActivity}
+                  disabled={isDeletingActivity}
+                >
+                  {isDeletingActivity ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      {t('deleting')}
+                    </>
+                  ) : (
+                    t('deleteButton')
+                  )}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       )}
     </Draggable>
   );
 };
 
-// Sub-components
 const ActivityTypeBadge = ({ activityType }: { activityType: ActivityType }) => {
   const t = useTranslations('CourseEdit.ActivityElement');
   const config = ACTIVITY_CONFIG[activityType];
-
-  if (!config) {
-    return null;
-  }
-
+  if (!config) return null;
   const { Icon, translationKey, colorClass } = config;
-  const label = t(`ActivityTypes.${translationKey}`);
-
   return (
-    <div className={cn('flex items-center gap-1.5 rounded-md border px-2.5 py-1', colorClass)}>
+    <div className={cn('flex flex-shrink-0 items-center gap-1.5 rounded-md border px-2.5 py-1', colorClass)}>
       <Icon className="h-3.5 w-3.5" />
-      <span className="pl-1 text-xs font-medium">{label}</span>
+      <span className="text-xs font-medium">{t(`ActivityTypes.${translationKey}`)}</span>
     </div>
   );
 };
@@ -480,100 +478,112 @@ const ActivityEditButton = ({
 }) => {
   const t = useTranslations('CourseEdit.ActivityElement');
   const course = useCourse() as Course;
-  const isMobile = useIsMobile();
 
-  // Dynamic page edit button
   if (activity.activity_type === 'TYPE_DYNAMIC') {
     const editUrl = `${getAbsoluteUrl('')}/course/${cleanCourseUuid(course?.courseStructure?.course_uuid ?? course_uuid)}/activity/${cleanActivityUuid(activity.activity_uuid)}/edit`;
-
     return (
-      <Button
-        size="sm"
-        variant="outline"
-        nativeButton={false}
-        render={
-          <a
-            href={editUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-          />
-        }
+      <ToolTip
+        content={t('editPageButton')}
+        side="top"
       >
-        <FilePenLine className="h-3.5 w-3.5" />
-        {!isMobile && <span className="ml-1.5 text-xs">{t('editPageButton')}</span>}
-      </Button>
+        <Button
+          size="sm"
+          variant="ghost"
+          className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+          nativeButton={false}
+          render={
+            <a
+              href={editUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+            />
+          }
+        >
+          <FilePenLine className="h-4 w-4" />
+        </Button>
+      </ToolTip>
     );
   }
 
-  // Assignment edit button
   if (activity.activity_type === 'TYPE_ASSIGNMENT') {
     if (isAssignmentLoading) {
       return (
         <Button
           size="sm"
-          variant="outline"
+          variant="ghost"
+          className="h-8 w-8 p-0"
           disabled
         >
-          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          <Loader2 className="h-4 w-4 animate-spin" />
         </Button>
       );
     }
-
     if (!assignmentUUID) {
       return (
-        <Button
-          size="sm"
-          variant="outline"
-          onMouseEnter={onRequestAssignment}
-          onClick={onRequestAssignment}
+        <ToolTip
+          content={t('editAssignmentButton')}
+          side="top"
         >
-          <FilePenLine className="h-3.5 w-3.5" />
-          {!isMobile && <span className="ml-1.5 text-xs">{t('editAssignmentButton')}</span>}
-        </Button>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+            onMouseEnter={onRequestAssignment}
+            onClick={onRequestAssignment}
+          >
+            <FilePenLine className="h-4 w-4" />
+          </Button>
+        </ToolTip>
       );
     }
-
     const editUrl = `${getAbsoluteUrl('')}/dash/assignments/${assignmentUUID}`;
-
     return (
-      <Button
-        size="sm"
-        variant="outline"
-        nativeButton={false}
-        render={
-          <a
-            href={editUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-          />
-        }
+      <ToolTip
+        content={t('editAssignmentButton')}
+        side="top"
       >
-        <FilePenLine className="h-3.5 w-3.5" />
-        {!isMobile && <span className="ml-1.5 text-xs">{t('editAssignmentButton')}</span>}
-      </Button>
+        <Button
+          size="sm"
+          variant="ghost"
+          className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+          nativeButton={false}
+          render={
+            <a
+              href={editUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+            />
+          }
+        >
+          <FilePenLine className="h-4 w-4" />
+        </Button>
+      </ToolTip>
     );
   }
 
-  // Code challenge edit button
   if (activity.activity_type === 'TYPE_CODE_CHALLENGE') {
     const editUrl = `${getAbsoluteUrl('')}/course/${cleanCourseUuid(course?.courseStructure?.course_uuid ?? course_uuid)}/activity/${cleanActivityUuid(activity.activity_uuid)}/editor`;
-
     return (
-      <Button
-        size="sm"
-        variant="outline"
-        nativeButton={false}
-        render={
-          <a
-            href={editUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-          />
-        }
+      <ToolTip
+        content={t('configureButton')}
+        side="top"
       >
-        <FilePenLine className="h-3.5 w-3.5" />
-        {!isMobile && <span className="ml-1.5 text-xs">{t('configureButton')}</span>}
-      </Button>
+        <Button
+          size="sm"
+          variant="ghost"
+          className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+          nativeButton={false}
+          render={
+            <a
+              href={editUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+            />
+          }
+        >
+          <FilePenLine className="h-4 w-4" />
+        </Button>
+      </ToolTip>
     );
   }
 

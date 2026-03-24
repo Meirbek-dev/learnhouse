@@ -203,7 +203,6 @@ const CurriculumEditor = () => {
                       chapterIndex={index}
                       course_uuid={course_uuid}
                       chapter={chapter}
-                      defaultExpanded={index === 0}
                     />
                   ))}
                   {provided.placeholder}

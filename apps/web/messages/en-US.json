@@ -2084,7 +2084,9 @@
       "updating": "Updating activity...",
       "editButton": "Edit",
       "draftBadge": "Draft",
-      "liveBadge": "Live"
+      "liveBadge": "Live",
+      "save": "Save",
+      "cancel": "Cancel"
     },
     "ChapterElement": {
       "chapterNamePlaceholder": "Chapter name",
@@ -2255,7 +2257,9 @@
     "editButton": "Edit",
     "noActivities": "No activities yet",
     "deleteChapterConfirmationBreakdown": "This will permanently delete the chapter and its {count, plural, =0 {0 activities} one {# activity} other {# activities}} ({published} published, {drafts} drafts).",
-    "noActivitiesHint": "Add your first activity below"
+    "noActivitiesHint": "Add your first activity below",
+    "save": "Save",
+    "cancel": "Cancel"
   },
   "CourseEndView": {
     "backToCourse": "Back to Course",
