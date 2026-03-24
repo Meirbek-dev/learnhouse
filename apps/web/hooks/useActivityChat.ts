@@ -193,8 +193,7 @@ export function useActivityChat({
           flushTimerRef.current = null;
         }
 
-        // Backward compat: backend may send `content` or legacy `message` key.
-        const finalMessage = final.content ?? (final as any).message ?? streamingBufferRef.current;
+        const finalMessage = final.content ?? streamingBufferRef.current;
         dispatch({
           type: 'addMessage',
           payload: { sender: 'ai', message: finalMessage } as AIMessage,

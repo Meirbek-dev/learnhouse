@@ -13,7 +13,7 @@ export const activityTypeEnum = v.picklist([
 export const activitySubTypeEnum = v.picklist([
   'SUBTYPE_DYNAMIC_PAGE',
   'SUBTYPE_VIDEO_YOUTUBE',
-  'SUBTYPE_VIDEO_UPLOAD',
+  'SUBTYPE_VIDEO_HOSTED',
   'SUBTYPE_DOCUMENT_PDF',
 ] as const);
 

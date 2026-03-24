@@ -51,10 +51,6 @@ export type AIChatBotAction = BaseChatAction | AIChatBotExtraAction;
 
 export interface AIChatBotStateTypes extends BaseChatState, AIChatBotExtraState {}
 
-// ── Backward-compatible named exports ────────────────────────────────────────
-// TODO: Fully migrate to the new named exports and remove these aliases.
-export const AIChatBotContext = AIChatBotContext_;
-export const AIChatBotDispatchContext = AIChatBotDispatchContext_;
 export default AIChatBotProvider_;
 
 export function useAIChatBot(): AIChatBotStateTypes {

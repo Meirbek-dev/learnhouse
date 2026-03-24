@@ -101,33 +101,6 @@ export const RequestBodyWithAuthHeader = (method: string, data: any, next: any, 
   });
 };
 
-/**
- * Note: This function stringifies the body but does not set the
- * 'Content-Type': 'application/json' header. This behavior is preserved
- * for backwards compatibility but may be unintended.
- */
-export const RequestBodyForm = (method: string, data: any, next: any) => {
-  const options: RequestInit & { next?: any } = {
-    method,
-    headers: {},
-    redirect: 'follow',
-    credentials: 'include',
-  };
-
-  const { next: sanitizedNext, cache } = sanitizeFetchConfig(next);
-  if (cache) {
-    options.cache = cache;
-  }
-  if (sanitizedNext) {
-    options.next = sanitizedNext;
-  }
-
-  if (method === 'POST' || method === 'PUT') {
-    options.body = JSON.stringify(data);
-  }
-  return options;
-};
-
 export const RequestBodyFormWithAuthHeader = (method: string, data: any, next: any, access_token: string) => {
   // Handles FormData, so isJson is false.
   return createRequestInit(method, {

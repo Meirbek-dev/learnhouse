@@ -17,10 +17,6 @@ export const chapterUpdateSchema = v.object({
 
 export type ChapterUpdateValues = v.InferOutput<typeof chapterUpdateSchema>;
 
-const activityOrderSchema = v.object({
-  activity_uuid: v.string(),
-});
-
 const chapterOrderItemSchema = v.object({
   chapter_uuid: v.string(),
   activities_order_by_uuids: v.array(v.string()),

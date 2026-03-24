@@ -71,10 +71,6 @@ export type AIEditorAction = BaseChatAction | AIEditorExtraAction;
 
 export interface AIEditorStateTypes extends BaseChatState, AIEditorExtraState {}
 
-// ── Backward-compatible named exports ─────────────────────────────────────────
-
-export const AIEditorContext = AIEditorContext_;
-export const AIEditorDispatchContext = AIEditorDispatchContext_;
 export default AIEditorProvider_;
 
 export function useAIEditor(): AIEditorStateTypes {
