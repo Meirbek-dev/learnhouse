@@ -14,12 +14,6 @@ interface SaveSectionOptions {
   successMessage?: string;
   errorMessage?: string;
   section?: CourseDirtySection;
-  /** Called when a 409 conflict is detected to capture a snapshot of the
-   *  current unsaved values for display in the conflict dialog. */
-  getDraftSnapshot?: () => unknown;
-  /** Called when the user resolves a conflict by choosing "use theirs" —
-   *  typically resets the form to server values. */
-  onUseTheirs?: () => void;
 }
 
 interface SaveInvocationOptions {
@@ -62,14 +56,11 @@ export function useSaveSection(options?: SaveSectionOptions) {
         if (!response.success) {
           if (response.status === 409) {
             setConflict({
-              section: options?.section,
-              draftSnapshot: options?.getDraftSnapshot?.() ?? null,
               serverVersion: response.data,
               message: typeof response.data?.detail === 'string' ? response.data.detail : undefined,
               pendingSave: async () => {
                 await runSave(saveFn, invocationOptions);
               },
-              resetForm: options?.onUseTheirs ?? null,
             });
             return;
           }
@@ -99,14 +90,11 @@ export function useSaveSection(options?: SaveSectionOptions) {
       } catch (error: any) {
         if (error?.status === 409) {
           setConflict({
-            section: options?.section,
-            draftSnapshot: options?.getDraftSnapshot?.() ?? null,
             serverVersion: error?.data,
             message: error?.detail || error?.message,
             pendingSave: async () => {
               await runSave(saveFn, invocationOptions);
             },
-            resetForm: options?.onUseTheirs ?? null,
           });
           return;
         }
@@ -121,7 +109,7 @@ export function useSaveSection(options?: SaveSectionOptions) {
         setIsSaving(false);
       }
     },
-     
+
     [options, refreshCourseEditor, refreshCourseMeta, setConflict, syncLastKnownUpdateDate],
   );
 

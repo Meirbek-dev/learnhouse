@@ -14,7 +14,6 @@ interface UploadProgress {
 
 interface ActivityInvalidationOptions {
   courseUuid?: string;
-  lastKnownUpdateDate?: string | null;
 }
 
 export async function createActivity(
@@ -29,7 +28,6 @@ export async function createActivity(
   }
   // ensure the server receives the target chapter so the activity is created under that chapter
   data.chapter_id = chapter_id;
-  data.last_known_update_date = options?.lastKnownUpdateDate ?? data.last_known_update_date ?? undefined;
 
   const result = await fetch(`${getAPIUrl()}activities/`, RequestBodyWithAuthHeader('POST', data, null, access_token));
   return getResponseMetadata(result);
@@ -197,9 +195,6 @@ async function createVideoActivityChunked(
   const formData = new FormData();
   formData.append('chapter_id', chapterId.toString());
   formData.append('name', data.name);
-  if (options?.lastKnownUpdateDate) {
-    formData.append('last_known_update_date', options.lastKnownUpdateDate);
-  }
   formData.append(
     'video_uploaded_path',
     `courses/${courseUuid}/activities/${tempActivityUuid}/video/video.${videoFormat}`,
@@ -252,9 +247,6 @@ async function createVideoActivityStandard(
   const formData = new FormData();
   formData.append('chapter_id', chapterId.toString());
   formData.append('name', data.name);
-  if (options?.lastKnownUpdateDate) {
-    formData.append('last_known_update_date', options.lastKnownUpdateDate);
-  }
   formData.append('video_file', file);
 
   if (data.details?.subtitles && Array.isArray(data.details.subtitles)) {
@@ -281,9 +273,6 @@ async function createPdfActivity(
 ): Promise<any> {
   const formData = new FormData();
   formData.append('chapter_id', chapterId.toString());
-  if (options?.lastKnownUpdateDate) {
-    formData.append('last_known_update_date', options.lastKnownUpdateDate);
-  }
   formData.append('pdf_file', file);
   formData.append('name', data.name);
 
@@ -344,7 +333,6 @@ export async function createExternalVideoActivity(
       }
     : defaultDetails;
   data.details = JSON.stringify(videoDetails);
-  data.last_known_update_date = options?.lastKnownUpdateDate ?? data.last_known_update_date ?? undefined;
   const result = await fetch(
     `${getAPIUrl()}activities/external_video`,
     RequestBodyWithAuthHeader('POST', data, null, access_token),
@@ -402,18 +390,9 @@ export async function getActivityByID(activity_id: number, _next?: any, access_t
   return fetchActivityById(activity_id, access_token);
 }
 
-export async function deleteActivity(
-  activity_uuid: string,
-  access_token: string,
-  options?: ActivityInvalidationOptions,
-) {
-  const query = new URLSearchParams();
-  if (options?.lastKnownUpdateDate) {
-    query.set('last_known_update_date', options.lastKnownUpdateDate);
-  }
-
+export async function deleteActivity(activity_uuid: string, access_token: string) {
   const result = await fetch(
-    `${getAPIUrl()}activities/${activity_uuid}${query.size > 0 ? `?${query.toString()}` : ''}`,
+    `${getAPIUrl()}activities/${activity_uuid}`,
     RequestBodyWithAuthHeader('DELETE', null, null, access_token),
   );
   return getResponseMetadata(result);
@@ -443,23 +422,10 @@ export async function getActivityWithAuthHeader(activity_uuid: string, _next?: a
   return fetchActivityWithAuth(activity_uuid, access_token || undefined);
 }
 
-export async function updateActivity(
-  data: any,
-  activity_uuid: string,
-  access_token: string,
-  options?: ActivityInvalidationOptions,
-) {
+export async function updateActivity(data: any, activity_uuid: string, access_token: string) {
   const result = await fetch(
     `${getAPIUrl()}activities/${activity_uuid}`,
-    RequestBodyWithAuthHeader(
-      'PUT',
-      {
-        ...data,
-        last_known_update_date: options?.lastKnownUpdateDate ?? data.last_known_update_date ?? undefined,
-      },
-      null,
-      access_token,
-    ),
+    RequestBodyWithAuthHeader('PATCH', data, null, access_token),
   );
   return getResponseMetadata(result);
 }

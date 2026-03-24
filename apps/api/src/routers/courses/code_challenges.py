@@ -22,7 +22,6 @@ from src.db.courses.activities import (
     ActivitySubTypeEnum,
     ActivityTypeEnum,
 )
-from src.db.courses.chapter_activities import ChapterActivity
 from src.db.courses.code_challenges import (
     CodeChallengeLeaderboard,
     CodeChallengeSettings,

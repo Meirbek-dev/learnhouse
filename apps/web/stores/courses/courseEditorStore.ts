@@ -7,14 +7,10 @@ export type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 
 interface ConflictState {
   isOpen: boolean;
-  serverVersion: any | null;
-  /** Point-in-time snapshot of the user's unsaved values — for display in the conflict dialog only. */
-  draftSnapshot: unknown | null;
-  draftSection: CourseDirtySection | null;
   message: string;
+  serverVersion: any | null;
+  /** Retry the failed save with the fresh lastKnownUpdateDate from the server version. */
   pendingSave: (() => Promise<unknown>) | null;
-  /** Called when the user chooses "use theirs" to reset the relevant form to server state. */
-  resetForm: (() => void) | null;
 }
 
 interface CourseEditorState {
@@ -33,25 +29,19 @@ interface CourseEditorActions {
   clearDirtySections: () => void;
   setConflict: (input: {
     serverVersion?: any | null;
-    draftSnapshot?: unknown | null;
-    section?: CourseDirtySection | null;
     message?: string;
     pendingSave?: (() => Promise<unknown>) | null;
-    resetForm?: (() => void) | null;
   }) => void;
   dismissConflict: () => void;
-  resolveConflict: (resolution: 'use-mine' | 'use-theirs', resetForm?: () => void) => Promise<void>;
+  saveAnyway: () => Promise<void>;
   setActivitySaveStatus: (status: SaveStatus) => void;
 }
 
 const createInitialConflictState = (): ConflictState => ({
   isOpen: false,
-  serverVersion: null,
-  draftSnapshot: null,
-  draftSection: null,
   message: '',
+  serverVersion: null,
   pendingSave: null,
-  resetForm: null,
 });
 
 const initialState: CourseEditorState = {
@@ -90,57 +80,25 @@ export const useCourseEditorStore = create<CourseEditorState & CourseEditorActio
 
   clearDirtySections: () => set({ dirtySections: {} }),
 
-  setConflict: ({
-    serverVersion = null,
-    draftSnapshot = null,
-    section = null,
-    message = '',
-    pendingSave = null,
-    resetForm = null,
-  }) =>
+  setConflict: ({ serverVersion = null, message = '', pendingSave = null }) =>
     set({
       conflict: {
         isOpen: true,
         serverVersion,
-        draftSnapshot,
-        draftSection: section,
         message: message.trim(),
         pendingSave,
-        resetForm,
       },
     }),
 
   dismissConflict: () => set({ conflict: createInitialConflictState() }),
 
   /**
-   * Resolve an optimistic-lock conflict.
-   *
-   * - 'use-mine'  → keep the user's unsaved changes; retry the save with the
-   *                 updated lastKnownUpdateDate from the server version.
-   * - 'use-theirs' → discard the user's changes; the caller must pass a
-   *                  `resetForm` callback that resets the relevant RHF form
-   *                  (or plain state) to the server version.
+   * "Save anyway" — sync lastKnownUpdateDate from the server version and retry the pending save.
    */
-  resolveConflict: async (resolution, resetForm) => {
+  saveAnyway: async () => {
     const { conflict } = get();
     if (!conflict.isOpen) return;
 
-    if (resolution === 'use-theirs') {
-      const storedReset = conflict.resetForm;
-      set((state) => ({
-        lastKnownUpdateDate: conflict.serverVersion?.update_date ?? state.lastKnownUpdateDate,
-        dirtySections: conflict.draftSection
-          ? { ...state.dirtySections, [conflict.draftSection]: false }
-          : state.dirtySections,
-        conflict: createInitialConflictState(),
-        activitySaveStatus: conflict.draftSection === 'content' ? 'idle' : state.activitySaveStatus,
-      }));
-      storedReset?.();
-      resetForm?.();
-      return;
-    }
-
-    // 'use-mine': update lastKnownUpdateDate so the retry succeeds, then re-run the save.
     set((state) => ({
       lastKnownUpdateDate: conflict.serverVersion?.update_date ?? state.lastKnownUpdateDate,
       conflict: createInitialConflictState(),

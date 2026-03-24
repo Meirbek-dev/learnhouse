@@ -143,7 +143,6 @@ function EditCourseGeneral() {
     errorMessage: t('errors.saveFailed'),
     successMessage: tCommon('saved'),
     onError: setError,
-    getDraftSnapshot: () => form.getValues(),
   });
 
   // Hydrate form from server data on mount / when server data changes.

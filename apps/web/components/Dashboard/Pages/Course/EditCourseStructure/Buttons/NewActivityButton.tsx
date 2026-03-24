@@ -12,7 +12,6 @@ import NewActivityModal from '@components/Objects/Modals/Activities/Create/NewAc
 import { useActivityMutations } from '@/hooks/mutations/useActivityMutations';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { useCourse } from '@components/Contexts/CourseContext';
-import { useCourseEditorStore } from '@/stores/courses';
 import { Button } from '@/components/ui/button';
 import { useTranslations } from 'next-intl';
 import { Layers } from 'lucide-react';
@@ -28,7 +27,6 @@ const NewActivityButton = (props: NewActivityButtonProps) => {
   const course = useCourse();
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
-  const setConflict = useCourseEditorStore((state) => state.setConflict);
   const activityMutations = useActivityMutations(course.courseStructure.course_uuid, true);
   const t = useTranslations('CourseEdit.NewActivityModal');
   const tNotify = useTranslations('DashPage.Notifications');
@@ -37,38 +35,19 @@ const NewActivityButton = (props: NewActivityButtonProps) => {
     setNewActivityModal(false);
   };
 
-  // Submit new activity
   const submitActivity = async (activity: any) => {
     const toast_loading = toast.loading(tNotify('creatingActivity'));
     try {
-      await activityMutations.createActivity(activity, props.chapterId, {
-        accessToken: access_token,
-        lastKnownUpdateDate: course.courseStructure.update_date,
-      });
+      await activityMutations.createActivity(activity, props.chapterId, access_token);
       toast.success(tNotify('activityCreatedSuccess'));
       setNewActivityModal(false);
     } catch (error: any) {
-      if (error?.status === 409) {
-        setConflict({
-          section: 'content',
-          serverVersion: course.courseStructure,
-          message: error?.detail || error?.message,
-          pendingSave: async () => {
-            await activityMutations.createActivity(activity, props.chapterId, {
-              accessToken: access_token,
-              lastKnownUpdateDate: course.courseStructure.update_date,
-            });
-          },
-        });
-        return;
-      }
       toast.error(error?.message || tNotify('uploadFailed'));
     } finally {
       toast.dismiss(toast_loading);
     }
   };
 
-  // Submit File Upload
   const submitFileActivity = async (file: any, type: any, activity: any, chapterId: number) => {
     const toast_loading = toast.loading(tNotify('uploadingAndCreating'));
 
@@ -78,10 +57,7 @@ const NewActivityButton = (props: NewActivityButtonProps) => {
         type,
         activity,
         chapterId,
-        {
-          accessToken: access_token,
-          lastKnownUpdateDate: course.courseStructure.update_date,
-        },
+        access_token,
         (progress) => {
           toast.loading(`${tNotify('uploadingAndCreating')} ${progress.percentage}%`, {
             id: toast_loading,
@@ -95,49 +71,17 @@ const NewActivityButton = (props: NewActivityButtonProps) => {
       toast.success(tNotify('activityCreatedSuccess'));
     } catch (error: any) {
       toast.dismiss(toast_loading);
-      if (error?.status === 409) {
-        setConflict({
-          section: 'content',
-          serverVersion: course.courseStructure,
-          message: error?.detail || error?.message,
-          pendingSave: async () => {
-            await activityMutations.createFileActivity(file, type, activity, chapterId, {
-              accessToken: access_token,
-              lastKnownUpdateDate: course.courseStructure.update_date,
-            });
-          },
-        });
-        return;
-      }
       toast.error(error?.message || tNotify('uploadFailed'));
     }
   };
 
-  // Submit YouTube Video Upload
   const submitExternalVideo = async (external_video_data: any, activity: any) => {
     const toast_loading = toast.loading(tNotify('creatingActivity'));
     try {
-      await activityMutations.createExternalVideo(external_video_data, activity, props.chapterId, {
-        accessToken: access_token,
-        lastKnownUpdateDate: course.courseStructure.update_date,
-      });
+      await activityMutations.createExternalVideo(external_video_data, activity, props.chapterId, access_token);
       setNewActivityModal(false);
       toast.success(tNotify('activityCreatedSuccess'));
     } catch (error: any) {
-      if (error?.status === 409) {
-        setConflict({
-          section: 'content',
-          serverVersion: course.courseStructure,
-          message: error?.detail || error?.message,
-          pendingSave: async () => {
-            await activityMutations.createExternalVideo(external_video_data, activity, props.chapterId, {
-              accessToken: access_token,
-              lastKnownUpdateDate: course.courseStructure.update_date,
-            });
-          },
-        });
-        return;
-      }
       toast.error(error?.message || tNotify('uploadFailed'));
     } finally {
       toast.dismiss(toast_loading);

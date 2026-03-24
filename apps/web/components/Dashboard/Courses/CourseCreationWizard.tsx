@@ -85,7 +85,6 @@ export default function CourseCreationWizard({ sourceCourses }: CourseCreationWi
         createChapter(
           { name: chapter.name, description: chapter.description, thumbnail_image: '', course_id: createdCourse.id },
           accessToken,
-          { courseUuid: createdCourse.course_uuid },
         ),
       ),
     );
@@ -105,7 +104,6 @@ export default function CourseCreationWizard({ sourceCourses }: CourseCreationWi
             course_id: createdCourse.id,
           },
           accessToken,
-          { courseUuid: createdCourse.course_uuid },
         ),
       ),
     );

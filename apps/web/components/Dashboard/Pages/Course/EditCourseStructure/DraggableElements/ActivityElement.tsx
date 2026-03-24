@@ -43,7 +43,6 @@ import type { ActivityUpdateValues } from '@/schemas/activitySchemas';
 import ToolTip from '@/components/Objects/Elements/Tooltip/Tooltip';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { getAbsoluteUrl } from '@services/config/config';
-import { useCourseEditorStore } from '@/stores/courses';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -150,9 +149,7 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
   const session = usePlatformSession() as PlatformSession;
   const access_token = session?.data?.tokens?.access_token;
   const courseContext = useCourse();
-  const course = courseContext as Course;
   const { deleteActivity, updateActivity } = useActivityMutations(course_uuid, true);
-  const setConflict = useCourseEditorStore((state) => state.setConflict);
   const isMobile = useIsMobile();
   const t = useTranslations('CourseEdit.ActivityElement');
 
@@ -213,32 +210,11 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
       await updateActivity(
         activity.activity_uuid,
         { name: trimmedName, activity_type: apiActivityType },
-        {
-          accessToken: access_token,
-          lastKnownUpdateDate: courseContext.courseStructure.update_date,
-        },
+        access_token,
       );
       toast.success(t('activityNameUpdatedSuccess'));
       setIsEditing(false);
     } catch (error: any) {
-      if (error?.status === 409) {
-        setConflict({
-          section: 'content',
-          serverVersion: activity,
-          message: error?.detail || error?.message,
-          pendingSave: async () => {
-            await updateActivity(
-              activity.activity_uuid,
-              { name: trimmedName, activity_type: apiActivityType },
-              {
-                accessToken: access_token,
-                lastKnownUpdateDate: courseContext.courseStructure.update_date,
-              },
-            );
-          },
-        });
-        return;
-      }
       console.error('Failed to update activity name:', error);
       toast.error(error?.message || t('failedToUpdateActivityName'));
       setEditedName(activity.name);
@@ -260,33 +236,10 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
       await updateActivity(
         activity.activity_uuid,
         { published: !activity.published, activity_type: apiActivityType },
-        {
-          accessToken: access_token,
-          lastKnownUpdateDate: courseContext.courseStructure.update_date,
-        },
+        access_token,
       );
       toast.success(t('activityUpdateSuccess'));
     } catch (error: any) {
-      toast.dismiss(toastId);
-      if (error?.status === 409) {
-        setConflict({
-          section: 'content',
-          serverVersion: activity,
-          message: error?.detail || error?.message,
-          pendingSave: async () => {
-            await updateActivity(
-              activity.activity_uuid,
-              { published: !activity.published, activity_type: apiActivityType },
-              {
-                accessToken: access_token,
-                lastKnownUpdateDate: courseContext.courseStructure.update_date,
-              },
-            );
-          },
-        });
-        setIsUpdatingPublish(false);
-        return;
-      }
       console.error('Failed to toggle publish status:', error);
       toast.error(error?.message || t('updateFailed'));
     } finally {
@@ -310,27 +263,10 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
         await deleteAssignmentUsingActivityUUID(activity.activity_uuid, access_token);
       }
 
-      await deleteActivity(activity.activity_uuid, {
-        accessToken: access_token,
-        lastKnownUpdateDate: courseContext.courseStructure.update_date,
-      });
+      await deleteActivity(activity.activity_uuid, access_token);
       toast.success(t('activityDeletedSuccess'));
       setIsDeleteDialogOpen(false);
     } catch (error: any) {
-      if (error?.status === 409) {
-        setConflict({
-          section: 'content',
-          serverVersion: activity,
-          message: error?.detail || error?.message,
-          pendingSave: async () => {
-            await deleteActivity(activity.activity_uuid, {
-              accessToken: access_token,
-              lastKnownUpdateDate: courseContext.courseStructure.update_date,
-            });
-          },
-        });
-        return;
-      }
       console.error('Failed to delete activity:', error);
       toast.error(error?.message || t('deleteFailed'));
     } finally {

@@ -64,7 +64,6 @@ export default function CourseReviewPublish({
         } catch (error: any) {
           if (error?.status === 409) {
             setConflict({
-              section: 'access',
               serverVersion: course.courseStructure,
               message: error?.detail || error?.message,
               pendingSave: async () => {

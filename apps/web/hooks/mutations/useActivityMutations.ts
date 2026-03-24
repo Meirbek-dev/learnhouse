@@ -10,13 +10,7 @@ import {
 import type { ActivityCreateValues, ActivityUpdateValues } from '@/schemas/activitySchemas';
 import { courseKeys } from '@/hooks/courses/courseKeys';
 import { assertSuccess } from '@/lib/api/assertSuccess';
-import { useCourseEditorStore } from '@/stores/courses';
 import { useSWRConfig } from 'swr';
-
-interface ActivityMutationOptions {
-  accessToken: string;
-  lastKnownUpdateDate?: string | null;
-}
 
 export function useActivityMutations(courseUuid: string, withUnpublishedActivities = true) {
   const { mutate, cache } = useSWRConfig();
@@ -27,7 +21,7 @@ export function useActivityMutations(courseUuid: string, withUnpublishedActiviti
   const updateActivityMutation = async (
     activityUuid: string,
     payload: Partial<ActivityUpdateValues>,
-    options: ActivityMutationOptions,
+    accessToken: string,
   ) => {
     const previousStructure = captureSnapshot(structureKey);
     const activityKey = courseKeys.activity(activityUuid);
@@ -56,13 +50,7 @@ export function useActivityMutations(courseUuid: string, withUnpublishedActiviti
     });
 
     try {
-      const response = assertSuccess(
-        await updateActivity(payload, activityUuid, options.accessToken, {
-          courseUuid,
-          lastKnownUpdateDate: options.lastKnownUpdateDate,
-        }),
-      );
-      useCourseEditorStore.getState().syncLastKnownUpdateDate(response?.data?.update_date);
+      const response = assertSuccess(await updateActivity(payload, activityUuid, accessToken));
       await Promise.all([mutate(structureKey), mutate(activityKey)]);
       return response;
     } catch (error) {
@@ -74,7 +62,7 @@ export function useActivityMutations(courseUuid: string, withUnpublishedActiviti
     }
   };
 
-  const deleteActivityMutation = async (activityUuid: string, options: ActivityMutationOptions) => {
+  const deleteActivityMutation = async (activityUuid: string, accessToken: string) => {
     const previousStructure = captureSnapshot(structureKey);
 
     await mutate(
@@ -96,12 +84,7 @@ export function useActivityMutations(courseUuid: string, withUnpublishedActiviti
     );
 
     try {
-      const response = assertSuccess(
-        await deleteActivity(activityUuid, options.accessToken, {
-          courseUuid,
-          lastKnownUpdateDate: options.lastKnownUpdateDate,
-        }),
-      );
+      const response = assertSuccess(await deleteActivity(activityUuid, accessToken));
       await mutate(structureKey);
       return response;
     } catch (error) {
@@ -113,14 +96,9 @@ export function useActivityMutations(courseUuid: string, withUnpublishedActiviti
   const createActivityMutation = async (
     payload: ActivityCreateValues,
     chapterId: number,
-    options: ActivityMutationOptions,
+    accessToken: string,
   ) => {
-    const response = assertSuccess(
-      await createActivity(payload, chapterId, options.accessToken, {
-        courseUuid,
-        lastKnownUpdateDate: options.lastKnownUpdateDate,
-      }),
-    );
+    const response = assertSuccess(await createActivity(payload, chapterId, accessToken));
     await mutate(structureKey);
     return response;
   };
@@ -130,21 +108,10 @@ export function useActivityMutations(courseUuid: string, withUnpublishedActiviti
     type: string,
     payload: Partial<ActivityCreateValues>,
     chapterId: number,
-    options: ActivityMutationOptions,
+    accessToken: string,
     onProgress?: (progress: { percentage: number }) => void,
   ) => {
-    const response = await createFileActivity(
-      file,
-      type,
-      payload,
-      chapterId,
-      options.accessToken,
-      {
-        courseUuid,
-        lastKnownUpdateDate: options.lastKnownUpdateDate,
-      },
-      onProgress,
-    );
+    const response = await createFileActivity(file, type, payload, chapterId, accessToken, undefined, onProgress);
     await mutate(structureKey);
     return response;
   };
@@ -153,13 +120,10 @@ export function useActivityMutations(courseUuid: string, withUnpublishedActiviti
     externalVideoData: Record<string, unknown>,
     activityPayload: Partial<ActivityCreateValues>,
     chapterId: number,
-    options: ActivityMutationOptions,
+    accessToken: string,
   ) => {
     const response = assertSuccess(
-      await createExternalVideoActivity(externalVideoData, activityPayload, chapterId, options.accessToken, {
-        courseUuid,
-        lastKnownUpdateDate: options.lastKnownUpdateDate,
-      }),
+      await createExternalVideoActivity(externalVideoData, activityPayload, chapterId, accessToken),
     );
     await mutate(structureKey);
     return response;

@@ -23,6 +23,7 @@ class Chapter(ChapterBase, table=True):
     chapter_uuid: str = ""
     creation_date: str = ""
     update_date: str = ""
+    order: int = Field(default=0)
     creator_id: int | None = Field(
         default=None,
         sa_column=Column(Integer, ForeignKey("user.id", ondelete="SET NULL")),
@@ -30,21 +31,7 @@ class Chapter(ChapterBase, table=True):
 
 
 class ChapterCreate(ChapterBase):
-    # referenced order here will be ignored and just used for validation
-    # used order will be the next available.
-    last_known_update_date: datetime | None = None
-
-    @field_validator("last_known_update_date", mode="before")
-    @classmethod
-    def validate_last_known_update_date(cls, value):
-        if isinstance(value, datetime) or value is None:
-            return value
-        if isinstance(value, str):
-            normalized = value.strip()
-            if normalized.endswith("Z"):
-                normalized = f"{normalized[:-1]}+00:00"
-            return datetime.fromisoformat(normalized)
-        return value
+    pass
 
 
 class ChapterUpdate(SQLModelStrictBaseModel):
@@ -52,19 +39,6 @@ class ChapterUpdate(SQLModelStrictBaseModel):
     description: str | None = None
     thumbnail_image: str | None = None
     course_id: int | None = None
-    last_known_update_date: datetime | None = None
-
-    @field_validator("last_known_update_date", mode="before")
-    @classmethod
-    def validate_last_known_update_date(cls, value):
-        if isinstance(value, datetime) or value is None:
-            return value
-        if isinstance(value, str):
-            normalized = value.strip()
-            if normalized.endswith("Z"):
-                normalized = f"{normalized[:-1]}+00:00"
-            return datetime.fromisoformat(normalized)
-        return value
 
 
 class ChapterRead(ChapterBase):
@@ -73,6 +47,7 @@ class ChapterRead(ChapterBase):
     chapter_uuid: str
     creation_date: str
     update_date: str
+    order: int = 0
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
@@ -84,42 +59,26 @@ class ChapterReadWithPermissions(ChapterBase):
     chapter_uuid: str
     creation_date: str
     update_date: str
+    order: int = 0
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
-class ChapterDelete(PydanticStrictBaseModel):
-    last_known_update_date: datetime | None = None
-
-    @field_validator("last_known_update_date", mode="before")
-    @classmethod
-    def validate_last_known_update_date(cls, value):
-        if isinstance(value, datetime) or value is None:
-            return value
-        if isinstance(value, str):
-            normalized = value.strip()
-            if normalized.endswith("Z"):
-                normalized = f"{normalized[:-1]}+00:00"
-            return datetime.fromisoformat(normalized)
-        return value
+class ChapterOrderPayload(PydanticStrictBaseModel):
+    """Single-item order update: move this chapter to position N."""
+    position: int
 
 
+class ActivityOrderPayload(PydanticStrictBaseModel):
+    """Move an activity to position N, optionally into a different chapter."""
+    position: int
+    chapter_uuid: str | None = None
+
+
+# Kept for backward compat with any external callers; new code uses PATCH /{uuid}/order
 class ChapterOrderByUuid(PydanticStrictBaseModel):
     chapter_uuid: str
     activities_order_by_uuids: list[str]
 
 
 class ChapterUpdateOrder(PydanticStrictBaseModel):
-    last_known_update_date: datetime | None = None
     chapter_order_by_uuids: list[ChapterOrderByUuid]
-
-    @field_validator("last_known_update_date", mode="before")
-    @classmethod
-    def validate_last_known_update_date(cls, value):
-        if isinstance(value, datetime) or value is None:
-            return value
-        if isinstance(value, str):
-            normalized = value.strip()
-            if normalized.endswith("Z"):
-                normalized = f"{normalized[:-1]}+00:00"
-            return datetime.fromisoformat(normalized)
-        return value

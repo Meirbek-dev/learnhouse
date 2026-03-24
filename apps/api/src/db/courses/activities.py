@@ -65,9 +65,17 @@ class Activity(ActivityBase, table=True):
     model_config = ConfigDict(from_attributes=True)
 
     id: int | None = Field(default=None, primary_key=True)
+    # Primary FK: activities belong to a chapter (cascades on chapter delete)
+    chapter_id: int | None = Field(
+        default=None,
+        sa_column=Column(Integer, ForeignKey("chapter.id", ondelete="CASCADE")),
+    )
+    # order within the chapter
+    order: int = Field(default=0)
+    # kept for backward compat with analytics / trail queries
     course_id: int | None = Field(
         default=None,
-        sa_column=Column(Integer, ForeignKey("course.id", ondelete="CASCADE")),
+        sa_column=Column(Integer, ForeignKey("course.id", ondelete="SET NULL")),
     )
     creator_id: int | None = Field(
         default=None,
@@ -91,19 +99,6 @@ class ActivityCreate(ActivityBase):
     activity_type: ActivityTypeEnum = ActivityTypeEnum.TYPE_CUSTOM
     activity_sub_type: ActivitySubTypeEnum = ActivitySubTypeEnum.SUBTYPE_CUSTOM
     details: dict = Field(default_factory=dict, sa_column=Column(JSON))
-    last_known_update_date: datetime | None = None
-
-    @field_validator("last_known_update_date", mode="before")
-    @classmethod
-    def validate_last_known_update_date(cls, value):
-        if isinstance(value, datetime) or value is None:
-            return value
-        if isinstance(value, str):
-            normalized = value.strip()
-            if normalized.endswith("Z"):
-                normalized = f"{normalized[:-1]}+00:00"
-            return datetime.fromisoformat(normalized)
-        return value
 
 
 class ActivityUpdate(ActivityBase):
@@ -115,26 +110,15 @@ class ActivityUpdate(ActivityBase):
     published: bool | None = None
     published_version: int | None = None
     version: int | None = None
-    last_known_update_date: datetime | None = None
-
-    @field_validator("last_known_update_date", mode="before")
-    @classmethod
-    def validate_last_known_update_date(cls, value):
-        if isinstance(value, datetime) or value is None:
-            return value
-        if isinstance(value, str):
-            normalized = value.strip()
-            if normalized.endswith("Z"):
-                normalized = f"{normalized[:-1]}+00:00"
-            return datetime.fromisoformat(normalized)
-        return value
 
 
 class ActivityRead(ActivityBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
-    course_id: int | None
+    chapter_id: int | None = None
+    course_id: int | None = None
+    order: int = 0
     activity_uuid: str
     creation_date: datetime
     update_date: datetime

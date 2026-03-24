@@ -17,8 +17,6 @@ import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { DragDropContext, Droppable } from '@hello-pangea/dnd';
-import { useCourseStructureStore } from '@/stores/courses';
-import { useCourseEditorStore } from '@/stores/courses';
 import { Button } from '@/components/ui/button';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
@@ -34,12 +32,9 @@ const EditCourseStructure = () => {
 
   const course = useCourse();
   const course_structure = course.courseStructure;
-  const setConflict = useCourseEditorStore((state) => state.setConflict);
   const course_uuid = course ? course.courseStructure.course_uuid : '';
   const { createChapter, reorderStructure } = useChapterMutations(course_uuid, true);
-  const expandedChapterIds = useCourseStructureStore((state) => state.expandedChapterIds);
-  const setExpanded = useCourseStructureStore((state) => state.setExpanded);
-  // New Chapter creation
+
   const [newChapterModal, setNewChapterModal] = useState(false);
   const [structureStatus, setStructureStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
 
@@ -50,19 +45,6 @@ const EditCourseStructure = () => {
     return () => clearTimeout(timer);
   }, [structureStatus]);
 
-  useEffect(() => {
-    if (course_structure.chapters.length === 0 || expandedChapterIds.size > 0) {
-      return;
-    }
-
-    const firstChapter = course_structure.chapters[0];
-    if (!firstChapter) {
-      return;
-    }
-
-    setExpanded(firstChapter.chapter_uuid, true);
-  }, [course_structure.chapters, expandedChapterIds.size, setExpanded]);
-
   const closeNewChapterModal = async () => {
     setNewChapterModal(false);
   };
@@ -71,27 +53,11 @@ const EditCourseStructure = () => {
   const submitChapter = async (chapter: any) => {
     setStructureStatus('saving');
     try {
-      await createChapter(chapter, {
-        accessToken: access_token,
-        lastKnownUpdateDate: course_structure.update_date,
-      });
+      await createChapter(chapter, access_token);
       setNewChapterModal(false);
       setStructureStatus('saved');
       toast.success(t('chapterCreatedSuccess'));
     } catch (error: any) {
-      if (error?.status === 409) {
-        setConflict({
-          section: 'content',
-          message: error?.detail || error?.message,
-          pendingSave: async () => {
-            await createChapter(chapter, {
-              accessToken: access_token,
-              lastKnownUpdateDate: course_structure.update_date,
-            });
-          },
-        });
-        return;
-      }
       setStructureStatus('error');
       toast.error(t('chapterCreateFailed'));
     }
@@ -138,25 +104,9 @@ const EditCourseStructure = () => {
 
     try {
       setStructureStatus('saving');
-      await reorderStructure(newCourseStructure, payload, {
-        accessToken: access_token,
-        lastKnownUpdateDate: course_structure.update_date,
-      });
+      await reorderStructure(newCourseStructure, payload, access_token);
       setStructureStatus('saved');
     } catch (error: any) {
-      if (error?.status === 409) {
-        setConflict({
-          section: 'content',
-          message: error?.detail || error?.message,
-          pendingSave: async () => {
-            await reorderStructure(newCourseStructure, payload, {
-              accessToken: access_token,
-              lastKnownUpdateDate: course_structure.update_date,
-            });
-          },
-        });
-        return;
-      }
       setStructureStatus('error');
       toast.error(error?.message || t('saveOrderError'));
     }
@@ -212,6 +162,7 @@ const EditCourseStructure = () => {
                     chapterIndex={index}
                     course_uuid={course_uuid}
                     chapter={chapter}
+                    defaultExpanded={index === 0}
                   />
                 );
               })}

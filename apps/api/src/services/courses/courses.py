@@ -6,8 +6,8 @@ from sqlmodel import Session, and_, or_, select, text
 from ulid import ULID
 
 from src.db.courses.certifications import Certifications
-from src.db.courses.chapter_activities import ChapterActivity
-from src.db.courses.course_chapters import CourseChapter
+from src.db.courses.activities import Activity
+from src.db.courses.chapters import Chapter
 from src.db.courses.courses import (
     AuthorWithRole,
     Course,
@@ -83,21 +83,16 @@ def _build_editable_course_insights(
     )
     chapter_counts = dict(
         db_session.exec(
-            select(
-                CourseChapter.course_id, func.count(CourseChapter.chapter_id.distinct())
-            )
-            .where(CourseChapter.course_id.in_(course_ids))
-            .group_by(CourseChapter.course_id)
+            select(Chapter.course_id, func.count(Chapter.id.distinct()))
+            .where(Chapter.course_id.in_(course_ids))
+            .group_by(Chapter.course_id)
         ).all()
     )
     activity_counts = dict(
         db_session.exec(
-            select(
-                ChapterActivity.course_id,
-                func.count(ChapterActivity.activity_id.distinct()),
-            )
-            .where(ChapterActivity.course_id.in_(course_ids))
-            .group_by(ChapterActivity.course_id)
+            select(Activity.course_id, func.count(Activity.id.distinct()))
+            .where(Activity.course_id.in_(course_ids))
+            .group_by(Activity.course_id)
         ).all()
     )
     linked_usergroup_counts = dict(

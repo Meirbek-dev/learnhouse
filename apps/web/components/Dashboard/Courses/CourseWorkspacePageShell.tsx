@@ -25,7 +25,7 @@ import {
   Sparkles,
   Users,
 } from 'lucide-react';
-import ConflictResolutionModal from '@components/Dashboard/Pages/Course/ConflictResolutionModal';
+import ConflictAlert from '@components/Dashboard/Pages/Course/ConflictResolutionModal';
 import type { CourseWorkspaceCapabilities } from '@/lib/course-management-server';
 import { CourseProvider, useCourse } from '@components/Contexts/CourseContext';
 import type { CourseWorkspaceStage } from '@/lib/course-management';
@@ -73,7 +73,6 @@ function CourseWorkspaceChrome({
 
   return (
     <div className="flex min-h-screen min-w-0 flex-1 flex-col bg-background">
-      <ConflictResolutionModal />
       <AlertDialog
         open={dirtyGuard.isPromptOpen}
         onOpenChange={(open) => {
@@ -180,7 +179,10 @@ function CourseWorkspaceChrome({
         </div>
       </header>
 
-      <main className="min-w-0 flex-1 px-4 py-8 lg:px-8">{children}</main>
+      <main className="min-w-0 flex-1 px-4 py-8 lg:px-8">
+        <ConflictAlert />
+        {children}
+      </main>
     </div>
   );
 }

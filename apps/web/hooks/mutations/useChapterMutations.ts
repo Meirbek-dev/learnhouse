@@ -2,25 +2,9 @@
 
 import { createChapter, deleteChapter, updateChapter, updateCourseOrderStructure } from '@services/courses/chapters';
 import type { ChapterCreateValues, ChapterUpdateValues, CourseOrderPayload } from '@/schemas/chapterSchemas';
-import { useCourseStructureStore } from '@/stores/courses';
 import { courseKeys } from '@/hooks/courses/courseKeys';
 import { assertSuccess } from '@/lib/api/assertSuccess';
 import { useSWRConfig } from 'swr';
-
-interface ChapterMutationOptions {
-  accessToken: string;
-  lastKnownUpdateDate?: string | null;
-}
-
-const buildOrderSnapshot = (chapters: any[]) =>
-  chapters.map((chapter) => ({
-    chapterId: chapter.id,
-    chapterUuid: chapter.chapter_uuid,
-    activityIds: (chapter.activities ?? []).map((activity: any) => ({
-      activityId: activity.id,
-      activityUuid: activity.activity_uuid,
-    })),
-  }));
 
 export function useChapterMutations(courseUuid: string, withUnpublishedActivities = true) {
   const { mutate, cache } = useSWRConfig();
@@ -28,7 +12,7 @@ export function useChapterMutations(courseUuid: string, withUnpublishedActivitie
 
   const captureSnapshot = <T>(key: string): T | undefined => (cache.get(key) as any)?.data as T | undefined;
 
-  const createChapterMutation = async (payload: ChapterCreateValues, options: ChapterMutationOptions) => {
+  const createChapterMutation = async (payload: ChapterCreateValues, accessToken: string) => {
     const tempId = `temp_chapter_${Date.now()}`;
     const optimisticChapter = { ...payload, id: tempId, chapter_uuid: tempId, activities: [] };
 
@@ -40,12 +24,7 @@ export function useChapterMutations(courseUuid: string, withUnpublishedActivitie
     );
 
     try {
-      const createdChapter = assertSuccess(
-        await createChapter(payload, options.accessToken, {
-          courseUuid,
-          lastKnownUpdateDate: options.lastKnownUpdateDate,
-        }),
-      );
+      const createdChapter = assertSuccess(await createChapter(payload, accessToken));
 
       await mutate(
         structureKey,
@@ -82,7 +61,7 @@ export function useChapterMutations(courseUuid: string, withUnpublishedActivitie
   const updateChapterMutation = async (
     chapterUuid: string,
     payload: ChapterUpdateValues,
-    options: ChapterMutationOptions,
+    accessToken: string,
   ) => {
     const previous = captureSnapshot(structureKey);
 
@@ -101,12 +80,7 @@ export function useChapterMutations(courseUuid: string, withUnpublishedActivitie
     );
 
     try {
-      const response = assertSuccess(
-        await updateChapter(chapterUuid, payload, options.accessToken, {
-          courseUuid,
-          lastKnownUpdateDate: options.lastKnownUpdateDate,
-        }),
-      );
+      const response = assertSuccess(await updateChapter(chapterUuid, payload, accessToken));
       await mutate(structureKey);
       return response;
     } catch (error) {
@@ -115,7 +89,7 @@ export function useChapterMutations(courseUuid: string, withUnpublishedActivitie
     }
   };
 
-  const deleteChapterMutation = async (chapterUuid: string, options: ChapterMutationOptions) => {
+  const deleteChapterMutation = async (chapterUuid: string, accessToken: string) => {
     const previous = captureSnapshot(structureKey);
 
     await mutate(
@@ -131,12 +105,7 @@ export function useChapterMutations(courseUuid: string, withUnpublishedActivitie
     );
 
     try {
-      const response = assertSuccess(
-        await deleteChapter(chapterUuid, options.accessToken, {
-          courseUuid,
-          lastKnownUpdateDate: options.lastKnownUpdateDate,
-        }),
-      );
+      const response = assertSuccess(await deleteChapter(chapterUuid, accessToken));
       await mutate(structureKey);
       return response;
     } catch (error) {
@@ -145,23 +114,15 @@ export function useChapterMutations(courseUuid: string, withUnpublishedActivitie
     }
   };
 
-  const reorderStructure = async (nextStructure: any, payload: CourseOrderPayload, options: ChapterMutationOptions) => {
+  const reorderStructure = async (nextStructure: any, payload: CourseOrderPayload, accessToken: string) => {
     const previousStructure = captureSnapshot<{ chapters?: any[] }>(structureKey);
-    const dragStore = useCourseStructureStore.getState();
-    const nextSnapshot = buildOrderSnapshot(nextStructure.chapters ?? []);
-
-    dragStore.beginDrag(buildOrderSnapshot(previousStructure?.chapters ?? []));
-    dragStore.updateDragOrder(nextSnapshot);
 
     await mutate(structureKey, nextStructure, { revalidate: false });
-    dragStore.markDragSaving();
 
     try {
-      await updateCourseOrderStructure(courseUuid, payload, options.accessToken, { courseUuid });
-      dragStore.commitDrag();
+      await updateCourseOrderStructure(courseUuid, payload, accessToken);
       await mutate(structureKey);
     } catch (error) {
-      dragStore.rollbackDrag();
       await mutate(structureKey, previousStructure, { revalidate: false });
       await mutate(structureKey);
       throw error;

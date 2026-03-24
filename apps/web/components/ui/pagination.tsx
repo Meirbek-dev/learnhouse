@@ -1,10 +1,8 @@
-'use client';
-
-import { useTranslations } from 'next-intl';
 import * as React from 'react';
 
 import { ChevronLeftIcon, ChevronRightIcon, MoreHorizontalIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 
 function Pagination({ className, ...props }: React.ComponentProps<'nav'>) {
@@ -23,7 +21,7 @@ function PaginationContent({ className, ...props }: React.ComponentProps<'ul'>) 
   return (
     <ul
       data-slot="pagination-content"
-      className={cn('gap-1 flex items-center', className)}
+      className={cn('flex items-center gap-1', className)}
       {...props}
     />
   );
@@ -104,7 +102,7 @@ function PaginationEllipsis({ className, ...props }: React.ComponentProps<'span'
     <span
       aria-hidden
       data-slot="pagination-ellipsis"
-      className={cn("size-9 [&_svg:not([class*='size-'])]:size-4 flex items-center justify-center", className)}
+      className={cn("flex size-9 items-center justify-center [&_svg:not([class*='size-'])]:size-4", className)}
       {...props}
     >
       <MoreHorizontalIcon />

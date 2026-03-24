@@ -60,8 +60,6 @@ const EditCourseAccess = () => {
 
   const { isSaving, save } = useSaveSection({
     section: 'access',
-    getDraftSnapshot: () => ({ public: draftPublic }),
-    onUseTheirs: handleDiscard,
   });
 
   // Rehydrate from server when not dirty (e.g. initial load, external update)

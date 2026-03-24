@@ -1,8 +1,8 @@
 'use client';
 
 import { useCourseEditorBundle } from '@/hooks/courses/useCourseEditorBundle';
-import { createEmptyCourseEditorBundle } from '@services/courses/editor';
 import { createContext, use, useCallback, useEffect, useMemo } from 'react';
+import { createEmptyCourseEditorBundle } from '@services/courses/editor';
 import { useCourseStructure } from '@/hooks/courses/useCourseStructure';
 import { getCourseReadinessSummary } from '@/lib/course-management';
 import type { CourseEditorBundle } from '@services/courses/editor';
@@ -55,11 +55,6 @@ export interface CourseStructure {
   [key: string]: any;
 }
 
-interface CourseConflictState {
-  isOpen: boolean;
-  message: string;
-}
-
 // Course state interface
 interface CourseState {
   courseStructure: CourseStructure;
@@ -67,7 +62,6 @@ interface CourseState {
   withUnpublishedActivities: boolean;
   dirtySections: Partial<Record<CourseSectionKey, boolean>>;
   editorData: CourseEditorBundle;
-  conflict: CourseConflictState;
 }
 
 interface CourseContextValue extends CourseState {
@@ -77,7 +71,6 @@ interface CourseContextValue extends CourseState {
   refreshCourseMeta: () => Promise<CourseStructure | undefined>;
   refreshEditorData: () => Promise<CourseEditorBundle | undefined>;
   refreshCourseEditor: () => Promise<void>;
-  dismissConflict: () => void;
 }
 
 // Course provider props interface
@@ -98,10 +91,7 @@ export const CourseProvider = ({
 }: CourseProviderProps) => {
   const t = useTranslations('Contexts.Course');
   const openEditor = useCourseEditorStore((state) => state.openEditor);
-  const dismissConflict = useCourseEditorStore((state) => state.dismissConflict);
   const dirtySections = useCourseEditorStore((state) => state.dirtySections);
-  const conflict = useCourseEditorStore((state) => state.conflict);
-  const syncLastKnownUpdateDate = useCourseEditorStore((state) => state.syncLastKnownUpdateDate);
 
   const {
     courseStructure: courseStructureData,
@@ -123,9 +113,8 @@ export const CourseProvider = ({
   useEffect(() => {
     if (courseStructureData) {
       openEditor(courseuuid, courseStructureData.update_date);
-      syncLastKnownUpdateDate(courseStructureData.update_date);
     }
-  }, [courseStructureData, courseuuid, openEditor, syncLastKnownUpdateDate]);
+  }, [courseStructureData, courseuuid, openEditor]);
 
   const refreshCourseMeta = useCallback(async () => mutateCourseMeta(), [mutateCourseMeta]);
   const refreshEditorData = useCallback(async () => mutateEditorBundle(), [mutateEditorBundle]);
@@ -133,8 +122,6 @@ export const CourseProvider = ({
     async () => void (await Promise.all([mutateCourseMeta(), mutateEditorBundle()])),
     [mutateCourseMeta, mutateEditorBundle],
   );
-  const dismissConflictHandler = useCallback(() => dismissConflict(), [dismissConflict]);
-
   const readiness = useMemo(
     () =>
       getCourseReadinessSummary(
@@ -158,14 +145,12 @@ export const CourseProvider = ({
       withUnpublishedActivities,
       dirtySections,
       editorData: editorBundleData || createEmptyCourseEditorBundle(),
-      conflict,
       courseMetaUrl,
       isEditorDataLoading,
       readiness,
       refreshCourseMeta,
       refreshEditorData,
       refreshCourseEditor,
-      dismissConflict: dismissConflictHandler,
     };
 
     return <CourseContext.Provider value={value}>{children}</CourseContext.Provider>;

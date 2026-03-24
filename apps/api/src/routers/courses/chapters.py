@@ -5,7 +5,6 @@ from fastapi import APIRouter, Depends, Request
 from src.core.events.database import get_db_session
 from src.db.courses.chapters import (
     ChapterCreate,
-    ChapterDelete,
     ChapterRead,
     ChapterUpdate,
     ChapterUpdateOrder,
@@ -15,6 +14,8 @@ from src.services.courses.chapters import (
     create_chapter,
     delete_chapter,
     get_chapter,
+    move_activity_to_order,
+    move_chapter_to_order,
     reorder_chapters_and_activities,
     update_chapter,
 )
@@ -30,9 +31,6 @@ async def api_create_coursechapter(
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session=Depends(get_db_session),
 ) -> ChapterRead:
-    """
-    Create new Course Chapter
-    """
     return await create_chapter(request, coursechapter_object, current_user, db_session)
 
 
@@ -43,29 +41,50 @@ async def api_get_coursechapter(
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session=Depends(get_db_session),
 ) -> ChapterRead:
-    """
-    Get single CourseChapter by chapter_uuid
-    """
     return await get_chapter(request, chapter_uuid, current_user, db_session)
 
 
-@router.put("/course/{course_uuid}/order")
-async def api_update_chapter_meta(
+@router.patch("/course/{course_uuid}/order")
+async def api_reorder_chapters_and_activities(
     request: Request,
     course_uuid: str,
     order: ChapterUpdateOrder,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session=Depends(get_db_session),
 ) -> dict:
-    """
-    Reorder chapters and activities within a course
-    """
     return await reorder_chapters_and_activities(
         request, course_uuid, order, current_user, db_session
     )
 
 
-@router.put("/{chapter_uuid}")
+@router.patch("/{chapter_uuid}/order")
+async def api_move_chapter_to_order(
+    request: Request,
+    chapter_uuid: str,
+    position: int,
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
+    db_session=Depends(get_db_session),
+) -> ChapterRead:
+    return await move_chapter_to_order(
+        request, chapter_uuid, position, current_user, db_session
+    )
+
+
+@router.patch("/activity/{activity_uuid}/order")
+async def api_move_activity_to_order(
+    request: Request,
+    activity_uuid: str,
+    position: int,
+    target_chapter_uuid: str | None = None,
+    current_user: Annotated[PublicUser, Depends(get_current_user)] = None,
+    db_session=Depends(get_db_session),
+) -> dict:
+    return await move_activity_to_order(
+        request, activity_uuid, position, target_chapter_uuid, current_user, db_session
+    )
+
+
+@router.patch("/{chapter_uuid}")
 async def api_update_coursechapter(
     request: Request,
     coursechapter_object: ChapterUpdate,
@@ -73,9 +92,6 @@ async def api_update_coursechapter(
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session=Depends(get_db_session),
 ) -> ChapterRead:
-    """
-    Update CourseChapter by chapter_uuid
-    """
     return await update_chapter(
         request, coursechapter_object, chapter_uuid, current_user, db_session
     )
@@ -85,17 +101,7 @@ async def api_update_coursechapter(
 async def api_delete_coursechapter(
     request: Request,
     chapter_uuid: str,
-    delete_body: ChapterDelete,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session=Depends(get_db_session),
 ) -> dict:
-    """
-    Delete CourseChapter by chapter_uuid
-    """
-    return await delete_chapter(
-        request,
-        chapter_uuid,
-        current_user,
-        db_session,
-        delete_body.last_known_update_date,
-    )
+    return await delete_chapter(request, chapter_uuid, current_user, db_session)

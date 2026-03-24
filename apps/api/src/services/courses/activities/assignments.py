@@ -29,7 +29,7 @@ from src.db.courses.assignments import (
     AssignmentUserSubmissionRead,
     AssignmentUserSubmissionStatus,
 )
-from src.db.courses.chapter_activities import ChapterActivity
+from src.db.courses.chapters import Chapter
 from src.db.courses.courses import Course
 from src.db.trail_runs import TrailRun
 from src.db.trail_steps import TrailStep
@@ -1934,13 +1934,28 @@ async def create_assignment_with_activity(
         resource_owner_id=course.creator_id,
     )
 
+    # Resolve chapter for order calculation
+    chapter = db_session.exec(select(Chapter).where(Chapter.id == chapter_id)).first()
+    if not chapter:
+        raise HTTPException(status_code=404, detail="Chapter not found")
+
+    # Determine order within chapter
+    last_in_chapter = db_session.exec(
+        select(Activity)
+        .where(Activity.chapter_id == chapter_id)
+        .order_by(Activity.order.desc())
+    ).first()
+    next_order = (last_in_chapter.order if last_in_chapter else 0) + 1
+
     # Create Activity first
     activity = Activity(
         name=activity_name,
         activity_type=ActivityTypeEnum.TYPE_ASSIGNMENT,
         activity_sub_type=ActivitySubTypeEnum.SUBTYPE_ASSIGNMENT_ANY,
         published=assignment_object.published,
-        course_id=assignment_object.course_id,
+        chapter_id=chapter_id,
+        course_id=assignment_object.course_id,  # keep legacy column in sync
+        order=next_order,
         activity_uuid=f"activity_{ULID()}",
         creation_date=datetime.now().isoformat(),
         update_date=datetime.now().isoformat(),
@@ -1949,20 +1964,6 @@ async def create_assignment_with_activity(
     # Insert Activity in DB
     db_session.add(activity)
     db_session.flush()  # Flush to get the ID without committing
-
-    # Create ChapterActivity relationship
-    chapter_activity = ChapterActivity(
-        chapter_id=chapter_id,
-        activity_id=activity.id,
-        course_id=assignment_object.course_id,
-        order=1,  # Default order, can be adjusted later
-        creation_date=datetime.now().isoformat(),
-        update_date=datetime.now().isoformat(),
-    )
-
-    # Insert ChapterActivity in DB
-    db_session.add(chapter_activity)
-    db_session.flush()  # Flush to ensure proper ordering
 
     assignment_data = assignment_object.model_dump(exclude_unset=True)
     assignment = Assignment(**assignment_data)

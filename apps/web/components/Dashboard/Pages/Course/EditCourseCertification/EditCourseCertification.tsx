@@ -197,8 +197,6 @@ const EditCourseCertification = () => {
     section: 'certification',
     errorMessage: t('certificationError'),
     onError: setError,
-    getDraftSnapshot: () => form.getValues(),
-    onUseTheirs: handleDiscard,
   });
 
   // Hydrate form from server data on load / when server data changes.

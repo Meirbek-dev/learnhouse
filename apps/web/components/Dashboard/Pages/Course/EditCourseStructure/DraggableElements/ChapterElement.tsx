@@ -30,10 +30,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useChapterMutations } from '@/hooks/mutations/useChapterMutations';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
-import { useCourse } from '@components/Contexts/CourseContext';
-import { useCourseStructureStore } from '@/stores/courses';
 import { Draggable, Droppable } from '@hello-pangea/dnd';
-import { useCourseEditorStore } from '@/stores/courses';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useTranslations } from 'next-intl';
@@ -59,7 +56,6 @@ interface Activity {
   activity_type: ActivityType;
   name: string;
   published: boolean;
-  // Backend permission metadata
   can_update?: boolean;
   can_delete?: boolean;
   is_owner?: boolean;
@@ -79,6 +75,8 @@ interface ChapterElementProps {
   chapter: Chapter;
   chapterIndex: number;
   course_uuid: string;
+  defaultExpanded?: boolean;
+  onAddActivity?: (chapterId: number) => void;
 }
 
 interface PlatformSession {
@@ -89,29 +87,22 @@ interface PlatformSession {
   };
 }
 
-const ChapterElement = ({ chapter, chapterIndex, course_uuid }: ChapterElementProps) => {
-  // Hooks
+const ChapterElement = ({ chapter, chapterIndex, course_uuid, defaultExpanded = false, onAddActivity }: ChapterElementProps) => {
   const session = usePlatformSession() as PlatformSession;
   const access_token = session?.data?.tokens?.access_token;
-  const course = useCourse();
-  const setConflict = useCourseEditorStore((state) => state.setConflict);
   const { deleteChapter, updateChapter } = useChapterMutations(course_uuid, true);
-  const expandedChapterIds = useCourseStructureStore((state) => state.expandedChapterIds);
-  const toggleChapter = useCourseStructureStore((state) => state.toggleChapter);
   const t = useTranslations('CourseEdit');
 
-  // State
+  // Local state (replaces courseStructureStore)
+  const [isExpanded, setIsExpanded] = useState(defaultExpanded);
   const [isEditing, setIsEditing] = useState(false);
   const [editedName, setEditedName] = useState(chapter?.name ?? '');
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isSavingEdit, setIsSavingEdit] = useState(false);
   const [isDeletingChapter, setIsDeletingChapter] = useState(false);
 
-  // Derived values
   const activities = chapter.activities ?? [];
-  const isExpanded = expandedChapterIds.has(chapter.chapter_uuid);
 
-  // Handlers
   const handleStartEdit = () => {
     setIsEditing(true);
     setEditedName(chapter.name);
@@ -136,33 +127,9 @@ const ChapterElement = ({ chapter, chapterIndex, course_uuid }: ChapterElementPr
 
     setIsSavingEdit(true);
     try {
-      await updateChapter(
-        chapter.chapter_uuid,
-        { name: trimmedName },
-        {
-          accessToken: access_token,
-          lastKnownUpdateDate: course.courseStructure.update_date,
-        },
-      );
+      await updateChapter(chapter.chapter_uuid, { name: trimmedName }, access_token);
       setIsEditing(false);
     } catch (error: any) {
-      if (error?.status === 409) {
-        setConflict({
-          section: 'content',
-          message: error?.detail || error?.message,
-          pendingSave: async () => {
-            await updateChapter(
-              chapter.chapter_uuid,
-              { name: trimmedName },
-              {
-                accessToken: access_token,
-                lastKnownUpdateDate: course.courseStructure.update_date,
-              },
-            );
-          },
-        });
-        return;
-      }
       toast.error(error?.message || t('chapterUpdateFailed'));
       setEditedName(chapter.name);
     } finally {
@@ -178,25 +145,9 @@ const ChapterElement = ({ chapter, chapterIndex, course_uuid }: ChapterElementPr
 
     setIsDeletingChapter(true);
     try {
-      await deleteChapter(chapter.chapter_uuid, {
-        accessToken: access_token,
-        lastKnownUpdateDate: course.courseStructure.update_date,
-      });
+      await deleteChapter(chapter.chapter_uuid, access_token);
       setIsDeleteDialogOpen(false);
     } catch (error: any) {
-      if (error?.status === 409) {
-        setConflict({
-          section: 'content',
-          message: error?.detail || error?.message,
-          pendingSave: async () => {
-            await deleteChapter(chapter.chapter_uuid, {
-              accessToken: access_token,
-              lastKnownUpdateDate: course.courseStructure.update_date,
-            });
-          },
-        });
-        return;
-      }
       toast.error(error?.message || t('chapterDeleteFailed'));
       setIsDeleteDialogOpen(false);
     } finally {
@@ -214,7 +165,6 @@ const ChapterElement = ({ chapter, chapterIndex, course_uuid }: ChapterElementPr
     }
   };
 
-  // Early validation (moved below all hooks to satisfy Rules of Hooks)
   if (!chapter?.chapter_uuid) {
     return null;
   }
@@ -290,7 +240,7 @@ const ChapterElement = ({ chapter, chapterIndex, course_uuid }: ChapterElementPr
                     <Button
                       size="sm"
                       variant="ghost"
-                      onClick={() => toggleChapter(chapter.chapter_uuid)}
+                      onClick={() => setIsExpanded((v) => !v)}
                       className="h-7 w-7 p-0"
                     >
                       {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
@@ -412,7 +362,18 @@ const ChapterElement = ({ chapter, chapterIndex, course_uuid }: ChapterElementPr
               </Droppable>
 
               <div className="px-4 pb-4">
-                <NewActivityButton chapterId={chapter.id} />
+                {onAddActivity ? (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="w-full"
+                    onClick={() => onAddActivity(chapter.id)}
+                  >
+                    + {t('addActivityButton')}
+                  </Button>
+                ) : (
+                  <NewActivityButton chapterId={chapter.id} />
+                )}
               </div>
             </>
           ) : null}

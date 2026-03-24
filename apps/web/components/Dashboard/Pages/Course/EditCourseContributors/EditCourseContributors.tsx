@@ -204,8 +204,6 @@ const EditCourseContributors = () => {
 
   const { isSaving, save } = useSaveSection({
     section: 'contributors',
-    getDraftSnapshot: () => ({ open_to_contributors: isOpenToContributors }),
-    onUseTheirs: handleDiscard,
   });
 
   // Rehydrate from server when not dirty
@@ -261,7 +259,6 @@ const EditCourseContributors = () => {
 
   const raiseContributorConflict = (message: string | undefined, pendingSave: () => Promise<unknown>) => {
     setConflict({
-      section: 'contributors',
       message: message || t('failedToUpdateContributor'),
       pendingSave,
     });

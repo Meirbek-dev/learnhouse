@@ -26,7 +26,6 @@ const EditorWrapper = (props: EditorWrapperProps): JSX.Element => {
     activityUuid: props.activity.activity_uuid,
     courseUuid: props.course.course_uuid,
     accessToken: access_token,
-    lastKnownUpdateDate: props.course.update_date,
   });
 
   async function setContent(content: any) {
