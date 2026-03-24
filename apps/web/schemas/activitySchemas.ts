@@ -1,13 +1,13 @@
 import * as v from 'valibot';
 
 export const activityTypeEnum = v.picklist([
-  'VIDEO',
-  'DOCUMENT',
-  'DYNAMIC',
-  'ASSIGNMENT',
-  'EXAM',
-  'CODE_CHALLENGE',
-  'CUSTOM',
+  'TYPE_VIDEO',
+  'TYPE_DOCUMENT',
+  'TYPE_DYNAMIC',
+  'TYPE_ASSIGNMENT',
+  'TYPE_EXAM',
+  'TYPE_CODE_CHALLENGE',
+  'TYPE_CUSTOM',
 ] as const);
 
 export const activitySubTypeEnum = v.picklist([

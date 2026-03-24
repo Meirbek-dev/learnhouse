@@ -39,7 +39,6 @@ import { deleteAssignmentUsingActivityUUID, getAssignmentFromActivityUUID } from
 import { CourseWorkflowBadge } from '@components/Dashboard/Courses/courseWorkflowUi';
 import { useActivityMutations } from '@/hooks/mutations/useActivityMutations';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
-import type { ActivityUpdateValues } from '@/schemas/activitySchemas';
 import ToolTip from '@/components/Objects/Elements/Tooltip/Tooltip';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { getAbsoluteUrl } from '@services/config/config';
@@ -61,8 +60,6 @@ type ActivityType =
   | 'TYPE_DYNAMIC'
   | 'TYPE_EXAM'
   | 'TYPE_CODE_CHALLENGE';
-
-type ActivityApiType = ActivityUpdateValues['activity_type'];
 
 interface Activity {
   id: string;
@@ -135,15 +132,6 @@ const ACTIVITY_CONFIG = {
   },
 } as const;
 
-const ACTIVITY_TYPE_MAP: Record<ActivityType, ActivityApiType> = {
-  TYPE_VIDEO: 'VIDEO',
-  TYPE_DOCUMENT: 'DOCUMENT',
-  TYPE_ASSIGNMENT: 'ASSIGNMENT',
-  TYPE_DYNAMIC: 'DYNAMIC',
-  TYPE_EXAM: 'EXAM',
-  TYPE_CODE_CHALLENGE: 'CODE_CHALLENGE',
-};
-
 const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityElementProps) => {
   // Hooks
   const session = usePlatformSession() as PlatformSession;
@@ -180,7 +168,6 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
   const canDelete = activity.can_delete ?? false;
   const isOwner = activity.is_owner ?? false;
   const availableActions = activity.available_actions ?? [];
-  const apiActivityType = ACTIVITY_TYPE_MAP[activity.activity_type];
 
   // Handlers
   const handleStartEdit = () => {
@@ -209,7 +196,7 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
     try {
       await updateActivity(
         activity.activity_uuid,
-        { name: trimmedName, activity_type: apiActivityType },
+        { name: trimmedName, activity_type: activity.activity_type },
         access_token,
       );
       toast.success(t('activityNameUpdatedSuccess'));
@@ -235,7 +222,7 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
     try {
       await updateActivity(
         activity.activity_uuid,
-        { published: !activity.published, activity_type: apiActivityType },
+        { published: !activity.published, activity_type: activity.activity_type },
         access_token,
       );
       toast.success(t('activityUpdateSuccess'));

@@ -46,7 +46,7 @@ const createRequestInit = (
     token?: string;
     next?: any;
     isJson?: boolean;
-    // When true, only adds a body for POST, PUT, or DELETE methods.
+    // When true, only adds a body for POST, PUT, PATCH, or DELETE methods.
     limitBodyToMethods?: boolean;
   },
 ): RequestInit & { next?: any } => {
@@ -77,7 +77,7 @@ const createRequestInit = (
     headers['Content-Type'] = 'application/json';
   }
 
-  const shouldSetBody = data !== null && (!limitBodyToMethods || ['POST', 'PUT', 'DELETE'].includes(method));
+  const shouldSetBody = data !== null && (!limitBodyToMethods || ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method));
 
   if (shouldSetBody) {
     options.body = isJson ? JSON.stringify(data) : data;
