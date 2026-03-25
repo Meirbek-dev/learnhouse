@@ -80,8 +80,8 @@ export default function GradingPanel({
       setFeedback('');
       return;
     }
-    // Pre-fill with existing grade if already graded
-    setScore(submission?.final_score !== null ? String(submission.final_score) : '');
+    // Pre-fill with existing grade if already graded; use loose != to guard both null and undefined
+    setScore(submission?.final_score != null ? String(submission.final_score) : '');
     setFeedback('');
   }, [submissionUuid, submission?.final_score]);
 

@@ -14,7 +14,6 @@ from fastapi import HTTPException, status
 from sqlmodel import Session, select
 
 from src.db.courses.activities import Activity
-from src.db.courses.courses import Course
 from src.db.grading.schemas import TeacherGradeInput
 from src.db.grading.submissions import (
     GradedItem,
@@ -22,8 +21,9 @@ from src.db.grading.submissions import (
     Submission,
     SubmissionRead,
     SubmissionStatus,
+    SubmissionUser,
 )
-from src.db.users import PublicUser
+from src.db.users import PublicUser, User
 from src.security.rbac import PermissionChecker
 
 logger = logging.getLogger(__name__)
@@ -78,8 +78,33 @@ async def get_submissions_for_activity(
     offset = (page - 1) * page_size
     page_rows = all_rows[offset : offset + page_size]
 
+    # Batch-fetch user records so we can embed display info in each row
+    user_ids = {s.user_id for s in page_rows}
+    users_by_id: dict[int, User] = {}
+    if user_ids:
+        user_rows = db_session.exec(
+            select(User).where(User.id.in_(user_ids))
+        ).all()
+        users_by_id = {u.id: u for u in user_rows}
+
+    def _enrich(s: Submission) -> SubmissionRead:
+        base = SubmissionRead.model_validate(s)
+        u = users_by_id.get(s.user_id)
+        if u:
+            base.user = SubmissionUser(
+                id=u.id,
+                username=u.username,
+                first_name=u.first_name or None,
+                last_name=u.last_name or None,
+                middle_name=u.middle_name or None,
+                email=str(u.email),
+                avatar_image=u.avatar_image or None,
+                user_uuid=u.user_uuid or None,
+            )
+        return base
+
     return {
-        "items": [SubmissionRead.model_validate(s) for s in page_rows],
+        "items": [_enrich(s) for s in page_rows],
         "total": total,
         "page": page,
         "page_size": page_size,

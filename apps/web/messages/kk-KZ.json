@@ -3219,7 +3219,8 @@
       "submission": "Жіберілген жұмыс",
       "submitted": "Жіберілді",
       "tasks": "Тапсырмалар",
-      "title": "Тапсырмалар"
+      "title": "Тапсырмалар",
+      "submissionsTitle": "Студенттердің жұмыстары"
     },
     "Card": {
       "AccountSettings": {
@@ -7040,5 +7041,42 @@
   "seconds": "Секунд",
   "selectDeadline": "Тапсырманы аяқтау үшін мерзімді таңдаңыз",
   "touUniversity": "Торайғыров университеті",
-  "webPreview": "Веб алдын ала қарау"
+  "webPreview": "Веб алдын ала қарау",
+  "Grading": {
+    "Table": {
+      "needGrading": "тексеруді қажет етеді",
+      "total": "Барлығы: {count}",
+      "student": "Студент",
+      "submitted": "Жіберілді",
+      "status": "Күй",
+      "score": "Баға",
+      "empty": "Жіберілген жұмыстар жоқ",
+      "prev": "Алдыңғы",
+      "next": "Келесі",
+      "pageOf": "{page}/{pages} бет",
+      "grade": "Тексеру",
+      "view": "Қарау"
+    },
+    "Panel": {
+      "loading": "Жүктелуде...",
+      "notYetSubmitted": "Әлі жіберілмеген",
+      "noData": "Деректер жоқ",
+      "finalScore": "Қорытынды баға",
+      "feedback": "Пікір",
+      "optional": "міндетті емес",
+      "feedbackPlaceholder": "Пікір немесе түсініктеме қосыңыз...",
+      "returnToStudent": "Студентке қайтару",
+      "saveGrade": "Бағаны сақтау",
+      "saving": "Сақталуда...",
+      "gradeSaved": "Баға сақталды",
+      "returned": "Жұмыс студентке қайтарылды",
+      "saveFailed": "Бағаны сақтау сәтсіз аяқталды",
+      "invalidScore": "Баға 0 мен 100 арасында болуы керек",
+      "previous": "Алдыңғы",
+      "next": "Келесі",
+      "manualReviewRequired": "Бұл жұмыс қолмен тексеруді қажет етеді",
+      "needsReview": "Тексеруді қажет етеді",
+      "noBreakdown": "Жауаптардың толық шолуы жоқ"
+    }
+  }
 }

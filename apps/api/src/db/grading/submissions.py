@@ -92,6 +92,19 @@ class SubmissionCreate(SubmissionBase):
     """Input model for creating a new submission."""
 
 
+class SubmissionUser(SQLModelStrictBaseModel):
+    """Public user info embedded in teacher-view submissions."""
+
+    id: int
+    username: str
+    first_name: str | None = None
+    last_name: str | None = None
+    middle_name: str | None = None
+    email: str
+    avatar_image: str | None = None
+    user_uuid: str | None = None
+
+
 class SubmissionRead(SubmissionBase):
     """Output model for reading a submission."""
 
@@ -103,6 +116,9 @@ class SubmissionRead(SubmissionBase):
     graded_at: datetime | None = None
     created_at: datetime
     updated_at: datetime
+
+    # Populated by the teacher list endpoint; None for student-facing endpoints
+    user: SubmissionUser | None = None
 
 
 class SubmissionUpdate(SQLModelStrictBaseModel):

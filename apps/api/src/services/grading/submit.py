@@ -118,10 +118,35 @@ async def submit_assessment(
     ).first()
 
     if not draft:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="No active draft submission found. Call /grading/start first.",
+        if assessment_type != AssessmentType.ASSIGNMENT:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="No active draft submission found. Call /grading/start first.",
+            )
+        # Assignments have no timed start — auto-create the draft inline so
+        # students can submit without a separate /grading/start call.
+        previous = db_session.exec(
+            select(Submission).where(
+                Submission.activity_id == activity_id,
+                Submission.user_id == current_user.id,
+                Submission.status != SubmissionStatus.DRAFT,
+            )
+        ).all()
+        now_ts = datetime.now(UTC)
+        draft = Submission(
+            submission_uuid=f"submission_{ULID()}",
+            assessment_type=assessment_type,
+            activity_id=activity_id,
+            user_id=current_user.id,
+            status=SubmissionStatus.DRAFT,
+            attempt_number=len(previous) + 1,
+            answers_json={},
+            grading_json={},
+            created_at=now_ts,
+            updated_at=now_ts,
         )
+        db_session.add(draft)
+        db_session.flush()
 
     # Enforce attempt limits
     max_attempts: int | None = settings.get("max_attempts")

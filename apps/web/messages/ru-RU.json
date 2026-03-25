@@ -3219,7 +3219,8 @@
       "submission": "Отправленная работа",
       "submitted": "Отправлено",
       "tasks": "Задания",
-      "title": "Задания"
+      "title": "Задания",
+      "submissionsTitle": "Работы студентов"
     },
     "Card": {
       "AccountSettings": {
@@ -7040,5 +7041,42 @@
   "seconds": "Секунды",
   "selectDeadline": "Выберите дедлайн для выполнения задачи",
   "touUniversity": "Торайгыров Университет",
-  "webPreview": "Веб-предпросмотр"
+  "webPreview": "Веб-предпросмотр",
+  "Grading": {
+    "Table": {
+      "needGrading": "ожидают проверки",
+      "total": "Всего: {count}",
+      "student": "Студент",
+      "submitted": "Отправлено",
+      "status": "Статус",
+      "score": "Оценка",
+      "empty": "Нет сданных работ",
+      "prev": "Пред.",
+      "next": "След.",
+      "pageOf": "Страница {page} из {pages}",
+      "grade": "Проверить",
+      "view": "Просмотр"
+    },
+    "Panel": {
+      "loading": "Загрузка...",
+      "notYetSubmitted": "Ещё не сдано",
+      "noData": "Нет данных",
+      "finalScore": "Итоговая оценка",
+      "feedback": "Комментарий",
+      "optional": "необязательно",
+      "feedbackPlaceholder": "Добавьте комментарий или отзыв...",
+      "returnToStudent": "Вернуть студенту",
+      "saveGrade": "Сохранить оценку",
+      "saving": "Сохранение...",
+      "gradeSaved": "Оценка сохранена",
+      "returned": "Работа возвращена студенту",
+      "saveFailed": "Не удалось сохранить оценку",
+      "invalidScore": "Оценка должна быть от 0 до 100",
+      "previous": "Предыдущий",
+      "next": "Следующий",
+      "manualReviewRequired": "Эта работа требует ручной проверки",
+      "needsReview": "Требует проверки",
+      "noBreakdown": "Нет детализации ответов"
+    }
+  }
 }

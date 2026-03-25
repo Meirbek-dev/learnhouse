@@ -106,10 +106,14 @@ async def api_get_my_submissions(
     """Get the current user's submissions for an activity."""
     from src.db.grading.submissions import Submission
 
+    from sqlalchemy import desc
+
     submissions = db_session.exec(
-        select(Submission).where(
+        select(Submission)
+        .where(
             Submission.activity_id == activity_id,
             Submission.user_id == current_user.id,
         )
+        .order_by(desc(Submission.created_at))
     ).all()
     return [SubmissionRead.model_validate(s) for s in submissions]

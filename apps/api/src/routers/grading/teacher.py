@@ -12,8 +12,8 @@ from fastapi import APIRouter, Depends, Query, Request
 
 from src.core.events.database import get_db_session
 from src.db.grading.schemas import TeacherGradeInput
-from src.db.grading.submissions import Submission, SubmissionRead
-from src.db.users import PublicUser
+from src.db.grading.submissions import Submission, SubmissionRead, SubmissionUser
+from src.db.users import PublicUser, User
 from src.security.auth import get_current_user
 from src.security.rbac import PermissionCheckerDep
 from src.services.grading.teacher import get_submissions_for_activity, save_grade
@@ -71,7 +71,20 @@ async def api_get_submission(
             detail="Submission not found",
         )
 
-    return SubmissionRead.model_validate(submission)
+    result = SubmissionRead.model_validate(submission)
+    user = db_session.exec(select(User).where(User.id == submission.user_id)).first()
+    if user:
+        result.user = SubmissionUser(
+            id=user.id,
+            username=user.username,
+            first_name=user.first_name or None,
+            last_name=user.last_name or None,
+            middle_name=user.middle_name or None,
+            email=str(user.email),
+            avatar_image=user.avatar_image or None,
+            user_uuid=user.user_uuid or None,
+        )
+    return result
 
 
 @router.patch("/submissions/{submission_uuid}", response_model=SubmissionRead)

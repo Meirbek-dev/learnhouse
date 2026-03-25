@@ -3204,7 +3204,8 @@
       "submission": "Submission",
       "submitted": "Submitted",
       "tasks": "Tasks",
-      "title": "Assignments"
+      "title": "Assignments",
+      "submissionsTitle": "Student Submissions"
     },
     "Card": {
       "AccountSettings": {
@@ -7015,5 +7016,42 @@
   "seconds": "Seconds",
   "selectDeadline": "Select a deadline for completing the task",
   "touUniversity": "Toraighyrov University",
-  "webPreview": "Web Preview"
+  "webPreview": "Web Preview",
+  "Grading": {
+    "Table": {
+      "needGrading": "need grading",
+      "total": "Total: {count}",
+      "student": "Student",
+      "submitted": "Submitted",
+      "status": "Status",
+      "score": "Score",
+      "empty": "No submissions yet",
+      "prev": "Prev",
+      "next": "Next",
+      "pageOf": "Page {page} of {pages}",
+      "grade": "Grade",
+      "view": "View"
+    },
+    "Panel": {
+      "loading": "Loading...",
+      "notYetSubmitted": "Not yet submitted",
+      "noData": "No submission data",
+      "finalScore": "Final Score",
+      "feedback": "Feedback",
+      "optional": "optional",
+      "feedbackPlaceholder": "Add a comment or feedback...",
+      "returnToStudent": "Return to student",
+      "saveGrade": "Save grade",
+      "saving": "Saving...",
+      "gradeSaved": "Grade saved successfully",
+      "returned": "Returned to student",
+      "saveFailed": "Failed to save grade",
+      "invalidScore": "Score must be between 0 and 100",
+      "previous": "Previous",
+      "next": "Next",
+      "manualReviewRequired": "This submission requires manual review",
+      "needsReview": "Needs review",
+      "noBreakdown": "No answer breakdown available"
+    }
+  }
 }
