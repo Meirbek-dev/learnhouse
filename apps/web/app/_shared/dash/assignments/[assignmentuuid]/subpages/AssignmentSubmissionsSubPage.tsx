@@ -21,8 +21,8 @@
 import { useTranslations } from 'next-intl';
 
 import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
-import PageLoading from '@components/Objects/Loaders/PageLoading';
 import SubmissionsTable from '@/components/Grading/SubmissionsTable';
+import PageLoading from '@components/Objects/Loaders/PageLoading';
 
 interface AssignmentSubmissionsSubPageProps {
   assignment_uuid: string;

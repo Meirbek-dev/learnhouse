@@ -14,8 +14,8 @@
  * wrap their subtrees with it.
  */
 
-import { create } from 'zustand';
 import type { ReactNode } from 'react';
+import { create } from 'zustand';
 
 // ---------------------------------------------------------------------------
 // Store shape
@@ -57,6 +57,4 @@ export const useAssignmentsTaskStore = create<AssignmentsTaskStore>((set) => ({
 // Provider (pass-through — kept for JSX compatibility)
 // ---------------------------------------------------------------------------
 
-export const AssignmentsTaskProvider = ({ children }: { children: ReactNode }) => (
-  <>{children}</>
-);
+export const AssignmentsTaskProvider = ({ children }: { children: ReactNode }) => <>{children}</>;

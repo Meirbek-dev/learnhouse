@@ -5,21 +5,17 @@
  *
  * Unified "Submit for Grading" button for all assessment types.
  *
- * Replaces the complete absence of a submission action in
- * AssignmentStudentActivity — previously students could fill out tasks
- * but had no way to mark their work as ready for teacher review.
+ * For timed assessments (QUIZ, EXAM), calls startSubmission first to
+ * create a DRAFT with a server-stamped start time before submitting answers.
+ * This prevents clients from falsifying the start timestamp.
  *
- * Features:
- * - Calls POST /grading/submit/{activity_id} on click
- * - Shows confirmation dialog before submitting
- * - Displays loading / success states
- * - Disabled when already submitted / graded
+ * For ASSIGNMENT types, skips startSubmission (no timed start needed).
  */
 
 import { useState, useCallback } from 'react';
+import { SendHorizonal } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { SendHorizonal } from 'lucide-react';
 
 import {
   AlertDialog,
@@ -34,23 +30,32 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
-import { submitAssessment } from '@services/grading/grading';
 import type { AssessmentType, Submission, SubmissionStatus } from '@/types/grading';
+import { startSubmission, submitAssessment } from '@services/grading/grading';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 
 interface SubmitButtonProps {
   activityId: number;
   assessmentType: AssessmentType;
   /** Current submission status — used to disable the button when not needed */
   currentStatus?: SubmissionStatus | null;
-  /** Arbitrary answers payload; omit for manual-graded types (ASSIGNMENT) */
+  /** Answers payload; omit for manual-graded types (ASSIGNMENT) */
   answersPayload?: Record<string, unknown>;
   violationCount?: number;
   onSubmitted?: (submission: Submission) => void;
   className?: string;
 }
 
-const NON_SUBMITTABLE_STATUSES: SubmissionStatus[] = new Set(['SUBMITTED', 'GRADED', 'LATE']);
+/** Assessment types that require a server-stamped start before submission */
+const TIMED_ASSESSMENT_TYPES: Set<AssessmentType> = new Set(['QUIZ', 'EXAM']);
+
+const NON_SUBMITTABLE_STATUSES: Set<SubmissionStatus> = new Set([
+  'SUBMITTED',
+  'UNDER_REVIEW',
+  'GRADED',
+  'PUBLISHED',
+  'LATE',
+]);
 
 export default function SubmitButton({
   activityId,
@@ -67,9 +72,7 @@ export default function SubmitButton({
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const alreadySubmitted = currentStatus
-    ? NON_SUBMITTABLE_STATUSES.has(currentStatus)
-    : false;
+  const alreadySubmitted = currentStatus ? NON_SUBMITTABLE_STATUSES.has(currentStatus) : false;
 
   const handleConfirm = useCallback(async () => {
     if (!accessToken) {
@@ -79,6 +82,12 @@ export default function SubmitButton({
 
     setIsSubmitting(true);
     try {
+      // For timed assessments, ensure a DRAFT exists with a server-stamped start time.
+      // startSubmission is idempotent — it returns the existing DRAFT if one already exists.
+      if (TIMED_ASSESSMENT_TYPES.has(assessmentType)) {
+        await startSubmission(activityId, assessmentType, accessToken);
+      }
+
       const submission = await submitAssessment(
         activityId,
         assessmentType,
@@ -126,9 +135,7 @@ export default function SubmitButton({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
-          <AlertDialogAction onClick={handleConfirm}>
-            {t('confirmSubmit')}
-          </AlertDialogAction>
+          <AlertDialogAction onClick={handleConfirm}>{t('confirmSubmit')}</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

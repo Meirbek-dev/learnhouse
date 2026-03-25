@@ -77,13 +77,23 @@ async def get_submissions_for_activity(
     )
 
     if status_filter:
-        try:
-            query = query.where(Submission.status == SubmissionStatus(status_filter))
-        except ValueError:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Invalid status '{status_filter}'",
+        # "NEEDS_GRADING" is a virtual filter that maps to SUBMITTED + LATE + UNDER_REVIEW
+        if status_filter == "NEEDS_GRADING":
+            query = query.where(
+                Submission.status.in_([
+                    SubmissionStatus.SUBMITTED,
+                    SubmissionStatus.LATE,
+                    SubmissionStatus.UNDER_REVIEW,
+                ])
             )
+        else:
+            try:
+                query = query.where(Submission.status == SubmissionStatus(status_filter))
+            except ValueError:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Invalid status '{status_filter}'",
+                )
 
     if search:
         term = f"%{search}%"
@@ -149,7 +159,10 @@ async def get_submission_stats(
     current_user: PublicUser,
     db_session: Session,
 ) -> SubmissionStats:
-    """Return aggregate statistics for the teacher dashboard header."""
+    """Return aggregate statistics for the teacher dashboard header.
+
+    Uses SQL-level aggregation — no full-table Python scan.
+    """
     activity = db_session.exec(
         select(Activity).where(Activity.id == activity_id)
     ).first()
@@ -159,28 +172,160 @@ async def get_submission_stats(
     checker = PermissionChecker(db_session)
     checker.require(current_user.id, "assignment:read", resource_owner_id=activity.creator_id)
 
-    rows = db_session.exec(
-        select(Submission).where(Submission.activity_id == activity_id)
+    # Total count (excludes DRAFTs)
+    total: int = db_session.exec(
+        select(func.count()).where(
+            Submission.activity_id == activity_id,
+            Submission.status != SubmissionStatus.DRAFT,
+        )
+    ).one()
+
+    # Graded count (GRADED + PUBLISHED)
+    graded_count: int = db_session.exec(
+        select(func.count()).where(
+            Submission.activity_id == activity_id,
+            Submission.status.in_([SubmissionStatus.GRADED, SubmissionStatus.PUBLISHED]),
+        )
+    ).one()
+
+    # Needs grading (SUBMITTED + LATE + UNDER_REVIEW)
+    needs_grading_count: int = db_session.exec(
+        select(func.count()).where(
+            Submission.activity_id == activity_id,
+            Submission.status.in_([
+                SubmissionStatus.SUBMITTED,
+                SubmissionStatus.LATE,
+                SubmissionStatus.UNDER_REVIEW,
+            ]),
+        )
+    ).one()
+
+    # Late count
+    late_count: int = db_session.exec(
+        select(func.count()).where(
+            Submission.activity_id == activity_id,
+            Submission.status == SubmissionStatus.LATE,
+        )
+    ).one()
+
+    # Avg score and pass rate from GRADED/PUBLISHED submissions only
+    graded_scores: list[float] = db_session.exec(
+        select(Submission.final_score).where(
+            Submission.activity_id == activity_id,
+            Submission.status.in_([SubmissionStatus.GRADED, SubmissionStatus.PUBLISHED]),
+            Submission.final_score.is_not(None),
+        )
     ).all()
 
-    total = len(rows)
-    graded = [r for r in rows if r.status == SubmissionStatus.GRADED]
-    needs_grading = [r for r in rows if r.status in (SubmissionStatus.SUBMITTED, SubmissionStatus.LATE)]
-    late = [r for r in rows if r.status == SubmissionStatus.LATE]
-
-    scores = [r.final_score for r in graded if r.final_score is not None]
-    avg_score = round(sum(scores) / len(scores), 2) if scores else None
-    passing = [s for s in scores if s >= 50.0]
-    pass_rate = round(len(passing) / len(scores) * 100, 1) if scores else None
+    avg_score = round(sum(graded_scores) / len(graded_scores), 2) if graded_scores else None
+    passing = [s for s in graded_scores if s >= 50.0]
+    pass_rate = round(len(passing) / len(graded_scores) * 100, 1) if graded_scores else None
 
     return SubmissionStats(
         total=total,
-        graded_count=len(graded),
-        needs_grading_count=len(needs_grading),
-        late_count=len(late),
+        graded_count=graded_count,
+        needs_grading_count=needs_grading_count,
+        late_count=late_count,
         avg_score=avg_score,
         pass_rate=pass_rate,
     )
+
+
+async def mark_under_review(
+    submission_uuid: str,
+    current_user: PublicUser,
+    db_session: Session,
+) -> SubmissionRead:
+    """Transition a SUBMITTED or LATE submission to UNDER_REVIEW when teacher opens it.
+
+    Idempotent — does nothing if already in UNDER_REVIEW or further along.
+    """
+    submission = db_session.exec(
+        select(Submission).where(Submission.submission_uuid == submission_uuid)
+    ).first()
+    if not submission:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Submission not found")
+
+    if submission.status in (SubmissionStatus.SUBMITTED, SubmissionStatus.LATE):
+        submission.status = SubmissionStatus.UNDER_REVIEW
+        submission.updated_at = datetime.now(UTC)
+        db_session.add(submission)
+        db_session.commit()
+        db_session.refresh(submission)
+
+    result = SubmissionRead.model_validate(submission)
+    user = db_session.exec(select(User).where(User.id == submission.user_id)).first()
+    if user:
+        result.user = SubmissionUser(
+            id=user.id,
+            username=user.username,
+            first_name=user.first_name or None,
+            last_name=user.last_name or None,
+            middle_name=user.middle_name or None,
+            email=str(user.email),
+            avatar_image=user.avatar_image or None,
+            user_uuid=user.user_uuid or None,
+        )
+    return result
+
+
+async def export_grades_csv(
+    activity_id: int,
+    current_user: PublicUser,
+    db_session: Session,
+) -> str:
+    """Generate and return a CSV string of all non-draft submissions for an activity.
+
+    Streams all rows from the DB via batched SQL (no 1000-row client-side cap).
+    """
+    activity = db_session.exec(
+        select(Activity).where(Activity.id == activity_id)
+    ).first()
+    if not activity:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Activity not found")
+
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "assignment:read", resource_owner_id=activity.creator_id)
+
+    # Fetch all non-draft submissions with user data via join
+    rows = db_session.exec(
+        select(Submission)
+        .join(User, User.id == Submission.user_id)
+        .where(
+            Submission.activity_id == activity_id,
+            Submission.status != SubmissionStatus.DRAFT,
+        )
+        .order_by(asc(Submission.submitted_at))
+    ).all()
+
+    # Build user lookup
+    user_ids = {s.user_id for s in rows}
+    users_by_id: dict[int, User] = {}
+    if user_ids:
+        user_rows = db_session.exec(select(User).where(User.id.in_(user_ids))).all()
+        users_by_id = {u.id: u for u in user_rows}
+
+    lines: list[str] = [
+        "Student Name,Email,Attempt,Status,Submitted At,Auto Score,Final Score"
+    ]
+    for s in rows:
+        u = users_by_id.get(s.user_id)
+        if u:
+            parts = [p for p in [u.first_name, u.middle_name, u.last_name] if p]
+            name = " ".join(parts) if parts else u.username
+            email = str(u.email)
+        else:
+            name = f"User #{s.user_id}"
+            email = ""
+
+        submitted = s.submitted_at.isoformat() if s.submitted_at else ""
+        lines.append(
+            f'"{name}","{email}",{s.attempt_number},{s.status},{submitted},'
+            f'{s.auto_score if s.auto_score is not None else ""},'
+            f'{s.final_score if s.final_score is not None else ""}'
+        )
+
+    return "\n".join(lines)
 
 
 async def save_grade(

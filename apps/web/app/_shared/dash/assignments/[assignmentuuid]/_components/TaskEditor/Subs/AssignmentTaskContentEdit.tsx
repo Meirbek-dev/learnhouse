@@ -9,10 +9,7 @@ const AssignmentTaskContentEdit = () => {
   return (
     <div>
       {assignmentTask.assignment_type === 'QUIZ' && (
-        <TaskQuizObject
-          view="teacher"
-          assignmentTaskUUID={assignmentTask.assignment_task_uuid}
-        />
+        <TaskQuizObject assignmentTaskUUID={assignmentTask.assignment_task_uuid} />
       )}
       {assignmentTask.assignment_type === 'FILE_SUBMISSION' && (
         <TaskFileObject
@@ -21,10 +18,7 @@ const AssignmentTaskContentEdit = () => {
         />
       )}
       {assignmentTask.assignment_type === 'FORM' && (
-        <TaskFormObject
-          view="teacher"
-          assignmentTaskUUID={assignmentTask.assignment_task_uuid}
-        />
+        <TaskFormObject assignmentTaskUUID={assignmentTask.assignment_task_uuid} />
       )}
     </div>
   );

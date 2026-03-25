@@ -1,10 +1,10 @@
 'use client';
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { useCourseEditorStore } from '@/stores/courses';
 import { useCourse } from '@components/Contexts/CourseContext';
-import { Button } from '@/components/ui/button';
 import { AlertTriangle, RefreshCcw } from 'lucide-react';
+import { useCourseEditorStore } from '@/stores/courses';
+import { Button } from '@/components/ui/button';
 import { useTranslations } from 'next-intl';
 
 export default function ConflictAlert() {
@@ -26,9 +26,7 @@ export default function ConflictAlert() {
       <AlertTriangle className="size-4 text-destructive" />
       <AlertTitle className="text-destructive">{t('title')}</AlertTitle>
       <AlertDescription className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <span className="text-sm text-muted-foreground">
-          {conflict.message || t('description')}
-        </span>
+        <span className="text-sm text-muted-foreground">{conflict.message || t('description')}</span>
         <div className="flex shrink-0 gap-2">
           <Button
             size="sm"

@@ -4,18 +4,9 @@
 
 // ── Enums ────────────────────────────────────────────────────────────────────
 
-export type SubmissionStatus =
-  | 'DRAFT'
-  | 'SUBMITTED'
-  | 'GRADED'
-  | 'LATE'
-  | 'RETURNED';
+export type SubmissionStatus = 'DRAFT' | 'SUBMITTED' | 'UNDER_REVIEW' | 'GRADED' | 'PUBLISHED' | 'LATE' | 'RETURNED';
 
-export type AssessmentType =
-  | 'QUIZ'
-  | 'ASSIGNMENT'
-  | 'EXAM'
-  | 'CODE_CHALLENGE';
+export type AssessmentType = 'QUIZ' | 'ASSIGNMENT' | 'EXAM' | 'CODE_CHALLENGE';
 
 // ── Grading breakdown ────────────────────────────────────────────────────────
 
@@ -24,7 +15,7 @@ export interface GradedItem {
   item_text: string;
   score: number;
   max_score: number;
-  correct: boolean | null;   // null for non-auto-gradeable items
+  correct: boolean | null; // null for non-auto-gradeable items
   feedback: string;
   needs_manual_review: boolean;
   user_answer: unknown;
@@ -64,6 +55,32 @@ export interface AssignmentAnswers {
   tasks: AssignmentTaskAnswer[];
 }
 
+export interface ExamQuestionAnswer {
+  question_id: number;
+  selected_option_ids: string[];
+  text_answer?: string | null;
+}
+
+export interface ExamAnswers {
+  submitted_answers: Record<number, ExamQuestionAnswer>;
+  started_at: string;
+  submitted_at: string;
+}
+
+export interface TestCaseResult {
+  test_id: string;
+  passed: boolean;
+  weight?: number;
+  description?: string;
+  message?: string;
+}
+
+export interface CodeChallengeAnswers {
+  test_results: TestCaseResult[];
+  code_strategy?: string;
+  source_code?: string;
+}
+
 export interface Submission {
   id: number;
   submission_uuid: string;
@@ -77,7 +94,7 @@ export interface Submission {
   status: SubmissionStatus;
   attempt_number: number;
 
-  answers_json: QuizAnswers | AssignmentAnswers | Record<string, unknown>;
+  answers_json: QuizAnswers | AssignmentAnswers | ExamAnswers | CodeChallengeAnswers | Record<string, unknown>;
   grading_json: GradingBreakdown | null;
 
   started_at: string | null;
@@ -134,7 +151,8 @@ export interface ItemFeedback {
 export interface TeacherGradeInput {
   final_score: number;
   item_feedback?: ItemFeedback[];
-  status: 'GRADED' | 'RETURNED';
+  /** GRADED = save (teacher-visible only), PUBLISHED = publish to student, RETURNED = request revision */
+  status: 'GRADED' | 'PUBLISHED' | 'RETURNED';
   feedback?: string;
 }
 
@@ -143,7 +161,9 @@ export interface TeacherGradeInput {
 export const STATUS_LABELS: Record<SubmissionStatus, string> = {
   DRAFT: 'Draft',
   SUBMITTED: 'Submitted',
+  UNDER_REVIEW: 'Under Review',
   GRADED: 'Graded',
+  PUBLISHED: 'Published',
   LATE: 'Late',
   RETURNED: 'Returned',
 };
@@ -151,7 +171,19 @@ export const STATUS_LABELS: Record<SubmissionStatus, string> = {
 export const STATUS_COLORS: Record<SubmissionStatus, string> = {
   DRAFT: 'bg-slate-100 text-slate-700',
   SUBMITTED: 'bg-amber-100 text-amber-800',
+  UNDER_REVIEW: 'bg-blue-100 text-blue-800',
   GRADED: 'bg-emerald-100 text-emerald-800',
+  PUBLISHED: 'bg-teal-100 text-teal-800',
   LATE: 'bg-rose-100 text-rose-800',
   RETURNED: 'bg-violet-100 text-violet-800',
 };
+
+/** True when the submission needs teacher action */
+export function needsTeacherAction(status: SubmissionStatus): boolean {
+  return status === 'SUBMITTED' || status === 'LATE' || status === 'UNDER_REVIEW';
+}
+
+/** True when the grade is visible to the student */
+export function isPublishedToStudent(status: SubmissionStatus): boolean {
+  return status === 'PUBLISHED' || status === 'RETURNED';
+}

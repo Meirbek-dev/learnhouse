@@ -201,12 +201,30 @@ async def submit_assessment(
         if violation_count > max_violations:
             violations_exceeded = True
 
-    # Grade the submission
+    # Grade the submission — dispatch correct payload per assessment type
     user_answers: list[dict] = answers_payload.get("answers", [])
+
+    # Exam: submitted_answers is a dict[question_id -> answer_dict]
+    exam_answers: dict[int, dict] | None = None
+    if assessment_type == AssessmentType.EXAM:
+        raw_exam = answers_payload.get("submitted_answers", {})
+        if isinstance(raw_exam, dict):
+            exam_answers = {int(k): v for k, v in raw_exam.items() if str(k).isdigit()}
+
+    # Code challenge: test_results from the code runner
+    test_results: list[dict] | None = None
+    code_strategy: str = "BEST_SUBMISSION"
+    if assessment_type == AssessmentType.CODE_CHALLENGE:
+        test_results = answers_payload.get("test_results", [])
+        code_strategy = answers_payload.get("code_strategy", "BEST_SUBMISSION")
+
     result = grade_submission(
         assessment_type=assessment_type,
         questions=questions or [],
         user_answers=user_answers,
+        exam_answers=exam_answers,
+        test_results=test_results,
+        code_strategy=code_strategy,
         attempt_number=draft.attempt_number,
         max_score_penalty_per_attempt=settings.get("max_score_penalty_per_attempt"),
     )

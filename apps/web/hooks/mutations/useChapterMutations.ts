@@ -57,11 +57,7 @@ export function useChapterMutations(courseUuid: string, withUnpublishedActivitie
     }
   };
 
-  const updateChapterMutation = async (
-    chapterUuid: string,
-    payload: ChapterUpdateValues,
-    accessToken: string,
-  ) => {
+  const updateChapterMutation = async (chapterUuid: string, payload: ChapterUpdateValues, accessToken: string) => {
     const previous = captureSnapshot(structureKey);
 
     await mutate(

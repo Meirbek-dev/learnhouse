@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Body, Depends, HTTPException, Query, Request, UploadFile
+from fastapi import APIRouter, Body, Depends, Request, UploadFile
 
 from src.core.events.database import get_db_session
 from src.db.courses.assignments import (
@@ -8,7 +8,6 @@ from src.db.courses.assignments import (
     AssignmentCreateWithActivity,
     AssignmentRead,
     AssignmentTaskCreate,
-    AssignmentTaskSubmissionUpdate,
     AssignmentTaskUpdate,
     AssignmentUpdate,
 )
@@ -21,20 +20,14 @@ from src.services.courses.activities.assignments import (
     delete_assignment,
     delete_assignment_from_activity_uuid,
     delete_assignment_task,
-    delete_assignment_task_submission,
     get_assignments_from_course,
     get_assignments_from_courses,
     get_editable_assignments_from_courses,
-    handle_assignment_task_submission,
     put_assignment_task_reference_file,
-    put_assignment_task_submission_file,
     read_assignment,
     read_assignment_from_activity_uuid,
     read_assignment_task,
-    read_assignment_task_submissions,
     read_assignment_tasks,
-    read_user_assignment_task_submissions,
-    read_user_assignment_task_submissions_me,
     update_assignment,
     update_assignment_task,
 )
@@ -202,27 +195,9 @@ async def api_put_assignment_task_ref_file(
     current_user: Annotated[PublicUser, Depends(get_current_user)] = None,
     db_session=Depends(get_db_session),
 ):
-    """
-    Update tasks for an assignment
-    """
+    """Upload a reference file for an assignment task."""
     return await put_assignment_task_reference_file(
         request, db_session, assignment_task_uuid, current_user, reference_file
-    )
-
-
-@router.post("/{assignment_uuid}/tasks/{assignment_task_uuid}/sub_file")
-async def api_put_assignment_task_sub_file(
-    request: Request,
-    assignment_task_uuid: str,
-    sub_file: UploadFile | None = None,
-    current_user: Annotated[PublicUser, Depends(get_current_user)] = None,
-    db_session=Depends(get_db_session),
-):
-    """
-    Update tasks for an assignment
-    """
-    return await put_assignment_task_submission_file(
-        request, db_session, assignment_task_uuid, current_user, sub_file
     )
 
 
@@ -238,114 +213,6 @@ async def api_delete_assignment_tasks(
     """
     return await delete_assignment_task(
         request, assignment_task_uuid, current_user, db_session
-    )
-
-
-## ASSIGNMENTS Tasks Submissions ##
-
-
-@router.put("/{assignment_uuid}/tasks/{assignment_task_uuid}/submissions")
-async def api_handle_assignment_task_submissions(
-    request: Request,
-    assignment_task_submission_object: AssignmentTaskSubmissionUpdate,
-    assignment_task_uuid: str,
-    current_user: Annotated[PublicUser, Depends(get_current_user)],
-    db_session=Depends(get_db_session),
-):
-    """
-    Create new task submissions for an assignment
-    """
-    return await handle_assignment_task_submission(
-        request,
-        assignment_task_uuid,
-        assignment_task_submission_object,
-        current_user,
-        db_session,
-    )
-
-
-@router.get(
-    "/{assignment_uuid}/tasks/{assignment_task_uuid}/submissions/user/{user_id}"
-)
-async def api_read_user_assignment_task_submissions(
-    request: Request,
-    assignment_task_uuid: str,
-    user_id: int,
-    current_user: Annotated[PublicUser, Depends(get_current_user)],
-    db_session=Depends(get_db_session),
-):
-    """
-    Read task submissions for an assignment from a user
-    """
-    result = await read_user_assignment_task_submissions(
-        request, assignment_task_uuid, user_id, current_user, db_session
-    )
-
-    if result is None:
-        return {
-            "assignment_task_submission_uuid": None,
-            "task_submission": None,
-        }
-
-    return result
-
-
-@router.get("/{assignment_uuid}/tasks/{assignment_task_uuid}/submissions/me")
-async def api_read_user_assignment_task_submissions_me(
-    request: Request,
-    assignment_task_uuid: str,
-    current_user: Annotated[PublicUser, Depends(get_current_user)],
-    db_session=Depends(get_db_session),
-):
-    """
-    Read task submissions for an assignment from the current user.
-
-    Returns an empty payload instead of a 404 when no submission exists yet.
-    This avoids treating the "not submitted" state as an error both in the API
-    and in upstream logging.
-    """
-    result = await read_user_assignment_task_submissions_me(
-        request, assignment_task_uuid, current_user, db_session
-    )
-
-    if result is None:
-        return {
-            "assignment_task_submission_uuid": None,
-            "task_submission": None,
-        }
-
-    return result
-
-
-@router.get("/{assignment_uuid}/tasks/{assignment_task_uuid}/submissions")
-async def api_read_assignment_task_submissions(
-    request: Request,
-    assignment_task_uuid: str,
-    current_user: Annotated[PublicUser, Depends(get_current_user)],
-    db_session=Depends(get_db_session),
-):
-    """
-    Read task submissions for an assignment from a user
-    """
-    return await read_assignment_task_submissions(
-        request, assignment_task_uuid, current_user, db_session
-    )
-
-
-@router.delete(
-    "/{assignment_uuid}/tasks/{assignment_task_uuid}/submissions/{assignment_task_submission_uuid}"
-)
-async def api_delete_assignment_task_submissions(
-    request: Request,
-    assignment_task_submission_uuid: str,
-    current_user: Annotated[PublicUser, Depends(get_current_user)],
-    db_session=Depends(get_db_session),
-):
-    """
-    Delete task submissions for an assignment from a user
-    """
-    return await delete_assignment_task_submission(
-        request, assignment_task_submission_uuid, current_user, db_session
     )
 
 

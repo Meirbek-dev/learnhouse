@@ -183,7 +183,6 @@ const ChapterElement = ({ chapter, chapterIndex, course_uuid }: ChapterElementPr
               {isEditing ? (
                 <div className="flex items-center gap-1.5">
                   <Input
-                    
                     type="text"
                     value={editedName}
                     onChange={(e) => setEditedName(e.target.value)}

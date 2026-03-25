@@ -6,14 +6,14 @@ import {
   courseWorkflowMutedPanelClass,
   courseWorkflowSummaryCardClass,
 } from './courseWorkflowUi';
+import { buildCourseWorkspacePath, getCourseContentStats } from '@/lib/course-management';
 import type { CourseWorkspaceCapabilities } from '@/lib/course-management-server';
 import { useCoursesMutations } from '@/hooks/mutations/useCoursesMutations';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
-import { buildCourseWorkspacePath, getCourseContentStats } from '@/lib/course-management';
+import { ExternalLink, FileStack, Loader2, Users } from 'lucide-react';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { getAbsoluteUrl } from '@services/config/config';
 import { useCourseEditorStore } from '@/stores/courses';
-import { ExternalLink, FileStack, Loader2, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState, useTransition } from 'react';
 import AppLink from '@/components/ui/AppLink';

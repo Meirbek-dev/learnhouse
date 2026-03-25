@@ -1,21 +1,21 @@
 'use client';
 
 import { buildCourseWorkspacePath, cleanCourseUuid, prefixedCourseUuid } from '@/lib/course-management';
-import { CheckCircle2, ChevronDown, Loader2, Search, Sparkles } from 'lucide-react';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { CourseChoiceCard, courseWorkflowSummaryCardClass } from './courseWorkflowUi';
 import { createNewCourse, getCourseMetadata, searchEditableCourses } from '@services/courses/courses';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react';
+import { CourseChoiceCard, courseWorkflowSummaryCardClass } from './courseWorkflowUi';
+import { CheckCircle2, ChevronDown, Loader2, Search, Sparkles } from 'lucide-react';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import type { CourseWizardValues } from '@/schemas/courseSchemas';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { courseWizardSchema } from '@/schemas/courseSchemas';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { createChapter } from '@services/courses/chapters';
 import { RadioGroup } from '@/components/ui/radio-group';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from 'react';
 import { Input } from '@/components/ui/input';
-import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import { cn } from '@/lib/utils';
@@ -82,7 +82,7 @@ export default function CourseCreationWizard() {
   // Trigger initial load when outline panel opens
   useEffect(() => {
     if (template === 'outline' && sourceOptions.length === 0 && accessToken) {
-       handleSourceSearch('');
+      handleSourceSearch('');
     }
   }, [template, sourceOptions.length, accessToken, handleSourceSearch]);
 
@@ -321,7 +321,11 @@ export default function CourseCreationWizard() {
                     className="grid gap-3"
                   >
                     {[
-                      { value: 'blank', title: t('template.blank.title'), description: t('template.blank.description') },
+                      {
+                        value: 'blank',
+                        title: t('template.blank.title'),
+                        description: t('template.blank.description'),
+                      },
                       {
                         value: 'starter',
                         title: t('template.starter.title'),
@@ -340,7 +344,13 @@ export default function CourseCreationWizard() {
                         checked={template === option.value}
                         title={option.title}
                         description={option.description}
-                        icon={option.value === 'outline' ? ChevronDown : option.value === 'starter' ? Sparkles : CheckCircle2}
+                        icon={
+                          option.value === 'outline'
+                            ? ChevronDown
+                            : option.value === 'starter'
+                              ? Sparkles
+                              : CheckCircle2
+                        }
                         onSelect={(value) => form.setValue('template', value as CourseWizardValues['template'])}
                       />
                     ))}
@@ -394,9 +404,7 @@ export default function CourseCreationWizard() {
                       )}
 
                       {sourceCourseUuid && (
-                        <p className="text-xs text-muted-foreground">
-                          {t('template.sourceCourseHelp')}
-                        </p>
+                        <p className="text-xs text-muted-foreground">{t('template.sourceCourseHelp')}</p>
                       )}
                     </div>
                   ) : null}

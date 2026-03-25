@@ -213,7 +213,11 @@ function ActivityCard({ activity, label, description, onClick, isLoading = false
       className="group flex w-full items-start gap-3.5 rounded-lg border border-gray-200 bg-white px-4 py-4 text-left transition-all duration-150 hover:border-gray-300 hover:bg-gray-50 focus:ring-2 focus:ring-gray-200 focus:outline-none"
     >
       <div className={`mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg ${activity.iconBg}`}>
-        {isLoading ? <span className="h-[17px] w-[17px] animate-spin rounded-full border-2 border-current border-t-transparent" /> : <Icon className={`h-[17px] w-[17px] ${activity.iconColor}`} />}
+        {isLoading ? (
+          <span className="h-[17px] w-[17px] animate-spin rounded-full border-2 border-current border-t-transparent" />
+        ) : (
+          <Icon className={`h-[17px] w-[17px] ${activity.iconColor}`} />
+        )}
       </div>
 
       <div className="flex flex-col gap-1">

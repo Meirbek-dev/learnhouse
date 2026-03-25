@@ -1,5 +1,5 @@
-import Link from '@components/ui/AppLink';
 import { useTranslations } from 'next-intl';
+import Link from '@components/ui/AppLink';
 
 export default function UnauthorizedPage() {
   const t = useTranslations('UnauthorizedPage');

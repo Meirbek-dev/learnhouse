@@ -85,7 +85,20 @@ async def api_submit_assessment(
                 "track_violations": quiz_settings.track_violations,
                 "block_on_violations": quiz_settings.block_on_violations,
                 "max_violations": quiz_settings.max_violations,
-                # due_date_iso can be added to block.content.settings in the future
+                "due_date_iso": block.content.get("settings", {}).get("due_date_iso"),
+            }
+
+    elif assessment_type == AssessmentType.EXAM:
+        # Fetch exam questions from the block content for exam activities
+        block = db_session.exec(
+            select(Block)
+            .where(Block.activity_id == activity_id)
+            .order_by(desc(Block.id))
+        ).first()
+        if block:
+            questions = block.content.get("questions", [])
+            settings = {
+                "max_attempts": block.content.get("settings", {}).get("max_attempts"),
                 "due_date_iso": block.content.get("settings", {}).get("due_date_iso"),
             }
 

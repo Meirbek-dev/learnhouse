@@ -4,9 +4,9 @@ import { Dialog as DialogPrimitive } from '@base-ui/react/dialog';
 import * as React from 'react';
 
 import { Button } from '@/components/ui/button';
+import { useTranslations } from 'next-intl';
 import { XIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useTranslations } from 'next-intl';
 
 function Dialog({ ...props }: DialogPrimitive.Root.Props) {
   return (

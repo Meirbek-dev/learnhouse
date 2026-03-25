@@ -3,25 +3,28 @@
 /**
  * SubmissionShell
  *
- * Wraps any student-facing assessment UI and adds:
- *   1. A status banner (DRAFT / SUBMITTED / GRADED / RETURNED / LATE)
- *   2. A "Submit for Grading" footer
- *   3. Full grading result (score + breakdown) after grading
+ * One student-facing lifecycle wrapper for every assessment type.
+ *
+ * Handles:
+ *   1. Status banner (SUBMITTED / UNDER_REVIEW / GRADED / PUBLISHED / RETURNED / LATE)
+ *   2. Full grading result (score + breakdown) after PUBLISHED or RETURNED
+ *   3. Submit footer for DRAFT / null states
+ *   4. Re-submit footer for RETURNED state
  */
 
-import type { ReactNode } from 'react';
+import { BookOpenCheck, CheckCircle2, Clock4, Eye, RotateCcw, Send, SendHorizonal } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { BookOpenCheck, CheckCircle2, Clock4, RotateCcw, SendHorizonal } from 'lucide-react';
+import type { ReactNode } from 'react';
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Separator } from '@/components/ui/separator';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
+import { Separator } from '@/components/ui/separator';
 
-import { useMySubmission } from '@/hooks/useMySubmission';
-import SubmitButton from './SubmitButton';
-import SubmissionResult from './SubmissionResult';
+import type { AssessmentType, Submission, SubmissionStatus } from '@/types/grading';
 import SubmissionStatusBadge from '../SubmissionStatusBadge';
-import type { AssessmentType, Submission } from '@/types/grading';
+import { useMySubmission } from '@/hooks/useMySubmission';
+import SubmissionResult from './SubmissionResult';
+import SubmitButton from './SubmitButton';
 
 interface SubmissionShellProps {
   activityId: number;
@@ -31,31 +34,55 @@ interface SubmissionShellProps {
   violationCount?: number;
 }
 
-const STATUS_BANNERS = {
+type BannerVariant = 'default' | 'destructive';
+
+interface BannerConfig {
+  icon: React.ElementType;
+  variant: BannerVariant;
+  titleKey: string;
+  descKey: string;
+  iconClass: string;
+}
+
+const STATUS_BANNERS: Partial<Record<SubmissionStatus, BannerConfig>> = {
   SUBMITTED: {
     icon: SendHorizonal,
-    variant: 'default' as const,
+    variant: 'default',
     titleKey: 'bannerSubmittedTitle',
     descKey: 'bannerSubmittedDesc',
     iconClass: 'text-blue-600',
   },
+  UNDER_REVIEW: {
+    icon: Eye,
+    variant: 'default',
+    titleKey: 'bannerUnderReviewTitle',
+    descKey: 'bannerUnderReviewDesc',
+    iconClass: 'text-blue-600',
+  },
   GRADED: {
-    icon: CheckCircle2,
-    variant: 'default' as const,
+    icon: BookOpenCheck,
+    variant: 'default',
     titleKey: 'bannerGradedTitle',
     descKey: 'bannerGradedDesc',
+    iconClass: 'text-slate-600',
+  },
+  PUBLISHED: {
+    icon: CheckCircle2,
+    variant: 'default',
+    titleKey: 'bannerPublishedTitle',
+    descKey: 'bannerPublishedDesc',
     iconClass: 'text-emerald-600',
   },
   LATE: {
     icon: Clock4,
-    variant: 'destructive' as const,
+    variant: 'destructive',
     titleKey: 'bannerLateTitle',
     descKey: 'bannerLateDesc',
     iconClass: '',
   },
   RETURNED: {
     icon: RotateCcw,
-    variant: 'default' as const,
+    variant: 'default',
     titleKey: 'bannerReturnedTitle',
     descKey: 'bannerReturnedDesc',
     iconClass: 'text-amber-600',
@@ -81,7 +108,14 @@ export default function SubmissionShell({
     void mutate();
   };
 
-  const showResult = (status === 'GRADED' || status === 'RETURNED') && submission;
+  // Show result breakdown when grade is visible to the student
+  const showResult = (status === 'PUBLISHED' || status === 'RETURNED') && submission;
+
+  // Student can submit when there's no prior submission or it's a DRAFT
+  const canSubmit = status === 'DRAFT' || status === null;
+
+  // Student can re-submit when RETURNED
+  const canResubmit = status === 'RETURNED';
 
   return (
     <div className="flex flex-col gap-6">
@@ -95,9 +129,10 @@ export default function SubmissionShell({
           </AlertTitle>
           <AlertDescription>{t(bannerConfig.descKey)}</AlertDescription>
 
-          {status === 'GRADED' && submission?.final_score !== null && (
+          {/* Show score only when published */}
+          {status === 'PUBLISHED' && submission?.final_score !== null && (
             <div className="mt-3 flex items-center gap-2">
-              <BookOpenCheck className="h-4 w-4 text-emerald-600" />
+              <CheckCircle2 className="h-4 w-4 text-emerald-600" />
               <span className="text-sm font-semibold">
                 {t('score')}: {submission.final_score}/100
               </span>
@@ -109,7 +144,7 @@ export default function SubmissionShell({
       {/* Assessment content */}
       {children}
 
-      {/* Full grading result breakdown after grading */}
+      {/* Full grading result breakdown — only when published to student */}
       {showResult && (
         <>
           <Separator />
@@ -117,8 +152,8 @@ export default function SubmissionShell({
         </>
       )}
 
-      {/* Submit footer — only for DRAFT or no submission */}
-      {(status === 'DRAFT' || status === null) && (
+      {/* Submit footer */}
+      {canSubmit && (
         <>
           <Separator />
           <div className="flex items-center justify-between rounded-md border bg-slate-50 px-5 py-3">
@@ -135,8 +170,8 @@ export default function SubmissionShell({
         </>
       )}
 
-      {/* Re-submit footer for RETURNED assignments */}
-      {status === 'RETURNED' && (
+      {/* Re-submit footer for RETURNED */}
+      {canResubmit && (
         <>
           <Separator />
           <div className="flex items-center justify-between rounded-md border border-amber-200 bg-amber-50 px-5 py-3">

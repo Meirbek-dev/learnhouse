@@ -8,11 +8,11 @@
  * AssignmentSubmissionContext, AssignmentsTaskContext, etc.
  */
 
-import useSWR from 'swr';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
-import { getAPIUrl } from '@services/config/config';
 import { swrFetcher } from '@services/utils/ts/requests';
+import { getAPIUrl } from '@services/config/config';
 import type { Submission } from '@/types/grading';
+import useSWR from 'swr';
 
 export interface UseMySubmissionResult {
   submission: Submission | null;
@@ -26,9 +26,7 @@ export function useMySubmission(activityId: number | null): UseMySubmissionResul
   const accessToken = session?.data?.tokens?.access_token;
 
   const { data, error, isLoading, mutate } = useSWR<Submission[]>(
-    activityId && accessToken
-      ? `${getAPIUrl()}grading/submissions/me?activity_id=${activityId}`
-      : null,
+    activityId && accessToken ? `${getAPIUrl()}grading/submissions/me?activity_id=${activityId}` : null,
     (url: string) => swrFetcher(url, accessToken),
   );
 

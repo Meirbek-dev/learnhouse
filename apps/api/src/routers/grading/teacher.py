@@ -3,6 +3,7 @@ Teacher-facing grading routes.
 
 GET   /grading/submissions           — paginated + filterable + searchable list
 GET   /grading/submissions/stats     — aggregate stats for dashboard header
+GET   /grading/submissions/export    — streaming CSV export (no 1000-row cap)
 GET   /grading/submissions/{uuid}    — single submission detail (with answers + grading)
 PATCH /grading/submissions/{uuid}    — save teacher grade + feedback
 """
@@ -11,6 +12,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Query, Request
 from fastapi import HTTPException, status as http_status
+from fastapi.responses import StreamingResponse
 from sqlalchemy import desc
 
 from src.core.events.database import get_db_session
@@ -26,8 +28,10 @@ from src.db.users import PublicUser, User
 from src.security.auth import get_current_user
 from src.security.rbac import PermissionChecker, PermissionCheckerDep
 from src.services.grading.teacher import (
+    export_grades_csv,
     get_submission_stats,
     get_submissions_for_activity,
+    mark_under_review,
     save_grade,
 )
 from sqlmodel import Session, select
@@ -85,50 +89,50 @@ async def api_get_submission_stats(
     )
 
 
+@router.get("/submissions/export")
+async def api_export_submissions_csv(
+    activity_id: int,
+    db_session: Annotated[Session, Depends(get_db_session)],
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
+) -> StreamingResponse:
+    """
+    Export all non-draft submissions for an activity as CSV.
+
+    Streams the full dataset — no 1000-row cap.
+    Content-Disposition header triggers a browser download.
+    """
+    csv_content = await export_grades_csv(
+        activity_id=activity_id,
+        current_user=current_user,
+        db_session=db_session,
+    )
+
+    def _iter():
+        yield csv_content
+
+    return StreamingResponse(
+        _iter(),
+        media_type="text/csv",
+        headers={"Content-Disposition": f"attachment; filename=grades-activity-{activity_id}.csv"},
+    )
+
+
 @router.get("/submissions/{submission_uuid}", response_model=SubmissionRead)
 async def api_get_submission(
     submission_uuid: str,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
 ) -> SubmissionRead:
-    """Fetch a single submission with full answers and grading breakdown."""
-    submission = db_session.exec(
-        select(Submission).where(Submission.submission_uuid == submission_uuid)
-    ).first()
+    """Fetch a single submission with full answers and grading breakdown.
 
-    if not submission:
-        raise HTTPException(
-            status_code=http_status.HTTP_404_NOT_FOUND,
-            detail="Submission not found",
-        )
-
-    # B4 fix: verify teacher has read access to the activity
-    from src.db.courses.activities import Activity
-    activity = db_session.exec(
-        select(Activity).where(Activity.id == submission.activity_id)
-    ).first()
-    if activity:
-        checker = PermissionChecker(db_session)
-        checker.require(
-            current_user.id,
-            "assignment:read",
-            resource_owner_id=activity.creator_id,
-        )
-
-    result = SubmissionRead.model_validate(submission)
-    user = db_session.exec(select(User).where(User.id == submission.user_id)).first()
-    if user:
-        result.user = SubmissionUser(
-            id=user.id,
-            username=user.username,
-            first_name=user.first_name or None,
-            last_name=user.last_name or None,
-            middle_name=user.middle_name or None,
-            email=str(user.email),
-            avatar_image=user.avatar_image or None,
-            user_uuid=user.user_uuid or None,
-        )
-    return result
+    Automatically transitions SUBMITTED/LATE → UNDER_REVIEW when a teacher
+    opens the submission for the first time.
+    """
+    return await mark_under_review(
+        submission_uuid=submission_uuid,
+        current_user=current_user,
+        db_session=db_session,
+    )
 
 
 @router.patch("/submissions/{submission_uuid}", response_model=SubmissionRead)

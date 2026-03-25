@@ -322,7 +322,7 @@ export async function searchEditableCourses(query: string, access_token: string,
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${access_token}`,
+      'Authorization': `Bearer ${access_token}`,
     },
   });
   if (!result.ok) return [];

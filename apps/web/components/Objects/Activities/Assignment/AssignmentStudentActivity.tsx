@@ -1,7 +1,5 @@
 'use client';
 
-import TaskQuizObject from '@/app/_shared/dash/assignments/[assignmentuuid]/_components/TaskEditor/Subs/TaskTypes/TaskQuizObject';
-import TaskFormObject from '@/app/_shared/dash/assignments/[assignmentuuid]/_components/TaskEditor/Subs/TaskTypes/TaskFormObject';
 import TaskFileObject from '@/app/_shared/dash/assignments/[assignmentuuid]/_components/TaskEditor/Subs/TaskTypes/TaskFileObject';
 import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
 import { Popover, PopoverContent, PopoverTrigger } from '@components/ui/popover';
@@ -15,7 +13,7 @@ import Link from '@components/ui/AppLink';
 import { useMemo } from 'react';
 
 // Type definitions
-type AssignmentType = 'QUIZ' | 'FILE_SUBMISSION' | 'FORM';
+type AssignmentType = 'QUIZ' | 'FILE_SUBMISSION' | 'FORM' | string;
 
 interface AssignmentTask {
   id: number;
@@ -229,20 +227,8 @@ const TaskCard = ({ task, index, assignments, t }: TaskCardProps) => {
 
         {/* Task Content */}
         <div className="w-full">
-          {task.assignment_type === 'QUIZ' && (
-            <TaskQuizObject
-              view="student"
-              assignmentTaskUUID={task.assignment_task_uuid}
-            />
-          )}
           {task.assignment_type === 'FILE_SUBMISSION' && (
             <TaskFileObject
-              view="student"
-              assignmentTaskUUID={task.assignment_task_uuid}
-            />
-          )}
-          {task.assignment_type === 'FORM' && (
-            <TaskFormObject
               view="student"
               assignmentTaskUUID={task.assignment_task_uuid}
             />

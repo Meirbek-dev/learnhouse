@@ -24,10 +24,10 @@ import {
   Sparkles,
 } from 'lucide-react';
 import ConflictAlert from '@components/Dashboard/Pages/Course/ConflictResolutionModal';
+import { buildCourseWorkspacePath, prefixedCourseUuid } from '@/lib/course-management';
 import type { CourseWorkspaceCapabilities } from '@/lib/course-management-server';
 import { CourseProvider, useCourse } from '@components/Contexts/CourseContext';
 import type { CourseWorkspaceStage } from '@/lib/course-management';
-import { buildCourseWorkspacePath, prefixedCourseUuid } from '@/lib/course-management';
 import { getAbsoluteUrl } from '@services/config/config';
 import { CourseStatusBadge } from './courseWorkflowUi';
 import { useDirtyGuard } from '@/hooks/useDirtyGuard';

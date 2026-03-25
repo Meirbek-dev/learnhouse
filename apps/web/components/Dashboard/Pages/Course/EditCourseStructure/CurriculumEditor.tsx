@@ -1,23 +1,17 @@
 'use client';
 
-import {
-  AlertTriangle,
-  BookOpen,
-  CheckCircle2,
-  Hexagon,
-  Loader2,
-} from 'lucide-react';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { AlertTriangle, BookOpen, CheckCircle2, Hexagon, Loader2 } from 'lucide-react';
 import { useChapterMutations } from '@/hooks/mutations/useChapterMutations';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { DragDropContext, Droppable } from '@hello-pangea/dnd';
+import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useTranslations } from 'next-intl';
-import { useEffect, useRef, useState } from 'react';
-import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 import type { CourseOrderPayload } from '@/schemas/chapterSchemas';
 import ChapterElement from './DraggableElements/ChapterElement';
@@ -30,7 +24,7 @@ const CurriculumEditor = () => {
 
   const course = useCourse();
   const course_structure = course.courseStructure;
-  const {course_uuid} = course_structure;
+  const { course_uuid } = course_structure;
   const { createChapter, reorderStructure } = useChapterMutations(course_uuid, true);
 
   // Inline chapter creation state
@@ -146,121 +140,124 @@ const CurriculumEditor = () => {
 
   return (
     <div className="min-w-0">
-        {structureStatus !== 'idle' && (
-          <Alert className="mb-4 border-border bg-muted/40">
-            {structureStatus === 'saving' ? (
-              <Loader2 className="size-4 animate-spin" />
-            ) : structureStatus === 'error' ? (
-              <AlertTriangle className="size-4" />
-            ) : (
-              <CheckCircle2 className="size-4" />
-            )}
-            <AlertTitle>
-              {structureStatus === 'saving'
-                ? tStructure('savingOrder')
-                : structureStatus === 'error'
-                  ? tStructure('saveOrderError')
-                  : tStructure('curriculumChangesApplyImmediately')}
-            </AlertTitle>
-            <AlertDescription>
-              {structureStatus === 'error' ? tStructure('refreshAfterError') : tStructure('curriculumInlineFeedback')}
-            </AlertDescription>
-          </Alert>
-        )}
+      {structureStatus !== 'idle' && (
+        <Alert className="mb-4 border-border bg-muted/40">
+          {structureStatus === 'saving' ? (
+            <Loader2 className="size-4 animate-spin" />
+          ) : structureStatus === 'error' ? (
+            <AlertTriangle className="size-4" />
+          ) : (
+            <CheckCircle2 className="size-4" />
+          )}
+          <AlertTitle>
+            {structureStatus === 'saving'
+              ? tStructure('savingOrder')
+              : structureStatus === 'error'
+                ? tStructure('saveOrderError')
+                : tStructure('curriculumChangesApplyImmediately')}
+          </AlertTitle>
+          <AlertDescription>
+            {structureStatus === 'error' ? tStructure('refreshAfterError') : tStructure('curriculumInlineFeedback')}
+          </AlertDescription>
+        </Alert>
+      )}
 
-        {course_structure.chapters.length === 0 && !showChapterInput ? (
-          <div className="mb-4 flex flex-col items-center rounded-xl border border-dashed bg-muted/20 px-6 py-12 text-center">
-            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-muted">
-              <BookOpen className="h-6 w-6 text-muted-foreground" />
-            </div>
-            <p className="mb-1 text-sm font-semibold text-foreground">{tStructure('emptyStateTitle')}</p>
-            <p className="mb-4 max-w-xs text-sm text-muted-foreground">{tStructure('emptyStateDescription')}</p>
+      {course_structure.chapters.length === 0 && !showChapterInput ? (
+        <div className="mb-4 flex flex-col items-center rounded-xl border border-dashed bg-muted/20 px-6 py-12 text-center">
+          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-muted">
+            <BookOpen className="h-6 w-6 text-muted-foreground" />
+          </div>
+          <p className="mb-1 text-sm font-semibold text-foreground">{tStructure('emptyStateTitle')}</p>
+          <p className="mb-4 max-w-xs text-sm text-muted-foreground">{tStructure('emptyStateDescription')}</p>
+          <Button
+            variant="default"
+            size="sm"
+            onClick={handleStartNewChapter}
+          >
+            <Hexagon
+              strokeWidth={3}
+              className="mr-2 size-4"
+            />
+            {tStructure('emptyStateAction')}
+          </Button>
+        </div>
+      ) : (
+        <DragDropContext onDragEnd={updateStructure}>
+          <Droppable
+            type="chapter"
+            droppableId="chapters"
+            direction="vertical"
+          >
+            {(provided, snapshot) => (
+              <div
+                className={cn('space-y-4', snapshot.isDraggingOver && 'bg-muted/40 rounded-xl')}
+                {...provided.droppableProps}
+                ref={provided.innerRef}
+              >
+                {course_structure.chapters.map((chapter: any, index: any) => (
+                  <ChapterElement
+                    key={chapter.chapter_uuid}
+                    chapterIndex={index}
+                    course_uuid={course_uuid}
+                    chapter={chapter}
+                  />
+                ))}
+                {provided.placeholder}
+              </div>
+            )}
+          </Droppable>
+        </DragDropContext>
+      )}
+
+      {/* Inline chapter creation */}
+      <div className="mt-4">
+        {showChapterInput ? (
+          <div className="flex items-center gap-2 rounded-xl border border-dashed border-primary/50 bg-muted/30 px-4 py-3">
+            <Hexagon
+              className="size-4 shrink-0 text-muted-foreground"
+              strokeWidth={2.5}
+            />
+            <Input
+              ref={newChapterInputRef}
+              value={newChapterName}
+              onChange={(e) => setNewChapterName(e.target.value)}
+              onKeyDown={handleChapterInputKeyDown}
+              placeholder={tStructure('chapterNamePlaceholder')}
+              className="h-8 flex-1 text-sm"
+              disabled={isCreatingChapter}
+            />
             <Button
-              variant="default"
               size="sm"
-              onClick={handleStartNewChapter}
+              onClick={() => void handleSubmitNewChapter()}
+              disabled={isCreatingChapter || !newChapterName.trim()}
+              className="h-8"
             >
-              <Hexagon strokeWidth={3} className="mr-2 size-4" />
-              {tStructure('emptyStateAction')}
+              {isCreatingChapter ? <Loader2 className="size-4 animate-spin" /> : tStructure('confirmChapter')}
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={handleCancelNewChapter}
+              disabled={isCreatingChapter}
+              className="h-8"
+            >
+              {tStructure('cancel')}
             </Button>
           </div>
         ) : (
-          <DragDropContext onDragEnd={updateStructure}>
-            <Droppable
-              type="chapter"
-              droppableId="chapters"
-              direction="vertical"
-            >
-              {(provided, snapshot) => (
-                <div
-                  className={cn('space-y-4', snapshot.isDraggingOver && 'bg-muted/40 rounded-xl')}
-                  {...provided.droppableProps}
-                  ref={provided.innerRef}
-                >
-                  {course_structure.chapters.map((chapter: any, index: any) => (
-                    <ChapterElement
-                      key={chapter.chapter_uuid}
-                      chapterIndex={index}
-                      course_uuid={course_uuid}
-                      chapter={chapter}
-                    />
-                  ))}
-                  {provided.placeholder}
-                </div>
-              )}
-            </Droppable>
-          </DragDropContext>
+          <Button
+            variant="outline"
+            className="w-full rounded-xl border-dashed py-5"
+            onClick={handleStartNewChapter}
+          >
+            <Hexagon
+              strokeWidth={3}
+              className="mr-2 size-4"
+            />
+            {tStructure('addChapterButton')}
+          </Button>
         )}
-
-        {/* Inline chapter creation */}
-        <div className="mt-4">
-          {showChapterInput ? (
-            <div className="flex items-center gap-2 rounded-xl border border-dashed border-primary/50 bg-muted/30 px-4 py-3">
-              <Hexagon
-                className="size-4 shrink-0 text-muted-foreground"
-                strokeWidth={2.5}
-              />
-              <Input
-                ref={newChapterInputRef}
-                value={newChapterName}
-                onChange={(e) => setNewChapterName(e.target.value)}
-                onKeyDown={handleChapterInputKeyDown}
-                placeholder={tStructure('chapterNamePlaceholder')}
-                className="h-8 flex-1 text-sm"
-                disabled={isCreatingChapter}
-              />
-              <Button
-                size="sm"
-                onClick={() => void handleSubmitNewChapter()}
-                disabled={isCreatingChapter || !newChapterName.trim()}
-                className="h-8"
-              >
-                {isCreatingChapter ? <Loader2 className="size-4 animate-spin" /> : tStructure('confirmChapter')}
-              </Button>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={handleCancelNewChapter}
-                disabled={isCreatingChapter}
-                className="h-8"
-              >
-                {tStructure('cancel')}
-              </Button>
-            </div>
-          ) : (
-            <Button
-              variant="outline"
-              className="w-full rounded-xl border-dashed py-5"
-              onClick={handleStartNewChapter}
-            >
-              <Hexagon
-                strokeWidth={3}
-                className="mr-2 size-4"
-              />
-              {tStructure('addChapterButton')}
-            </Button>
-          )}
-        </div>
+      </div>
     </div>
   );
 };

@@ -17,11 +17,7 @@ export async function updateChapter(chapterUuid: string, data: any, access_token
   return errorHandling(result);
 }
 
-export async function updateCourseOrderStructure(
-  course_uuid: string,
-  data: CourseOrderPayload,
-  access_token: string,
-) {
+export async function updateCourseOrderStructure(course_uuid: string, data: CourseOrderPayload, access_token: string) {
   const result: any = await fetch(
     `${getAPIUrl()}chapters/course/${course_uuid}/order`,
     RequestBodyWithAuthHeader('PATCH', data, null, access_token),

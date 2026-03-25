@@ -14,11 +14,13 @@ from src.db.strict_base_model import PydanticStrictBaseModel, SQLModelStrictBase
 
 
 class SubmissionStatus(StrEnum):
-    DRAFT = "DRAFT"          # student is working, not yet submitted
-    SUBMITTED = "SUBMITTED"  # submitted, awaiting grading
-    GRADED = "GRADED"        # teacher (or auto-grader) set final_score
-    LATE = "LATE"            # submitted after the due_date
-    RETURNED = "RETURNED"    # teacher sent it back for revision
+    DRAFT = "DRAFT"                  # student is working, not yet submitted
+    SUBMITTED = "SUBMITTED"          # submitted, awaiting grading
+    UNDER_REVIEW = "UNDER_REVIEW"    # teacher has opened it but not yet saved a grade
+    GRADED = "GRADED"                # teacher (or auto-grader) set final_score
+    PUBLISHED = "PUBLISHED"          # grade is finalised and visible to the student
+    LATE = "LATE"                    # submitted after the due_date (modifier, not terminal)
+    RETURNED = "RETURNED"            # teacher sent it back for revision
 
 
 class AssessmentType(StrEnum):
@@ -83,7 +85,10 @@ class TeacherGradeInput(PydanticStrictBaseModel):
         default_factory=list,
         description="Optional per-question/per-task comments",
     )
-    status: str = "GRADED"  # "GRADED" | "RETURNED"
+    # GRADED = save grade (visible to teacher only)
+    # PUBLISHED = publish grade (visible to student)
+    # RETURNED = send back for revision
+    status: str = "GRADED"
     feedback: str = ""
 
 

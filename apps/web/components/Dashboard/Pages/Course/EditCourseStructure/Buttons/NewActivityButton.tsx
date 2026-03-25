@@ -8,9 +8,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { cleanActivityUuid, cleanCourseUuid } from '@/lib/course-management';
 import NewActivityModal from '@components/Objects/Modals/Activities/Create/NewActivity';
 import { useActivityMutations } from '@/hooks/mutations/useActivityMutations';
+import { cleanActivityUuid, cleanCourseUuid } from '@/lib/course-management';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { Button } from '@/components/ui/button';
@@ -57,18 +57,11 @@ const NewActivityButton = (props: NewActivityButtonProps) => {
     const toast_loading = toast.loading(tNotify('uploadingAndCreating'));
 
     try {
-      await activityMutations.createFileActivity(
-        file,
-        type,
-        activity,
-        chapterId,
-        access_token,
-        (progress) => {
-          toast.loading(`${tNotify('uploadingAndCreating')} ${progress.percentage}%`, {
-            id: toast_loading,
-          });
-        },
-      );
+      await activityMutations.createFileActivity(file, type, activity, chapterId, access_token, (progress) => {
+        toast.loading(`${tNotify('uploadingAndCreating')} ${progress.percentage}%`, {
+          id: toast_loading,
+        });
+      });
 
       setNewActivityModal(false);
       toast.dismiss(toast_loading);

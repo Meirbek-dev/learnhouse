@@ -24,11 +24,6 @@ import {
   Minimize2,
   UserRoundPen,
 } from 'lucide-react';
-import {
-  getAssignmentFromActivityUUID,
-} from '@services/courses/assignments';
-import { submitAssessment } from '@services/grading/grading';
-import { useMySubmission } from '@/hooks/useMySubmission';
 import PaidCourseActivityDisclaimer from '@components/Objects/Courses/CourseActions/PaidCourseActivityDisclaimer';
 import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media';
 import { AssignmentsTaskProvider } from '@components/Contexts/Assignments/AssignmentsTaskContext';
@@ -40,6 +35,7 @@ import { AssignmentProvider } from '@components/Contexts/Assignments/AssignmentC
 import GeneralWrapper from '@/components/Objects/Elements/Wrappers/GeneralWrapper';
 import { Suspense, lazy, useEffect, useRef, useState, useTransition } from 'react';
 import ActivityBreadcrumbs from '@components/Pages/Activity/ActivityBreadcrumbs';
+import { getAssignmentFromActivityUUID } from '@services/courses/assignments';
 import ActivityIndicators from '@components/Pages/Courses/ActivityIndicators';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import AIChatBotProvider from '@components/Contexts/AI/AIChatBotContext';
@@ -50,7 +46,9 @@ import { usePlatform } from '@/components/Contexts/PlatformContext';
 import { CourseProvider } from '@components/Contexts/CourseContext';
 import { useContributorStatus } from '@/hooks/useContributorStatus';
 import { getAPIUrl, getAbsoluteUrl } from '@services/config/config';
+import { submitAssessment } from '@services/grading/grading';
 import { useGamificationStore } from '@/stores/gamification';
+import { useMySubmission } from '@/hooks/useMySubmission';
 import { swrFetcher } from '@services/utils/ts/requests';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { getTrailSwrKey } from '@services/courses/keys';
@@ -1379,13 +1377,7 @@ const AssignmentTools = (props: {
   async function submitForGradingUI() {
     if (!props.activity?.id || !session.data?.tokens?.access_token) return;
     try {
-      await submitAssessment(
-        props.activity.id,
-        'ASSIGNMENT',
-        {},
-        session.data.tokens.access_token,
-        0,
-      );
+      await submitAssessment(props.activity.id, 'ASSIGNMENT', {}, session.data.tokens.access_token, 0);
       toast.success(t('submitSuccessToast'));
       await mutateSubmission();
     } catch {
@@ -1416,9 +1408,7 @@ const AssignmentTools = (props: {
 
   if (submission.status === 'GRADED') {
     const displayScore =
-      submission.final_score !== null && submission.final_score !== undefined
-        ? `${submission.final_score}%`
-        : null;
+      submission.final_score !== null && submission.final_score !== undefined ? `${submission.final_score}%` : null;
 
     return (
       <div className="soft-shadow flex flex-col rounded-md bg-teal-600 p-2.5 px-4 text-white transition delay-150 duration-300 ease-in-out">
@@ -1427,9 +1417,7 @@ const AssignmentTools = (props: {
           <CheckCircle size={17} />
           <span className="flex items-center space-x-2 text-xs font-bold">
             <span>{t('assignmentStatus.graded')}</span>
-            {displayScore && (
-              <span className="rounded-md bg-white px-1 py-0.5 text-teal-800">{displayScore}</span>
-            )}
+            {displayScore && <span className="rounded-md bg-white px-1 py-0.5 text-teal-800">{displayScore}</span>}
           </span>
         </div>
       </div>

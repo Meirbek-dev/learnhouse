@@ -93,11 +93,7 @@ export function useActivityMutations(courseUuid: string, withUnpublishedActiviti
     }
   };
 
-  const createActivityMutation = async (
-    payload: ActivityCreateValues,
-    chapterId: number,
-    accessToken: string,
-  ) => {
+  const createActivityMutation = async (payload: ActivityCreateValues, chapterId: number, accessToken: string) => {
     const response = assertSuccess(await createActivity(payload, chapterId, accessToken));
     await mutate(structureKey);
     return response;

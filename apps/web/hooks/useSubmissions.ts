@@ -1,11 +1,11 @@
 'use client';
 
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
+import type { SubmissionStatus, SubmissionsPage } from '@/types/grading';
+import { swrFetcher } from '@services/utils/ts/requests';
+import { getAPIUrl } from '@services/config/config';
 import { useState } from 'react';
 import useSWR from 'swr';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
-import { getAPIUrl } from '@services/config/config';
-import { swrFetcher } from '@services/utils/ts/requests';
-import type { SubmissionStatus, SubmissionsPage } from '@/types/grading';
 
 export interface UseSubmissionsOptions {
   activityId: number | null;
@@ -38,9 +38,7 @@ export function useSubmissions({
   params.set('page_size', String(pageSize));
 
   const { data, error, isLoading, mutate } = useSWR<SubmissionsPage>(
-    activityId && accessToken
-      ? `${getAPIUrl()}grading/submissions?${params}`
-      : null,
+    activityId && accessToken ? `${getAPIUrl()}grading/submissions?${params}` : null,
     (url: string) => swrFetcher(url, accessToken),
   );
 
