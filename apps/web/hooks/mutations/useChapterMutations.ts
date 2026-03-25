@@ -9,7 +9,7 @@ export function useChapterMutations(courseUuid: string, withUnpublishedActivitie
   const { mutate, cache } = useSWRConfig();
   const structureKey = courseKeys.structure(courseUuid, withUnpublishedActivities);
 
-  const captureSnapshot = <T>(key: string): T | undefined => (cache.get(key) as any)?.data as T | undefined;
+  const captureSnapshot = (key: string): unknown | undefined => (cache.get(key) as any)?.data as unknown | undefined;
 
   const createChapterMutation = async (payload: ChapterCreateValues, accessToken: string) => {
     const tempId = `temp_chapter_${Date.now()}`;

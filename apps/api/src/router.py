@@ -27,6 +27,8 @@ from src.routers.courses import (
 )
 from src.routers.courses.activities import activities, blocks
 from src.routers.ee import payments
+from src.routers.grading.submit import router as grading_submit_router
+from src.routers.grading.teacher import router as grading_teacher_router
 from src.routers.uploads import chunked_upload
 from src.routers.utils import router as utils_router
 from src.services.dev.dev import isDevModeEnabledOrRaise
@@ -73,6 +75,14 @@ v1_router.include_router(
     tags=["gamification"],
 )
 v1_router.include_router(analytics.router, prefix="/analytics", tags=["analytics"])
+
+# Unified grading system (replaces fragmented assignment/quiz grading)
+v1_router.include_router(
+    grading_submit_router, prefix="/grading", tags=["grading"]
+)
+v1_router.include_router(
+    grading_teacher_router, prefix="/grading", tags=["grading"]
+)
 
 v1_router.include_router(ai.router, prefix="/ai", tags=["ai"])
 

@@ -82,7 +82,7 @@ export default function CourseCreationWizard() {
   // Trigger initial load when outline panel opens
   useEffect(() => {
     if (template === 'outline' && sourceOptions.length === 0 && accessToken) {
-      void handleSourceSearch('');
+       handleSourceSearch('');
     }
   }, [template, sourceOptions.length, accessToken, handleSourceSearch]);
 

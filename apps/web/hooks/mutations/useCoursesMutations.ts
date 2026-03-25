@@ -63,8 +63,8 @@ export function useCoursesMutations(courseUuid: string, withUnpublishedActivitie
   const detailKey = courseKeys.detail(courseUuid);
 
   // Read current SWR cache value synchronously — no identity-mutate hack needed.
-  const captureSnapshot = <T>(key: string | readonly unknown[]): T | undefined =>
-    (cache.get(key as any) as any)?.data as T | undefined;
+  const captureSnapshot = (key: string | readonly unknown[]): unknown | undefined =>
+    (cache.get(key as any) as any)?.data as unknown | undefined;
 
   const refreshCourse = async () => {
     await Promise.all([mutate(structureKey), mutate(detailKey)]);

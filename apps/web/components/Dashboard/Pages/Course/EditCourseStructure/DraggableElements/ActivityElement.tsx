@@ -263,7 +263,7 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
             {isEditing ? (
               <div className="flex items-center gap-1.5">
                 <Input
-                  autoFocus
+                  
                   type="text"
                   value={editedName}
                   onChange={(e) => setEditedName(e.target.value)}

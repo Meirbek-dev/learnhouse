@@ -17,8 +17,8 @@
   },
   "devDependencies": {
     "eslint": "^10.1.0",
-    "oxlint": "^1.56.0",
-    "oxlint-tsgolint": "^0.17.2",
+    "oxlint": "^1.57.0",
+    "oxlint-tsgolint": "^0.17.3",
     "prettier": "^3.8.1",
     "prettier-plugin-organize-imports": "^4.3.0",
     "prettier-plugin-sort-imports": "^1.8.11",

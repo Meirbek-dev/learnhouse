@@ -24,14 +24,11 @@ import {
   Minimize2,
   UserRoundPen,
 } from 'lucide-react';
-import AssignmentSubmissionProvider, {
-  useAssignmentSubmission,
-} from '@components/Contexts/Assignments/AssignmentSubmissionContext';
 import {
   getAssignmentFromActivityUUID,
-  getFinalGrade,
-  submitAssignmentForGrading,
 } from '@services/courses/assignments';
+import { submitAssessment } from '@services/grading/grading';
+import { useMySubmission } from '@/hooks/useMySubmission';
 import PaidCourseActivityDisclaimer from '@components/Objects/Courses/CourseActions/PaidCourseActivityDisclaimer';
 import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media';
 import { AssignmentsTaskProvider } from '@components/Contexts/Assignments/AssignmentsTaskContext';
@@ -280,15 +277,13 @@ const ActivityActions = ({ activity, activityid, course, assignment, showNavigat
             />
           )}
           {activity.activity_type === 'TYPE_ASSIGNMENT' && assignment?.assignment_uuid ? (
-            <AssignmentSubmissionProvider assignment_uuid={assignment.assignment_uuid}>
-              <AssignmentTools
-                assignment={assignment}
-                activity={activity}
-                activityid={activityid}
-                course={course}
-                t={t}
-              />
-            </AssignmentSubmissionProvider>
+            <AssignmentTools
+              assignment={assignment}
+              activity={activity}
+              activityid={activityid}
+              course={course}
+              t={t}
+            />
           ) : null}
           {showNavigation ? (
             <NextActivityButton
@@ -421,9 +416,7 @@ const ActivityClient = (props: ActivityClientProps) => {
           <Suspense fallback={<LoadingFallback />}>
             <AssignmentProvider assignment_uuid={assignment.assignment_uuid}>
               <AssignmentsTaskProvider>
-                <AssignmentSubmissionProvider assignment_uuid={assignment.assignment_uuid}>
-                  <AssignmentStudentActivity />
-                </AssignmentSubmissionProvider>
+                <AssignmentStudentActivity />
               </AssignmentsTaskProvider>
             </AssignmentProvider>
           </Suspense>
@@ -1377,90 +1370,30 @@ const AssignmentTools = (props: {
   assignment: any;
   t: ReturnType<typeof useTranslations<'ActivityPage'>>;
 }) => {
-  const submissionContext = useAssignmentSubmission();
-  const submission = submissionContext.submissions;
   const session = usePlatformSession() as any;
-  const [finalGrade, setFinalGrade] = useState(null) as any;
   const { t } = props;
 
+  // Use the unified grading endpoint instead of the legacy AssignmentSubmissionContext
+  const { submission, mutate: mutateSubmission } = useMySubmission(props.activity?.id ?? null);
+
   async function submitForGradingUI() {
-    if (props.assignment) {
-      const res = await submitAssignmentForGrading(
-        props.assignment?.assignment_uuid,
-        session.data?.tokens?.access_token,
+    if (!props.activity?.id || !session.data?.tokens?.access_token) return;
+    try {
+      await submitAssessment(
+        props.activity.id,
+        'ASSIGNMENT',
+        {},
+        session.data.tokens.access_token,
+        0,
       );
-      if (res.success) {
-        toast.success(t('submitSuccessToast'));
-        mutate(`${getAPIUrl()}assignments/${props.assignment?.assignment_uuid}/submissions/me`);
-      } else {
-        toast.error(t('submitErrorToast'));
-      }
+      toast.success(t('submitSuccessToast'));
+      await mutateSubmission();
+    } catch {
+      toast.error(t('submitErrorToast'));
     }
   }
 
-  // Load final grade when submission is graded - only fetch once and guard against unmounted component
-  useEffect(() => {
-    if (!(submission && submission.length > 0 && submission[0]?.submission_status === 'GRADED')) {
-      return;
-    }
-
-    // If we've already loaded the final grade, skip re-fetching (prevents repeated renders)
-    if (finalGrade !== null) return;
-
-    let mounted = true;
-
-    const loadGrade = async () => {
-      try {
-        const res = await getFinalGrade(
-          session.data?.user?.id,
-          props.assignment?.assignment_uuid,
-          session.data?.tokens?.access_token,
-        );
-
-        if (mounted && res.success) {
-          const { grade, max_grade, grading_type } = res.data;
-          let displayGrade: string;
-
-          switch (grading_type) {
-            case 'NUMERIC': {
-              displayGrade = `${grade}/${max_grade}`;
-              break;
-            }
-            case 'PERCENTAGE': {
-              const percentage = (grade / max_grade) * 100;
-              displayGrade = `${percentage.toFixed(2)}%`;
-              break;
-            }
-            default: {
-              // Fallback static label to avoid pulling in possibly unstable `t` identity in deps
-              displayGrade = t('unknownGradingType');
-            }
-          }
-
-          setFinalGrade(displayGrade);
-        }
-      } catch (error) {
-        // Fail silently - keep `finalGrade` null so we can retry if submission changes
-        console.error('Failed to load final grade:', error);
-      }
-    };
-
-    loadGrade();
-
-    return () => {
-      mounted = false;
-    };
-  }, [
-    submission,
-    session.data?.user?.id,
-    props.assignment?.assignment_uuid,
-    session.data?.tokens?.access_token,
-    t,
-    finalGrade,
-    setFinalGrade,
-  ]);
-
-  if (!submission || submission.length === 0) {
+  if (!submission) {
     return (
       <SubmitAssignmentDialog
         onSubmit={submitForGradingUI}
@@ -1469,10 +1402,7 @@ const AssignmentTools = (props: {
     );
   }
 
-  // At this point, submission is guaranteed to be an array with at least one element
-  const firstSubmission = submission[0];
-
-  if (firstSubmission?.submission_status === 'SUBMITTED') {
+  if (submission.status === 'SUBMITTED') {
     return (
       <div className="soft-shadow flex flex-col rounded-md bg-amber-800 p-2.5 px-4 text-white transition delay-150 duration-300 ease-in-out">
         <span className="mb-1 text-[10px] font-bold uppercase">{t('status')}</span>
@@ -1484,7 +1414,12 @@ const AssignmentTools = (props: {
     );
   }
 
-  if (firstSubmission?.submission_status === 'GRADED') {
+  if (submission.status === 'GRADED') {
+    const displayScore =
+      submission.final_score !== null && submission.final_score !== undefined
+        ? `${submission.final_score}%`
+        : null;
+
     return (
       <div className="soft-shadow flex flex-col rounded-md bg-teal-600 p-2.5 px-4 text-white transition delay-150 duration-300 ease-in-out">
         <span className="mb-1 text-[10px] font-bold uppercase">{t('status')}</span>
@@ -1492,14 +1427,16 @@ const AssignmentTools = (props: {
           <CheckCircle size={17} />
           <span className="flex items-center space-x-2 text-xs font-bold">
             <span>{t('assignmentStatus.graded')}</span>
-            <span className="rounded-md bg-white px-1 py-0.5 text-teal-800">{finalGrade}</span>
+            {displayScore && (
+              <span className="rounded-md bg-white px-1 py-0.5 text-teal-800">{displayScore}</span>
+            )}
           </span>
         </div>
       </div>
     );
   }
 
-  // Default return in case none of the conditions are met
+  // Handles DRAFT / LATE / RETURNED statuses
   return null;
 };
 

@@ -25,9 +25,28 @@ import ExamSettings from './ExamSettings';
 import ExamResults from './ExamResults';
 import ExamLayout from './ExamLayout';
 
+interface ActivityObject {
+  activity_uuid: string;
+  name: string;
+}
+
+interface ChapterActivity {
+  activity_uuid: string;
+}
+
+interface CourseChapter {
+  activities?: ChapterActivity[];
+}
+
+interface CourseObject {
+  course_uuid: string;
+  withUnpublishedActivities?: boolean;
+  chapters?: CourseChapter[];
+}
+
 interface ExamActivityProps {
-  activity: any;
-  course: any;
+  activity: ActivityObject;
+  course: CourseObject;
 }
 
 export default function ExamActivity({ activity, course }: ExamActivityProps) {
@@ -169,9 +188,10 @@ export default function ExamActivity({ activity, course }: ExamActivityProps) {
   const handleProceedToNextActivity = useCallback(() => {
     try {
       const cleanCurrent = activity.activity_uuid?.replace('activity_', '');
-      const allActivities: any[] = [];
-      (course?.chapters || []).forEach((chapter: any) =>
-        (chapter.activities || []).forEach((a: any) =>
+      type FlatActivity = ChapterActivity & { cleanUuid: string };
+      const allActivities: FlatActivity[] = [];
+      (course?.chapters ?? []).forEach((chapter) =>
+        (chapter.activities ?? []).forEach((a) =>
           allActivities.push({ ...a, cleanUuid: a.activity_uuid?.replace('activity_', '') }),
         ),
       );
@@ -241,7 +261,12 @@ export default function ExamActivity({ activity, course }: ExamActivityProps) {
     const totalAttempts = allAttempts?.length ?? 0;
     const avgScore =
       allAttempts && allAttempts.length > 0
-        ? Math.round(allAttempts.reduce((s: number, a: any) => s + (a.percentage || 0), 0) / allAttempts.length)
+        ? Math.round(
+            allAttempts.reduce(
+              (s: number, a: AttemptData) => s + ((a as AttemptData & { percentage?: number }).percentage ?? 0),
+              0,
+            ) / allAttempts.length,
+          )
         : 0;
 
     return (

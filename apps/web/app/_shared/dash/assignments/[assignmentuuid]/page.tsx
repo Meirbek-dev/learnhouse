@@ -120,7 +120,7 @@ const BrdCmpx = () => {
 const PublishingState = () => {
   const t = useTranslations('DashPage.Assignments.AssignmentPage');
   const assignment = useAssignments();
-  const session = usePlatformSession() as any;
+  const session = usePlatformSession();
   const access_token = session?.data?.tokens?.access_token;
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 

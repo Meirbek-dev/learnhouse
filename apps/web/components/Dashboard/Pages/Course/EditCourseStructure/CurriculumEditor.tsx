@@ -30,7 +30,7 @@ const CurriculumEditor = () => {
 
   const course = useCourse();
   const course_structure = course.courseStructure;
-  const course_uuid = course_structure.course_uuid;
+  const {course_uuid} = course_structure;
   const { createChapter, reorderStructure } = useChapterMutations(course_uuid, true);
 
   // Inline chapter creation state
@@ -77,7 +77,7 @@ const CurriculumEditor = () => {
       toast.success(tStructure('chapterCreatedSuccess'));
       setShowChapterInput(false);
       setNewChapterName('');
-    } catch (error: any) {
+    } catch {
       toast.error(tStructure('chapterCreateFailed'));
     } finally {
       setIsCreatingChapter(false);

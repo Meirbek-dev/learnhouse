@@ -1,6 +1,5 @@
 'use client';
 
-import { useAssignmentSubmission } from '@components/Contexts/Assignments/AssignmentSubmissionContext';
 import { BookPlus, BookUser, FileUp, Forward, InfoIcon, ListTodo, Save, Type } from 'lucide-react';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { Alert, AlertDescription } from '@components/ui/alert';
@@ -23,6 +22,8 @@ interface AssignmentBoxProps {
   view?: ViewMode;
   maxPoints?: number;
   currentPoints?: number;
+  /** Pass true when the student already has a submission — hides the submit button. */
+  hasExistingSubmission?: boolean;
   saveFC?: () => void;
   submitFC?: () => void;
   gradeFC?: () => void;
@@ -36,6 +37,7 @@ const AssignmentBoxUI = ({
   view = 'student',
   currentPoints = 0,
   maxPoints,
+  hasExistingSubmission = false,
   saveFC,
   submitFC,
   gradeFC,
@@ -45,13 +47,10 @@ const AssignmentBoxUI = ({
 }: AssignmentBoxProps) => {
   const t = useTranslations('Activities.AssignmentBoxUI');
   const [customGrade, setCustomGrade] = useState<string>('');
-  const submissionContext = useAssignmentSubmission();
   const session = usePlatformSession();
 
-  const submissions = submissionContext?.submissions ?? [];
   const isAuthenticated = session?.status === 'authenticated';
-  const hasNoSubmissions = submissions.length === 0;
-  const showStudentSubmitButton = view === 'student' && isAuthenticated && hasNoSubmissions;
+  const showStudentSubmitButton = view === 'student' && isAuthenticated && !hasExistingSubmission;
 
   const handleCustomGradeSubmit = () => {
     if (!gradeCustomFC || !customGrade) return;

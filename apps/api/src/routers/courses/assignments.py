@@ -11,42 +11,31 @@ from src.db.courses.assignments import (
     AssignmentTaskSubmissionUpdate,
     AssignmentTaskUpdate,
     AssignmentUpdate,
-    AssignmentUserSubmissionCreate,
 )
 from src.db.users import PublicUser
 from src.security.auth import get_current_user
-from src.security.rbac import PermissionCheckerDep, PermissionDenied
 from src.services.courses.activities.assignments import (
     create_assignment,
-    create_assignment_submission,
     create_assignment_task,
     create_assignment_with_activity,
     delete_assignment,
     delete_assignment_from_activity_uuid,
-    delete_assignment_submission,
     delete_assignment_task,
     delete_assignment_task_submission,
     get_assignments_from_course,
     get_assignments_from_courses,
     get_editable_assignments_from_courses,
-    get_grade_assignment_submission,
-    grade_assignment_submission,
     handle_assignment_task_submission,
-    mark_activity_as_done_for_user,
     put_assignment_task_reference_file,
     put_assignment_task_submission_file,
     read_assignment,
     read_assignment_from_activity_uuid,
-    read_assignment_submissions,
     read_assignment_task,
     read_assignment_task_submissions,
     read_assignment_tasks,
-    read_user_assignment_submissions,
-    read_user_assignment_submissions_me,
     read_user_assignment_task_submissions,
     read_user_assignment_task_submissions_me,
     update_assignment,
-    update_assignment_submission,
     update_assignment_task,
 )
 
@@ -357,156 +346,6 @@ async def api_delete_assignment_task_submissions(
     """
     return await delete_assignment_task_submission(
         request, assignment_task_submission_uuid, current_user, db_session
-    )
-
-
-## ASSIGNMENTS Submissions ##
-
-
-@router.post("/{assignment_uuid}/submissions")
-async def api_create_assignment_submissions(
-    request: Request,
-    assignment_uuid: str,
-    current_user: Annotated[PublicUser, Depends(get_current_user)],
-    db_session=Depends(get_db_session),
-):
-    """
-    Create new submissions for an assignment
-    """
-    return await create_assignment_submission(
-        request, assignment_uuid, current_user, db_session
-    )
-
-
-@router.get("/{assignment_uuid}/submissions")
-async def api_read_assignment_submissions(
-    request: Request,
-    assignment_uuid: str,
-    current_user: Annotated[PublicUser, Depends(get_current_user)],
-    db_session=Depends(get_db_session),
-):
-    """
-    Read submissions for an assignment
-    """
-    return await read_assignment_submissions(
-        request, assignment_uuid, current_user, db_session
-    )
-
-
-@router.get("/{assignment_uuid}/submissions/me")
-async def api_read_user_assignment_submission_me(
-    request: Request,
-    assignment_uuid: str,
-    current_user: Annotated[PublicUser, Depends(get_current_user)],
-    db_session=Depends(get_db_session),
-):
-    """
-    Read submissions for an assignment from the current user
-    """
-    return await read_user_assignment_submissions_me(
-        request, assignment_uuid, current_user, db_session
-    )
-
-
-@router.get("/{assignment_uuid}/submissions/{user_id}")
-async def api_read_user_assignment_submissions(
-    request: Request,
-    assignment_uuid: str,
-    user_id: int,
-    current_user: Annotated[PublicUser, Depends(get_current_user)],
-    db_session=Depends(get_db_session),
-):
-    """
-    Read submissions for an assignment from a user
-    """
-    return await read_user_assignment_submissions(
-        request, assignment_uuid, user_id, current_user, db_session
-    )
-
-
-@router.put("/{assignment_uuid}/submissions/{user_id}")
-async def api_update_user_assignment_submissions(
-    request: Request,
-    assignment_uuid: str,
-    user_id: int,
-    assignment_submission: AssignmentUserSubmissionCreate,
-    current_user: Annotated[PublicUser, Depends(get_current_user)],
-    db_session=Depends(get_db_session),
-):
-    """
-    Update submissions for an assignment from a user
-    """
-    return await update_assignment_submission(
-        request, user_id, assignment_submission, current_user, db_session
-    )
-
-
-@router.delete("/{assignment_uuid}/submissions/{user_id}")
-async def api_delete_user_assignment_submissions(
-    request: Request,
-    assignment_uuid: str,
-    user_id: int,
-    current_user: Annotated[PublicUser, Depends(get_current_user)],
-    db_session=Depends(get_db_session),
-):
-    """
-    Delete submissions for an assignment from a user
-    """
-    return await delete_assignment_submission(
-        request, user_id, assignment_uuid, current_user, db_session
-    )
-
-
-@router.get("/{assignment_uuid}/submissions/{user_id}/grade")
-async def api_get_submission_grade(
-    request: Request,
-    assignment_uuid: str,
-    user_id: int,
-    current_user: Annotated[PublicUser, Depends(get_current_user)],
-    db_session=Depends(get_db_session),
-):
-    """
-    Grade submissions for an assignment from a user
-    """
-    return await get_grade_assignment_submission(
-        request, user_id, assignment_uuid, current_user, db_session
-    )
-
-
-@router.post("/{assignment_uuid}/submissions/{user_id}/grade")
-async def api_final_grade_submission(
-    request: Request,
-    assignment_uuid: str,
-    user_id: int,
-    current_user: Annotated[PublicUser, Depends(get_current_user)],
-    checker: PermissionCheckerDep,
-    db_session=Depends(get_db_session),
-):
-    """
-    Grade submissions for an assignment from a user
-
-    **Required Permission**: `assignment:grade:platform` (instructors/graders only)
-    """
-    checker.require(current_user.id, "assignment:grade")
-
-    return await grade_assignment_submission(
-        request, user_id, assignment_uuid, current_user, db_session
-    )
-
-
-@router.post("/{assignment_uuid}/submissions/{user_id}/done")
-async def api_submission_mark_as_done(
-    request: Request,
-    assignment_uuid: str,
-    user_id: int,
-    current_user: Annotated[PublicUser, Depends(get_current_user)],
-    db_session=Depends(get_db_session),
-):
-    """
-    Grade submissions for an assignment from a user
-    """
-    return await mark_activity_as_done_for_user(
-        request, user_id, assignment_uuid, current_user, db_session
     )
 
 

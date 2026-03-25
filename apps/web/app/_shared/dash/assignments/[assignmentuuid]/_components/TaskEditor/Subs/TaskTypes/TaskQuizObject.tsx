@@ -32,7 +32,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { useAssignmentSubmission } from '@components/Contexts/Assignments/AssignmentSubmissionContext';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -55,6 +54,7 @@ import { useAssignmentsTaskStore } from '@components/Contexts/Assignments/Assign
 import AssignmentBoxUI from '@components/Objects/Activities/Assignment/AssignmentBoxUI';
 import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
+import { useMySubmission } from '@/hooks/useMySubmission';
 import QuizSkeleton from '@components/Objects/Quiz/QuizSkeleton';
 import { useTestGuard } from '@/hooks/useTestGuard';
 
@@ -567,7 +567,9 @@ const TaskQuizObject = ({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
   const reload = useAssignmentsTaskStore((s) => s.reload);
   const setSelectedTaskUUID = useAssignmentsTaskStore((s) => s.setSelectedTaskUUID);
   const assignment = useAssignments();
-  const submissionContext = useAssignmentSubmission();
+  // Fetch the student's own submission for this activity (used on the pre-test screen)
+  const activityId = (assignment?.activity_object?.id as number | undefined) ?? null;
+  const { submission: mySubmission } = useMySubmission(view === 'student' ? activityId : null);
 
   // Initialize questions based on view
   const initialQuestions = useMemo(() => {
@@ -1118,12 +1120,8 @@ const TaskQuizObject = ({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
 
   // Pre-test start screen for students
   if (view === 'student' && !testStarted) {
-    const assignmentSubmission =
-      submissionContext.submissions && submissionContext.submissions.length > 0
-        ? submissionContext.submissions[0]
-        : null;
-    const isAssignmentSubmitted = assignmentSubmission?.submission_status === 'SUBMITTED';
-    const isAssignmentGraded = assignmentSubmission?.submission_status === 'GRADED';
+    const isAssignmentSubmitted = mySubmission?.status === 'SUBMITTED';
+    const isAssignmentGraded = mySubmission?.status === 'GRADED';
     const cannotStartDueToSubmission = isAssignmentSubmitted || isAssignmentGraded;
 
     const hasAttempts = !quizSettings.max_attempts || attemptNumber < quizSettings.max_attempts;
@@ -1142,7 +1140,7 @@ const TaskQuizObject = ({ view, assignmentTaskUUID, user_id }: TaskQuizObjectPro
             {isAssignmentGraded ? (
               <SubmissionGradedCard
                 assignmentUUID={assignment.assignment_object?.assignment_uuid}
-                grade={(assignmentSubmission as any)?.grade}
+                grade={mySubmission?.final_score ?? mySubmission?.auto_score ?? null}
                 t={t}
               />
             ) : (
