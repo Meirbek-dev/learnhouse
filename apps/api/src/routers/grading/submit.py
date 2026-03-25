@@ -1,23 +1,26 @@
 """
 Student-facing grading routes.
 
-POST /grading/start/{activity_id}   — server-stamp the start time (replaces client timestamps)
-POST /grading/submit/{activity_id}  — submit answers and receive grading result
-GET  /grading/submissions/me        — student's own submissions for an activity
+POST /grading/start/{activity_id}        — server-stamp the start time
+POST /grading/submit/{activity_id}       — submit answers and receive grading result
+GET  /grading/submissions/me             — student's own submissions for an activity
+GET  /grading/submissions/me/{uuid}      — student fetches one of their own submissions
 """
 
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, Query, Request
+from fastapi import HTTPException, status as http_status
 
 from src.core.events.database import get_db_session
 from src.db.courses.blocks import Block
 from src.db.courses.quiz import QuizSettings
-from src.db.grading.submissions import AssessmentType, SubmissionRead
+from src.db.grading.submissions import AssessmentType, Submission, SubmissionRead
 from src.db.users import PublicUser
 from src.security.auth import get_current_user
 from src.services.grading.submit import start_submission, submit_assessment
 from sqlmodel import Session, select
+from sqlalchemy import desc
 
 router = APIRouter()
 
@@ -34,7 +37,7 @@ async def api_start_submission(
     Create a DRAFT Submission and record the server-stamped start time.
 
     Must be called before submitting a quiz or exam so the server controls
-    the start timestamp. Clients can no longer falsify the elapsed time.
+    the start timestamp (B2 fix: started_at in dedicated column).
     """
     return await start_submission(
         request=request,
@@ -69,7 +72,7 @@ async def api_submit_assessment(
         block = db_session.exec(
             select(Block)
             .where(Block.activity_id == activity_id)
-            .order_by(Block.id.desc())
+            .order_by(desc(Block.id))
         ).first()
         if block:
             questions = block.content.get("questions", [])
@@ -82,6 +85,8 @@ async def api_submit_assessment(
                 "track_violations": quiz_settings.track_violations,
                 "block_on_violations": quiz_settings.block_on_violations,
                 "max_violations": quiz_settings.max_violations,
+                # due_date_iso can be added to block.content.settings in the future
+                "due_date_iso": block.content.get("settings", {}).get("due_date_iso"),
             }
 
     return await submit_assessment(
@@ -103,11 +108,7 @@ async def api_get_my_submissions(
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
 ) -> list[SubmissionRead]:
-    """Get the current user's submissions for an activity."""
-    from src.db.grading.submissions import Submission
-
-    from sqlalchemy import desc
-
+    """Get the current user's submissions for an activity (most-recent first)."""
     submissions = db_session.exec(
         select(Submission)
         .where(
@@ -117,3 +118,30 @@ async def api_get_my_submissions(
         .order_by(desc(Submission.created_at))
     ).all()
     return [SubmissionRead.model_validate(s) for s in submissions]
+
+
+@router.get("/submissions/me/{submission_uuid}", response_model=SubmissionRead)
+async def api_get_my_submission(
+    submission_uuid: str,
+    db_session: Annotated[Session, Depends(get_db_session)],
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
+) -> SubmissionRead:
+    """
+    Student fetches one of their own submissions to see grade/feedback.
+
+    Ownership is enforced: only the submitting student can access this endpoint.
+    """
+    submission = db_session.exec(
+        select(Submission).where(
+            Submission.submission_uuid == submission_uuid,
+            Submission.user_id == current_user.id,
+        )
+    ).first()
+
+    if not submission:
+        raise HTTPException(
+            status_code=http_status.HTTP_404_NOT_FOUND,
+            detail="Submission not found",
+        )
+
+    return SubmissionRead.model_validate(submission)

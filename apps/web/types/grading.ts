@@ -1,8 +1,5 @@
 /**
- * Grading system type definitions.
- *
- * Replaces the scattered `any` types in AssignmentSubmissionsSubPage,
- * EvaluateAssignment, and ExamActivity components.
+ * Grading system type definitions — v2.
  */
 
 // ── Enums ────────────────────────────────────────────────────────────────────
@@ -38,13 +35,11 @@ export interface GradingBreakdown {
   items: GradedItem[];
   needs_manual_review: boolean;
   auto_graded: boolean;
-  /** Overall teacher feedback comment stored after grading */
   feedback?: string;
 }
 
 // ── Submission ───────────────────────────────────────────────────────────────
 
-/** Typed answer payloads — discriminated by assessment_type */
 export interface QuizAnswer {
   question_id: string;
   selected_option_ids: string[];
@@ -53,8 +48,8 @@ export interface QuizAnswer {
 
 export interface QuizAnswers {
   answers: QuizAnswer[];
-  started_at: string;   // ISO datetime — server-stamped
-  submitted_at: string; // ISO datetime — server-stamped
+  started_at: string;
+  submitted_at: string;
 }
 
 export interface AssignmentTaskAnswer {
@@ -85,12 +80,14 @@ export interface Submission {
   answers_json: QuizAnswers | AssignmentAnswers | Record<string, unknown>;
   grading_json: GradingBreakdown | null;
 
+  started_at: string | null;
   submitted_at: string | null;
   graded_at: string | null;
   created_at: string;
   updated_at: string;
+  grading_version: number;
 
-  // Enriched fields populated by the teacher endpoint
+  // Enriched by teacher endpoint
   user?: SubmissionUser;
 }
 
@@ -113,6 +110,17 @@ export interface SubmissionsPage {
   page: number;
   page_size: number;
   pages: number;
+}
+
+// ── Aggregate stats ───────────────────────────────────────────────────────────
+
+export interface SubmissionStats {
+  total: number;
+  graded_count: number;
+  needs_grading_count: number;
+  late_count: number;
+  avg_score: number | null;
+  pass_rate: number | null;
 }
 
 // ── Teacher grade input ───────────────────────────────────────────────────────

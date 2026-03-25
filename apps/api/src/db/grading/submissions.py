@@ -1,20 +1,16 @@
 """
 Unified Submission model for all assessment types.
-
-Replaces the fragmented 4-table assignment chain (Assignment → AssignmentTask →
-AssignmentTaskSubmission → AssignmentUserSubmission) and the isolated QuizAttempt
-model with a single, consistent row per student per assessment.
 """
 
 from datetime import datetime
 from enum import StrEnum
 from typing import Any
 
-from pydantic import ConfigDict, field_validator
+from pydantic import ConfigDict, Field, field_validator
 from sqlalchemy import JSON, Column, DateTime, ForeignKey, Index, String
-from sqlmodel import Field
+from sqlmodel import Field as SQLField
 
-from src.db.strict_base_model import SQLModelStrictBaseModel
+from src.db.strict_base_model import PydanticStrictBaseModel, SQLModelStrictBaseModel
 
 
 class SubmissionStatus(StrEnum):
@@ -49,11 +45,49 @@ class GradedItem(SQLModelStrictBaseModel):
 class GradingBreakdown(SQLModelStrictBaseModel):
     """Complete grading result for a submission."""
 
-    items: list[GradedItem] = Field(default_factory=list)
+    items: list[GradedItem] = SQLField(default_factory=list)
     needs_manual_review: bool = False   # true if any open-text items present
     auto_graded: bool = False
     feedback: str = ""                  # Overall teacher feedback comment
 
+
+# ── Teacher grading input ─────────────────────────────────────────────────────
+
+class ItemFeedback(PydanticStrictBaseModel):
+    """Optional per-item feedback from the teacher."""
+
+    item_id: str
+    score: float | None = None
+    feedback: str = ""
+
+    @field_validator("score", mode="before")
+    @classmethod
+    def validate_score(cls, v: object) -> object:
+        if v is not None:
+            val = float(v)
+            if val < 0 or val > 100:
+                raise ValueError(f"Score {val} is out of range (0–100)")
+        return v
+
+
+class TeacherGradeInput(PydanticStrictBaseModel):
+    """Body for PATCH /grading/submissions/{submission_uuid}."""
+
+    final_score: float = Field(
+        ...,
+        ge=0,
+        le=100,
+        description="Final score 0–100",
+    )
+    item_feedback: list[ItemFeedback] = Field(
+        default_factory=list,
+        description="Optional per-question/per-task comments",
+    )
+    status: str = "GRADED"  # "GRADED" | "RETURNED"
+    feedback: str = ""
+
+
+# ── Submission base + table ───────────────────────────────────────────────────
 
 class SubmissionBase(SQLModelStrictBaseModel):
     model_config = ConfigDict(use_enum_values=True)
@@ -110,12 +144,14 @@ class SubmissionRead(SubmissionBase):
 
     id: int
     submission_uuid: str
-    answers_json: dict = Field(default_factory=dict)
-    grading_json: dict = Field(default_factory=dict)
+    answers_json: dict = SQLField(default_factory=dict)
+    grading_json: dict = SQLField(default_factory=dict)
+    started_at: datetime | None = None
     submitted_at: datetime | None = None
     graded_at: datetime | None = None
     created_at: datetime
     updated_at: datetime
+    grading_version: int = 1
 
     # Populated by the teacher list endpoint; None for student-facing endpoints
     user: SubmissionUser | None = None
@@ -140,14 +176,7 @@ class SubmissionUpdate(SQLModelStrictBaseModel):
 
 
 class Submission(SubmissionBase, table=True):
-    """
-    Single unified row per student per assessment attempt.
-
-    Replaces:
-    - AssignmentTaskSubmission (one per task)  → answers stored in answers_json
-    - AssignmentUserSubmission (status tracker) → merged into status/final_score
-    - QuizAttempt                               → one row per attempt
-    """
+    """Single unified row per student per assessment attempt."""
 
     __tablename__ = "submission"
     __table_args__ = (
@@ -155,51 +184,80 @@ class Submission(SubmissionBase, table=True):
         Index("ix_submission_uuid", "submission_uuid", unique=True),
     )
 
-    id: int | None = Field(default=None, primary_key=True)
-    submission_uuid: str = Field(index=True)
+    id: int | None = SQLField(default=None, primary_key=True)
+    submission_uuid: str = SQLField(index=True)
 
-    # Explicitly store enum fields as VARCHAR so SQLModel/SQLAlchemy never
-    # auto-creates PostgreSQL ENUM types (submissionstatus, assessmenttype).
-    # Python-level validation is handled by the field_validators on SubmissionBase.
-    assessment_type: AssessmentType = Field(
+    # Explicitly store enum fields as VARCHAR
+    assessment_type: AssessmentType = SQLField(
         sa_column=Column("assessment_type", String, nullable=False),
     )
-    status: SubmissionStatus = Field(
+    status: SubmissionStatus = SQLField(
         default=SubmissionStatus.DRAFT,
         sa_column=Column("status", String, nullable=False, server_default="DRAFT"),
     )
 
-    activity_id: int = Field(
+    activity_id: int = SQLField(
         sa_column=Column("activity_id", ForeignKey("activity.id", ondelete="CASCADE"))
     )
-    user_id: int = Field(
+    user_id: int = SQLField(
         sa_column=Column("user_id", ForeignKey("user.id", ondelete="CASCADE"))
     )
 
     # Typed payload — validated by Pydantic schemas before saving
-    answers_json: dict = Field(
+    answers_json: dict = SQLField(
         default_factory=dict,
         sa_column=Column(JSON),
     )
-    grading_json: dict = Field(
+    grading_json: dict = SQLField(
         default_factory=dict,
         sa_column=Column(JSON),
     )
 
-    # Timestamps
-    submitted_at: datetime | None = Field(
+    # Server-only start timestamp (B2: prevents client falsification)
+    started_at: datetime | None = SQLField(
         default=None,
         sa_column=Column(DateTime(timezone=True), nullable=True),
     )
-    graded_at: datetime | None = Field(
+    submitted_at: datetime | None = SQLField(
         default=None,
         sa_column=Column(DateTime(timezone=True), nullable=True),
     )
-    created_at: datetime = Field(
+    graded_at: datetime | None = SQLField(
+        default=None,
+        sa_column=Column(DateTime(timezone=True), nullable=True),
+    )
+    created_at: datetime = SQLField(
         default_factory=datetime.utcnow,
         sa_column=Column(DateTime(timezone=True)),
     )
-    updated_at: datetime = Field(
+    updated_at: datetime = SQLField(
         default_factory=datetime.utcnow,
         sa_column=Column(DateTime(timezone=True)),
     )
+    # Schema version for safe JSON evolution
+    grading_version: int = SQLField(default=1, sa_column=Column("grading_version", nullable=False, server_default="1"))
+
+
+# ── Paginated response ────────────────────────────────────────────────────────
+
+class SubmissionListResponse(SQLModelStrictBaseModel):
+    """Typed paginated response for the teacher submissions list."""
+
+    items: list[SubmissionRead]
+    total: int
+    page: int
+    page_size: int
+    pages: int
+
+
+# ── Aggregate stats ───────────────────────────────────────────────────────────
+
+class SubmissionStats(SQLModelStrictBaseModel):
+    """Aggregate statistics for the teacher dashboard header."""
+
+    total: int
+    graded_count: int
+    needs_grading_count: int
+    late_count: int
+    avg_score: float | None
+    pass_rate: float | None  # percentage of GRADED submissions scoring ≥ 50

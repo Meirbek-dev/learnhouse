@@ -7047,6 +7047,7 @@
       "needGrading": "тексеруді қажет етеді",
       "total": "Барлығы: {count}",
       "student": "Студент",
+      "attempt": "Әрекет",
       "submitted": "Жіберілді",
       "status": "Күй",
       "score": "Баға",
@@ -7055,13 +7056,31 @@
       "next": "Келесі",
       "pageOf": "{page}/{pages} бет",
       "grade": "Тексеру",
-      "view": "Қарау"
+      "view": "Қарау",
+      "filterAll": "Барлығы",
+      "filterNeedsGrading": "Тексеруді күтеді",
+      "filterGraded": "Бағаланған",
+      "filterLate": "Кешіктірілген",
+      "searchPlaceholder": "Студентті іздеу...",
+      "sortBy": "Сорттау",
+      "sortByDate": "Жіберілген күні",
+      "sortByScore": "Баға бойынша",
+      "sortByAttempt": "Әрекет нөмірі",
+      "exportCSV": "CSV экспорт"
+    },
+    "Stats": {
+      "total": "Барлық жіберілімдер",
+      "needsGrading": "Тексеруді күтеді",
+      "avgScore": "Орташа баға",
+      "passRate": "Өту пайызы"
     },
     "Panel": {
       "loading": "Жүктелуде...",
       "notYetSubmitted": "Әлі жіберілмеген",
       "noData": "Деректер жоқ",
+      "attempt": "Әрекет",
       "finalScore": "Қорытынды баға",
+      "autoScore": "Автоматты баға",
       "feedback": "Пікір",
       "optional": "міндетті емес",
       "feedbackPlaceholder": "Пікір немесе түсініктеме қосыңыз...",
@@ -7076,7 +7095,48 @@
       "next": "Келесі",
       "manualReviewRequired": "Бұл жұмыс қолмен тексеруді қажет етеді",
       "needsReview": "Тексеруді қажет етеді",
-      "noBreakdown": "Жауаптардың толық шолуы жоқ"
+      "noBreakdown": "Жауаптардың толық шолуы жоқ",
+      "confirmReturnTitle": "Студентке қайтаруды растаңыз",
+      "confirmReturnDesc": "Жұмыс студентке қайтарылады. Студент жұмысты қайта жіберуге мүмкіндік алады.",
+      "cancel": "Болдырмау",
+      "confirm": "Растау"
+    },
+    "Result": {
+      "score": "Баға",
+      "passed": "Өтті",
+      "failed": "Өтпеді",
+      "autoScore": "Автоматты баға",
+      "teacherFeedback": "Мұғалімнің пікірі",
+      "yourAnswer": "Сіздің жауабыңыз",
+      "correctAnswer": "Дұрыс жауап",
+      "breakdown": "Жауаптар бойынша тіркелу",
+      "pendingReview": "Тексеруді күтеді",
+      "waitingForGrade": "Баға күтілуде..."
+    },
+    "SubmissionShell": {
+      "bannerSubmittedTitle": "Жұмыс жіберілді",
+      "bannerSubmittedDesc": "Жұмысыңыз жіберілді. Мұғалімнің тексеруін күтіңіз.",
+      "bannerGradedTitle": "Жұмыс бағаланды",
+      "bannerGradedDesc": "Мұғалім жұмысыңызды тексерді.",
+      "bannerLateTitle": "Жұмыс кешіктіріліп жіберілді",
+      "bannerLateDesc": "Жұмысыңыз мерзімінен кеш жіберілді.",
+      "bannerReturnedTitle": "Жұмыс қайтарылды",
+      "bannerReturnedDesc": "Мұғалім жұмысыңызды қайта тапсыруды сұрады.",
+      "score": "Баға",
+      "readyToSubmit": "Жіберуге дайынсыз ба?",
+      "returnedResubmit": "Жұмыс қайтарылды. Түзетіп, қайта жіберуге болады."
+    },
+    "SubmitButton": {
+      "submitForGrading": "Тексеруге жіберу",
+      "submitting": "Жіберілуде...",
+      "submitted": "Сәтті жіберілді",
+      "alreadySubmitted": "Жіберілді",
+      "notAuthenticated": "Жіберу үшін жүйеге кіріңіз",
+      "submitFailed": "Жіберу сәтсіз аяқталды. Қайталап көріңіз.",
+      "confirmTitle": "Тексеруге жіберу керек пе?",
+      "confirmDescription": "Жіберілгеннен кейін жауаптарды өзгерту мүмкін болмайды.",
+      "cancel": "Болдырмау",
+      "confirmSubmit": "Жіберу"
     }
   }
 }

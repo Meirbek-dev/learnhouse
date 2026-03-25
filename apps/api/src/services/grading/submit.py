@@ -1,6 +1,5 @@
 """
-Submission orchestrator — replaces the scattered submit_quiz / create_assignment_submission
-logic with a single entry point per lifecycle action.
+Submission orchestrator — single entry point per lifecycle action.
 """
 
 import logging
@@ -25,6 +24,22 @@ from src.services.grading.grader import grade_submission
 
 logger = logging.getLogger(__name__)
 
+# B6: per-type submit permission map
+_SUBMIT_PERMISSION: dict[AssessmentType, str] = {
+    AssessmentType.QUIZ: "quiz:submit",
+    AssessmentType.EXAM: "exam:submit",
+    AssessmentType.ASSIGNMENT: "assignment:submit",
+    AssessmentType.CODE_CHALLENGE: "assignment:submit",
+}
+
+# B8: per-type XP source map
+_XP_SOURCE: dict[AssessmentType, XPSource] = {
+    AssessmentType.QUIZ: XPSource.QUIZ_COMPLETION,
+    AssessmentType.EXAM: XPSource.EXAM_COMPLETION,
+    AssessmentType.ASSIGNMENT: XPSource.ASSIGNMENT_SUBMISSION,
+    AssessmentType.CODE_CHALLENGE: XPSource.CODE_CHALLENGE_COMPLETION,
+}
+
 
 async def start_submission(
     request: Request,
@@ -36,13 +51,13 @@ async def start_submission(
     """
     Create a DRAFT Submission and record the server-stamped start time.
 
-    Called when a student clicks "Start" on a quiz or exam — the start
-    timestamp is set here on the server, so clients cannot falsify it.
+    The started_at timestamp is set here on the server so clients cannot
+    falsify it (B2 fix: moved out of mutable answers_json).
     """
     activity = _get_activity_or_404(activity_id, db_session)
-    _require_permission(current_user, activity, "quiz:submit", db_session)
+    _require_permission(current_user, activity, assessment_type, db_session)
 
-    # Find or create a DRAFT submission for this attempt
+    # Return existing DRAFT if present (idempotent)
     existing_draft = db_session.exec(
         select(Submission).where(
             Submission.activity_id == activity_id,
@@ -54,15 +69,15 @@ async def start_submission(
     if existing_draft:
         return SubmissionRead.model_validate(existing_draft)
 
-    # Count previous attempts (non-draft) to set attempt_number
-    previous = db_session.exec(
+    # B7 fix: count all non-DRAFT statuses (including RETURNED) as previous attempts
+    previous_count = db_session.exec(
         select(Submission).where(
             Submission.activity_id == activity_id,
             Submission.user_id == current_user.id,
             Submission.status != SubmissionStatus.DRAFT,
         )
     ).all()
-    attempt_number = len(previous) + 1
+    attempt_number = len(previous_count) + 1
 
     now = datetime.now(UTC)
     submission = Submission(
@@ -72,8 +87,9 @@ async def start_submission(
         user_id=current_user.id,
         status=SubmissionStatus.DRAFT,
         attempt_number=attempt_number,
-        answers_json={"started_at": now.isoformat()},
+        answers_json={},
         grading_json={},
+        started_at=now,   # B2 fix: dedicated column, not answers_json
         created_at=now,
         updated_at=now,
     )
@@ -91,20 +107,15 @@ async def submit_assessment(
     current_user: PublicUser,
     db_session: Session,
     *,
-    # Quiz-specific extras
     violation_count: int = 0,
-    # Grading context (fetched by the route handler)
     questions: list[dict] | None = None,
     settings: dict | None = None,
 ) -> SubmissionRead:
     """
     Submit an assessment attempt and auto-grade where possible.
-
-    The route handler fetches the activity-specific content (questions, settings)
-    and passes them here. This keeps the service layer assessment-agnostic.
     """
     activity = _get_activity_or_404(activity_id, db_session)
-    _require_permission(current_user, activity, "quiz:submit", db_session)
+    _require_permission(current_user, activity, assessment_type, db_session)
 
     settings = settings or {}
 
@@ -123,9 +134,9 @@ async def submit_assessment(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="No active draft submission found. Call /grading/start first.",
             )
-        # Assignments have no timed start — auto-create the draft inline so
-        # students can submit without a separate /grading/start call.
-        previous = db_session.exec(
+        # Assignments have no timed start — auto-create the draft inline
+        # B7 fix: count RETURNED as previous attempts
+        previous_count = db_session.exec(
             select(Submission).where(
                 Submission.activity_id == activity_id,
                 Submission.user_id == current_user.id,
@@ -139,9 +150,10 @@ async def submit_assessment(
             activity_id=activity_id,
             user_id=current_user.id,
             status=SubmissionStatus.DRAFT,
-            attempt_number=len(previous) + 1,
+            attempt_number=len(previous_count) + 1,
             answers_json={},
             grading_json={},
+            started_at=now_ts,
             created_at=now_ts,
             updated_at=now_ts,
         )
@@ -151,25 +163,30 @@ async def submit_assessment(
     # Enforce attempt limits
     max_attempts: int | None = settings.get("max_attempts")
     if max_attempts:
-        previous_count = db_session.exec(
+        completed = db_session.exec(
             select(Submission).where(
                 Submission.activity_id == activity_id,
                 Submission.user_id == current_user.id,
-                Submission.status.in_([SubmissionStatus.SUBMITTED, SubmissionStatus.GRADED]),
+                Submission.status.in_([
+                    SubmissionStatus.SUBMITTED,
+                    SubmissionStatus.GRADED,
+                    SubmissionStatus.LATE,
+                ]),
             )
         ).all()
-        if len(previous_count) >= max_attempts:
+        if len(completed) >= max_attempts:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail=f"Maximum attempts ({max_attempts}) reached",
             )
 
-    # Server-side time-limit enforcement using the stored started_at
+    # B2 fix: time-limit enforcement using dedicated started_at column
     now = datetime.now(UTC)
-    started_at_raw: str | None = draft.answers_json.get("started_at")
     time_limit_seconds: int | None = settings.get("time_limit_seconds")
-    if started_at_raw and time_limit_seconds:
-        started_at = datetime.fromisoformat(started_at_raw)
+    if draft.started_at and time_limit_seconds:
+        started_at = draft.started_at
+        if started_at.tzinfo is None:
+            started_at = started_at.replace(tzinfo=UTC)
         elapsed = (now - started_at).total_seconds()
         if elapsed > time_limit_seconds:
             raise HTTPException(
@@ -196,13 +213,28 @@ async def submit_assessment(
 
     final_auto_score = 0.0 if violations_exceeded else result.auto_score
 
-    # Determine due-date status
-    new_status = SubmissionStatus.SUBMITTED
-    if assessment_type == AssessmentType.QUIZ and not result.needs_manual_review:
+    # B3 fix: detect LATE submissions using due_date_iso from settings
+    due_date_iso: str | None = settings.get("due_date_iso")
+    is_late = False
+    if due_date_iso:
+        try:
+            due_date = datetime.fromisoformat(due_date_iso)
+            if due_date.tzinfo is None:
+                due_date = due_date.replace(tzinfo=UTC)
+            is_late = now > due_date
+        except ValueError:
+            pass
+
+    # Determine submission status
+    if is_late:
+        new_status = SubmissionStatus.LATE
+    elif assessment_type == AssessmentType.QUIZ and not result.needs_manual_review:
         new_status = SubmissionStatus.GRADED
+    else:
+        new_status = SubmissionStatus.SUBMITTED
 
     # Persist the completed submission
-    draft.answers_json = {**draft.answers_json, **answers_payload}
+    draft.answers_json = answers_payload
     draft.grading_json = result.breakdown.model_dump()
     draft.auto_score = final_auto_score
     draft.final_score = final_auto_score if not result.needs_manual_review else None
@@ -215,14 +247,15 @@ async def submit_assessment(
     db_session.commit()
     db_session.refresh(draft)
 
-    # Award XP if passed
+    # Award XP if passed (B8 fix: use correct XP source per assessment type)
     passed = (draft.auto_score or 0) >= 50.0
-    if passed and not violations_exceeded:
+    if passed and not violations_exceeded and new_status != SubmissionStatus.LATE:
+        xp_source = _XP_SOURCE.get(assessment_type, XPSource.QUIZ_COMPLETION)
         try:
             await award_xp(
                 request=request,
                 user_id=current_user.id,
-                source=XPSource.QUIZ_COMPLETION,
+                source=xp_source,
                 source_id=draft.submission_uuid,
                 idempotency_key=f"submission_{draft.submission_uuid}",
                 db_session=db_session,
@@ -250,9 +283,11 @@ def _get_activity_or_404(activity_id: int, db_session: Session) -> Activity:
 def _require_permission(
     current_user: PublicUser,
     activity: Activity,
-    permission: str,
+    assessment_type: AssessmentType,
     db_session: Session,
 ) -> None:
+    # B6 fix: use per-type permission; fall back gracefully
+    permission = _SUBMIT_PERMISSION.get(assessment_type, "quiz:submit")
     checker = PermissionChecker(db_session)
     checker.require(
         current_user.id,

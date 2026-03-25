@@ -1,10 +1,7 @@
 'use server';
 
 /**
- * Grading API service.
- *
- * Replaces the scattered assignment/quiz service functions with a single
- * module that covers the full grading lifecycle.
+ * Grading API service — v2.
  */
 
 import { revalidateTag } from 'next/cache';
@@ -14,6 +11,7 @@ import type {
   AssessmentType,
   Submission,
   SubmissionsPage,
+  SubmissionStats,
   TeacherGradeInput,
 } from '@/types/grading';
 
@@ -21,10 +19,6 @@ const API = () => getServerAPIUrl();
 
 // ── Student endpoints ─────────────────────────────────────────────────────────
 
-/**
- * Record the server-stamped start time for a quiz/exam attempt.
- * Must be called before submitting — the returned submission_uuid identifies the draft.
- */
 export async function startSubmission(
   activityId: number,
   assessmentType: AssessmentType,
@@ -37,9 +31,6 @@ export async function startSubmission(
   return meta.data as Submission;
 }
 
-/**
- * Submit an assessment attempt and receive grading results.
- */
 export async function submitAssessment(
   activityId: number,
   assessmentType: AssessmentType,
@@ -56,9 +47,6 @@ export async function submitAssessment(
   return meta.data as Submission;
 }
 
-/**
- * Fetch the current user's submissions for an activity.
- */
 export async function getMySubmissions(
   activityId: number,
   accessToken: string,
@@ -70,23 +58,36 @@ export async function getMySubmissions(
   return meta.data as Submission[];
 }
 
+export async function getMySubmissionResult(
+  submissionUuid: string,
+  accessToken: string,
+): Promise<Submission | null> {
+  const url = `${API()}grading/submissions/me/${submissionUuid}`;
+  const res = await fetch(url, RequestBodyWithAuthHeader('GET', null, { tags: ['submissions'] }, accessToken));
+  const meta = await getResponseMetadata(res);
+  if (!meta.success) return null;
+  return meta.data as Submission;
+}
+
 // ── Teacher endpoints ─────────────────────────────────────────────────────────
 
-/**
- * Paginated submissions list for a teacher.
- * Replaces the kanban board that had no filtering or pagination.
- */
 export async function getSubmissionsForActivity(
   activityId: number,
   accessToken: string,
   options: {
     status?: string;
+    search?: string;
+    sortBy?: string;
+    sortDir?: string;
     page?: number;
     pageSize?: number;
   } = {},
 ): Promise<SubmissionsPage> {
   const params = new URLSearchParams({ activity_id: String(activityId) });
   if (options.status) params.set('status', options.status);
+  if (options.search) params.set('search', options.search);
+  if (options.sortBy) params.set('sort_by', options.sortBy);
+  if (options.sortDir) params.set('sort_dir', options.sortDir);
   if (options.page) params.set('page', String(options.page));
   if (options.pageSize) params.set('page_size', String(options.pageSize));
 
@@ -100,9 +101,20 @@ export async function getSubmissionsForActivity(
   return meta.data as SubmissionsPage;
 }
 
-/**
- * Fetch a single submission with full answers + grading breakdown.
- */
+export async function getSubmissionStats(
+  activityId: number,
+  accessToken: string,
+): Promise<SubmissionStats | null> {
+  const url = `${API()}grading/submissions/stats?activity_id=${activityId}`;
+  const res = await fetch(
+    url,
+    RequestBodyWithAuthHeader('GET', null, { tags: ['submissions'] }, accessToken),
+  );
+  const meta = await getResponseMetadata(res);
+  if (!meta.success) return null;
+  return meta.data as SubmissionStats;
+}
+
 export async function getSubmission(
   submissionUuid: string,
   accessToken: string,
@@ -117,12 +129,6 @@ export async function getSubmission(
   return meta.data as Submission;
 }
 
-/**
- * Save a teacher-entered final score and optional per-item feedback.
- *
- * Replaces the broken POST .../grade endpoint that had no body and
- * therefore no way to accept a numeric score.
- */
 export async function saveGrade(
   submissionUuid: string,
   gradeInput: TeacherGradeInput,
@@ -135,4 +141,46 @@ export async function saveGrade(
 
   revalidateTag('submissions');
   return meta.data as Submission;
+}
+
+export async function exportGradesCSV(
+  activityId: number,
+  accessToken: string,
+): Promise<string> {
+  // Fetch all submissions (no pagination) for export
+  const params = new URLSearchParams({
+    activity_id: String(activityId),
+    page_size: '1000',
+    page: '1',
+  });
+  const url = `${API()}grading/submissions?${params}`;
+  const res = await fetch(
+    url,
+    RequestBodyWithAuthHeader('GET', null, { tags: ['submissions'] }, accessToken),
+  );
+  const meta = await getResponseMetadata(res);
+  if (!meta.success) return '';
+
+  const page = meta.data as SubmissionsPage;
+  const rows = page.items;
+
+  const header = ['Student Name', 'Email', 'Attempt', 'Status', 'Submitted At', 'Auto Score', 'Final Score'];
+  const lines = rows.map((s) => {
+    const name = s.user
+      ? [s.user.first_name, s.user.middle_name, s.user.last_name].filter(Boolean).join(' ') || s.user.username
+      : String(s.user_id);
+    const email = s.user?.email ?? '';
+    const submitted = s.submitted_at ? new Date(s.submitted_at).toISOString() : '';
+    return [
+      `"${name}"`,
+      `"${email}"`,
+      s.attempt_number,
+      s.status,
+      submitted,
+      s.auto_score ?? '',
+      s.final_score ?? '',
+    ].join(',');
+  });
+
+  return [header.join(','), ...lines].join('\n');
 }

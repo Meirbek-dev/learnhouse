@@ -7047,6 +7047,7 @@
       "needGrading": "ожидают проверки",
       "total": "Всего: {count}",
       "student": "Студент",
+      "attempt": "Попытка",
       "submitted": "Отправлено",
       "status": "Статус",
       "score": "Оценка",
@@ -7055,13 +7056,31 @@
       "next": "След.",
       "pageOf": "Страница {page} из {pages}",
       "grade": "Проверить",
-      "view": "Просмотр"
+      "view": "Просмотр",
+      "filterAll": "Все",
+      "filterNeedsGrading": "Ожидают проверки",
+      "filterGraded": "Проверено",
+      "filterLate": "С опозданием",
+      "searchPlaceholder": "Поиск студента...",
+      "sortBy": "Сортировка",
+      "sortByDate": "По дате отправки",
+      "sortByScore": "По оценке",
+      "sortByAttempt": "По номеру попытки",
+      "exportCSV": "Экспорт CSV"
+    },
+    "Stats": {
+      "total": "Всего сдано",
+      "needsGrading": "Ожидают проверки",
+      "avgScore": "Средняя оценка",
+      "passRate": "Процент успеваемости"
     },
     "Panel": {
       "loading": "Загрузка...",
       "notYetSubmitted": "Ещё не сдано",
       "noData": "Нет данных",
+      "attempt": "Попытка",
       "finalScore": "Итоговая оценка",
+      "autoScore": "Автоматическая оценка",
       "feedback": "Комментарий",
       "optional": "необязательно",
       "feedbackPlaceholder": "Добавьте комментарий или отзыв...",
@@ -7076,7 +7095,48 @@
       "next": "Следующий",
       "manualReviewRequired": "Эта работа требует ручной проверки",
       "needsReview": "Требует проверки",
-      "noBreakdown": "Нет детализации ответов"
+      "noBreakdown": "Нет детализации ответов",
+      "confirmReturnTitle": "Подтвердите возврат студенту",
+      "confirmReturnDesc": "Работа будет возвращена студенту. Студент сможет повторно сдать работу.",
+      "cancel": "Отмена",
+      "confirm": "Подтвердить"
+    },
+    "Result": {
+      "score": "Оценка",
+      "passed": "Зачтено",
+      "failed": "Не зачтено",
+      "autoScore": "Автоматическая оценка",
+      "teacherFeedback": "Комментарий преподавателя",
+      "yourAnswer": "Ваш ответ",
+      "correctAnswer": "Правильный ответ",
+      "breakdown": "Детализация по вопросам",
+      "pendingReview": "Ожидает проверки",
+      "waitingForGrade": "Ожидание оценки..."
+    },
+    "SubmissionShell": {
+      "bannerSubmittedTitle": "Работа сдана",
+      "bannerSubmittedDesc": "Ваша работа отправлена. Ожидайте проверки преподавателя.",
+      "bannerGradedTitle": "Работа проверена",
+      "bannerGradedDesc": "Преподаватель проверил вашу работу.",
+      "bannerLateTitle": "Работа сдана с опозданием",
+      "bannerLateDesc": "Ваша работа была отправлена после истечения срока.",
+      "bannerReturnedTitle": "Работа возвращена",
+      "bannerReturnedDesc": "Преподаватель попросил вас переработать и повторно сдать работу.",
+      "score": "Оценка",
+      "readyToSubmit": "Готовы сдать работу?",
+      "returnedResubmit": "Работа возвращена. Вы можете исправить и повторно отправить."
+    },
+    "SubmitButton": {
+      "submitForGrading": "Сдать на проверку",
+      "submitting": "Отправка...",
+      "submitted": "Успешно отправлено",
+      "alreadySubmitted": "Уже отправлено",
+      "notAuthenticated": "Войдите в систему для отправки",
+      "submitFailed": "Не удалось отправить. Попробуйте ещё раз.",
+      "confirmTitle": "Сдать на проверку?",
+      "confirmDescription": "После отправки изменить ответы будет невозможно.",
+      "cancel": "Отмена",
+      "confirmSubmit": "Сдать"
     }
   }
 }

@@ -1,32 +1,38 @@
 """
 Teacher grading service.
-
-Replaces the broken grade_assignment_submission() which:
-- Had no grade input (just averaged task submissions)
-- Could not accept a manual score
-- Had no feedback field
 """
 
 import logging
 from datetime import UTC, datetime
 
 from fastapi import HTTPException, status
+from sqlalchemy import asc, desc, func, or_
 from sqlmodel import Session, select
 
 from src.db.courses.activities import Activity
-from src.db.grading.schemas import TeacherGradeInput
 from src.db.grading.submissions import (
     GradedItem,
     GradingBreakdown,
+    ItemFeedback,
     Submission,
+    SubmissionListResponse,
     SubmissionRead,
+    SubmissionStats,
     SubmissionStatus,
     SubmissionUser,
+    TeacherGradeInput,
 )
 from src.db.users import PublicUser, User
 from src.security.rbac import PermissionChecker
 
 logger = logging.getLogger(__name__)
+
+_SORT_MAP = {
+    "submitted_at": Submission.submitted_at,
+    "final_score": Submission.final_score,
+    "created_at": Submission.created_at,
+    "attempt_number": Submission.attempt_number,
+}
 
 
 async def get_submissions_for_activity(
@@ -35,14 +41,16 @@ async def get_submissions_for_activity(
     db_session: Session,
     *,
     status_filter: str | None = None,
+    search: str | None = None,
+    sort_by: str = "submitted_at",
+    sort_dir: str = "desc",
     page: int = 1,
     page_size: int = 25,
-) -> dict:
+) -> SubmissionListResponse:
     """
-    Return paginated submissions for an activity (teacher view).
+    Return paginated, filterable, searchable submissions for an activity (teacher view).
 
-    Replaces the kanban query that fetched all submissions at once with
-    no pagination, filtering, or sorting.
+    B1 fix: uses SQL LIMIT/OFFSET — no longer loads all rows into Python memory.
     """
     activity = db_session.exec(
         select(Activity).where(Activity.id == activity_id)
@@ -61,7 +69,12 @@ async def get_submissions_for_activity(
         resource_owner_id=activity.creator_id,
     )
 
-    query = select(Submission).where(Submission.activity_id == activity_id)
+    # Base query — join User for search support
+    query = (
+        select(Submission)
+        .join(User, User.id == Submission.user_id)
+        .where(Submission.activity_id == activity_id)
+    )
 
     if status_filter:
         try:
@@ -72,13 +85,31 @@ async def get_submissions_for_activity(
                 detail=f"Invalid status '{status_filter}'",
             )
 
-    all_rows = db_session.exec(query).all()
-    total = len(all_rows)
+    if search:
+        term = f"%{search}%"
+        query = query.where(
+            or_(
+                User.first_name.ilike(term),
+                User.last_name.ilike(term),
+                User.username.ilike(term),
+                User.email.ilike(term),
+            )
+        )
 
+    # Count total (B1 fix: SQL count instead of len(all_rows))
+    count_query = select(func.count()).select_from(query.subquery())
+    total: int = db_session.exec(count_query).one()
+
+    # Sort
+    sort_col = _SORT_MAP.get(sort_by, Submission.submitted_at)
+    order_fn = desc if sort_dir == "desc" else asc
+    query = query.order_by(order_fn(sort_col))
+
+    # Paginate via SQL (B1 fix)
     offset = (page - 1) * page_size
-    page_rows = all_rows[offset : offset + page_size]
+    page_rows = db_session.exec(query.offset(offset).limit(page_size)).all()
 
-    # Batch-fetch user records so we can embed display info in each row
+    # Batch-fetch user records
     user_ids = {s.user_id for s in page_rows}
     users_by_id: dict[int, User] = {}
     if user_ids:
@@ -103,13 +134,53 @@ async def get_submissions_for_activity(
             )
         return base
 
-    return {
-        "items": [_enrich(s) for s in page_rows],
-        "total": total,
-        "page": page,
-        "page_size": page_size,
-        "pages": max(1, -(-total // page_size)),
-    }
+    pages = max(1, -(-total // page_size))
+    return SubmissionListResponse(
+        items=[_enrich(s) for s in page_rows],
+        total=total,
+        page=page,
+        page_size=page_size,
+        pages=pages,
+    )
+
+
+async def get_submission_stats(
+    activity_id: int,
+    current_user: PublicUser,
+    db_session: Session,
+) -> SubmissionStats:
+    """Return aggregate statistics for the teacher dashboard header."""
+    activity = db_session.exec(
+        select(Activity).where(Activity.id == activity_id)
+    ).first()
+    if not activity:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Activity not found")
+
+    checker = PermissionChecker(db_session)
+    checker.require(current_user.id, "assignment:read", resource_owner_id=activity.creator_id)
+
+    rows = db_session.exec(
+        select(Submission).where(Submission.activity_id == activity_id)
+    ).all()
+
+    total = len(rows)
+    graded = [r for r in rows if r.status == SubmissionStatus.GRADED]
+    needs_grading = [r for r in rows if r.status in (SubmissionStatus.SUBMITTED, SubmissionStatus.LATE)]
+    late = [r for r in rows if r.status == SubmissionStatus.LATE]
+
+    scores = [r.final_score for r in graded if r.final_score is not None]
+    avg_score = round(sum(scores) / len(scores), 2) if scores else None
+    passing = [s for s in scores if s >= 50.0]
+    pass_rate = round(len(passing) / len(scores) * 100, 1) if scores else None
+
+    return SubmissionStats(
+        total=total,
+        graded_count=len(graded),
+        needs_grading_count=len(needs_grading),
+        late_count=len(late),
+        avg_score=avg_score,
+        pass_rate=pass_rate,
+    )
 
 
 async def save_grade(
@@ -118,12 +189,7 @@ async def save_grade(
     current_user: PublicUser,
     db_session: Session,
 ) -> SubmissionRead:
-    """
-    Apply a teacher-entered final score and optional feedback to a submission.
-
-    Replaces the broken PUT /assignments/{uuid}/submissions/{user_id}/grade
-    endpoint which had no body (and therefore no way to input a score).
-    """
+    """Apply a teacher-entered final score and optional feedback to a submission."""
     submission = db_session.exec(
         select(Submission).where(Submission.submission_uuid == submission_uuid)
     ).first()
@@ -158,10 +224,13 @@ async def save_grade(
     if grade_input.item_feedback:
         item_map = {item["item_id"]: item for item in existing_items}
         for fb in grade_input.item_feedback:
+            if not isinstance(fb, ItemFeedback):
+                fb = ItemFeedback(**fb) if isinstance(fb, dict) else fb
             if fb.item_id in item_map:
                 item_map[fb.item_id]["feedback"] = fb.feedback
                 if fb.score is not None:
                     item_map[fb.item_id]["score"] = fb.score
+                    item_map[fb.item_id]["needs_manual_review"] = False
             else:
                 item_map[fb.item_id] = GradedItem(
                     item_id=fb.item_id,
@@ -171,10 +240,16 @@ async def save_grade(
                 ).model_dump()
         existing_items = list(item_map.values())
 
+    # DX4 fix: preserve needs_manual_review if items still lack scores
+    still_needs_review = any(
+        item.get("needs_manual_review") and not item.get("feedback")
+        for item in existing_items
+    )
+
     updated_grading = GradingBreakdown(
         items=[GradedItem(**item) for item in existing_items],
-        needs_manual_review=False,
-        auto_graded=False,
+        needs_manual_review=still_needs_review,
+        auto_graded=existing_grading.get("auto_graded", False),
         feedback=grade_input.feedback,
     )
 

@@ -5,17 +5,8 @@
  *
  * Wraps any student-facing assessment UI and adds:
  *   1. A status banner (DRAFT / SUBMITTED / GRADED / RETURNED / LATE)
- *   2. A "Submit for Grading" footer with SubmitButton
- *   3. Score + feedback display after grading
- *
- * Replaces AssignmentStudentActivity's ad-hoc task list that had
- * zero unified submit action — students could fill out tasks forever
- * with no way to signal they were done.
- *
- * Usage:
- *   <SubmissionShell activityId={activity.id} assessmentType="ASSIGNMENT">
- *     <AssignmentStudentActivity />
- *   </SubmissionShell>
+ *   2. A "Submit for Grading" footer
+ *   3. Full grading result (score + breakdown) after grading
  */
 
 import type { ReactNode } from 'react';
@@ -28,20 +19,18 @@ import PageLoading from '@components/Objects/Loaders/PageLoading';
 
 import { useMySubmission } from '@/hooks/useMySubmission';
 import SubmitButton from './SubmitButton';
+import SubmissionResult from './SubmissionResult';
 import SubmissionStatusBadge from '../SubmissionStatusBadge';
 import type { AssessmentType, Submission } from '@/types/grading';
 
 interface SubmissionShellProps {
   activityId: number;
   assessmentType: AssessmentType;
-  /** The assessment content (task forms, quiz questions, etc.) */
   children: ReactNode;
-  /** Extra answers to forward to the submit endpoint (leave empty for ASSIGNMENT) */
   answersPayload?: Record<string, unknown>;
   violationCount?: number;
 }
 
-// Status-specific banner config
 const STATUS_BANNERS = {
   SUBMITTED: {
     icon: SendHorizonal,
@@ -88,15 +77,15 @@ export default function SubmissionShell({
   const status = submission?.status ?? null;
   const bannerConfig = status && status !== 'DRAFT' ? STATUS_BANNERS[status] : null;
 
-  const handleSubmitted = (updated: Submission) => {
-    // Revalidate so the status banner reflects the new SUBMITTED state
+  const handleSubmitted = (_updated: Submission) => {
     void mutate();
-    // Parent components can also listen via onSubmitted if needed
   };
+
+  const showResult = (status === 'GRADED' || status === 'RETURNED') && submission;
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Status banner — shown for SUBMITTED / GRADED / RETURNED / LATE */}
+      {/* Status banner */}
       {bannerConfig && (
         <Alert variant={bannerConfig.variant}>
           <bannerConfig.icon className={`h-4 w-4 ${bannerConfig.iconClass}`} />
@@ -106,7 +95,6 @@ export default function SubmissionShell({
           </AlertTitle>
           <AlertDescription>{t(bannerConfig.descKey)}</AlertDescription>
 
-          {/* Score display once graded */}
           {status === 'GRADED' && submission?.final_score !== null && (
             <div className="mt-3 flex items-center gap-2">
               <BookOpenCheck className="h-4 w-4 text-emerald-600" />
@@ -115,20 +103,21 @@ export default function SubmissionShell({
               </span>
             </div>
           )}
-
-          {/* Teacher feedback */}
-          {submission?.grading_json?.feedback && (
-            <p className="mt-2 text-sm italic text-slate-600">
-              &ldquo;{submission.grading_json.feedback}&rdquo;
-            </p>
-          )}
         </Alert>
       )}
 
       {/* Assessment content */}
       {children}
 
-      {/* Submit footer — only shown for DRAFT or no submission yet */}
+      {/* Full grading result breakdown after grading */}
+      {showResult && (
+        <>
+          <Separator />
+          <SubmissionResult submission={submission} />
+        </>
+      )}
+
+      {/* Submit footer — only for DRAFT or no submission */}
       {(status === 'DRAFT' || status === null) && (
         <>
           <Separator />
@@ -155,7 +144,7 @@ export default function SubmissionShell({
             <SubmitButton
               activityId={activityId}
               assessmentType={assessmentType}
-              currentStatus={null} // allow re-submit
+              currentStatus={null}
               answersPayload={answersPayload}
               violationCount={violationCount}
               onSubmitted={handleSubmitted}

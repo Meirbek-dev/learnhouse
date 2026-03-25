@@ -1,13 +1,5 @@
 'use client';
 
-/**
- * useSubmissions
- *
- * Hook for the teacher submissions table.
- * Supports status filtering and pagination — neither of which was possible
- * with the old kanban that loaded everything at once.
- */
-
 import { useState } from 'react';
 import useSWR from 'swr';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
@@ -18,12 +10,18 @@ import type { SubmissionStatus, SubmissionsPage } from '@/types/grading';
 export interface UseSubmissionsOptions {
   activityId: number | null;
   status?: SubmissionStatus | null;
+  search?: string;
+  sortBy?: string;
+  sortDir?: 'asc' | 'desc';
   pageSize?: number;
 }
 
 export function useSubmissions({
   activityId,
   status,
+  search,
+  sortBy = 'submitted_at',
+  sortDir = 'desc',
   pageSize = 25,
 }: UseSubmissionsOptions) {
   const session = usePlatformSession();
@@ -33,6 +31,9 @@ export function useSubmissions({
   const params = new URLSearchParams();
   if (activityId) params.set('activity_id', String(activityId));
   if (status) params.set('status', status);
+  if (search) params.set('search', search);
+  params.set('sort_by', sortBy);
+  params.set('sort_dir', sortDir);
   params.set('page', String(page));
   params.set('page_size', String(pageSize));
 

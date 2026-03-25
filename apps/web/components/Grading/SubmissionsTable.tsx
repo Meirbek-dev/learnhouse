@@ -1,30 +1,19 @@
 'use client';
 
-/**
- * SubmissionsTable
- *
- * Paginated, filterable teacher submissions table.
- *
- * Replaces the 3-column Kanban board (AssignmentSubmissionsSubPage) that:
- * - Loaded ALL submissions at once with no pagination
- * - Had no filtering, searching, or sorting
- * - Used fixed 350px cards with hardcoded flex layout
- * - Opened a modal with 3 nested Context Providers and no grade input
- *
- * Features:
- * - Status filter tabs (All / Needs Grading / Graded / Late)
- * - Sort by: submitted date, score, student name
- * - Pagination
- * - "Grade ▸" opens GradingPanel side panel with real score input
- * - Grading backlog count in header
- */
-
 import { useState, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
-import { BookOpenCheck, ChevronLeft, ChevronRight, Clock4 } from 'lucide-react';
+import { BookOpenCheck, ChevronLeft, ChevronRight, Clock4, Download, Search } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -37,7 +26,11 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 
 import { useSubmissions } from '@/hooks/useSubmissions';
+import { useSubmissionStats } from '@/hooks/useSubmissionStats';
+import { exportGradesCSV } from '@services/grading/grading';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import GradingPanel from './GradingPanel';
+import GradingStats from './GradingStats';
 import SubmissionStatusBadge from './SubmissionStatusBadge';
 import type { Submission, SubmissionStatus } from '@/types/grading';
 
@@ -48,20 +41,24 @@ interface SubmissionsTableProps {
 
 type StatusFilter = SubmissionStatus | 'ALL' | 'NEEDS_GRADING';
 
-const FILTER_OPTIONS: { label: string; value: StatusFilter }[] = [
-  { label: 'All', value: 'ALL' },
-  { label: 'Needs Grading', value: 'NEEDS_GRADING' },
-  { label: 'Graded', value: 'GRADED' },
-  { label: 'Late', value: 'LATE' },
-];
-
-export default function SubmissionsTable({
-  activityId,
-  title,
-}: SubmissionsTableProps) {
+export default function SubmissionsTable({ activityId, title }: SubmissionsTableProps) {
   const t = useTranslations('Grading.Table');
+  const session = usePlatformSession();
+  const accessToken = session?.data?.tokens?.access_token ?? '';
+
   const [activeFilter, setActiveFilter] = useState<StatusFilter>('ALL');
+  const [search, setSearch] = useState('');
+  const [sortBy, setSortBy] = useState('submitted_at');
   const [openSubmissionUuid, setOpenSubmissionUuid] = useState<string | null>(null);
+  const [isExporting, setIsExporting] = useState(false);
+
+  // F3 fix: filter options use i18n
+  const FILTER_OPTIONS: { labelKey: string; value: StatusFilter }[] = [
+    { labelKey: 'filterAll', value: 'ALL' },
+    { labelKey: 'filterNeedsGrading', value: 'NEEDS_GRADING' },
+    { labelKey: 'filterGraded', value: 'GRADED' },
+    { labelKey: 'filterLate', value: 'LATE' },
+  ];
 
   const statusParam: SubmissionStatus | undefined =
     activeFilter === 'ALL'
@@ -70,18 +67,20 @@ export default function SubmissionsTable({
         ? 'SUBMITTED'
         : activeFilter;
 
-  const { submissions, total, pages, page, setPage, isLoading, mutate } =
-    useSubmissions({
-      activityId,
-      status: statusParam,
-    });
+  const { submissions, total, pages, page, setPage, isLoading, mutate } = useSubmissions({
+    activityId,
+    status: statusParam,
+    search: search || undefined,
+    sortBy,
+  });
 
-  // When Needs Grading filter is active, `total` is the authoritative server count.
-  // Otherwise, count from the current page (approximate, good enough for the banner).
+  // F9 fix: use server-side total for needs-grading count when on that tab;
+  // for other tabs, rely on stats hook
+  const { stats } = useSubmissionStats(activityId);
   const needsGradingCount =
     activeFilter === 'NEEDS_GRADING'
       ? total
-      : submissions.filter((s) => s.status === 'SUBMITTED' || s.status === 'LATE').length;
+      : (stats?.needs_grading_count ?? 0);
 
   const allUuids = submissions.map((s) => s.submission_uuid);
 
@@ -104,8 +103,28 @@ export default function SubmissionsTable({
     [allUuids, submissions, mutate],
   );
 
+  const handleExportCSV = useCallback(async () => {
+    if (!accessToken) return;
+    setIsExporting(true);
+    try {
+      const csv = await exportGradesCSV(activityId, accessToken);
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `grades-activity-${activityId}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } finally {
+      setIsExporting(false);
+    }
+  }, [activityId, accessToken]);
+
   return (
     <div className="space-y-4">
+      {/* Stats cards */}
+      <GradingStats activityId={activityId} />
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -120,9 +139,52 @@ export default function SubmissionsTable({
           )}
         </div>
 
-        <Badge variant="outline" className="text-xs">
-          {t('total', { count: total })}
-        </Badge>
+        <div className="flex items-center gap-2">
+          <Badge variant="outline" className="text-xs">
+            {t('total', { count: total })}
+          </Badge>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleExportCSV}
+            disabled={isExporting || total === 0}
+          >
+            <Download className="h-4 w-4 mr-1.5" />
+            {t('exportCSV')}
+          </Button>
+        </div>
+      </div>
+
+      {/* Search + sort toolbar */}
+      <div className="flex items-center gap-2">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+          <Input
+            placeholder={t('searchPlaceholder')}
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
+            className="pl-9"
+          />
+        </div>
+        <Select
+          value={sortBy}
+          onValueChange={(v) => {
+            setSortBy(v);
+            setPage(1);
+          }}
+        >
+          <SelectTrigger className="w-44">
+            <SelectValue placeholder={t('sortBy')} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="submitted_at">{t('sortByDate')}</SelectItem>
+            <SelectItem value="final_score">{t('sortByScore')}</SelectItem>
+            <SelectItem value="attempt_number">{t('sortByAttempt')}</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Filter tabs */}
@@ -136,7 +198,7 @@ export default function SubmissionsTable({
         <TabsList>
           {FILTER_OPTIONS.map((opt) => (
             <TabsTrigger key={opt.value} value={opt.value}>
-              {opt.label}
+              {t(opt.labelKey)}
             </TabsTrigger>
           ))}
         </TabsList>
@@ -155,6 +217,7 @@ export default function SubmissionsTable({
             <TableHeader>
               <TableRow>
                 <TableHead>{t('student')}</TableHead>
+                <TableHead>{t('attempt')}</TableHead>
                 <TableHead>{t('submitted')}</TableHead>
                 <TableHead>{t('status')}</TableHead>
                 <TableHead className="text-right">{t('score')}</TableHead>
@@ -215,12 +278,13 @@ export default function SubmissionsTable({
 
 // ── Row component ─────────────────────────────────────────────────────────────
 
-interface SubmissionRowProps {
+function SubmissionRow({
+  submission,
+  onGrade,
+}: {
   submission: Submission;
   onGrade: () => void;
-}
-
-function SubmissionRow({ submission, onGrade }: SubmissionRowProps) {
+}) {
   const t = useTranslations('Grading.Table');
 
   const displayName = submission.user
@@ -233,8 +297,7 @@ function SubmissionRow({ submission, onGrade }: SubmissionRowProps) {
         .join(' ') || `@${submission.user.username}`
     : `User #${submission.user_id}`;
 
-  const needsGrading =
-    submission.status === 'SUBMITTED' || submission.status === 'LATE';
+  const needsGrading = submission.status === 'SUBMITTED' || submission.status === 'LATE';
 
   return (
     <TableRow>
@@ -245,6 +308,9 @@ function SubmissionRow({ submission, onGrade }: SubmissionRowProps) {
             <p className="text-xs text-slate-400">{submission.user.email}</p>
           )}
         </div>
+      </TableCell>
+      <TableCell className="text-center text-sm text-slate-600">
+        #{submission.attempt_number}
       </TableCell>
       <TableCell className="text-sm text-slate-600">
         {submission.submitted_at
