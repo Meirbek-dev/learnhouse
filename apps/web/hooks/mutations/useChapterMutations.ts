@@ -110,7 +110,7 @@ export function useChapterMutations(courseUuid: string, withUnpublishedActivitie
   };
 
   const reorderStructure = async (nextStructure: any, payload: CourseOrderPayload, accessToken: string) => {
-    const previousStructure = captureSnapshot<{ chapters?: any[] }>(structureKey);
+    const previousStructure = captureSnapshot(structureKey);
 
     await mutate(structureKey, nextStructure, { revalidate: false });
 

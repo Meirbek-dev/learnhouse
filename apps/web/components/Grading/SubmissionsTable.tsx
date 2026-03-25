@@ -76,7 +76,7 @@ export default function SubmissionsTable({ activityId, title }: SubmissionsTable
           needsTeacherAction(submissions.find((s) => s.submission_uuid === uuid)?.status ?? 'GRADED'),
       );
       if (nextIndex !== -1) {
-        setOpenSubmissionUuid(allUuids[nextIndex]);
+        setOpenSubmissionUuid(allUuids[nextIndex] ?? null);
       } else {
         setOpenSubmissionUuid(null);
       }
@@ -157,7 +157,7 @@ export default function SubmissionsTable({ activityId, title }: SubmissionsTable
         <Select
           value={sortBy}
           onValueChange={(v) => {
-            setSortBy(v);
+            if (v) setSortBy(v);
             setPage(1);
           }}
         >

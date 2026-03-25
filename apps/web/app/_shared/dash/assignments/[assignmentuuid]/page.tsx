@@ -128,12 +128,12 @@ const PublishingState = () => {
     const res = await updateAssignment(
       { published: !assignment?.assignment_object?.published },
       assignmentUUID,
-      access_token,
+      access_token ?? '',
     );
     const res2 = await updateActivity(
       { published: !assignment?.assignment_object?.published },
       assignment?.activity_object?.activity_uuid,
-      access_token,
+      access_token ?? '',
     );
     const toast_loading = toast.loading(t('updateLoading'));
     if (res.success && res2) {
@@ -232,7 +232,7 @@ const PublishingState = () => {
             setIsEditModalOpen(false);
           }}
           assignment={assignment?.assignment_object}
-          accessToken={access_token}
+          accessToken={access_token ?? ''}
         />
       ) : null}
     </>

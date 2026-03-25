@@ -80,7 +80,7 @@ export const AssignmentTaskGeneralEdit = () => {
         try {
           const res = await updateAssignmentTask(
             values,
-            assignmentTask.assignment_task_uuid,
+            assignmentTask.assignment_task_uuid!,
             assignment.assignment_object.assignment_uuid,
             access_token,
           );
@@ -270,7 +270,7 @@ const UpdateTaskRef = () => {
       assignment.course_object.course_uuid,
       assignment.activity_object.activity_uuid,
       assignment.assignment_object.assignment_uuid,
-      assignmentTask.assignment_task_uuid,
+      assignmentTask.assignment_task_uuid!,
       fileName,
     );
   };
@@ -304,7 +304,7 @@ const UpdateTaskRef = () => {
     try {
       const res = await updateReferenceFile(
         file,
-        assignmentTask.assignment_task_uuid,
+        assignmentTask.assignment_task_uuid!,
         assignment.assignment_object.assignment_uuid,
         access_token,
       );

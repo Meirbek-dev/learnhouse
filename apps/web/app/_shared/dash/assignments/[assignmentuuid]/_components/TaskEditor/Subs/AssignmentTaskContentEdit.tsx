@@ -18,7 +18,7 @@ const AssignmentTaskContentEdit = () => {
         />
       )}
       {assignmentTask.assignment_type === 'FORM' && (
-        <TaskFormObject assignmentTaskUUID={assignmentTask.assignment_task_uuid} />
+        <TaskFormObject assignmentTaskUUID={assignmentTask.assignment_task_uuid ?? ''} />
       )}
     </div>
   );

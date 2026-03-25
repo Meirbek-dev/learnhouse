@@ -136,7 +136,7 @@ export function useCoursesMutations(courseUuid: string, withUnpublishedActivitie
 
   const addContributors = async (usernames: string[], users: ContributorDraftUser[], options: MutationOptions) => {
     const editorBundleKey = courseKeys.editorBundle(courseUuid);
-    const previousEditorBundle = editorBundleKey ? captureSnapshot<CourseEditorBundle>(editorBundleKey) : undefined;
+    const previousEditorBundle = editorBundleKey ? captureSnapshot(editorBundleKey) : undefined;
 
     if (editorBundleKey && users.length > 0) {
       await mutate(
@@ -178,7 +178,7 @@ export function useCoursesMutations(courseUuid: string, withUnpublishedActivitie
     options: MutationOptions,
   ) => {
     const editorBundleKey = courseKeys.editorBundle(courseUuid);
-    const previousEditorBundle = editorBundleKey ? captureSnapshot<CourseEditorBundle>(editorBundleKey) : undefined;
+    const previousEditorBundle = editorBundleKey ? captureSnapshot(editorBundleKey) : undefined;
 
     if (editorBundleKey) {
       await mutate(
@@ -219,7 +219,7 @@ export function useCoursesMutations(courseUuid: string, withUnpublishedActivitie
 
   const removeContributors = async (usernames: string[], userIds: number[], options: MutationOptions) => {
     const editorBundleKey = courseKeys.editorBundle(courseUuid);
-    const previousEditorBundle = editorBundleKey ? captureSnapshot<CourseEditorBundle>(editorBundleKey) : undefined;
+    const previousEditorBundle = editorBundleKey ? captureSnapshot(editorBundleKey) : undefined;
 
     if (editorBundleKey) {
       const usernameSet = new Set(usernames);

@@ -130,7 +130,7 @@ export default function SubmissionShell({
           <AlertDescription>{t(bannerConfig.descKey)}</AlertDescription>
 
           {/* Show score only when published */}
-          {status === 'PUBLISHED' && submission?.final_score !== null && (
+          {status === 'PUBLISHED' && submission != null && submission.final_score !== null && (
             <div className="mt-3 flex items-center gap-2">
               <CheckCircle2 className="h-4 w-4 text-emerald-600" />
               <span className="text-sm font-semibold">

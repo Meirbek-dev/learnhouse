@@ -374,13 +374,13 @@ const TaskQuizObject = ({ assignmentTaskUUID }: TaskQuizObjectProps) => {
   const assignment = useAssignments();
 
   const initialQuestions = useMemo(
-    () => assignmentTask.contents?.questions ?? [createQuestion()],
+    () => (assignmentTask.contents?.questions as QuizQuestion[] | undefined) ?? [createQuestion()],
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
   );
 
   const initialSettings = useMemo(
-    () => ({ ...DEFAULT_QUIZ_SETTINGS, ...assignmentTask.contents?.settings }),
+    () => ({ ...DEFAULT_QUIZ_SETTINGS, ...(assignmentTask.contents?.settings as Record<string, unknown> | undefined) }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
   );
@@ -476,7 +476,7 @@ const TaskQuizObject = ({ assignmentTaskUUID }: TaskQuizObjectProps) => {
     try {
       const res = await updateAssignmentTask(
         { contents: { questions, settings: quizSettings } },
-        assignmentTask.assignment_task_uuid,
+        assignmentTask.assignment_task_uuid as string,
         assignment.assignment_object.assignment_uuid,
         access_token,
       );

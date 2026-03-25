@@ -335,7 +335,7 @@ function TaskFormObject({ assignmentTaskUUID }: TaskFormObjectProps) {
   const [isSaving, setIsSaving] = useState(false);
 
   const [questions, setQuestions] = useState<FormSchema[]>(() => {
-    const savedQuestions = assignmentTask.contents?.questions;
+    const savedQuestions = assignmentTask.contents?.questions as unknown[] | undefined;
     if (savedQuestions) {
       return normalizeQuestions(savedQuestions);
     }
@@ -414,7 +414,7 @@ function TaskFormObject({ assignmentTaskUUID }: TaskFormObjectProps) {
     try {
       const res = await updateAssignmentTask(
         { contents: { questions } },
-        assignmentTask.assignment_task_uuid,
+        assignmentTask.assignment_task_uuid as string,
         assignment.assignment_object.assignment_uuid,
         access_token,
       );

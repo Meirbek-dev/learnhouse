@@ -424,7 +424,7 @@ const ActivityClient = (props: ActivityClientProps) => {
         return (
           <Suspense fallback={<LoadingFallback />}>
             <ExamActivity
-              activity={activity}
+              activity={activity as any}
               course={course}
             />
           </Suspense>

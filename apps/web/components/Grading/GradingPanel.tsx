@@ -172,7 +172,7 @@ export default function GradingPanel({
                 variant="outline"
                 size="sm"
                 disabled={!hasPrev}
-                onClick={() => onNavigate?.(allSubmissionUuids[currentIndex - 1])}
+                onClick={() => onNavigate?.(allSubmissionUuids[currentIndex - 1]!)}
               >
                 <ChevronLeft className="h-4 w-4" />
                 {t('previous')}
@@ -184,7 +184,7 @@ export default function GradingPanel({
                 variant="outline"
                 size="sm"
                 disabled={!hasNext}
-                onClick={() => onNavigate?.(allSubmissionUuids[currentIndex + 1])}
+                onClick={() => onNavigate?.(allSubmissionUuids[currentIndex + 1]!)}
               >
                 {t('next')}
                 <ChevronRight className="h-4 w-4" />
@@ -277,17 +277,14 @@ export default function GradingPanel({
           <div className="flex items-center justify-between gap-2 flex-wrap">
             {/* Return to student — requires confirmation */}
             <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={!canSave}
-                  className="gap-1.5"
-                >
-                  <RotateCcw className="h-4 w-4" />
-                  {t('returnToStudent')}
-                </Button>
-              </AlertDialogTrigger>
+              <AlertDialogTrigger
+                render={
+                  <Button variant="outline" size="sm" disabled={!canSave} className="gap-1.5">
+                    <RotateCcw className="h-4 w-4" />
+                    {t('returnToStudent')}
+                  </Button>
+                }
+              />
               <AlertDialogContent>
                 <AlertDialogHeader>
                   <AlertDialogTitle>{t('confirmReturnTitle')}</AlertDialogTitle>
@@ -314,15 +311,14 @@ export default function GradingPanel({
 
               {/* Publish — confirm before making visible to student */}
               <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <Button
-                    disabled={!canSave}
-                    className="gap-1.5"
-                  >
-                    <Send className="h-4 w-4" />
-                    {t('publishGrade')}
-                  </Button>
-                </AlertDialogTrigger>
+                <AlertDialogTrigger
+                  render={
+                    <Button disabled={!canSave} className="gap-1.5">
+                      <Send className="h-4 w-4" />
+                      {t('publishGrade')}
+                    </Button>
+                  }
+                />
                 <AlertDialogContent>
                   <AlertDialogHeader>
                     <AlertDialogTitle>{t('confirmPublishTitle')}</AlertDialogTitle>

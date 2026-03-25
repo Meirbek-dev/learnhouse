@@ -21,9 +21,24 @@ import { create } from 'zustand';
 // Store shape
 // ---------------------------------------------------------------------------
 
+export interface AssignmentTaskData {
+  assignment_task_uuid?: string;
+  assignment_type?: string;
+  title?: string;
+  description?: string;
+  hint?: string | null;
+  max_grade_value?: number;
+  reference_file?: string | null;
+  contents?: {
+    questions?: unknown[];
+    settings?: unknown;
+  };
+  [key: string]: unknown;
+}
+
 interface AssignmentsTaskStore {
   /** The full task object currently open in the editor (empty object = none). */
-  assignmentTask: Record<string, unknown>;
+  assignmentTask: AssignmentTaskData;
 
   /** UUID of the task currently selected in the sidebar task list. */
   selectedAssignmentTaskUUID: string | null;

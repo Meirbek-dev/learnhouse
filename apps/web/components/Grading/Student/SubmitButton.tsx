@@ -119,15 +119,14 @@ export default function SubmitButton({
 
   return (
     <AlertDialog>
-      <AlertDialogTrigger asChild>
-        <Button
-          disabled={isSubmitting}
-          className={className}
-        >
-          <SendHorizonal className="mr-2 h-4 w-4" />
-          {isSubmitting ? t('submitting') : t('submitForGrading')}
-        </Button>
-      </AlertDialogTrigger>
+      <AlertDialogTrigger
+        render={
+          <Button disabled={isSubmitting} className={className}>
+            <SendHorizonal className="mr-2 h-4 w-4" />
+            {isSubmitting ? t('submitting') : t('submitForGrading')}
+          </Button>
+        }
+      />
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>{t('confirmTitle')}</AlertDialogTitle>

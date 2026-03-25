@@ -37,7 +37,7 @@ export async function submitAssessment(
   const meta = await getResponseMetadata(res);
   if (!meta.success) throw new Error(meta.data?.detail ?? 'Failed to submit assessment');
 
-  revalidateTag('submissions');
+  revalidateTag('submissions', 'max');
   return meta.data as Submission;
 }
 
@@ -112,7 +112,7 @@ export async function saveGrade(
   const meta = await getResponseMetadata(res);
   if (!meta.success) throw new Error(meta.data?.detail ?? 'Failed to save grade');
 
-  revalidateTag('submissions');
+  revalidateTag('submissions', 'max');
   return meta.data as Submission;
 }
 
