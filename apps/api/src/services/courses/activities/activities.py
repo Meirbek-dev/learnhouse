@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import UTC, datetime
 
 from fastapi import HTTPException, Request
 from sqlmodel import Session, select
@@ -17,6 +17,7 @@ from src.db.courses.courses import Course
 from src.db.users import AnonymousUser, PublicUser
 from src.security.rbac import PermissionChecker
 from src.services.courses._auth import require_course_permission
+from src.services.courses._utils import _next_activity_order
 from src.services.payments.payments_access import check_activity_paid_access
 
 logger = logging.getLogger(__name__)
@@ -44,15 +45,6 @@ def _get_course_for_activity(activity: Activity, db_session: Session) -> Course:
             if course:
                 return course
     raise HTTPException(status_code=404, detail="Course not found")
-
-
-def _next_activity_order(chapter_id: int, db_session: Session) -> int:
-    result = db_session.exec(
-        select(Activity)
-        .where(Activity.chapter_id == chapter_id)
-        .order_by(Activity.order.desc())
-    ).first()
-    return (result.order if result else 0) + 1
 
 
 ####################################################
@@ -83,9 +75,11 @@ async def create_activity(
 
     activity = Activity(**activity_object.model_dump())
     activity.activity_uuid = f"activity_{ULID()}"
-    activity.creation_date = datetime.now()
-    activity.update_date = datetime.now()
+    activity.creation_date = datetime.now(tz=UTC)
+    activity.update_date = datetime.now(tz=UTC)
     activity.chapter_id = activity_object.chapter_id
+    # Populate the denormalized FK so queries on activity.course_id stay valid.
+    activity.course_id = course.id
     activity.creator_id = current_user.id
     activity.order = _next_activity_order(activity_object.chapter_id, db_session)
 
@@ -157,7 +151,7 @@ async def update_activity(
         if value is not None:
             setattr(activity, field, value)
 
-    activity.update_date = datetime.now()
+    activity.update_date = datetime.now(tz=UTC)
 
     db_session.add(activity)
     db_session.commit()

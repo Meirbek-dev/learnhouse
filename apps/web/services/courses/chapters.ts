@@ -27,7 +27,7 @@ export async function updateCourseOrderStructure(course_uuid: string, data: Cour
 
 export async function createChapter(data: any, access_token: string) {
   const result: any = await fetch(
-    `${getAPIUrl()}chapters/`,
+    `${getAPIUrl()}chapters`,
     RequestBodyWithAuthHeader('POST', data, null, access_token),
   );
   return errorHandling(result);

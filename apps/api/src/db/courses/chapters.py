@@ -1,7 +1,7 @@
 from datetime import UTC, datetime
 
 from pydantic import ConfigDict, field_validator
-from sqlalchemy import DateTime, func
+from sqlalchemy import DateTime, String, func
 from sqlmodel import Column, Field, ForeignKey, Integer
 
 from src.db.courses.activities import ActivityRead, ActivityReadWithPermissions
@@ -21,6 +21,8 @@ class ChapterBase(SQLModelStrictBaseModel):
 
 class Chapter(ChapterBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
+    # Override name with a length-constrained column at the DB level.
+    name: str = Field(sa_column=Column(String(500), nullable=False))
     chapter_uuid: str = ""
     creation_date: datetime = Field(
         default_factory=lambda: datetime.now(tz=UTC),
@@ -39,15 +41,20 @@ class Chapter(ChapterBase, table=True):
     )
 
 
-class ChapterCreate(ChapterBase):
-    pass
+class ChapterCreateRequest(PydanticStrictBaseModel):
+    """API-facing create schema. Accepts a UUID so internal integer IDs are never exposed."""
+
+    name: str
+    description: str | None = ""
+    thumbnail_image: str | None = ""
+    course_uuid: str
 
 
 class ChapterUpdate(SQLModelStrictBaseModel):
     name: str | None = None
     description: str | None = None
     thumbnail_image: str | None = None
-    course_id: int | None = None
+    # course_id intentionally omitted — chapter-to-course assignment is immutable.
 
 
 class ChapterRead(ChapterBase):
@@ -109,7 +116,6 @@ class ActivityOrderPayload(PydanticStrictBaseModel):
     chapter_uuid: str | None = None
 
 
-# Kept for backward compat with any external callers; new code uses PATCH /{uuid}/order
 class ChapterOrderByUuid(PydanticStrictBaseModel):
     chapter_uuid: str
     activities_order_by_uuids: list[str]
@@ -117,3 +123,8 @@ class ChapterOrderByUuid(PydanticStrictBaseModel):
 
 class ChapterUpdateOrder(PydanticStrictBaseModel):
     chapter_order_by_uuids: list[ChapterOrderByUuid]
+    # Optional optimistic-concurrency guard: set to the course's current
+    # update_date (from GET /courses/{uuid}/meta X-Structure-Version header).
+    # When provided the server rejects the request with 409 if the course has
+    # changed since the client last loaded it.
+    last_known_update_date: datetime | None = None

@@ -386,7 +386,9 @@ async function fetchActivityWithAuth(activity_uuid: string, access_token?: strin
     headers.Authorization = `Bearer ${access_token}`;
   }
 
-  const result = await fetch(`${getAPIUrl()}activities/activity_${activity_uuid}`, {
+  // activity_uuid is already the full canonical UUID (e.g. "activity_XYZ").
+  // Do NOT prepend "activity_" here — that would produce a double-prefixed path.
+  const result = await fetch(`${getAPIUrl()}activities/${activity_uuid}`, {
     method: 'GET',
     headers,
   });

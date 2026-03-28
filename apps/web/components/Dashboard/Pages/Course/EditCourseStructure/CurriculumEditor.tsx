@@ -67,7 +67,7 @@ const CurriculumEditor = () => {
 
     setIsCreatingChapter(true);
     try {
-      await createChapter({ name, course_id: course.courseStructure.id }, access_token);
+      await createChapter({ name, course_uuid: course.courseStructure.course_uuid }, access_token);
       toast.success(tStructure('chapterCreatedSuccess'));
       setShowChapterInput(false);
       setNewChapterName('');

@@ -67,7 +67,7 @@ export function useChapterMutations(courseUuid: string, withUnpublishedActivitie
           ? {
               ...current,
               chapters: (current.chapters ?? []).map((chapter: any) =>
-                chapter.chapter_uuid === chapterUuid ? Object.assign(chapter, payload) : chapter,
+                chapter.chapter_uuid === chapterUuid ? { ...chapter, ...payload } : chapter,
               ),
             }
           : current,

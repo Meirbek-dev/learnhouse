@@ -1,10 +1,10 @@
 import * as v from 'valibot';
 
 export const chapterCreateSchema = v.object({
-  name: v.pipe(v.string(), v.minLength(1), v.maxLength(200)),
+  name: v.pipe(v.string(), v.minLength(1), v.maxLength(500)),
   description: v.optional(v.string()),
   thumbnail_image: v.optional(v.string()),
-  course_id: v.number(),
+  course_uuid: v.string(),
 });
 
 export type ChapterCreateValues = v.InferOutput<typeof chapterCreateSchema>;

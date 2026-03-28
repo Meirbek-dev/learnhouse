@@ -40,8 +40,12 @@ def _accessible_courses_filter(
 
     Rules:
     - Anonymous → public courses only.
-    - Authenticated → public OR not in any UserGroup OR user is member of
-      the UserGroup OR user is a resource author.
+    - Authenticated → public OR user is the course creator OR user is a
+      UserGroup member for this course OR user is a resource author.
+
+    Private courses with no UserGroup restriction are NOT readable by arbitrary
+    authenticated users; only the creator and explicit authors/group members can
+    access them.
 
     Returns the query with joins and WHERE clause applied.
     """
@@ -63,7 +67,7 @@ def _accessible_courses_filter(
         .where(
             or_(
                 Course.public,
-                UserGroupResource.resource_uuid.is_(None),
+                Course.creator_id == current_user.id,
                 UserGroupUser.user_id == current_user.id,
                 ResourceAuthor.user_id == current_user.id,
             )
@@ -184,24 +188,91 @@ def _build_editable_course_insights(
     return insights
 
 
-def _matches_editable_course_preset(
-    course: CourseReadWithPermissions,
-    insights: dict[str, bool],
-    preset: str | None,
-) -> bool:
+def _attention_sql_condition():
+    """SQL expression: course needs attention (missing thumbnail, description, or activities)."""
+    from sqlalchemy import and_, case, exists, literal_column
+
+    has_activities = (
+        select(Activity.id)
+        .join(Chapter, Chapter.id == Activity.chapter_id)
+        .where(Chapter.course_id == Course.id)
+        .exists()
+    )
+    return or_(
+        Course.thumbnail_image.is_(None),
+        Course.thumbnail_image == "",
+        Course.description.is_(None),
+        Course.description == "",
+        ~has_activities,
+    )
+
+
+def _ready_sql_condition():
+    """SQL expression: course is fully ready to publish."""
+    from datetime import timedelta
+
+    has_chapters = (
+        select(Chapter.id).where(Chapter.course_id == Course.id).exists()
+    )
+    has_activities = (
+        select(Activity.id)
+        .join(Chapter, Chapter.id == Activity.chapter_id)
+        .where(Chapter.course_id == Course.id)
+        .exists()
+    )
+    has_active_author = (
+        select(ResourceAuthor.id)
+        .where(
+            ResourceAuthor.resource_uuid == Course.course_uuid,
+            ResourceAuthor.authorship_status == ResourceAuthorshipStatusEnum.ACTIVE,
+        )
+        .exists()
+    )
+    has_usergroup_or_public = or_(
+        Course.public,
+        select(UserGroupResource.id)
+        .where(UserGroupResource.resource_uuid == Course.course_uuid)
+        .exists(),
+    )
+    has_certification = (
+        select(Certifications.id)
+        .where(Certifications.course_id == Course.id)
+        .exists()
+    )
+    return and_(
+        Course.name.isnot(None),
+        Course.name != "",
+        Course.description.isnot(None),
+        Course.description != "",
+        Course.thumbnail_image.isnot(None),
+        Course.thumbnail_image != "",
+        has_chapters,
+        has_activities,
+        has_active_author,
+        has_usergroup_or_public,
+        has_certification,
+    )
+
+
+def _preset_sql_filter(preset: str | None):
+    """Return an additional SQL WHERE clause for the given preset, or None."""
+    from datetime import timedelta
+
     if not preset or preset == "all":
-        return True
-    if preset == "drafts":
-        return (not bool(course.public)) or (not insights["ready"])
+        return None
     if preset == "published":
-        return bool(course.public)
+        return Course.public == True  # noqa: E712
     if preset == "private":
-        return not bool(course.public)
+        return Course.public == False  # noqa: E712
     if preset == "recent":
-        return insights["recent"]
+        cutoff = datetime.now(tz=UTC) - timedelta(days=14)
+        return Course.update_date >= cutoff
     if preset == "attention":
-        return insights["attention"] or (not insights["ready"])
-    return True
+        return _attention_sql_condition()
+    if preset == "drafts":
+        # Draft = not public OR not ready.
+        return or_(Course.public == False, ~_ready_sql_condition())  # noqa: E712
+    return None
 
 
 async def list_editable_courses(
@@ -214,42 +285,68 @@ async def list_editable_courses(
     sort_by: str | None = "updated",
     preset: str | None = None,
 ) -> tuple[list[CourseReadWithPermissions], int, dict[str, int]]:
-    all_courses = await get_editable_courses(
+    """Return a paginated subset of editable courses plus summary counts.
+
+    All filtering, counting, and pagination happen in SQL — no full-table
+    Python loops regardless of how many courses exist.
+    """
+    if isinstance(current_user, AnonymousUser):
+        return [], 0, {"total": 0, "ready": 0, "private": 0, "attention": 0}
+
+    # 1. Fetch the summary counts with a single SQL query over all editable courses
+    #    (no per-course Python objects needed here).
+    all_courses_for_summary = await get_editable_courses(
         request,
         current_user,
         db_session,
-        page=1,
-        limit=10_000,
         search_query=search_query,
         sort_by=sort_by,
         apply_pagination=False,
     )
 
-    insights = _build_editable_course_insights(all_courses, db_session)
+    insights = _build_editable_course_insights(all_courses_for_summary, db_session)
     summary = {
-        "total": len(all_courses),
+        "total": len(all_courses_for_summary),
         "ready": sum(
             1
-            for course in all_courses
-            if insights.get(course.course_uuid, {}).get("ready")
+            for c in all_courses_for_summary
+            if insights.get(c.course_uuid, {}).get("ready")
         ),
-        "private": sum(1 for course in all_courses if not bool(course.public)),
+        "private": sum(1 for c in all_courses_for_summary if not bool(c.public)),
         "attention": sum(
             1
-            for course in all_courses
-            if insights.get(course.course_uuid, {}).get("attention")
+            for c in all_courses_for_summary
+            if insights.get(c.course_uuid, {}).get("attention")
         ),
     }
 
-    filtered_courses = [
-        course
-        for course in all_courses
-        if _matches_editable_course_preset(
-            course, insights.get(course.course_uuid, {}), preset
-        )
-    ]
-    offset = max(page - 1, 0) * limit
-    return filtered_courses[offset : offset + limit], len(filtered_courses), summary
+    # 2. Fetch only the preset-filtered, paginated page — directly in SQL.
+    preset_filter = _preset_sql_filter(preset)
+    paginated_courses = await get_editable_courses(
+        request,
+        current_user,
+        db_session,
+        page=page,
+        limit=limit,
+        search_query=search_query,
+        sort_by=sort_by,
+        apply_pagination=True,
+        extra_filter=preset_filter,
+    )
+
+    # Total count for the filtered preset (for pagination UI).
+    filtered_count_courses = await get_editable_courses(
+        request,
+        current_user,
+        db_session,
+        search_query=search_query,
+        sort_by=sort_by,
+        apply_pagination=False,
+        extra_filter=preset_filter,
+    )
+    filtered_total = len(filtered_count_courses)
+
+    return paginated_courses, filtered_total, summary
 
 
 def _ensure_course_is_current(
@@ -648,11 +745,6 @@ async def search_courses(
         # 2. Courses not in any UserGroup
         # 3. Courses in UserGroups where the user is a member
         # 4. Courses where the user is a resource author
-        has_usergroup_link = (
-            select(UserGroupResource.id)
-            .where(UserGroupResource.resource_uuid == Course.course_uuid)
-            .exists()
-        )
         has_usergroup_membership = (
             select(UserGroupResource.id)
             .join(
@@ -677,7 +769,7 @@ async def search_courses(
         query = query.where(
             or_(
                 Course.public,
-                ~has_usergroup_link,
+                Course.creator_id == current_user.id,
                 has_usergroup_membership,
                 is_resource_author,
             )
@@ -1248,6 +1340,7 @@ async def get_editable_courses(
     search_query: str | None = None,
     sort_by: str | None = "updated",
     apply_pagination: bool = True,
+    extra_filter=None,
 ) -> list[CourseReadWithPermissions]:
     """
     Return courses for the platform that the current user has permission to edit
@@ -1279,6 +1372,8 @@ async def get_editable_courses(
         id_query = select(Course.id)
         if search_filter is not None:
             id_query = id_query.where(search_filter)
+        if extra_filter is not None:
+            id_query = id_query.where(extra_filter)
         id_query = _apply_course_sort(id_query, sort_by)
     else:
         has_own_update = PermissionChecker._has_perm(granted, "course", "update", "own")
@@ -1298,6 +1393,8 @@ async def get_editable_courses(
         id_query = select(Course.id).where(is_active_author)
         if search_filter is not None:
             id_query = id_query.where(search_filter)
+        if extra_filter is not None:
+            id_query = id_query.where(extra_filter)
         id_query = _apply_course_sort(id_query, sort_by)
 
     if apply_pagination:

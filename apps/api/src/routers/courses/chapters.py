@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, Request
 from src.core.events.database import get_db_session
 from src.db.courses.chapters import (
     ActivityOrderPayload,
-    ChapterCreate,
+    ChapterCreateRequest,
     ChapterOrderPayload,
     ChapterRead,
     ChapterUpdate,
@@ -29,7 +29,7 @@ router = APIRouter()
 @router.post("")
 async def api_create_coursechapter(
     request: Request,
-    coursechapter_object: ChapterCreate,
+    coursechapter_object: ChapterCreateRequest,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session=Depends(get_db_session),
 ) -> ChapterRead:

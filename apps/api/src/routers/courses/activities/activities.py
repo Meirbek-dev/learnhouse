@@ -62,23 +62,6 @@ async def api_update_activity(
     )
 
 
-@router.patch("/{activity_uuid}/publish")
-async def api_publish_activity(
-    request: Request,
-    activity_uuid: str,
-    published: bool,
-    current_user: Annotated[PublicUser, Depends(get_current_user)],
-    db_session=Depends(get_db_session),
-) -> ActivityRead:
-    return await update_activity(
-        request,
-        ActivityUpdate(published=published),
-        activity_uuid,
-        current_user,
-        db_session,
-    )
-
-
 @router.delete("/{activity_uuid}")
 async def api_delete_activity(
     request: Request,

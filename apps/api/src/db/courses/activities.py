@@ -2,7 +2,7 @@ from datetime import UTC, datetime, timezone
 from enum import Enum, StrEnum
 
 from pydantic import ConfigDict, field_validator, model_validator
-from sqlalchemy import JSON, BigInteger, Column, DateTime, ForeignKey, Integer, func
+from sqlalchemy import JSON, BigInteger, Column, DateTime, ForeignKey, Integer, String, func
 from sqlmodel import Field
 
 from src.db.strict_base_model import SQLModelStrictBaseModel
@@ -65,6 +65,8 @@ class Activity(ActivityBase, table=True):
     model_config = ConfigDict(from_attributes=True)
 
     id: int | None = Field(default=None, primary_key=True)
+    # Override name with a length-constrained column at the DB level.
+    name: str = Field(sa_column=Column(String(500), nullable=False))
     # Primary FK: activities belong to a chapter (cascades on chapter delete)
     chapter_id: int = Field(
         sa_column=Column(
@@ -142,6 +144,19 @@ class ActivityUpdate(ActivityBase):
     content: dict | None = None
     details: dict | None = None
     published: bool | None = None
+
+    @model_validator(mode="after")
+    def subtype_matches_type(self):
+        if self.activity_type is not None and self.activity_sub_type is not None:
+            allowed = _VALID_SUBTYPES.get(self.activity_type, set())
+            if allowed and self.activity_sub_type not in allowed:
+                msg = (
+                    f"activity_sub_type {self.activity_sub_type!r} is not valid for "
+                    f"activity_type {self.activity_type!r}. "
+                    f"Allowed: {sorted(s.value for s in allowed)}"
+                )
+                raise ValueError(msg)
+        return self
 
 
 class ActivityRead(ActivityBase):

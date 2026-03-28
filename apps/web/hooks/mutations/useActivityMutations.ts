@@ -33,13 +33,12 @@ export function useActivityMutations(courseUuid: string, withUnpublishedActiviti
         current
           ? {
               ...current,
-              chapters: (current.chapters ?? []).map((chapter: any) =>
-                Object.assign(chapter, {
-                  activities: (chapter.activities ?? []).map((activity: any) =>
-                    activity.activity_uuid === activityUuid ? Object.assign(activity, payload) : activity,
-                  ),
-                }),
-              ),
+              chapters: (current.chapters ?? []).map((chapter: any) => ({
+                ...chapter,
+                activities: (chapter.activities ?? []).map((activity: any) =>
+                  activity.activity_uuid === activityUuid ? { ...activity, ...payload } : activity,
+                ),
+              })),
             }
           : current,
       { revalidate: false },
@@ -71,13 +70,12 @@ export function useActivityMutations(courseUuid: string, withUnpublishedActiviti
         current
           ? {
               ...current,
-              chapters: (current.chapters ?? []).map((chapter: any) =>
-                Object.assign(chapter, {
-                  activities: (chapter.activities ?? []).filter(
-                    (activity: any) => activity.activity_uuid !== activityUuid,
-                  ),
-                }),
-              ),
+              chapters: (current.chapters ?? []).map((chapter: any) => ({
+                ...chapter,
+                activities: (chapter.activities ?? []).filter(
+                  (activity: any) => activity.activity_uuid !== activityUuid,
+                ),
+              })),
             }
           : current,
       { revalidate: false },
