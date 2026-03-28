@@ -39,19 +39,22 @@ logger = logging.getLogger(__name__)
 _ALLOWED_TEACHER_TRANSITIONS: dict[SubmissionStatus, frozenset[SubmissionStatus]] = {
     SubmissionStatus.PENDING: frozenset({
         SubmissionStatus.GRADED,
+        SubmissionStatus.PUBLISHED,
         SubmissionStatus.RETURNED,
     }),
     SubmissionStatus.GRADED: frozenset({
+        SubmissionStatus.GRADED,   # re-save is a no-op transition, always allowed
         SubmissionStatus.PUBLISHED,
         SubmissionStatus.RETURNED,
-        SubmissionStatus.GRADED,   # re-save is a no-op transition, always allowed
     }),
     SubmissionStatus.RETURNED: frozenset({
         SubmissionStatus.GRADED,
         SubmissionStatus.PENDING,
+        SubmissionStatus.PUBLISHED,
     }),
     SubmissionStatus.PUBLISHED: frozenset({
-        SubmissionStatus.RETURNED,  # allow recalling a published grade for correction
+        SubmissionStatus.PUBLISHED,  # Idempotent publish should be allowed
+        SubmissionStatus.RETURNED,   # allow recalling a published grade for correction
     }),
 }
 
@@ -408,15 +411,24 @@ async def save_grade(
     # Validate status transition against the state machine.
     requested_status = SubmissionStatus(grade_input.status)
     current_status = submission.status
-    allowed = _ALLOWED_TEACHER_TRANSITIONS.get(current_status, frozenset())
-    if requested_status not in allowed:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=(
-                f"Cannot transition from {current_status} to {requested_status}. "
-                f"Allowed transitions: {[s.value for s in allowed]}"
-            ),
-        )
+
+    # shortcut no-op if status already matched (allows re-posting same status)
+    if requested_status != current_status:
+        allowed = _ALLOWED_TEACHER_TRANSITIONS.get(current_status, frozenset())
+        if requested_status not in allowed:
+            logger.warning(
+                "Invalid teacher grade transition from %s to %s for submission %s",
+                current_status,
+                requested_status,
+                submission_uuid,
+            )
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=(
+                    f"Cannot transition from {current_status} to {requested_status}. "
+                    f"Allowed transitions: {[s.value for s in allowed]}"
+                ),
+            )
 
     # Model-aware merge of item feedback — preserves all GradedItem fields.
     # Only items explicitly included in grade_input.item_feedback are updated;

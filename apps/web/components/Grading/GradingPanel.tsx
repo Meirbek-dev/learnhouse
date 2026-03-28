@@ -14,7 +14,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import {
   Drawer,
@@ -82,6 +81,10 @@ export default function GradingPanel({
   const [pendingNavigate, setPendingNavigate] = useState<string | null>(null);
   const [pendingClose, setPendingClose] = useState(false);
 
+  // Confirmation dialogs for destructive actions
+  const [publishOpen, setPublishOpen] = useState(false);
+  const [returnOpen, setReturnOpen] = useState(false);
+
   // Effect 1: reset everything when a different submission is opened (uuid changes).
   useEffect(() => {
     setScore('');
@@ -119,10 +122,14 @@ export default function GradingPanel({
     void dirtyVersion;
     if (score !== initialRef.current.score) return true;
     if (feedback !== initialRef.current.feedback) return true;
-    for (const [id, cur] of Object.entries(itemFeedbacks)) {
+
+    const itemIds = new Set([...Object.keys(initialRef.current.items), ...Object.keys(itemFeedbacks)]);
+    for (const id of itemIds) {
+      const current = itemFeedbacks[id] ?? { score: '', feedback: '' };
       const saved = initialRef.current.items[id] ?? { score: '', feedback: '' };
-      if (cur.score !== saved.score || cur.feedback !== saved.feedback) return true;
+      if (current.score !== saved.score || current.feedback !== saved.feedback) return true;
     }
+
     return false;
   }, [score, feedback, itemFeedbacks, dirtyVersion]);
 
@@ -132,6 +139,10 @@ export default function GradingPanel({
   const hasNext = currentIndex < allSubmissionUuids.length - 1;
 
   function tryNavigate(uuid: string) {
+    if (isSaving || publishOpen || returnOpen) {
+      return;
+    }
+
     if (isDirty) {
       setPendingNavigate(uuid);
     } else {
@@ -140,6 +151,10 @@ export default function GradingPanel({
   }
 
   function tryClose() {
+    if (isSaving || publishOpen || returnOpen) {
+      return;
+    }
+
     if (isDirty) {
       setPendingClose(true);
     } else {
@@ -147,7 +162,7 @@ export default function GradingPanel({
     }
   }
 
-  const unsavedOpen = pendingNavigate !== null || pendingClose;
+  const unsavedOpen = (pendingNavigate !== null || pendingClose) && !isSaving && !publishOpen && !returnOpen;
 
   function handleDiscardAndContinue() {
     if (pendingNavigate) {
@@ -157,11 +172,16 @@ export default function GradingPanel({
       onClose();
       setPendingClose(false);
     }
+
+    setPublishOpen(false);
+    setReturnOpen(false);
   }
 
   function handleCancelDiscard() {
     setPendingNavigate(null);
     setPendingClose(false);
+    setPublishOpen(false);
+    setReturnOpen(false);
   }
 
   // Score validation
@@ -213,12 +233,19 @@ export default function GradingPanel({
       setIsSaving(true);
       try {
         const updated = await saveGrade(submissionUuid, input, accessToken);
-        const msgKey =
-          status === 'PUBLISHED' ? 'gradePublished' : status === 'RETURNED' ? 'returned' : 'gradeSaved';
+        const msgKey = status === 'PUBLISHED' ? 'gradePublished' : status === 'RETURNED' ? 'returned' : 'gradeSaved';
         toast.success(t(msgKey));
-        // Mark form clean by updating the ref and bumping dirtyVersion
+
+        // Reset navigation guard and close confirmation dialogs to avoid stale modal overlap.
+        setPendingNavigate(null);
+        setPendingClose(false);
+        setPublishOpen(false);
+        setReturnOpen(false);
+
+        // Mark form clean by updating the ref and bumping dirtyVersion.
         initialRef.current = { score, feedback, items: { ...itemFeedbacks } };
         setDirtyVersion((v) => v + 1);
+
         onGradeSaved?.(updated);
         mutate();
       } catch {
@@ -232,9 +259,8 @@ export default function GradingPanel({
   );
 
   const studentName = submission?.user
-    ? [submission.user.first_name, submission.user.middle_name, submission.user.last_name]
-        .filter(Boolean)
-        .join(' ') || `@${submission.user.username}`
+    ? [submission.user.first_name, submission.user.middle_name, submission.user.last_name].filter(Boolean).join(' ') ||
+      `@${submission.user.username}`
     : '—';
 
   const canSave = !isSaving && score !== '' && !scoreInvalid;
@@ -288,9 +314,7 @@ export default function GradingPanel({
             {/* Meta: attempt + submitted date */}
             <DrawerDescription className="text-xs">
               {t('attempt')} #{submission?.attempt_number ?? '—'} ·{' '}
-              {submission?.submitted_at
-                ? new Date(submission.submitted_at).toLocaleString()
-                : t('notYetSubmitted')}
+              {submission?.submitted_at ? new Date(submission.submitted_at).toLocaleString() : t('notYetSubmitted')}
             </DrawerDescription>
 
             {/* Navigation buttons */}
@@ -398,9 +422,7 @@ export default function GradingPanel({
           {/* Scrollable body — answers with per-item scoring */}
           <ScrollArea className="flex-1 px-6 py-4">
             {isLoading ? (
-              <div className="flex h-32 items-center justify-center text-sm text-slate-500">
-                {t('loading')}
-              </div>
+              <div className="flex h-32 items-center justify-center text-sm text-slate-500">{t('loading')}</div>
             ) : submission ? (
               <SubmissionAnswers
                 submission={submission}
@@ -414,9 +436,7 @@ export default function GradingPanel({
                 t={t}
               />
             ) : (
-              <div className="flex h-32 items-center justify-center text-sm text-slate-500">
-                {t('noData')}
-              </div>
+              <div className="flex h-32 items-center justify-center text-sm text-slate-500">{t('noData')}</div>
             )}
           </ScrollArea>
 
@@ -442,20 +462,20 @@ export default function GradingPanel({
 
             <div className="flex items-center justify-between gap-2 flex-wrap">
               {/* Return to student — requires confirmation */}
-              <AlertDialog>
-                <AlertDialogTrigger
-                  render={
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      disabled={!canSave}
-                      className="gap-1.5"
-                    >
-                      <RotateCcw className="h-4 w-4" />
-                      {t('returnToStudent')}
-                    </Button>
-                  }
-                />
+              <AlertDialog
+                open={returnOpen}
+                onOpenChange={setReturnOpen}
+              >
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={!canSave}
+                  className="gap-1.5"
+                  onClick={() => setReturnOpen(true)}
+                >
+                  <RotateCcw className="h-4 w-4" />
+                  {t('returnToStudent')}
+                </Button>
                 <AlertDialogContent>
                   <AlertDialogHeader>
                     <AlertDialogTitle>{t('confirmReturnTitle')}</AlertDialogTitle>
@@ -481,18 +501,18 @@ export default function GradingPanel({
                 </Button>
 
                 {/* Publish — requires confirmation */}
-                <AlertDialog>
-                  <AlertDialogTrigger
-                    render={
-                      <Button
-                        disabled={!canSave}
-                        className="gap-1.5"
-                      >
-                        <Send className="h-4 w-4" />
-                        {t('publishGrade')}
-                      </Button>
-                    }
-                  />
+                <AlertDialog
+                  open={publishOpen}
+                  onOpenChange={setPublishOpen}
+                >
+                  <Button
+                    disabled={!canSave}
+                    className="gap-1.5"
+                    onClick={() => setPublishOpen(true)}
+                  >
+                    <Send className="h-4 w-4" />
+                    {t('publishGrade')}
+                  </Button>
                   <AlertDialogContent>
                     <AlertDialogHeader>
                       <AlertDialogTitle>{t('confirmPublishTitle')}</AlertDialogTitle>
