@@ -960,7 +960,7 @@ const ActivityClient = (props: ActivityClientProps) => {
                         <div className="flex items-center space-x-2">
                           {activity &&
                           (activity.published === true || contributorStatus === 'ACTIVE') &&
-                          (activity.content.paid_access !== false || contributorStatus === 'ACTIVE') &&
+                          (activity?.content?.paid_access !== false || contributorStatus === 'ACTIVE') &&
                           isAuthenticated ? (
                             <>
                               {activity.activity_type !== 'TYPE_ASSIGNMENT' && (
@@ -1002,7 +1002,7 @@ const ActivityClient = (props: ActivityClientProps) => {
                     ) : null}
 
                     {activity && (activity.published === true || contributorStatus === 'ACTIVE') ? (
-                      activity.content.paid_access === false ? (
+                      activity?.content?.paid_access === false ? (
                         <PaidCourseActivityDisclaimer course={course} />
                       ) : (
                         <div className={`rounded-lg p-7 drop-shadow-xs ${bgColor} relative`}>

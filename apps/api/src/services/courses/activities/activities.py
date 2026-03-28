@@ -23,9 +23,16 @@ from src.services.payments.payments_access import check_activity_paid_access
 logger = logging.getLogger(__name__)
 
 
+def _normalize_activity_uuid(activity_uuid: str) -> str:
+    if activity_uuid.startswith("activity_"):
+        return activity_uuid
+    return f"activity_{activity_uuid}"
+
+
 def _get_activity_by_uuid(activity_uuid: str, db_session: Session) -> Activity:
+    normalized_uuid = _normalize_activity_uuid(activity_uuid)
     activity = db_session.exec(
-        select(Activity).where(Activity.activity_uuid == activity_uuid)
+        select(Activity).where(Activity.activity_uuid == normalized_uuid)
     ).first()
     if not activity:
         raise HTTPException(status_code=404, detail="Activity not found")

@@ -161,8 +161,8 @@ const CourseEndView: FC<CourseEndViewProps> = ({ courseName, courseUuid, thumbna
       confetti({ particleCount: 80, spread: 70, origin: { x: 0.8, y: 0.5 }, scalar: 1.5, ticks: 300, colors });
     }, 500);
 
-    // Continuous cannons from both sides for 6 seconds
-    const end = Date.now() + 6000;
+    // Continuous cannons from both sides for 3 seconds
+    const end = Date.now() + 3000;
     const interval = setInterval(() => {
       if (Date.now() > end) {
         clearInterval(interval);
