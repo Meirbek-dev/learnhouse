@@ -4,10 +4,10 @@ import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
 import { BadgeHelp, Check, Minus, Plus, RefreshCcw } from 'lucide-react';
 import { NodeViewWrapper } from '@tiptap/react';
 import { useTranslations } from 'next-intl';
-import ReactConfetti from 'react-confetti';
 import { generateUUID } from '@/lib/utils';
 import { twMerge } from 'tailwind-merge';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import confetti from 'canvas-confetti';
 
 interface Answer {
   answer_id: string;
@@ -77,6 +77,12 @@ const QuizBlockComponent = (props: any) => {
 
     setSubmissionMessage(correctAnswers ? t('allCorrect') : t('someIncorrect'));
   };
+
+  useEffect(() => {
+    if (submitted && submissionMessage === t('allCorrect')) {
+      confetti({ particleCount: 1400, spread: 90, disableForReducedMotion: true });
+    }
+  }, [submitted, submissionMessage, t]);
 
   const getAnswerID = (answerIndex: number, questionId: string) => {
     const alphabet = Array.from({ length: 26 }, (_, i) => String.fromCharCode('A'.charCodeAt(0) + i));
@@ -192,13 +198,6 @@ const QuizBlockComponent = (props: any) => {
       <div className="rounded-xl bg-slate-100 px-3 py-2 transition-all ease-linear sm:px-5">
         {/* Header section */}
         <div className="flex flex-wrap items-center gap-2 pt-1 text-sm z-50">
-          {submitted && submissionMessage === t('allCorrect') ? (
-            <ReactConfetti
-              numberOfPieces={submitted ? 1400 : 0}
-              recycle={false}
-              className="h-screen w-full"
-            />
-          ) : null}
           <div className="flex items-center space-x-2 text-sm">
             <BadgeHelp
               className="text-slate-400"

@@ -8,12 +8,11 @@ import SimpleAlertDialog from '@/components/ui/alert-dialog-simple';
 import { useGamificationStore } from '@/stores/gamification';
 import { getAbsoluteUrl } from '@services/config/config';
 import { useLocale, useTranslations } from 'next-intl';
-import { useWindowSize } from '@/hooks/useWindowSize';
 import { useEffect, useRef, useState } from 'react';
 // Gamification imports
 import { LevelProgress } from '@/lib/gamification';
 import Link from '@components/ui/ServerLink';
-import ReactConfetti from 'react-confetti';
+import confetti from 'canvas-confetti';
 import type { FC } from 'react';
 import QRCode from 'qrcode';
 
@@ -26,7 +25,6 @@ interface CourseEndViewProps {
 }
 
 const CourseEndView: FC<CourseEndViewProps> = ({ courseName, courseUuid, thumbnailImage, course, trailData }) => {
-  const { width, height } = useWindowSize();
   const session = usePlatformSession();
   const [userCertificate, setUserCertificate] = useState<any>(null);
   const [isLoadingCertificate, setIsLoadingCertificate] = useState(false);
@@ -139,6 +137,32 @@ const CourseEndView: FC<CourseEndViewProps> = ({ courseName, courseUuid, thumbna
     }, 1000);
     return () => clearTimeout(timer);
   }, [isCourseCompleted, gamificationRefetch]);
+
+  useEffect(() => {
+    if (!isCourseCompleted) return;
+
+    const colors = ['#6366f1', '#10b981', '#3b82f6', '#f59e0b', '#ec4899', '#ffffff'];
+
+    // Big opening bursts
+    confetti({ particleCount: 140, spread: 100, origin: { y: 0.4 }, scalar: 1.6, ticks: 400, colors });
+    const t1 = setTimeout(() => {
+      confetti({ particleCount: 90, spread: 80, shapes: ['star'], scalar: 2.2, origin: { y: 0.4 }, ticks: 350, colors });
+    }, 200);
+    const t2 = setTimeout(() => {
+      confetti({ particleCount: 80, spread: 70, origin: { x: 0.2, y: 0.5 }, scalar: 1.5, ticks: 300, colors });
+      confetti({ particleCount: 80, spread: 70, origin: { x: 0.8, y: 0.5 }, scalar: 1.5, ticks: 300, colors });
+    }, 500);
+
+    // Continuous cannons from both sides for 6 seconds
+    const end = Date.now() + 6000;
+    const interval = setInterval(() => {
+      if (Date.now() > end) { clearInterval(interval); return; }
+      confetti({ particleCount: 7, angle: 60, spread: 58, origin: { x: 0, y: 0.65 }, scalar: 1.4, ticks: 300, colors });
+      confetti({ particleCount: 7, angle: 120, spread: 58, origin: { x: 1, y: 0.65 }, scalar: 1.4, ticks: 300, colors });
+    }, 50);
+
+    return () => { clearTimeout(t1); clearTimeout(t2); clearInterval(interval); };
+  }, [isCourseCompleted]);
 
   // Generate PDF using @react-pdf/renderer
   const downloadCertificate = async () => {
@@ -796,16 +820,6 @@ const CourseEndView: FC<CourseEndViewProps> = ({ courseName, courseUuid, thumbna
     // Show congratulations for completed course
     return (
       <div className="relative flex min-h-[70vh] flex-col items-center justify-center overflow-hidden px-4 text-center">
-        <div className="pointer-events-none fixed inset-0 z-50">
-          <ReactConfetti
-            width={width}
-            height={height}
-            numberOfPieces={200}
-            recycle={false}
-            colors={['#6366f1', '#10b981', '#3b82f6']}
-          />
-        </div>
-
         <SimpleAlertDialog
           open={dialogAlertOpen}
           onOpenChange={setDialogAlertOpen}
