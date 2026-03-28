@@ -3,36 +3,32 @@ Teacher-facing grading routes.
 
 GET   /grading/submissions           — paginated + filterable + searchable list
 GET   /grading/submissions/stats     — aggregate stats for dashboard header
-GET   /grading/submissions/export    — streaming CSV export (no 1000-row cap)
+GET   /grading/submissions/export    — streaming CSV export
 GET   /grading/submissions/{uuid}    — single submission detail (with answers + grading)
 PATCH /grading/submissions/{uuid}    — save teacher grade + feedback
 """
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
-from fastapi import status as http_status
+from fastapi import APIRouter, Depends, Query, Request
 from fastapi.responses import StreamingResponse
-from sqlalchemy import desc
-from sqlmodel import Session, select
+from sqlmodel import Session
 
 from src.core.events.database import get_db_session
 from src.db.grading.submissions import (
-    Submission,
     SubmissionListResponse,
     SubmissionRead,
     SubmissionStats,
-    SubmissionUser,
     TeacherGradeInput,
 )
-from src.db.users import PublicUser, User
+from src.db.users import PublicUser
 from src.security.auth import get_current_user
-from src.security.rbac import PermissionChecker, PermissionCheckerDep
+from src.security.rbac import PermissionCheckerDep
 from src.services.grading.teacher import (
     export_grades_csv,
+    get_submission_for_teacher,
     get_submission_stats,
     get_submissions_for_activity,
-    mark_under_review,
     save_grade,
 )
 
@@ -45,6 +41,7 @@ async def api_list_submissions(
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     status_filter: Annotated[str | None, Query(alias="status")] = None,
+    late_only: Annotated[bool, Query()] = False,
     search: Annotated[str | None, Query()] = None,
     sort_by: Annotated[str, Query()] = "submitted_at",
     sort_dir: Annotated[str, Query()] = "desc",
@@ -56,8 +53,9 @@ async def api_list_submissions(
 
     Query params:
     - activity_id: required
-    - status: DRAFT | SUBMITTED | GRADED | LATE | RETURNED  (optional)
-    - search: student name or email filter (optional)
+    - status: DRAFT | PENDING | GRADED | PUBLISHED | RETURNED | NEEDS_GRADING (virtual)
+    - late_only: filter PENDING submissions to only those submitted after the deadline
+    - search: student name or email filter
     - sort_by: submitted_at | final_score | created_at | attempt_number
     - sort_dir: asc | desc
     - page, page_size: pagination
@@ -67,6 +65,7 @@ async def api_list_submissions(
         current_user=current_user,
         db_session=db_session,
         status_filter=status_filter,
+        late_only=late_only,
         search=search,
         sort_by=sort_by,
         sort_dir=sort_dir,
@@ -98,7 +97,7 @@ async def api_export_submissions_csv(
     """
     Export all non-draft submissions for an activity as CSV.
 
-    Streams the full dataset — no 1000-row cap.
+    Streams the full dataset — no row cap.
     Content-Disposition header triggers a browser download.
     """
     csv_content = await export_grades_csv(
@@ -125,12 +124,8 @@ async def api_get_submission(
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
 ) -> SubmissionRead:
-    """Fetch a single submission with full answers and grading breakdown.
-
-    Automatically transitions SUBMITTED/LATE → UNDER_REVIEW when a teacher
-    opens the submission for the first time.
-    """
-    return await mark_under_review(
+    """Fetch a single submission with full answers and grading breakdown."""
+    return await get_submission_for_teacher(
         submission_uuid=submission_uuid,
         current_user=current_user,
         db_session=db_session,

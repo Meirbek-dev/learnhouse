@@ -43,9 +43,9 @@ export default function SubmissionsTable({ activityId, title }: SubmissionsTable
   const FILTER_OPTIONS: { labelKey: string; value: StatusFilter }[] = [
     { labelKey: 'filterAll', value: 'ALL' },
     { labelKey: 'filterNeedsGrading', value: 'NEEDS_GRADING' },
+    { labelKey: 'filterPending', value: 'PENDING' },
     { labelKey: 'filterGraded', value: 'GRADED' },
     { labelKey: 'filterPublished', value: 'PUBLISHED' },
-    { labelKey: 'filterLate', value: 'LATE' },
     { labelKey: 'filterReturned', value: 'RETURNED' },
   ];
 
@@ -67,19 +67,15 @@ export default function SubmissionsTable({ activityId, title }: SubmissionsTable
 
   const handleGradeSaved = useCallback(
     (updated: Submission) => {
-      mutate();
-      // Auto-advance to next submission needing action
+      // Determine next pending submission BEFORE mutating (mutate invalidates the list)
       const currentIndex = allUuids.indexOf(updated.submission_uuid);
-      const nextIndex = allUuids.findIndex(
-        (uuid, i) =>
-          i > currentIndex &&
-          needsTeacherAction(submissions.find((s) => s.submission_uuid === uuid)?.status ?? 'GRADED'),
-      );
-      if (nextIndex !== -1) {
-        setOpenSubmissionUuid(allUuids[nextIndex] ?? null);
-      } else {
-        setOpenSubmissionUuid(null);
-      }
+      const nextUuid =
+        allUuids
+          .slice(currentIndex + 1)
+          .find((uuid) => needsTeacherAction(submissions.find((s) => s.submission_uuid === uuid)?.status ?? 'GRADED')) ??
+        null;
+      mutate();
+      setOpenSubmissionUuid(nextUuid);
     },
     [allUuids, submissions, mutate],
   );

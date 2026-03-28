@@ -7066,7 +7066,10 @@
       "sortByDate": "По дате отправки",
       "sortByScore": "По оценке",
       "sortByAttempt": "По номеру попытки",
-      "exportCSV": "Экспорт CSV"
+      "exportCSV": "Экспорт CSV",
+      "filterPending": "На проверке",
+      "filterPublished": "Опубликовано",
+      "filterReturned": "Возвращено"
     },
     "Stats": {
       "total": "Всего сдано",
@@ -7099,7 +7102,24 @@
       "confirmReturnTitle": "Подтвердите возврат студенту",
       "confirmReturnDesc": "Работа будет возвращена студенту. Студент сможет повторно сдать работу.",
       "cancel": "Отмена",
-      "confirm": "Подтвердить"
+      "confirm": "Подтвердить",
+      "saveDraft": "Сохранить черновик",
+      "publishGrade": "Опубликовать оценку",
+      "gradePublished": "Оценка опубликована студенту",
+      "confirmPublishTitle": "Опубликовать оценку?",
+      "confirmPublishDesc": "Студент сможет увидеть оценку и комментарий.",
+      "unsavedTitle": "Несохранённые изменения",
+      "unsavedDesc": "Есть несохранённые изменения. Отменить их и продолжить?",
+      "discardAndContinue": "Отменить и продолжить",
+      "late": "С опозданием",
+      "autoSum": "Авто-сумма",
+      "useAutoScore": "Применить авто-оценку",
+      "useAutoSum": "Применить авто-сумму",
+      "studentAnswer": "Ответ студента",
+      "itemScore": "Баллы",
+      "itemFeedback": "Комментарий",
+      "itemFeedbackPlaceholder": "Добавьте комментарий к этому пункту...",
+      "correctAnswer": "Правильный ответ"
     },
     "Result": {
       "score": "Оценка",
@@ -7117,14 +7137,18 @@
       "bannerSubmittedTitle": "Работа сдана",
       "bannerSubmittedDesc": "Ваша работа отправлена. Ожидайте проверки преподавателя.",
       "bannerGradedTitle": "Работа проверена",
-      "bannerGradedDesc": "Преподаватель проверил вашу работу.",
+      "bannerGradedDesc": "Ваша работа проверяется преподавателем.",
       "bannerLateTitle": "Работа сдана с опозданием",
       "bannerLateDesc": "Ваша работа была отправлена после истечения срока.",
       "bannerReturnedTitle": "Работа возвращена",
       "bannerReturnedDesc": "Преподаватель попросил вас переработать и повторно сдать работу.",
       "score": "Оценка",
       "readyToSubmit": "Готовы сдать работу?",
-      "returnedResubmit": "Работа возвращена. Вы можете исправить и повторно отправить."
+      "returnedResubmit": "Работа возвращена. Вы можете исправить и повторно отправить.",
+      "bannerPendingTitle": "Работа отправлена",
+      "bannerPendingDesc": "Ваша работа отправлена и ожидает проверки преподавателя.",
+      "bannerPublishedTitle": "Оценка опубликована",
+      "bannerPublishedDesc": "Ваша оценка и отзыв теперь доступны."
     },
     "SubmitButton": {
       "submitForGrading": "Сдать на проверку",

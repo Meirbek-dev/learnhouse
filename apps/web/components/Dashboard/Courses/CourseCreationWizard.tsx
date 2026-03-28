@@ -3,9 +3,9 @@
 import { buildCourseWorkspacePath, cleanCourseUuid, prefixedCourseUuid } from '@/lib/course-management';
 import { createNewCourse, getCourseMetadata, searchEditableCourses } from '@services/courses/courses';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { useCallback, useEffect, useRef, useState, useTransition } from 'react';
 import { CourseChoiceCard, courseWorkflowSummaryCardClass } from './courseWorkflowUi';
 import { CheckCircle2, ChevronDown, Loader2, Search, Sparkles } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState, useTransition } from 'react';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import type { CourseWizardValues } from '@/schemas/courseSchemas';
 import { valibotResolver } from '@hookform/resolvers/valibot';

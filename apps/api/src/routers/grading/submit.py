@@ -15,11 +15,10 @@ from sqlalchemy import desc
 from sqlmodel import Session, select
 
 from src.core.events.database import get_db_session
-from src.db.courses.blocks import Block
-from src.db.courses.quiz import QuizSettings
 from src.db.grading.submissions import AssessmentType, Submission, SubmissionRead
 from src.db.users import PublicUser
 from src.security.auth import get_current_user
+from src.services.grading.settings_loader import load_activity_settings
 from src.services.grading.submit import start_submission, submit_assessment
 
 router = APIRouter()
@@ -37,7 +36,7 @@ async def api_start_submission(
     Create a DRAFT Submission and record the server-stamped start time.
 
     Must be called before submitting a quiz or exam so the server controls
-    the start timestamp (B2 fix: started_at in dedicated column).
+    the start timestamp (prevents client falsification).
     """
     return await start_submission(
         request=request,
@@ -61,59 +60,20 @@ async def api_submit_assessment(
     """
     Submit an assessment attempt and receive auto-grading results.
 
-    For quizzes: fetches questions and settings from the Block table.
-    For exams:   the exam service continues to handle exam-specific flow.
-    For assignments: creates a SUBMITTED record awaiting manual grading.
+    Settings (questions, time limits, due date) are loaded server-side
+    from the Block content — not supplied by the client.
     """
-    questions: list[dict] = []
-    settings: dict = {}
-
-    if assessment_type == AssessmentType.QUIZ:
-        block = db_session.exec(
-            select(Block)
-            .where(Block.activity_id == activity_id)
-            .order_by(desc(Block.id))
-        ).first()
-        if block:
-            questions = block.content.get("questions", [])
-            settings_data = block.content.get("settings", {})
-            quiz_settings = (
-                QuizSettings(**settings_data) if settings_data else QuizSettings()
-            )
-            settings = {
-                "max_attempts": quiz_settings.max_attempts,
-                "time_limit_seconds": quiz_settings.time_limit_seconds,
-                "max_score_penalty_per_attempt": quiz_settings.max_score_penalty_per_attempt,
-                "track_violations": quiz_settings.track_violations,
-                "block_on_violations": quiz_settings.block_on_violations,
-                "max_violations": quiz_settings.max_violations,
-                "due_date_iso": block.content.get("settings", {}).get("due_date_iso"),
-            }
-
-    elif assessment_type == AssessmentType.EXAM:
-        # Fetch exam questions from the block content for exam activities
-        block = db_session.exec(
-            select(Block)
-            .where(Block.activity_id == activity_id)
-            .order_by(desc(Block.id))
-        ).first()
-        if block:
-            questions = block.content.get("questions", [])
-            settings = {
-                "max_attempts": block.content.get("settings", {}).get("max_attempts"),
-                "due_date_iso": block.content.get("settings", {}).get("due_date_iso"),
-            }
+    settings = load_activity_settings(activity_id, assessment_type, db_session)
 
     return await submit_assessment(
         request=request,
         activity_id=activity_id,
         assessment_type=assessment_type,
         answers_payload=answers_payload,
+        settings=settings,
         current_user=current_user,
         db_session=db_session,
         violation_count=violation_count,
-        questions=questions,
-        settings=settings,
     )
 
 

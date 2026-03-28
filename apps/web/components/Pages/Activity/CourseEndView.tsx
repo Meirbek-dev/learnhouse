@@ -146,7 +146,15 @@ const CourseEndView: FC<CourseEndViewProps> = ({ courseName, courseUuid, thumbna
     // Big opening bursts
     confetti({ particleCount: 140, spread: 100, origin: { y: 0.4 }, scalar: 1.6, ticks: 400, colors });
     const t1 = setTimeout(() => {
-      confetti({ particleCount: 90, spread: 80, shapes: ['star'], scalar: 2.2, origin: { y: 0.4 }, ticks: 350, colors });
+      confetti({
+        particleCount: 90,
+        spread: 80,
+        shapes: ['star'],
+        scalar: 2.2,
+        origin: { y: 0.4 },
+        ticks: 350,
+        colors,
+      });
     }, 200);
     const t2 = setTimeout(() => {
       confetti({ particleCount: 80, spread: 70, origin: { x: 0.2, y: 0.5 }, scalar: 1.5, ticks: 300, colors });
@@ -156,12 +164,27 @@ const CourseEndView: FC<CourseEndViewProps> = ({ courseName, courseUuid, thumbna
     // Continuous cannons from both sides for 6 seconds
     const end = Date.now() + 6000;
     const interval = setInterval(() => {
-      if (Date.now() > end) { clearInterval(interval); return; }
+      if (Date.now() > end) {
+        clearInterval(interval);
+        return;
+      }
       confetti({ particleCount: 7, angle: 60, spread: 58, origin: { x: 0, y: 0.65 }, scalar: 1.4, ticks: 300, colors });
-      confetti({ particleCount: 7, angle: 120, spread: 58, origin: { x: 1, y: 0.65 }, scalar: 1.4, ticks: 300, colors });
+      confetti({
+        particleCount: 7,
+        angle: 120,
+        spread: 58,
+        origin: { x: 1, y: 0.65 },
+        scalar: 1.4,
+        ticks: 300,
+        colors,
+      });
     }, 50);
 
-    return () => { clearTimeout(t1); clearTimeout(t2); clearInterval(interval); };
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearInterval(interval);
+    };
   }, [isCourseCompleted]);
 
   // Generate PDF using @react-pdf/renderer

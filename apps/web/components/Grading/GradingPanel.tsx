@@ -1,7 +1,7 @@
 'use client';
 
-import { BookOpenCheck, ChevronLeft, ChevronRight, Eye, RotateCcw, Send } from 'lucide-react';
-import { useState, useCallback, useEffect } from 'react';
+import { BookOpenCheck, ChevronLeft, ChevronRight, RotateCcw, Send, Wand2 } from 'lucide-react';
+import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
@@ -16,7 +16,14 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerDescription,
+  DrawerFooter,
+} from '@/components/ui/drawer';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
@@ -41,6 +48,8 @@ interface GradingPanelProps {
   onNavigate?: (uuid: string) => void;
 }
 
+type ItemFeedbackMap = Record<string, { score: string; feedback: string }>;
+
 export default function GradingPanel({
   submissionUuid,
   allSubmissionUuids,
@@ -56,57 +65,136 @@ export default function GradingPanel({
 
   const [score, setScore] = useState<string>('');
   const [feedback, setFeedback] = useState('');
-  // Per-item feedback: map of item_id → { score, feedback }
-  const [itemFeedbacks, setItemFeedbacks] = useState<Record<string, { score: string; feedback: string }>>({});
+  const [itemFeedbacks, setItemFeedbacks] = useState<ItemFeedbackMap>({});
   const [isSaving, setIsSaving] = useState(false);
 
-  // Reset / pre-fill inputs when the panel switches or loads
+  // Dirty-state tracking.
+  // We store the last-saved values in a ref so SWR revalidation never resets isDirty.
+  // dirtyVersion is bumped after a successful save to force the memo to recompute.
+  const initialRef = useRef<{ score: string; feedback: string; items: ItemFeedbackMap }>({
+    score: '',
+    feedback: '',
+    items: {},
+  });
+  const [dirtyVersion, setDirtyVersion] = useState(0);
+
+  // Unsaved-changes navigation guard
+  const [pendingNavigate, setPendingNavigate] = useState<string | null>(null);
+  const [pendingClose, setPendingClose] = useState(false);
+
+  // Effect 1: reset everything when a different submission is opened (uuid changes).
   useEffect(() => {
     if (submissionUuid === null) {
       setScore('');
       setFeedback('');
       setItemFeedbacks({});
-      return;
+      initialRef.current = { score: '', feedback: '', items: {} };
+      setDirtyVersion(0);
     }
-    setScore(submission?.final_score != null ? String(submission.final_score) : '');
-    setFeedback(submission?.grading_json?.feedback ?? '');
+  }, [submissionUuid]);
 
-    // Pre-fill item-level feedback from existing grading
-    if (submission?.grading_json?.items) {
-      const existing: Record<string, { score: string; feedback: string }> = {};
-      for (const item of submission.grading_json.items) {
-        existing[item.item_id] = {
-          score: item.score != null ? String(item.score) : '',
-          feedback: item.feedback ?? '',
-        };
-      }
-      setItemFeedbacks(existing);
-    } else {
-      setItemFeedbacks({});
+  // Effect 2: pre-fill form from loaded data. Keyed on submission.id so that SWR
+  // revalidation (same id, same uuid) does NOT re-run and wipe in-progress edits.
+  const submissionId = submission?.id;
+  useEffect(() => {
+    if (!submission) return;
+    const s = submission.final_score != null ? String(submission.final_score) : '';
+    const fb = submission.grading_json?.feedback ?? '';
+    const items: ItemFeedbackMap = {};
+    for (const item of submission.grading_json?.items ?? []) {
+      items[item.item_id] = {
+        score: item.score != null ? String(item.score) : '',
+        feedback: item.feedback ?? '',
+      };
     }
-  }, [submissionUuid, submission?.final_score, submission?.grading_json]);
+    setScore(s);
+    setFeedback(fb);
+    setItemFeedbacks(items);
+    initialRef.current = { score: s, feedback: fb, items };
+    setDirtyVersion(0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [submissionId]);
 
-  // Navigation
+  // isDirty: compares current state against last-saved ref values.
+  // dirtyVersion in deps allows the memo to recompute after a save bumps it.
+  const isDirty = useMemo(() => {
+    void dirtyVersion;
+    if (score !== initialRef.current.score) return true;
+    if (feedback !== initialRef.current.feedback) return true;
+    for (const [id, cur] of Object.entries(itemFeedbacks)) {
+      const saved = initialRef.current.items[id] ?? { score: '', feedback: '' };
+      if (cur.score !== saved.score || cur.feedback !== saved.feedback) return true;
+    }
+    return false;
+  }, [score, feedback, itemFeedbacks, dirtyVersion]);
+
+  // Navigation helpers with unsaved-changes guard
   const currentIndex = submissionUuid ? allSubmissionUuids.indexOf(submissionUuid) : -1;
   const hasPrev = currentIndex > 0;
   const hasNext = currentIndex < allSubmissionUuids.length - 1;
+
+  function tryNavigate(uuid: string) {
+    if (isDirty) {
+      setPendingNavigate(uuid);
+    } else {
+      onNavigate?.(uuid);
+    }
+  }
+
+  function tryClose() {
+    if (isDirty) {
+      setPendingClose(true);
+    } else {
+      onClose();
+    }
+  }
+
+  const unsavedOpen = pendingNavigate !== null || pendingClose;
+
+  function handleDiscardAndContinue() {
+    if (pendingNavigate) {
+      onNavigate?.(pendingNavigate);
+      setPendingNavigate(null);
+    } else {
+      onClose();
+      setPendingClose(false);
+    }
+  }
+
+  function handleCancelDiscard() {
+    setPendingNavigate(null);
+    setPendingClose(false);
+  }
 
   // Score validation
   const scoreNum = Number.parseFloat(score);
   const scoreInvalid = score !== '' && (Number.isNaN(scoreNum) || scoreNum < 0 || scoreNum > 100);
 
-  const buildItemFeedbackList = (): ItemFeedback[] => {
-    return Object.entries(itemFeedbacks).map(([item_id, val]) => ({
+  // Auto-sum score: Σ(item.score) / Σ(item.max_score) × 100
+  // Uses teacher-entered per-item values if present, otherwise falls back to auto-graded scores.
+  const autoSumScore = useMemo(() => {
+    const items = submission?.grading_json?.items ?? [];
+    if (!items.length) return null;
+    const totalMax = items.reduce((sum, it) => sum + it.max_score, 0);
+    if (!totalMax) return null;
+    const totalScore = items.reduce((sum, it) => {
+      const raw = itemFeedbacks[it.item_id]?.score;
+      const s = raw !== undefined && raw !== '' ? Number.parseFloat(raw) : it.score;
+      return sum + (Number.isNaN(s) ? 0 : s);
+    }, 0);
+    return Math.round((totalScore / totalMax) * 100 * 100) / 100;
+  }, [submission?.grading_json?.items, itemFeedbacks]);
+
+  const buildItemFeedbackList = (): ItemFeedback[] =>
+    Object.entries(itemFeedbacks).map(([item_id, val]) => ({
       item_id,
       score: val.score !== '' ? Number.parseFloat(val.score) : undefined,
       feedback: val.feedback,
     }));
-  };
 
   const handleSaveGrade = useCallback(
     async (status: 'GRADED' | 'PUBLISHED' | 'RETURNED') => {
       if (!submissionUuid || !accessToken) return;
-
       if (scoreInvalid || score === '') {
         toast.error(t('invalidScore'));
         return;
@@ -122,8 +210,12 @@ export default function GradingPanel({
       setIsSaving(true);
       try {
         const updated = await saveGrade(submissionUuid, input, accessToken);
-        const msgKey = status === 'PUBLISHED' ? 'gradePublished' : status === 'RETURNED' ? 'returned' : 'gradeSaved';
+        const msgKey =
+          status === 'PUBLISHED' ? 'gradePublished' : status === 'RETURNED' ? 'returned' : 'gradeSaved';
         toast.success(t(msgKey));
+        // Mark form clean by updating the ref and bumping dirtyVersion
+        initialRef.current = { score, feedback, items: { ...itemFeedbacks } };
+        setDirtyVersion((v) => v + 1);
         onGradeSaved?.(updated);
         mutate();
       } catch {
@@ -137,212 +229,280 @@ export default function GradingPanel({
   );
 
   const studentName = submission?.user
-    ? [submission.user.first_name, submission.user.middle_name, submission.user.last_name].filter(Boolean).join(' ') ||
-      `@${submission.user.username}`
+    ? [submission.user.first_name, submission.user.middle_name, submission.user.last_name]
+        .filter(Boolean)
+        .join(' ') || `@${submission.user.username}`
     : '—';
 
   const canSave = !isSaving && score !== '' && !scoreInvalid;
 
   return (
-    <Sheet
-      open={Boolean(submissionUuid)}
-      onOpenChange={(open) => !open && onClose()}
-    >
-      <SheetContent
-        side="right"
-        className="flex w-full max-w-2xl flex-col p-0 sm:max-w-2xl"
+    <>
+      {/* Unsaved-changes confirmation dialog */}
+      <AlertDialog
+        open={unsavedOpen}
+        onOpenChange={(open) => !open && handleCancelDiscard()}
       >
-        {/* Header */}
-        <SheetHeader className="border-b px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <SheetTitle className="text-base">{studentName}</SheetTitle>
-              <SheetDescription className="text-xs">
-                {t('attempt')} #{submission?.attempt_number ?? '—'} ·{' '}
-                {submission?.submitted_at ? new Date(submission.submitted_at).toLocaleString() : t('notYetSubmitted')}
-              </SheetDescription>
-            </div>
-            {submission && <SubmissionStatusBadge status={submission.status} />}
-          </div>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('unsavedTitle')}</AlertDialogTitle>
+            <AlertDialogDescription>{t('unsavedDesc')}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleCancelDiscard}>{t('cancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDiscardAndContinue}>{t('discardAndContinue')}</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
-          {/* Navigation */}
-          {allSubmissionUuids.length > 1 && (
-            <div className="mt-3 flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={!hasPrev}
-                onClick={() => onNavigate?.(allSubmissionUuids[currentIndex - 1]!)}
-              >
-                <ChevronLeft className="h-4 w-4" />
-                {t('previous')}
-              </Button>
-              <span className="text-xs text-slate-500">
-                {currentIndex + 1} / {allSubmissionUuids.length}
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={!hasNext}
-                onClick={() => onNavigate?.(allSubmissionUuids[currentIndex + 1]!)}
-              >
-                {t('next')}
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </div>
-          )}
-        </SheetHeader>
-
-        {/* Body — student answers with inline item scoring */}
-        <ScrollArea className="flex-1 px-6 py-4">
-          {isLoading ? (
-            <div className="flex h-32 items-center justify-center text-sm text-slate-500">{t('loading')}</div>
-          ) : submission ? (
-            <SubmissionAnswers
-              submission={submission}
-              itemFeedbacks={itemFeedbacks}
-              onItemFeedbackChange={(itemId, field, value) =>
-                setItemFeedbacks((prev) => ({
-                  ...prev,
-                  [itemId]: { ...(prev[itemId] ?? { score: '', feedback: '' }), [field]: value },
-                }))
-              }
-              t={t}
-            />
-          ) : (
-            <div className="flex h-32 items-center justify-center text-sm text-slate-500">{t('noData')}</div>
-          )}
-        </ScrollArea>
-
-        {/* Grade entry footer */}
-        <div className="border-t bg-slate-50 px-6 py-4 space-y-4">
-          {/* Overall score + auto-score reference */}
-          <div className="flex items-start gap-6">
-            <div className="space-y-1.5">
-              <Label
-                htmlFor="final-score"
-                className="text-sm font-medium"
-              >
-                {t('finalScore')}
-              </Label>
-              <div className="flex items-center gap-2">
-                <Input
-                  id="final-score"
-                  type="number"
-                  min={0}
-                  max={100}
-                  step={0.5}
-                  placeholder="0–100"
-                  value={score}
-                  onChange={(e) => setScore(e.target.value)}
-                  className={cn(
-                    'w-28 text-center font-semibold',
-                    scoreInvalid && 'border-red-500 focus-visible:ring-red-500',
-                  )}
-                />
-                <span className="text-sm text-slate-500">/ 100</span>
+      <Drawer
+        open={Boolean(submissionUuid)}
+        onOpenChange={(open) => !open && tryClose()}
+        direction="right"
+      >
+        <DrawerContent
+          className="flex flex-col p-0"
+          style={{ maxWidth: '48rem' }}
+        >
+          {/* Header — always visible, contains score entry */}
+          <DrawerHeader className="border-b px-6 py-4 gap-0 space-y-3">
+            {/* Student name + status + late badge */}
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 flex-1 min-w-0">
+                <DrawerTitle className="text-base truncate">{studentName}</DrawerTitle>
+                {submission?.is_late && (
+                  <Badge
+                    variant="outline"
+                    className="shrink-0 border-red-300 bg-red-50 text-red-700 text-xs"
+                  >
+                    {t('late')}
+                  </Badge>
+                )}
               </div>
-              {scoreInvalid && <p className="text-xs text-red-600">{t('invalidScore')}</p>}
+              {submission && <SubmissionStatusBadge status={submission.status} />}
             </div>
 
-            {/* Auto-score so teacher knows what the auto-grader computed */}
-            {submission?.auto_score != null && (
-              <div className="space-y-1.5">
-                <Label className="text-sm font-medium text-slate-500">{t('autoScore')}</Label>
-                <p className="text-sm font-semibold text-slate-600 pt-2">{submission.auto_score}/100</p>
+            {/* Meta: attempt + submitted date */}
+            <DrawerDescription className="text-xs">
+              {t('attempt')} #{submission?.attempt_number ?? '—'} ·{' '}
+              {submission?.submitted_at
+                ? new Date(submission.submitted_at).toLocaleString()
+                : t('notYetSubmitted')}
+            </DrawerDescription>
+
+            {/* Navigation buttons */}
+            {allSubmissionUuids.length > 1 && (
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={!hasPrev}
+                  onClick={() => tryNavigate(allSubmissionUuids[currentIndex - 1]!)}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  {t('previous')}
+                </Button>
+                <span className="text-xs text-slate-500">
+                  {currentIndex + 1} / {allSubmissionUuids.length}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={!hasNext}
+                  onClick={() => tryNavigate(allSubmissionUuids[currentIndex + 1]!)}
+                >
+                  {t('next')}
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
               </div>
             )}
-          </div>
 
-          {/* Overall feedback */}
-          <div className="space-y-1.5">
-            <Label
-              htmlFor="feedback"
-              className="text-sm font-medium"
-            >
-              {t('feedback')} <span className="text-slate-400 font-normal">({t('optional')})</span>
-            </Label>
-            <Textarea
-              id="feedback"
-              rows={2}
-              placeholder={t('feedbackPlaceholder')}
-              value={feedback}
-              onChange={(e) => setFeedback(e.target.value)}
-            />
-          </div>
+            <Separator />
 
-          <Separator />
+            {/* Score entry — always visible without scrolling */}
+            <div className="flex items-end gap-6 pt-1">
+              <div className="space-y-1.5">
+                <Label
+                  htmlFor="final-score"
+                  className="text-sm font-medium"
+                >
+                  {t('finalScore')}
+                </Label>
+                <div className="flex items-center gap-2">
+                  <Input
+                    id="final-score"
+                    type="number"
+                    min={0}
+                    max={100}
+                    step={0.5}
+                    placeholder="0–100"
+                    value={score}
+                    onChange={(e) => setScore(e.target.value)}
+                    className={cn(
+                      'w-28 text-center font-semibold',
+                      scoreInvalid && 'border-red-500 focus-visible:ring-red-500',
+                    )}
+                  />
+                  <span className="text-sm text-slate-500">/ 100</span>
+                </div>
+                {scoreInvalid && <p className="text-xs text-red-600">{t('invalidScore')}</p>}
+              </div>
 
-          {/* Action buttons: Save Draft | Publish | Return */}
-          <div className="flex items-center justify-between gap-2 flex-wrap">
-            {/* Return to student — requires confirmation */}
-            <AlertDialog>
-              <AlertDialogTrigger
-                render={
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    disabled={!canSave}
-                    className="gap-1.5"
-                  >
-                    <RotateCcw className="h-4 w-4" />
-                    {t('returnToStudent')}
-                  </Button>
+              {/* Auto-score reference + one-click fill buttons */}
+              <div className="flex flex-col gap-1.5">
+                {submission?.auto_score != null && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-slate-500">
+                      {t('autoScore')}: <strong>{submission.auto_score}/100</strong>
+                    </span>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 gap-1 px-2 text-xs"
+                      onClick={() => setScore(String(submission.auto_score))}
+                    >
+                      <Wand2 className="h-3 w-3" />
+                      {t('useAutoScore')}
+                    </Button>
+                  </div>
+                )}
+                {autoSumScore !== null && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-slate-500">
+                      {t('autoSum')}: <strong>{autoSumScore}/100</strong>
+                    </span>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 gap-1 px-2 text-xs"
+                      onClick={() => setScore(String(autoSumScore))}
+                    >
+                      <Wand2 className="h-3 w-3" />
+                      {t('useAutoSum')}
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </DrawerHeader>
+
+          {/* Scrollable body — answers with per-item scoring */}
+          <ScrollArea className="flex-1 px-6 py-4">
+            {isLoading ? (
+              <div className="flex h-32 items-center justify-center text-sm text-slate-500">
+                {t('loading')}
+              </div>
+            ) : submission ? (
+              <SubmissionAnswers
+                submission={submission}
+                itemFeedbacks={itemFeedbacks}
+                onItemFeedbackChange={(itemId, field, value) =>
+                  setItemFeedbacks((prev) => ({
+                    ...prev,
+                    [itemId]: { ...(prev[itemId] ?? { score: '', feedback: '' }), [field]: value },
+                  }))
                 }
+                t={t}
               />
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>{t('confirmReturnTitle')}</AlertDialogTitle>
-                  <AlertDialogDescription>{t('confirmReturnDesc')}</AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
-                  <AlertDialogAction onClick={() => handleSaveGrade('RETURNED')}>{t('confirm')}</AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+            ) : (
+              <div className="flex h-32 items-center justify-center text-sm text-slate-500">
+                {t('noData')}
+              </div>
+            )}
+          </ScrollArea>
 
-            <div className="flex items-center gap-2">
-              {/* Save grade (teacher draft — student cannot see yet) */}
-              <Button
-                variant="outline"
-                disabled={!canSave}
-                onClick={() => handleSaveGrade('GRADED')}
-                className="gap-1.5"
+          {/* Footer — overall feedback + action buttons */}
+          <DrawerFooter className="border-t bg-slate-50 px-6 py-4 gap-4">
+            <div className="space-y-1.5">
+              <Label
+                htmlFor="feedback"
+                className="text-sm font-medium"
               >
-                <BookOpenCheck className="h-4 w-4" />
-                {isSaving ? t('saving') : t('saveDraft')}
-              </Button>
+                {t('feedback')} <span className="text-slate-400 font-normal">({t('optional')})</span>
+              </Label>
+              <Textarea
+                id="feedback"
+                rows={2}
+                placeholder={t('feedbackPlaceholder')}
+                value={feedback}
+                onChange={(e) => setFeedback(e.target.value)}
+              />
+            </div>
 
-              {/* Publish — confirm before making visible to student */}
+            <Separator />
+
+            <div className="flex items-center justify-between gap-2 flex-wrap">
+              {/* Return to student — requires confirmation */}
               <AlertDialog>
                 <AlertDialogTrigger
                   render={
                     <Button
+                      variant="outline"
+                      size="sm"
                       disabled={!canSave}
                       className="gap-1.5"
                     >
-                      <Send className="h-4 w-4" />
-                      {t('publishGrade')}
+                      <RotateCcw className="h-4 w-4" />
+                      {t('returnToStudent')}
                     </Button>
                   }
                 />
                 <AlertDialogContent>
                   <AlertDialogHeader>
-                    <AlertDialogTitle>{t('confirmPublishTitle')}</AlertDialogTitle>
-                    <AlertDialogDescription>{t('confirmPublishDesc')}</AlertDialogDescription>
+                    <AlertDialogTitle>{t('confirmReturnTitle')}</AlertDialogTitle>
+                    <AlertDialogDescription>{t('confirmReturnDesc')}</AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
-                    <AlertDialogAction onClick={() => handleSaveGrade('PUBLISHED')}>{t('confirm')}</AlertDialogAction>
+                    <AlertDialogAction onClick={() => handleSaveGrade('RETURNED')}>{t('confirm')}</AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
+
+              <div className="flex items-center gap-2">
+                {/* Save draft — teacher-visible only */}
+                <Button
+                  variant="outline"
+                  disabled={!canSave}
+                  onClick={() => handleSaveGrade('GRADED')}
+                  className="gap-1.5"
+                >
+                  <BookOpenCheck className="h-4 w-4" />
+                  {isSaving ? t('saving') : t('saveDraft')}
+                </Button>
+
+                {/* Publish — requires confirmation */}
+                <AlertDialog>
+                  <AlertDialogTrigger
+                    render={
+                      <Button
+                        disabled={!canSave}
+                        className="gap-1.5"
+                      >
+                        <Send className="h-4 w-4" />
+                        {t('publishGrade')}
+                      </Button>
+                    }
+                  />
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>{t('confirmPublishTitle')}</AlertDialogTitle>
+                      <AlertDialogDescription>{t('confirmPublishDesc')}</AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
+                      <AlertDialogAction onClick={() => handleSaveGrade('PUBLISHED')}>{t('confirm')}</AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
             </div>
-          </div>
-        </div>
-      </SheetContent>
-    </Sheet>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
+    </>
   );
 }
 
@@ -350,7 +510,7 @@ export default function GradingPanel({
 
 interface SubmissionAnswersProps {
   submission: Submission;
-  itemFeedbacks: Record<string, { score: string; feedback: string }>;
+  itemFeedbacks: ItemFeedbackMap;
   onItemFeedbackChange: (itemId: string, field: 'score' | 'feedback', value: string) => void;
   t: ReturnType<typeof useTranslations<'Grading.Panel'>>;
 }
@@ -401,7 +561,6 @@ function AnswerItem({ item, index, itemFeedback, isEditable, onFeedbackChange, t
 
   return (
     <div className="rounded-lg border bg-white p-4 space-y-3">
-      {/* Question header */}
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-center gap-2">
           {item.needs_manual_review && (
@@ -421,7 +580,6 @@ function AnswerItem({ item, index, itemFeedback, isEditable, onFeedbackChange, t
         </span>
       </div>
 
-      {/* Student's answer */}
       {item.user_answer != null && (
         <div className="rounded bg-slate-100 px-3 py-2 text-sm text-slate-700">
           <span className="text-xs font-medium text-slate-500 mr-1">{t('studentAnswer')}:</span>
@@ -429,7 +587,6 @@ function AnswerItem({ item, index, itemFeedback, isEditable, onFeedbackChange, t
         </div>
       )}
 
-      {/* Correct answer (auto-graded items only) */}
       {item.correct === false && item.correct_answer != null && (
         <div className="rounded bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
           <span className="text-xs font-medium text-emerald-600 mr-1">{t('correctAnswer')}:</span>
@@ -437,10 +594,8 @@ function AnswerItem({ item, index, itemFeedback, isEditable, onFeedbackChange, t
         </div>
       )}
 
-      {/* Existing auto-feedback */}
       {item.feedback && !item.needs_manual_review && <p className="text-xs text-slate-500 italic">{item.feedback}</p>}
 
-      {/* Per-item scoring controls for manual-review items */}
       {isEditable && (
         <div className="space-y-2 border-t pt-3">
           <div className="flex items-center gap-3">

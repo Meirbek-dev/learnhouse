@@ -30,6 +30,7 @@ export function useGradingPanel(submissionUuid: string | null): UseGradingPanelR
   const { data, error, isLoading, mutate } = useSWR<Submission>(
     submissionUuid && accessToken ? `${getAPIUrl()}grading/submissions/${submissionUuid}` : null,
     (url: string) => swrFetcher(url, accessToken),
+    { revalidateOnFocus: false, dedupingInterval: 2000 },
   );
 
   return {

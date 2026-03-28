@@ -13,6 +13,7 @@ export function useSubmissionStats(activityId: number | null) {
   const { data, error, isLoading, mutate } = useSWR<SubmissionStats>(
     activityId && accessToken ? `${getAPIUrl()}grading/submissions/stats?activity_id=${activityId}` : null,
     (url: string) => swrFetcher(url, accessToken),
+    { revalidateOnFocus: false, dedupingInterval: 5000 },
   );
 
   return {

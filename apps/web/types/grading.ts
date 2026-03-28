@@ -1,10 +1,19 @@
 /**
- * Grading system type definitions — v2.
+ * Grading system type definitions — v3.
+ *
+ * Status model (simplified from 7 → 5 states):
+ *   DRAFT      — student is working, not yet submitted
+ *   PENDING    — submitted, awaiting teacher grading (replaces SUBMITTED / LATE / UNDER_REVIEW)
+ *   GRADED     — teacher has set a final score (not yet visible to student)
+ *   PUBLISHED  — grade is visible to the student
+ *   RETURNED   — teacher sent it back for revision
+ *
+ * Late submissions use is_late: boolean on the Submission object itself.
  */
 
 // ── Enums ────────────────────────────────────────────────────────────────────
 
-export type SubmissionStatus = 'DRAFT' | 'SUBMITTED' | 'UNDER_REVIEW' | 'GRADED' | 'PUBLISHED' | 'LATE' | 'RETURNED';
+export type SubmissionStatus = 'DRAFT' | 'PENDING' | 'GRADED' | 'PUBLISHED' | 'RETURNED';
 
 export type AssessmentType = 'QUIZ' | 'ASSIGNMENT' | 'EXAM' | 'CODE_CHALLENGE';
 
@@ -93,9 +102,10 @@ export interface Submission {
 
   status: SubmissionStatus;
   attempt_number: number;
+  is_late: boolean;
 
   answers_json: QuizAnswers | AssignmentAnswers | ExamAnswers | CodeChallengeAnswers | Record<string, unknown>;
-  grading_json: GradingBreakdown | null;
+  grading_json: GradingBreakdown;
 
   started_at: string | null;
   submitted_at: string | null;
@@ -134,8 +144,8 @@ export interface SubmissionsPage {
 export interface SubmissionStats {
   total: number;
   graded_count: number;
-  needs_grading_count: number;
-  late_count: number;
+  needs_grading_count: number; // count of PENDING submissions
+  late_count: number;          // count of PENDING submissions where is_late=true
   avg_score: number | null;
   pass_rate: number | null;
 }
@@ -160,27 +170,23 @@ export interface TeacherGradeInput {
 
 export const STATUS_LABELS: Record<SubmissionStatus, string> = {
   DRAFT: 'Draft',
-  SUBMITTED: 'Submitted',
-  UNDER_REVIEW: 'Under Review',
+  PENDING: 'Pending',
   GRADED: 'Graded',
   PUBLISHED: 'Published',
-  LATE: 'Late',
   RETURNED: 'Returned',
 };
 
 export const STATUS_COLORS: Record<SubmissionStatus, string> = {
   DRAFT: 'bg-slate-100 text-slate-700',
-  SUBMITTED: 'bg-amber-100 text-amber-800',
-  UNDER_REVIEW: 'bg-blue-100 text-blue-800',
+  PENDING: 'bg-amber-100 text-amber-800',
   GRADED: 'bg-emerald-100 text-emerald-800',
   PUBLISHED: 'bg-teal-100 text-teal-800',
-  LATE: 'bg-rose-100 text-rose-800',
   RETURNED: 'bg-violet-100 text-violet-800',
 };
 
 /** True when the submission needs teacher action */
 export function needsTeacherAction(status: SubmissionStatus): boolean {
-  return status === 'SUBMITTED' || status === 'LATE' || status === 'UNDER_REVIEW';
+  return status === 'PENDING';
 }
 
 /** True when the grade is visible to the student */

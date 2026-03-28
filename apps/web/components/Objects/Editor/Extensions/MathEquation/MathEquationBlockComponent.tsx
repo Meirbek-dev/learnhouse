@@ -8,8 +8,8 @@ import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
 import type { ChangeEvent } from 'react';
 import { motion } from 'motion/react';
-import katex from 'katex';
 import 'katex/dist/katex.min.css';
+import katex from 'katex';
 
 // Predefined LaTeX templates
 const mathTemplates = [

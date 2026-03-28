@@ -7066,7 +7066,10 @@
       "sortByDate": "Жіберілген күні",
       "sortByScore": "Баға бойынша",
       "sortByAttempt": "Әрекет нөмірі",
-      "exportCSV": "CSV экспорт"
+      "exportCSV": "CSV экспорт",
+      "filterPending": "Күтуде",
+      "filterPublished": "Жарияланған",
+      "filterReturned": "Қайтарылған"
     },
     "Stats": {
       "total": "Барлық жіберілімдер",
@@ -7099,7 +7102,24 @@
       "confirmReturnTitle": "Студентке қайтаруды растаңыз",
       "confirmReturnDesc": "Жұмыс студентке қайтарылады. Студент жұмысты қайта жіберуге мүмкіндік алады.",
       "cancel": "Болдырмау",
-      "confirm": "Растау"
+      "confirm": "Растау",
+      "saveDraft": "Жобаны сақтау",
+      "publishGrade": "Бағаны жариялау",
+      "gradePublished": "Баға студентке жарияланды",
+      "confirmPublishTitle": "Бағаны жариялау керек пе?",
+      "confirmPublishDesc": "Студент бағасы мен пікірді көре алатын болады.",
+      "unsavedTitle": "Сақталмаған өзгерістер",
+      "unsavedDesc": "Сізде сақталмаған өзгерістер бар. Оларды жойып жалғастыру керек пе?",
+      "discardAndContinue": "Жойып жалғастыру",
+      "late": "Кешіктірілген",
+      "autoSum": "Авто-сумма",
+      "useAutoScore": "Авто-бағаны қолдану",
+      "useAutoSum": "Авто-суммаға қолдану",
+      "studentAnswer": "Студенттің жауабы",
+      "itemScore": "Баға",
+      "itemFeedback": "Пікір",
+      "itemFeedbackPlaceholder": "Тапсырма бойынша пікір қосыңыз...",
+      "correctAnswer": "Дұрыс жауап"
     },
     "Result": {
       "score": "Баға",
@@ -7117,14 +7137,18 @@
       "bannerSubmittedTitle": "Жұмыс жіберілді",
       "bannerSubmittedDesc": "Жұмысыңыз жіберілді. Мұғалімнің тексеруін күтіңіз.",
       "bannerGradedTitle": "Жұмыс бағаланды",
-      "bannerGradedDesc": "Мұғалім жұмысыңызды тексерді.",
+      "bannerGradedDesc": "Жұмысыңызды мұғалім тексеруде.",
       "bannerLateTitle": "Жұмыс кешіктіріліп жіберілді",
       "bannerLateDesc": "Жұмысыңыз мерзімінен кеш жіберілді.",
       "bannerReturnedTitle": "Жұмыс қайтарылды",
       "bannerReturnedDesc": "Мұғалім жұмысыңызды қайта тапсыруды сұрады.",
       "score": "Баға",
       "readyToSubmit": "Жіберуге дайынсыз ба?",
-      "returnedResubmit": "Жұмыс қайтарылды. Түзетіп, қайта жіберуге болады."
+      "returnedResubmit": "Жұмыс қайтарылды. Түзетіп, қайта жіберуге болады.",
+      "bannerPendingTitle": "Жұмыс жіберілді",
+      "bannerPendingDesc": "Жұмысыңыз жіберілді. Мұғалімнің тексеруін күтіңіз.",
+      "bannerPublishedTitle": "Баға жарияланды",
+      "bannerPublishedDesc": "Бағаңыз бен пікір қол жетімді."
     },
     "SubmitButton": {
       "submitForGrading": "Тексеруге жіберу",

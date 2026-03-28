@@ -2,25 +2,23 @@
 Unified Submission model for all assessment types.
 """
 
-from datetime import datetime
+from datetime import UTC, datetime
 from enum import StrEnum
 from typing import Any
 
 from pydantic import ConfigDict, Field, field_validator
-from sqlalchemy import JSON, Column, DateTime, ForeignKey, Index, String
+from sqlalchemy import JSON, Boolean, Column, DateTime, ForeignKey, Index, String
 from sqlmodel import Field as SQLField
 
 from src.db.strict_base_model import PydanticStrictBaseModel, SQLModelStrictBaseModel
 
 
 class SubmissionStatus(StrEnum):
-    DRAFT = "DRAFT"  # student is working, not yet submitted
-    SUBMITTED = "SUBMITTED"  # submitted, awaiting grading
-    UNDER_REVIEW = "UNDER_REVIEW"  # teacher has opened it but not yet saved a grade
-    GRADED = "GRADED"  # teacher (or auto-grader) set final_score
+    DRAFT = "DRAFT"          # student is working, not yet submitted
+    PENDING = "PENDING"      # submitted, awaiting teacher grading
+    GRADED = "GRADED"        # teacher (or auto-grader) set final_score
     PUBLISHED = "PUBLISHED"  # grade is finalised and visible to the student
-    LATE = "LATE"  # submitted after the due_date (modifier, not terminal)
-    RETURNED = "RETURNED"  # teacher sent it back for revision
+    RETURNED = "RETURNED"    # teacher sent it back for revision
 
 
 class AssessmentType(StrEnum):
@@ -115,6 +113,9 @@ class SubmissionBase(SQLModelStrictBaseModel):
     status: SubmissionStatus = SubmissionStatus.DRAFT
     attempt_number: int = 1
 
+    # Late flag — set when submitted after due_date, independent of status
+    is_late: bool = False
+
     @field_validator("assessment_type", mode="before")
     @classmethod
     def validate_assessment_type(cls, v: object) -> object:
@@ -153,7 +154,7 @@ class SubmissionRead(SubmissionBase):
     id: int
     submission_uuid: str
     answers_json: dict = SQLField(default_factory=dict)
-    grading_json: dict = SQLField(default_factory=dict)
+    grading_json: GradingBreakdown = SQLField(default_factory=GradingBreakdown)
     started_at: datetime | None = None
     submitted_at: datetime | None = None
     graded_at: datetime | None = None
@@ -163,6 +164,14 @@ class SubmissionRead(SubmissionBase):
 
     # Populated by the teacher list endpoint; None for student-facing endpoints
     user: SubmissionUser | None = None
+
+    @field_validator("grading_json", mode="before")
+    @classmethod
+    def coerce_grading_json(cls, v: object) -> object:
+        """Coerce a raw dict from the DB into a GradingBreakdown model."""
+        if isinstance(v, dict):
+            return GradingBreakdown(**v) if v else GradingBreakdown()
+        return v
 
 
 class SubmissionUpdate(SQLModelStrictBaseModel):
@@ -221,6 +230,12 @@ class Submission(SubmissionBase, table=True):
         sa_column=Column(JSON),
     )
 
+    # Late flag — set when submitted after due_date
+    is_late: bool = SQLField(
+        default=False,
+        sa_column=Column(Boolean, nullable=False, server_default="false"),
+    )
+
     # Server-only start timestamp (B2: prevents client falsification)
     started_at: datetime | None = SQLField(
         default=None,
@@ -235,11 +250,11 @@ class Submission(SubmissionBase, table=True):
         sa_column=Column(DateTime(timezone=True), nullable=True),
     )
     created_at: datetime = SQLField(
-        default_factory=datetime.utcnow,
+        default_factory=lambda: datetime.now(UTC),
         sa_column=Column(DateTime(timezone=True)),
     )
     updated_at: datetime = SQLField(
-        default_factory=datetime.utcnow,
+        default_factory=lambda: datetime.now(UTC),
         sa_column=Column(DateTime(timezone=True)),
     )
     # Schema version for safe JSON evolution
@@ -270,7 +285,7 @@ class SubmissionStats(SQLModelStrictBaseModel):
 
     total: int
     graded_count: int
-    needs_grading_count: int
-    late_count: int
+    needs_grading_count: int  # count of PENDING submissions
+    late_count: int           # count of PENDING submissions where is_late=True
     avg_score: float | None
-    pass_rate: float | None  # percentage of GRADED submissions scoring ≥ 50
+    pass_rate: float | None   # percentage of GRADED/PUBLISHED scoring ≥ 50

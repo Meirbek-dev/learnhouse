@@ -6,13 +6,13 @@
  * One student-facing lifecycle wrapper for every assessment type.
  *
  * Handles:
- *   1. Status banner (SUBMITTED / UNDER_REVIEW / GRADED / PUBLISHED / RETURNED / LATE)
+ *   1. Status banner (PENDING / GRADED / PUBLISHED / RETURNED)
  *   2. Full grading result (score + breakdown) after PUBLISHED or RETURNED
  *   3. Submit footer for DRAFT / null states
  *   4. Re-submit footer for RETURNED state
  */
 
-import { BookOpenCheck, CheckCircle2, Clock4, Eye, RotateCcw, Send, SendHorizonal } from 'lucide-react';
+import { BookOpenCheck, CheckCircle2, Clock4, RotateCcw, SendHorizonal } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
 
@@ -45,22 +45,15 @@ interface BannerConfig {
 }
 
 const STATUS_BANNERS: Partial<Record<SubmissionStatus, BannerConfig>> = {
-  SUBMITTED: {
+  PENDING: {
     icon: SendHorizonal,
     variant: 'default',
-    titleKey: 'bannerSubmittedTitle',
-    descKey: 'bannerSubmittedDesc',
-    iconClass: 'text-blue-600',
-  },
-  UNDER_REVIEW: {
-    icon: Eye,
-    variant: 'default',
-    titleKey: 'bannerUnderReviewTitle',
-    descKey: 'bannerUnderReviewDesc',
+    titleKey: 'bannerPendingTitle',
+    descKey: 'bannerPendingDesc',
     iconClass: 'text-blue-600',
   },
   GRADED: {
-    icon: BookOpenCheck,
+    icon: Clock4,
     variant: 'default',
     titleKey: 'bannerGradedTitle',
     descKey: 'bannerGradedDesc',
@@ -72,13 +65,6 @@ const STATUS_BANNERS: Partial<Record<SubmissionStatus, BannerConfig>> = {
     titleKey: 'bannerPublishedTitle',
     descKey: 'bannerPublishedDesc',
     iconClass: 'text-emerald-600',
-  },
-  LATE: {
-    icon: Clock4,
-    variant: 'destructive',
-    titleKey: 'bannerLateTitle',
-    descKey: 'bannerLateDesc',
-    iconClass: '',
   },
   RETURNED: {
     icon: RotateCcw,
@@ -179,7 +165,7 @@ export default function SubmissionShell({
             <SubmitButton
               activityId={activityId}
               assessmentType={assessmentType}
-              currentStatus={null}
+              currentStatus="RETURNED"
               answersPayload={answersPayload}
               violationCount={violationCount}
               onSubmitted={handleSubmitted}

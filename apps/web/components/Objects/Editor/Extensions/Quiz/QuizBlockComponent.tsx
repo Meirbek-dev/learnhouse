@@ -4,9 +4,9 @@ import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
 import { BadgeHelp, Check, Minus, Plus, RefreshCcw } from 'lucide-react';
 import { NodeViewWrapper } from '@tiptap/react';
 import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
 import { generateUUID } from '@/lib/utils';
 import { twMerge } from 'tailwind-merge';
-import { useEffect, useState } from 'react';
 import confetti from 'canvas-confetti';
 
 interface Answer {

@@ -49,13 +49,7 @@ interface SubmitButtonProps {
 /** Assessment types that require a server-stamped start before submission */
 const TIMED_ASSESSMENT_TYPES = new Set<AssessmentType>(['QUIZ', 'EXAM']);
 
-const NON_SUBMITTABLE_STATUSES = new Set<SubmissionStatus>([
-  'SUBMITTED',
-  'UNDER_REVIEW',
-  'GRADED',
-  'PUBLISHED',
-  'LATE',
-]);
+const NON_SUBMITTABLE_STATUSES = new Set<SubmissionStatus>(['PENDING', 'GRADED', 'PUBLISHED']);
 
 export default function SubmitButton({
   activityId,

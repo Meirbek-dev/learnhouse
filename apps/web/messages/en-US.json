@@ -7041,7 +7041,10 @@
       "sortByDate": "Submitted date",
       "sortByScore": "Score",
       "sortByAttempt": "Attempt",
-      "exportCSV": "Export CSV"
+      "exportCSV": "Export CSV",
+      "filterPending": "Pending",
+      "filterPublished": "Published",
+      "filterReturned": "Returned"
     },
     "Stats": {
       "total": "Total",
@@ -7074,7 +7077,24 @@
       "attempt": "Attempt",
       "manualReviewRequired": "This submission requires manual review",
       "needsReview": "Needs review",
-      "noBreakdown": "No answer breakdown available"
+      "noBreakdown": "No answer breakdown available",
+      "saveDraft": "Save draft",
+      "publishGrade": "Publish grade",
+      "gradePublished": "Grade published to student",
+      "confirmPublishTitle": "Publish grade?",
+      "confirmPublishDesc": "The student will be able to see their grade and feedback.",
+      "unsavedTitle": "Unsaved changes",
+      "unsavedDesc": "You have unsaved changes. Are you sure you want to discard them and continue?",
+      "discardAndContinue": "Discard and continue",
+      "late": "Late",
+      "autoSum": "Auto-sum",
+      "useAutoScore": "Use auto-score",
+      "useAutoSum": "Use auto-sum",
+      "studentAnswer": "Student answer",
+      "itemScore": "Score",
+      "itemFeedback": "Feedback",
+      "itemFeedbackPlaceholder": "Add item-level feedback...",
+      "correctAnswer": "Correct answer"
     },
     "Result": {
       "score": "Score",
@@ -7092,14 +7112,18 @@
       "bannerSubmittedTitle": "Submitted",
       "bannerSubmittedDesc": "Your work has been submitted and is awaiting review.",
       "bannerGradedTitle": "Graded",
-      "bannerGradedDesc": "Your submission has been graded.",
+      "bannerGradedDesc": "Your submission is being reviewed by the teacher.",
       "bannerLateTitle": "Late submission",
       "bannerLateDesc": "Your submission was received after the deadline.",
       "bannerReturnedTitle": "Returned for revision",
       "bannerReturnedDesc": "The teacher has returned your work. Please revise and resubmit.",
       "score": "Score",
       "readyToSubmit": "Ready to submit your work?",
-      "returnedResubmit": "Your work has been returned. Make corrections and resubmit."
+      "returnedResubmit": "Your work has been returned. Make corrections and resubmit.",
+      "bannerPendingTitle": "Submitted",
+      "bannerPendingDesc": "Your work has been submitted and is awaiting review.",
+      "bannerPublishedTitle": "Grade published",
+      "bannerPublishedDesc": "Your grade and feedback are now available."
     },
     "SubmitButton": {
       "submitForGrading": "Submit for grading",
