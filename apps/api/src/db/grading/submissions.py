@@ -7,7 +7,7 @@ from enum import StrEnum
 from typing import Any
 
 from pydantic import ConfigDict, Field, field_validator
-from sqlalchemy import JSON, Boolean, Column, DateTime, ForeignKey, Index, String
+from sqlalchemy import JSON, Boolean, Column, DateTime, ForeignKey, Index, Integer, String
 from sqlmodel import Field as SQLField
 
 from src.db.strict_base_model import PydanticStrictBaseModel, SQLModelStrictBaseModel
@@ -260,7 +260,7 @@ class Submission(SubmissionBase, table=True):
     # Schema version for safe JSON evolution
     grading_version: int = SQLField(
         default=1,
-        sa_column=Column("grading_version", nullable=False, server_default="1"),
+        sa_column=Column("grading_version", Integer, nullable=False, server_default="1"),
     )
 
 
