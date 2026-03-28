@@ -251,6 +251,7 @@ const ActivityActions = ({ activity, activityid, course, assignment, showNavigat
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const isAuthenticated = session.status === 'authenticated';
+  const isPaidAccessAllowed = activity?.content?.paid_access !== false || contributorStatus === 'ACTIVE';
 
   // Add SWR for trail data
   const TRAIL_KEY = getTrailSwrKey();
@@ -262,7 +263,7 @@ const ActivityActions = ({ activity, activityid, course, assignment, showNavigat
     <div className="flex items-center space-x-2">
       {activity &&
       (activity.published === true || contributorStatus === 'ACTIVE') &&
-      (activity.content.paid_access !== false || contributorStatus === 'ACTIVE') &&
+      isPaidAccessAllowed &&
       isAuthenticated ? (
         <>
           {activity.activity_type !== 'TYPE_ASSIGNMENT' && (
@@ -683,7 +684,7 @@ const ActivityClient = (props: ActivityClientProps) => {
                 <div className="h-full overflow-auto pt-16 pb-20">
                   <div className="container mx-auto px-4">
                     {activity && (activity.published === true || contributorStatus === 'ACTIVE') ? (
-                      activity.content.paid_access === false && contributorStatus !== 'ACTIVE' ? (
+                      activity?.content?.paid_access === false && contributorStatus !== 'ACTIVE' ? (
                         <PaidCourseActivityDisclaimer course={course} />
                       ) : (
                         <motion.div
@@ -703,7 +704,7 @@ const ActivityClient = (props: ActivityClientProps) => {
                 {/* Focus Mode Bottom Bar */}
                 {activity &&
                 (activity.published === true || contributorStatus === 'ACTIVE') &&
-                (activity.content.paid_access !== false || contributorStatus === 'ACTIVE') ? (
+                (activity?.content?.paid_access !== false || contributorStatus === 'ACTIVE') ? (
                   <motion.div
                     initial={isInitialRender ? false : { y: 100 }}
                     animate={{ y: 0 }}
@@ -1032,7 +1033,7 @@ const ActivityClient = (props: ActivityClientProps) => {
                     {/* Activity Actions below the content box */}
                     {activity &&
                     (activity.published === true || contributorStatus === 'ACTIVE') &&
-                    (activity.content.paid_access !== false || contributorStatus === 'ACTIVE') ? (
+                    (activity?.content?.paid_access !== false || contributorStatus === 'ACTIVE') ? (
                       <div className="mt-4 flex w-full items-center justify-between">
                         <div>
                           <PreviousActivityButton
@@ -1059,7 +1060,7 @@ const ActivityClient = (props: ActivityClientProps) => {
                     {/* Fixed Activity Secondary Bar */}
                     {activity &&
                     (activity.published === true || contributorStatus === 'ACTIVE') &&
-                    (activity.content.paid_access !== false || contributorStatus === 'ACTIVE') ? (
+                    (activity?.content?.paid_access !== false || contributorStatus === 'ACTIVE') ? (
                       <FixedActivitySecondaryBar
                         course={course}
                         currentActivityId={activityid}
