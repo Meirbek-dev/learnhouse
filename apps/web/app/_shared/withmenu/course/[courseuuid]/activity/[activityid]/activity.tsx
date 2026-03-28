@@ -1394,7 +1394,7 @@ const AssignmentTools = (props: {
     );
   }
 
-  if (submission.status === 'SUBMITTED') {
+  if (submission.status === 'PENDING') {
     return (
       <div className="soft-shadow flex flex-col rounded-md bg-amber-800 p-2.5 px-4 text-white transition delay-150 duration-300 ease-in-out">
         <span className="mb-1 text-[10px] font-bold uppercase">{t('status')}</span>

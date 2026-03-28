@@ -98,12 +98,12 @@ export default function GradingPanel({
   const submissionId = submission?.id;
   useEffect(() => {
     if (!submission) return;
-    const s = submission.final_score != null ? String(submission.final_score) : '';
+    const s = submission.final_score !== null ? String(submission.final_score) : '';
     const fb = submission.grading_json?.feedback ?? '';
     const items: ItemFeedbackMap = {};
     for (const item of submission.grading_json?.items ?? []) {
       items[item.item_id] = {
-        score: item.score != null ? String(item.score) : '',
+        score: item.score !== null ? String(item.score) : '',
         feedback: item.feedback ?? '',
       };
     }
@@ -350,23 +350,27 @@ export default function GradingPanel({
 
               {/* Auto-score reference + one-click fill buttons */}
               <div className="flex flex-col gap-1.5">
-                {submission?.auto_score != null && (
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-slate-500">
-                      {t('autoScore')}: <strong>{submission.auto_score}/100</strong>
-                    </span>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="h-6 gap-1 px-2 text-xs"
-                      onClick={() => setScore(String(submission.auto_score))}
-                    >
-                      <Wand2 className="h-3 w-3" />
-                      {t('useAutoScore')}
-                    </Button>
-                  </div>
-                )}
+                {(() => {
+                  const autoScore = submission?.auto_score ?? null;
+                  if (autoScore === null) return null;
+                  return (
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-slate-500">
+                        {t('autoScore')}: <strong>{autoScore}/100</strong>
+                      </span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 gap-1 px-2 text-xs"
+                        onClick={() => setScore(String(autoScore))}
+                      >
+                        <Wand2 className="h-3 w-3" />
+                        {t('useAutoScore')}
+                      </Button>
+                    </div>
+                  );
+                })()}
                 {autoSumScore !== null && (
                   <div className="flex items-center gap-2">
                     <span className="text-xs text-slate-500">
@@ -580,14 +584,14 @@ function AnswerItem({ item, index, itemFeedback, isEditable, onFeedbackChange, t
         </span>
       </div>
 
-      {item.user_answer != null && (
+      {item.user_answer !== null && (
         <div className="rounded bg-slate-100 px-3 py-2 text-sm text-slate-700">
           <span className="text-xs font-medium text-slate-500 mr-1">{t('studentAnswer')}:</span>
           {typeof item.user_answer === 'string' ? item.user_answer : JSON.stringify(item.user_answer, null, 2)}
         </div>
       )}
 
-      {item.correct === false && item.correct_answer != null && (
+      {item.correct === false && item.correct_answer !== null && (
         <div className="rounded bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
           <span className="text-xs font-medium text-emerald-600 mr-1">{t('correctAnswer')}:</span>
           {typeof item.correct_answer === 'string' ? item.correct_answer : JSON.stringify(item.correct_answer)}

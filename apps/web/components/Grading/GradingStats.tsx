@@ -56,13 +56,13 @@ export default function GradingStats({ activityId }: GradingStatsProps) {
       />
       <StatCard
         label={t('avgScore')}
-        value={stats.avg_score != null ? `${stats.avg_score.toFixed(1)}%` : '—'}
+        value={stats.avg_score !== null ? `${stats.avg_score.toFixed(1)}%` : '—'}
         icon={TrendingUp}
         accent="sky"
       />
       <StatCard
         label={t('passRate')}
-        value={stats.pass_rate != null ? `${stats.pass_rate.toFixed(0)}%` : '—'}
+        value={stats.pass_rate !== null ? `${stats.pass_rate.toFixed(0)}%` : '—'}
         icon={BookOpenCheck}
         accent="emerald"
       />

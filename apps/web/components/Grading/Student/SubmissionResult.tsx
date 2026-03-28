@@ -25,8 +25,8 @@ export default function SubmissionResult({ submission }: SubmissionResultProps) 
   const breakdown = submission.grading_json;
   const score = submission.final_score;
 
-  const passed = score != null && score >= 50;
-  const scoreColor = score == null ? 'text-slate-500' : passed ? 'text-emerald-600' : 'text-rose-600';
+  const passed = score !== null && score >= 50;
+  const scoreColor = score === null ? 'text-slate-500' : passed ? 'text-emerald-600' : 'text-rose-600';
   // Only show teacher feedback and item breakdown if grade is published
   const isPublished = submission.status === 'PUBLISHED' || submission.status === 'RETURNED';
 
@@ -36,9 +36,9 @@ export default function SubmissionResult({ submission }: SubmissionResultProps) 
       <div className="flex items-center justify-between rounded-lg border bg-slate-50 px-5 py-4">
         <div>
           <p className="text-sm text-slate-500">{t('score')}</p>
-          <p className={cn('text-3xl font-bold', scoreColor)}>{score != null ? `${score}/100` : '—'}</p>
+          <p className={cn('text-3xl font-bold', scoreColor)}>{score !== null ? `${score}/100` : '—'}</p>
         </div>
-        {score != null && (
+        {score !== null && (
           <span
             className={cn(
               'rounded-full px-3 py-1 text-sm font-semibold',
@@ -51,7 +51,7 @@ export default function SubmissionResult({ submission }: SubmissionResultProps) 
       </div>
 
       {/* Auto-score note */}
-      {submission.auto_score != null && submission.auto_score !== submission.final_score && (
+      {submission.auto_score !== null && submission.auto_score !== submission.final_score && (
         <p className="text-xs text-slate-500">
           {t('autoScore')}: {submission.auto_score}/100
         </p>
@@ -80,7 +80,7 @@ export default function SubmissionResult({ submission }: SubmissionResultProps) 
       )}
 
       {/* Waiting state */}
-      {(!breakdown?.items || breakdown.items.length === 0) && score == null && (
+      {(!breakdown?.items || breakdown.items.length === 0) && score === null && (
         <p className="text-sm text-slate-500 italic">{t('waitingForGrade')}</p>
       )}
     </div>
@@ -113,7 +113,7 @@ function ResultItem({ item, index }: { item: GradedItem; index: number }) {
           </div>
 
           {/* Student's answer */}
-          {item.user_answer != null && (
+          {item.user_answer !== null && (
             <div className="rounded bg-slate-100 px-3 py-2 text-sm text-slate-700">
               <span className="text-xs font-medium text-slate-500 mr-2">{t('yourAnswer')}:</span>
               {typeof item.user_answer === 'string' ? item.user_answer : JSON.stringify(item.user_answer)}
@@ -121,7 +121,7 @@ function ResultItem({ item, index }: { item: GradedItem; index: number }) {
           )}
 
           {/* Correct answer (only show if wrong) */}
-          {item.correct === false && item.correct_answer != null && (
+          {item.correct === false && item.correct_answer !== null && (
             <div className="rounded bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
               <span className="text-xs font-medium text-emerald-600 mr-2">{t('correctAnswer')}:</span>
               {typeof item.correct_answer === 'string' ? item.correct_answer : JSON.stringify(item.correct_answer)}
