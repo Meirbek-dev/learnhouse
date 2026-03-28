@@ -62,10 +62,11 @@ def upgrade() -> None:
     ).scalar_one()
 
     if remaining:
-        raise RuntimeError(
+        msg = (
             f"[k5l6m7n8o9p] Still {remaining} activity rows without chapter_id "
             "after backfill — cannot enforce NOT NULL."
         )
+        raise RuntimeError(msg)
 
     with op.batch_alter_table("activity") as batch_op:
         batch_op.alter_column("chapter_id", existing_type=sa.Integer(), nullable=False)

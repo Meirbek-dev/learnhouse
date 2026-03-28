@@ -9,8 +9,10 @@ GET  /grading/submissions/me/{uuid}      — student fetches one of their own su
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Query, Request
-from fastapi import HTTPException, status as http_status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi import status as http_status
+from sqlalchemy import desc
+from sqlmodel import Session, select
 
 from src.core.events.database import get_db_session
 from src.db.courses.blocks import Block
@@ -19,8 +21,6 @@ from src.db.grading.submissions import AssessmentType, Submission, SubmissionRea
 from src.db.users import PublicUser
 from src.security.auth import get_current_user
 from src.services.grading.submit import start_submission, submit_assessment
-from sqlmodel import Session, select
-from sqlalchemy import desc
 
 router = APIRouter()
 
@@ -56,7 +56,7 @@ async def api_submit_assessment(
     answers_payload: dict,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
-    violation_count: int = Query(default=0, ge=0),
+    violation_count: Annotated[int, Query(ge=0)] = 0,
 ) -> SubmissionRead:
     """
     Submit an assessment attempt and receive auto-grading results.
@@ -77,7 +77,9 @@ async def api_submit_assessment(
         if block:
             questions = block.content.get("questions", [])
             settings_data = block.content.get("settings", {})
-            quiz_settings = QuizSettings(**settings_data) if settings_data else QuizSettings()
+            quiz_settings = (
+                QuizSettings(**settings_data) if settings_data else QuizSettings()
+            )
             settings = {
                 "max_attempts": quiz_settings.max_attempts,
                 "time_limit_seconds": quiz_settings.time_limit_seconds,

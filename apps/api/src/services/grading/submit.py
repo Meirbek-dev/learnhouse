@@ -89,7 +89,7 @@ async def start_submission(
         attempt_number=attempt_number,
         answers_json={},
         grading_json={},
-        started_at=now,   # B2 fix: dedicated column, not answers_json
+        started_at=now,  # B2 fix: dedicated column, not answers_json
         created_at=now,
         updated_at=now,
     )
@@ -167,11 +167,13 @@ async def submit_assessment(
             select(Submission).where(
                 Submission.activity_id == activity_id,
                 Submission.user_id == current_user.id,
-                Submission.status.in_([
-                    SubmissionStatus.SUBMITTED,
-                    SubmissionStatus.GRADED,
-                    SubmissionStatus.LATE,
-                ]),
+                Submission.status.in_(
+                    [
+                        SubmissionStatus.SUBMITTED,
+                        SubmissionStatus.GRADED,
+                        SubmissionStatus.LATE,
+                    ]
+                ),
             )
         ).all()
         if len(completed) >= max_attempts:
@@ -279,12 +281,15 @@ async def submit_assessment(
                 db_session=db_session,
             )
         except Exception as e:
-            logger.warning("Failed to award XP for submission %s: %s", draft.submission_uuid, e)
+            logger.warning(
+                "Failed to award XP for submission %s: %s", draft.submission_uuid, e
+            )
 
     return SubmissionRead.model_validate(draft)
 
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
+
 
 def _get_activity_or_404(activity_id: int, db_session: Session) -> Activity:
     activity = db_session.exec(

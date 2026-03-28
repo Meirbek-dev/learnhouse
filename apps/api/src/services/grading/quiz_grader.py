@@ -24,7 +24,9 @@ def grade_quiz_questions(
     questions are present — these must be reviewed in the teacher grading panel.
     """
     if not questions:
-        return 0.0, GradingBreakdown(items=[], needs_manual_review=False, auto_graded=True)
+        return 0.0, GradingBreakdown(
+            items=[], needs_manual_review=False, auto_graded=True
+        )
 
     answer_lookup: dict[str, dict] = {
         ans.get("question_id", ""): ans for ans in user_answers
@@ -40,7 +42,9 @@ def grade_quiz_questions(
     needs_manual_review = False
 
     for question in questions:
-        question_id: str = question.get("question_id") or question.get("questionUUID", "")
+        question_id: str = question.get("question_id") or question.get(
+            "questionUUID", ""
+        )
         question_type: str = question.get("type", "multiple_choice")
 
         # Compute points for this question
@@ -95,6 +99,7 @@ def apply_attempt_penalty(
 
 
 # ── Internal helpers ─────────────────────────────────────────────────────────
+
 
 def _grade_multiple_choice(
     question: dict[str, Any],

@@ -81,12 +81,16 @@ async def create_video_activity(
     if not chapter:
         raise HTTPException(status_code=404, detail="Chapter not found")
 
-    course = db_session.exec(select(Course).where(Course.id == chapter.course_id)).first()
+    course = db_session.exec(
+        select(Course).where(Course.id == chapter.course_id)
+    ).first()
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")
 
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "activity:create", resource_owner_id=course.creator_id)
+    checker.require(
+        current_user.id, "activity:create", resource_owner_id=course.creator_id
+    )
 
     details_dict = orjson.loads(details) if isinstance(details, str) else details
 
@@ -110,7 +114,9 @@ async def create_video_activity(
         chapter_id=chapter.id,
         course_id=chapter.course_id,  # keep legacy column in sync
         content={"filename": f"video.{video_format}", "activity_uuid": activity_uuid},
-        details=details_dict if isinstance(details_dict, dict) else orjson.loads(details_dict),
+        details=details_dict
+        if isinstance(details_dict, dict)
+        else orjson.loads(details_dict),
         creation_date=str(datetime.now()),
         update_date=str(datetime.now()),
         order=_next_activity_order(chapter_id, db_session),
@@ -155,21 +161,33 @@ async def create_video_activity(
         if valid_subtitles:
             upload_results = await asyncio.gather(
                 *[
-                    upload_subtitle(subtitle_file, activity.activity_uuid, course.course_uuid, language, None)
+                    upload_subtitle(
+                        subtitle_file,
+                        activity.activity_uuid,
+                        course.course_uuid,
+                        language,
+                        None,
+                    )
                     for subtitle_file, language in valid_subtitles
                 ]
             )
-            for (_, language), upload_result in zip(valid_subtitles, upload_results, strict=False):
+            for (_, language), upload_result in zip(
+                valid_subtitles, upload_results, strict=False
+            ):
                 if upload_result.get("success"):
-                    subtitle_info.append({
-                        "language": language,
-                        "filename": upload_result.get("filename"),
-                        "label": _get_language_label(language),
-                        "url": f"/content/platform/courses/{course.course_uuid}/activities/{activity.activity_uuid}/video/{upload_result.get('filename')}",
-                    })
+                    subtitle_info.append(
+                        {
+                            "language": language,
+                            "filename": upload_result.get("filename"),
+                            "label": _get_language_label(language),
+                            "url": f"/content/platform/courses/{course.course_uuid}/activities/{activity.activity_uuid}/video/{upload_result.get('filename')}",
+                        }
+                    )
 
         if subtitle_info:
-            updated_details = details_dict.copy() if isinstance(details_dict, dict) else {}
+            updated_details = (
+                details_dict.copy() if isinstance(details_dict, dict) else {}
+            )
             updated_details["subtitles"] = subtitle_info
             activity.details = updated_details
             db_session.add(activity)
@@ -197,16 +215,22 @@ async def create_external_video_activity(
     data: ExternalVideo,
     db_session: Session,
 ):
-    chapter = db_session.exec(select(Chapter).where(Chapter.id == data.chapter_id)).first()
+    chapter = db_session.exec(
+        select(Chapter).where(Chapter.id == data.chapter_id)
+    ).first()
     if not chapter:
         raise HTTPException(status_code=404, detail="Chapter not found")
 
-    course = db_session.exec(select(Course).where(Course.id == chapter.course_id)).first()
+    course = db_session.exec(
+        select(Course).where(Course.id == chapter.course_id)
+    ).first()
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")
 
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "activity:create", resource_owner_id=course.creator_id)
+    checker.require(
+        current_user.id, "activity:create", resource_owner_id=course.creator_id
+    )
 
     activity_uuid = f"activity_{ULID()}"
     details = orjson.loads(data.details)

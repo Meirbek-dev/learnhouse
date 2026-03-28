@@ -38,12 +38,16 @@ async def create_documentpdf_activity(
     if not chapter:
         raise HTTPException(status_code=404, detail="Chapter not found")
 
-    course = db_session.exec(select(Course).where(Course.id == chapter.course_id)).first()
+    course = db_session.exec(
+        select(Course).where(Course.id == chapter.course_id)
+    ).first()
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")
 
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "activity:create", resource_owner_id=course.creator_id)
+    checker.require(
+        current_user.id, "activity:create", resource_owner_id=course.creator_id
+    )
 
     if not pdf_file:
         raise HTTPException(
@@ -67,7 +71,10 @@ async def create_documentpdf_activity(
         name=name,
         activity_type=ActivityTypeEnum.TYPE_DOCUMENT,
         activity_sub_type=ActivitySubTypeEnum.SUBTYPE_DOCUMENT_PDF,
-        content={"filename": f"documentpdf.{pdf_format}", "activity_uuid": activity_uuid},
+        content={
+            "filename": f"documentpdf.{pdf_format}",
+            "activity_uuid": activity_uuid,
+        },
         chapter_id=chapter.id,
         course_id=chapter.course_id,  # keep legacy column in sync
         activity_uuid=activity_uuid,

@@ -77,12 +77,8 @@ v1_router.include_router(
 v1_router.include_router(analytics.router, prefix="/analytics", tags=["analytics"])
 
 # Unified grading system (replaces fragmented assignment/quiz grading)
-v1_router.include_router(
-    grading_submit_router, prefix="/grading", tags=["grading"]
-)
-v1_router.include_router(
-    grading_teacher_router, prefix="/grading", tags=["grading"]
-)
+v1_router.include_router(grading_submit_router, prefix="/grading", tags=["grading"])
+v1_router.include_router(grading_teacher_router, prefix="/grading", tags=["grading"])
 
 v1_router.include_router(ai.router, prefix="/ai", tags=["ai"])
 

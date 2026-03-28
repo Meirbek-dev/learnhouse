@@ -34,9 +34,13 @@ def _get_activity_by_uuid(activity_uuid: str, db_session: Session) -> Activity:
 def _get_course_for_activity(activity: Activity, db_session: Session) -> Course:
     """Resolve course from activity via chapter."""
     if activity.chapter_id:
-        chapter = db_session.exec(select(Chapter).where(Chapter.id == activity.chapter_id)).first()
+        chapter = db_session.exec(
+            select(Chapter).where(Chapter.id == activity.chapter_id)
+        ).first()
         if chapter:
-            course = db_session.exec(select(Course).where(Course.id == chapter.course_id)).first()
+            course = db_session.exec(
+                select(Course).where(Course.id == chapter.course_id)
+            ).first()
             if course:
                 return course
     raise HTTPException(status_code=404, detail="Course not found")
@@ -68,7 +72,9 @@ async def create_activity(
     if not chapter:
         raise HTTPException(status_code=404, detail="Chapter not found")
 
-    course = db_session.exec(select(Course).where(Course.id == chapter.course_id)).first()
+    course = db_session.exec(
+        select(Course).where(Course.id == chapter.course_id)
+    ).first()
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")
 
@@ -99,7 +105,9 @@ async def get_activity(
     activity = _get_activity_by_uuid(activity_uuid, db_session)
 
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "activity:read", resource_owner_id=activity.creator_id)
+    checker.require(
+        current_user.id, "activity:read", resource_owner_id=activity.creator_id
+    )
 
     has_paid_access = await check_activity_paid_access(
         request=request,
@@ -113,8 +121,12 @@ async def get_activity(
         activity_read.content if has_paid_access else {"paid_access": False}
     )
 
-    can_update = checker.check(current_user.id, "activity:update", resource_owner_id=activity.creator_id)
-    can_delete = checker.check(current_user.id, "activity:delete", resource_owner_id=activity.creator_id)
+    can_update = checker.check(
+        current_user.id, "activity:update", resource_owner_id=activity.creator_id
+    )
+    can_delete = checker.check(
+        current_user.id, "activity:delete", resource_owner_id=activity.creator_id
+    )
     is_owner = activity.creator_id == current_user.id
 
     return ActivityReadWithPermissions(
@@ -136,7 +148,9 @@ async def update_activity(
     activity = _get_activity_by_uuid(activity_uuid, db_session)
 
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "activity:update", resource_owner_id=activity.creator_id)
+    checker.require(
+        current_user.id, "activity:update", resource_owner_id=activity.creator_id
+    )
 
     update_data = activity_object.model_dump(exclude_unset=True)
     for field, value in update_data.items():
@@ -154,7 +168,9 @@ async def update_activity(
 
         get_ai_cache_manager().invalidate_activity_cache(activity_uuid)
     except Exception as _inv_err:
-        logger.warning("AI cache invalidation failed for %s: %s", activity_uuid, _inv_err)
+        logger.warning(
+            "AI cache invalidation failed for %s: %s", activity_uuid, _inv_err
+        )
 
     return ActivityRead.model_validate(activity)
 
@@ -168,7 +184,9 @@ async def delete_activity(
     activity = _get_activity_by_uuid(activity_uuid, db_session)
 
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "activity:delete", resource_owner_id=activity.creator_id)
+    checker.require(
+        current_user.id, "activity:delete", resource_owner_id=activity.creator_id
+    )
 
     db_session.delete(activity)
     db_session.commit()
@@ -178,7 +196,9 @@ async def delete_activity(
 
         get_ai_cache_manager().invalidate_activity_cache(activity_uuid)
     except Exception as _inv_err:
-        logger.warning("AI cache invalidation failed for %s: %s", activity_uuid, _inv_err)
+        logger.warning(
+            "AI cache invalidation failed for %s: %s", activity_uuid, _inv_err
+        )
 
     return {"detail": "Activity deleted"}
 
@@ -186,5 +206,3 @@ async def delete_activity(
 ####################################################
 # Misc
 ####################################################
-
-

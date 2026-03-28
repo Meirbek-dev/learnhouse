@@ -14,13 +14,13 @@ from src.db.strict_base_model import PydanticStrictBaseModel, SQLModelStrictBase
 
 
 class SubmissionStatus(StrEnum):
-    DRAFT = "DRAFT"                  # student is working, not yet submitted
-    SUBMITTED = "SUBMITTED"          # submitted, awaiting grading
-    UNDER_REVIEW = "UNDER_REVIEW"    # teacher has opened it but not yet saved a grade
-    GRADED = "GRADED"                # teacher (or auto-grader) set final_score
-    PUBLISHED = "PUBLISHED"          # grade is finalised and visible to the student
-    LATE = "LATE"                    # submitted after the due_date (modifier, not terminal)
-    RETURNED = "RETURNED"            # teacher sent it back for revision
+    DRAFT = "DRAFT"  # student is working, not yet submitted
+    SUBMITTED = "SUBMITTED"  # submitted, awaiting grading
+    UNDER_REVIEW = "UNDER_REVIEW"  # teacher has opened it but not yet saved a grade
+    GRADED = "GRADED"  # teacher (or auto-grader) set final_score
+    PUBLISHED = "PUBLISHED"  # grade is finalised and visible to the student
+    LATE = "LATE"  # submitted after the due_date (modifier, not terminal)
+    RETURNED = "RETURNED"  # teacher sent it back for revision
 
 
 class AssessmentType(StrEnum):
@@ -37,7 +37,7 @@ class GradedItem(SQLModelStrictBaseModel):
     item_text: str = ""
     score: float = 0.0
     max_score: float = 0.0
-    correct: bool | None = None          # None for non-auto-gradeable items
+    correct: bool | None = None  # None for non-auto-gradeable items
     feedback: str = ""
     needs_manual_review: bool = False
     user_answer: Any = None
@@ -48,12 +48,13 @@ class GradingBreakdown(SQLModelStrictBaseModel):
     """Complete grading result for a submission."""
 
     items: list[GradedItem] = SQLField(default_factory=list)
-    needs_manual_review: bool = False   # true if any open-text items present
+    needs_manual_review: bool = False  # true if any open-text items present
     auto_graded: bool = False
-    feedback: str = ""                  # Overall teacher feedback comment
+    feedback: str = ""  # Overall teacher feedback comment
 
 
 # ── Teacher grading input ─────────────────────────────────────────────────────
+
 
 class ItemFeedback(PydanticStrictBaseModel):
     """Optional per-item feedback from the teacher."""
@@ -68,7 +69,8 @@ class ItemFeedback(PydanticStrictBaseModel):
         if v is not None:
             val = float(v)
             if val < 0 or val > 100:
-                raise ValueError(f"Score {val} is out of range (0–100)")
+                msg = f"Score {val} is out of range (0–100)"
+                raise ValueError(msg)
         return v
 
 
@@ -94,6 +96,7 @@ class TeacherGradeInput(PydanticStrictBaseModel):
 
 # ── Submission base + table ───────────────────────────────────────────────────
 
+
 class SubmissionBase(SQLModelStrictBaseModel):
     model_config = ConfigDict(use_enum_values=True)
 
@@ -105,8 +108,8 @@ class SubmissionBase(SQLModelStrictBaseModel):
     user_id: int
 
     # Scores — always 0–100 percentage
-    auto_score: float | None = None    # set by auto-grader
-    final_score: float | None = None   # teacher override (or auto_score copy)
+    auto_score: float | None = None  # set by auto-grader
+    final_score: float | None = None  # teacher override (or auto_score copy)
 
     # Workflow
     status: SubmissionStatus = SubmissionStatus.DRAFT
@@ -240,10 +243,14 @@ class Submission(SubmissionBase, table=True):
         sa_column=Column(DateTime(timezone=True)),
     )
     # Schema version for safe JSON evolution
-    grading_version: int = SQLField(default=1, sa_column=Column("grading_version", nullable=False, server_default="1"))
+    grading_version: int = SQLField(
+        default=1,
+        sa_column=Column("grading_version", nullable=False, server_default="1"),
+    )
 
 
 # ── Paginated response ────────────────────────────────────────────────────────
+
 
 class SubmissionListResponse(SQLModelStrictBaseModel):
     """Typed paginated response for the teacher submissions list."""
@@ -256,6 +263,7 @@ class SubmissionListResponse(SQLModelStrictBaseModel):
 
 
 # ── Aggregate stats ───────────────────────────────────────────────────────────
+
 
 class SubmissionStats(SQLModelStrictBaseModel):
     """Aggregate statistics for the teacher dashboard header."""

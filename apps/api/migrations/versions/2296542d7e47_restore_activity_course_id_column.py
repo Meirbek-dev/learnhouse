@@ -26,9 +26,7 @@ def upgrade() -> None:
 
     # Re-add the column (nullable, no FK enforcement to avoid lock issues)
     conn.execute(
-        sa.text(
-            "ALTER TABLE activity ADD COLUMN IF NOT EXISTS course_id INTEGER"
-        )
+        sa.text("ALTER TABLE activity ADD COLUMN IF NOT EXISTS course_id INTEGER")
     )
 
     # Backfill from chapter.course_id
@@ -86,6 +84,4 @@ def downgrade() -> None:
         )
     )
 
-    conn.execute(
-        sa.text("ALTER TABLE activity DROP COLUMN IF EXISTS course_id")
-    )
+    conn.execute(sa.text("ALTER TABLE activity DROP COLUMN IF EXISTS course_id"))

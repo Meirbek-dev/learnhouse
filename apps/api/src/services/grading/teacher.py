@@ -80,15 +80,19 @@ async def get_submissions_for_activity(
         # "NEEDS_GRADING" is a virtual filter that maps to SUBMITTED + LATE + UNDER_REVIEW
         if status_filter == "NEEDS_GRADING":
             query = query.where(
-                Submission.status.in_([
-                    SubmissionStatus.SUBMITTED,
-                    SubmissionStatus.LATE,
-                    SubmissionStatus.UNDER_REVIEW,
-                ])
+                Submission.status.in_(
+                    [
+                        SubmissionStatus.SUBMITTED,
+                        SubmissionStatus.LATE,
+                        SubmissionStatus.UNDER_REVIEW,
+                    ]
+                )
             )
         else:
             try:
-                query = query.where(Submission.status == SubmissionStatus(status_filter))
+                query = query.where(
+                    Submission.status == SubmissionStatus(status_filter)
+                )
             except ValueError:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
@@ -123,9 +127,7 @@ async def get_submissions_for_activity(
     user_ids = {s.user_id for s in page_rows}
     users_by_id: dict[int, User] = {}
     if user_ids:
-        user_rows = db_session.exec(
-            select(User).where(User.id.in_(user_ids))
-        ).all()
+        user_rows = db_session.exec(select(User).where(User.id.in_(user_ids))).all()
         users_by_id = {u.id: u for u in user_rows}
 
     def _enrich(s: Submission) -> SubmissionRead:
@@ -167,10 +169,14 @@ async def get_submission_stats(
         select(Activity).where(Activity.id == activity_id)
     ).first()
     if not activity:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Activity not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Activity not found"
+        )
 
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "assignment:read", resource_owner_id=activity.creator_id)
+    checker.require(
+        current_user.id, "assignment:read", resource_owner_id=activity.creator_id
+    )
 
     # Total count (excludes DRAFTs)
     total: int = db_session.exec(
@@ -184,7 +190,9 @@ async def get_submission_stats(
     graded_count: int = db_session.exec(
         select(func.count()).where(
             Submission.activity_id == activity_id,
-            Submission.status.in_([SubmissionStatus.GRADED, SubmissionStatus.PUBLISHED]),
+            Submission.status.in_(
+                [SubmissionStatus.GRADED, SubmissionStatus.PUBLISHED]
+            ),
         )
     ).one()
 
@@ -192,11 +200,13 @@ async def get_submission_stats(
     needs_grading_count: int = db_session.exec(
         select(func.count()).where(
             Submission.activity_id == activity_id,
-            Submission.status.in_([
-                SubmissionStatus.SUBMITTED,
-                SubmissionStatus.LATE,
-                SubmissionStatus.UNDER_REVIEW,
-            ]),
+            Submission.status.in_(
+                [
+                    SubmissionStatus.SUBMITTED,
+                    SubmissionStatus.LATE,
+                    SubmissionStatus.UNDER_REVIEW,
+                ]
+            ),
         )
     ).one()
 
@@ -212,14 +222,20 @@ async def get_submission_stats(
     graded_scores: list[float] = db_session.exec(
         select(Submission.final_score).where(
             Submission.activity_id == activity_id,
-            Submission.status.in_([SubmissionStatus.GRADED, SubmissionStatus.PUBLISHED]),
+            Submission.status.in_(
+                [SubmissionStatus.GRADED, SubmissionStatus.PUBLISHED]
+            ),
             Submission.final_score.is_not(None),
         )
     ).all()
 
-    avg_score = round(sum(graded_scores) / len(graded_scores), 2) if graded_scores else None
+    avg_score = (
+        round(sum(graded_scores) / len(graded_scores), 2) if graded_scores else None
+    )
     passing = [s for s in graded_scores if s >= 50.0]
-    pass_rate = round(len(passing) / len(graded_scores) * 100, 1) if graded_scores else None
+    pass_rate = (
+        round(len(passing) / len(graded_scores) * 100, 1) if graded_scores else None
+    )
 
     return SubmissionStats(
         total=total,
@@ -244,7 +260,9 @@ async def mark_under_review(
         select(Submission).where(Submission.submission_uuid == submission_uuid)
     ).first()
     if not submission:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Submission not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Submission not found"
+        )
 
     if submission.status in (SubmissionStatus.SUBMITTED, SubmissionStatus.LATE):
         submission.status = SubmissionStatus.UNDER_REVIEW
@@ -282,10 +300,14 @@ async def export_grades_csv(
         select(Activity).where(Activity.id == activity_id)
     ).first()
     if not activity:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Activity not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Activity not found"
+        )
 
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "assignment:read", resource_owner_id=activity.creator_id)
+    checker.require(
+        current_user.id, "assignment:read", resource_owner_id=activity.creator_id
+    )
 
     # Fetch all non-draft submissions with user data via join
     rows = db_session.exec(
@@ -321,8 +343,8 @@ async def export_grades_csv(
         submitted = s.submitted_at.isoformat() if s.submitted_at else ""
         lines.append(
             f'"{name}","{email}",{s.attempt_number},{s.status},{submitted},'
-            f'{s.auto_score if s.auto_score is not None else ""},'
-            f'{s.final_score if s.final_score is not None else ""}'
+            f"{s.auto_score if s.auto_score is not None else ''},"
+            f"{s.final_score if s.final_score is not None else ''}"
         )
 
     return "\n".join(lines)

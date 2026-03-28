@@ -10,10 +10,11 @@ PATCH /grading/submissions/{uuid}    — save teacher grade + feedback
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Query, Request
-from fastapi import HTTPException, status as http_status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi import status as http_status
 from fastapi.responses import StreamingResponse
 from sqlalchemy import desc
+from sqlmodel import Session, select
 
 from src.core.events.database import get_db_session
 from src.db.grading.submissions import (
@@ -34,7 +35,6 @@ from src.services.grading.teacher import (
     mark_under_review,
     save_grade,
 )
-from sqlmodel import Session, select
 
 router = APIRouter()
 
@@ -44,12 +44,12 @@ async def api_list_submissions(
     activity_id: int,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
-    status_filter: str | None = Query(default=None, alias="status"),
-    search: str | None = Query(default=None),
-    sort_by: str = Query(default="submitted_at"),
-    sort_dir: str = Query(default="desc"),
-    page: int = Query(default=1, ge=1),
-    page_size: int = Query(default=25, ge=1, le=100),
+    status_filter: Annotated[str | None, Query(alias="status")] = None,
+    search: Annotated[str | None, Query()] = None,
+    sort_by: Annotated[str, Query()] = "submitted_at",
+    sort_dir: Annotated[str, Query()] = "desc",
+    page: Annotated[int, Query(ge=1)] = 1,
+    page_size: Annotated[int, Query(ge=1, le=100)] = 25,
 ) -> SubmissionListResponse:
     """
     Paginated, filterable, searchable submissions list for a teacher.
@@ -113,7 +113,9 @@ async def api_export_submissions_csv(
     return StreamingResponse(
         _iter(),
         media_type="text/csv",
-        headers={"Content-Disposition": f"attachment; filename=grades-activity-{activity_id}.csv"},
+        headers={
+            "Content-Disposition": f"attachment; filename=grades-activity-{activity_id}.csv"
+        },
     )
 
 

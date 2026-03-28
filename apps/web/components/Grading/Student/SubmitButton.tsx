@@ -47,9 +47,9 @@ interface SubmitButtonProps {
 }
 
 /** Assessment types that require a server-stamped start before submission */
-const TIMED_ASSESSMENT_TYPES: Set<AssessmentType> = new Set(['QUIZ', 'EXAM']);
+const TIMED_ASSESSMENT_TYPES = new Set<AssessmentType>(['QUIZ', 'EXAM']);
 
-const NON_SUBMITTABLE_STATUSES: Set<SubmissionStatus> = new Set([
+const NON_SUBMITTABLE_STATUSES = new Set<SubmissionStatus>([
   'SUBMITTED',
   'UNDER_REVIEW',
   'GRADED',
@@ -121,7 +121,10 @@ export default function SubmitButton({
     <AlertDialog>
       <AlertDialogTrigger
         render={
-          <Button disabled={isSubmitting} className={className}>
+          <Button
+            disabled={isSubmitting}
+            className={className}
+          >
             <SendHorizonal className="mr-2 h-4 w-4" />
             {isSubmitting ? t('submitting') : t('submitForGrading')}
           </Button>

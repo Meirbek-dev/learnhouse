@@ -67,7 +67,9 @@ class Activity(ActivityBase, table=True):
     id: int | None = Field(default=None, primary_key=True)
     # Primary FK: activities belong to a chapter (cascades on chapter delete)
     chapter_id: int = Field(
-        sa_column=Column(Integer, ForeignKey("chapter.id", ondelete="CASCADE"), nullable=False),
+        sa_column=Column(
+            Integer, ForeignKey("chapter.id", ondelete="CASCADE"), nullable=False
+        ),
     )
     # Denormalised FK kept for query performance; synced on create/move.
     # The canonical source of truth is chapter_id → Chapter.course_id.
@@ -124,11 +126,12 @@ class ActivityCreate(ActivityBase):
     def subtype_matches_type(self):
         allowed = _VALID_SUBTYPES.get(self.activity_type, set())
         if allowed and self.activity_sub_type not in allowed:
-            raise ValueError(
+            msg = (
                 f"activity_sub_type {self.activity_sub_type!r} is not valid for "
                 f"activity_type {self.activity_type!r}. "
                 f"Allowed: {sorted(s.value for s in allowed)}"
             )
+            raise ValueError(msg)
         return self
 
 

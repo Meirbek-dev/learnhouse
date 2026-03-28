@@ -737,7 +737,9 @@ _STARTER_CHAPTERS = [
 ]
 
 
-def _seed_starter_chapters(course: Course, creator_id: int, db_session: Session) -> None:
+def _seed_starter_chapters(
+    course: Course, creator_id: int, db_session: Session
+) -> None:
     """Insert the two default chapters for the 'starter' template."""
     from src.db.courses.chapters import Chapter
     from ulid import ULID

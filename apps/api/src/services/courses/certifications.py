@@ -8,6 +8,7 @@ from sqlmodel import Session, select
 from ulid import ULID
 
 from src.core.timezone import now as tz_now
+from src.db.courses.activities import Activity
 from src.db.courses.certifications import (
     CertificateUser,
     CertificateUserRead,
@@ -16,7 +17,6 @@ from src.db.courses.certifications import (
     Certifications,
     CertificationUpdate,
 )
-from src.db.courses.activities import Activity
 from src.db.courses.courses import Course
 from src.db.trail_steps import TrailStep
 from src.db.users import AnonymousUser, PublicUser

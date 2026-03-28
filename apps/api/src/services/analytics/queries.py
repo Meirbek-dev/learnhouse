@@ -369,7 +369,7 @@ def load_analytics_context(
             select(Chapter).where(Chapter.course_id.in_(course_ids))
         ).all()
     ]
-    chapter_ids = [item.id for item in course_chapters]
+    [item.id for item in course_chapters]
 
     chapter_map = {
         chapter.id: chapter for chapter in course_chapters if chapter.id is not None
@@ -699,9 +699,7 @@ def progress_snapshots(
 ) -> dict[tuple[int, int], ProgressSnapshot]:
     total_steps_by_course: dict[int, set[int]] = defaultdict(set)
     for chapter_activity in context.chapter_activities:
-        total_steps_by_course[chapter_activity.course_id].add(
-            chapter_activity.id
-        )
+        total_steps_by_course[chapter_activity.course_id].add(chapter_activity.id)
 
     completed_by_course_user: dict[tuple[int, int], set[int]] = defaultdict(set)
     trailrun_by_course_user: dict[tuple[int, int], int] = {}

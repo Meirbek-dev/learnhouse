@@ -79,9 +79,7 @@ def downgrade() -> None:
 
     # Re-add the column as nullable with no FK (data is gone)
     conn.execute(
-        sa.text(
-            "ALTER TABLE activity ADD COLUMN IF NOT EXISTS course_id INTEGER"
-        )
+        sa.text("ALTER TABLE activity ADD COLUMN IF NOT EXISTS course_id INTEGER")
     )
 
     # Best-effort backfill from chapter.course_id

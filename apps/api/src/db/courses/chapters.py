@@ -98,11 +98,13 @@ class ChapterReadWithPermissions(ChapterBase):
 
 class ChapterOrderPayload(PydanticStrictBaseModel):
     """Single-item order update: move this chapter to position N."""
+
     position: int
 
 
 class ActivityOrderPayload(PydanticStrictBaseModel):
     """Move an activity to position N, optionally into a different chapter."""
+
     position: int
     chapter_uuid: str | None = None
 

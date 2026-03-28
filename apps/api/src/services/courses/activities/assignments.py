@@ -51,6 +51,7 @@ def _build_assignment_read(
         },
     )
 
+
 ## > Assignments CRUD
 
 
@@ -131,7 +132,9 @@ async def read_assignment(
     )
 
     # return assignment read
-    activity = db_session.exec(select(Activity).where(Activity.id == assignment.activity_id)).first()
+    activity = db_session.exec(
+        select(Activity).where(Activity.id == assignment.activity_id)
+    ).first()
     return _build_assignment_read(
         assignment,
         course_uuid=course.course_uuid,
@@ -240,7 +243,9 @@ async def update_assignment(
     db_session.refresh(assignment)
 
     # return assignment read
-    activity = db_session.exec(select(Activity).where(Activity.id == assignment.activity_id)).first()
+    activity = db_session.exec(
+        select(Activity).where(Activity.id == assignment.activity_id)
+    ).first()
     return _build_assignment_read(
         assignment,
         course_uuid=course.course_uuid,

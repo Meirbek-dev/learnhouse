@@ -35,8 +35,8 @@ import { AssignmentProvider } from '@components/Contexts/Assignments/AssignmentC
 import GeneralWrapper from '@/components/Objects/Elements/Wrappers/GeneralWrapper';
 import { Suspense, lazy, useEffect, useRef, useState, useTransition } from 'react';
 import ActivityBreadcrumbs from '@components/Pages/Activity/ActivityBreadcrumbs';
-import { getAssignmentFromActivityUUID } from '@services/courses/assignments';
 import ActivityIndicators from '@components/Pages/Courses/ActivityIndicators';
+import { getAssignmentFromActivityUUID } from '@services/courses/assignments';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import AIChatBotProvider from '@components/Contexts/AI/AIChatBotContext';
 import CourseEndView from '@components/Pages/Activity/CourseEndView';
@@ -45,7 +45,7 @@ import ToolTip from '@/components/Objects/Elements/Tooltip/Tooltip';
 import { usePlatform } from '@/components/Contexts/PlatformContext';
 import { CourseProvider } from '@components/Contexts/CourseContext';
 import { useContributorStatus } from '@/hooks/useContributorStatus';
-import { getAPIUrl, getAbsoluteUrl } from '@services/config/config';
+import { getAbsoluteUrl } from '@services/config/config';
 import { submitAssessment } from '@services/grading/grading';
 import { useGamificationStore } from '@/stores/gamification';
 import { useMySubmission } from '@/hooks/useMySubmission';

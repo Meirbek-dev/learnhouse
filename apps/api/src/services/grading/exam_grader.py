@@ -29,7 +29,9 @@ def grade_exam_questions(
         (auto_score, GradingBreakdown)
     """
     if not questions:
-        return 0.0, GradingBreakdown(items=[], needs_manual_review=False, auto_graded=True)
+        return 0.0, GradingBreakdown(
+            items=[], needs_manual_review=False, auto_graded=True
+        )
 
     total_defined_points = sum(float(q.get("points", 1)) for q in questions)
     items: list[GradedItem] = []
@@ -69,7 +71,10 @@ def grade_exam_questions(
         else:
             # MATCHING or other types that need manual review
             item = _grade_open_text(
-                {"question_id": str(qid), "question": question.get("question_text", "")},
+                {
+                    "question_id": str(qid),
+                    "question": question.get("question_text", ""),
+                },
                 user_answer,
                 q_points,
             )

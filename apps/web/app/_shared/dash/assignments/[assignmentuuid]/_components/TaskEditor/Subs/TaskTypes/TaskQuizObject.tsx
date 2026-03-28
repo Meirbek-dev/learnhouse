@@ -476,7 +476,7 @@ const TaskQuizObject = ({ assignmentTaskUUID }: TaskQuizObjectProps) => {
     try {
       const res = await updateAssignmentTask(
         { contents: { questions, settings: quizSettings } },
-        assignmentTask.assignment_task_uuid as string,
+        assignmentTask.assignment_task_uuid!,
         assignment.assignment_object.assignment_uuid,
         access_token,
       );

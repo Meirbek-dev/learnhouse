@@ -41,7 +41,10 @@ def upgrade() -> None:
 
     # ── 1. Add order column to chapter ──────────────────────────────────────
     if not _column_exists(conn, "chapter", "order"):
-        op.add_column("chapter", sa.Column("order", sa.Integer(), nullable=False, server_default="0"))
+        op.add_column(
+            "chapter",
+            sa.Column("order", sa.Integer(), nullable=False, server_default="0"),
+        )
 
     # Backfill chapter.order from coursechapter.order if the join table exists
     if _table_exists(conn, "coursechapter"):
@@ -75,7 +78,10 @@ def upgrade() -> None:
         )
 
     if not _column_exists(conn, "activity", "order"):
-        op.add_column("activity", sa.Column("order", sa.Integer(), nullable=False, server_default="0"))
+        op.add_column(
+            "activity",
+            sa.Column("order", sa.Integer(), nullable=False, server_default="0"),
+        )
 
     # Backfill activity.chapter_id and activity.order from chapteractivity
     if _table_exists(conn, "chapteractivity"):
@@ -118,8 +124,18 @@ def downgrade() -> None:
         "coursechapter",
         sa.Column("id", sa.Integer(), primary_key=True),
         sa.Column("order", sa.Integer(), nullable=False),
-        sa.Column("course_id", sa.Integer(), sa.ForeignKey("course.id", ondelete="CASCADE"), nullable=False),
-        sa.Column("chapter_id", sa.Integer(), sa.ForeignKey("chapter.id", ondelete="CASCADE"), nullable=False),
+        sa.Column(
+            "course_id",
+            sa.Integer(),
+            sa.ForeignKey("course.id", ondelete="CASCADE"),
+            nullable=False,
+        ),
+        sa.Column(
+            "chapter_id",
+            sa.Integer(),
+            sa.ForeignKey("chapter.id", ondelete="CASCADE"),
+            nullable=False,
+        ),
         sa.Column("creation_date", sa.String(), nullable=False, server_default=""),
         sa.Column("update_date", sa.String(), nullable=False, server_default=""),
     )
@@ -127,9 +143,24 @@ def downgrade() -> None:
         "chapteractivity",
         sa.Column("id", sa.Integer(), primary_key=True),
         sa.Column("order", sa.Integer(), nullable=False),
-        sa.Column("chapter_id", sa.Integer(), sa.ForeignKey("chapter.id", ondelete="CASCADE"), nullable=False),
-        sa.Column("activity_id", sa.Integer(), sa.ForeignKey("activity.id", ondelete="CASCADE"), nullable=False),
-        sa.Column("course_id", sa.Integer(), sa.ForeignKey("course.id", ondelete="CASCADE"), nullable=False),
+        sa.Column(
+            "chapter_id",
+            sa.Integer(),
+            sa.ForeignKey("chapter.id", ondelete="CASCADE"),
+            nullable=False,
+        ),
+        sa.Column(
+            "activity_id",
+            sa.Integer(),
+            sa.ForeignKey("activity.id", ondelete="CASCADE"),
+            nullable=False,
+        ),
+        sa.Column(
+            "course_id",
+            sa.Integer(),
+            sa.ForeignKey("course.id", ondelete="CASCADE"),
+            nullable=False,
+        ),
         sa.Column("creation_date", sa.String(), nullable=False, server_default=""),
         sa.Column("update_date", sa.String(), nullable=False, server_default=""),
     )

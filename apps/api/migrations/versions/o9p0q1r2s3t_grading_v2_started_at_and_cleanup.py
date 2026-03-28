@@ -46,5 +46,7 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     conn = op.get_bind()
-    conn.execute(sa.text("ALTER TABLE submission DROP COLUMN IF EXISTS grading_version"))
+    conn.execute(
+        sa.text("ALTER TABLE submission DROP COLUMN IF EXISTS grading_version")
+    )
     conn.execute(sa.text("ALTER TABLE submission DROP COLUMN IF EXISTS started_at"))

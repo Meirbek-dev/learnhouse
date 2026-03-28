@@ -1,3 +1,9 @@
+from src.db.grading.schemas import (
+    AssignmentAnswers,
+    AssignmentTaskAnswer,
+    QuizAnswer,
+    QuizAnswers,
+)
 from src.db.grading.submissions import (
     AssessmentType,
     GradedItem,
@@ -12,18 +18,16 @@ from src.db.grading.submissions import (
     SubmissionUpdate,
     TeacherGradeInput,
 )
-from src.db.grading.schemas import (
-    AssignmentAnswers,
-    AssignmentTaskAnswer,
-    QuizAnswer,
-    QuizAnswers,
-)
 
 __all__ = [
     "AssessmentType",
+    "AssignmentAnswers",
+    "AssignmentTaskAnswer",
     "GradedItem",
     "GradingBreakdown",
     "ItemFeedback",
+    "QuizAnswer",
+    "QuizAnswers",
     "Submission",
     "SubmissionCreate",
     "SubmissionListResponse",
@@ -32,8 +36,4 @@ __all__ = [
     "SubmissionStatus",
     "SubmissionUpdate",
     "TeacherGradeInput",
-    "AssignmentAnswers",
-    "AssignmentTaskAnswer",
-    "QuizAnswer",
-    "QuizAnswers",
 ]

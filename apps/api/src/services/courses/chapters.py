@@ -35,7 +35,9 @@ def _get_chapter_by_uuid(chapter_uuid: str, db_session) -> Chapter:
 
 
 def _get_course_for_chapter(chapter: Chapter, db_session: Session) -> Course:
-    course = db_session.exec(select(Course).where(Course.id == chapter.course_id)).first()
+    course = db_session.exec(
+        select(Course).where(Course.id == chapter.course_id)
+    ).first()
     if not course:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Course does not exist"
@@ -45,14 +47,18 @@ def _get_course_for_chapter(chapter: Chapter, db_session: Session) -> Course:
 
 def _next_chapter_order(course_id: int, db_session: Session) -> int:
     result = db_session.exec(
-        select(Chapter).where(Chapter.course_id == course_id).order_by(Chapter.order.desc())
+        select(Chapter)
+        .where(Chapter.course_id == course_id)
+        .order_by(Chapter.order.desc())
     ).first()
     return (result.order if result else 0) + 1
 
 
 def _next_activity_order(chapter_id: int, db_session: Session) -> int:
     result = db_session.exec(
-        select(Activity).where(Activity.chapter_id == chapter_id).order_by(Activity.order.desc())
+        select(Activity)
+        .where(Activity.chapter_id == chapter_id)
+        .order_by(Activity.order.desc())
     ).first()
     return (result.order if result else 0) + 1
 
@@ -68,7 +74,9 @@ async def create_chapter(
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
 ) -> ChapterRead:
-    course = db_session.exec(select(Course).where(Course.id == chapter_object.course_id)).one()
+    course = db_session.exec(
+        select(Course).where(Course.id == chapter_object.course_id)
+    ).one()
 
     checker = PermissionChecker(db_session)
     require_course_permission("chapter:create", current_user, course, checker)
@@ -94,7 +102,7 @@ async def get_chapter(
     db_session: Session,
 ) -> ChapterRead:
     chapter = _get_chapter_by_uuid(chapter_uuid, db_session)
-    course = _get_course_for_chapter(chapter, db_session)
+    _get_course_for_chapter(chapter, db_session)
 
     checker = PermissionChecker(db_session)
     checker.require(current_user.id, "course:read")
@@ -177,7 +185,6 @@ async def move_chapter_to_order(
     checker = PermissionChecker(db_session)
     require_course_permission("chapter:update", current_user, course, checker)
 
-    old_order = chapter.order
     new_order = max(1, position)
 
     siblings = db_session.exec(
@@ -220,7 +227,9 @@ async def move_activity_to_order(
         raise HTTPException(status_code=404, detail="Activity not found")
 
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "activity:update", resource_owner_id=activity.creator_id)
+    checker.require(
+        current_user.id, "activity:update", resource_owner_id=activity.creator_id
+    )
 
     if target_chapter_uuid:
         target_chapter = _get_chapter_by_uuid(target_chapter_uuid, db_session)
@@ -259,16 +268,16 @@ async def get_course_chapters(
 ) -> list[ChapterReadWithPermissions]:
     course = db_session.exec(select(Course).where(Course.id == course_id)).first()
     if not course:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Course does not exist")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Course does not exist"
+        )
 
     checker = PermissionChecker(db_session)
     if not course.public:
         checker.require(current_user.id, "course:read")
 
     chapters = db_session.exec(
-        select(Chapter)
-        .where(Chapter.course_id == course_id)
-        .order_by(Chapter.order)
+        select(Chapter).where(Chapter.course_id == course_id).order_by(Chapter.order)
     ).all()
 
     chapter_reads = [
@@ -297,10 +306,14 @@ async def get_course_chapters(
             if not with_unpublished_activities and not activity.published:
                 continue
             can_update = checker.check(
-                current_user.id, "activity:update", resource_owner_id=activity.creator_id
+                current_user.id,
+                "activity:update",
+                resource_owner_id=activity.creator_id,
             )
             can_delete = checker.check(
-                current_user.id, "activity:delete", resource_owner_id=activity.creator_id
+                current_user.id,
+                "activity:delete",
+                resource_owner_id=activity.creator_id,
             )
             is_owner = activity.creator_id == current_user.id
 
@@ -325,15 +338,23 @@ async def reorder_chapters_and_activities(
     db_session: Session,
 ):
     """Bulk reorder all chapters and activities in a course (used by drag-and-drop)."""
-    course = db_session.exec(select(Course).where(Course.course_uuid == course_uuid)).first()
+    course = db_session.exec(
+        select(Course).where(Course.course_uuid == course_uuid)
+    ).first()
     if not course:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Course does not exist")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Course does not exist"
+        )
 
     checker = PermissionChecker(db_session)
-    checker.require(current_user.id, "chapter:update", resource_owner_id=course.creator_id)
+    checker.require(
+        current_user.id, "chapter:update", resource_owner_id=course.creator_id
+    )
 
     # Batch-resolve chapter UUIDs
-    all_chapter_uuids = [co.chapter_uuid for co in chapters_order.chapter_order_by_uuids]
+    all_chapter_uuids = [
+        co.chapter_uuid for co in chapters_order.chapter_order_by_uuids
+    ]
     chapters_by_uuid: dict[str, Chapter] = {}
     if all_chapter_uuids:
         result = db_session.exec(

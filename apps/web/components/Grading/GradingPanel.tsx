@@ -279,7 +279,12 @@ export default function GradingPanel({
             <AlertDialog>
               <AlertDialogTrigger
                 render={
-                  <Button variant="outline" size="sm" disabled={!canSave} className="gap-1.5">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={!canSave}
+                    className="gap-1.5"
+                  >
                     <RotateCcw className="h-4 w-4" />
                     {t('returnToStudent')}
                   </Button>
@@ -313,7 +318,10 @@ export default function GradingPanel({
               <AlertDialog>
                 <AlertDialogTrigger
                   render={
-                    <Button disabled={!canSave} className="gap-1.5">
+                    <Button
+                      disabled={!canSave}
+                      className="gap-1.5"
+                    >
                       <Send className="h-4 w-4" />
                       {t('publishGrade')}
                     </Button>

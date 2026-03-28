@@ -25,7 +25,9 @@ def grade_code_challenge(
         (auto_score 0–100, GradingBreakdown)
     """
     if not test_results:
-        return 0.0, GradingBreakdown(items=[], needs_manual_review=False, auto_graded=True)
+        return 0.0, GradingBreakdown(
+            items=[], needs_manual_review=False, auto_graded=True
+        )
 
     total_weight = sum(float(t.get("weight", 1)) for t in test_results)
     if total_weight == 0:

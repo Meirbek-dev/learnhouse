@@ -15,7 +15,7 @@ import { cn } from '@/lib/utils';
 
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader } from '@/components/ui/card';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -335,7 +335,7 @@ function TaskFormObject({ assignmentTaskUUID }: TaskFormObjectProps) {
   const [isSaving, setIsSaving] = useState(false);
 
   const [questions, setQuestions] = useState<FormSchema[]>(() => {
-    const savedQuestions = assignmentTask.contents?.questions as unknown[] | undefined;
+    const savedQuestions = assignmentTask.contents?.questions;
     if (savedQuestions) {
       return normalizeQuestions(savedQuestions);
     }
@@ -414,7 +414,7 @@ function TaskFormObject({ assignmentTaskUUID }: TaskFormObjectProps) {
     try {
       const res = await updateAssignmentTask(
         { contents: { questions } },
-        assignmentTask.assignment_task_uuid as string,
+        assignmentTask.assignment_task_uuid,
         assignment.assignment_object.assignment_uuid,
         access_token,
       );

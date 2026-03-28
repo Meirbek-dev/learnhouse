@@ -4,8 +4,8 @@ import { BookOpenCheck, ChevronLeft, ChevronRight, Clock4, Download, Search } fr
 import { useState, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { Button } from '@/components/ui/button';

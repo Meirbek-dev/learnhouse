@@ -179,9 +179,10 @@ async def api_get_course_meta(
 
     # Emit the structure version so clients can detect concurrent edits
     try:
-        from sqlmodel import select as _select
-        from src.db.courses.chapters import Chapter as _Chapter
         from sqlalchemy import func as _func
+        from sqlmodel import select as _select
+
+        from src.db.courses.chapters import Chapter as _Chapter
 
         latest_chapter_update = db_session.exec(
             _select(_func.max(_Chapter.update_date)).where(
