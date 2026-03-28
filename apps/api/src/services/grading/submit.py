@@ -10,7 +10,7 @@ Each concern is isolated in a private helper so it can be tested independently:
 import logging
 from datetime import UTC, datetime
 
-from fastapi import HTTPException, Request, status
+from fastapi import HTTPException, status
 from sqlmodel import Session, select
 from ulid import ULID
 
@@ -24,7 +24,7 @@ from src.db.grading.submissions import (
 )
 from src.db.users import PublicUser
 from src.security.rbac import PermissionChecker
-from src.services.gamification.service import award_xp
+from src.services.gamification.service import award_xp as _gamification_award_xp
 from src.services.grading.grader import grade_submission
 from src.services.grading.settings_loader import AssessmentSettings
 
@@ -48,7 +48,6 @@ _XP_SOURCE: dict[AssessmentType, XPSource] = {
 
 
 async def start_submission(
-    request: Request,
     activity_id: int,
     assessment_type: AssessmentType,
     current_user: PublicUser,
@@ -97,7 +96,6 @@ async def start_submission(
 
 
 async def submit_assessment(
-    request: Request,
     activity_id: int,
     assessment_type: AssessmentType,
     answers_payload: dict,
@@ -165,7 +163,7 @@ async def submit_assessment(
 
     passed = (draft.auto_score or 0) >= 50.0
     if passed and not violation_exceeded and not is_late:
-        await _award_xp_safe(request, current_user.id, assessment_type, draft, db_session)
+        _award_xp_safe(current_user.id, assessment_type, draft.submission_uuid, db_session)
 
     return SubmissionRead.model_validate(draft)
 
@@ -245,14 +243,13 @@ def _enforce_attempt_limit(
 ) -> None:
     if not settings.max_attempts:
         return
+    # Count all non-DRAFT submissions — PUBLISHED and RETURNED must count too,
+    # otherwise students bypass the limit by repeatedly getting submissions returned.
     completed = db_session.exec(
         select(Submission).where(
             Submission.activity_id == activity_id,
             Submission.user_id == user_id,
-            Submission.status.in_([
-                SubmissionStatus.PENDING,
-                SubmissionStatus.GRADED,
-            ]),
+            Submission.status != SubmissionStatus.DRAFT,
         )
     ).all()
     if len(completed) >= settings.max_attempts:
@@ -262,6 +259,9 @@ def _enforce_attempt_limit(
         )
 
 
+_SUBMIT_GRACE_SECONDS = 30  # tolerance for network latency at the time-limit boundary
+
+
 def _enforce_time_limit(draft: Submission, settings: AssessmentSettings) -> None:
     if not draft.started_at or not settings.time_limit_seconds:
         return
@@ -269,7 +269,7 @@ def _enforce_time_limit(draft: Submission, settings: AssessmentSettings) -> None
     if started_at.tzinfo is None:
         started_at = started_at.replace(tzinfo=UTC)
     elapsed = (datetime.now(UTC) - started_at).total_seconds()
-    if elapsed > settings.time_limit_seconds:
+    if elapsed > settings.time_limit_seconds + _SUBMIT_GRACE_SECONDS:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail=f"Time limit ({settings.time_limit_seconds}s) exceeded",
@@ -277,11 +277,14 @@ def _enforce_time_limit(draft: Submission, settings: AssessmentSettings) -> None
 
 
 def _check_violations(settings: AssessmentSettings, violation_count: int) -> bool:
-    """Return True if violations should zero out the score."""
+    """Return True if violations should zero out the score.
+
+    max_violations is the inclusive upper limit — reaching it triggers zeroing.
+    """
     return (
         settings.track_violations
         and settings.block_on_violations
-        and violation_count > settings.max_violations
+        and violation_count >= settings.max_violations
     )
 
 
@@ -326,10 +329,11 @@ def _resolve_status(
     """
     Determine the post-submission status.
 
-    Auto-graded quizzes with no manual review items move straight to GRADED.
-    Everything else goes to PENDING (awaiting teacher).
+    Any fully auto-graded submission (quiz, code challenge, or exam with only
+    auto-gradeable question types) goes straight to GRADED — no teacher action
+    needed. Anything with manual-review items goes to PENDING.
     """
-    if assessment_type == AssessmentType.QUIZ and not result.needs_manual_review:
+    if not result.needs_manual_review:
         return SubmissionStatus.GRADED
     return SubmissionStatus.PENDING
 
@@ -358,25 +362,27 @@ def _persist_submission(
     db_session.refresh(draft)
 
 
-async def _award_xp_safe(
-    request: Request,
+def _award_xp_safe(
     user_id: int,
     assessment_type: AssessmentType,
-    draft: Submission,
+    submission_uuid: str,
     db_session: Session,
 ) -> None:
+    """Award XP for a passed submission.  Errors are logged and swallowed so a
+    gamification failure never rolls back the submission itself."""
     xp_source = _XP_SOURCE.get(assessment_type, XPSource.QUIZ_COMPLETION)
     try:
-        await award_xp(
-            request=request,
+        _gamification_award_xp(
+            db=db_session,
             user_id=user_id,
-            source=xp_source,
-            source_id=draft.submission_uuid,
-            idempotency_key=f"submission_{draft.submission_uuid}",
-            db_session=db_session,
+            source=xp_source.value,
+            source_id=submission_uuid,
+            idempotency_key=f"submission_{submission_uuid}",
         )
+        db_session.commit()
     except Exception as e:
-        logger.warning("Failed to award XP for submission %s: %s", draft.submission_uuid, e)
+        logger.warning("Failed to award XP for submission %s: %s", submission_uuid, e)
+        db_session.rollback()
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────

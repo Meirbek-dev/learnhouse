@@ -5,6 +5,7 @@ Teacher grading service.
 import csv
 import io
 import logging
+from collections.abc import Generator
 from datetime import UTC, datetime
 
 from fastapi import HTTPException, status
@@ -12,7 +13,9 @@ from sqlalchemy import asc, desc, func, or_
 from sqlmodel import Session, select
 
 from src.db.courses.activities import Activity
+from src.db.gamification import XPSource
 from src.db.grading.submissions import (
+    AssessmentType,
     GradedItem,
     GradingBreakdown,
     ItemFeedback,
@@ -26,8 +29,39 @@ from src.db.grading.submissions import (
 )
 from src.db.users import PublicUser, User
 from src.security.rbac import PermissionChecker
+from src.services.gamification.service import award_xp as _gamification_award_xp
 
 logger = logging.getLogger(__name__)
+
+# Valid status transitions a teacher may request.
+# DRAFT is intentionally absent — teachers should never be able to revert
+# a submitted submission to draft.
+_ALLOWED_TEACHER_TRANSITIONS: dict[SubmissionStatus, frozenset[SubmissionStatus]] = {
+    SubmissionStatus.PENDING: frozenset({
+        SubmissionStatus.GRADED,
+        SubmissionStatus.RETURNED,
+    }),
+    SubmissionStatus.GRADED: frozenset({
+        SubmissionStatus.PUBLISHED,
+        SubmissionStatus.RETURNED,
+        SubmissionStatus.GRADED,   # re-save is a no-op transition, always allowed
+    }),
+    SubmissionStatus.RETURNED: frozenset({
+        SubmissionStatus.GRADED,
+        SubmissionStatus.PENDING,
+    }),
+    SubmissionStatus.PUBLISHED: frozenset({
+        SubmissionStatus.RETURNED,  # allow recalling a published grade for correction
+    }),
+}
+
+# XP source for each assessment type — awarded when a grade is published.
+_XP_SOURCE_ON_PUBLISH: dict[AssessmentType, XPSource] = {
+    AssessmentType.QUIZ: XPSource.QUIZ_COMPLETION,
+    AssessmentType.EXAM: XPSource.EXAM_COMPLETION,
+    AssessmentType.ASSIGNMENT: XPSource.ASSIGNMENT_SUBMISSION,
+    AssessmentType.CODE_CHALLENGE: XPSource.CODE_CHALLENGE_COMPLETION,
+}
 
 _SORT_MAP = {
     "submitted_at": Submission.submitted_at,
@@ -173,11 +207,12 @@ async def get_submission_stats(
         + status_counts.get(SubmissionStatus.PUBLISHED, 0)
     )
 
-    # Query 2: late count (PENDING with is_late=True)
+    # Query 2: late count — all submitted (non-DRAFT) late submissions, regardless
+    # of current status (graded/published late submissions still count as late).
     late_count: int = db_session.exec(
         select(func.count()).where(
             Submission.activity_id == activity_id,
-            Submission.status == SubmissionStatus.PENDING,
+            Submission.status != SubmissionStatus.DRAFT,
             Submission.is_late == True,  # noqa: E712
         )
     ).one()
@@ -217,8 +252,8 @@ async def get_submission_for_teacher(
     """
     Fetch a single submission with full answers and grading breakdown.
 
-    No longer auto-transitions status — PENDING is the single awaiting-grading
-    state; there is no separate UNDER_REVIEW state.
+    Requires assignment:read permission scoped to the activity's creator,
+    preventing cross-activity and cross-course data leakage.
     """
     submission = db_session.exec(
         select(Submission).where(Submission.submission_uuid == submission_uuid)
@@ -228,6 +263,21 @@ async def get_submission_for_teacher(
             status_code=status.HTTP_404_NOT_FOUND, detail="Submission not found"
         )
 
+    activity = db_session.exec(
+        select(Activity).where(Activity.id == submission.activity_id)
+    ).first()
+    if not activity:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Activity not found"
+        )
+
+    checker = PermissionChecker(db_session)
+    checker.require(
+        current_user.id,
+        "assignment:read",
+        resource_owner_id=activity.creator_id,
+    )
+
     result = SubmissionRead.model_validate(submission)
     users_by_id = _batch_fetch_users({submission.user_id}, db_session)
     user = users_by_id.get(submission.user_id)
@@ -236,16 +286,17 @@ async def get_submission_for_teacher(
     return result
 
 
-async def export_grades_csv(
+def export_grades_csv(
     activity_id: int,
     current_user: PublicUser,
     db_session: Session,
-) -> str:
+) -> Generator[str, None, None]:
     """
-    Generate and return a CSV string of all non-draft submissions.
+    Stream CSV rows of all non-draft submissions one batch at a time.
 
-    Uses Python's csv module for safe escaping of names/emails containing
-    quotes, commas, or newlines.
+    Yields the header line first, then rows in batches of 200 so the
+    response starts immediately and memory usage stays bounded regardless
+    of class size.  Uses Python's csv module for safe escaping.
     """
     activity = db_session.exec(
         select(Activity).where(Activity.id == activity_id)
@@ -260,7 +311,17 @@ async def export_grades_csv(
         current_user.id, "assignment:read", resource_owner_id=activity.creator_id
     )
 
-    rows = db_session.exec(
+    buf = io.StringIO()
+    writer = csv.writer(buf)
+
+    writer.writerow(
+        ["Student Name", "Email", "Attempt", "Status", "Late", "Submitted At", "Auto Score", "Final Score"]
+    )
+    yield buf.getvalue()
+    buf.truncate(0)
+    buf.seek(0)
+
+    query = (
         select(Submission)
         .join(User, User.id == Submission.user_id)
         .where(
@@ -268,17 +329,23 @@ async def export_grades_csv(
             Submission.status != SubmissionStatus.DRAFT,
         )
         .order_by(asc(Submission.submitted_at))
-    ).all()
-
-    users_by_id = _batch_fetch_users({s.user_id for s in rows}, db_session)
-
-    output = io.StringIO()
-    writer = csv.writer(output)
-    writer.writerow(
-        ["Student Name", "Email", "Attempt", "Status", "Late", "Submitted At", "Auto Score", "Final Score"]
     )
 
-    for s in rows:
+    # Pre-fetch all involved users in a single query (user records are small).
+    # Submission rows are streamed below so memory scales with batch size, not
+    # with the total number of submissions.
+    all_user_ids_query = (
+        select(Submission.user_id)
+        .where(
+            Submission.activity_id == activity_id,
+            Submission.status != SubmissionStatus.DRAFT,
+        )
+        .distinct()
+    )
+    all_user_ids = set(db_session.exec(all_user_ids_query).all())
+    users_by_id = _batch_fetch_users(all_user_ids, db_session)
+
+    for s in db_session.exec(query).yield_per(200):
         u = users_by_id.get(s.user_id)
         if u:
             parts = [p for p in [u.first_name, u.middle_name, u.last_name] if p]
@@ -299,8 +366,9 @@ async def export_grades_csv(
             s.auto_score if s.auto_score is not None else "",
             s.final_score if s.final_score is not None else "",
         ])
-
-    return output.getvalue()
+        yield buf.getvalue()
+        buf.truncate(0)
+        buf.seek(0)
 
 
 async def save_grade(
@@ -337,7 +405,22 @@ async def save_grade(
         resource_owner_id=activity.creator_id,
     )
 
-    # Model-aware merge of item feedback — preserves all GradedItem fields
+    # Validate status transition against the state machine.
+    requested_status = SubmissionStatus(grade_input.status)
+    current_status = submission.status
+    allowed = _ALLOWED_TEACHER_TRANSITIONS.get(current_status, frozenset())
+    if requested_status not in allowed:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=(
+                f"Cannot transition from {current_status} to {requested_status}. "
+                f"Allowed transitions: {[s.value for s in allowed]}"
+            ),
+        )
+
+    # Model-aware merge of item feedback — preserves all GradedItem fields.
+    # Only items explicitly included in grade_input.item_feedback are updated;
+    # untouched auto-graded items keep their original "Correct"/"Incorrect" text.
     existing = GradingBreakdown.model_validate(submission.grading_json or {})
     item_map = {item.item_id: item for item in existing.items}
 
@@ -345,11 +428,14 @@ async def save_grade(
         if not isinstance(fb, ItemFeedback):
             fb = ItemFeedback(**fb) if isinstance(fb, dict) else fb
         if fb.item_id in item_map:
-            update: dict = {"feedback": fb.feedback}
+            update: dict = {}
             if fb.score is not None:
                 update["score"] = fb.score
                 update["needs_manual_review"] = False
-            item_map[fb.item_id] = item_map[fb.item_id].model_copy(update=update)
+            if fb.feedback:
+                update["feedback"] = fb.feedback
+            if update:
+                item_map[fb.item_id] = item_map[fb.item_id].model_copy(update=update)
         else:
             item_map[fb.item_id] = GradedItem(
                 item_id=fb.item_id,
@@ -372,7 +458,7 @@ async def save_grade(
 
     now = datetime.now(UTC)
     submission.final_score = grade_input.final_score
-    submission.status = SubmissionStatus(grade_input.status)
+    submission.status = requested_status
     submission.grading_json = updated_grading.model_dump()
     submission.graded_at = now
     submission.updated_at = now
@@ -380,6 +466,21 @@ async def save_grade(
     db_session.add(submission)
     db_session.commit()
     db_session.refresh(submission)
+
+    # Award XP when a grade is published and the student passed.
+    # The idempotency key ensures this is safe to call multiple times
+    # (e.g., re-publishing after a recall) without double-awarding.
+    if (
+        current_status != SubmissionStatus.PUBLISHED
+        and requested_status == SubmissionStatus.PUBLISHED
+        and grade_input.final_score >= 50.0
+    ):
+        _award_xp_on_publish(
+            user_id=submission.user_id,
+            assessment_type=submission.assessment_type,
+            submission_uuid=submission_uuid,
+            db_session=db_session,
+        )
 
     return SubmissionRead.model_validate(submission)
 
@@ -413,3 +514,32 @@ def _enrich(s: Submission, users_by_id: dict[int, User]) -> SubmissionRead:
     if user:
         base.user = _make_submission_user(user)
     return base
+
+
+def _award_xp_on_publish(
+    user_id: int,
+    assessment_type: AssessmentType,
+    submission_uuid: str,
+    db_session: Session,
+) -> None:
+    """Award XP when a grade is published and the student passed.
+
+    Errors are logged and swallowed so a gamification failure never prevents
+    a grade from being published.  The idempotency key prevents double-awarding
+    if a grade is recalled and re-published.
+    """
+    xp_source = _XP_SOURCE_ON_PUBLISH.get(assessment_type)
+    if not xp_source:
+        return
+    try:
+        _gamification_award_xp(
+            db=db_session,
+            user_id=user_id,
+            source=xp_source.value,
+            source_id=submission_uuid,
+            idempotency_key=f"submission_{submission_uuid}",
+        )
+        db_session.commit()
+    except Exception as e:
+        logger.warning("Failed to award XP for submission %s: %s", submission_uuid, e)
+        db_session.rollback()

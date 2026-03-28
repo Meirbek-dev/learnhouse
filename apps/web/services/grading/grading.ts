@@ -117,19 +117,6 @@ export async function saveGrade(
 }
 
 /**
- * Publish a grade so it becomes visible to the student.
- * Convenience wrapper around saveGrade with status = 'PUBLISHED'.
- */
-export async function publishGrade(
-  submissionUuid: string,
-  finalScore: number,
-  feedback: string,
-  accessToken: string,
-): Promise<Submission> {
-  return saveGrade(submissionUuid, { final_score: finalScore, status: 'PUBLISHED', feedback }, accessToken);
-}
-
-/**
  * Export grades for an activity as CSV.
  *
  * Uses the server-side export endpoint — no 1000-row cap, no client-side CSV generation.

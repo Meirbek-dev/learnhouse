@@ -33,14 +33,14 @@ def grade_exam_questions(
             items=[], needs_manual_review=False, auto_graded=True
         )
 
-    total_defined_points = sum(float(q.get("points", 1)) for q in questions)
+    total_defined_points = sum(float(q.get("points", 0)) for q in questions)
     items: list[GradedItem] = []
     total_score = 0.0
     needs_manual_review = False
 
     for question in questions:
         qid = question.get("id") or question.get("question_uuid", "")
-        q_pts_raw = float(question.get("points", 1))
+        q_pts_raw = float(question.get("points", 0))
 
         # Scale to max_score
         if total_defined_points > 0:

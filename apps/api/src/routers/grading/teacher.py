@@ -10,7 +10,7 @@ PATCH /grading/submissions/{uuid}    — save teacher grade + feedback
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Query, Request
+from fastapi import APIRouter, Depends, Query
 from fastapi.responses import StreamingResponse
 from sqlmodel import Session
 
@@ -23,7 +23,6 @@ from src.db.grading.submissions import (
 )
 from src.db.users import PublicUser
 from src.security.auth import get_current_user
-from src.security.rbac import PermissionCheckerDep
 from src.services.grading.teacher import (
     export_grades_csv,
     get_submission_for_teacher,
@@ -89,7 +88,7 @@ async def api_get_submission_stats(
 
 
 @router.get("/submissions/export")
-async def api_export_submissions_csv(
+def api_export_submissions_csv(
     activity_id: int,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
@@ -100,17 +99,12 @@ async def api_export_submissions_csv(
     Streams the full dataset — no row cap.
     Content-Disposition header triggers a browser download.
     """
-    csv_content = await export_grades_csv(
-        activity_id=activity_id,
-        current_user=current_user,
-        db_session=db_session,
-    )
-
-    def _iter():
-        yield csv_content
-
     return StreamingResponse(
-        _iter(),
+        export_grades_csv(
+            activity_id=activity_id,
+            current_user=current_user,
+            db_session=db_session,
+        ),
         media_type="text/csv",
         headers={
             "Content-Disposition": f"attachment; filename=grades-activity-{activity_id}.csv"
@@ -134,20 +128,16 @@ async def api_get_submission(
 
 @router.patch("/submissions/{submission_uuid}", response_model=SubmissionRead)
 async def api_save_grade(
-    request: Request,
     submission_uuid: str,
     grade_input: TeacherGradeInput,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
-    checker: PermissionCheckerDep,
 ) -> SubmissionRead:
     """
     Save a teacher-entered final score and optional per-item feedback.
 
-    Required permission: assignment:grade
+    Permission is checked in save_grade via the activity's creator_id.
     """
-    checker.require(current_user.id, "assignment:grade")
-
     return await save_grade(
         submission_uuid=submission_uuid,
         grade_input=grade_input,

@@ -11,7 +11,7 @@ from fastapi import HTTPException, status
 from sqlalchemy import desc
 from sqlmodel import Session, select
 
-from src.db.courses.blocks import Block
+from src.db.courses.blocks import Block, BlockTypeEnum
 from src.db.courses.quiz import QuizSettings
 from src.db.grading.submissions import AssessmentType
 
@@ -54,16 +54,19 @@ def load_activity_settings(
 # ── Per-type loaders ──────────────────────────────────────────────────────────
 
 
-def _get_block(activity_id: int, db_session: Session) -> Block | None:
-    return db_session.exec(
-        select(Block)
-        .where(Block.activity_id == activity_id)
-        .order_by(desc(Block.id))
-    ).first()
+def _get_block(
+    activity_id: int,
+    db_session: Session,
+    block_type: BlockTypeEnum | None = None,
+) -> Block | None:
+    query = select(Block).where(Block.activity_id == activity_id)
+    if block_type is not None:
+        query = query.where(Block.block_type == block_type)
+    return db_session.exec(query.order_by(desc(Block.id))).first()
 
 
 def _load_quiz_settings(activity_id: int, db_session: Session) -> AssessmentSettings:
-    block = _get_block(activity_id, db_session)
+    block = _get_block(activity_id, db_session, BlockTypeEnum.BLOCK_QUIZ)
     if not block:
         return AssessmentSettings()
 

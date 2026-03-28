@@ -84,13 +84,11 @@ export default function GradingPanel({
 
   // Effect 1: reset everything when a different submission is opened (uuid changes).
   useEffect(() => {
-    if (submissionUuid === null) {
-      setScore('');
-      setFeedback('');
-      setItemFeedbacks({});
-      initialRef.current = { score: '', feedback: '', items: {} };
-      setDirtyVersion(0);
-    }
+    setScore('');
+    setFeedback('');
+    setItemFeedbacks({});
+    initialRef.current = { score: '', feedback: '', items: {} };
+    setDirtyVersion(0);
   }, [submissionUuid]);
 
   // Effect 2: pre-fill form from loaded data. Keyed on submission.id so that SWR
@@ -113,7 +111,7 @@ export default function GradingPanel({
     initialRef.current = { score: s, feedback: fb, items };
     setDirtyVersion(0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [submissionId]);
+  }, [submissionId, submissionUuid]);
 
   // isDirty: compares current state against last-saved ref values.
   // dirtyVersion in deps allows the memo to recompute after a save bumps it.
@@ -186,11 +184,16 @@ export default function GradingPanel({
   }, [submission?.grading_json?.items, itemFeedbacks]);
 
   const buildItemFeedbackList = (): ItemFeedback[] =>
-    Object.entries(itemFeedbacks).map(([item_id, val]) => ({
-      item_id,
-      score: val.score !== '' ? Number.parseFloat(val.score) : undefined,
-      feedback: val.feedback,
-    }));
+    Object.entries(itemFeedbacks)
+      .filter(([item_id, val]) => {
+        const initial = initialRef.current.items[item_id] ?? { score: '', feedback: '' };
+        return val.score !== initial.score || val.feedback !== initial.feedback;
+      })
+      .map(([item_id, val]) => ({
+        item_id,
+        score: val.score !== '' ? Number.parseFloat(val.score) : undefined,
+        feedback: val.feedback,
+      }));
 
   const handleSaveGrade = useCallback(
     async (status: 'GRADED' | 'PUBLISHED' | 'RETURNED') => {
@@ -540,7 +543,7 @@ function SubmissionAnswers({ submission, itemFeedbacks, onItemFeedbackChange, t 
           item={item}
           index={i}
           itemFeedback={itemFeedbacks[item.item_id] ?? { score: '', feedback: '' }}
-          isEditable={isEditable && item.needs_manual_review}
+          isEditable={isEditable}
           onFeedbackChange={(field, value) => onItemFeedbackChange(item.item_id, field, value)}
           t={t}
         />

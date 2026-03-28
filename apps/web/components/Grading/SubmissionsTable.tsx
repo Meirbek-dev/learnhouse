@@ -66,18 +66,20 @@ export default function SubmissionsTable({ activityId, title }: SubmissionsTable
   const allUuids = submissions.map((s) => s.submission_uuid);
 
   const handleGradeSaved = useCallback(
-    (updated: Submission) => {
-      // Determine next pending submission BEFORE mutating (mutate invalidates the list)
-      const currentIndex = allUuids.indexOf(updated.submission_uuid);
+    async (updated: Submission) => {
+      const freshPage = await mutate();
+      const freshSubmissions = freshPage?.items ?? [];
+      const freshUuids = freshSubmissions.map((s) => s.submission_uuid);
+      const currentIndex = freshUuids.indexOf(updated.submission_uuid);
       const nextUuid =
-        allUuids
+        freshUuids
           .slice(currentIndex + 1)
-          .find((uuid) => needsTeacherAction(submissions.find((s) => s.submission_uuid === uuid)?.status ?? 'GRADED')) ??
-        null;
-      mutate();
+          .find((uuid) =>
+            needsTeacherAction(freshSubmissions.find((s) => s.submission_uuid === uuid)?.status ?? 'GRADED'),
+          ) ?? null;
       setOpenSubmissionUuid(nextUuid);
     },
-    [allUuids, submissions, mutate],
+    [mutate],
   );
 
   const handleExportCSV = useCallback(async () => {

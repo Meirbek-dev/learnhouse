@@ -4,12 +4,12 @@ import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import type { SubmissionStatus, SubmissionsPage } from '@/types/grading';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import useSWR from 'swr';
 
 export interface UseSubmissionsOptions {
   activityId: number | null;
-  status?: SubmissionStatus | null;
+  status?: SubmissionStatus | 'NEEDS_GRADING' | null;
   search?: string;
   sortBy?: string;
   sortDir?: 'asc' | 'desc';
@@ -27,6 +27,10 @@ export function useSubmissions({
   const session = usePlatformSession();
   const accessToken = session?.data?.tokens?.access_token;
   const [page, setPage] = useState(1);
+
+  useEffect(() => {
+    setPage(1);
+  }, [activityId]);
 
   const params = new URLSearchParams();
   if (activityId) params.set('activity_id', String(activityId));
