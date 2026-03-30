@@ -632,7 +632,7 @@ const CoursesHome = ({
           <DataTable
             columns={columns}
             data={courses}
-            enableColumnVisibility
+            enableColumnVisibility={false}
             enableCsvExport
             csvFileName={`courses-${new Date().toISOString().slice(0, 10)}.csv`}
             storageKey="course-management"

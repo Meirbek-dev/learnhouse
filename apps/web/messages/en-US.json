@@ -3217,6 +3217,14 @@
         "errorOccurred": "An error occurred",
         "title": "Courses"
       },
+      "Assignments": {
+        "description": "View and grade assignments across your courses",
+        "title": "Assignments"
+      },
+      "Analytics": {
+        "description": "Access analytics dashboards and export reports",
+        "title": "Analytics"
+      },
       "Platform": {
         "description": "Configure general settings for your platform",
         "title": "Platform"
@@ -3225,6 +3233,16 @@
         "description": "Manage your organization's users and roles",
         "title": "Users"
       },
+      "Admin": {
+        "description": "Organization administration and system settings",
+        "title": "Admin",
+        "badge": "System"
+      },
+      "Payments": {
+        "description": "Manage payment settings, subscriptions, and invoices",
+        "title": "Payments"
+      },
+      "noAccess": "You don’t have access to dashboard features yet.",
       "platformLogo": "Ashyq Bilim Logo",
       "touUniversity": "Toraighyrov University"
     },

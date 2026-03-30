@@ -231,7 +231,7 @@ def refresh_teacher_analytics_rollups(
             teacher_user_id=0,
             course_ids=course_ids,
             cohort_ids=[],
-            has_org_scope=True,
+            has_platform_scope=True,
         )
         # Bound the context load to the previous-period start (2× the window) so the nightly
         # rollup refresh does not repeatedly scan unbounded historical data (issue 12).
