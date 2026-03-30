@@ -1,8 +1,8 @@
 'use client';
 
-import { cva } from 'class-variance-authority';
 import type { VariantProps } from 'class-variance-authority';
 import { Tabs as TabsPrimitive } from '@base-ui/react/tabs';
+import { cva } from 'class-variance-authority';
 
 import { cn } from '@/lib/utils';
 
@@ -11,7 +11,7 @@ function Tabs({ className, orientation = 'horizontal', ...props }: TabsPrimitive
     <TabsPrimitive.Root
       data-slot="tabs"
       data-orientation={orientation}
-      className={cn('group/tabs flex gap-2 data-horizontal:flex-col', className)}
+      className={cn('gap-2 group/tabs flex data-[orientation=horizontal]:flex-col', className)}
       {...props}
     />
   );
