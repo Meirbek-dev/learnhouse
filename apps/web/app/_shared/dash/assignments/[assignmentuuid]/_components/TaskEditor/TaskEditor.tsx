@@ -9,7 +9,7 @@ import { getAPIUrl } from '@services/config/config';
 import { useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
 import { useSWRConfig } from 'swr';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 import { AssignmentTaskGeneralEdit } from './Subs/AssignmentTaskGeneralEdit';
@@ -29,10 +29,12 @@ const AssignmentTaskEditor = ({ page }: any) => {
   const [taskUUIDKey, setTaskUUIDKey] = useState(assignmentTask.assignment_task_uuid);
   const [selectedSubPage, setSelectedSubPage] = useState(page);
 
-  if (taskUUIDKey !== assignmentTask.assignment_task_uuid) {
-    setTaskUUIDKey(assignmentTask.assignment_task_uuid);
-    setSelectedSubPage('general');
-  }
+  useEffect(() => {
+    if (taskUUIDKey !== assignmentTask.assignment_task_uuid) {
+      setTaskUUIDKey(assignmentTask.assignment_task_uuid);
+      setSelectedSubPage('general');
+    }
+  }, [assignmentTask.assignment_task_uuid, taskUUIDKey]);
 
   async function deleteTaskUI() {
     if (!assignment?.assignment_object?.assignment_uuid) {

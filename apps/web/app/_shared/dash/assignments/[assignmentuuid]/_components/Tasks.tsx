@@ -14,6 +14,7 @@ const AssignmentTasks = ({ assignment_uuid }: any) => {
   const assignments = useAssignments();
   const selectedAssignmentTaskUUID = useAssignmentsTaskStore((s) => s.selectedAssignmentTaskUUID);
   const setSelectedTaskUUID = useAssignmentsTaskStore((s) => s.setSelectedTaskUUID);
+  const setAssignmentTask = useAssignmentsTaskStore((s) => s.setAssignmentTask);
   const [isNewTaskModalOpen, setIsNewTaskModalOpen] = useState(false);
 
   return (
@@ -46,7 +47,10 @@ const AssignmentTasks = ({ assignment_uuid }: any) => {
             <Card
               key={task.id}
               className={`w-[250px] cursor-pointer ${task.assignment_task_uuid === selectedAssignmentTaskUUID ? 'ring-2 ring-primary' : ''}`}
-              onClick={() => setSelectedTaskUUID(task.assignment_task_uuid)}
+              onClick={() => {
+                setSelectedTaskUUID(task.assignment_task_uuid);
+                setAssignmentTask(task);
+              }}
             >
               <CardContent className="px-2 py-3">
                 <div className="flex items-center justify-between gap-2">
