@@ -6,6 +6,7 @@ import { getTranslations } from 'next-intl/server';
 import { Button } from '@/components/ui/button';
 import { auth } from '@/auth';
 import Link from 'next/link';
+import { Card, CardContent } from '@/components/ui/card';
 
 export default function PlatformAnalyticsAtRiskPage(props: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -45,13 +46,17 @@ async function PlatformAnalyticsAtRiskPageInner(props: {
 
     return (
       <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-6 px-4 py-6 md:px-6 xl:px-8">
-        <TeacherFilterBar
-          path="/dash/analytics/learners/at-risk"
-          query={query}
-          courseCount={risk.course_options.length}
-          courseOptions={risk.course_options}
-          cohortOptions={risk.cohort_options}
-        />
+        <Card className="border-slate-200 bg-background shadow-sm">
+          <CardContent>
+            <TeacherFilterBar
+              path="/dash/analytics/learners/at-risk"
+              query={query}
+              courseCount={risk.course_options.length}
+              courseOptions={risk.course_options}
+              cohortOptions={risk.cohort_options}
+            />
+          </CardContent>
+        </Card>
         <div className="flex items-center justify-between text-sm text-slate-500">
           <span>
             {t('table.showingRows', {

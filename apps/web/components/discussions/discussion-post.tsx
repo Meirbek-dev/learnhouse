@@ -10,6 +10,7 @@ import { Separator } from '@/components/ui/separator';
 import DiscussionReply from './discussion-reply';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
 import dynamic from 'next/dynamic';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
@@ -112,7 +113,8 @@ export default function DiscussionPost({
   };
 
   return (
-    <div className="group bg-card text-card-foreground overflow-hidden rounded-lg border shadow-sm">
+    <Card className="group overflow-hidden rounded-lg border shadow-sm">
+      <CardContent className="bg-card text-card-foreground">
       <div className="p-5">
         <div className="flex items-start gap-4">
           <UserAvatar
@@ -380,6 +382,7 @@ export default function DiscussionPost({
           </div>
         </>
       ) : null}
-    </div>
+      </CardContent>
+    </Card>
   );
 }

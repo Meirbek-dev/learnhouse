@@ -74,7 +74,8 @@ const AssignmentStudentActivity = () => {
   const hasTasks = sortedTasks.length > 0;
 
   return (
-    <div className="flex flex-col gap-6">
+    <Card className="bg-background border border-border">
+      <CardContent className="flex flex-col gap-6">
       {/* Header Section */}
       <Card className="border-slate-200 bg-gradient-to-br from-slate-50 to-white">
         <CardContent className="p-6">
@@ -138,7 +139,8 @@ const AssignmentStudentActivity = () => {
           ))}
         </div>
       )}
-    </div>
+    </CardContent>
+  </Card>
   );
 };
 

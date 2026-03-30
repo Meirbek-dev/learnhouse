@@ -52,13 +52,17 @@ async function PlatformAnalyticsCoursesPageInner(props: {
           </CardHeader>
           <CardContent className="text-sm text-slate-600">{t('pages.courseRankingDescription')}</CardContent>
         </Card>
-        <TeacherFilterBar
-          path="/dash/analytics/courses"
-          query={query}
-          courseCount={courseList.total}
-          courseOptions={courseList.course_options}
-          cohortOptions={courseList.cohort_options}
-        />
+        <Card className="border-slate-200 bg-background shadow-sm">
+          <CardContent>
+            <TeacherFilterBar
+              path="/dash/analytics/courses"
+              query={query}
+              courseCount={courseList.total}
+              courseOptions={courseList.course_options}
+              cohortOptions={courseList.cohort_options}
+            />
+          </CardContent>
+        </Card>
         <div className="flex items-center justify-between text-sm text-slate-500">
           <span>
             {t('table.showingRows', {

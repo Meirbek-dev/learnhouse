@@ -17,6 +17,7 @@ import { useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Card, CardContent } from '@components/ui/card';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { Separator } from '@/components/ui/separator';
 
@@ -142,17 +143,19 @@ export default function SubmissionShell({
       {canSubmit && (
         <>
           <Separator />
-          <div className="flex items-center justify-between rounded-md border bg-card px-5 py-3">
-            <p className="text-sm text-muted-foreground">{t('readyToSubmit')}</p>
-            <SubmitButton
-              activityId={activityId}
-              assessmentType={assessmentType}
-              currentStatus={status}
-              answersPayload={answersPayload}
-              violationCount={violationCount}
-              onSubmitted={handleSubmitted}
-            />
-          </div>
+          <Card>
+            <CardContent className="flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">{t('readyToSubmit')}</p>
+              <SubmitButton
+                activityId={activityId}
+                assessmentType={assessmentType}
+                currentStatus={status}
+                answersPayload={answersPayload}
+                violationCount={violationCount}
+                onSubmitted={handleSubmitted}
+              />
+            </CardContent>
+          </Card>
         </>
       )}
 
@@ -160,17 +163,19 @@ export default function SubmissionShell({
       {canResubmit && (
         <>
           <Separator />
-          <div className="flex items-center justify-between rounded-md border border-secondary/20 bg-secondary/10 px-5 py-3">
-            <p className="text-sm text-warning">{t('returnedResubmit')}</p>
-            <SubmitButton
-              activityId={activityId}
-              assessmentType={assessmentType}
-              currentStatus="RETURNED"
-              answersPayload={answersPayload}
-              violationCount={violationCount}
-              onSubmitted={handleSubmitted}
-            />
-          </div>
+          <Card className="border-secondary/20 bg-secondary/10">
+            <CardContent className="flex items-center justify-between">
+              <p className="text-sm text-warning">{t('returnedResubmit')}</p>
+              <SubmitButton
+                activityId={activityId}
+                assessmentType={assessmentType}
+                currentStatus="RETURNED"
+                answersPayload={answersPayload}
+                violationCount={violationCount}
+                onSubmitted={handleSubmitted}
+              />
+            </CardContent>
+          </Card>
         </>
       )}
     </div>

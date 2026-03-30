@@ -348,6 +348,7 @@ const DeleteUpdateButton = ({ update }: any) => {
       onOpenChange={setIsOpen}
     >
       <AlertDialogTrigger
+        nativeButton={false}
         render={
           <div
             id="delete-update-button"

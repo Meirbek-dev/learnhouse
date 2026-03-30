@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 
 import { useSubmissionStats } from '@/hooks/useSubmissionStats';
 import { cn } from '@/lib/utils';
+import { Card, CardContent } from '@components/ui/card';
 
 interface GradingStatsProps {
   activityId: number;
@@ -24,14 +25,17 @@ function StatCard({ label, value, icon: Icon, accent = 'default' }: StatCardProp
     emerald: 'text-emerald-600',
     sky: 'text-sky-600',
   };
+
   return (
-    <div className="flex items-center gap-3 rounded-lg border bg-white px-4 py-3 shadow-sm">
-      <Icon className={cn('h-5 w-5 shrink-0', colorMap[accent])} />
-      <div>
-        <p className="text-xs text-slate-500">{label}</p>
-        <p className="text-lg font-semibold leading-tight">{value}</p>
-      </div>
-    </div>
+    <Card className="shadow-sm">
+      <CardContent className="flex items-center gap-3 p-3">
+        <Icon className={cn('h-5 w-5 shrink-0', colorMap[accent])} />
+        <div>
+          <p className="text-xs text-slate-500">{label}</p>
+          <p className="text-lg font-semibold leading-tight">{value}</p>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 

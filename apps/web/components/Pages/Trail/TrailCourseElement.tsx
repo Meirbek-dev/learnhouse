@@ -1,5 +1,6 @@
 'use client';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
+import { Card, CardContent } from '@components/ui/card';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { getUserCertificates } from '@services/courses/certifications';
 import { revalidateTags } from '@services/utils/ts/requests';
@@ -68,10 +69,8 @@ const TrailCourseElement = ({ course, run }: TrailCourseElementProps) => {
   }, [access_token, course_progress, course.course_uuid]);
 
   return (
-    <div
-      className="trailcoursebox flex rounded-xl bg-white p-3"
-      style={{ boxShadow: '0px 4px 7px 0px rgba(0, 0, 0, 0.03)' }}
-    >
+    <Card className="trailcoursebox flex rounded-xl bg-white p-3" style={{ boxShadow: '0px 4px 7px 0px rgba(0, 0, 0, 0.03)' }}>
+      <CardContent className="p-0">
       <Link
         prefetch={false}
         href={getAbsoluteUrl(`/course/${courseid}`)}
@@ -152,7 +151,8 @@ const TrailCourseElement = ({ course, run }: TrailCourseElementProps) => {
           </div>
         )}
       </div>
-    </div>
+    </CardContent>
+  </Card>
   );
 };
 

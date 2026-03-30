@@ -1,4 +1,5 @@
-import { STATUS_COLORS, STATUS_LABELS } from '@/types/grading';
+import { Badge } from '@components/ui/badge';
+import { STATUS_LABELS } from '@/types/grading';
 import type { SubmissionStatus } from '@/types/grading';
 import { cn } from '@/lib/utils';
 
@@ -7,16 +8,21 @@ interface SubmissionStatusBadgeProps {
   className?: string;
 }
 
+const STATUS_VARIANTS: Record<SubmissionStatus, 'secondary' | 'warning' | 'success' | 'default' | 'destructive'> = {
+  DRAFT: 'secondary',
+  PENDING: 'warning',
+  GRADED: 'success',
+  PUBLISHED: 'default',
+  RETURNED: 'destructive',
+};
+
 export default function SubmissionStatusBadge({ status, className }: SubmissionStatusBadgeProps) {
   return (
-    <span
-      className={cn(
-        'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold',
-        STATUS_COLORS[status] ?? 'bg-muted text-muted-foreground',
-        className,
-      )}
+    <Badge
+      variant={STATUS_VARIANTS[status] ?? 'default'}
+      className={cn('inline-flex items-center text-xs font-semibold', className)}
     >
       {STATUS_LABELS[status] ?? status}
-    </span>
+    </Badge>
   );
 }

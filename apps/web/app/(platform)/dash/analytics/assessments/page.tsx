@@ -4,6 +4,7 @@ import AnalyticsEmptyState from '@components/Dashboard/Analytics/AnalyticsEmptyS
 import TeacherFilterBar from '@components/Dashboard/Analytics/TeacherFilterBar';
 import { getTranslations } from 'next-intl/server';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { auth } from '@/auth';
 import Link from 'next/link';
 
@@ -46,8 +47,10 @@ async function PlatformAnalyticsAssessmentsPageInner(props: {
 
     return (
       <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-6 px-4 py-6 md:px-6 xl:px-8">
-        <TeacherFilterBar
-          path="/dash/analytics/assessments"
+        <Card className="border-slate-200 bg-background shadow-sm">
+          <CardContent className="space-y-4">
+            <TeacherFilterBar
+              path="/dash/analytics/assessments"
           query={query}
           courseCount={assessments.course_options.length}
           courseOptions={assessments.course_options}
@@ -98,6 +101,8 @@ async function PlatformAnalyticsAssessmentsPageInner(props: {
             </Button>
           </div>
         ) : null}
+          </CardContent>
+        </Card>
       </div>
     );
   } catch (error) {

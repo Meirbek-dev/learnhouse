@@ -99,6 +99,7 @@ function UnmarkActivityDialog({ onConfirm, t }: UnmarkActivityDialogProps) {
       onOpenChange={setIsOpen}
     >
       <AlertDialogTrigger
+        nativeButton={false}
         render={
           <div className="soft-shadow flex flex-col rounded-md bg-teal-600 p-2.5 px-4 text-white transition delay-150 duration-300 ease-in-out hover:cursor-pointer">
             <span className="mb-1 text-[10px] font-bold uppercase">{t('status')}</span>
@@ -174,6 +175,7 @@ function SubmitAssignmentDialog({ onSubmit, t }: SubmitAssignmentDialogProps) {
       onOpenChange={setIsOpen}
     >
       <AlertDialogTrigger
+        nativeButton={false}
         render={
           <div className="soft-shadow flex flex-col rounded-md bg-cyan-800 p-2.5 px-4 text-white transition delay-150 duration-300 ease-in-out hover:cursor-pointer">
             <span className="mb-1 text-[10px] font-bold uppercase">{t('status')}</span>
