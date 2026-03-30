@@ -10,7 +10,7 @@ Each concern is isolated in a private helper so it can be tested independently:
 import logging
 from datetime import UTC, datetime
 
-from fastapi import HTTPException, status
+from fastapi import HTTPException, Request, status
 from sqlmodel import Session, select
 from ulid import ULID
 
@@ -48,6 +48,7 @@ _XP_SOURCE: dict[AssessmentType, XPSource] = {
 
 
 async def start_submission(
+    request: Request | None,
     activity_id: int,
     assessment_type: AssessmentType,
     current_user: PublicUser,
@@ -96,6 +97,7 @@ async def start_submission(
 
 
 async def submit_assessment(
+    request: Request | None,
     activity_id: int,
     assessment_type: AssessmentType,
     answers_payload: dict,
