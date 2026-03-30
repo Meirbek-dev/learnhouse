@@ -9,10 +9,10 @@ The migration container gets its backend settings from the `app` service environ
 repository is normally `extra/.env` via `docker-compose.yml`. There is no runtime fallback to
 `apps/api/config/config.yaml` or `apps/api/.env`.
 
-Docker Compose also interpolates `${...}` variables while loading `docker-compose.yml`, including the
-`app.build.args` values used by the frontend image. Because of that, run these commands with
-`--env-file ./extra/.env`; relying on the service-level `env_file` alone still produces missing-variable
-warnings before the one-off container starts.
+Docker Compose also interpolates `${...}` variables while loading `docker-compose.yml`, including
+the `app.build.args` values used by the frontend image. Because of that, run these commands with
+`--env-file ./extra/.env`; relying on the service-level `env_file` alone still produces
+missing-variable warnings before the one-off container starts.
 
 ## When To Use Which Command
 
@@ -116,8 +116,10 @@ If you are applying migrations on a live server, use this order:
 
 1. Take a database backup.
 2. Confirm `db` is healthy.
-3. Run `docker compose --env-file ./extra/.env run --rm -w /app/api app uv run --no-sync alembic upgrade head`.
-4. Verify with `docker compose --env-file ./extra/.env run --rm -w /app/api app uv run --no-sync alembic current`.
+3. Run
+   `docker compose --env-file ./extra/.env run --rm -w /app/api app uv run --no-sync alembic upgrade head`.
+4. Verify with
+   `docker compose --env-file ./extra/.env run --rm -w /app/api app uv run --no-sync alembic current`.
 5. Start or restart `app`.
 6. Check `docker compose --env-file ./extra/.env logs -f app`.
 

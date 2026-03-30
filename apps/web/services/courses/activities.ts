@@ -388,9 +388,7 @@ async function fetchActivityWithAuth(activity_uuid: string, access_token?: strin
 
   // Support both raw and canonical UUID variants.
   // Some UI routes pass the raw suffix (e.g. "01KE..."), but API uses "activity_...".
-  const canonicalActivityUuid = activity_uuid.startsWith('activity_')
-    ? activity_uuid
-    : `activity_${activity_uuid}`;
+  const canonicalActivityUuid = activity_uuid.startsWith('activity_') ? activity_uuid : `activity_${activity_uuid}`;
 
   const result = await fetch(`${getAPIUrl()}activities/${canonicalActivityUuid}`, {
     method: 'GET',

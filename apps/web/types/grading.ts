@@ -145,7 +145,7 @@ export interface SubmissionStats {
   total: number;
   graded_count: number;
   needs_grading_count: number; // count of PENDING submissions
-  late_count: number;          // count of PENDING submissions where is_late=true
+  late_count: number; // count of PENDING submissions where is_late=true
   avg_score: number | null;
   pass_rate: number | null;
 }
