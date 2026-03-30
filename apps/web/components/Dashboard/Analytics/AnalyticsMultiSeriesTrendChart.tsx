@@ -1,6 +1,7 @@
 'use client';
 
-import { Area, AreaChart, CartesianGrid, Legend, XAxis, YAxis, type MouseHandlerDataParam } from 'recharts';
+import { Area, AreaChart, CartesianGrid, Legend, XAxis, YAxis } from 'recharts';
+import type { MouseHandlerDataParam } from 'recharts';
 import { useTranslations } from 'next-intl';
 
 import {

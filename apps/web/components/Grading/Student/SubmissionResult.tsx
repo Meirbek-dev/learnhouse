@@ -15,7 +15,6 @@ import { useTranslations } from 'next-intl';
 import { Alert, AlertDescription, AlertTitle } from '@components/ui/alert';
 import type { Submission, GradedItem } from '@/types/grading';
 import { Card, CardContent } from '@components/ui/card';
-import { Separator } from '@/components/ui/separator';
 import { Badge } from '@components/ui/badge';
 import { cn } from '@/lib/utils';
 

@@ -21,9 +21,9 @@ export type ChartConfig = Record<
   } & ({ color?: string; theme?: never } | { color?: never; theme: Record<keyof typeof THEMES, string> })
 >;
 
-type ChartContextProps = {
+interface ChartContextProps {
   config: ChartConfig;
-};
+}
 
 const ChartContext = React.createContext<ChartContextProps | null>(null);
 
@@ -130,7 +130,7 @@ function ChartTooltipContent({
     indicator?: 'line' | 'dot' | 'dashed';
     nameKey?: string;
     labelKey?: string;
-  } & Omit<RechartsPrimitive.DefaultTooltipContentProps<TooltipValueType, TooltipNameType>, 'accessibilityLayer'>) {
+  } & Omit<RechartsPrimitive.DefaultTooltipContentProps<TooltipValueType>, 'accessibilityLayer'>) {
   const { config } = useChart();
 
   const tooltipLabel = React.useMemo(() => {

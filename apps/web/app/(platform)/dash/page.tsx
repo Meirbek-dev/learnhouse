@@ -24,7 +24,7 @@ import { Badge } from '@/components/ui/badge';
 export default async function PlatformDashHomePage() {
   const t = await getTranslations('DashPage.Card');
   const session = await requireAuth();
-  const permsSet = new Set(session.permissions ?? []);
+  const permsSet = new Set(session.permissions);
   const can = (action: Action, resource: Resource, scope: Scope): boolean =>
     sessionCan(session, resource, action, scope, permsSet);
 
