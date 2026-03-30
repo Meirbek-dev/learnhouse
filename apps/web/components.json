@@ -9,7 +9,7 @@
   },
   "iconLibrary": "lucide",
   "menuAccent": "subtle",
-  "menuColor": "default-translucent",
+  "menuColor": "default",
   "rsc": true,
   "rtl": true,
   "style": "base-nova",

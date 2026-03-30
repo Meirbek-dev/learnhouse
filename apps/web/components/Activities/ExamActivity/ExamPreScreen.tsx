@@ -115,7 +115,9 @@ export default function ExamPreScreen({
                       <p className="mt-1 text-3xl font-bold text-foreground">
                         {timeLimit || <span className="text-2xl">{t('unlimited')}</span>}
                       </p>
-                      {timeLimit && <p className="text-xs text-muted-foreground">{t('minutes', { count: timeLimit })}</p>}
+                      {timeLimit && (
+                        <p className="text-xs text-muted-foreground">{t('minutes', { count: timeLimit })}</p>
+                      )}
                     </div>
                   </div>
                   <div className="absolute right-0 bottom-0 h-20 w-20 translate-x-8 translate-y-8 rounded-full bg-orange-600/10" />

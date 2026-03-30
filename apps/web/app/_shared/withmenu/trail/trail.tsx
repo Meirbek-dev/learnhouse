@@ -111,8 +111,8 @@ const Trail = () => {
                   disabled={isQuittingAll || isPending}
                   className={`rounded-lg px-4 py-2 text-sm font-medium transition-all ${
                     isQuittingAll || isPending
-                      ? 'cursor-not-allowed bg-gray-100 text-gray-500'
-                      : 'bg-red-100 text-red-700 hover:bg-red-200'
+                      ? 'cursor-not-allowed bg-muted/40 text-muted-foreground'
+                      : 'bg-destructive/20 text-destructive hover:bg-destructive/30'
                   }`}
                 >
                   {isQuittingAll || isPending
@@ -123,7 +123,7 @@ const Trail = () => {
             />
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogMedia className="bg-red-50 text-red-600 dark:bg-red-950/20 dark:text-red-400">
+                <AlertDialogMedia className="bg-destructive/10 text-destructive dark:bg-destructive/20 dark:text-destructive/70">
                   <AlertTriangle className="size-8" />
                 </AlertDialogMedia>
                 <AlertDialogTitle>{t('quitAllCoursesDialogTitle')}</AlertDialogTitle>
@@ -153,12 +153,12 @@ const Trail = () => {
 
       <div className="space-y-8">
         {/* Progress Section */}
-        <div className="rounded-xl bg-white p-6 shadow-sm">
+        <div className="rounded-xl bg-card p-6 shadow-sm">
           <div className="mb-6 flex items-center space-x-3">
-            <BookOpen className="h-6 w-6 text-blue-500" />
-            <h2 className="text-xl font-semibold text-gray-900">{t('myProgress')}</h2>
+            <BookOpen className="h-6 w-6 text-primary" />
+            <h2 className="text-xl font-semibold text-foreground">{t('myProgress')}</h2>
             {trail?.runs ? (
-              <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800">
+              <span className="rounded-full bg-primary/20 px-2.5 py-0.5 text-xs font-medium text-primary-foreground">
                 {trail.runs.length}
               </span>
             ) : null}
@@ -168,9 +168,9 @@ const Trail = () => {
             <PageLoading />
           ) : trail.runs.length === 0 ? (
             <div className="py-8 text-center">
-              <BookOpen className="mx-auto mb-3 h-12 w-12 text-gray-300" />
-              <p className="text-gray-500">{t('noCoursesInProgress')}</p>
-              <p className="mt-1 text-sm text-gray-400">{t('startACourseToSeeYourProgress')}</p>
+              <BookOpen className="mx-auto mb-3 h-12 w-12 text-muted-foreground" />
+              <p className="text-muted-foreground">{t('noCoursesInProgress')}</p>
+              <p className="mt-1 text-sm text-muted-foreground">{t('startACourseToSeeYourProgress')}</p>
             </div>
           ) : (
             <div className="space-y-6">

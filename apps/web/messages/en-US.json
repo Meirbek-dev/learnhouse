@@ -6919,9 +6919,9 @@
       "description": "Warm coffee-inspired theme with rich mocha and cream tones",
       "name": "Mocha Mousse"
     },
-    "mono": {
-      "description": "Ultra-minimal monochrome theme with pure black and white, no shadows",
-      "name": "Mono"
+    "darkBeta": {
+      "description": "An experimental dark theme with deep contrasts and subtle accents designed for comfortable nighttime use",
+      "name": "Dark (Beta)"
     },
     "nature": {
       "description": "Fresh nature-inspired theme with organic green tones and earthy accents",

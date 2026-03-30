@@ -1,6 +1,6 @@
 'use client';
 
-import { Area, AreaChart, CartesianGrid, Legend, XAxis, YAxis } from 'recharts';
+import { Area, AreaChart, CartesianGrid, Legend, XAxis, YAxis, type MouseHandlerDataParam } from 'recharts';
 import { useTranslations } from 'next-intl';
 
 import {
@@ -28,12 +28,6 @@ interface AnalyticsMultiSeriesTrendChartProps {
   onBucketClick?: (bucketStart: string, row?: AnalyticsMultiSeriesTrendRow) => void;
 }
 
-interface AnalyticsTrendChartClickState {
-  activePayload?: {
-    payload?: AnalyticsMultiSeriesTrendRow;
-  }[];
-}
-
 export default function AnalyticsMultiSeriesTrendChart({
   title,
   description,
@@ -42,11 +36,13 @@ export default function AnalyticsMultiSeriesTrendChart({
 }: AnalyticsMultiSeriesTrendChartProps) {
   const t = useTranslations('TeacherAnalytics');
 
-  const handleChartClick = (state: AnalyticsTrendChartClickState | undefined) => {
-    const payload = state?.activePayload?.[0]?.payload;
-    const bucketStart = payload?.bucket_start;
-    if (bucketStart) {
-      onBucketClick?.(bucketStart, payload);
+  const handleChartClick = (state: MouseHandlerDataParam, _event: unknown) => {
+    const index = state.activeTooltipIndex;
+    if (typeof index === 'number' && index >= 0 && index < data.length) {
+      const row = data[index];
+      if (row) {
+        onBucketClick?.(row.bucket_start, row);
+      }
     }
   };
 

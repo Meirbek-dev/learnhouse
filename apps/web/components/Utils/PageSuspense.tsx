@@ -16,7 +16,7 @@ export function LoadingSkeleton({
   animated = true,
 }: LoadingSkeletonProps) {
   const baseClasses = animated ? 'animate-pulse' : '';
-  const skeletonBg = 'bg-gray-200 dark:bg-gray-700';
+  const skeletonBg = 'bg-muted/40 dark:bg-muted/50';
 
   const renderLines = (count: number) => {
     return Array.from({ length: count }, (_, i) => {
@@ -42,7 +42,7 @@ export function LoadingSkeleton({
     ),
 
     card: (
-      <div className={`${baseClasses} rounded-lg border border-border p-4 dark:border-gray-700 ${className}`}>
+      <div className={`${baseClasses} rounded-lg border border-border p-4 dark:border-border ${className}`}>
         <div className={`h-6 w-1/3 rounded-md ${skeletonBg} mb-4`} />
         {renderLines(lines)}
         <div className={`h-10 w-24 rounded-md ${skeletonBg} mt-4`} />
@@ -135,7 +135,7 @@ export async function PageTransitionLoader({
   };
 
   const containerClasses = fullScreen
-    ? 'fixed inset-0 bg-card/80 dark:bg-slate-950/80 backdrop-blur-sm z-50'
+    ? 'fixed inset-0 bg-card/80 dark:bg-card/80 backdrop-blur-sm z-50'
     : 'min-h-[200px]';
 
   const t = await getTranslations('Components.PageLoading');
@@ -148,7 +148,7 @@ export async function PageTransitionLoader({
           {[0, 1, 2].map((i) => (
             <div
               key={i}
-              className={`${sizeClasses[size]} animate-pulse rounded-full bg-blue-500`}
+              className={`${sizeClasses[size]} animate-pulse rounded-full bg-primary/80`}
               style={{
                 animationDelay: `${i * 0.2}s`,
                 animationDuration: '1s',
@@ -158,7 +158,7 @@ export async function PageTransitionLoader({
         </div>
 
         {/* Optional loading text */}
-        <div className="text-sm font-medium text-muted-foreground dark:text-gray-400">{t('loading')}</div>
+        <div className="text-sm font-medium text-muted-foreground dark:text-muted-foreground">{t('loading')}</div>
       </div>
     </div>
   );

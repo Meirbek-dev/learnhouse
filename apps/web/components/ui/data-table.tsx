@@ -290,7 +290,7 @@ export default function DataTable<TData>({
           ) : null}
           {toolbarContent}
         </div>
-<div className="text-sm text-muted-foreground">
+        <div className="text-sm text-muted-foreground">
           {totalFiltered > 0
             ? resolvedLabels.showingRows({ from, to, total: totalFiltered })
             : resolvedLabels.visibleRows(0)}

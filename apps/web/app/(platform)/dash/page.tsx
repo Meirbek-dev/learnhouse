@@ -1,13 +1,4 @@
-import {
-  BarChart2,
-  BookCopy,
-  ClipboardList,
-  School,
-  Settings,
-  ShieldCheck,
-  Users,
-  ChevronRight,
-} from 'lucide-react';
+import { BarChart2, BookCopy, ClipboardList, School, Settings, ShieldCheck, Users, ChevronRight } from 'lucide-react';
 import touEmblemLight from '@/app/_shared/dash/images/tou_emblem_light.webp';
 import ServerLink from '@/components/ui/ServerLink';
 import { getTranslations } from 'next-intl/server';
@@ -124,22 +115,22 @@ export default async function PlatformDashHomePage() {
 
       {/* Footer */}
       <div className="mt-6 flex flex-col gap-6 sm:mt-10 sm:gap-10">
-        <div className="mx-auto h-1 w-[100px] rounded-full bg-neutral-200/100" />
+        <div className="mx-auto h-1 w-[100px] rounded-full bg-muted/40 dark:bg-muted/80" />
         <div className="flex items-center justify-center">
           <ServerLink
             href="https://tou.edu.kz/ru/"
             target="_blank"
-            className="mt-4 flex cursor-pointer items-center gap-2 rounded-lg bg-sky-900 px-7 py-3 shadow-lg transition-all ease-linear hover:scale-105 sm:mt-[40px]"
+            className="mt-4 flex cursor-pointer items-center gap-2 rounded-lg bg-primary px-7 py-3 shadow-lg transition-all ease-linear hover:scale-105 sm:mt-[40px]"
           >
             <Image
               width={26}
               src={touEmblemLight}
               alt={t('touUniversity')}
             />
-            <div className="text-sm font-bold text-gray-100/100">{t('touUniversity')}</div>
+            <div className="text-sm font-bold text-primary-foreground">{t('touUniversity')}</div>
           </ServerLink>
         </div>
-        <div className="mx-auto mt-4 h-1 w-28 rounded-full bg-neutral-200/100 sm:mt-[40px]" />
+        <div className="mx-auto mt-4 h-1 w-28 rounded-full bg-muted/40 dark:bg-muted/80 sm:mt-[40px]" />
 
         <ServerLink
           href="/dash/user-account/settings/general"
@@ -147,12 +138,12 @@ export default async function PlatformDashHomePage() {
         >
           <div className="mx-auto flex flex-col items-center gap-2 text-center sm:flex-row sm:gap-3 sm:text-left">
             <Settings
-              className="text-gray-500/100"
+              className="text-muted-foreground"
               size={20}
             />
             <div>
-              <div className="font-bold text-gray-500/100">{t('AccountSettings.title')}</div>
-              <p className="text-sm text-gray-400/100">{t('AccountSettings.description')}</p>
+              <div className="font-bold text-muted-foreground">{t('AccountSettings.title')}</div>
+              <p className="text-sm text-muted-foreground">{t('AccountSettings.description')}</p>
             </div>
           </div>
         </ServerLink>
