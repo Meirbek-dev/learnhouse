@@ -7052,10 +7052,6 @@
     "myProgress": "My Progress",
     "noCourses": "You haven't started any courses yet.",
     "noCoursesInProgress": "No courses in progress",
-    "quitAllCourses": "Quit All Courses",
-    "quitAllCoursesConfirmation": "Are you sure you want to quit all courses? This action cannot be undone and you will lose all your progress.",
-    "quitAllCoursesDialogTitle": "Quit All Courses?",
-    "quittingProgress": "Quitting Courses ({progress}%)",
     "startACourseToSeeYourProgress": "Start a course to see your progress here",
     "startExploring": "Start exploring courses!",
     "title": "Progress"

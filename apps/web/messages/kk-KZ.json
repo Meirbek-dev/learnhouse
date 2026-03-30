@@ -7077,10 +7077,6 @@
     "myProgress": "Менің прогрессім",
     "noCourses": "Сіз әлі ешбір курс бастамадыңыз.",
     "noCoursesInProgress": "Жүріп жатқан курстар жоқ",
-    "quitAllCourses": "Барлық курстардан шығу",
-    "quitAllCoursesConfirmation": "Барлық курстардан шығуға сенімдісіз бе? Бұл әрекетті қайтару мүмкін емес және сіз барлық прогрессіңізді жоғалтасыз.",
-    "quitAllCoursesDialogTitle": "Барлық курстардан шығу?",
-    "quittingProgress": "Курстардан шығу ({progress}%)",
     "startACourseToSeeYourProgress": "Прогрессіңізді осында көру үшін курс бастаңыз",
     "startExploring": "Курстарды зерттеуді бастаңыз!",
     "title": "Прогресс"

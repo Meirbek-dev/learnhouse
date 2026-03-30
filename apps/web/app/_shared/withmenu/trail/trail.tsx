@@ -1,44 +1,23 @@
 'use client';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogMedia,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
 import { RecentActivityFeed } from '@/components/Dashboard/Gamification/recent-activity-feed';
-import TypeOfContentTitle from '@/components/Objects/Elements/Titles/TypeOfContentTitle';
 import GeneralWrapper from '@/components/Objects/Elements/Wrappers/GeneralWrapper';
 import { Leaderboard } from '@/components/Dashboard/Gamification/leaderboard';
 import TrailCourseElement from '@components/Pages/Trail/TrailCourseElement';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
-import { revalidateTags, swrFetcher } from '@services/utils/ts/requests';
 import UserCertificates from '@components/Pages/Trail/UserCertificates';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
-import { AlertTriangle, BookOpen, Loader2 } from 'lucide-react';
 import { useGamificationStore } from '@/stores/gamification';
-import { removeCourse } from '@services/courses/activity';
+import { swrFetcher } from '@services/utils/ts/requests';
 import { getTrailSwrKey } from '@services/courses/keys';
 import { getAPIUrl } from '@services/config/config';
-import { useState, useTransition } from 'react';
-import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { BookOpen } from 'lucide-react';
 import useSWR from 'swr';
 
 const Trail = () => {
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const t = useTranslations('TrailPage');
-  const router = useRouter();
-  const [isQuittingAll, setIsQuittingAll] = useState(false);
-  const [isPending, startTransition] = useTransition();
-  const [quittingProgress, setQuittingProgress] = useState(0);
-  const [isQuitDialogOpen, setIsQuitDialogOpen] = useState(false);
 
   const TRAIL_KEY = getTrailSwrKey();
   const {
@@ -64,93 +43,8 @@ const Trail = () => {
 
   const userRankData = { rank: gamificationData.user_rank };
 
-  const handleQuitAllCourses = async () => {
-    if (!trail?.runs?.length || isQuittingAll) return;
-
-    startTransition(() => setIsQuittingAll(true));
-    const totalCourses = trail.runs.length;
-
-    try {
-      let completed = 0;
-      await Promise.all(
-        trail.runs.map((run: any) =>
-          removeCourse(run.course.course_uuid, access_token).then(() => {
-            completed += 1;
-            setQuittingProgress(Math.round((completed / totalCourses) * 100));
-          }),
-        ),
-      );
-
-      await revalidateTags(['courses']);
-      router.refresh();
-      await mutate();
-      setIsQuitDialogOpen(false);
-    } catch (error) {
-      console.error('Error quitting courses:', error);
-    } finally {
-      startTransition(() => setIsQuittingAll(false));
-      startTransition(() => setQuittingProgress(0));
-    }
-  };
-
   return (
     <GeneralWrapper>
-      <div className="mb-6 flex items-center justify-between">
-        <TypeOfContentTitle
-          title={t('title')}
-          type="tra"
-        />
-        {trail?.runs?.length > 0 && (
-          <AlertDialog
-            open={isQuitDialogOpen}
-            onOpenChange={setIsQuitDialogOpen}
-          >
-            <AlertDialogTrigger
-              render={
-                <button
-                  disabled={isQuittingAll || isPending}
-                  className={`rounded-lg px-4 py-2 text-sm font-medium transition-all ${
-                    isQuittingAll || isPending
-                      ? 'cursor-not-allowed bg-muted/40 text-muted-foreground'
-                      : 'bg-destructive/20 text-destructive hover:bg-destructive/30'
-                  }`}
-                >
-                  {isQuittingAll || isPending
-                    ? t('quittingProgress', { progress: quittingProgress })
-                    : t('quitAllCourses')}
-                </button>
-              }
-            />
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogMedia className="bg-destructive/10 text-destructive dark:bg-destructive/20 dark:text-destructive/70">
-                  <AlertTriangle className="size-8" />
-                </AlertDialogMedia>
-                <AlertDialogTitle>{t('quitAllCoursesDialogTitle')}</AlertDialogTitle>
-                <AlertDialogDescription>{t('quitAllCoursesConfirmation')}</AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel />
-                <AlertDialogAction
-                  variant="destructive"
-                  onClick={handleQuitAllCourses}
-                  disabled={isQuittingAll || isPending}
-                >
-                  {isQuittingAll || isPending ? (
-                    <div className="flex items-center gap-2">
-                      <Loader2 className="size-4 animate-spin" />
-                      {t('quittingProgress', { progress: quittingProgress })}
-                    </div>
-                  ) : (
-                    t('quitAllCourses')
-                  )}
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        )}
-      </div>
-
       <div className="space-y-8">
         {/* Progress Section */}
         <div className="rounded-xl bg-card p-6 shadow-sm">
