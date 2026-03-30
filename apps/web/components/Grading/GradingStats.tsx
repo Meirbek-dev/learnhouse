@@ -4,8 +4,8 @@ import { BookOpenCheck, Clock4, TrendingUp, Users } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import { useSubmissionStats } from '@/hooks/useSubmissionStats';
-import { cn } from '@/lib/utils';
 import { Card, CardContent } from '@components/ui/card';
+import { cn } from '@/lib/utils';
 
 interface GradingStatsProps {
   activityId: number;

@@ -621,7 +621,9 @@ function AnswerItem({ item, index, itemFeedback, isEditable, onFeedbackChange, t
         </div>
       )}
 
-      {item.feedback && !item.needs_manual_review && <p className="text-xs text-muted-foreground italic">{item.feedback}</p>}
+      {item.feedback && !item.needs_manual_review && (
+        <p className="text-xs text-muted-foreground italic">{item.feedback}</p>
+      )}
 
       {isEditable && (
         <div className="space-y-2 border-t pt-3">

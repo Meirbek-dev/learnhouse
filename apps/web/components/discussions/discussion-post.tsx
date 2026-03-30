@@ -5,12 +5,12 @@ import { PermissionTooltip } from '@/components/Utils/PermissionTooltip';
 import { usePlatform } from '@/components/Contexts/PlatformContext';
 import { useFormatter, useNow, useTranslations } from 'next-intl';
 import RichContentRenderer from './rich-content-renderer';
+import { Card, CardContent } from '@/components/ui/card';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { Separator } from '@/components/ui/separator';
 import DiscussionReply from './discussion-reply';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
 import dynamic from 'next/dynamic';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
@@ -115,273 +115,273 @@ export default function DiscussionPost({
   return (
     <Card className="group overflow-hidden rounded-lg border shadow-sm">
       <CardContent className="bg-card text-card-foreground">
-      <div className="p-5">
-        <div className="flex items-start gap-4">
-          <UserAvatar
-            size="md"
-            variant="default"
-            username={post.username}
-          />
-          <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <div className="flex flex-wrap items-center gap-2">
-                <h4 className="font-semibold text-foreground">{getUserDisplayName(post.firstName, post.lastName)}</h4>
-                <span className="text-sm text-muted-foreground">@{post.username}</span>
-                {canModerate && (
-                  <Badge
-                    variant="destructive"
-                    className="h-auto px-1.5 py-0.5 text-xs"
-                  >
-                    {t('moderator')}
-                  </Badge>
-                )}
-                {isOwner && (
-                  <Badge
-                    variant="secondary"
-                    className="h-auto px-1.5 py-0.5 text-xs"
-                  >
-                    {t('author')}
-                  </Badge>
-                )}
-                <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <Clock size={12} />
-                  <span>{format.relativeTime(new Date(post.createDate), now)}</span>
-                  {post.updateDate &&
-                    post.createDate &&
-                    new Date(post.updateDate).getTime() !== new Date(post.createDate).getTime() && (
-                      <span className="text-xs text-muted-foreground">({t('edited')})</span>
-                    )}
-                </div>
-              </div>
-              {(canDelete || canUpdate) && !editingPost && (
-                <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-                  <PermissionTooltip
-                    enabled={canUpdate}
-                    action="update"
-                  >
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        setEditingPost(true);
-                        setEditContent(post.postMessage);
-                      }}
-                      disabled={!canUpdate}
-                      className="h-7 w-7 p-0 text-muted-foreground hover:bg-primary/10 hover:text-primary"
+        <div className="p-5">
+          <div className="flex items-start gap-4">
+            <UserAvatar
+              size="md"
+              variant="default"
+              username={post.username}
+            />
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h4 className="font-semibold text-foreground">{getUserDisplayName(post.firstName, post.lastName)}</h4>
+                  <span className="text-sm text-muted-foreground">@{post.username}</span>
+                  {canModerate && (
+                    <Badge
+                      variant="destructive"
+                      className="h-auto px-1.5 py-0.5 text-xs"
                     >
-                      <Edit size={12} />
-                    </Button>
-                  </PermissionTooltip>
-                  <PermissionTooltip
-                    enabled={canDelete}
-                    action="delete"
-                  >
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onDeletePost(post.id)}
-                      disabled={!canDelete}
-                      className="h-7 w-7 p-0 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                      {t('moderator')}
+                    </Badge>
+                  )}
+                  {isOwner && (
+                    <Badge
+                      variant="secondary"
+                      className="h-auto px-1.5 py-0.5 text-xs"
                     >
-                      <Trash2 size={12} />
-                    </Button>
-                  </PermissionTooltip>
-                </div>
-              )}
-            </div>
-
-            {editingPost ? (
-              <form
-                action={handleEditSubmit}
-                className="mt-3"
-              >
-                <input
-                  type="hidden"
-                  name="editContent"
-                  value={editContent}
-                />
-                <RichTextEditor
-                  content={editContent}
-                  onChange={setEditContent}
-                  placeholder={t('editPostPlaceholder')}
-                  minHeight="120px"
-                />
-                <div className="mt-3 flex justify-end gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      setEditingPost(false);
-                    }}
-                  >
-                    {t('cancel')}
-                  </Button>
-                  <Button
-                    type="submit"
-                    size="sm"
-                    disabled={!hasMeaningfulText(editContent)}
-                  >
-                    {t('save')}
-                  </Button>
-                </div>
-              </form>
-            ) : (
-              <div className="mt-3">
-                <RichContentRenderer content={post.postMessage} />
-              </div>
-            )}
-
-            <div className="mt-4 flex flex-wrap items-center gap-4">
-              <div className="flex items-center gap-3">
-                <div className="flex items-center overflow-hidden rounded-lg border border-border bg-muted">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onVotePost(post.id, 'up')}
-                    className={cn(
-                      'h-8 rounded-none border-border border-r px-3 transition-all',
-                      post.userVote === 'up'
-                        ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
-                        : 'text-muted-foreground hover:bg-muted/70 hover:text-emerald-600',
-                    )}
-                  >
-                    <ArrowBigUp
-                      size={16}
-                      className="mr-1"
-                    />
-                    <span className="text-sm font-medium">{post.upvotes}</span>
-                  </Button>
-
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onVotePost(post.id, 'down')}
-                    className={cn(
-                      'h-8 rounded-none px-3 transition-all',
-                      post.userVote === 'down'
-                        ? 'bg-red-50 text-red-700 hover:bg-red-100'
-                        : 'text-slate-600 hover:bg-slate-100 hover:text-red-600',
-                    )}
-                  >
-                    <ArrowBigDown
-                      size={16}
-                      className="mr-1"
-                    />
-                    <span className="text-sm font-medium">{post.downvotes}</span>
-                  </Button>
-                </div>
-
-                {/* Net score indicator */}
-                {Math.abs(netScore) > 0 && (
-                  <div className="flex items-center">
-                    <div
-                      className={cn(
-                        'rounded-full px-2 py-1 font-medium text-xs',
-                        netScore > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700',
+                      {t('author')}
+                    </Badge>
+                  )}
+                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <Clock size={12} />
+                    <span>{format.relativeTime(new Date(post.createDate), now)}</span>
+                    {post.updateDate &&
+                      post.createDate &&
+                      new Date(post.updateDate).getTime() !== new Date(post.createDate).getTime() && (
+                        <span className="text-xs text-muted-foreground">({t('edited')})</span>
                       )}
-                    >
-                      {netScore > 0 ? '+' : ''}
-                      {netScore}
-                    </div>
                   </div>
-                )}
-              </div>
-
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setReplyingTo(!replyingTo)}
-                className={cn(
-                  'h-8 rounded-full px-3 text-muted-foreground transition-all',
-                  replyingTo && 'bg-primary/10 text-primary',
-                )}
-              >
-                <Reply
-                  size={16}
-                  className="mr-1"
-                />
-                <span>{t('reply')}</span>
-                {post.replies && post.replies.length > 0 && (
-                  <span className="ml-1 rounded-full bg-secondary/20 px-1.5 py-0.5 text-xs font-medium text-muted-foreground">
-                    {post.replies.length}
-                  </span>
-                )}
-              </Button>
-            </div>
-
-            {replyingTo ? (
-              <form
-                action={handleSubmitReply}
-                className="mt-4"
-              >
-                <input
-                  type="hidden"
-                  name="replyContent"
-                  value={replyContent}
-                />
-                <div className="flex items-start gap-3">
-                  <UserAvatar
-                    size="xs"
-                    variant="default"
-                    username={currentUser?.username}
-                  />
-                  <div className="flex-1">
-                    <RichTextEditor
-                      content={replyContent}
-                      onChange={setReplyContent}
-                      placeholder={t('writeReplyPlaceholder')}
-                      minHeight="100px"
-                    />
-                    <div className="mt-2 flex justify-end gap-2">
+                </div>
+                {(canDelete || canUpdate) && !editingPost && (
+                  <div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                    <PermissionTooltip
+                      enabled={canUpdate}
+                      action="update"
+                    >
                       <Button
-                        type="button"
-                        variant="outline"
+                        variant="ghost"
                         size="sm"
                         onClick={() => {
-                          setReplyingTo(false);
-                          setReplyContent('');
+                          setEditingPost(true);
+                          setEditContent(post.postMessage);
                         }}
+                        disabled={!canUpdate}
+                        className="h-7 w-7 p-0 text-muted-foreground hover:bg-primary/10 hover:text-primary"
                       >
-                        {t('cancel')}
+                        <Edit size={12} />
                       </Button>
+                    </PermissionTooltip>
+                    <PermissionTooltip
+                      enabled={canDelete}
+                      action="delete"
+                    >
                       <Button
-                        type="submit"
+                        variant="ghost"
                         size="sm"
-                        disabled={!hasMeaningfulText(replyContent)}
-                        className="flex items-center gap-1"
+                        onClick={() => onDeletePost(post.id)}
+                        disabled={!canDelete}
+                        className="h-7 w-7 p-0 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
                       >
-                        <Send size={14} />
-                        <span>{t('reply')}</span>
+                        <Trash2 size={12} />
                       </Button>
+                    </PermissionTooltip>
+                  </div>
+                )}
+              </div>
+
+              {editingPost ? (
+                <form
+                  action={handleEditSubmit}
+                  className="mt-3"
+                >
+                  <input
+                    type="hidden"
+                    name="editContent"
+                    value={editContent}
+                  />
+                  <RichTextEditor
+                    content={editContent}
+                    onChange={setEditContent}
+                    placeholder={t('editPostPlaceholder')}
+                    minHeight="120px"
+                  />
+                  <div className="mt-3 flex justify-end gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setEditingPost(false);
+                      }}
+                    >
+                      {t('cancel')}
+                    </Button>
+                    <Button
+                      type="submit"
+                      size="sm"
+                      disabled={!hasMeaningfulText(editContent)}
+                    >
+                      {t('save')}
+                    </Button>
+                  </div>
+                </form>
+              ) : (
+                <div className="mt-3">
+                  <RichContentRenderer content={post.postMessage} />
+                </div>
+              )}
+
+              <div className="mt-4 flex flex-wrap items-center gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center overflow-hidden rounded-lg border border-border bg-muted">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onVotePost(post.id, 'up')}
+                      className={cn(
+                        'h-8 rounded-none border-border border-r px-3 transition-all',
+                        post.userVote === 'up'
+                          ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
+                          : 'text-muted-foreground hover:bg-muted/70 hover:text-emerald-600',
+                      )}
+                    >
+                      <ArrowBigUp
+                        size={16}
+                        className="mr-1"
+                      />
+                      <span className="text-sm font-medium">{post.upvotes}</span>
+                    </Button>
+
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onVotePost(post.id, 'down')}
+                      className={cn(
+                        'h-8 rounded-none px-3 transition-all',
+                        post.userVote === 'down'
+                          ? 'bg-red-50 text-red-700 hover:bg-red-100'
+                          : 'text-slate-600 hover:bg-slate-100 hover:text-red-600',
+                      )}
+                    >
+                      <ArrowBigDown
+                        size={16}
+                        className="mr-1"
+                      />
+                      <span className="text-sm font-medium">{post.downvotes}</span>
+                    </Button>
+                  </div>
+
+                  {/* Net score indicator */}
+                  {Math.abs(netScore) > 0 && (
+                    <div className="flex items-center">
+                      <div
+                        className={cn(
+                          'rounded-full px-2 py-1 font-medium text-xs',
+                          netScore > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700',
+                        )}
+                      >
+                        {netScore > 0 ? '+' : ''}
+                        {netScore}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setReplyingTo(!replyingTo)}
+                  className={cn(
+                    'h-8 rounded-full px-3 text-muted-foreground transition-all',
+                    replyingTo && 'bg-primary/10 text-primary',
+                  )}
+                >
+                  <Reply
+                    size={16}
+                    className="mr-1"
+                  />
+                  <span>{t('reply')}</span>
+                  {post.replies && post.replies.length > 0 && (
+                    <span className="ml-1 rounded-full bg-secondary/20 px-1.5 py-0.5 text-xs font-medium text-muted-foreground">
+                      {post.replies.length}
+                    </span>
+                  )}
+                </Button>
+              </div>
+
+              {replyingTo ? (
+                <form
+                  action={handleSubmitReply}
+                  className="mt-4"
+                >
+                  <input
+                    type="hidden"
+                    name="replyContent"
+                    value={replyContent}
+                  />
+                  <div className="flex items-start gap-3">
+                    <UserAvatar
+                      size="xs"
+                      variant="default"
+                      username={currentUser?.username}
+                    />
+                    <div className="flex-1">
+                      <RichTextEditor
+                        content={replyContent}
+                        onChange={setReplyContent}
+                        placeholder={t('writeReplyPlaceholder')}
+                        minHeight="100px"
+                      />
+                      <div className="mt-2 flex justify-end gap-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setReplyingTo(false);
+                            setReplyContent('');
+                          }}
+                        >
+                          {t('cancel')}
+                        </Button>
+                        <Button
+                          type="submit"
+                          size="sm"
+                          disabled={!hasMeaningfulText(replyContent)}
+                          className="flex items-center gap-1"
+                        >
+                          <Send size={14} />
+                          <span>{t('reply')}</span>
+                        </Button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </form>
-            ) : null}
+                </form>
+              ) : null}
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Replies */}
-      {post.replies && post.replies.length > 0 ? (
-        <>
-          <Separator />
-          <div className="bg-muted/80 py-1">
-            {post.replies.map((reply: any) => (
-              <DiscussionReply
-                key={reply.id}
-                reply={reply}
-                postId={post.id}
-                currentUser={currentUser}
-                onVoteReply={onVoteReply}
-                onDeleteReply={onDeleteReply}
-                onEditReply={onEditReply}
-              />
-            ))}
-          </div>
-        </>
-      ) : null}
+        {/* Replies */}
+        {post.replies && post.replies.length > 0 ? (
+          <>
+            <Separator />
+            <div className="bg-muted/80 py-1">
+              {post.replies.map((reply: any) => (
+                <DiscussionReply
+                  key={reply.id}
+                  reply={reply}
+                  postId={post.id}
+                  currentUser={currentUser}
+                  onVoteReply={onVoteReply}
+                  onDeleteReply={onDeleteReply}
+                  onEditReply={onEditReply}
+                />
+              ))}
+            </div>
+          </>
+        ) : null}
       </CardContent>
     </Card>
   );

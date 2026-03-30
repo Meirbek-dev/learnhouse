@@ -6,13 +6,13 @@ import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { BookCopy, Menu, Signpost, SquareLibrary, X } from 'lucide-react';
 import { LocaleSwitcher } from '@/components/Utils/LocaleSwitcher';
 import { SearchBar } from '@/components/Objects/Search/SearchBar';
-import { useEffect, useState } from 'react';
 import platformLogoFull from '@public/platform_logo_full.svg';
 import { getAbsoluteUrl } from '@/services/config/config';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
 import Link from '@components/ui/AppLink';
 import Image from 'next/image';
 

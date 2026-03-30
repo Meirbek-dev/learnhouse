@@ -76,71 +76,71 @@ const AssignmentStudentActivity = () => {
   return (
     <Card className="bg-background border border-border">
       <CardContent className="flex flex-col gap-6">
-      {/* Header Section */}
-      <Card className="border-slate-200 bg-gradient-to-br from-slate-50 to-white">
-        <CardContent className="p-6">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <Badge
-              variant="secondary"
-              className="h-7 w-fit gap-2 px-4 py-2"
-            >
-              <Backpack className="h-4 w-4" />
-              <span className="font-semibold">{t('assignment')}</span>
-            </Badge>
+        {/* Header Section */}
+        <Card className="border-slate-200 bg-gradient-to-br from-slate-50 to-white">
+          <CardContent className="p-6">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <Badge
+                variant="secondary"
+                className="h-7 w-fit gap-2 px-4 py-2"
+              >
+                <Backpack className="h-4 w-4" />
+                <span className="font-semibold">{t('assignment')}</span>
+              </Badge>
 
-            {assignment_object.due_date && (
+              {assignment_object.due_date && (
+                <>
+                  <Separator
+                    orientation="vertical"
+                    className="hidden h-6 sm:block"
+                  />
+                  <div className="flex items-center gap-2 text-sm text-slate-600">
+                    <Calendar className="h-4 w-4" />
+                    <span className="font-medium">
+                      {t('dueDate')}: {assignment_object.due_date}
+                    </span>
+                  </div>
+                </>
+              )}
+            </div>
+
+            {assignment_object.description && (
               <>
-                <Separator
-                  orientation="vertical"
-                  className="hidden h-6 sm:block"
-                />
-                <div className="flex items-center gap-2 text-sm text-slate-600">
-                  <Calendar className="h-4 w-4" />
-                  <span className="font-medium">
-                    {t('dueDate')}: {assignment_object.due_date}
-                  </span>
+                <Separator className="my-4" />
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 text-slate-700">
+                    <Info className="h-4 w-4 text-slate-500" />
+                    <h3 className="text-sm font-semibold">{t('descriptionTitle')}</h3>
+                  </div>
+                  <p className="pl-6 text-sm leading-relaxed text-slate-600">{assignment_object.description}</p>
                 </div>
               </>
             )}
-          </div>
-
-          {assignment_object.description && (
-            <>
-              <Separator className="my-4" />
-              <div className="space-y-3">
-                <div className="flex items-center gap-2 text-slate-700">
-                  <Info className="h-4 w-4 text-slate-500" />
-                  <h3 className="text-sm font-semibold">{t('descriptionTitle')}</h3>
-                </div>
-                <p className="pl-6 text-sm leading-relaxed text-slate-600">{assignment_object.description}</p>
-              </div>
-            </>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Tasks Section */}
-      {!hasTasks ? (
-        <Card>
-          <CardContent className="p-8 text-center">
-            <p className="text-sm text-slate-500">{t('noTasks', { default: 'No tasks available' })}</p>
           </CardContent>
         </Card>
-      ) : (
-        <div className="space-y-6">
-          {sortedTasks.map((task, index) => (
-            <TaskCard
-              key={task.assignment_task_uuid}
-              task={task}
-              index={index}
-              assignments={assignments}
-              t={t}
-            />
-          ))}
-        </div>
-      )}
-    </CardContent>
-  </Card>
+
+        {/* Tasks Section */}
+        {!hasTasks ? (
+          <Card>
+            <CardContent className="p-8 text-center">
+              <p className="text-sm text-slate-500">{t('noTasks', { default: 'No tasks available' })}</p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="space-y-6">
+            {sortedTasks.map((task, index) => (
+              <TaskCard
+                key={task.assignment_task_uuid}
+                task={task}
+                index={index}
+                assignments={assignments}
+                t={t}
+              />
+            ))}
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 };
 

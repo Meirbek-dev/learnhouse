@@ -12,11 +12,11 @@
 import { CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
-import type { Submission, GradedItem } from '@/types/grading';
 import { Alert, AlertDescription, AlertTitle } from '@components/ui/alert';
-import { Badge } from '@components/ui/badge';
+import type { Submission, GradedItem } from '@/types/grading';
 import { Card, CardContent } from '@components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { Badge } from '@components/ui/badge';
 import { cn } from '@/lib/utils';
 
 interface SubmissionResultProps {
@@ -42,7 +42,10 @@ export default function SubmissionResult({ submission }: SubmissionResultProps) 
             <p className={cn('text-3xl font-bold', scoreColor)}>{score !== null ? `${score}/100` : '—'}</p>
           </div>
           {score !== null && (
-            <Badge variant={passed ? 'success' : 'destructive'} className="self-start">
+            <Badge
+              variant={passed ? 'success' : 'destructive'}
+              className="self-start"
+            >
               {passed ? t('passed') : t('failed')}
             </Badge>
           )}
@@ -58,7 +61,10 @@ export default function SubmissionResult({ submission }: SubmissionResultProps) 
 
       {/* Teacher feedback — only visible after publishing */}
       {isPublished && breakdown?.feedback && (
-        <Alert variant="default" className="border-l-4 border-primary/70 bg-primary/10">
+        <Alert
+          variant="default"
+          className="border-l-4 border-primary/70 bg-primary/10"
+        >
           <AlertTitle className="text-sm font-semibold">{t('teacherFeedback')}</AlertTitle>
           <AlertDescription className="text-sm italic">{breakdown.feedback}</AlertDescription>
         </Alert>
@@ -104,8 +110,13 @@ function ResultItem({ item, index }: { item: GradedItem; index: number }) {
           {icon}
           <div className="flex-1 space-y-1.5">
             <div className="flex items-start justify-between gap-4">
-              <p className="text-sm font-medium text-foreground">{index + 1}. {item.item_text || item.item_id}</p>
-              <Badge variant="outline" className="text-xs font-semibold">
+              <p className="text-sm font-medium text-foreground">
+                {index + 1}. {item.item_text || item.item_id}
+              </p>
+              <Badge
+                variant="outline"
+                className="text-xs font-semibold"
+              >
                 {item.score} / {item.max_score}
               </Badge>
             </div>

@@ -2,11 +2,11 @@ import { getAtRiskLearners, normalizeAnalyticsQuery } from '@services/analytics/
 import AtRiskLearnersTable from '@components/Dashboard/Analytics/AtRiskLearnersTable';
 import AnalyticsEmptyState from '@components/Dashboard/Analytics/AnalyticsEmptyState';
 import TeacherFilterBar from '@components/Dashboard/Analytics/TeacherFilterBar';
+import { Card, CardContent } from '@/components/ui/card';
 import { getTranslations } from 'next-intl/server';
 import { Button } from '@/components/ui/button';
 import { auth } from '@/auth';
 import Link from 'next/link';
-import { Card, CardContent } from '@/components/ui/card';
 
 export default function PlatformAnalyticsAtRiskPage(props: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;

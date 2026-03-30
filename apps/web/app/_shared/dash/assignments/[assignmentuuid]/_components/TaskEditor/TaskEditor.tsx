@@ -7,9 +7,9 @@ import { GalleryVerticalEnd, Info, TentTree, Trash } from 'lucide-react';
 import { deleteAssignmentTask } from '@services/courses/assignments';
 import { getAPIUrl } from '@services/config/config';
 import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { useSWRConfig } from 'swr';
-import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 import { AssignmentTaskGeneralEdit } from './Subs/AssignmentTaskGeneralEdit';

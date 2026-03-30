@@ -175,7 +175,10 @@ interface TeacherViewBadgeProps {
 }
 
 const TeacherViewBadge = ({ t }: TeacherViewBadgeProps) => (
-  <Badge variant="secondary" className="gap-1.5">
+  <Badge
+    variant="secondary"
+    className="gap-1.5"
+  >
     <BookUser className="h-3 w-3" />
     <span className="text-xs">{t('teacherView')}</span>
   </Badge>
@@ -187,7 +190,10 @@ interface PointsBadgeProps {
 }
 
 const PointsBadge = ({ points, t }: PointsBadgeProps) => (
-  <Badge variant="success" className="gap-1.5">
+  <Badge
+    variant="success"
+    className="gap-1.5"
+  >
     <BookPlus className="h-3 w-3" />
     <span className="text-xs">{t('points', { count: points })}</span>
   </Badge>
@@ -216,7 +222,12 @@ const TeacherActions = ({ saveFC, t }: TeacherActionsProps) => {
   if (!saveFC) return null;
 
   return (
-    <Button onClick={saveFC} variant="secondary" size="sm" className="gap-2">
+    <Button
+      onClick={saveFC}
+      variant="secondary"
+      size="sm"
+      className="gap-2"
+    >
       <Save className="h-4 w-4" />
       <span className="text-xs font-semibold">{t('save')}</span>
     </Button>
@@ -232,7 +243,12 @@ const StudentActions = ({ submitFC, t }: StudentActionsProps) => {
   if (!submitFC) return null;
 
   return (
-    <Button onClick={submitFC} variant="default" size="sm" className="w-full gap-2 sm:w-auto">
+    <Button
+      onClick={submitFC}
+      variant="default"
+      size="sm"
+      className="w-full gap-2 sm:w-auto"
+    >
       <Forward className="h-4 w-4" />
       <span className="text-xs font-semibold">{t('saveProgress')}</span>
     </Button>

@@ -1,9 +1,9 @@
 import { useAssignmentsTaskStore } from '@components/Contexts/Assignments/AssignmentsTaskContext';
 import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
 import { FileUp, ListTodo, PanelLeftOpen, Plus, Type } from 'lucide-react';
+import Modal from '@/components/Objects/Elements/Modal/Modal';
 import { Card, CardContent } from '@components/ui/card';
 import { Button } from '@components/ui/button';
-import Modal from '@/components/Objects/Elements/Modal/Modal';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 
@@ -35,7 +35,11 @@ const AssignmentTasks = ({ assignment_uuid }: any) => {
             dialogTitle={t('addTaskModalTitle')}
             dialogDescription={t('addTaskModalDescription')}
             dialogTrigger={
-              <Button size="sm" variant="default" className="flex items-center gap-1">
+              <Button
+                size="sm"
+                variant="default"
+                className="flex items-center gap-1"
+              >
                 <Plus size={17} />
                 {t('addTask')}
               </Button>
@@ -62,7 +66,11 @@ const AssignmentTasks = ({ assignment_uuid }: any) => {
                     </span>
                     {task.title}
                   </div>
-                  <Button size="icon" variant="ghost" aria-label={t('openTask')}>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    aria-label={t('openTask')}
+                  >
                     <PanelLeftOpen size={16} />
                   </Button>
                 </div>

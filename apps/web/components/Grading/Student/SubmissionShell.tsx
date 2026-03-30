@@ -17,8 +17,8 @@ import { useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Card, CardContent } from '@components/ui/card';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
+import { Card, CardContent } from '@components/ui/card';
 import { Separator } from '@/components/ui/separator';
 
 import type { AssessmentType, Submission, SubmissionStatus } from '@/types/grading';
