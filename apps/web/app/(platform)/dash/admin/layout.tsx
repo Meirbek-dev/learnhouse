@@ -8,6 +8,7 @@ export default async function PlatformAdminLayout({ children }: { children: Reac
     { action: Actions.UPDATE, resource: Resources.PLATFORM, scope: Scopes.OWN },
     { action: Actions.MANAGE, resource: Resources.PLATFORM, scope: Scopes.PLATFORM },
     { action: Actions.UPDATE, resource: Resources.PLATFORM, scope: Scopes.PLATFORM },
+    { action: Actions.MANAGE, resource: Resources.ROLE, scope: Scopes.PLATFORM },
     { action: Actions.UPDATE, resource: Resources.ROLE, scope: Scopes.PLATFORM },
     { action: Actions.READ, resource: Resources.ROLE, scope: Scopes.PLATFORM },
   ]);

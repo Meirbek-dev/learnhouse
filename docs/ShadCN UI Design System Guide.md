@@ -2,7 +2,7 @@
 
 ## Objective
 
-Migrate all custom UI components (Next.js 16 + React 19) to the ShadCN UI design system with full dark mode support, accessibility, and consistency.
+Migrate all UI components, pages, layouts (Next.js 16 + React 19) to the ShadCN UI design system with full dark mode support, accessibility, and consistency.
 
 This document is intended for an LLM coding agent. Follow instructions deterministically.
 

@@ -83,9 +83,12 @@ const isUnsupportedCookieDomain = (host?: string | null) => {
   return false;
 };
 
+const normalizeCookieDomain = (value: string): string =>
+  value.trim().replace(/^\.+/, '');
+
 const deriveCookieDomain = (inputUrl: string, explicitCookieDomain?: string) => {
   const manualDomain = getOptionalEnvValue(explicitCookieDomain);
-  if (manualDomain) return manualDomain;
+  if (manualDomain) return normalizeCookieDomain(manualDomain);
 
   const { hostname } = new URL(inputUrl);
   return isUnsupportedCookieDomain(hostname) ? undefined : hostname;

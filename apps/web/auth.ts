@@ -108,7 +108,8 @@ type AuthHandlers = NextAuthResult['handlers'];
 
 const createAuthConfig = (): NextAuthConfig => {
   const serverConfig = getServerConfig();
-  const cookieDomain = !isDevEnv ? serverConfig.cookieDomain : undefined;
+  const rawCookieDomain = !isDevEnv ? serverConfig.cookieDomain : undefined;
+  const cookieDomain = rawCookieDomain ? `.${rawCookieDomain.replace(/^\.+/, '')}` : undefined;
   const cookieSecure = !isDevEnv && serverConfig.cookieSecure;
   const cookieNamePrefix = cookieSecure ? '__Secure-' : '';
 
