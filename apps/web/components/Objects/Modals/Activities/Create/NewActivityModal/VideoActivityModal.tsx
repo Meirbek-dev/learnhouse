@@ -934,10 +934,10 @@ const VideoModal = ({ submitFileActivity, submitExternalVideo, chapterId, course
 
     try {
       if (selectedView === 'file' && selectedVideo) {
-        await submitFileActivity(
-          selectedVideo,
-          'video',
-          {
+        await submitFileActivity({
+          file: selectedVideo,
+          type: 'video',
+          activity: {
             name: submittedName,
             chapter_id: chapterId,
             activity_type: 'TYPE_VIDEO',
@@ -945,7 +945,7 @@ const VideoModal = ({ submitFileActivity, submitExternalVideo, chapterId, course
             details: videoDetails,
           },
           chapterId,
-        );
+        });
         toast.success(t('successVideoActivityCreated'));
       }
 

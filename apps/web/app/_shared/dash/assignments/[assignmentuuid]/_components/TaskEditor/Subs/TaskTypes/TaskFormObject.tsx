@@ -10,8 +10,7 @@ import AssignmentBoxUI from '@components/Objects/Activities/Assignment/Assignmen
 import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { updateAssignmentTask } from '@services/courses/assignments';
-import { generateUUID } from '@/lib/utils';
-import { cn } from '@/lib/utils';
+import { cn, generateUUID } from '@/lib/utils';
 
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -38,6 +37,13 @@ interface FormSchema {
   questionText: string;
   questionUUID?: string;
   blanks: BlankSchema[];
+}
+
+interface BlankChangeParams {
+  qIndex: number;
+  bIndex: number;
+  field: 'placeholder' | 'correctAnswer' | 'hint';
+  value: string;
 }
 
 interface TaskFormObjectProps {
@@ -90,12 +96,7 @@ interface BlankInputTeacherProps {
   isLast: boolean;
   canAddMore: boolean;
   canRemove: boolean;
-  onBlankChange: (
-    qIndex: number,
-    bIndex: number,
-    field: 'placeholder' | 'correctAnswer' | 'hint',
-    value: string,
-  ) => void;
+  onBlankChange: (params: BlankChangeParams) => void;
   onAddBlank: (qIndex: number) => void;
   onRemoveBlank: (qIndex: number, bIndex: number) => void;
 }
@@ -125,7 +126,7 @@ function BlankInputTeacher({
               <Label className="text-muted-foreground text-xs">{t('placeholderText')}</Label>
               <Input
                 value={blank.placeholder}
-                onChange={(e) => onBlankChange(qIndex, bIndex, 'placeholder', e.target.value)}
+                onChange={(e) => onBlankChange({ qIndex, bIndex, field: 'placeholder', value: e.target.value })}
                 placeholder={t('placeholderText')}
                 className="placeholder:text-muted-foreground h-8 rounded-md border bg-white px-2 text-sm focus-visible:ring-2 focus-visible:ring-blue-500"
               />
@@ -134,7 +135,7 @@ function BlankInputTeacher({
               <Label className="text-xs text-green-600">{t('correctAnswerPlaceholder')}</Label>
               <Input
                 value={blank.correctAnswer}
-                onChange={(e) => onBlankChange(qIndex, bIndex, 'correctAnswer', e.target.value)}
+                onChange={(e) => onBlankChange({ qIndex, bIndex, field: 'correctAnswer', value: e.target.value })}
                 placeholder={t('correctAnswerPlaceholder')}
                 className="h-8 border-green-200 bg-green-50 focus-visible:ring-green-500"
               />
@@ -160,7 +161,7 @@ function BlankInputTeacher({
               <CollapsibleContent className="pt-2">
                 <Input
                   value={blank.hint || ''}
-                  onChange={(e) => onBlankChange(qIndex, bIndex, 'hint', e.target.value)}
+                  onChange={(e) => onBlankChange({ qIndex, bIndex, field: 'hint', value: e.target.value })}
                   placeholder={t('hintOptional')}
                   className="h-8 border-blue-200 bg-blue-50 text-sm focus-visible:ring-blue-500"
                 />
@@ -214,12 +215,7 @@ interface QuestionCardProps {
   question: FormSchema;
   qIndex: number;
   onQuestionChange: (index: number, value: string) => void;
-  onBlankChange: (
-    qIndex: number,
-    bIndex: number,
-    field: 'placeholder' | 'correctAnswer' | 'hint',
-    value: string,
-  ) => void;
+  onBlankChange: (params: BlankChangeParams) => void;
   onAddBlank: (qIndex: number) => void;
   onRemoveBlank: (qIndex: number, bIndex: number) => void;
   onRemoveQuestion: (qIndex: number) => void;
@@ -352,12 +348,7 @@ function TaskFormObject({ assignmentTaskUUID }: TaskFormObjectProps) {
     });
   };
 
-  const handleBlankChange = (
-    qIndex: number,
-    bIndex: number,
-    field: 'placeholder' | 'correctAnswer' | 'hint',
-    value: string,
-  ) => {
+  const handleBlankChange = ({ qIndex, bIndex, field, value }: BlankChangeParams) => {
     setQuestions((prev) => {
       const updated = [...prev];
       if (updated[qIndex]?.blanks[bIndex]) {

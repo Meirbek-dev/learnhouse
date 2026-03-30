@@ -188,7 +188,9 @@ const ThumbnailUpdate = ({ thumbnailType, disabled = false, disabledReason }: Th
               isLoading ? 'animate-pulse' : ''
             }`}
             controls
-          />
+          >
+            <track kind="captions" srcLang="en" label={t('videoCaptions')} default />
+          </video>
         </div>
       );
     }

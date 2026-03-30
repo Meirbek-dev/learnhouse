@@ -495,7 +495,9 @@ const ActivityEditButton = ({
               href={editUrl}
               target="_blank"
               rel="noopener noreferrer"
-            />
+            >
+              <span className="sr-only">{t('openEditPage')}</span>
+            </a>
           }
         >
           <FilePenLine className="h-4 w-4" />
@@ -551,7 +553,9 @@ const ActivityEditButton = ({
               href={editUrl}
               target="_blank"
               rel="noopener noreferrer"
-            />
+            >
+              <span className="sr-only">{t('openEditPage')}</span>
+            </a>
           }
         >
           <FilePenLine className="h-4 w-4" />
@@ -577,7 +581,9 @@ const ActivityEditButton = ({
               href={editUrl}
               target="_blank"
               rel="noopener noreferrer"
-            />
+            >
+              <span className="sr-only">{t('openEditPage')}</span>
+            </a>
           }
         >
           <FilePenLine className="h-4 w-4" />

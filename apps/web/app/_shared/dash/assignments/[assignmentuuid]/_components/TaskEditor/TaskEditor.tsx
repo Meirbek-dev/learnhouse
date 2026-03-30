@@ -77,42 +77,44 @@ const AssignmentTaskEditor = ({ page }: any) => {
             <div className="flex items-center justify-between py-1">
               <div className="text-lg font-semibold">{assignmentTask.title}</div>
               <div>
-                <div
-                  onClick={() => deleteTaskUI()}
-                  className="flex cursor-pointer items-center space-x-2 rounded-md border border-rose-600/10 bg-rose-100 bg-linear-to-bl px-2 py-1.5 text-red-800 shadow-lg shadow-rose-900/10"
+                <button
+                  type="button"
+                  onClick={deleteTaskUI}
+                  aria-label={t('deleteTask')}
+                  className="flex items-center space-x-2 rounded-md border border-rose-600/10 bg-rose-100 bg-linear-to-bl px-2 py-1.5 text-red-800 shadow-lg shadow-rose-900/10"
                 >
                   <Trash size={18} />
-                  <p className="text-xs font-semibold">{t('deleteTask')}</p>
-                </div>
+                  <span className="text-xs font-semibold">{t('deleteTask')}</span>
+                </button>
               </div>
             </div>
             <div className="flex space-x-2">
-              <div
-                onClick={() => {
-                  setSelectedSubPage('general');
-                }}
+              <button
+                type="button"
+                onClick={() => setSelectedSubPage('general')}
+                aria-pressed={selectedSubPage === 'general'}
                 className={`border-primary flex w-fit space-x-4 py-2 text-center transition-all ease-linear ${
                   selectedSubPage === 'general' ? 'border-b-4' : 'opacity-50'
-                } cursor-pointer`}
+                }`}
               >
                 <div className="mx-2 flex items-center space-x-2.5">
                   <Info size={16} />
-                  <div>{t('general')}</div>
+                  <span>{t('general')}</span>
                 </div>
-              </div>
-              <div
-                onClick={() => {
-                  setSelectedSubPage('content');
-                }}
+              </button>
+              <button
+                type="button"
+                onClick={() => setSelectedSubPage('content')}
+                aria-pressed={selectedSubPage === 'content'}
                 className={`border-primary flex w-fit space-x-4 py-2 text-center transition-all ease-linear ${
                   selectedSubPage === 'content' ? 'border-b-4' : 'opacity-50'
-                } cursor-pointer`}
+                }`}
               >
                 <div className="mx-2 flex items-center space-x-2.5">
                   <GalleryVerticalEnd size={16} />
-                  <div>{t('content')}</div>
+                  <span>{t('content')}</span>
                 </div>
-              </div>
+              </button>
             </div>
           </div>
           <div className="soft-shadow mx-auto mr-10 ml-10 min-h-0 flex-1 overflow-auto rounded-xl bg-white px-6 py-5 shadow-xs">

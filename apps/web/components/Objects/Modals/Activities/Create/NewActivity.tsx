@@ -26,7 +26,7 @@ interface ActivityType {
 interface NewActivityModalProps {
   closeModal: () => void;
   submitActivity: (data?: any) => Promise<any>;
-  submitFileActivity: (file: any, type: any, activity: any, chapterId: number) => Promise<void>;
+  submitFileActivity: (params: { file: any; type: any; activity: any; chapterId: number }) => Promise<void>;
   submitExternalVideo: (external_video_data: any, activity: any, chapterId: number) => Promise<void>;
   createAndOpenActivity: (kind: 'dynamic' | 'codechallenge') => Promise<void>;
   chapterId: number;

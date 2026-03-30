@@ -21,7 +21,7 @@ import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
-import NewActivityButton from '../Buttons/NewActivityButton';
+import NewActivityButton from '@/components/Dashboard/Pages/Course/EditCourseStructure/Buttons/NewActivityButton';
 import ActivityElement from './ActivityElement';
 
 type ActivityType =

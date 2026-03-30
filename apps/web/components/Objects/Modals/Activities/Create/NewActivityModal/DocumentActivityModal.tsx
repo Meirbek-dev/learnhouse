@@ -41,17 +41,17 @@ const DocumentPdfModal = ({ submitFileActivity, chapterId, course }: any) => {
   const onSubmit = (values: FormValues) => {
     startTransition(() => {
       void (async () => {
-        await submitFileActivity(
-          values.file,
-          'documentpdf',
-          {
+        await submitFileActivity({
+          file: values.file,
+          type: 'documentpdf',
+          activity: {
             name: values.name,
             chapter_id: chapterId,
             activity_type: 'TYPE_DOCUMENT',
             activity_sub_type: 'SUBTYPE_DOCUMENT_PDF',
           },
           chapterId,
-        );
+        });
       })();
     });
   };

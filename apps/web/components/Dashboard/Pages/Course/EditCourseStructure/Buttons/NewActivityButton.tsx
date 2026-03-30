@@ -53,7 +53,17 @@ const NewActivityButton = (props: NewActivityButtonProps) => {
     }
   };
 
-  const submitFileActivity = async (file: any, type: any, activity: any, chapterId: number) => {
+  const submitFileActivity = async ({
+    file,
+    type,
+    activity,
+    chapterId,
+  }: {
+    file: any;
+    type: any;
+    activity: any;
+    chapterId: number;
+  }) => {
     const toast_loading = toast.loading(tNotify('uploadingAndCreating'));
 
     try {

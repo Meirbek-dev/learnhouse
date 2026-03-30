@@ -86,8 +86,9 @@ const UserEditPassword = () => {
         });
 
         // Wait for 4 seconds before signing out
-        await new Promise((resolve) => setTimeout(resolve, 4000));
-        signOut({ redirect: true, callbackUrl: getAbsoluteUrl('/') });
+        setTimeout(() => {
+          signOut({ redirect: true, callbackUrl: getAbsoluteUrl('/') });
+        }, 4000);
       } else {
         toast.error(t('passwordUpdateError'), {
           id: loadingToast,

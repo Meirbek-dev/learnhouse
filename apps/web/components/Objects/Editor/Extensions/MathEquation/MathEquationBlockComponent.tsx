@@ -9,7 +9,7 @@ import Link from '@components/ui/AppLink';
 import type { ChangeEvent } from 'react';
 import { motion } from 'motion/react';
 import 'katex/dist/katex.min.css';
-import katex from 'katex';
+import { renderToString } from 'katex';
 
 // Predefined LaTeX templates
 const mathTemplates = [
@@ -181,7 +181,7 @@ const MathEquationBlockComponent = (props: any) => {
           <div className="soft-shadow rounded-md bg-white p-4">
             <span
               dangerouslySetInnerHTML={{
-                __html: katex.renderToString(equation, { displayMode: true, throwOnError: false }),
+                __html: renderToString(equation, { displayMode: true, throwOnError: false }),
               }}
             />
           </div>
@@ -216,18 +216,19 @@ const MathEquationBlockComponent = (props: any) => {
                     <div className="absolute left-0 z-10 mt-1 max-h-80 w-64 overflow-y-auto bg-white rounded-[8px] border border-border shadow-lg">
                       <div className="border-b p-2 text-xs text-zinc-500">{t('selectTemplate')}</div>
                       {mathTemplates.map((template, index) => (
-                        <div
+                        <button
                           key={index}
+                          type="button"
                           onClick={() => {
                             insertTemplate(template.latex);
                           }}
-                          className="py-2 px-3 cursor-pointer [transition:background_0.15s] hover:bg-muted/20"
+                          className="w-full text-left py-2 px-3 [transition:background_0.15s] hover:bg-muted/20"
                         >
                           <div className="flex flex-col">
                             <span className="font-medium">{t(template.name)}</span>
                             <span className="text-xs text-zinc-500">{t(template.description)}</span>
                           </div>
-                        </div>
+                        </button>
                       ))}
                     </div>
                   ) : null}

@@ -13,7 +13,7 @@ import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { usePlatform } from '@/components/Contexts/PlatformContext';
 import { getTaskFileSubmissionDir } from '@services/media/media';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Link from '@components/ui/AppLink';
 import { toast } from 'sonner';
 
@@ -61,6 +61,25 @@ const UPLOAD_DELAY_MS = 1500;
 const MAX_FILENAME_LENGTH = 20;
 const UUID_PREVIEW_START = 8;
 const UUID_PREVIEW_END = 4;
+
+// ================= Render helpers =================
+const FileCard = ({ label }: { label: string }) => (
+  <Card className="relative w-full sm:w-auto">
+    <CardContent className="flex items-center gap-2 py-4">
+      <Badge className="absolute top-2 right-2 rounded-full bg-emerald-600 p-1 shadow-sm">
+        <Cloud
+          className="text-white"
+          size={16}
+        />
+      </Badge>
+      <File
+        className="text-emerald-500"
+        size={18}
+      />
+      <span className="text-xs font-medium break-all uppercase sm:text-sm">{label}</span>
+    </CardContent>
+  </Card>
+);
 
 // ================= Utils =================
 const truncateFilename = (filename: string): string => {
@@ -116,7 +135,6 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
 
     try {
       const res = await updateSubFile(file, assignmentTaskUUID, assignmentUUID, accessToken);
-      await new Promise((r) => setTimeout(r, UPLOAD_DELAY_MS));
 
       if (!res.success) {
         setError(res.data?.detail || t('uploadFailed'));
@@ -226,55 +244,65 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
     }
   }
 
+  const fetchStudentView = useCallback(async () => {
+    if (accessToken && assignmentTaskUUID) {
+      const res = await getAssignmentTask(assignmentTaskUUID, accessToken);
+      if (res.success && res.data) setAssignmentTask(res.data);
+    }
+
+    if (accessToken && assignmentTaskUUID && assignmentUUID) {
+      const res = await getAssignmentTaskSubmissionsMe(assignmentTaskUUID, assignmentUUID, accessToken);
+      if (res.success && res.data?.task_submission) {
+        const sub = {
+          ...res.data.task_submission,
+          assignment_task_submission_uuid: res.data.assignment_task_submission_uuid,
+        };
+        setUserSubmissions(sub);
+        setInitialUserSubmissions(sub);
+      } else {
+        setUserSubmissions({ fileUUID: '' });
+        setInitialUserSubmissions({ fileUUID: '' });
+      }
+    }
+  }, [accessToken, assignmentTaskUUID, assignmentUUID]);
+
+  const fetchCustomGradingView = useCallback(async () => {
+    if (accessToken && assignmentTaskUUID) {
+      const res = await getAssignmentTask(assignmentTaskUUID, accessToken);
+      if (res.success && res.data) setAssignmentTask(res.data);
+    }
+
+    if (accessToken && assignmentTaskUUID && assignmentUUID && user_id) {
+      const res = await getAssignmentTaskSubmissionsUser(
+        assignmentTaskUUID,
+        user_id,
+        assignmentUUID,
+        accessToken,
+      );
+      if (res.success && res.data?.task_submission) {
+        const sub = {
+          ...res.data.task_submission,
+          assignment_task_submission_uuid: res.data.assignment_task_submission_uuid,
+        };
+        setUserSubmissions(sub);
+        setInitialUserSubmissions(sub);
+        setUserSubmissionObject(res.data);
+      } else {
+        setUserSubmissions({ fileUUID: '' });
+        setInitialUserSubmissions({ fileUUID: '' });
+        setUserSubmissionObject(null);
+      }
+    }
+  }, [accessToken, assignmentTaskUUID, assignmentUUID, user_id]);
+
   useEffect(() => {
     const loadIfNeeded = async () => {
       setIsLoading(true);
       try {
         if (view === 'student') {
-          if (accessToken && assignmentTaskUUID) {
-            const res = await getAssignmentTask(assignmentTaskUUID, accessToken);
-            if (res.success && res.data) setAssignmentTask(res.data);
-          }
-          if (accessToken && assignmentTaskUUID && assignmentUUID) {
-            const res = await getAssignmentTaskSubmissionsMe(assignmentTaskUUID, assignmentUUID, accessToken);
-            if (res.success && res.data?.task_submission) {
-              const sub = {
-                ...res.data.task_submission,
-                assignment_task_submission_uuid: res.data.assignment_task_submission_uuid,
-              };
-              setUserSubmissions(sub);
-              setInitialUserSubmissions(sub);
-            } else {
-              setUserSubmissions({ fileUUID: '' });
-              setInitialUserSubmissions({ fileUUID: '' });
-            }
-          }
+          await fetchStudentView();
         } else if (view === 'custom-grading') {
-          if (accessToken && assignmentTaskUUID) {
-            const res = await getAssignmentTask(assignmentTaskUUID, accessToken);
-            if (res.success && res.data) setAssignmentTask(res.data);
-          }
-          if (accessToken && assignmentTaskUUID && assignmentUUID && user_id) {
-            const res = await getAssignmentTaskSubmissionsUser(
-              assignmentTaskUUID,
-              user_id,
-              assignmentUUID,
-              accessToken,
-            );
-            if (res.success && res.data?.task_submission) {
-              const sub = {
-                ...res.data.task_submission,
-                assignment_task_submission_uuid: res.data.assignment_task_submission_uuid,
-              };
-              setUserSubmissions(sub);
-              setInitialUserSubmissions(sub);
-              setUserSubmissionObject(res.data);
-            } else {
-              setUserSubmissions({ fileUUID: '' });
-              setInitialUserSubmissions({ fileUUID: '' });
-              setUserSubmissionObject(null);
-            }
-          }
+          await fetchCustomGradingView();
         }
       } finally {
         setIsLoading(false);
@@ -282,27 +310,9 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
     };
 
     void loadIfNeeded();
-  }, [view, accessToken, assignmentTaskUUID, assignmentUUID, user_id]);
+  }, [view, accessToken, assignmentTaskUUID, assignmentUUID, user_id, fetchStudentView, fetchCustomGradingView]);
 
   // ================= Render helpers =================
-  const FileCard = ({ label }: { label: string }) => (
-    <Card className="relative w-full sm:w-auto">
-      <CardContent className="flex items-center gap-2 py-4">
-        <Badge className="absolute top-2 right-2 rounded-full bg-emerald-600 p-1 shadow-sm">
-          <Cloud
-            className="text-white"
-            size={16}
-          />
-        </Badge>
-        <File
-          className="text-emerald-500"
-          size={18}
-        />
-        <span className="text-xs font-medium break-all uppercase sm:text-sm">{label}</span>
-      </CardContent>
-    </Card>
-  );
-
   const renderTeacherView = () => (
     <Alert>
       <Info className="h-4 w-4" />

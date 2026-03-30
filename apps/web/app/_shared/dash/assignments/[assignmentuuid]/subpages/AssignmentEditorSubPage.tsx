@@ -6,9 +6,9 @@ import { useTranslations } from 'next-intl';
 import { LayoutList } from 'lucide-react';
 import dynamic from 'next/dynamic';
 
-import AssignmentTasks from '../_components/Tasks';
+import AssignmentTasks from '@/app/_shared/dash/assignments/[assignmentuuid]/_components/Tasks';
 
-const AssignmentTaskEditor = dynamic(() => import('../_components/TaskEditor/TaskEditor'));
+const AssignmentTaskEditor = dynamic(() => import('@/app/_shared/dash/assignments/[assignmentuuid]/_components/TaskEditor/TaskEditor'));
 
 const AssignmentEditorSubPage = ({ assignmentuuid }: { assignmentuuid: string }) => {
   const t = useTranslations('DashPage.Assignments');

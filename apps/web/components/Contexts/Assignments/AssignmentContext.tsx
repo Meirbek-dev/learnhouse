@@ -6,7 +6,7 @@ import ErrorUI from '@/components/Objects/Elements/Error/Error';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
 import { useTranslations } from 'next-intl';
-import { createContext, use } from 'react';
+import { createContext, use, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import useSWR from 'swr';
 
@@ -59,21 +59,24 @@ export const AssignmentProvider = ({
     (url) => swrFetcher(url, accessToken),
   );
 
-  // Derive assignmentsFull (no explicit memoization - cheap computation)
-  const assignmentsFull: AssignmentContextType =
-    assignment && assignment_tasks && (!course_uuid || course_object) && (!activity_uuid || activity_object)
-      ? {
-          assignment_object: assignment,
-          assignment_tasks,
-          course_object,
-          activity_object,
-        }
-      : {
-          assignment_object: null,
-          assignment_tasks: null,
-          course_object: null,
-          activity_object: null,
-        };
+  // Derive assignmentsFull (memoized to avoid unnecessary context value changes)
+  const assignmentsFull: AssignmentContextType = useMemo(
+    () =>
+      assignment && assignment_tasks && (!course_uuid || course_object) && (!activity_uuid || activity_object)
+        ? {
+            assignment_object: assignment,
+            assignment_tasks,
+            course_object,
+            activity_object,
+          }
+        : {
+            assignment_object: null,
+            assignment_tasks: null,
+            course_object: null,
+            activity_object: null,
+          },
+    [assignment, assignment_tasks, course_uuid, course_object, activity_uuid, activity_object],
+  );
 
   const isLoading =
     !(assignment && assignment_tasks) || (course_uuid && !course_object) || (activity_uuid && !activity_object);

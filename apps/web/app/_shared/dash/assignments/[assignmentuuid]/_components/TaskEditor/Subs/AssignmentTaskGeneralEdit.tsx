@@ -78,10 +78,18 @@ export const AssignmentTaskGeneralEdit = () => {
     startTransition(() => {
       void (async () => {
         try {
+          const assignmentTaskUUID = assignmentTask?.assignment_task_uuid;
+          const assignmentUUID = assignment?.assignment_object?.assignment_uuid;
+
+          if (!assignmentTaskUUID || !assignmentUUID) {
+            toast.error(t('saveError'));
+            return;
+          }
+
           const res = await updateAssignmentTask(
             values,
-            assignmentTask.assignment_task_uuid!,
-            assignment.assignment_object.assignment_uuid,
+            assignmentTaskUUID,
+            assignmentUUID,
             access_token,
           );
           if (res.success) {
@@ -266,11 +274,20 @@ const UpdateTaskRef = () => {
 
   const getTaskRefDirUI = () => {
     if (!fileName) return '';
+    const courseUUID = assignment?.course_object?.course_uuid;
+    const activityUUID = assignment?.activity_object?.activity_uuid;
+    const assignmentUUID = assignment?.assignment_object?.assignment_uuid;
+    const assignmentTaskUUID = assignmentTask?.assignment_task_uuid;
+
+    if (!courseUUID || !activityUUID || !assignmentUUID || !assignmentTaskUUID) {
+      return '';
+    }
+
     return getTaskRefFileDir(
-      assignment.course_object.course_uuid,
-      assignment.activity_object.activity_uuid,
-      assignment.assignment_object.assignment_uuid,
-      assignmentTask.assignment_task_uuid!,
+      courseUUID,
+      activityUUID,
+      assignmentUUID,
+      assignmentTaskUUID,
       fileName,
     );
   };
@@ -302,10 +319,18 @@ const UpdateTaskRef = () => {
     setError(null);
 
     try {
+      const assignmentTaskUUID = assignmentTask?.assignment_task_uuid;
+      const assignmentUUID = assignment?.assignment_object?.assignment_uuid;
+
+      if (!assignmentTaskUUID || !assignmentUUID) {
+        setError(t('missingAssignmentInfo'));
+        return;
+      }
+
       const res = await updateReferenceFile(
         file,
-        assignmentTask.assignment_task_uuid!,
-        assignment.assignment_object.assignment_uuid,
+        assignmentTaskUUID,
+        assignmentUUID,
         access_token,
       );
 

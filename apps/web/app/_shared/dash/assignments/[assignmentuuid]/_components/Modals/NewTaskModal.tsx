@@ -48,36 +48,39 @@ const NewTaskModal = ({ closeModal, assignment_uuid }: any) => {
 
   return (
     <div className="mx-auto flex items-center justify-center space-x-6">
-      <div
+      <button
+        type="button"
         onClick={() => createTask('QUIZ')}
         className="flex flex-col justify-center space-y-2 pt-10 text-center"
       >
-        <div className="soft-shadow mx-auto w-fit cursor-pointer rounded-full bg-gray-100/50 px-5 py-5 text-gray-500 transition-all ease-linear hover:bg-gray-100">
+        <div className="soft-shadow mx-auto w-fit rounded-full bg-gray-100/50 px-5 py-5 text-gray-500 transition-all ease-linear hover:bg-gray-100">
           <ListTodo size={30} />
         </div>
         <p className="text-xl font-semibold text-gray-700">{t('quizTitle')}</p>
         <p className="w-40 text-sm text-gray-500">{t('quizDescription')}</p>
-      </div>
-      <div
+      </button>
+      <button
+        type="button"
         onClick={() => createTask('FILE_SUBMISSION')}
         className="flex flex-col justify-center space-y-2 pt-10 text-center"
       >
-        <div className="soft-shadow mx-auto w-fit cursor-pointer rounded-full bg-gray-100/50 px-5 py-5 text-gray-500 transition-all ease-linear hover:bg-gray-100">
+        <div className="soft-shadow mx-auto w-fit rounded-full bg-gray-100/50 px-5 py-5 text-gray-500 transition-all ease-linear hover:bg-gray-100">
           <FileUp size={30} />
         </div>
         <p className="text-xl font-semibold text-gray-700">{t('fileSubmissionTitle')}</p>
         <p className="w-40 text-sm text-gray-500">{t('fileSubmissionDescription')}</p>
-      </div>
-      <div
+      </button>
+      <button
+        type="button"
         onClick={() => createTask('FORM')}
         className="flex flex-col justify-center space-y-2 pt-10 text-center"
       >
-        <div className="soft-shadow mx-auto w-fit cursor-pointer rounded-full bg-gray-100/50 px-5 py-5 text-gray-500 transition-all ease-linear hover:bg-gray-100">
+        <div className="soft-shadow mx-auto w-fit rounded-full bg-gray-100/50 px-5 py-5 text-gray-500 transition-all ease-linear hover:bg-gray-100">
           <AArrowUp size={30} />
         </div>
         <p className="text-xl font-semibold text-gray-700">{t('formTitle')}</p>
         <p className="w-40 text-sm text-gray-500">{t('formDescription')}</p>
-      </div>
+      </button>
     </div>
   );
 };
