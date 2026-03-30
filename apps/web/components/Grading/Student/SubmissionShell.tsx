@@ -50,28 +50,28 @@ const STATUS_BANNERS: Partial<Record<SubmissionStatus, BannerConfig>> = {
     variant: 'default',
     titleKey: 'bannerPendingTitle',
     descKey: 'bannerPendingDesc',
-    iconClass: 'text-blue-600',
+    iconClass: 'text-primary',
   },
   GRADED: {
     icon: Clock4,
     variant: 'default',
     titleKey: 'bannerGradedTitle',
     descKey: 'bannerGradedDesc',
-    iconClass: 'text-slate-600',
+    iconClass: 'text-muted-foreground',
   },
   PUBLISHED: {
     icon: CheckCircle2,
     variant: 'default',
     titleKey: 'bannerPublishedTitle',
     descKey: 'bannerPublishedDesc',
-    iconClass: 'text-emerald-600',
+    iconClass: 'text-success',
   },
   RETURNED: {
     icon: RotateCcw,
     variant: 'default',
     titleKey: 'bannerReturnedTitle',
     descKey: 'bannerReturnedDesc',
-    iconClass: 'text-amber-600',
+    iconClass: 'text-warning',
   },
 };
 
@@ -142,8 +142,8 @@ export default function SubmissionShell({
       {canSubmit && (
         <>
           <Separator />
-          <div className="flex items-center justify-between rounded-md border bg-slate-50 px-5 py-3">
-            <p className="text-sm text-slate-600">{t('readyToSubmit')}</p>
+          <div className="flex items-center justify-between rounded-md border bg-card px-5 py-3">
+            <p className="text-sm text-muted-foreground">{t('readyToSubmit')}</p>
             <SubmitButton
               activityId={activityId}
               assessmentType={assessmentType}
@@ -160,8 +160,8 @@ export default function SubmissionShell({
       {canResubmit && (
         <>
           <Separator />
-          <div className="flex items-center justify-between rounded-md border border-amber-200 bg-amber-50 px-5 py-3">
-            <p className="text-sm text-amber-800">{t('returnedResubmit')}</p>
+          <div className="flex items-center justify-between rounded-md border border-secondary/20 bg-secondary/10 px-5 py-3">
+            <p className="text-sm text-warning">{t('returnedResubmit')}</p>
             <SubmitButton
               activityId={activityId}
               assessmentType={assessmentType}

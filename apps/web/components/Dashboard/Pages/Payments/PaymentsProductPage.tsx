@@ -109,7 +109,7 @@ function ArchiveProductButton({ productId, productName, onArchive, t }: ArchiveP
       <AlertDialogTrigger
         render={
           <button
-            className="text-red-500 hover:text-red-700"
+            className="text-destructive hover:text-destructive/80"
             title={t('archiveButton')}
           >
             <Archive size={16} />
@@ -196,7 +196,7 @@ const PaymentsProductPage = () => {
   if (!products)
     return (
       <div className="flex h-64 items-center justify-center">
-        <div className="flex animate-pulse items-center rounded-md bg-slate-100 px-4 py-2 text-sm font-medium text-gray-600">
+        <div className="flex animate-pulse items-center rounded-md bg-muted px-4 py-2 text-sm font-medium text-muted-foreground">
           <Loader2
             size={16}
             className="mr-2 animate-spin"
@@ -227,7 +227,7 @@ const PaymentsProductPage = () => {
           {products.data.map((product: any) => (
             <div
               key={product.id}
-              className="soft-shadow flex h-full flex-col rounded-lg bg-white p-4"
+              className="flex h-full flex-col rounded-lg bg-card p-4 shadow-sm ring-1 ring-border"
             >
               {editingProductId === product.id ? (
                 <EditProductForm
@@ -259,7 +259,7 @@ const PaymentsProductPage = () => {
                         onClick={() => {
                           setEditingProductId(product.id);
                         }}
-                        className={`text-blue-500 hover:text-blue-700 ${isStripeEnabled ? '' : 'cursor-not-allowed opacity-50'}`}
+                        className={`text-primary hover:text-primary/80 ${isStripeEnabled ? '' : 'cursor-not-allowed opacity-50'}`}
                         disabled={!isStripeEnabled}
                         title={t('editButton')}
                       >
@@ -277,11 +277,11 @@ const PaymentsProductPage = () => {
                     <div
                       className={`transition-all duration-300 ease-in-out ${expandedProducts[product.id] ? 'max-h-[1000px]' : 'max-h-24'} overflow-hidden`}
                     >
-                      <p className="text-gray-600">{product.description}</p>
+                      <p className="text-muted-foreground">{product.description}</p>
                       {product.benefits ? (
                         <div className="mt-2">
-                          <h4 className="text-sm font-semibold">{t('benefitsLabel')}</h4>
-                          <p className="text-sm text-gray-600">{product.benefits}</p>
+                          <h4 className="text-sm font-semibold text-foreground">{t('benefitsLabel')}</h4>
+                          <p className="text-sm text-muted-foreground">{product.benefits}</p>
                         </div>
                       ) : null}
                     </div>
@@ -291,7 +291,7 @@ const PaymentsProductPage = () => {
                       onClick={() => {
                         toggleProductExpansion(product.id);
                       }}
-                      className="flex items-center text-sm text-slate-500 hover:text-slate-700"
+                      className="flex items-center text-sm text-muted-foreground hover:text-foreground"
                     >
                       {expandedProducts[product.id] ? (
                         <>
@@ -307,9 +307,9 @@ const PaymentsProductPage = () => {
                     </button>
                   </div>
                   <ProductLinkedCourses productId={product.id} />
-                  <div className="mt-2 flex items-center justify-between rounded-md bg-gray-100 p-2">
-                    <span className="text-sm text-gray-600">{t('priceLabel')}</span>
-                    <span className="text-lg font-semibold">
+                  <div className="mt-2 flex items-center justify-between rounded-md bg-secondary/10 p-2">
+                    <span className="text-sm text-muted-foreground">{t('priceLabel')}</span>
+                    <span className="text-lg font-semibold text-foreground">
                       {new Intl.NumberFormat(navigator.language, {
                         style: 'currency',
                         currency: product.currency,
@@ -322,7 +322,7 @@ const PaymentsProductPage = () => {
           ))}
         </div>
         {products.data.length === 0 && (
-          <div className="mx-auto mt-3 flex items-center space-x-2 font-semibold text-gray-600">
+          <div className="mx-auto mt-3 flex items-center space-x-2 font-semibold text-muted-foreground">
             <Info size={20} />
             <p>{t('noProducts')}</p>
           </div>
@@ -333,8 +333,8 @@ const PaymentsProductPage = () => {
             onClick={() => {
               setIsCreateModalOpen(true);
             }}
-            className={`soft-shadow mb-4 flex items-center space-x-2 rounded-lg border bg-foreground px-3 py-1.5 font-medium text-background transition duration-300 ${
-              isStripeEnabled ? 'hover:bg-foreground/90' : 'cursor-not-allowed opacity-50'
+            className={`mb-4 flex items-center space-x-2 rounded-lg border bg-primary px-3 py-1.5 font-medium text-primary-foreground transition duration-300 ${
+              isStripeEnabled ? 'hover:bg-primary/90' : 'cursor-not-allowed opacity-50'
             }`}
             disabled={!isStripeEnabled}
           >

@@ -81,9 +81,9 @@ export default function DiscussionReply({
   };
 
   return (
-    <div className="group relative ml-6 border-l-2 border-slate-200 py-4 pl-6 transition-colors hover:border-slate-300">
+    <div className="group relative ml-6 border-l-2 border-border py-4 pl-6 transition-colors hover:border-muted-foreground">
       {/* Connection line dot */}
-      <div className="absolute top-6 left-[-5px] h-2 w-2 rounded-full bg-slate-300 transition-colors group-hover:bg-slate-400" />
+      <div className="absolute top-6 left-[-5px] h-2 w-2 rounded-full bg-border transition-colors group-hover:bg-foreground" />
 
       <div className="flex gap-3">
         <UserAvatar
@@ -97,10 +97,10 @@ export default function DiscussionReply({
           {/* Header */}
           <div className="mb-2 flex items-center justify-between gap-3">
             <div className="flex min-w-0 items-center gap-2">
-              <span className="truncate font-medium text-slate-900">
+              <span className="truncate font-medium text-foreground">
                 {getUserDisplayName(reply.firstName, reply.lastName)}
               </span>
-              <span className="truncate text-sm text-slate-500">@{reply.username}</span>
+              <span className="truncate text-sm text-muted-foreground">@{reply.username}</span>
               {isAuthorAdmin(reply.username) && (
                 <Badge
                   variant="destructive"
@@ -109,13 +109,13 @@ export default function DiscussionReply({
                   {t('admin')}
                 </Badge>
               )}
-              <div className="flex shrink-0 items-center gap-1 text-xs text-slate-400">
+              <div className="flex shrink-0 items-center gap-1 text-xs text-muted-foreground">
                 <Clock size={12} />
                 <span>{format.relativeTime(new Date(reply.createDate), now)}</span>
                 {reply.updateDate &&
                   reply.createDate &&
                   new Date(reply.updateDate).getTime() !== new Date(reply.createDate).getTime() && (
-                    <span className="text-xs text-slate-400">({t('edited')})</span>
+                    <span className="text-xs text-muted-foreground">({t('edited')})</span>
                   )}
               </div>
             </div>
@@ -131,7 +131,7 @@ export default function DiscussionReply({
                       setEditing(true);
                       setEditContent(reply.replyMessage);
                     }}
-                    className="h-7 w-7 p-0 text-slate-500 hover:bg-blue-50 hover:text-blue-600"
+                    className="h-7 w-7 p-0 text-muted-foreground hover:bg-primary/10 hover:text-primary"
                   >
                     <Edit size={12} />
                   </Button>
@@ -140,7 +140,7 @@ export default function DiscussionReply({
                   variant="ghost"
                   size="sm"
                   onClick={() => onDeleteReply(postId, reply.id)}
-                  className="h-7 w-7 p-0 text-slate-500 hover:bg-red-50 hover:text-red-600"
+                  className="h-7 w-7 p-0 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
                 >
                   <Trash2 size={12} />
                 </Button>
@@ -190,22 +190,22 @@ export default function DiscussionReply({
               <div className="mb-3">
                 <RichContentRenderer
                   content={reply.replyMessage}
-                  className="text-sm leading-relaxed text-slate-700"
+                  className="text-sm leading-relaxed text-muted-foreground"
                 />
               </div>
 
               {/* Voting section */}
               <div className="flex items-center gap-3">
-                <div className="flex items-center overflow-hidden rounded-lg border border-slate-200 bg-slate-50">
+                <div className="flex items-center overflow-hidden rounded-lg border border-border bg-muted">
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => onVoteReply(postId, reply.id, 'up')}
                     className={cn(
-                      'h-8 rounded-none border-slate-200 border-r px-3 transition-all',
+                      'h-8 rounded-none border-border border-r px-3 transition-all',
                       reply.userVote === 'up'
-                        ? 'bg-green-50 text-green-700 hover:bg-green-100'
-                        : 'text-slate-600 hover:bg-slate-100 hover:text-green-600',
+                        ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'
+                        : 'text-muted-foreground hover:bg-muted/70 hover:text-emerald-600',
                     )}
                   >
                     <ArrowBigUp
@@ -222,8 +222,8 @@ export default function DiscussionReply({
                     className={cn(
                       'h-8 rounded-none px-3 transition-all',
                       reply.userVote === 'down'
-                        ? 'bg-red-50 text-red-700 hover:bg-red-100'
-                        : 'text-slate-600 hover:bg-slate-100 hover:text-red-600',
+                        ? 'bg-destructive/20 text-destructive hover:bg-destructive/30'
+                        : 'text-muted-foreground hover:bg-muted/70 hover:text-destructive',
                     )}
                   >
                     <ArrowBigDown

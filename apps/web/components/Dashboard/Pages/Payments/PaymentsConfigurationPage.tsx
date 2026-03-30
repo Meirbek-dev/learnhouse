@@ -72,7 +72,7 @@ function ConfirmDeleteStripeConfig({ onDelete, t }: ConfirmDeleteStripeConfigPro
       <AlertDialogTrigger
         nativeButton
         render={
-          <Button className="flex items-center space-x-2 rounded-full bg-red-500 text-sm text-white transition duration-300 hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50">
+          <Button className="flex items-center space-x-2 rounded-full bg-destructive text-sm text-destructive-foreground transition duration-300 hover:bg-destructive/90 disabled:cursor-not-allowed disabled:opacity-50">
             <Trash2 size={16} />
             <span>{t('removeConnectionButton')}</span>
           </Button>
@@ -195,13 +195,13 @@ const PaymentsConfigurationPage: FC = () => {
 
   return (
     <div>
-      <div className="soft-shadow mx-auto mr-10 ml-10 rounded-xl bg-white px-4 py-4">
+      <div className="mx-auto mr-10 ml-10 rounded-xl bg-card p-4 shadow-sm ring-1 ring-border">
         <div className="mb-3 flex flex-col -space-y-1 rounded-md bg-muted px-5 py-3">
           <h1 className="text-xl font-bold text-foreground">{t('pageTitle')}</h1>
           <h2 className="text-base text-muted-foreground">{t('pageDescription')}</h2>
         </div>
 
-        <Alert className="mb-3 border-2 border-blue-100 bg-blue-50/50 p-6">
+        <Alert className="mb-3 border border-primary/20 bg-primary/10 p-6">
           <AlertTitle className="mb-2 flex items-center space-x-2 text-lg font-semibold">
             <Info className="h-5 w-5" />
             <span>{t('aboutStripe.title')}</span>
@@ -231,7 +231,7 @@ const PaymentsConfigurationPage: FC = () => {
               href="https://stripe.com/docs"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center pl-2 font-medium text-blue-600 transition-colors duration-200 hover:text-blue-800"
+              className="inline-flex items-center pl-2 font-medium text-primary transition-colors duration-200 hover:text-primary/80"
             >
               {t('aboutStripe.learnMore')}
               <ExternalLink className="ml-1.5 h-4 w-4" />
@@ -253,12 +253,12 @@ const PaymentsConfigurationPage: FC = () => {
                     {stripeConfig.provider_specific_id && stripeConfig.active ? (
                       <div className="flex items-center space-x-1 rounded-full bg-emerald-500/20 px-2 py-0.5">
                         <div className="h-2 w-2 rounded-full bg-emerald-500" />
-                        <span className="text-xs text-emerald-700 dark:text-emerald-300">{t('connectedStatus')}</span>
+                        <span className="text-xs text-foreground">{t('connectedStatus')}</span>
                       </div>
                     ) : (
-                      <div className="flex items-center space-x-1 rounded-full bg-red-500/20 px-2 py-0.5">
-                        <div className="h-2 w-2 rounded-full bg-red-500" />
-                        <span className="text-xs text-red-700 dark:text-red-300">{t('notConnectedStatus')}</span>
+                      <div className="flex items-center space-x-1 rounded-full bg-destructive/20 px-2 py-0.5">
+                        <div className="h-2 w-2 rounded-full bg-destructive" />
+                        <span className="text-xs text-destructive-foreground">{t('notConnectedStatus')}</span>
                       </div>
                     )}
                   </div>
@@ -273,7 +273,7 @@ const PaymentsConfigurationPage: FC = () => {
                 {!(stripeConfig.provider_specific_id && stripeConfig.active) && (
                   <Button
                     onClick={handleStripeOnboarding}
-                    className="flex items-center space-x-2 rounded-full border-2 border-green-400 bg-green-500 px-4 py-2 text-sm text-white shadow-md transition duration-300 hover:bg-green-600 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="flex items-center space-x-2 rounded-full border border-primary/30 bg-primary px-4 py-2 text-sm text-primary-foreground shadow-md transition duration-300 hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
                     disabled={isOnboardingLoading}
                   >
                     {isOnboardingLoading ? (
@@ -431,7 +431,7 @@ const EditStripeConfigModal: FC<EditStripeConfigModalProps> = ({ configId, acces
             <div className="flex justify-end pt-4">
               <Button
                 type="submit"
-                className="rounded-lg bg-blue-500 px-4 py-2 text-white transition duration-300 hover:bg-blue-600"
+                className="rounded-lg bg-primary px-4 py-2 text-primary-foreground transition duration-300 hover:bg-primary/90"
                 disabled={form.formState.isSubmitting}
               >
                 {form.formState.isSubmitting ? t('saving') : t('saveButton')}

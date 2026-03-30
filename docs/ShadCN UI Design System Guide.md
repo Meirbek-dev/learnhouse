@@ -10,6 +10,7 @@ This document is intended for an LLM coding agent. Follow instructions determini
 
 ## Core Principles
 
+* Prefer using shadcn ui components and their variants
 * All styling must use Tailwind CSS utility classes.
 * Use design tokens via CSS variables (from ShadCN theme).
 * No hardcoded colors like `#fff`, `#000`, etc.

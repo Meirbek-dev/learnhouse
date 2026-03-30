@@ -302,7 +302,7 @@ export default function GradingPanel({
                 {submission?.is_late && (
                   <Badge
                     variant="outline"
-                    className="shrink-0 border-red-300 bg-red-50 text-red-700 text-xs"
+                    className="shrink-0 border-destructive bg-destructive/20 text-destructive text-xs"
                   >
                     {t('late')}
                   </Badge>
@@ -329,7 +329,7 @@ export default function GradingPanel({
                   <ChevronLeft className="h-4 w-4" />
                   {t('previous')}
                 </Button>
-                <span className="text-xs text-slate-500">
+                <span className="text-xs text-muted-foreground">
                   {currentIndex + 1} / {allSubmissionUuids.length}
                 </span>
                 <Button
@@ -367,12 +367,12 @@ export default function GradingPanel({
                     onChange={(e) => setScore(e.target.value)}
                     className={cn(
                       'w-28 text-center font-semibold',
-                      scoreInvalid && 'border-red-500 focus-visible:ring-red-500',
+                      scoreInvalid && 'border-destructive focus-visible:ring-destructive',
                     )}
                   />
-                  <span className="text-sm text-slate-500">/ 100</span>
+                  <span className="text-sm text-muted-foreground">/ 100</span>
                 </div>
-                {scoreInvalid && <p className="text-xs text-red-600">{t('invalidScore')}</p>}
+                {scoreInvalid && <p className="text-xs text-destructive">{t('invalidScore')}</p>}
               </div>
 
               {/* Auto-score reference + one-click fill buttons */}
@@ -382,7 +382,7 @@ export default function GradingPanel({
                   if (autoScore === null) return null;
                   return (
                     <div className="flex items-center gap-2">
-                      <span className="text-xs text-slate-500">
+                      <span className="text-xs text-muted-foreground">
                         {t('autoScore')}: <strong>{autoScore}/100</strong>
                       </span>
                       <Button
@@ -400,7 +400,7 @@ export default function GradingPanel({
                 })()}
                 {autoSumScore !== null && (
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-slate-500">
+                    <span className="text-xs text-muted-foreground">
                       {t('autoSum')}: <strong>{autoSumScore}/100</strong>
                     </span>
                     <Button
@@ -422,7 +422,7 @@ export default function GradingPanel({
           {/* Scrollable body — answers with per-item scoring */}
           <ScrollArea className="flex-1 px-6 py-4">
             {isLoading ? (
-              <div className="flex h-32 items-center justify-center text-sm text-slate-500">{t('loading')}</div>
+              <div className="flex h-32 items-center justify-center text-sm text-muted-foreground">{t('loading')}</div>
             ) : submission ? (
               <SubmissionAnswers
                 submission={submission}
@@ -436,18 +436,18 @@ export default function GradingPanel({
                 t={t}
               />
             ) : (
-              <div className="flex h-32 items-center justify-center text-sm text-slate-500">{t('noData')}</div>
+              <div className="flex h-32 items-center justify-center text-sm text-muted-foreground">{t('noData')}</div>
             )}
           </ScrollArea>
 
           {/* Footer — overall feedback + action buttons */}
-          <DrawerFooter className="border-t bg-slate-50 px-6 py-4 gap-4">
+          <DrawerFooter className="border-t bg-muted px-6 py-4 gap-4">
             <div className="space-y-1.5">
               <Label
                 htmlFor="feedback"
                 className="text-sm font-medium"
               >
-                {t('feedback')} <span className="text-slate-400 font-normal">({t('optional')})</span>
+                {t('feedback')} <span className="text-muted-foreground font-normal">({t('optional')})</span>
               </Label>
               <Textarea
                 id="feedback"
@@ -547,13 +547,13 @@ function SubmissionAnswers({ submission, itemFeedbacks, onItemFeedbackChange, t 
   const isEditable = needsTeacherAction(submission.status) || submission.status === 'GRADED';
 
   if (!breakdown?.items?.length) {
-    return <p className="text-sm text-slate-500">{t('noBreakdown')}</p>;
+    return <p className="text-sm text-muted-foreground">{t('noBreakdown')}</p>;
   }
 
   return (
     <div className="space-y-4">
       {breakdown.needs_manual_review && (
-        <div className="rounded-md border border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-800">
+        <div className="rounded-md border border-secondary/50 bg-secondary/10 px-4 py-2 text-sm text-primary">
           {t('manualReviewRequired')}
         </div>
       )}
@@ -593,23 +593,23 @@ function AnswerItem({ item, index, itemFeedback, isEditable, onFeedbackChange, t
           {item.needs_manual_review && (
             <Badge
               variant="outline"
-              className="border-amber-300 bg-amber-50 text-amber-700 text-xs"
+              className="border-secondary/20 bg-secondary/10 text-secondary-foreground text-xs"
             >
               {t('needsReview')}
             </Badge>
           )}
-          <p className="text-sm font-medium text-slate-800">
+          <p className="text-sm font-medium text-foreground">
             {index + 1}. {item.item_text || item.item_id}
           </p>
         </div>
-        <span className="shrink-0 text-xs font-semibold text-slate-500">
+        <span className="shrink-0 text-xs font-semibold text-muted-foreground">
           {item.score} / {item.max_score}
         </span>
       </div>
 
       {item.user_answer !== null && (
-        <div className="rounded bg-slate-100 px-3 py-2 text-sm text-slate-700">
-          <span className="text-xs font-medium text-slate-500 mr-1">{t('studentAnswer')}:</span>
+        <div className="rounded bg-muted/70 px-3 py-2 text-sm text-muted-foreground">
+          <span className="text-xs font-medium text-muted-foreground mr-1">{t('studentAnswer')}:</span>
           {typeof item.user_answer === 'string' ? item.user_answer : JSON.stringify(item.user_answer, null, 2)}
         </div>
       )}
@@ -621,7 +621,7 @@ function AnswerItem({ item, index, itemFeedback, isEditable, onFeedbackChange, t
         </div>
       )}
 
-      {item.feedback && !item.needs_manual_review && <p className="text-xs text-slate-500 italic">{item.feedback}</p>}
+      {item.feedback && !item.needs_manual_review && <p className="text-xs text-muted-foreground italic">{item.feedback}</p>}
 
       {isEditable && (
         <div className="space-y-2 border-t pt-3">
@@ -637,9 +637,9 @@ function AnswerItem({ item, index, itemFeedback, isEditable, onFeedbackChange, t
                   placeholder="0"
                   value={itemFeedback.score}
                   onChange={(e) => onFeedbackChange('score', e.target.value)}
-                  className={cn('w-20 text-center text-xs', itemScoreInvalid && 'border-red-500')}
+                  className={cn('w-20 text-center text-xs', itemScoreInvalid && 'border-destructive')}
                 />
-                <span className="text-xs text-slate-400">/ {item.max_score}</span>
+                <span className="text-xs text-muted-foreground">/ {item.max_score}</span>
               </div>
             </div>
           </div>

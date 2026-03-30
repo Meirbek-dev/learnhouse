@@ -70,7 +70,7 @@ const CoursePaidOptions = ({ course }: CoursePaidOptionsProps) => {
   if (!linkedProducts)
     return (
       <div className="flex items-center justify-center p-8">
-        <div className="flex animate-pulse items-center rounded-md bg-slate-100 px-4 py-2 text-sm font-medium text-gray-600">
+        <div className="flex animate-pulse items-center rounded-md bg-muted px-4 py-2 text-sm font-medium text-muted-foreground">
           <Loader2
             size={16}
             className="mr-2 animate-spin"
@@ -85,21 +85,21 @@ const CoursePaidOptions = ({ course }: CoursePaidOptionsProps) => {
       {linkedProducts.data.map((product: any) => (
         <div
           key={product.id}
-          className="soft-shadow flex flex-col rounded-lg bg-slate-50/30 p-4"
+          className="flex flex-col rounded-lg bg-card p-4 shadow-sm ring-1 ring-border"
         >
           <div className="mb-2 flex items-start justify-between">
             <div className="flex flex-col items-start space-y-1">
               <Badge
-                className="flex w-fit items-center space-x-2 bg-gray-100/50"
+                className="flex w-fit items-center space-x-2"
                 variant="outline"
               >
                 {product.product_type === 'subscription' ? <RefreshCcw size={12} /> : <SquareCheck size={12} />}
-                <span className="text-sm">
+                <span className="text-sm text-muted-foreground">
                   {product.product_type === 'subscription' ? t('subscription') : t('oneTimePayment')}
                   {product.product_type === 'subscription' && ` ${t('perMonth')}`}
                 </span>
               </Badge>
-              <h3 className="text-lg font-bold">{product.name}</h3>
+              <h3 className="text-lg font-bold text-foreground">{product.name}</h3>
             </div>
           </div>
 
@@ -109,11 +109,11 @@ const CoursePaidOptions = ({ course }: CoursePaidOptionsProps) => {
                 expandedProducts[product.id] ? 'max-h-[1000px]' : 'max-h-24'
               } overflow-hidden`}
             >
-              <p className="text-gray-600">{product.description}</p>
+              <p className="text-muted-foreground">{product.description}</p>
               {product.benefits ? (
                 <div className="mt-2">
-                  <h4 className="text-sm font-semibold">{t('benefits')}</h4>
-                  <p className="text-sm text-gray-600">{product.benefits}</p>
+                  <h4 className="text-sm font-semibold text-foreground">{t('benefits')}</h4>
+                  <p className="text-sm text-muted-foreground">{product.benefits}</p>
                 </div>
               ) : null}
             </div>
@@ -124,7 +124,7 @@ const CoursePaidOptions = ({ course }: CoursePaidOptionsProps) => {
               onClick={() => {
                 toggleProductExpansion(product.id);
               }}
-              className="flex items-center text-sm text-slate-500 hover:text-slate-700"
+              className="flex items-center text-sm text-muted-foreground hover:text-foreground"
             >
               {expandedProducts[product.id] ? (
                 <>
@@ -140,22 +140,22 @@ const CoursePaidOptions = ({ course }: CoursePaidOptionsProps) => {
             </button>
           </div>
 
-          <div className="mt-2 flex items-center justify-between rounded-md bg-gray-100 p-2">
-            <span className="text-sm text-gray-600">
+          <div className="mt-2 flex items-center justify-between rounded-md bg-secondary/10 p-2">
+            <span className="text-sm text-muted-foreground">
               {product.price_type === 'customer_choice' ? t('minimumPrice') : t('price')}
             </span>
             <div className="flex flex-col items-end">
-              <span className="text-lg font-semibold">
+              <span className="text-lg font-semibold text-foreground">
                 {new Intl.NumberFormat('en-US', {
                   style: 'currency',
                   currency: product.currency,
                 }).format(product.amount)}
                 {product.product_type === 'subscription' && (
-                  <span className="ml-1 text-sm text-gray-500">{t('perMonthSuffix')}</span>
+                  <span className="ml-1 text-sm text-muted-foreground">{t('perMonthSuffix')}</span>
                 )}
               </span>
               {product.price_type === 'customer_choice' && (
-                <span className="text-sm text-gray-500">{t('choosePrice')}</span>
+                <span className="text-sm text-muted-foreground">{t('choosePrice')}</span>
               )}
             </div>
           </div>
