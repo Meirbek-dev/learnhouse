@@ -41,8 +41,8 @@ export default function PlatformPaymentsPage(props: { params: Promise<{ subpage:
   const { h1, h2 } = getPageTitle();
 
   return (
-    <div className="flex h-screen w-full flex-col bg-[#f8f8f8]">
-      <div className="soft-shadow z-10 shrink-0 bg-[#fcfbfc] pr-10 pl-10 tracking-tight">
+    <div className="flex h-screen w-full flex-col bg-muted">
+      <div className="soft-shadow z-10 shrink-0 bg-card pr-10 pl-10 tracking-tight">
         <BreadCrumbs type="payments" />
         <div className="my-2 py-2">
           <div className="flex w-100 flex-col space-y-1">

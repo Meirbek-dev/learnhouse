@@ -32,7 +32,7 @@ const PlatformAssignmentPage = () => {
 
   if (isMobile) {
     return (
-      <div className="flex h-screen w-full items-center justify-center bg-[#f8f8f8] p-4">
+      <div className="flex h-screen w-full items-center justify-center bg-muted p-4">
         <div className="rounded-lg bg-white p-6 text-center shadow-md">
           <h2 className="mb-4 text-xl font-bold">{t('desktopOnlyTitle')}</h2>
           <Monitor

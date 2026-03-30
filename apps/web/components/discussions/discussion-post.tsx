@@ -165,7 +165,7 @@ export default function DiscussionPost({
                         setEditContent(post.postMessage);
                       }}
                       disabled={!canUpdate}
-                      className="h-7 w-7 p-0 text-slate-500 hover:bg-blue-50 hover:text-blue-600"
+                      className="h-7 w-7 p-0 text-slate-500 hover:bg-primary/10 hover:text-blue-600"
                     >
                       <Edit size={12} />
                     </Button>
@@ -292,7 +292,7 @@ export default function DiscussionPost({
                 onClick={() => setReplyingTo(!replyingTo)}
                 className={cn(
                   'h-8 rounded-full px-3 text-slate-600 transition-all',
-                  replyingTo && 'bg-blue-50 text-blue-700',
+                  replyingTo && 'bg-primary/10 text-blue-700',
                 )}
               >
                 <Reply

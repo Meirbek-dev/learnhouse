@@ -77,7 +77,7 @@ const InfoCalloutComponent = (props: any) => {
           <NodeViewContent
             className={cn(
               'm-[5px] p-2 rounded-lg',
-              isEditable ? 'border-2 border-dashed border-[#1f3a8a12]' : 'border-none',
+              isEditable ? 'border-2 border-dashed border-muted/30' : 'border-none',
               options.size === 'sm'
                 ? 'max-sm:mx-[3px] max-sm:my-[3px] max-sm:p-1'
                 : 'max-sm:w-full max-sm:mx-0 max-sm:my-[5px] max-sm:p-2',

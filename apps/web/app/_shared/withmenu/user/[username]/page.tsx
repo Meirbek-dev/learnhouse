@@ -63,7 +63,7 @@ async function UserPage({ params }: UserPageProps) {
   if (hasError) {
     return (
       <div className="container mx-auto py-8">
-        <div className="soft-shadow rounded-xl bg-white p-6">
+        <div className="soft-shadow rounded-xl bg-card p-6">
           <p className="text-red-600">{t('profileLoadError')}</p>
         </div>
       </div>

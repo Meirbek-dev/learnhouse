@@ -217,7 +217,7 @@ export default function WhitelistManagement({
             filteredStudents.map((student) => (
               <div
                 key={student.user_id}
-                className="flex items-center space-x-2 rounded-md p-2 hover:bg-gray-50"
+                className="flex items-center space-x-2 rounded-md p-2 hover:bg-muted"
               >
                 <Checkbox
                   id={`student-${student.user_id}`}

@@ -64,7 +64,7 @@ const StripeConnectCallback = () => {
   }, [session, searchParams, t]);
 
   return (
-    <div className="flex h-screen w-full items-center justify-center bg-[#f8f8f8]">
+    <div className="flex h-screen w-full items-center justify-center bg-muted">
       <div className="flex flex-col items-center">
         <div className="mb-10">
           <Image

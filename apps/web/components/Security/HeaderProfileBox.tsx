@@ -100,7 +100,7 @@ export const HeaderProfileBox = () => {
   return (
     <div className="flex items-center">
       {session.status === 'unauthenticated' && (
-        <div className="flex grow rounded-lg p-1.5 px-2 text-sm font-bold text-gray-700">
+        <div className="flex grow rounded-lg p-1.5 px-2 text-sm font-bold text-foreground">
           <ul className="flex items-center space-x-3">
             <li>
               <Link
@@ -142,7 +142,7 @@ export const HeaderProfileBox = () => {
                 <UserAvatar size="sm" />
                 <div className="flex flex-col space-y-0">
                   <div className="flex items-center space-x-2">
-                    <p className="text-sm font-semibold text-gray-900 capitalize">{session.data.user.username}</p>
+                    <p className="text-sm font-semibold text-foreground capitalize">{session.data.user.username}</p>
                     {userRoleInfo && userRoleInfo.name !== 'USER' && (
                       <Tooltip>
                         <TooltipTrigger

@@ -299,7 +299,7 @@ export default function ExamTakingInterface({
             {question.answer_options.map((option, index) => (
               <div
                 key={index}
-                className="flex items-center space-x-3 rounded-lg border border-gray-200 p-4 transition-colors hover:border-gray-300 hover:bg-gray-50"
+                className="flex items-center space-x-3 rounded-lg border border-border p-4 transition-colors hover:border-gray-300 hover:bg-muted"
               >
                 <RadioGroupItem
                   value={index.toString()}
@@ -328,7 +328,7 @@ export default function ExamTakingInterface({
             {question.answer_options.map((option, index) => (
               <div
                 key={index}
-                className="flex items-center space-x-3 rounded-lg border border-gray-200 p-4 transition-colors hover:border-gray-300 hover:bg-gray-50"
+                className="flex items-center space-x-3 rounded-lg border border-border p-4 transition-colors hover:border-gray-300 hover:bg-muted"
               >
                 <Checkbox
                   id={`q${questionId}-${index}`}
@@ -361,7 +361,7 @@ export default function ExamTakingInterface({
               return (
                 <div
                   key={index}
-                  className="flex items-center gap-4 rounded-lg border border-gray-200 p-4"
+                  className="flex items-center gap-4 rounded-lg border border-border p-4"
                 >
                   <span className="min-w-[200px] text-base font-medium">{option.left}</span>
                   <span className="text-gray-400">→</span>
@@ -583,12 +583,12 @@ export default function ExamTakingInterface({
                   {t('questionNumber', { number: currentIndex + 1 })}
                 </span>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-normal text-gray-500">
+                  <span className="text-sm font-normal text-muted-foreground">
                     {t('points', { count: currentQuestion?.points ?? 0 })}
                   </span>
                 </div>
               </CardTitle>
-              <CardDescription className="mt-4 text-xl leading-relaxed text-gray-900">
+              <CardDescription className="mt-4 text-xl leading-relaxed text-foreground">
                 {currentQuestion?.question_text}
               </CardDescription>
             </CardHeader>
@@ -648,7 +648,7 @@ export default function ExamTakingInterface({
                   const answered = isAnswered(question.id);
                   const current = index === currentIndex;
 
-                  let bgColor = 'bg-gray-100 hover:bg-gray-200';
+                  let bgColor = 'bg-muted hover:bg-gray-200';
                   let textColor = 'text-gray-600';
 
                   if (current) {
@@ -683,7 +683,7 @@ export default function ExamTakingInterface({
                   <span className="text-gray-600">{t('current')}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="h-4 w-4 rounded bg-gray-100" />
+                  <div className="h-4 w-4 rounded bg-muted" />
                   <span className="text-gray-600">{t('unanswered')}</span>
                 </div>
               </div>
@@ -693,7 +693,7 @@ export default function ExamTakingInterface({
       </div>
 
       {/* Mobile bottom nav */}
-      <div className="fixed right-0 bottom-0 left-0 z-50 border-t bg-white lg:hidden">
+      <div className="fixed right-0 bottom-0 left-0 z-50 border-t bg-card lg:hidden">
         <div className="px-4 py-3">
           <div className="flex items-center gap-2">
             <Button
@@ -747,7 +747,7 @@ export default function ExamTakingInterface({
             <AlertDialogDescription>{t('confirmSubmissionMessage')}</AlertDialogDescription>
 
             <div className="space-y-3">
-              <div className="rounded-lg border bg-gray-50 p-4">
+              <div className="rounded-lg border bg-muted p-4">
                 <div className="grid gap-2 text-sm">
                   <div className="flex justify-between">
                     <span className="text-gray-600">{t('totalQuestions')}:</span>

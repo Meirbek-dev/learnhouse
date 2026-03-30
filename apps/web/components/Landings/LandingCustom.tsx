@@ -129,12 +129,12 @@ const LandingCustom = ({ landing, gamificationData }: LandingCustomProps) => {
             className="mx-2 w-full py-16 sm:mx-4 lg:mx-16"
           >
             <div
-              className={`soft-shadow flex flex-col items-center gap-8 rounded-xl bg-white p-6 md:flex-row md:gap-12 md:p-8 lg:p-12 ${
+              className={`soft-shadow flex flex-col items-center gap-8 rounded-xl bg-card p-6 md:flex-row md:gap-12 md:p-8 lg:p-12 ${
                 section.flow === 'right' ? 'md:flex-row-reverse' : ''
               }`}
             >
               <div className="w-full max-w-2xl flex-1">
-                <h2 className="mb-4 text-2xl font-bold tracking-tight text-gray-900 md:text-3xl">{section.title}</h2>
+                <h2 className="mb-4 text-2xl font-bold tracking-tight text-foreground md:text-3xl">{section.title}</h2>
                 <div className="prose prose-lg prose-gray max-w-none">
                   <p className="text-base leading-relaxed whitespace-pre-line text-gray-600 md:text-lg">
                     {section.text}
@@ -180,7 +180,7 @@ const LandingCustom = ({ landing, gamificationData }: LandingCustomProps) => {
             className="mx-2 w-full py-16 sm:mx-4 lg:mx-16"
           >
             {section.title ? (
-              <h2 className="mb-16 text-left text-2xl font-bold text-gray-900 md:text-3xl">{section.title}</h2>
+              <h2 className="mb-16 text-left text-2xl font-bold text-foreground md:text-3xl">{section.title}</h2>
             ) : null}
             <div className="flex w-full justify-center">
               <div className="flex max-w-7xl flex-wrap justify-center gap-16">
@@ -209,7 +209,7 @@ const LandingCustom = ({ landing, gamificationData }: LandingCustomProps) => {
             key={`people-${section.title}`}
             className="mx-2 w-full py-16 sm:mx-4 lg:mx-16"
           >
-            <h2 className="mb-10 text-left text-2xl font-bold text-gray-900 md:text-3xl">{section.title}</h2>
+            <h2 className="mb-10 text-left text-2xl font-bold text-foreground md:text-3xl">{section.title}</h2>
             <div className="flex flex-wrap justify-center gap-x-20 gap-y-8">
               {section.people.map((person, index) => (
                 <div
@@ -236,7 +236,7 @@ const LandingCustom = ({ landing, gamificationData }: LandingCustomProps) => {
                       </div>
                     )}
                   </div>
-                  <h3 className="text-center text-lg font-semibold text-gray-900">{person.name}</h3>
+                  <h3 className="text-center text-lg font-semibold text-foreground">{person.name}</h3>
                   <p className="mt-1 text-center text-sm text-gray-600">{person.description}</p>
                 </div>
               ))}
@@ -251,8 +251,8 @@ const LandingCustom = ({ landing, gamificationData }: LandingCustomProps) => {
               key={`featured-courses-${section.title}`}
               className="mx-2 w-full py-16 sm:mx-4 lg:mx-16"
             >
-              <h2 className="mb-6 text-left text-2xl font-bold text-gray-900 md:text-3xl">{section.title}</h2>
-              <div className="py-6 text-center text-gray-500">{t('loadingCourses')}</div>
+              <h2 className="mb-6 text-left text-2xl font-bold text-foreground md:text-3xl">{section.title}</h2>
+              <div className="py-6 text-center text-muted-foreground">{t('loadingCourses')}</div>
             </div>
           );
         }
@@ -264,7 +264,7 @@ const LandingCustom = ({ landing, gamificationData }: LandingCustomProps) => {
             key={`featured-courses-${section.title}`}
             className="mx-2 w-full py-16 sm:mx-4 lg:mx-16"
           >
-            <h2 className="mb-6 text-left text-2xl font-bold text-gray-900 md:text-3xl">{section.title}</h2>
+            <h2 className="mb-6 text-left text-2xl font-bold text-foreground md:text-3xl">{section.title}</h2>
             <div className="grid w-full grid-cols-1 gap-6 pb-12 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
               {featuredCourses.map((course: any) => (
                 <div
@@ -275,7 +275,7 @@ const LandingCustom = ({ landing, gamificationData }: LandingCustomProps) => {
                 </div>
               ))}
               {featuredCourses.length === 0 && (
-                <div className="col-span-full py-6 text-center text-gray-500">{t('noFeaturedCourses')}</div>
+                <div className="col-span-full py-6 text-center text-muted-foreground">{t('noFeaturedCourses')}</div>
               )}
             </div>
           </div>

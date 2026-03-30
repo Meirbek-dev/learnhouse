@@ -40,7 +40,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
       {/* Dev-only non-blocking script loader (client-side) */}
       {isDevEnv && <DevScriptLoader />}
-      <body className="bg-background/20">
+      <body>
         <Suspense fallback={null}>
           <LocalizedLayout>{children}</LocalizedLayout>
         </Suspense>

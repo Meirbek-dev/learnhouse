@@ -370,7 +370,7 @@ const VideoBlockComponent = (props: ExtendedNodeViewProps) => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
       >
-        <div className="flex flex-col space-y-4 rounded-lg px-5 py-6 [transition:all_0.2s_ease] bg-[#f9f9f9] border border-[#eaeaea]">
+        <div className="flex flex-col space-y-4 rounded-lg px-5 py-6 [transition:all_0.2s_ease] bg-muted border border-border">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2 text-sm text-zinc-500">
               <Video size={16} />

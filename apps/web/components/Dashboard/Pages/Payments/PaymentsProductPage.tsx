@@ -207,7 +207,7 @@ const PaymentsProductPage = () => {
     );
 
   return (
-    <div className="h-full w-full bg-[#f8f8f8]">
+    <div className="h-full w-full bg-muted">
       <div className="mx-auto pr-10 pl-10">
         <Modal
           isDialogOpen={isCreateModalOpen}

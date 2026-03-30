@@ -134,7 +134,7 @@ const ScenariosExtension: React.FC = (props: any) => {
                       setTitle(e.target.value);
                       props.updateAttributes({ title: e.target.value });
                     }}
-                    className="text-md w-full rounded-md border-2 border-dotted border-gray-200 bg-[#00008b00] p-2 font-bold text-slate-800"
+                    className="text-md w-full rounded-md border-2 border-dotted border-gray-200 bg-primary/10 p-2 font-bold text-slate-800"
                   />
                 </div>
               </div>

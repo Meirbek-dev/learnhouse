@@ -271,10 +271,10 @@ const QuizBlockComponent = (props: any) => {
                       onChange={(e) => {
                         changeQuestionValue(question.question_id, e.target.value);
                       }}
-                      className="w-full rounded-md border-2 border-dotted border-gray-200 bg-[#00008b00] p-2 text-base font-bold text-slate-800"
+                      className="w-full rounded-md border-2 border-dotted border-gray-200 bg-primary/10 p-2 text-base font-bold text-slate-800"
                     />
                   ) : (
-                    <p className="w-full rounded-md bg-[#00008b00] p-2 text-base font-bold break-words text-slate-800">
+                    <p className="w-full rounded-md bg-primary/10 p-2 text-base font-bold break-words text-slate-800">
                       {question.question}
                     </p>
                   )}
@@ -363,10 +363,10 @@ const QuizBlockComponent = (props: any) => {
                           changeAnswerValue(question.question_id, answer.answer_id, e.target.value);
                         }}
                         placeholder={t('answerPlaceholder')}
-                        className="mx-2 w-full rounded-md border-2 border-dotted border-gray-200 bg-[#00008b00] px-3 py-1.5 pr-6 text-sm font-bold text-neutral-600"
+                        className="mx-2 w-full rounded-md border-2 border-dotted border-gray-200 bg-primary/10 px-3 py-1.5 pr-6 text-sm font-bold text-neutral-600"
                       />
                     ) : (
-                      <p className="mx-2 w-full rounded-md bg-[#00008b00] px-3 py-1.5 pr-6 text-sm font-bold wrap-break-word text-neutral-600">
+                      <p className="mx-2 w-full rounded-md bg-primary/10 px-3 py-1.5 pr-6 text-sm font-bold wrap-break-word text-neutral-600">
                         {answer.answer}
                       </p>
                     )}

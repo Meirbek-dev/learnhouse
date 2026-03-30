@@ -225,10 +225,10 @@ const CourseClient = (props: any) => {
                     !course.thumbnail_type;
                   if (showVideo && course.thumbnail_video) {
                     return (
-                      <div className="relative w-full overflow-hidden rounded-lg shadow-xl ring-1 ring-black/10 ring-inset">
+                      <div className="relative w-full overflow-hidden rounded-lg shadow-xl ring-1 focus:ring-primary/20/10 ring-inset">
                         {course.thumbnail_type === 'both' && (
                           <div className="absolute top-3 right-3 z-10">
-                            <div className="flex space-x-1 rounded-lg bg-black/20 p-1 backdrop-blur-sm">
+                            <div className="flex space-x-1 rounded-lg bg-muted/20 p-1 backdrop-blur-sm">
                               <Button
                                 variant="ghost"
                                 size="sm"
@@ -238,8 +238,8 @@ const CourseClient = (props: any) => {
                                 className={cn(
                                   'h-8 px-2 text-xs',
                                   activeThumbnailType === 'image'
-                                    ? 'bg-white/90 text-gray-900 shadow-sm'
-                                    : 'text-white/80 hover:bg-white/10 hover:text-white',
+                                    ? 'bg-card/90 text-foreground shadow-sm'
+                                    : 'text-white/80 hover:bg-muted/20 hover:text-white',
                                 )}
                               >
                                 <ImageIcon
@@ -257,8 +257,8 @@ const CourseClient = (props: any) => {
                                 className={cn(
                                   'h-8 px-2 text-xs',
                                   activeThumbnailType === 'video'
-                                    ? 'bg-white/90 text-gray-900 shadow-sm'
-                                    : 'text-white/80 hover:bg-white/10 hover:text-white',
+                                    ? 'bg-card/90 text-foreground shadow-sm'
+                                    : 'text-white/80 hover:bg-muted/20 hover:text-white',
                                 )}
                               >
                                 <Video
@@ -284,7 +284,7 @@ const CourseClient = (props: any) => {
                   }
                   if (showImage && course.thumbnail_image) {
                     return (
-                      <div className="relative max-h-192 w-full overflow-hidden rounded-lg shadow-xl ring-1 ring-black/10 ring-inset">
+                      <div className="relative max-h-192 w-full overflow-hidden rounded-lg shadow-xl ring-1 focus:ring-primary/20/10 ring-inset">
                         <img
                           src={getCourseThumbnailMediaDirectory(course?.course_uuid, course?.thumbnail_image)}
                           alt={t('courseThumbnailAlt')}
@@ -292,7 +292,7 @@ const CourseClient = (props: any) => {
                         />
                         {course.thumbnail_type === 'both' && (
                           <div className="absolute top-3 right-3 z-10">
-                            <div className="flex space-x-1 rounded-lg bg-black/20 p-1 backdrop-blur-sm">
+                            <div className="flex space-x-1 rounded-lg bg-muted/20 p-1 backdrop-blur-sm">
                               <Button
                                 variant="ghost"
                                 size="sm"
@@ -302,8 +302,8 @@ const CourseClient = (props: any) => {
                                 className={cn(
                                   'h-8 px-2 text-xs',
                                   activeThumbnailType === 'image'
-                                    ? 'bg-white/90 text-gray-900 shadow-sm'
-                                    : 'text-white/80 hover:bg-white/10 hover:text-white',
+                                    ? 'bg-card/90 text-foreground shadow-sm'
+                                    : 'text-white/80 hover:bg-muted/20 hover:text-white',
                                 )}
                               >
                                 <ImageIcon
@@ -321,8 +321,8 @@ const CourseClient = (props: any) => {
                                 className={cn(
                                   'h-8 px-2 text-xs',
                                   activeThumbnailType === 'video'
-                                    ? 'bg-white/90 text-gray-900 shadow-sm'
-                                    : 'text-white/80 hover:bg-white/10 hover:text-white',
+                                    ? 'bg-card/90 text-foreground shadow-sm'
+                                    : 'text-white/80 hover:bg-muted/20 hover:text-white',
                                 )}
                               >
                                 <Video
@@ -339,7 +339,7 @@ const CourseClient = (props: any) => {
                   }
                   return (
                     <div
-                      className="relative h-auto w-full overflow-hidden rounded-lg bg-cover bg-center shadow-xl ring-1 ring-black/10 ring-inset"
+                      className="relative h-auto w-full overflow-hidden rounded-lg bg-cover bg-center shadow-xl ring-1 focus:ring-primary/20/10 ring-inset"
                       style={{
                         backgroundImage: `url('../empty_thumbnail.webp')`,
                         backgroundSize: 'auto',
@@ -402,7 +402,7 @@ const CourseClient = (props: any) => {
                       return (
                         <div
                           key={learningId}
-                          className="flex items-center space-x-2 font-semibold text-gray-500"
+                          className="flex items-center space-x-2 font-semibold text-muted-foreground"
                         >
                           <div className="rounded-full px-2 py-2">
                             {learningEmoji ? (
@@ -492,7 +492,7 @@ const CourseClient = (props: any) => {
                                 href={`${getAbsoluteUrl('')}/course/${courseuuid}/activity/${activity.activity_uuid.replace('activity_', '')}`}
                                 rel="noopener noreferrer"
                                 prefetch={false}
-                                className="activity-container group block px-4 py-4 transition-all duration-200 hover:bg-gray-50"
+                                className="activity-container group block px-4 py-4 transition-all duration-200 hover:bg-muted"
                               >
                                 <div className="flex items-center space-x-3">
                                   <div className="flex items-center">
@@ -522,7 +522,7 @@ const CourseClient = (props: any) => {
                                       {isActivityCurrent(activity) && (
                                         <Badge
                                           variant="secondary"
-                                          className="text-primary-foreground animate-pulse bg-blue-50"
+                                          className="text-primary-foreground animate-pulse bg-primary/10"
                                         >
                                           {t('current')}
                                         </Badge>

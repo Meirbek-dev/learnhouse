@@ -42,7 +42,7 @@ export function LoadingSkeleton({
     ),
 
     card: (
-      <div className={`${baseClasses} rounded-lg border border-gray-200 p-4 dark:border-gray-700 ${className}`}>
+      <div className={`${baseClasses} rounded-lg border border-border p-4 dark:border-gray-700 ${className}`}>
         <div className={`h-6 w-1/3 rounded-md ${skeletonBg} mb-4`} />
         {renderLines(lines)}
         <div className={`h-10 w-24 rounded-md ${skeletonBg} mt-4`} />
@@ -135,7 +135,7 @@ export async function PageTransitionLoader({
   };
 
   const containerClasses = fullScreen
-    ? 'fixed inset-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm z-50'
+    ? 'fixed inset-0 bg-card/80 dark:bg-slate-950/80 backdrop-blur-sm z-50'
     : 'min-h-[200px]';
 
   const t = await getTranslations('Components.PageLoading');
@@ -158,7 +158,7 @@ export async function PageTransitionLoader({
         </div>
 
         {/* Optional loading text */}
-        <div className="text-sm font-medium text-gray-500 dark:text-gray-400">{t('loading')}</div>
+        <div className="text-sm font-medium text-muted-foreground dark:text-gray-400">{t('loading')}</div>
       </div>
     </div>
   );

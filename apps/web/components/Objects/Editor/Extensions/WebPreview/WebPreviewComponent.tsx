@@ -424,7 +424,7 @@ const WebPreviewComponent = ({ node, updateAttributes, deleteNode }: WebPreviewP
                 ) : null}
                 <div className="pt-4 pb-2">
                   <span
-                    className="mb-1.5 text-lg leading-tight font-semibold text-[#232323] no-underline hover:no-underline focus:no-underline active:no-underline"
+                    className="mb-1.5 text-lg leading-tight font-semibold text-foreground no-underline hover:no-underline focus:no-underline active:no-underline"
                     style={{ textDecoration: 'none', borderBottom: 'none' }}
                   >
                     {previewData.title}

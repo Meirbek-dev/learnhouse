@@ -64,7 +64,7 @@ const TableOfContents = ({ editor }: TableOfContentsProps) => {
             style={{ paddingLeft: `${(heading.level - 1) * 1.2}rem` }}
             className="my-2 !list-none flex items-start gap-2"
           >
-            <span className="flex shrink-0 items-center mt-[0.1rem] text-[#23272f]">
+            <span className="flex shrink-0 items-center mt-[0.1rem] text-foreground">
               <Check
                 size={15}
                 strokeWidth={1.7}
@@ -75,7 +75,7 @@ const TableOfContents = ({ editor }: TableOfContentsProps) => {
                 fontWeight: heading.level === 1 ? 500 : 400,
                 fontSize: heading.level === 1 ? '1rem' : heading.level === 2 ? '0.97rem' : '0.95rem',
               }}
-              className="block flex-1 min-w-0 p-0 text-[#23272f] leading-[1.4] no-underline break-words hyphens-auto bg-transparent transition-none hover:text-[#007acc]"
+              className="block flex-1 min-w-0 p-0 text-foreground leading-[1.4] no-underline break-words hyphens-auto bg-transparent transition-none hover:text-primary"
               href={`#${heading.id}`}
             >
               {heading.text}
