@@ -6,7 +6,7 @@ import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { BookCopy, Menu, Signpost, SquareLibrary, X } from 'lucide-react';
 import { LocaleSwitcher } from '@/components/Utils/LocaleSwitcher';
 import { SearchBar } from '@/components/Objects/Search/SearchBar';
-import { useEffect, useState, useSyncExternalStore } from 'react';
+import { useEffect, useState } from 'react';
 import platformLogoFull from '@public/platform_logo_full.svg';
 import { getAbsoluteUrl } from '@/services/config/config';
 import { Button } from '@/components/ui/button';
@@ -62,20 +62,34 @@ export default function NavBar() {
   const session = usePlatformSession();
   const isAuthenticated = session.status === 'authenticated';
 
-  // Use useSyncExternalStore for focus mode from localStorage
+  // Use local state for focus mode from localStorage (avoid getSnapshot sync warning)
   const isOnActivityPage = pathname?.includes('/activity/') ?? false;
+  const [isFocusMode, setIsFocusMode] = useState(false);
 
-  function subscribe(callback: () => void) {
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'globalFocusMode' && isOnActivityPage) {
-        callback();
+  useEffect(() => {
+    if (!isOnActivityPage) {
+      setIsFocusMode(false);
+      return;
+    }
+
+    const readFocusMode = () => {
+      try {
+        return localStorage.getItem('globalFocusMode') === 'true';
+      } catch {
+        return false;
       }
     };
 
-    const handleFocusModeChange = (e: CustomEvent) => {
-      if (isOnActivityPage) {
-        callback();
+    setIsFocusMode(readFocusMode());
+
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'globalFocusMode') {
+        setIsFocusMode(readFocusMode());
       }
+    };
+
+    const handleFocusModeChange = () => {
+      setIsFocusMode(readFocusMode());
     };
 
     globalThis.addEventListener('storage', handleStorageChange);
@@ -85,23 +99,7 @@ export default function NavBar() {
       globalThis.removeEventListener('storage', handleStorageChange);
       globalThis.removeEventListener('focusModeChange', handleFocusModeChange as EventListener);
     };
-  }
-
-  function getSnapshot() {
-    if (!isOnActivityPage) return 'false';
-    try {
-      return localStorage.getItem('globalFocusMode') ?? 'false';
-    } catch {
-      return 'false';
-    }
-  }
-
-  function getServerSnapshot() {
-    return 'false';
-  }
-
-  const isFocusModeString = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
-  const isFocusMode = isFocusModeString === 'true';
+  }, [isOnActivityPage]);
 
   useEffect(() => {
     // Scroll detection for header background
