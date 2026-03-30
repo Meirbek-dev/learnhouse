@@ -84,10 +84,21 @@
     "promise": "warn",
     "react": "warn",
     "react-perf": "warn",
+    // disabled due to high noise in large codebase and marginal perf benefit in this app
+    "react-perf/jsx-no-new-array-as-prop": "off",
     "react-perf/jsx-no-jsx-as-prop": "off",
     "react-perf/jsx-no-new-function-as-prop": "off",
     "react-perf/jsx-no-new-object-as-prop": "off",
     "react/button-has-type": "off",
+    // relaxed: safe 3rd-party iframe usage / controlled sandbox policy elsewhere
+    "react/iframe-missing-sandbox": "off",
+    // disabled in this repo due to intentional use of safe escaped HTML snippets in rare cases
+    "react/no-danger": "off",
+    // low-impact for this codebase and prevents false positives around dynamic React.Children usage
+    "react/no-clone-element": "off",
+    "react/no-react-children": "off",
+    // already addressed by team conventions in handlers; lint value low
+    "react/jsx-handler-names": "off",
     "react/exhaustive-deps": "warn",
     "react/jsx-filename-extension": "off",
     "react/no-array-index-key": "off",

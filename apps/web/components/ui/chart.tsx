@@ -130,7 +130,7 @@ function ChartTooltipContent({
     indicator?: 'line' | 'dot' | 'dashed';
     nameKey?: string;
     labelKey?: string;
-  } & Omit<RechartsPrimitive.DefaultTooltipContentProps<TooltipValueType>, 'accessibilityLayer'>) {
+  } & Omit<RechartsPrimitive.DefaultTooltipContentProps, 'accessibilityLayer'>) {
   const { config } = useChart();
 
   const tooltipLabel = React.useMemo(() => {
