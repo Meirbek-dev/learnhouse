@@ -109,7 +109,8 @@ type AuthHandlers = NextAuthResult['handlers'];
 const createAuthConfig = (): NextAuthConfig => {
   const serverConfig = getServerConfig();
   const rawCookieDomain = !isDevEnv ? serverConfig.cookieDomain : undefined;
-  const cookieDomain = rawCookieDomain ? `.${rawCookieDomain.replace(/^\.+/, '')}` : undefined;
+  const normalizedCookieDomain = rawCookieDomain ? rawCookieDomain.replace(/^\.+/, '') : undefined;
+  const cookieDomain = normalizedCookieDomain ? `.${normalizedCookieDomain}` : undefined;
   const cookieSecure = !isDevEnv && serverConfig.cookieSecure;
   const cookieNamePrefix = cookieSecure ? '__Secure-' : '';
 
@@ -225,7 +226,7 @@ const createAuthConfig = (): NextAuthConfig => {
           httpOnly: true,
           sameSite: 'lax' as const,
           path: '/',
-          domain: cookieDomain ? `.${cookieDomain}` : undefined,
+          domain: cookieDomain || undefined,
           secure: cookieSecure,
         },
       },
