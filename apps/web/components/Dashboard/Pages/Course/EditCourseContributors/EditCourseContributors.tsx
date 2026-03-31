@@ -371,7 +371,7 @@ const EditCourseContributors = () => {
                 contributors.find((contributor) => contributor.user_id === contributorId)?.authorship_status,
             },
             {
-              accessToken: access_token as string,
+              accessToken: access_token!,
               lastKnownUpdateDate: courseStructure.update_date,
             },
           );

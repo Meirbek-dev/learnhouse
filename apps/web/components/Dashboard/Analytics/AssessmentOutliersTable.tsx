@@ -25,7 +25,8 @@ export default function AssessmentOutliersTable({ rows, storageKey, serverPagina
         <div>
           <Link
             href={`/dash/analytics/assessments/${row.original.assessment_type}/${row.original.assessment_id}`}
-            className="font-medium text-foreground hover:text-emerald-700"
+            className="font-medium text-foreground hover:text-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:ring-offset-background dark:focus-visible:ring-offset-slate-900"
+            aria-label={t('assessmentOutliers.viewAssessment', { title: row.original.title })}
           >
             {row.original.title}
           </Link>
@@ -90,6 +91,9 @@ export default function AssessmentOutliersTable({ rows, storageKey, serverPagina
         <CardDescription>{t('assessmentOutliers.description')}</CardDescription>
       </CardHeader>
       <CardContent>
+        <div className="sr-only" aria-live="polite">
+          {t('assessmentOutliers.rowCount', { count: rows.length })}
+        </div>
         <AnalyticsDataTable
           columns={columns}
           data={rows}

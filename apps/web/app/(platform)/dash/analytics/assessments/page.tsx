@@ -46,8 +46,8 @@ async function PlatformAnalyticsAssessmentsPageInner(props: {
     if (query.bucket_start) params.set('bucket_start', query.bucket_start);
 
     return (
-      <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-6 px-4 py-6 md:px-6 xl:px-8">
-        <Card className="border-slate-200 bg-background shadow-sm">
+      <main role="main" className="mx-auto flex w-full max-w-[1440px] flex-col gap-6 px-4 py-6 md:px-6 xl:px-8">
+        <Card className="border-slate-200 bg-card text-card-foreground shadow-sm dark:border-slate-700 dark:bg-slate-800">
           <CardContent className="space-y-4">
             <TeacherFilterBar
               path="/dash/analytics/assessments"
@@ -56,7 +56,11 @@ async function PlatformAnalyticsAssessmentsPageInner(props: {
               courseOptions={assessments.course_options}
               cohortOptions={assessments.cohort_options}
             />
-            <div className="flex items-center justify-between text-sm text-slate-500">
+            <div
+              className="flex items-center justify-between text-sm text-slate-600 dark:text-slate-300"
+              aria-live="polite"
+              aria-atomic="true"
+            >
               <span>
                 {t('table.showingRows', {
                   from: (assessments.page - 1) * assessments.page_size + 1,
@@ -71,11 +75,12 @@ async function PlatformAnalyticsAssessmentsPageInner(props: {
               serverPaginated
             />
             {totalPages > 1 ? (
-              <div className="flex items-center justify-end gap-2">
+              <nav aria-label={t('table.pagination')} className="flex items-center justify-end gap-2">
                 <Button
                   variant="outline"
                   size="sm"
                   disabled={assessments.page <= 1}
+                  aria-label={t('table.prev')}
                   render={
                     <Link
                       href={`/dash/analytics/assessments?${new URLSearchParams({ ...Object.fromEntries(params.entries()), page: String(Math.max(1, assessments.page - 1)), page_size: String(assessments.page_size) }).toString()}`}
@@ -84,13 +89,14 @@ async function PlatformAnalyticsAssessmentsPageInner(props: {
                 >
                   {t('table.prev')}
                 </Button>
-                <span className="text-sm text-slate-600">
+                <span className="text-sm text-slate-600 dark:text-slate-300">
                   {t('table.page', { current: assessments.page, total: totalPages })}
                 </span>
                 <Button
                   variant="outline"
                   size="sm"
                   disabled={assessments.page >= totalPages}
+                  aria-label={t('table.next')}
                   render={
                     <Link
                       href={`/dash/analytics/assessments?${new URLSearchParams({ ...Object.fromEntries(params.entries()), page: String(Math.min(totalPages, assessments.page + 1)), page_size: String(assessments.page_size) }).toString()}`}
@@ -99,11 +105,11 @@ async function PlatformAnalyticsAssessmentsPageInner(props: {
                 >
                   {t('table.next')}
                 </Button>
-              </div>
+              </nav>
             ) : null}
           </CardContent>
         </Card>
-      </div>
+      </main>
     );
   } catch (error) {
     return (
