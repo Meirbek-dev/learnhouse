@@ -26,7 +26,8 @@ export function generateUUID(): string {
   }
   // Minimal fallback (RFC 4122 v4 shape) — no external dependency needed.
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-    const r = (Math.random() * 16) | 0;
-    return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16);
+    const r = Math.floor(Math.random() * 16);
+    const value = c === 'x' ? r : ((r % 4) + 8);
+    return value.toString(16);
   });
 }

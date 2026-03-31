@@ -47,12 +47,12 @@ export default function PlatformSettingsPage(props: { params: Promise<{ subpage:
   const t = useTranslations('DashPage.PlatformSettings');
   const params = use(props.params);
 
-  const currentTab = useMemo(
-    () => SETTING_TABS.find((tab) => tab.id === params.subpage) || SETTING_TABS[0],
-    [params.subpage],
-  );
-  const pageTitle = useMemo(() => t(currentTab!.titleKey), [currentTab, t]);
-  const pageDescription = useMemo(() => t(currentTab!.descriptionKey), [currentTab, t]);
+  const currentTab = useMemo<TabItem>(() => {
+    const tab = SETTING_TABS.find((tabItem) => tabItem.id === params.subpage);
+    return tab ?? (SETTING_TABS[0] as TabItem);
+  }, [params.subpage]);
+  const pageTitle = useMemo(() => t(currentTab.titleKey), [currentTab, t]);
+  const pageDescription = useMemo(() => t(currentTab.descriptionKey), [currentTab, t]);
 
   return (
     <div className="bg-background flex h-full w-full flex-col">

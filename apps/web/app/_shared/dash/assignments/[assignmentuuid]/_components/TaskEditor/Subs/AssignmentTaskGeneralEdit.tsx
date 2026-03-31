@@ -86,12 +86,12 @@ export const AssignmentTaskGeneralEdit = () => {
             return;
           }
 
-          const res = await updateAssignmentTask(
-            values,
+          const res = await updateAssignmentTask({
+            body: values,
             assignmentTaskUUID,
             assignmentUUID,
             access_token,
-          );
+          });
           if (res.success) {
             reload();
             toast.success(t('saveSuccess'));
@@ -283,13 +283,13 @@ const UpdateTaskRef = () => {
       return '';
     }
 
-    return getTaskRefFileDir(
+    return getTaskRefFileDir({
       courseUUID,
       activityUUID,
       assignmentUUID,
       assignmentTaskUUID,
-      fileName,
-    );
+      fileID: fileName,
+    });
   };
 
   const validateFile = (file: File | null) => {
@@ -327,12 +327,12 @@ const UpdateTaskRef = () => {
         return;
       }
 
-      const res = await updateReferenceFile(
+      const res = await updateReferenceFile({
         file,
         assignmentTaskUUID,
         assignmentUUID,
         access_token,
-      );
+      });
 
       if (!res.success) {
         setError(res.data?.detail || t('uploadFailed'));

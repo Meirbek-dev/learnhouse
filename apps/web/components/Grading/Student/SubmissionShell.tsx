@@ -112,7 +112,7 @@ export default function SubmissionShell({
           <bannerConfig.icon className={`h-4 w-4 ${bannerConfig.iconClass}`} />
           <AlertTitle className="flex items-center gap-2">
             {t(bannerConfig.titleKey)}
-            <SubmissionStatusBadge status={status!} />
+            <SubmissionStatusBadge status={status as SubmissionStatus} />
           </AlertTitle>
           <AlertDescription>{t(bannerConfig.descKey)}</AlertDescription>
 

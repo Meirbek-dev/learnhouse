@@ -324,7 +324,10 @@ export default function GradingPanel({
                   variant="outline"
                   size="sm"
                   disabled={!hasPrev}
-                  onClick={() => tryNavigate(allSubmissionUuids[currentIndex - 1]!)}
+                  onClick={() => {
+                    const prevUuid = allSubmissionUuids[currentIndex - 1];
+                    if (prevUuid) tryNavigate(prevUuid);
+                  }}
                 >
                   <ChevronLeft className="h-4 w-4" />
                   {t('previous')}
@@ -336,7 +339,10 @@ export default function GradingPanel({
                   variant="outline"
                   size="sm"
                   disabled={!hasNext}
-                  onClick={() => tryNavigate(allSubmissionUuids[currentIndex + 1]!)}
+                  onClick={() => {
+                    const nextUuid = allSubmissionUuids[currentIndex + 1];
+                    if (nextUuid) tryNavigate(nextUuid);
+                  }}
                 >
                   {t('next')}
                   <ChevronRight className="h-4 w-4" />

@@ -365,7 +365,11 @@ export default function QuestionManagement({
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => promptDeleteQuestion(question.question_uuid!)}
+                              onClick={() => {
+                                if (question.question_uuid) {
+                                  promptDeleteQuestion(question.question_uuid);
+                                }
+                              }}
                               disabled={isDeleting}
                             >
                               <Trash2 className="h-4 w-4 text-red-600" />

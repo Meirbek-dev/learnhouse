@@ -345,11 +345,12 @@ function useStreamingChat(activityUuid: string, accessToken: string) {
           resolve(finalMessage);
         };
 
-        const streamFn = aiEditorState.aichat_uuid
+        const aichatUuid = aiEditorState.aichat_uuid;
+        const streamFn = aichatUuid
           ? () =>
               sendActivityAIChatMessageStream(
                 message,
-                aiEditorState.aichat_uuid!,
+                aichatUuid,
                 activityUuid,
                 accessToken,
                 handleChunk,

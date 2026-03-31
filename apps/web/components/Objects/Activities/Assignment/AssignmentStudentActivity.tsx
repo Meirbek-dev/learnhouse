@@ -166,13 +166,18 @@ const TaskCard = ({ task, index, assignments, t }: TaskCardProps) => {
       return null;
     }
 
-    return getTaskRefFileDir(
-      assignments.course_object.course_uuid,
-      assignments.activity_object.activity_uuid,
-      assignments.assignment_object.assignment_uuid,
-      task.assignment_task_uuid,
-      task.reference_file!,
-    );
+    const referenceFileId = task.reference_file;
+    if (!referenceFileId) {
+      return null;
+    }
+
+    return getTaskRefFileDir({
+      courseUUID: assignments.course_object.course_uuid,
+      activityUUID: assignments.activity_object.activity_uuid,
+      assignmentUUID: assignments.assignment_object.assignment_uuid,
+      assignmentTaskUUID: task.assignment_task_uuid,
+      fileID: referenceFileId,
+    });
   }, [hasReferenceFile, assignments, task]);
 
   return (

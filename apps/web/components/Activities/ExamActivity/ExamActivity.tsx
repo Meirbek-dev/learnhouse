@@ -234,6 +234,10 @@ export default function ExamActivity({ activity, course }: ExamActivityProps) {
     mutateAttempts();
   }, [mutateAttempts]);
 
+  if (!accessToken) {
+    return <div className="p-4 text-red-600">{t('noAccessToken')}</div>;
+  }
+
   if (state.phase === 'loading' || !exam || !questions) {
     return <PageLoading />;
   }
@@ -299,7 +303,7 @@ export default function ExamActivity({ activity, course }: ExamActivityProps) {
               <QuestionManagement
                 examUuid={examUuid}
                 questions={questions}
-                accessToken={accessToken!}
+                accessToken={accessToken}
                 onQuestionsChange={() => mutateQuestions()}
               />
             </TabsContent>
@@ -311,7 +315,7 @@ export default function ExamActivity({ activity, course }: ExamActivityProps) {
               <ExamSettings
                 exam={exam}
                 courseUuid={course.course_uuid}
-                accessToken={accessToken!}
+                accessToken={accessToken}
                 onSettingsUpdated={() => mutateExam()}
               />
             </TabsContent>
@@ -324,7 +328,7 @@ export default function ExamActivity({ activity, course }: ExamActivityProps) {
                 <ExamResultsDashboard
                   examUuid={examUuid}
                   attempts={allAttempts}
-                  accessToken={accessToken!}
+                  accessToken={accessToken}
                   onViewAttempt={(attemptUuid) => {
                     toast.info(t('viewAttempt', { attempt: attemptUuid }));
                   }}
@@ -346,7 +350,7 @@ export default function ExamActivity({ activity, course }: ExamActivityProps) {
           exam={state.exam}
           questionCount={state.questions.length}
           userAttempts={state.userAttempts}
-          accessToken={accessToken!}
+          accessToken={accessToken}
           onStartExam={handleStartExam}
           onReviewAttempt={handleReviewAttempt}
           isTeacher={isTeacher}
@@ -363,7 +367,7 @@ export default function ExamActivity({ activity, course }: ExamActivityProps) {
           exam={state.exam}
           questions={state.questions}
           attempt={state.attempt}
-          accessToken={accessToken!}
+          accessToken={accessToken}
           onComplete={handleCompleteExam}
         />
       </ExamLayout>

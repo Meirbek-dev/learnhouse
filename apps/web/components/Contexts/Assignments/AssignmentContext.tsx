@@ -24,6 +24,40 @@ export const AssignmentContext = createContext<AssignmentContextType>({
   activity_object: null,
 });
 
+interface GetAssignmentsFullParams {
+  assignment: any;
+  assignment_tasks: any[] | null;
+  course_uuid: string | undefined;
+  course_object: any | null;
+  activity_uuid: string | undefined;
+  activity_object: any | null;
+}
+
+const getAssignmentsFull = ({
+  assignment,
+  assignment_tasks,
+  course_uuid,
+  course_object,
+  activity_uuid,
+  activity_object,
+}: GetAssignmentsFullParams): AssignmentContextType => {
+  if (assignment && assignment_tasks && (!course_uuid || course_object) && (!activity_uuid || activity_object)) {
+    return {
+      assignment_object: assignment,
+      assignment_tasks,
+      course_object,
+      activity_object,
+    };
+  }
+
+  return {
+    assignment_object: null,
+    assignment_tasks: null,
+    course_object: null,
+    activity_object: null,
+  };
+};
+
 export const AssignmentProvider = ({
   children,
   assignment_uuid,
@@ -62,19 +96,14 @@ export const AssignmentProvider = ({
   // Derive assignmentsFull (memoized to avoid unnecessary context value changes)
   const assignmentsFull: AssignmentContextType = useMemo(
     () =>
-      assignment && assignment_tasks && (!course_uuid || course_object) && (!activity_uuid || activity_object)
-        ? {
-            assignment_object: assignment,
-            assignment_tasks,
-            course_object,
-            activity_object,
-          }
-        : {
-            assignment_object: null,
-            assignment_tasks: null,
-            course_object: null,
-            activity_object: null,
-          },
+      getAssignmentsFull({
+        assignment,
+        assignment_tasks,
+        course_uuid,
+        course_object,
+        activity_uuid,
+        activity_object,
+      }),
     [assignment, assignment_tasks, course_uuid, course_object, activity_uuid, activity_object],
   );
 

@@ -43,7 +43,12 @@ async function PlatformAnalyticsAssessmentDetailPageInner(props: {
   }
 
   try {
-    const detail = await getTeacherAssessmentDetail(assessmentType, Number(assessmentId), accessToken, query);
+    const detail = await getTeacherAssessmentDetail({
+    assessmentType,
+    assessmentId: Number(assessmentId),
+    accessToken,
+    query,
+  });
     return (
       <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-6 px-4 py-6 md:px-6 xl:px-8">
         <Card className="border-slate-200 bg-white/90 shadow-sm">

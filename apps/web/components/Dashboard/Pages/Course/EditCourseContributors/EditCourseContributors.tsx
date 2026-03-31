@@ -164,6 +164,12 @@ const StatusDropdown = ({
   </DropdownMenu>
 );
 
+const sortContributors = (list: Contributor[]) => {
+  const creator = list.find((c) => c.authorship === 'CREATOR');
+  const others = list.filter((c) => c.authorship !== 'CREATOR');
+  return creator ? [creator, ...others] : others;
+};
+
 const EditCourseContributors = () => {
   const t = useTranslations('DashPage.EditCourseContributors');
   const locale = useLocale() as Locale;
@@ -225,7 +231,13 @@ const EditCourseContributors = () => {
       setIsSearching(true);
       setSearchOpen(true);
       try {
-        const response = await searchContent(debouncedSearch, 1, 5, null, access_token);
+        const response = await searchContent({
+          query: debouncedSearch,
+          page: 1,
+          limit: 5,
+          next: null,
+          access_token,
+        });
         if (response.success && response.data?.users) {
           const users = response.data.users.map((user: SearchUser) =>
             Object.assign(user, {
@@ -284,9 +296,9 @@ const EditCourseContributors = () => {
         toast.success(t('successfullyAddedContributors', { count: result.successful.length }));
       }
 
-      result.failed.forEach((failure) => {
+      for (const failure of result.failed) {
         toast.error(t('failedToAddContributor', { username: failure.username, reason: failure.reason }));
-      });
+      }
 
       const failedUsernames = new Set(result.failed.map((failure) => failure.username));
       setSelectedUsers(result.failed.map((failure) => failure.username));
@@ -330,6 +342,11 @@ const EditCourseContributors = () => {
         authorship: data.authorship || currentContributor.authorship,
         authorship_status: data.authorship_status || currentContributor.authorship_status,
       };
+      if (!access_token) {
+        toast.error(t('noAccessToken'));
+        return;
+      }
+
       const res = await updateContributorMutation(contributorId, updatedData, {
         accessToken: access_token,
         lastKnownUpdateDate: courseStructure.update_date,
@@ -354,7 +371,7 @@ const EditCourseContributors = () => {
                 contributors.find((contributor) => contributor.user_id === contributorId)?.authorship_status,
             },
             {
-              accessToken: access_token!,
+              accessToken: access_token as string,
               lastKnownUpdateDate: courseStructure.update_date,
             },
           );
@@ -380,12 +397,6 @@ const EditCourseContributors = () => {
         return `${getCourseWorkflowToneClass('info')} hover:bg-muted`;
       }
     }
-  };
-
-  const sortContributors = (list: Contributor[]) => {
-    const creator = list.find((c) => c.authorship === 'CREATOR');
-    const others = list.filter((c) => c.authorship !== 'CREATOR');
-    return creator ? [creator, ...others] : others;
   };
 
   const handleContributorSelect = (userId: number) => {
@@ -415,9 +426,9 @@ const EditCourseContributors = () => {
         toast.success(t('successfullyRemovedContributors', { count: result.successful.length }));
       }
 
-      result.failed.forEach((failure) => {
+      for (const failure of result.failed) {
         toast.error(t('failedToRemoveContributor', { username: failure.username, reason: failure.reason }));
-      });
+      }
 
       const failedUsernames = new Set(result.failed.map((failure) => failure.username));
       setSelectedContributors(

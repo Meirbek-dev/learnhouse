@@ -229,13 +229,13 @@ const SearchPage = () => {
 
       setIsLoading(true);
       try {
-        const response = await searchContent(
+        const response = await searchContent({
           query,
           page,
-          perPage,
-          selectedType === 'all' ? null : selectedType,
-          session?.data?.tokens?.access_token,
-        );
+          limit: perPage,
+          next: selectedType === 'all' ? null : selectedType,
+          access_token: session?.data?.tokens?.access_token,
+        });
 
         // The response data is directly what we need
         const results = response.data;

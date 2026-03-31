@@ -47,13 +47,13 @@ const PDFBlockComponent = (props: any) => {
   const handleDownload = () => {
     if (!fileId) return;
 
-    const pdfUrl = getActivityBlockMediaDirectory(
-      course?.courseStructure.course_uuid,
-      props.extension.options.activity.activity_uuid,
-      blockObject.block_uuid,
+    const pdfUrl = getActivityBlockMediaDirectory({
+      courseId: course?.courseStructure.course_uuid || '',
+      activityId: props.extension.options.activity.activity_uuid,
+      blockId: blockObject.block_uuid,
       fileId,
-      'pdfBlock',
-    );
+      type: 'pdfBlock',
+    });
 
     const link = document.createElement('a');
     link.href = pdfUrl || '';
@@ -71,13 +71,13 @@ const PDFBlockComponent = (props: any) => {
   };
 
   const pdfUrl = blockObject
-    ? getActivityBlockMediaDirectory(
-        course?.courseStructure.course_uuid,
-        props.extension.options.activity.activity_uuid,
-        blockObject.block_uuid,
-        fileId || '',
-        'pdfBlock',
-      )
+    ? getActivityBlockMediaDirectory({
+        courseId: course?.courseStructure.course_uuid || '',
+        activityId: props.extension.options.activity.activity_uuid,
+        blockId: blockObject.block_uuid,
+        fileId: fileId || '',
+        type: 'pdfBlock',
+      })
     : null;
 
   return (

@@ -92,8 +92,8 @@ const NewAssignment = ({ submitActivity, chapterId, course, closeModal }: any) =
       void (async () => {
         try {
           // Use combined endpoint for better performance
-          const res = await createAssignmentWithActivity(
-            {
+          const res = await createAssignmentWithActivity({
+            body: {
               title: values.name,
               description: values.description,
               due_date: values.dueDate,
@@ -102,9 +102,9 @@ const NewAssignment = ({ submitActivity, chapterId, course, closeModal }: any) =
               chapter_id: chapterId,
             },
             chapterId,
-            values.name,
-            session.data?.tokens?.access_token,
-          );
+            activityName: values.name,
+            access_token: session.data?.tokens?.access_token,
+          });
 
           if (res.success) {
             toast.success(t('createSuccess'));

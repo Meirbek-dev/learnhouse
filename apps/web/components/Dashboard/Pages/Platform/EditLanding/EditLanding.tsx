@@ -895,13 +895,14 @@ const HeroSectionEditor: FC<{
               <Select
                 value={section.background.type}
                 onValueChange={(value) => {
+                  const selectedType = value || 'solid';
                   onChange({
                     ...section,
                     background: {
-                      type: value!,
-                      color: value === 'solid' ? '#ffffff' : undefined,
-                      colors: value === 'gradient' ? PREDEFINED_GRADIENTS.sunrise.colors : undefined,
-                      image: value === 'image' ? '' : undefined,
+                      type: selectedType,
+                      color: selectedType === 'solid' ? '#ffffff' : undefined,
+                      colors: selectedType === 'gradient' ? PREDEFINED_GRADIENTS.sunrise.colors : undefined,
+                      image: selectedType === 'image' ? '' : undefined,
                     },
                   });
                 }}
@@ -1623,7 +1624,7 @@ const TextAndImageSectionEditor: FC<{
           <Select
             value={section.flow}
             onValueChange={(value) => {
-              onChange({ ...section, flow: value! });
+              onChange({ ...section, flow: value || section.flow });
             }}
             items={makeFlowItems(t)}
           >

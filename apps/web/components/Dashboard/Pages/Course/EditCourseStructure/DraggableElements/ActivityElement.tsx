@@ -135,7 +135,10 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
       ? [`assignment-${activity.activity_uuid}`, access_token]
       : null,
     async () => {
-      const result = await getAssignmentFromActivityUUID(activity.activity_uuid, access_token!);
+      if (!access_token) {
+        return null;
+      }
+      const result = await getAssignmentFromActivityUUID(activity.activity_uuid, access_token);
       return result?.data?.assignment_uuid?.replace('assignment_', '') ?? null;
     },
   );

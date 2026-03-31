@@ -9,12 +9,12 @@ const DocumentPdfActivity = ({ activity, course }: { activity: any; course: any 
       <iframe
         className="h-[900px] w-full rounded-lg"
         title={t('viewerTitle')}
-        src={getActivityMediaDirectory(
-          course?.course_uuid,
-          activity.activity_uuid,
-          activity.content.filename,
-          'documentpdf',
-        )}
+        src={getActivityMediaDirectory({
+          courseUUID: course?.course_uuid ?? '',
+          activityUUID: activity.activity_uuid,
+          fileId: activity.content.filename,
+          activityType: 'documentpdf',
+        })}
       />
     </div>
   );

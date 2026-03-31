@@ -28,7 +28,7 @@ Object.entries(CORE_THEMES).forEach(([name, theme]) => {
 export async function loadTheme(name: string): Promise<Theme | null> {
   // Return cached theme if available
   if (themeCache.has(name)) {
-    return themeCache.get(name)!;
+    return themeCache.get(name) ?? null;
   }
 
   try {

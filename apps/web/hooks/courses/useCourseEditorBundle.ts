@@ -25,11 +25,20 @@ export function useCourseEditorBundle(courseUuid?: string | null) {
     accessTokenRef.current = accessToken;
   }, [accessToken]);
 
-  const key = courseKeys.editorBundle(courseUuid);
+  const key = courseUuid ? courseKeys.editorBundle(courseUuid) : null;
 
-  const swr = useSWR<CourseEditorBundle>(key, () => getCourseEditorBundle(courseUuid!, accessTokenRef.current!), {
-    revalidateOnFocus: false,
-  });
+  const swr = useSWR<CourseEditorBundle>(
+    key,
+    () => {
+      if (!courseUuid || !accessTokenRef.current) {
+        throw new Error('Course UUID or access token is missing');
+      }
+      return getCourseEditorBundle(courseUuid, accessTokenRef.current);
+    },
+    {
+      revalidateOnFocus: false,
+    },
+  );
 
   return {
     ...swr,

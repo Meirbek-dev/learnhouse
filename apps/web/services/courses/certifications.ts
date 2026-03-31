@@ -22,12 +22,19 @@ interface CertificationInvalidationOptions {
   lastKnownUpdateDate?: string | null;
 }
 
-export async function createCertification(
-  course_id: number,
-  config: any,
-  access_token: string,
-  options?: CertificationInvalidationOptions,
-) {
+export interface CreateCertificationParams {
+  course_id: number;
+  config: any;
+  access_token: string;
+  options?: CertificationInvalidationOptions;
+}
+
+export async function createCertification({
+  course_id,
+  config,
+  access_token,
+  options,
+}: CreateCertificationParams) {
   const result = await fetch(
     `${getAPIUrl()}certifications/`,
     RequestBodyWithAuthHeader(
@@ -44,12 +51,19 @@ export async function createCertification(
   return errorHandling(result);
 }
 
-export async function updateCertification(
-  certification_uuid: string,
-  config: any,
-  access_token: string,
-  options?: CertificationInvalidationOptions,
-) {
+export interface UpdateCertificationParams {
+  certification_uuid: string;
+  config: any;
+  access_token: string;
+  options?: CertificationInvalidationOptions;
+}
+
+export async function updateCertification({
+  certification_uuid,
+  config,
+  access_token,
+  options,
+}: UpdateCertificationParams) {
   const result = await fetch(
     `${getAPIUrl()}certifications/${certification_uuid}`,
     RequestBodyWithAuthHeader(

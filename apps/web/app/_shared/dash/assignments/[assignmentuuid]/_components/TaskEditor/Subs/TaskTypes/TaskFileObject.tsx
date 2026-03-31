@@ -134,7 +134,7 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
     setError(null);
 
     try {
-      const res = await updateSubFile(file, assignmentTaskUUID, assignmentUUID, accessToken);
+      const res = await updateSubFile({ file, assignmentTaskUUID, assignmentUUID, access_token: accessToken });
 
       if (!res.success) {
         setError(res.data?.detail || t('uploadFailed'));
@@ -172,7 +172,12 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
     };
 
     try {
-      const res = await handleAssignmentTaskSubmission(values, assignmentTaskUUID, assignmentUUID, accessToken);
+      const res = await handleAssignmentTaskSubmission({
+        body: values,
+        assignmentTaskUUID,
+        assignmentUUID,
+        access_token: accessToken,
+      });
       if (!res) {
         toast.error(t('errorSaving'));
         return;
@@ -212,7 +217,12 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
     };
 
     try {
-      const res = await handleAssignmentTaskSubmission(values, assignmentTaskUUID, assignmentUUID, accessToken);
+      const res = await handleAssignmentTaskSubmission({
+        body: values,
+        assignmentTaskUUID,
+        assignmentUUID,
+        access_token: accessToken,
+      });
       if (!res) {
         toast.error(t('gradeError'));
         return;
@@ -228,7 +238,7 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
   // ================= Fetching =================
   async function fetchUserSubmission() {
     if (!accessToken || !assignmentTaskUUID || !assignmentUUID || !user_id) return;
-    const res = await getAssignmentTaskSubmissionsUser(assignmentTaskUUID, user_id, assignmentUUID, accessToken);
+    const res = await getAssignmentTaskSubmissionsUser({ assignmentTaskUUID, user_id, assignmentUUID, access_token: accessToken });
     if (res.success && res.data?.task_submission) {
       const sub = {
         ...res.data.task_submission,
@@ -273,12 +283,12 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
     }
 
     if (accessToken && assignmentTaskUUID && assignmentUUID && user_id) {
-      const res = await getAssignmentTaskSubmissionsUser(
+      const res = await getAssignmentTaskSubmissionsUser({
         assignmentTaskUUID,
         user_id,
         assignmentUUID,
-        accessToken,
-      );
+        access_token: accessToken,
+      });
       if (res.success && res.data?.task_submission) {
         const sub = {
           ...res.data.task_submission,
@@ -331,13 +341,13 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
       );
     }
 
-    const fileUrl = getTaskFileSubmissionDir(
+    const fileUrl = getTaskFileSubmissionDir({
       courseUUID,
       activityUUID,
       assignmentUUID,
       assignmentTaskUUID,
-      userSubmissions.fileUUID,
-    );
+      fileSubID: userSubmissions.fileUUID,
+    });
 
     return (
       <div className="space-y-3">

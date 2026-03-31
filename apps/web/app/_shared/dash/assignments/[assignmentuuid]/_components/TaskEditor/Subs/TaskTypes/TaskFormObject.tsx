@@ -144,9 +144,8 @@ function BlankInputTeacher({
               <CollapsibleTrigger
                 nativeButton={false}
                 render={
-                  <div
-                    role="button"
-                    tabIndex={0}
+                  <button
+                    type="button"
                     className={cn(
                       buttonVariants({ variant: 'ghost', size: 'sm' }),
                       'h-6 gap-1 px-2 text-xs flex items-center',
@@ -155,7 +154,7 @@ function BlankInputTeacher({
                     <Lightbulb className="h-3 w-3" />
                     {t('hintOptional')}
                     <ChevronDown className="h-3 w-3" />
-                  </div>
+                  </button>
                 }
               />
               <CollapsibleContent className="pt-2">
@@ -403,12 +402,12 @@ function TaskFormObject({ assignmentTaskUUID }: TaskFormObjectProps) {
     }
     setIsSaving(true);
     try {
-      const res = await updateAssignmentTask(
-        { contents: { questions } },
-        assignmentTask.assignment_task_uuid,
-        assignment.assignment_object.assignment_uuid,
+      const res = await updateAssignmentTask({
+        body: { contents: { questions } },
+        assignmentTaskUUID: assignmentTask.assignment_task_uuid,
+        assignmentUUID: assignment.assignment_object.assignment_uuid,
         access_token,
-      );
+      });
       if (res) {
         reload();
         toast.success(t('savedSuccessfully'));

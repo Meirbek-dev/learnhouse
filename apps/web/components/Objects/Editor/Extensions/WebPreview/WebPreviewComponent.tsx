@@ -52,6 +52,12 @@ const FaviconDisplay = ({ favicon, url, faviconAlt }: { favicon?: string; url: s
   </div>
 );
 
+const getAlignmentClass = (alignment: string) => {
+  if (alignment === 'center') return 'justify-center';
+  if (alignment === 'right') return 'justify-end';
+  return 'justify-start';
+};
+
 const AlignmentControls = ({
   alignment,
   onAlignmentChange,
@@ -88,6 +94,9 @@ const AlignmentControls = ({
   </div>
 );
 
+// The component logic is intentionally split across helper functions and local state.
+// Complexity is managed by breaking large expressions into isolated helpers.
+ 
 const WebPreviewComponent = ({ node, updateAttributes, deleteNode }: WebPreviewProps) => {
   const t = useTranslations('Components.WebPreview');
   const [inputUrl, setInputUrl] = useState(node.attrs.url || '');
@@ -215,12 +224,7 @@ const WebPreviewComponent = ({ node, updateAttributes, deleteNode }: WebPreviewP
     }
   };
 
-  const alignClass = (() => {
-    const alignment = node.attrs.alignment || 'left';
-    if (alignment === 'center') return 'justify-center';
-    if (alignment === 'right') return 'justify-end';
-    return 'justify-start';
-  })();
+  const alignmentClass = getAlignmentClass(node.attrs.alignment || 'left');
 
   return (
     <NodeViewWrapper className="web-preview-block relative">
@@ -241,7 +245,7 @@ const WebPreviewComponent = ({ node, updateAttributes, deleteNode }: WebPreviewP
           />
         }
       />
-      <div className={`flex w-full ${alignClass}`}>
+      <div className={`flex w-full ${alignmentClass}`}>
         {/* CardWrapper */}
         <div className="soft-shadow relative my-2 max-w-[420px] min-w-[260px] rounded-xl bg-white px-6 pt-6 pb-4">
           {/* PreviewCard */}

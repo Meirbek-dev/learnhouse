@@ -474,12 +474,19 @@ const TaskQuizObject = ({ assignmentTaskUUID }: TaskQuizObjectProps) => {
   const saveFC = useCallback(async () => {
     setIsSaving(true);
     try {
-      const res = await updateAssignmentTask(
-        { contents: { questions, settings: quizSettings } },
-        assignmentTask.assignment_task_uuid!,
-        assignment.assignment_object.assignment_uuid,
+      const taskUUID = assignmentTask.assignment_task_uuid;
+      const assignmentUUID = assignment.assignment_object.assignment_uuid;
+      if (!taskUUID || !assignmentUUID) {
+        toast.error(t('saveError')); // fallback when required ids aren't available
+        return;
+      }
+
+      const res = await updateAssignmentTask({
+        body: { contents: { questions, settings: quizSettings } },
+        assignmentTaskUUID: taskUUID,
+        assignmentUUID,
         access_token,
-      );
+      });
 
       if (res) {
         reload();

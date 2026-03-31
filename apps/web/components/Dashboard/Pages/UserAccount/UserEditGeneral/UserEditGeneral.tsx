@@ -509,8 +509,8 @@ const UserEditForm = ({ form, profilePicture }: UserEditFormProps) => {
                     }}
                     onRemove={(id) => {
                       const newDetails = { ...details };
-                      delete newDetails[id];
-                      form.setValue('details', newDetails);
+                      const { [id]: removed, ...nextDetails } = newDetails;
+                      form.setValue('details', nextDetails);
                     }}
                     onLabelChange={(id, newLabel) => {
                       const newDetails = { ...details };

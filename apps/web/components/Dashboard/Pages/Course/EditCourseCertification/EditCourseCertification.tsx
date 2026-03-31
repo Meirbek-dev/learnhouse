@@ -127,7 +127,7 @@ const EditCourseCertification = () => {
 
   const certifications = editorData.certifications.data ?? [];
   const certificationsError = editorData.certifications.error;
-  const existingCertification = certifications[0];
+  const [existingCertification] = certifications;
   const hasExistingCertification = Boolean(existingCertification);
 
   const form = useForm<FormValues>({
@@ -159,7 +159,7 @@ const EditCourseCertification = () => {
   const getInitialValues = useCallback((): FormValues => {
     const getInstructorName = () => {
       if (courseStructure?.authors?.length > 0) {
-        const author = courseStructure.authors[0];
+        const [author] = courseStructure.authors;
         const firstName = author.user?.first_name || '';
         const lastName = author.user?.last_name || '';
         if (firstName || lastName) return `${firstName} ${lastName}`.trim();
@@ -231,15 +231,25 @@ const EditCourseCertification = () => {
       async () => {
         if (values.enable_certification) {
           if (existingCertification) {
-            return updateCertification(existingCertification.certification_uuid, config, access_token, {
-              courseUuid: courseStructure.course_uuid,
-              lastKnownUpdateDate: courseStructure.update_date,
+            return updateCertification({
+              certification_uuid: existingCertification.certification_uuid,
+              config,
+              access_token,
+              options: {
+                courseUuid: courseStructure.course_uuid,
+                lastKnownUpdateDate: courseStructure.update_date,
+              },
             });
           }
 
-          return createCertification(courseStructure.id, config, access_token, {
-            courseUuid: courseStructure.course_uuid,
-            lastKnownUpdateDate: courseStructure.update_date,
+          return createCertification({
+            course_id: courseStructure.id,
+            config,
+            access_token,
+            options: {
+              courseUuid: courseStructure.course_uuid,
+              lastKnownUpdateDate: courseStructure.update_date,
+            },
           });
         }
 

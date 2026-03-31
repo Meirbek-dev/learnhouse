@@ -53,6 +53,22 @@ export function getCourseContentStats(course: any): { chapters: number; activiti
   return { chapters, activities };
 }
 
+const isCourseDetailsComplete = (course: any): boolean =>
+  Boolean(course?.name?.trim() && course?.description?.trim());
+
+const isCourseMediaComplete = (course: any): boolean => Boolean(course?.thumbnail_image);
+
+const isCourseCurriculumComplete = (stats: { chapters: number; activities: number }): boolean =>
+  stats.chapters > 0 && stats.activities > 0;
+
+const isCourseCollaborationComplete = (contributors: any[]): boolean =>
+  Array.isArray(contributors) && contributors.length > 0;
+
+const isCourseAccessComplete = (course: any, linkedUserGroups: any[]): boolean =>
+  course?.public === true || (course?.public === false && linkedUserGroups.length > 0);
+
+const isCourseCertificateComplete = (certifications: any[]): boolean => certifications.length > 0;
+
 export function getCourseReadinessChecklist(
   course: any,
   editorData?: CourseEditorBundle | null,
@@ -65,32 +81,32 @@ export function getCourseReadinessChecklist(
   return [
     {
       id: 'details',
-      complete: Boolean(course?.name?.trim() && course?.description?.trim()),
+      complete: isCourseDetailsComplete(course),
       href: 'details',
     },
     {
       id: 'media',
-      complete: Boolean(course?.thumbnail_image),
+      complete: isCourseMediaComplete(course),
       href: 'details',
     },
     {
       id: 'curriculum',
-      complete: stats.chapters > 0 && stats.activities > 0,
+      complete: isCourseCurriculumComplete(stats),
       href: 'curriculum',
     },
     {
       id: 'collaboration',
-      complete: Array.isArray(contributors) && contributors.length > 0,
+      complete: isCourseCollaborationComplete(contributors),
       href: 'collaboration',
     },
     {
       id: 'access',
-      complete: course?.public === true || (course?.public === false && linkedUserGroups.length > 0),
+      complete: isCourseAccessComplete(course, linkedUserGroups),
       href: 'access',
     },
     {
       id: 'certificate',
-      complete: certifications.length > 0,
+      complete: isCourseCertificateComplete(certifications),
       href: 'certificate',
     },
   ];

@@ -61,7 +61,11 @@ export function getLevelInfo(level: number, t: (key: string) => string): LevelIn
     .map(Number)
     .toSorted((a, b) => b - a);
   const currentLevelConfig = availableLevels.find((configLevel) => level >= configLevel) || 1;
-  const baseConfig = LEVEL_CONFIG[currentLevelConfig]!;
+  const baseConfig = LEVEL_CONFIG[currentLevelConfig] ?? LEVEL_CONFIG[1];
+
+  if (!baseConfig) {
+    throw new Error('Invalid level configuration');
+  }
 
   return {
     ...baseConfig,

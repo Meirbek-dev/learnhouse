@@ -431,13 +431,13 @@ export default function ImageBlockComponent({ node, updateAttributes, extension 
     if (!blockObject || !course) return null;
 
     const fileId = `${blockObject.content.file_id}.${blockObject.content.file_format}`;
-    return getActivityBlockMediaDirectory(
-      course.courseStructure.course_uuid,
-      activityUuid,
-      blockObject.block_uuid,
+    return getActivityBlockMediaDirectory({
+      courseId: course.courseStructure.course_uuid,
+      activityId: activityUuid,
+      blockId: blockObject.block_uuid,
       fileId,
-      'imageBlock',
-    );
+      type: 'imageBlock',
+    });
   }, [blockObject, course, activityUuid]);
 
   // Upload handling

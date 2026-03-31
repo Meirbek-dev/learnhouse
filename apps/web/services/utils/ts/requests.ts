@@ -168,9 +168,9 @@ export const swrFetcherWithHeaders = async (
   }
   const data = await response.json();
   const resHeaders: Record<string, string> = {};
-  response.headers.forEach((value, key) => {
+  for (const [key, value] of response.headers.entries()) {
     resHeaders[key.toLowerCase()] = value;
-  });
+  }
   return { data, headers: resHeaders };
 };
 

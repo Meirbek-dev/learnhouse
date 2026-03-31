@@ -218,7 +218,7 @@ export default function RBACAdminClient() {
     if (!acc[permission.resource_type]) {
       acc[permission.resource_type] = [];
     }
-    acc[permission.resource_type]!.push(permission);
+    acc[permission.resource_type]?.push(permission);
     return acc;
   }, {});
 
@@ -241,7 +241,7 @@ export default function RBACAdminClient() {
       if (!acc[perm.resource_type]) {
         acc[perm.resource_type] = [];
       }
-      acc[perm.resource_type]!.push(perm);
+      acc[perm.resource_type]?.push(perm);
       return acc;
     },
     {},

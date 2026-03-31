@@ -122,12 +122,19 @@ export async function getAssignmentTaskSubmissionsMe(
   return await getResponseMetadata(result);
 }
 
-export async function getAssignmentTaskSubmissionsUser(
-  assignmentTaskUUID: string,
-  user_id: number,
-  assignmentUUID: string,
-  access_token: string,
-) {
+export interface GetAssignmentTaskSubmissionsUserParams {
+  assignmentTaskUUID: string;
+  user_id: number;
+  assignmentUUID: string;
+  access_token: string;
+}
+
+export async function getAssignmentTaskSubmissionsUser({
+  assignmentTaskUUID,
+  user_id,
+  assignmentUUID,
+  access_token,
+}: GetAssignmentTaskSubmissionsUserParams) {
   const result: any = await fetch(
     `${getAPIUrl()}assignments/${assignmentUUID}/tasks/${assignmentTaskUUID}/submissions/user/${user_id}`,
     RequestBodyWithAuthHeader('GET', null, null, access_token),
@@ -135,12 +142,19 @@ export async function getAssignmentTaskSubmissionsUser(
   return await getResponseMetadata(result);
 }
 
-export async function handleAssignmentTaskSubmission(
-  body: any,
-  assignmentTaskUUID: string,
-  assignmentUUID: string,
-  access_token: string,
-) {
+export interface HandleAssignmentTaskSubmissionParams {
+  body: any;
+  assignmentTaskUUID: string;
+  assignmentUUID: string;
+  access_token: string;
+}
+
+export async function handleAssignmentTaskSubmission({
+  body,
+  assignmentTaskUUID,
+  assignmentUUID,
+  access_token,
+}: HandleAssignmentTaskSubmissionParams) {
   const result: any = await fetch(
     `${getAPIUrl()}assignments/${assignmentUUID}/tasks/${assignmentTaskUUID}/submissions`,
     RequestBodyWithAuthHeader('PUT', body, null, access_token),
@@ -156,12 +170,19 @@ export async function handleAssignmentTaskSubmission(
   return metadata;
 }
 
-export async function updateAssignmentTask(
-  body: any,
-  assignmentTaskUUID: string,
-  assignmentUUID: string,
-  access_token: string,
-) {
+export interface UpdateAssignmentTaskParams {
+  body: any;
+  assignmentTaskUUID: string;
+  assignmentUUID: string;
+  access_token: string;
+}
+
+export async function updateAssignmentTask({
+  body,
+  assignmentTaskUUID,
+  assignmentUUID,
+  access_token,
+}: UpdateAssignmentTaskParams) {
   const result: any = await fetch(
     `${getAPIUrl()}assignments/${assignmentUUID}/tasks/${assignmentTaskUUID}`,
     RequestBodyWithAuthHeader('PUT', body, null, access_token),
@@ -193,12 +214,19 @@ export async function deleteAssignmentTask(assignmentTaskUUID: string, assignmen
   return metadata;
 }
 
-export async function updateReferenceFile(
-  file: any,
-  assignmentTaskUUID: string,
-  assignmentUUID: string,
-  access_token: string,
-) {
+export interface UpdateReferenceFileParams {
+  file: any;
+  assignmentTaskUUID: string;
+  assignmentUUID: string;
+  access_token: string;
+}
+
+export async function updateReferenceFile({
+  file,
+  assignmentTaskUUID,
+  assignmentUUID,
+  access_token,
+}: UpdateReferenceFileParams) {
   // Send file thumbnail as form data
   const formData = new FormData();
 
@@ -220,12 +248,19 @@ export async function updateReferenceFile(
   return metadata;
 }
 
-export async function updateSubFile(
-  file: any,
-  assignmentTaskUUID: string,
-  assignmentUUID: string,
-  access_token: string,
-) {
+export interface UpdateSubFileParams {
+  file: any;
+  assignmentTaskUUID: string;
+  assignmentUUID: string;
+  access_token: string;
+}
+
+export async function updateSubFile({
+  file,
+  assignmentTaskUUID,
+  assignmentUUID,
+  access_token,
+}: UpdateSubFileParams) {
   // Send file thumbnail as form data
   const formData = new FormData();
 
@@ -263,12 +298,19 @@ export async function getAssignmentsFromCourses(courseUUIDs: string[], access_to
   return await getResponseMetadata(result);
 }
 
-export async function createAssignmentWithActivity(
-  body: any,
-  chapterId: number,
-  activityName: string,
-  access_token: string,
-) {
+export interface CreateAssignmentWithActivityParams {
+  body: any;
+  chapterId: number;
+  activityName: string;
+  access_token: string;
+}
+
+export async function createAssignmentWithActivity({
+  body,
+  chapterId,
+  activityName,
+  access_token,
+}: CreateAssignmentWithActivityParams) {
   const result: any = await fetch(
     `${getAPIUrl()}assignments/with-activity?chapter_id=${chapterId}&activity_name=${encodeURIComponent(activityName)}`,
     RequestBodyWithAuthHeader('POST', body, null, access_token),

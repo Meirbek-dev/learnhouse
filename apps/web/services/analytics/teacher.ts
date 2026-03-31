@@ -13,12 +13,16 @@ import { getAPIUrl } from '@services/config/config';
 const buildQueryString = (query: AnalyticsQuery = {}) => {
   const params = new URLSearchParams();
   for (const [key, value] of Object.entries(query)) {
-    if (value === undefined || value === null || value === '') continue;
-    params.set(key, String(value));
+    if (value !== undefined && value !== null && value !== '') {
+      params.set(key, String(value));
+    }
   }
   const serialized = params.toString();
   return serialized ? `?${serialized}` : '';
 };
+
+const getFirstQueryValue = (value: string | string[] | undefined): string | undefined =>
+  Array.isArray(value) ? value[0] : value;
 
 async function analyticsRequest<T>(path: string, accessToken: string, query?: AnalyticsQuery): Promise<T> {
   const response = await fetch(`${getAPIUrl()}analytics/${path}${buildQueryString(query)}`, {
@@ -41,23 +45,22 @@ async function analyticsRequest<T>(path: string, accessToken: string, query?: An
 }
 
 export function normalizeAnalyticsQuery(searchParams: Record<string, string | string[] | undefined>): AnalyticsQuery {
-  const first = (value: string | string[] | undefined) => (Array.isArray(value) ? value[0] : value);
-  const teacherUserId = first(searchParams.teacher_user_id);
-  const page = first(searchParams.page);
-  const pageSize = first(searchParams.page_size);
+  const teacherUserId = getFirstQueryValue(searchParams.teacher_user_id);
+  const page = getFirstQueryValue(searchParams.page);
+  const pageSize = getFirstQueryValue(searchParams.page_size);
   return {
-    window: (first(searchParams.window) as AnalyticsQuery['window']) || '28d',
-    compare: (first(searchParams.compare) as AnalyticsQuery['compare']) || 'previous_period',
-    bucket: (first(searchParams.bucket) as AnalyticsQuery['bucket']) || 'day',
-    course_ids: first(searchParams.course_ids),
-    cohort_ids: first(searchParams.cohort_ids),
+    window: (getFirstQueryValue(searchParams.window) as AnalyticsQuery['window']) || '28d',
+    compare: (getFirstQueryValue(searchParams.compare) as AnalyticsQuery['compare']) || 'previous_period',
+    bucket: (getFirstQueryValue(searchParams.bucket) as AnalyticsQuery['bucket']) || 'day',
+    course_ids: getFirstQueryValue(searchParams.course_ids),
+    cohort_ids: getFirstQueryValue(searchParams.cohort_ids),
     teacher_user_id: teacherUserId ? Number(teacherUserId) : undefined,
-    timezone: first(searchParams.timezone) || 'UTC',
+    timezone: getFirstQueryValue(searchParams.timezone) || 'UTC',
     page: page ? Number(page) : 1,
     page_size: pageSize ? Number(pageSize) : 25,
-    sort_by: first(searchParams.sort_by),
-    sort_order: (first(searchParams.sort_order) as AnalyticsQuery['sort_order']) || 'desc',
-    bucket_start: first(searchParams.bucket_start),
+    sort_by: getFirstQueryValue(searchParams.sort_by),
+    sort_order: (getFirstQueryValue(searchParams.sort_order) as AnalyticsQuery['sort_order']) || 'desc',
+    bucket_start: getFirstQueryValue(searchParams.bucket_start),
   };
 }
 
@@ -81,12 +84,19 @@ export function getTeacherAssessmentList(accessToken: string, query?: AnalyticsQ
   return analyticsRequest<TeacherAssessmentListResponse>('teacher/assessments', accessToken, query);
 }
 
-export function getTeacherAssessmentDetail(
-  assessmentType: AssessmentType,
-  assessmentId: number,
-  accessToken: string,
-  query?: AnalyticsQuery,
-) {
+export interface GetTeacherAssessmentDetailParams {
+  assessmentType: AssessmentType;
+  assessmentId: number;
+  accessToken: string;
+  query?: AnalyticsQuery;
+}
+
+export function getTeacherAssessmentDetail({
+  assessmentType,
+  assessmentId,
+  accessToken,
+  query,
+}: GetTeacherAssessmentDetailParams) {
   return analyticsRequest<TeacherAssessmentDetailResponse>(
     `teacher/assessments/${assessmentType}/${assessmentId}`,
     accessToken,

@@ -843,10 +843,10 @@ const ActivityClient = (props: ActivityClientProps) => {
                         <div className="flex flex-1/3 items-center space-x-3">
                           <div className="flex flex-col -space-y-1">
                             <p className="text-base font-bold text-gray-700">
-                              {getChapterNameByActivityId(course, activity!.id)}
+                              {activity ? getChapterNameByActivityId(course, activity.id) : ''}
                             </p>
                             <h1 className="text-2xl font-bold text-gray-950 first-letter:uppercase">
-                              {activity!.name}
+                              {activity?.name || ''}
                             </h1>
                             {/* Authors and Dates Section */}
                             <div className="mt-2 flex flex-wrap items-center gap-3">

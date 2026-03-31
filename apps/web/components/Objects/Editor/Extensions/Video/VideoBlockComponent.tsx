@@ -254,13 +254,13 @@ const VideoBlockComponent = (props: ExtendedNodeViewProps) => {
 
   const videoUrl =
     blockObject && course?.courseStructure.course_uuid
-      ? getActivityBlockMediaDirectory(
-          course.courseStructure.course_uuid,
-          extension.options.activity.activity_uuid,
-          blockObject.block_uuid,
-          fileId || '',
-          'videoBlock',
-        )
+      ? getActivityBlockMediaDirectory({
+          courseId: course.courseStructure.course_uuid,
+          activityId: extension.options.activity.activity_uuid,
+          blockId: blockObject.block_uuid,
+          fileId: fileId || '',
+          type: 'videoBlock',
+        })
       : null;
 
   const handleDownload = () => {

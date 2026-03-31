@@ -153,7 +153,13 @@ export const SearchBar: FC<SearchBarProps> = ({ className = '', isMobile = false
 
     (async () => {
       try {
-        const response = await searchContent(currentQuery, 1, 3, null, accessToken);
+        const response = await searchContent({
+          query: currentQuery,
+          page: 1,
+          limit: 3,
+          next: null,
+          access_token: accessToken,
+        });
         if (controller.signal.aborted) return;
 
         // Type assertion and safe access
