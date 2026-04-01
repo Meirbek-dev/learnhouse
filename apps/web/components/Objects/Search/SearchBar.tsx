@@ -89,18 +89,18 @@ interface SearchBarProps {
 const CourseResultsSkeleton = () => (
   <div className="p-2">
     <div className="flex items-center gap-2 px-2 py-2">
-      <div className="h-4 w-4 animate-pulse rounded bg-black/5" />
-      <div className="h-4 w-20 animate-pulse rounded bg-black/5" />
+      <div className="h-4 w-4 animate-pulse rounded bg-muted" />
+      <div className="h-4 w-20 animate-pulse rounded bg-muted" />
     </div>
     {[1, 2].map((i) => (
       <div
         key={i}
         className="flex items-center gap-3 p-2"
       >
-        <div className="h-10 w-10 animate-pulse rounded-lg bg-black/5" />
+        <div className="h-10 w-10 animate-pulse rounded-lg bg-muted" />
         <div className="flex-1">
-          <div className="mb-2 h-4 w-48 animate-pulse rounded bg-black/5" />
-          <div className="h-3 w-32 animate-pulse rounded bg-black/5" />
+          <div className="mb-2 h-4 w-48 animate-pulse rounded bg-muted" />
+          <div className="h-3 w-32 animate-pulse rounded bg-muted" />
         </div>
       </div>
     ))}
@@ -195,11 +195,11 @@ export const SearchBar: FC<SearchBarProps> = ({ className = '', isMobile = false
   const MemoizedEmptyState = !searchQuery.trim() ? (
     <div className="px-4 py-8">
       <div className="flex flex-col items-center text-center">
-        <div className="mb-4 rounded-full bg-black/5 p-3">
-          <Sparkles className="h-6 w-6 text-black/70" />
+        <div className="mb-4 rounded-full bg-muted p-3">
+          <Sparkles className="h-6 w-6 text-muted-foreground" />
         </div>
-        <h3 className="mb-1 text-sm font-medium text-black/80">{t('discoverTitle')}</h3>
-        <p className="max-w-[240px] text-xs text-black/50">{t('discoverSubtitle')}</p>
+        <h3 className="mb-1 text-sm font-medium text-foreground">{t('discoverTitle')}</h3>
+        <p className="max-w-[240px] text-xs text-muted-foreground">{t('discoverSubtitle')}</p>
       </div>
     </div>
   ) : null;
@@ -224,7 +224,7 @@ export const SearchBar: FC<SearchBarProps> = ({ className = '', isMobile = false
       icon: (
         <Search
           size={14}
-          className="text-black/40"
+          className="text-muted-foreground"
         />
       ),
     },
@@ -234,7 +234,7 @@ export const SearchBar: FC<SearchBarProps> = ({ className = '', isMobile = false
       icon: (
         <GraduationCap
           size={14}
-          className="text-black/40"
+          className="text-muted-foreground"
         />
       ),
     },
@@ -244,7 +244,7 @@ export const SearchBar: FC<SearchBarProps> = ({ className = '', isMobile = false
       icon: (
         <Book
           size={14}
-          className="text-black/40"
+          className="text-muted-foreground"
         />
       ),
     },
@@ -252,7 +252,7 @@ export const SearchBar: FC<SearchBarProps> = ({ className = '', isMobile = false
 
   const MemoizedSearchSuggestions = searchQuery.trim() ? (
     <div className="p-2">
-      <div className="flex items-center gap-2 px-2 py-2 text-sm text-black/50">
+      <div className="flex items-center gap-2 px-2 py-2 text-sm text-muted-foreground">
         <ScanSearch size={16} />
         <span className="font-medium">{t('suggestionsTitle')}</span>
       </div>
@@ -262,15 +262,15 @@ export const SearchBar: FC<SearchBarProps> = ({ className = '', isMobile = false
             prefetch={false}
             key={`${term}-${type}`}
             href={getAbsoluteUrl(`/search?q=${encodeURIComponent(term)}`)}
-            className="group flex items-center rounded-lg px-3 py-2 transition-colors hover:bg-black/2"
+            className="group flex items-center rounded-lg px-3 py-2 transition-colors hover:bg-accent"
           >
             <div className="flex flex-1 items-center gap-2">
               {icon}
-              <span className="text-sm text-black/70">{term}</span>
+              <span className="text-sm text-foreground">{term}</span>
             </div>
             <ArrowUpRight
               size={14}
-              className="text-black/30 transition-colors group-hover:text-black/50"
+              className="text-muted-foreground transition-colors group-hover:text-foreground"
             />
           </Link>
         ))}
@@ -286,15 +286,14 @@ export const SearchBar: FC<SearchBarProps> = ({ className = '', isMobile = false
 
     return (
       <div className="p-2">
-        <div className="flex items-center gap-2 px-2 py-2 text-sm text-black/50">
+        <div className="flex items-center gap-2 px-2 py-2 text-sm text-muted-foreground">
           <TextSearch size={16} />
           <span className="font-medium">{t('quickResultsTitle')}</span>
         </div>
 
-        {/* Courses Section */}
-        {searchResults.courses.length > 0 && (
+        {searchResults.courses.length > 0 ? (
           <div className="mb-2">
-            <div className="flex items-center gap-2 px-2 py-1 text-xs text-black/40">
+            <div className="flex items-center gap-2 px-2 py-1 text-xs text-muted-foreground">
               <GraduationCap size={12} />
               <span>{t('coursesSection')}</span>
             </div>
@@ -303,7 +302,7 @@ export const SearchBar: FC<SearchBarProps> = ({ className = '', isMobile = false
                 prefetch={false}
                 key={course.course_uuid}
                 href={getAbsoluteUrl(`/course/${removeCoursePrefix(course.course_uuid)}`)}
-                className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-black/2"
+                className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-accent"
               >
                 <div className="relative h-10 w-10">
                   {course.thumbnail_image ? (
@@ -315,38 +314,37 @@ export const SearchBar: FC<SearchBarProps> = ({ className = '', isMobile = false
                       sizes="100vw"
                     />
                   ) : (
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-black/5">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
                       <Book
                         size={20}
-                        className="text-black/40"
+                        className="text-muted-foreground"
                       />
                     </div>
                   )}
-                  <div className="absolute -right-1 -bottom-1 rounded-full bg-white p-1 shadow-sm">
+                  <div className="absolute -right-1 -bottom-1 rounded-full bg-background p-1 shadow-sm ring-1 ring-border">
                     <GraduationCap
                       size={11}
-                      className="text-black/60"
+                      className="text-muted-foreground"
                     />
                   </div>
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <h3 className="truncate text-sm font-medium text-black/80">{course.name}</h3>
-                    <span className="text-[10px] font-medium tracking-wide whitespace-nowrap text-black/40 uppercase">
+                    <h3 className="truncate text-sm font-medium text-foreground">{course.name}</h3>
+                    <span className="whitespace-nowrap text-[10px] font-medium tracking-wide uppercase text-muted-foreground">
                       {t('courseType')}
                     </span>
                   </div>
-                  <p className="truncate text-xs text-black/50">{course.description}</p>
+                  <p className="truncate text-xs text-muted-foreground">{course.description}</p>
                 </div>
               </Link>
             ))}
           </div>
-        )}
+        ) : null}
 
-        {/* Collections Section */}
-        {searchResults.collections.length > 0 && (
+        {searchResults.collections.length > 0 ? (
           <div className="mb-2">
-            <div className="flex items-center gap-2 px-2 py-1 text-xs text-black/40">
+            <div className="flex items-center gap-2 px-2 py-1 text-xs text-muted-foreground">
               <Book size={12} />
               <span>{t('collectionsSection')}</span>
             </div>
@@ -355,32 +353,31 @@ export const SearchBar: FC<SearchBarProps> = ({ className = '', isMobile = false
                 prefetch={false}
                 key={collection.collection_uuid}
                 href={getAbsoluteUrl(`/collection/${collection.collection_uuid}`)}
-                className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-black/2"
+                className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-accent"
               >
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-black/5">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
                   <Book
                     size={20}
-                    className="text-black/40"
+                    className="text-muted-foreground"
                   />
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <h3 className="truncate text-sm font-medium text-black/80">{collection.name}</h3>
-                    <span className="text-[10px] font-medium tracking-wide whitespace-nowrap text-black/40 uppercase">
+                    <h3 className="truncate text-sm font-medium text-foreground">{collection.name}</h3>
+                    <span className="whitespace-nowrap text-[10px] font-medium tracking-wide uppercase text-muted-foreground">
                       {t('collectionType')}
                     </span>
                   </div>
-                  <p className="truncate text-xs text-black/50">{collection.description}</p>
+                  <p className="truncate text-xs text-muted-foreground">{collection.description}</p>
                 </div>
               </Link>
             ))}
           </div>
-        )}
+        ) : null}
 
-        {/* Users Section */}
-        {searchResults.users.length > 0 && (
+        {searchResults.users.length > 0 ? (
           <div className="mb-2">
-            <div className="flex items-center gap-2 px-2 py-1 text-xs text-black/40">
+            <div className="flex items-center gap-2 px-2 py-1 text-xs text-muted-foreground">
               <Users size={12} />
               <span>{t('usersSection')}</span>
             </div>
@@ -389,7 +386,7 @@ export const SearchBar: FC<SearchBarProps> = ({ className = '', isMobile = false
                 prefetch={false}
                 key={user.user_uuid}
                 href={getAbsoluteUrl(`/user/${user.username}`)}
-                className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-black/2"
+                className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-accent"
               >
                 <UserAvatar
                   size="md"
@@ -400,19 +397,19 @@ export const SearchBar: FC<SearchBarProps> = ({ className = '', isMobile = false
                 />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <h3 className="truncate text-sm font-medium text-black/80">
+                    <h3 className="truncate text-sm font-medium text-foreground">
                       {[user.first_name, user.middle_name, user.last_name].filter(Boolean).join(' ')}
                     </h3>
-                    <span className="text-[10px] font-medium tracking-wide whitespace-nowrap text-black/40 uppercase">
+                    <span className="whitespace-nowrap text-[10px] font-medium tracking-wide uppercase text-muted-foreground">
                       {t('userType')}
                     </span>
                   </div>
-                  <p className="truncate text-xs text-black/50">@{user.username}</p>
+                  <p className="truncate text-xs text-muted-foreground">@{user.username}</p>
                 </div>
               </Link>
             ))}
           </div>
-        )}
+        ) : null}
       </div>
     );
   })();
@@ -448,14 +445,14 @@ export const SearchBar: FC<SearchBarProps> = ({ className = '', isMobile = false
         />
         <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
           <Search
-            className="text-black/40 transition-colors group-focus-within:text-black/60"
+            className="text-muted-foreground transition-colors group-focus-within:text-foreground"
             size={16}
           />
         </div>
       </div>
 
       <div
-        className={`soft-shadow absolute z-50 mt-2 w-full divide-y divide-black/5 overflow-hidden rounded-xl bg-white transition-all duration-200 ease-in-out ${shouldShowDropdown ? 'translate-y-0 opacity-100' : 'pointer-events-none -translate-y-2 opacity-0'} ${isMobile ? 'max-w-full' : 'min-w-[240px]'}`}
+        className={`soft-shadow absolute z-50 mt-2 w-full divide-y divide-border overflow-hidden rounded-xl border border-border bg-card text-card-foreground transition-all duration-200 ease-in-out ${shouldShowDropdown ? 'translate-y-0 opacity-100' : 'pointer-events-none -translate-y-2 opacity-0'} ${isMobile ? 'max-w-full' : 'min-w-[240px]'}`}
       >
         {shouldShowDropdown &&
           (!searchQuery.trim() || isInitialLoad ? (
@@ -475,7 +472,7 @@ export const SearchBar: FC<SearchBarProps> = ({ className = '', isMobile = false
                     <Link
                       prefetch={false}
                       href={getAbsoluteUrl(`/search?q=${encodeURIComponent(searchQuery)}`)}
-                      className="flex items-center justify-between px-4 py-2.5 text-xs text-black/50 transition-colors hover:bg-black/2 hover:text-black/70"
+                      className="flex items-center justify-between px-4 py-2.5 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
                     >
                       <span>{t('viewAllResults')}</span>
                       <ArrowRight size={14} />

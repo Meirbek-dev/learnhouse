@@ -33,7 +33,7 @@ const PlatformAssignmentPage = () => {
   if (isMobile) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-muted p-4">
-        <div className="rounded-lg bg-white p-6 text-center shadow-md">
+        <div className="rounded-lg border border-border bg-card p-6 text-center text-card-foreground shadow-sm">
           <h2 className="mb-4 text-xl font-bold">{t('desktopOnlyTitle')}</h2>
           <Monitor
             className="mx-auto my-5"
@@ -49,7 +49,7 @@ const PlatformAssignmentPage = () => {
   return (
     <div className="flex h-screen w-full flex-col">
       <AssignmentProvider assignment_uuid={`assignment_${params.assignmentuuid}`}>
-        <div className="soft-shadow z-10 flex shrink-0 flex-col bg-white shadow-[0px_4px_16px_rgba(0,0,0,0.06)]">
+        <div className="soft-shadow z-10 flex shrink-0 flex-col border-b border-border bg-card text-card-foreground shadow-sm">
           <div className="mr-10 flex h-full justify-between">
             <div className="mr-10 pl-10 tracking-tighter">
               <BrdCmpx />

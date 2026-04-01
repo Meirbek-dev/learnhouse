@@ -103,9 +103,9 @@ const UserEditPassword = () => {
   };
 
   return (
-    <div className="soft-shadow mx-0 rounded-xl bg-white sm:mx-10">
+    <div className="soft-shadow mx-0 rounded-xl border border-border bg-card text-card-foreground shadow-sm sm:mx-10">
       <div className="flex flex-col">
-        <div className="mx-3 my-3 flex flex-col -space-y-1 rounded-md bg-muted px-5 py-3">
+        <div className="mx-3 my-3 flex flex-col gap-1 rounded-md bg-muted px-5 py-3">
           <h1 className="text-xl font-bold text-foreground">{tPassword('title')}</h1>
           <h2 className="text-base text-muted-foreground">{tPassword('description')}</h2>
         </div>
@@ -135,7 +135,7 @@ const UserEditPassword = () => {
               {errors.new_password ? <p className="mt-1 text-sm text-red-500">{errors.new_password.message}</p> : null}
             </div>
 
-            <div className="flex items-center space-x-2 rounded-md bg-amber-50 p-3 text-amber-600">
+            <div className="flex items-center gap-2 rounded-md border border-amber-500/20 bg-amber-500/10 p-3 text-amber-700 dark:text-amber-400">
               <AlertTriangle size={16} />
               <span className="text-sm">{tPassword('logoutWarning')}</span>
             </div>

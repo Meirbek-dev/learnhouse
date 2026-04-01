@@ -64,7 +64,7 @@ const StripeConnectCallback = () => {
   }, [session, searchParams, t]);
 
   return (
-    <div className="flex h-screen w-full items-center justify-center bg-muted">
+    <div className="flex h-screen w-full items-center justify-center bg-background text-foreground">
       <div className="flex flex-col items-center">
         <div className="mb-10">
           <Image
@@ -80,34 +80,34 @@ const StripeConnectCallback = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
-          className="soft-shadow mx-4 w-full max-w-md rounded-xl bg-white p-8"
+          className="soft-shadow mx-4 w-full max-w-md rounded-xl border border-border bg-card p-8 text-card-foreground shadow-sm"
         >
-          <div className="flex flex-col items-center space-y-4 text-center">
+          <div className="flex flex-col items-center gap-4 text-center">
             {status === 'processing' && (
               <>
-                <Loader2 className="h-12 w-12 animate-spin text-blue-500" />
-                <h2 className="text-xl font-semibold text-gray-800">{t('completing')}</h2>
-                <p className="text-gray-500">{t('pleaseWait')}</p>
+                <Loader2 className="h-12 w-12 animate-spin text-primary" />
+                <h2 className="text-xl font-semibold text-foreground">{t('completing')}</h2>
+                <p className="text-muted-foreground">{t('pleaseWait')}</p>
               </>
             )}
 
             {status === 'success' && (
               <>
-                <div className="rounded-full bg-green-100 p-3">
-                  <Check className="h-8 w-8 text-green-600" />
+                <div className="rounded-full bg-primary/10 p-3">
+                  <Check className="h-8 w-8 text-primary" />
                 </div>
-                <h2 className="text-xl font-semibold text-gray-800">{message}</h2>
-                <p className="text-gray-500">{t('returnToDashboard')}</p>
+                <h2 className="text-xl font-semibold text-foreground">{message}</h2>
+                <p className="text-muted-foreground">{t('returnToDashboard')}</p>
               </>
             )}
 
             {status === 'error' && (
               <>
-                <div className="rounded-full bg-red-100 p-3">
-                  <AlertTriangle className="h-8 w-8 text-red-600" />
+                <div className="rounded-full bg-destructive/10 p-3">
+                  <AlertTriangle className="h-8 w-8 text-destructive" />
                 </div>
-                <h2 className="text-xl font-semibold text-gray-800">{message}</h2>
-                <p className="text-gray-500">{t('tryAgainOrContact')}</p>
+                <h2 className="text-xl font-semibold text-foreground">{message}</h2>
+                <p className="text-muted-foreground">{t('tryAgainOrContact')}</p>
               </>
             )}
           </div>

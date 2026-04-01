@@ -393,33 +393,33 @@ export default function EditImages() {
   };
 
   return (
-    <div className="soft-shadow mx-0 mb-16 rounded-xl bg-white px-3 py-3 sm:mx-10 sm:mb-0">
-      <div className="mb-2 flex flex-col -space-y-1 rounded-md bg-gray-50 px-5 py-3">
-        <h1 className="text-xl font-bold text-gray-800">{t('title')}</h1>
-        <h2 className="text-base text-gray-500">{t('description')}</h2>
+    <div className="soft-shadow mx-0 mb-16 rounded-xl border border-border bg-card px-3 py-3 text-card-foreground shadow-sm sm:mx-10 sm:mb-0">
+      <div className="mb-2 flex flex-col gap-1 rounded-md bg-muted px-5 py-3">
+        <h1 className="text-xl font-bold text-foreground">{t('title')}</h1>
+        <h2 className="text-base text-muted-foreground">{t('description')}</h2>
       </div>
       <Tabs
         defaultValue="logo"
         className="w-full"
       >
-        <TabsList className="grid w-full grid-cols-3 rounded-lg bg-gray-100 p-1">
+        <TabsList className="grid w-full grid-cols-3 rounded-lg bg-muted p-1">
           <TabsTrigger
             value="logo"
-            className="flex items-center space-x-2 transition-all data-[state=active]:bg-white data-[state=active]:shadow-xs"
+            className="flex items-center gap-2 transition-all data-[state=active]:bg-background data-[state=active]:shadow-xs"
           >
             <StarIcon size={16} />
             <span>{t('Tabs.logo')}</span>
           </TabsTrigger>
           <TabsTrigger
             value="thumbnail"
-            className="flex items-center space-x-2 transition-all data-[state=active]:bg-white data-[state=active]:shadow-xs"
+            className="flex items-center gap-2 transition-all data-[state=active]:bg-background data-[state=active]:shadow-xs"
           >
             <ImageIcon size={16} />
             <span>{t('Tabs.thumbnail')}</span>
           </TabsTrigger>
           <TabsTrigger
             value="previews"
-            className="flex items-center space-x-2 transition-all data-[state=active]:bg-white data-[state=active]:shadow-xs"
+            className="flex items-center gap-2 transition-all data-[state=active]:bg-background data-[state=active]:shadow-xs"
           >
             <Images size={16} />
             <span>{t('Tabs.previews')}</span>
@@ -432,7 +432,7 @@ export default function EditImages() {
         >
           <div className="flex w-full flex-col space-y-5">
             <div className="w-full rounded-xl bg-muted/30 py-8 transition-all duration-300">
-              <div className="flex flex-col items-center justify-center space-y-8">
+              <div className="flex flex-col items-center justify-center gap-8">
                 <div className="group relative h-[125px] w-[250px]">
                   <NextImage
                     src={
@@ -443,8 +443,8 @@ export default function EditImages() {
                     alt="Лого организации"
                     fill
                     className={cn(
-                      'rounded-lg bg-white object-contain shadow-md',
-                      'border-2 border-gray-100 transition-all duration-300 hover:border-blue-200',
+                      'rounded-lg bg-background object-contain shadow-md',
+                      'border-2 border-border transition-all duration-300 hover:border-primary/40',
                       isLogoUploading && 'opacity-50',
                     )}
                     sizes="100vw"

@@ -38,7 +38,7 @@ const NavigationButtons = ({
         navigateToActivity(prevActivity);
       }}
       className={`flex items-center space-x-1 rounded-md px-1.5 py-1.5 transition-all duration-200 sm:space-x-2 sm:px-2 ${
-        prevActivity ? 'text-gray-700 hover:bg-gray-100' : 'cursor-not-allowed text-gray-300'
+        prevActivity ? 'text-foreground hover:bg-muted' : 'cursor-not-allowed text-muted-foreground/40'
       }`}
       disabled={!prevActivity}
       title={
@@ -54,14 +54,14 @@ const NavigationButtons = ({
         className="shrink-0 sm:h-5 sm:w-5"
       />
       <div className="hidden flex-col items-start sm:flex">
-        <span className="text-xs text-gray-500">{t('NavigationButtons.previous')}</span>
+        <span className="text-xs text-muted-foreground">{t('NavigationButtons.previous')}</span>
         <span className="max-w-[100px] truncate text-left text-sm font-medium sm:max-w-[150px]">
           {prevActivity ? prevActivity.name : t('NavigationButtons.noPreviousActivity')}
         </span>
       </div>
     </button>
 
-    <span className="px-1 text-sm font-medium text-gray-500 sm:px-2">
+    <span className="px-1 text-sm font-medium text-muted-foreground sm:px-2">
       {t('NavigationButtons.currentOfTotal', {
         currentIndex: currentIndex + 1,
         totalActivities: allActivities.length,
@@ -83,7 +83,7 @@ const NavigationButtons = ({
       }
     >
       <div className="hidden flex-col items-end sm:flex">
-        <span className={`text-xs ${nextActivity ? 'text-gray-500' : 'text-gray-500'}`}>
+        <span className="text-xs text-muted-foreground">
           {t('NavigationButtons.next')}
         </span>
         <span className="max-w-[100px] truncate text-right text-sm font-medium sm:max-w-[150px]">
@@ -123,8 +123,8 @@ const CourseInfo = ({
       />
     </div>
     <div className="hidden min-w-0 flex-col -space-y-0.5 sm:block">
-      <p className="text-sm font-medium text-gray-500">{t('CourseInfo.course')}</p>
-      <h1 className="truncate text-base font-semibold text-gray-900">{course.name}</h1>
+      <p className="text-sm font-medium text-muted-foreground">{t('CourseInfo.course')}</p>
+      <h1 className="truncate text-base font-semibold text-foreground">{course.name}</h1>
     </div>
   </div>
 );

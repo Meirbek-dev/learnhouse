@@ -68,7 +68,7 @@ const CourseProgress: FC<CourseProgressProps> = ({ course, isOpen, onClose, trai
   };
 
   const getActivityTypeIcon = (activityType: string, isDone: boolean) => {
-    const iconClass = cn('size-4 shrink-0', isDone ? 'text-teal-600' : 'text-muted-foreground');
+    const iconClass = cn('size-4 shrink-0', isDone ? 'text-primary' : 'text-muted-foreground');
 
     switch (activityType) {
       case 'TYPE_VIDEO': {
@@ -96,10 +96,8 @@ const CourseProgress: FC<CourseProgressProps> = ({ course, isOpen, onClose, trai
       {/* Progress Header */}
       <div
         className={cn(
-          'relative overflow-hidden rounded-xl p-5',
-          isCompleted
-            ? 'bg-gradient-to-br from-teal-50 to-emerald-50 ring-1 ring-teal-200/50'
-            : 'bg-gradient-to-br from-neutral-50 to-neutral-100/50 ring-1 ring-neutral-200/50',
+          'relative overflow-hidden rounded-xl border border-border bg-card p-5 text-card-foreground shadow-sm',
+          isCompleted && 'ring-1 ring-primary/20',
         )}
       >
         {/* Background Pattern */}
@@ -125,7 +123,7 @@ const CourseProgress: FC<CourseProgressProps> = ({ course, isOpen, onClose, trai
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="8"
-                className={isCompleted ? 'text-teal-200' : 'text-neutral-200'}
+                className="text-muted"
               />
               <circle
                 cx="50"
@@ -136,33 +134,33 @@ const CourseProgress: FC<CourseProgressProps> = ({ course, isOpen, onClose, trai
                 strokeWidth="8"
                 strokeLinecap="round"
                 strokeDasharray={`${progressPercentage * 2.64} 264`}
-                className={cn('transition-all duration-500 ease-out', isCompleted ? 'text-teal-500' : 'text-primary')}
+                className="text-primary transition-all duration-500 ease-out"
               />
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
               {isCompleted ? (
-                <Trophy className="size-6 text-teal-600" />
+                <Trophy className="size-6 text-primary" />
               ) : (
-                <span className="text-lg font-bold text-neutral-900 tabular-nums">{progressPercentage}%</span>
+                <span className="text-lg font-bold text-foreground tabular-nums">{progressPercentage}%</span>
               )}
             </div>
           </div>
 
           {/* Stats */}
           <div className="flex flex-1 flex-col gap-1.5">
-            <p className={cn('text-lg font-semibold', isCompleted ? 'text-teal-700' : 'text-neutral-900')}>
+            <p className={cn('text-lg font-semibold', isCompleted ? 'text-primary' : 'text-foreground')}>
               {isCompleted ? t('progressCard.courseCompleted') : `${completedActivities} of ${totalActivities}`}
             </p>
-            <p className={cn('text-sm', isCompleted ? 'text-teal-600/80' : 'text-muted-foreground')}>
+            <p className="text-sm text-muted-foreground">
               {isCompleted ? t('progressCard.completedAllActivities') : t('progressCard.activitiesCompletedLabel')}
             </p>
 
             {/* Progress Bar */}
-            <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-neutral-200/70">
+            <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-muted">
               <div
                 className={cn(
                   'h-full rounded-full transition-all duration-500 ease-out',
-                  isCompleted ? 'bg-gradient-to-r from-teal-500 to-emerald-500' : 'bg-primary',
+                  'bg-primary',
                 )}
                 style={{ width: `${progressPercentage}%` }}
               />
@@ -186,22 +184,22 @@ const CourseProgress: FC<CourseProgressProps> = ({ course, isOpen, onClose, trai
             return (
               <div
                 key={chapter.chapter_uuid}
-                className="overflow-hidden rounded-xl ring-1 ring-neutral-200/80 transition-shadow hover:ring-neutral-300"
+                className="overflow-hidden rounded-xl border border-border transition-shadow hover:border-border/80"
               >
                 {/* Chapter Header */}
                 <button
                   type="button"
                   onClick={() => toggleChapter(chapter.chapter_uuid)}
                   className={cn(
-                    'flex w-full items-center gap-3 p-4 text-left transition-colors',
-                    isChapterComplete ? 'bg-teal-50/50 hover:bg-teal-50' : 'bg-white hover:bg-neutral-50',
+                    'flex w-full items-center gap-3 bg-card p-4 text-left transition-colors hover:bg-muted/60',
+                    isChapterComplete && 'bg-primary/5',
                   )}
                 >
                   {/* Chapter Number */}
                   <div
                     className={cn(
                       'flex size-8 shrink-0 items-center justify-center rounded-lg text-sm font-semibold',
-                      isChapterComplete ? 'bg-teal-100 text-teal-700' : 'bg-neutral-100 text-neutral-600',
+                      isChapterComplete ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground',
                     )}
                   >
                     {isChapterComplete ? <Check className="size-4" /> : chapterIndex + 1}
@@ -209,7 +207,7 @@ const CourseProgress: FC<CourseProgressProps> = ({ course, isOpen, onClose, trai
 
                   {/* Chapter Info */}
                   <div className="flex flex-1 flex-col gap-10.5 overflow-hidden">
-                    <span className="truncate font-medium text-neutral-900">{chapter.name}</span>
+                    <span className="truncate font-medium text-foreground">{chapter.name}</span>
                     <div className="flex items-center gap-2">
                       <span className="text-muted-foreground text-xs">
                         {t('progressCard.chapterActivitiesCount', {

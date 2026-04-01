@@ -270,9 +270,9 @@ const SearchPage = () => {
   const totalPages = Math.ceil(totalResults / perPage);
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-background text-foreground">
       {/* Search Header */}
-      <div className="border-b border-border bg-white">
+      <div className="border-b border-border bg-card text-card-foreground">
         <div className="container mx-auto px-4 py-6">
           <div className="mx-auto max-w-2xl">
             <h1 className="mb-6 text-2xl font-semibold text-foreground">{t('searchTitle')}</h1>
@@ -290,7 +290,7 @@ const SearchPage = () => {
                   setSearchQuery(e.target.value);
                 }}
                 placeholder={t('searchInputPlaceholder')}
-                className="soft-shadow h-12 w-full rounded-xl bg-white text-foreground pr-4 pl-12 text-sm transition-all placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary/20 focus:outline-none"
+                className="soft-shadow h-12 w-full rounded-xl border border-border bg-background text-foreground pr-4 pl-12 text-sm transition-all placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary/20 focus:outline-none"
               />
               <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
                 <Search
@@ -403,7 +403,7 @@ const SearchPage = () => {
                         prefetch={false}
                         key={course.course_uuid}
                         href={getAbsoluteUrl(`/course/${removeCoursePrefix(course.course_uuid)}`)}
-                        className="soft-shadow group overflow-hidden rounded-xl bg-card border border-border text-card-foreground transition-all hover:shadow-md"
+                        className="soft-shadow group overflow-hidden rounded-xl border border-border bg-card text-card-foreground transition-all hover:shadow-md"
                       >
                         <div className="relative aspect-video w-full overflow-hidden">
                           <NextImage
@@ -471,7 +471,7 @@ const SearchPage = () => {
                         prefetch={false}
                         key={collection.collection_uuid}
                         href={getAbsoluteUrl(`/collection/${collection.collection_uuid.replace('collection_', '')}`)}
-                        className="soft-shadow flex items-start gap-4 rounded-xl bg-card border border-border p-4 text-card-foreground transition-all hover:shadow-md"
+                        className="soft-shadow flex items-start gap-4 rounded-xl border border-border bg-card p-4 text-card-foreground transition-all hover:shadow-md"
                       >
                         <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-muted/20">
                           <Book
@@ -508,7 +508,7 @@ const SearchPage = () => {
                         prefetch={false}
                         key={user.user_uuid}
                         href={getAbsoluteUrl(`/user/${user.username}`)}
-                        className="soft-shadow flex items-center gap-4 rounded-xl bg-card border border-border p-4 text-card-foreground transition-all hover:shadow-md"
+                        className="soft-shadow flex items-center gap-4 rounded-xl border border-border bg-card p-4 text-card-foreground transition-all hover:shadow-md"
                       >
                         <UserAvatar
                           size="lg"

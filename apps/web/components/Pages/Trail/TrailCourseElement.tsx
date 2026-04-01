@@ -70,8 +70,7 @@ const TrailCourseElement = ({ course, run }: TrailCourseElementProps) => {
 
   return (
     <Card
-      className="trailcoursebox flex rounded-xl bg-white p-3"
-      style={{ boxShadow: '0px 4px 7px 0px rgba(0, 0, 0, 0.03)' }}
+      className="trailcoursebox flex rounded-xl border border-border bg-card p-3 text-card-foreground shadow-sm"
     >
       <CardContent className="p-0">
         <Link
@@ -79,12 +78,11 @@ const TrailCourseElement = ({ course, run }: TrailCourseElementProps) => {
           href={getAbsoluteUrl(`/course/${courseid}`)}
         >
           <div
-            className="course_tumbnail relative inset-0 h-[50px] w-[72px] rounded-lg bg-cover bg-center ring-1 ring-black/10 ring-inset"
+            className="course_tumbnail relative inset-0 h-[50px] w-[72px] rounded-lg bg-cover bg-center ring-1 ring-border ring-inset"
             style={{
               backgroundImage: course.thumbnail_image
                 ? `url(${getCourseThumbnailMediaDirectory(course.course_uuid, course.thumbnail_image)})`
                 : `url('/empty_thumbnail.webp')`,
-              boxShadow: '0px 4px 7px 0px rgba(0, 0, 0, 0.03)',
             }}
           />
         </Link>
@@ -92,17 +90,17 @@ const TrailCourseElement = ({ course, run }: TrailCourseElementProps) => {
           <div className="course_top">
             <div className="course_info flex">
               <div className="course_basic flex-end flex flex-col -space-y-2">
-                <p className="p-0 pb-1 text-sm font-bold text-gray-700">{t('courseLabel')}</p>
+                <p className="p-0 pb-1 text-sm font-bold text-muted-foreground">{t('courseLabel')}</p>
                 <div className="flex items-center space-x-2">
-                  <h2 className="text-xl font-bold">{course.name}</h2>
-                  <div className="h-[5px] w-[10px] rounded-full bg-slate-300" />
-                  <h2>{course_progress}%</h2>
+                  <h2 className="text-xl font-bold text-foreground">{course.name}</h2>
+                  <div className="h-[5px] w-[10px] rounded-full bg-muted-foreground/30" />
+                  <h2 className="text-foreground">{course_progress}%</h2>
                 </div>
               </div>
               <div className="course_actions flex grow flex-row-reverse">
                 <button
                   onClick={() => quitCourse(course.course_uuid)}
-                  className="h-5 rounded-full bg-red-200 px-2 text-xs font-semibold text-red-700 hover:bg-red-300"
+                  className="h-5 rounded-full bg-destructive/10 px-2 text-xs font-semibold text-destructive hover:bg-destructive/20"
                 >
                   {t('quitCourseButton')}
                 </button>
@@ -110,9 +108,9 @@ const TrailCourseElement = ({ course, run }: TrailCourseElementProps) => {
             </div>
           </div>
           <div className="indicator w-full">
-            <div className="h-1.5 w-full rounded-full bg-gray-200">
+            <div className="h-1.5 w-full rounded-full bg-muted">
               <div
-                className="h-1.5 rounded-full bg-teal-600"
+                className="h-1.5 rounded-full bg-primary"
                 style={{ width: `${course_progress}%` }}
               />
             </div>
@@ -120,17 +118,17 @@ const TrailCourseElement = ({ course, run }: TrailCourseElementProps) => {
 
           {/* Certificate Section */}
           {course_progress === 100 && (
-            <div className="mt-2 border-t border-gray-100 pt-2">
+            <div className="mt-2 border-t border-border pt-2">
               {isLoadingCertificate ? (
-                <div className="flex items-center space-x-1 text-xs text-gray-500">
+                <div className="flex items-center gap-1 text-xs text-muted-foreground">
                   <Loader2 className="h-3 w-3 animate-spin" />
                   <span>{t('loadingCertificate')}</span>
                 </div>
               ) : courseCertificate ? (
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-1">
-                    <Award className="h-3 w-3 text-yellow-500" />
-                    <span className="text-xs font-medium text-gray-700">{t('viewCertificate')}</span>
+                    <Award className="h-3 w-3 text-primary" />
+                    <span className="text-xs font-medium text-foreground">{t('viewCertificate')}</span>
                   </div>
                   <Link
                     prefetch={false}
@@ -139,15 +137,15 @@ const TrailCourseElement = ({ course, run }: TrailCourseElementProps) => {
                     )}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center space-x-1 text-xs font-medium text-blue-600 hover:text-blue-700"
+                    className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:text-primary/80"
                   >
                     <span>{t('downloadCertificate')}</span>
                     <ExternalLink className="h-3 w-3" />
                   </Link>
                 </div>
               ) : (
-                <div className="flex items-center space-x-1 text-xs text-gray-500">
-                  <Award className="h-3 w-3 text-gray-300" />
+                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <Award className="h-3 w-3 text-muted-foreground/40" />
                   <span>{t('noCertificateAvailable')}</span>
                 </div>
               )}

@@ -145,7 +145,7 @@ export default function EditSocials() {
   ];
 
   return (
-    <div className="soft-shadow mx-0 rounded-xl bg-white sm:mx-10">
+    <div className="soft-shadow mx-0 rounded-xl border border-border bg-card text-card-foreground shadow-sm sm:mx-10">
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit((values) =>
@@ -155,7 +155,7 @@ export default function EditSocials() {
           )}
         >
           <div className="flex flex-col gap-0">
-            <div className="mx-3 my-3 flex flex-col -space-y-1 rounded-md bg-muted px-5 py-3">
+            <div className="mx-3 my-3 flex flex-col gap-1 rounded-md bg-muted px-5 py-3">
               <h1 className="text-xl font-bold text-foreground">{t('title')}</h1>
               <h2 className="text-base text-muted-foreground">{t('description')}</h2>
             </div>
@@ -164,7 +164,7 @@ export default function EditSocials() {
               <div className="w-full space-y-6">
                 <div>
                   <FormLabel className="text-lg font-semibold">{t('socialLinksTitle')}</FormLabel>
-                  <div className="soft-shadow mt-2 space-y-3 rounded-lg bg-muted/50 p-4">
+                  <div className="soft-shadow mt-2 space-y-3 rounded-lg border border-border bg-muted/50 p-4">
                     <div className="grid gap-3">
                       {socialFields.map((field) => (
                         <FormField
@@ -173,14 +173,14 @@ export default function EditSocials() {
                           name={field.name}
                           render={({ field: formField }) => (
                             <FormItem>
-                              <div className="flex items-center space-x-3">
+                              <div className="flex items-center gap-3">
                                 <div className={`flex h-8 w-8 items-center justify-center rounded-md ${field.bgColor}`}>
                                   {field.icon}
                                 </div>
                                 <FormControl>
                                   <Input
                                     placeholder={field.placeholder}
-                                    className="h-9 bg-white"
+                                    className="h-9 bg-background"
                                     {...formField}
                                   />
                                 </FormControl>
@@ -198,7 +198,7 @@ export default function EditSocials() {
               <div className="w-full space-y-6">
                 <div>
                   <FormLabel className="text-lg font-semibold">{t('customLinksTitle')}</FormLabel>
-                  <div className="soft-shadow mt-2 space-y-3 rounded-lg bg-muted/50 p-4">
+                  <div className="soft-shadow mt-2 space-y-3 rounded-lg border border-border bg-muted/50 p-4">
                     {linksEntries.map(([linkKey, linkValue], index) => (
                       <div
                         key={index}
@@ -211,7 +211,7 @@ export default function EditSocials() {
                           <Input
                             placeholder={t('Form.customLinkLabelPlaceholder')}
                             value={linkKey}
-                            className="h-9 w-1/3 bg-white"
+                            className="h-9 w-1/3 bg-background"
                             onChange={(e) => {
                               handleLinkChange(linkKey, e.target.value, linkValue);
                             }}
@@ -219,7 +219,7 @@ export default function EditSocials() {
                           <Input
                             placeholder={t('Form.customLinkUrlPlaceholder')}
                             value={linkValue}
-                            className="h-9 flex-1 bg-white"
+                            className="h-9 flex-1 bg-background"
                             onChange={(e) => {
                               handleLinkChange(linkKey, linkKey, e.target.value);
                             }}

@@ -179,7 +179,7 @@ const ActivityTooltipContent = ({
 }) => {
   const t = useTranslations('ActivityIndicators');
   return (
-    <div className="min-w-[220px] rounded-xl bg-white p-4 shadow-lg ring-1 ring-gray-100">
+    <div className="min-w-[220px] rounded-xl border border-border bg-card p-4 text-card-foreground shadow-lg">
       <div className="flex items-start gap-3">
         <div
           className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${getActivityTypeBadgeColor(activity.activity_type).split(' ')[0]}`}
@@ -190,18 +190,18 @@ const ActivityTooltipContent = ({
           />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-medium text-gray-900">{activity.name}</p>
-          <p className="mt-0.5 text-xs text-gray-500">{getActivityTypeLabel(activity.activity_type, t)}</p>
+          <p className="truncate text-sm font-medium text-foreground">{activity.name}</p>
+          <p className="mt-0.5 text-xs text-muted-foreground">{getActivityTypeLabel(activity.activity_type, t)}</p>
         </div>
       </div>
-      <div className="mt-3 flex items-center justify-between border-t border-gray-100 pt-3">
+      <div className="mt-3 flex items-center justify-between border-t border-border pt-3">
         <span
           className={`inline-flex items-center gap-1.5 rounded-full px-2 py-1 text-xs font-medium ${
             isCurrent
-              ? 'bg-blue-50 text-blue-600'
+              ? 'bg-primary/10 text-primary'
               : isDone
-                ? 'bg-emerald-50 text-emerald-600'
-                : 'bg-gray-50 text-gray-500'
+                ? 'bg-primary/10 text-primary'
+                : 'bg-muted text-muted-foreground'
           }`}
         >
           {isDone && (
@@ -233,11 +233,11 @@ const ChapterTooltipContent = ({
   const isComplete = completedActivities === totalActivities;
 
   return (
-    <div className="min-w-[200px] rounded-xl bg-white p-4 shadow-lg ring-1 ring-gray-100">
+    <div className="min-w-[200px] rounded-xl border border-border bg-card p-4 text-card-foreground shadow-lg">
       <div className="flex items-center gap-3">
         <div
           className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-sm font-semibold ${
-            isComplete ? 'bg-emerald-100 text-emerald-600' : 'bg-gray-100 text-gray-600'
+            isComplete ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'
           }`}
         >
           {isComplete ? (
@@ -250,22 +250,22 @@ const ChapterTooltipContent = ({
           )}
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-xs font-medium text-gray-500">
+          <p className="text-xs font-medium text-muted-foreground">
             {t('chapter')} {chapterNumber}
           </p>
-          <p className="truncate text-sm font-medium text-gray-900">{chapter.name}</p>
+          <p className="truncate text-sm font-medium text-foreground">{chapter.name}</p>
         </div>
       </div>
       <div className="mt-3 space-y-2">
         <div className="flex items-center justify-between text-xs">
-          <span className="text-gray-500">{t('progress')}</span>
-          <span className={`font-medium ${isComplete ? 'text-emerald-600' : 'text-gray-700'}`}>
+          <span className="text-muted-foreground">{t('progress')}</span>
+          <span className={`font-medium ${isComplete ? 'text-primary' : 'text-foreground'}`}>
             {completedActivities}/{totalActivities} {t('completed')}
           </span>
         </div>
-        <div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-100">
+        <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
           <div
-            className={`h-full rounded-full transition-all duration-300 ${isComplete ? 'bg-emerald-500' : 'bg-blue-500'}`}
+            className={`h-full rounded-full transition-all duration-300 ${isComplete ? 'bg-primary' : 'bg-primary/70'}`}
             style={{ width: `${progress}%` }}
           />
         </div>
@@ -281,23 +281,23 @@ const CertificationBadge = ({ courseid, isCompleted }: { courseid: string; isCom
       sideOffset={8}
       unstyled
       content={
-        <div className="min-w-[200px] rounded-xl bg-white p-4 shadow-lg ring-1 ring-gray-100">
+        <div className="min-w-[200px] rounded-xl border border-border bg-card p-4 text-card-foreground shadow-lg">
           <div className="flex items-center gap-3">
             <div
               className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
-                isCompleted ? 'bg-gradient-to-br from-yellow-400 to-orange-400' : 'bg-gray-100'
+                isCompleted ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
               }`}
             >
               <Trophy
                 size={20}
-                className={isCompleted ? 'text-white' : 'text-gray-400'}
+                className={isCompleted ? 'text-primary-foreground' : 'text-muted-foreground'}
               />
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-900">
+              <p className="text-sm font-medium text-foreground">
                 {isCompleted ? t('certificationAvailable') : t('earnCertificate')}
               </p>
-              <p className="mt-0.5 text-xs text-gray-500">
+              <p className="mt-0.5 text-xs text-muted-foreground">
                 {isCompleted ? t('viewCertificate') : t('completeAllActivities')}
               </p>
             </div>
@@ -316,13 +316,13 @@ const CertificationBadge = ({ courseid, isCompleted }: { courseid: string; isCom
         <div
           className={`flex h-7 w-7 items-center justify-center rounded-lg transition-all duration-200 ${
             isCompleted
-              ? 'bg-gradient-to-br from-yellow-400 to-orange-400 shadow-sm hover:scale-105 hover:shadow-md'
-              : 'bg-gray-100'
+              ? 'bg-primary text-primary-foreground shadow-sm hover:scale-105 hover:shadow-md'
+              : 'bg-muted'
           }`}
         >
           <Trophy
             size={14}
-            className={isCompleted ? 'text-white' : 'text-gray-400'}
+            className={isCompleted ? 'text-primary-foreground' : 'text-muted-foreground'}
           />
         </div>
       </Link>
@@ -405,17 +405,17 @@ const ActivityIndicators = (props: Props) => {
         <button
           onClick={navigateToPrevious}
           disabled={currentActivityIndex <= 0}
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gray-50 transition-all duration-200 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted transition-all duration-200 hover:bg-muted/80 disabled:cursor-not-allowed disabled:opacity-40"
           aria-label={t('previousActivity')}
         >
           <ChevronLeft
             size={18}
-            className="text-gray-600"
+            className="text-muted-foreground"
           />
         </button>
       ) : null}
 
-      <div className="flex flex-1 items-center gap-1 overflow-hidden rounded-full bg-gray-100 p-1">
+      <div className="flex flex-1 items-center gap-1 overflow-hidden rounded-full bg-muted p-1">
         {course.chapters.map((chapter: any, chapterIndex: number) => {
           const completedActivities = getChapterProgress(chapter.activities);
           const isChapterComplete = completedActivities === chapter.activities.length;
@@ -449,8 +449,8 @@ const ActivityIndicators = (props: Props) => {
                     <div
                       className={`flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-semibold transition-all duration-200 group-hover:scale-110 ${
                         isChapterComplete
-                          ? 'bg-emerald-500 text-white shadow-sm'
-                          : 'bg-white text-gray-600 shadow-sm ring-1 ring-gray-200'
+                          ? 'bg-primary text-primary-foreground shadow-sm'
+                          : 'bg-card text-muted-foreground shadow-sm ring-1 ring-border'
                       }`}
                     >
                       {isChapterComplete ? (
@@ -467,7 +467,7 @@ const ActivityIndicators = (props: Props) => {
                   <div className="relative flex shrink-0 items-center justify-center">
                     <div
                       className={`flex h-6 w-6 cursor-not-allowed items-center justify-center rounded-full text-[10px] font-semibold ${
-                        isChapterComplete ? 'bg-emerald-500 text-white' : 'bg-white text-gray-400 ring-1 ring-gray-200'
+                        isChapterComplete ? 'bg-primary text-primary-foreground' : 'bg-card text-muted-foreground ring-1 ring-border'
                       }`}
                     >
                       {chapterIndex + 1}
@@ -505,15 +505,15 @@ const ActivityIndicators = (props: Props) => {
                       >
                         {/* Current activity indicator */}
                         {isCurrent && (
-                          <span className="absolute inset-0 animate-pulse rounded bg-blue-400 opacity-30" />
+                          <span className="absolute inset-0 animate-pulse rounded bg-primary opacity-30" />
                         )}
                         <span
                           className={`relative block h-2 w-full rounded transition-all duration-200 ${
                             isCurrent
-                              ? 'bg-blue-500 ring-2 ring-blue-200'
+                              ? 'bg-primary ring-2 ring-primary/30'
                               : isDone
-                                ? 'bg-emerald-500 group-hover:bg-emerald-600'
-                                : 'bg-gray-300 group-hover:bg-gray-400'
+                                ? 'bg-primary group-hover:bg-primary/90'
+                                : 'bg-muted-foreground/30 group-hover:bg-muted-foreground/40'
                           }`}
                         />
                       </Link>
@@ -536,12 +536,12 @@ const ActivityIndicators = (props: Props) => {
         <button
           onClick={navigateToNext}
           disabled={currentActivityIndex >= allActivities.length - 1}
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gray-50 transition-all duration-200 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted transition-all duration-200 hover:bg-muted/80 disabled:cursor-not-allowed disabled:opacity-40"
           aria-label={t('nextActivity')}
         >
           <ChevronRight
             size={18}
-            className="text-gray-600"
+            className="text-muted-foreground"
           />
         </button>
       ) : null}
