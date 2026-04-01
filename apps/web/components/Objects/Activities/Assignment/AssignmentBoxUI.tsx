@@ -46,7 +46,7 @@ const AssignmentBoxUI = ({
   children,
 }: AssignmentBoxProps) => {
   const t = useTranslations('Activities.AssignmentBoxUI');
-  const [customGrade, setCustomGrade] = useState<string>('');
+  const [customGrade, setCustomGrade] = useState('');
   const session = usePlatformSession();
 
   const isAuthenticated = session?.status === 'authenticated';

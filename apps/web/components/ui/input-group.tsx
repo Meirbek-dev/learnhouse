@@ -1,7 +1,7 @@
 'use client';
 
-import { cva } from 'class-variance-authority';
 import type { VariantProps } from 'class-variance-authority';
+import { cva } from 'class-variance-authority';
 import * as React from 'react';
 
 import { Textarea } from '@/components/ui/textarea';

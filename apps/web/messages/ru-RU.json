@@ -2071,6 +2071,7 @@
       "deletingActivity": "Удаление активности...",
       "editAssignmentButton": "Редактировать задание",
       "editPageButton": "Редактировать страницу",
+      "openEditPage": "Открыть страницу редактирования",
       "failedToUpdateActivityName": "Не удалось обновить название активности",
       "noAccessToken": "Требуется аутентификация",
       "ownerLabel": "Создатель",
@@ -6733,6 +6734,7 @@
       "colMedian": "Медиана",
       "colDifficulty": "Сложность",
       "colSignals": "Сигналы",
+      "viewAssessment": "Просмотр задания {title}",
       "healthy": "В норме",
       "searchPlaceholder": "Поиск по заданиям...",
       "emptyMessage": "Нет проблемных заданий для текущего охвата."

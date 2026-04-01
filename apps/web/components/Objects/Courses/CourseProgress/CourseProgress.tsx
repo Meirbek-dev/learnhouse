@@ -18,7 +18,7 @@ interface CourseProgressProps {
 
 const CourseProgress: FC<CourseProgressProps> = ({ course, isOpen, onClose, trailData }) => {
   const t = useTranslations('Courses.CoursesActions');
-  const [expandedChapters, setExpandedChapters] = useState<Set<string>>(new Set());
+  const [expandedChapters, setExpandedChapters] = useState(new Set());
 
   function isActivityDone(activity: any) {
     const cleanCourseUuid = course.course_uuid?.replace('course_', '');

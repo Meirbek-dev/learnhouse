@@ -24,7 +24,6 @@ import ActivityIndicators from '@components/Pages/Courses/ActivityIndicators';
 import CourseBreadcrumbs from '@components/Pages/Courses/CourseBreadcrumbs';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { getDiscussionsSwrKey } from '@services/courses/discussions-keys';
-// Import existing components and utilities
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { CourseProvider } from '@components/Contexts/CourseContext';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
@@ -37,6 +36,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { getTrailSwrKey } from '@services/courses/keys';
 import { Separator } from '@/components/ui/separator';
 import { useEffect, useMemo, useState } from 'react';
+// Import existing components and utilities
+import NextImage from '@components/ui/NextImage';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -285,11 +286,15 @@ const CourseClient = (props: any) => {
                   if (showImage && course.thumbnail_image) {
                     return (
                       <div className="relative max-h-192 w-full overflow-hidden rounded-lg shadow-xl ring-1 focus:ring-primary/20/10 ring-inset">
-                        <img
-                          src={getCourseThumbnailMediaDirectory(course?.course_uuid, course?.thumbnail_image)}
-                          alt={t('courseThumbnailAlt')}
-                          className="h-auto w-full object-contain"
-                        />
+                        <div className="relative h-full w-full">
+                          <NextImage
+                            src={getCourseThumbnailMediaDirectory(course?.course_uuid, course?.thumbnail_image)}
+                            alt={t('courseThumbnailAlt')}
+                            fill
+                            className="object-contain"
+                            sizes="100vw"
+                          />
+                        </div>
                         {course.thumbnail_type === 'both' && (
                           <div className="absolute top-3 right-3 z-10">
                             <div className="flex space-x-1 rounded-lg bg-muted/20 p-1 backdrop-blur-sm">

@@ -48,7 +48,8 @@ export function useContributorStatus(courseUuid: string) {
         setContributorStatus('NONE');
       }
     } catch (error) {
-      console.error(`${t('checkStatusError')}: ${error}`);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error(`${t('checkStatusError')}: ${errorMessage}`);
       toast.error(t('checkStatusError'));
       setContributorStatus('NONE');
     } finally {

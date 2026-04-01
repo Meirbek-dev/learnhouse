@@ -5,6 +5,7 @@ import { usePlatform } from '@/components/Contexts/PlatformContext';
 import { getAbsoluteUrl } from '@services/config/config';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import NextImage from '@components/ui/NextImage';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
@@ -108,15 +109,19 @@ const CourseInfo = ({
   t: (key: string, values?: Record<string, any>) => string;
 }) => (
   <div className="flex min-w-0 shrink items-center space-x-2 sm:space-x-4">
-    <img
-      className="h-[20px] w-[35px] shrink-0 rounded-md object-cover sm:h-[26px] sm:w-[45px]"
-      src={
-        course.thumbnail_image
-          ? `${getCourseThumbnailMediaDirectory(course.course_uuid, course.thumbnail_image)}`
-          : '/empty_thumbnail.webp'
-      }
-      alt=""
-    />
+    <div className="relative h-[20px] w-[35px] shrink-0 rounded-md sm:h-[26px] sm:w-[45px] overflow-hidden">
+      <NextImage
+        src={
+          course.thumbnail_image
+            ? `${getCourseThumbnailMediaDirectory(course.course_uuid, course.thumbnail_image)}`
+            : '/empty_thumbnail.webp'
+        }
+        alt={course.name || ''}
+        fill
+        className="object-cover"
+        sizes="100vw"
+      />
+    </div>
     <div className="hidden min-w-0 flex-col -space-y-0.5 sm:block">
       <p className="text-sm font-medium text-gray-500">{t('CourseInfo.course')}</p>
       <h1 className="truncate text-base font-semibold text-gray-900">{course.name}</h1>

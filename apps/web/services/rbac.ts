@@ -24,13 +24,16 @@ import { getAPIUrl } from '@/services/config/config';
 const api = (path: string) => `${getAPIUrl()}${path}`;
 
 async function request<T>(url: string, token: string, options?: RequestInit): Promise<T> {
+  const headers = {
+    'Authorization': `Bearer ${token}`,
+    'Content-Type': 'application/json',
+    ...options?.headers,
+  };
+
   const res = await fetch(url, {
-    ...options,
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json',
-      ...options?.headers,
-    },
+    method: options?.method,
+    body: options?.body,
+    headers,
     credentials: 'include',
   });
 

@@ -18,9 +18,9 @@ const CORE_THEMES = {
 const themeCache = new Map<string, Theme>();
 
 // Initialize cache with core themes
-Object.entries(CORE_THEMES).forEach(([name, theme]) => {
+for (const [name, theme] of Object.entries(CORE_THEMES)) {
   themeCache.set(name, theme);
-});
+}
 
 /**
  * Lazy load a theme by name
@@ -68,16 +68,16 @@ export function preloadThemes(themeNames: string[]): void {
   // Use requestIdleCallback for non-blocking preloading
   if (typeof globalThis.window !== 'undefined' && 'requestIdleCallback' in globalThis) {
     globalThis.requestIdleCallback(() => {
-      themeNames.forEach((name) => {
+      for (const name of themeNames) {
         loadTheme(name);
-      });
+      }
     });
   } else {
     // Fallback for browsers without requestIdleCallback
     setTimeout(() => {
-      themeNames.forEach((name) => {
+      for (const name of themeNames) {
         loadTheme(name);
-      });
+      }
     }, 100);
   }
 }
@@ -91,9 +91,9 @@ export function clearThemeCache(): void {
   themeCache.clear();
 
   // Re-add core themes
-  Object.entries(CORE_THEMES).forEach(([name, theme]) => {
+  for (const [name, theme] of Object.entries(CORE_THEMES)) {
     themeCache.set(name, theme);
-  });
+  }
 }
 
 /**

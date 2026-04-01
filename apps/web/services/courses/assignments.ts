@@ -255,12 +255,7 @@ export interface UpdateSubFileParams {
   access_token: string;
 }
 
-export async function updateSubFile({
-  file,
-  assignmentTaskUUID,
-  assignmentUUID,
-  access_token,
-}: UpdateSubFileParams) {
+export async function updateSubFile({ file, assignmentTaskUUID, assignmentUUID, access_token }: UpdateSubFileParams) {
   // Send file thumbnail as form data
   const formData = new FormData();
 

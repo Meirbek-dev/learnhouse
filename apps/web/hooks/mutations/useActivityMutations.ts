@@ -16,7 +16,7 @@ export function useActivityMutations(courseUuid: string, withUnpublishedActiviti
   const { mutate, cache } = useSWRConfig();
   const structureKey = courseKeys.structure(courseUuid, withUnpublishedActivities);
 
-  const captureSnapshot = (key: string): unknown | undefined => (cache.get(key) as any)?.data as unknown | undefined;
+  const captureSnapshot = (key: string) => (cache.get(key as any) as any)?.data ?? undefined;
 
   const updateActivityMutation = async (
     activityUuid: string,

@@ -5,8 +5,8 @@ import PageLoading from '@components/Objects/Loaders/PageLoading';
 import ErrorUI from '@/components/Objects/Elements/Error/Error';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
-import { useTranslations } from 'next-intl';
 import { createContext, use, useMemo } from 'react';
+import { useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
 import useSWR from 'swr';
 

@@ -13,29 +13,29 @@ import EditorOptionsProvider from '@components/Contexts/Editor/EditorContext';
 import QuizBlock from '@components/Objects/Editor/Extensions/Quiz/QuizBlock';
 import Buttons from '@components/Objects/Editor/Extensions/Buttons/Buttons';
 import PDFBlock from '@components/Objects/Editor/Extensions/PDF/PDFBlock';
+import { CodeBlockLowlight } from '@tiptap/extension-code-block-lowlight';
 import Badges from '@components/Objects/Editor/Extensions/Badges/Badges';
 import { getLinkExtension } from '@components/Objects/Editor/EditorConf';
-import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
+import { TableHeader } from '@tiptap/extension-table-header';
 import { CustomHeading } from './CustomHeadingExtenstion';
-import TableHeader from '@tiptap/extension-table-header';
+import { TableCell } from '@tiptap/extension-table-cell';
 import { EditorContent, useEditor } from '@tiptap/react';
 import ts from 'highlight.js/lib/languages/typescript';
 import js from 'highlight.js/lib/languages/javascript';
 import python from 'highlight.js/lib/languages/python';
-import TableCell from '@tiptap/extension-table-cell';
+import { TableRow } from '@tiptap/extension-table-row';
+import { Youtube } from '@tiptap/extension-youtube';
 import java from 'highlight.js/lib/languages/java';
-import TableRow from '@tiptap/extension-table-row';
 import html from 'highlight.js/lib/languages/xml';
 import { common, createLowlight } from 'lowlight';
 import css from 'highlight.js/lib/languages/css';
+import { StarterKit } from '@tiptap/starter-kit';
 import AICanvaToolkit from './AI/AICanvaToolkit';
 // Custom Extensions
 import { useIsMobile } from '@/hooks/use-mobile';
-import Youtube from '@tiptap/extension-youtube';
 import { Table } from '@tiptap/extension-table';
 import TableOfContents from './TableOfContents';
 import styles from './DynamicCanva.module.css';
-import StarterKit from '@tiptap/starter-kit';
 
 // Lowlight initialization at module scope (one-time)
 const LOWLIGHT = (() => {

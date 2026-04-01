@@ -2071,6 +2071,7 @@
       "deletingActivity": "Deleting activity...",
       "editAssignmentButton": "Edit Assignment",
       "editPageButton": "Edit Page",
+      "openEditPage": "Open edit page",
       "failedToUpdateActivityName": "Failed to update activity name",
       "noAccessToken": "Authentication required",
       "ownerLabel": "Owner",
@@ -6708,6 +6709,7 @@
       "colMedian": "Median",
       "colDifficulty": "Difficulty",
       "colSignals": "Signals",
+      "viewAssessment": "View assessment {title}",
       "healthy": "Healthy",
       "searchPlaceholder": "Search assessments...",
       "emptyMessage": "No assessment outliers match the current scope."

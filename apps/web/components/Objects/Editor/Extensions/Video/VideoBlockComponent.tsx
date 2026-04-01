@@ -100,7 +100,7 @@ const VideoBlockComponent = (props: ExtendedNodeViewProps) => {
   const [isDragging, setIsDragging] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const uploadResetTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [blockObject, setBlockObject] = useState<VideoBlockObject | null>(initialBlockObject || null);
+  const [blockObject, setBlockObject] = useState(initialBlockObject || null);
   const [selectedSize, setSelectedSize] = useState<VideoSize>(initialBlockObject?.size || 'medium');
   const [isModalOpen, setIsModalOpen] = useState(false);
 

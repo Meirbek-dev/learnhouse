@@ -44,7 +44,7 @@ export default function QuestionEditor({
 }: QuestionEditorProps) {
   const t = useTranslations('Components.QuestionManagement');
   const [formData, setFormData] = useState<Question>(
-    question || {
+    question ?? {
       question_text: '',
       question_type: 'SINGLE_CHOICE',
       points: 1,
@@ -65,14 +65,14 @@ export default function QuestionEditor({
   useEffect(() => {
     // If parent supplies a different question (e.g., opening for edit/new), update form
     setFormData(
-      question || {
+      (question ?? {
         question_text: '',
         question_type: 'SINGLE_CHOICE',
         points: 1,
         explanation: '',
         answer_options: [{ text: '', is_correct: false }],
         order_index: 0,
-      },
+      }),
     );
   }, [question]);
 
@@ -185,14 +185,14 @@ export default function QuestionEditor({
         // ensure texts are present
         const normalized = opts
           .slice(0, 2)
-          .map((o, i) => (Object.assign(o, {text:o.text||(i===0?t(`true`):t(`false`))})));
+          .map((o, i) => Object.assign(o, { text: o.text || (i === 0 ? t(`true`) : t(`false`)) }));
         const firstCorrect = normalized.findIndex((o) => o.is_correct);
         if (firstCorrect === -1) {
           return { ...prev, answer_options: normalized };
         }
         return {
           ...prev,
-          answer_options: normalized.map((o, i) => (Object.assign(o, {is_correct:i===firstCorrect}))),
+          answer_options: normalized.map((o, i) => Object.assign(o, { is_correct: i === firstCorrect })),
         };
       }
 

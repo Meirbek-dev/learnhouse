@@ -795,7 +795,12 @@ const EmbedObjectsComponent = (props: any) => {
           <>
             <div
               className="absolute top-0 right-0 bottom-0 flex w-4 cursor-ew-resize items-center justify-center bg-white/70 opacity-0 transition-opacity hover:bg-white/90 hover:opacity-100"
+              role="button"
+              tabIndex={0}
               onMouseDown={(e) => handleResizeStart(e, 'horizontal')}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') handleResizeStart(e as any, 'horizontal');
+              }}
             >
               <GripVertical
                 size={16}
@@ -804,7 +809,12 @@ const EmbedObjectsComponent = (props: any) => {
             </div>
             <div
               className="absolute right-0 bottom-0 left-0 flex h-4 cursor-ns-resize items-center justify-center bg-white/70 opacity-0 transition-opacity hover:bg-white/90 hover:opacity-100"
+              role="button"
+              tabIndex={0}
               onMouseDown={(e) => handleResizeStart(e, 'vertical')}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') handleResizeStart(e as any, 'vertical');
+              }}
             >
               <GripHorizontal
                 size={16}

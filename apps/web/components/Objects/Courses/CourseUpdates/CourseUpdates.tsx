@@ -67,9 +67,10 @@ const CourseUpdates = () => {
 
   return (
     <div className="soft-shadow relative z-20 rounded-full bg-white px-5 py-1 transition-all ease-linear hover:bg-neutral-50">
-      <div
+      <button
+        type="button"
         onClick={handleModelOpen}
-        className="flex items-center space-x-2 font-normal text-gray-600 hover:cursor-pointer"
+        className="flex items-center space-x-2 font-normal text-gray-600"
       >
         <div>
           <Rss size={16} />
@@ -82,7 +83,7 @@ const CourseUpdates = () => {
             </span>
           ) : null}
         </div>
-      </div>
+      </button>
       {isModelOpen ? (
         <motion.div
           initial={{ opacity: 0, y: -10 }}
@@ -115,15 +116,16 @@ const UpdatesSection = () => {
           <span>{t('updates')}</span>
         </div>
         {canUpdateCourse ? (
-          <div
+          <button
+            type="button"
             onClick={() => {
               setSelectedView('new');
             }}
-            className="flex cursor-pointer items-center space-x-2 bg-gray-100 px-4 py-2 text-xs font-medium outline-1 outline-neutral-200/40 hover:bg-gray-200"
+            className="flex items-center space-x-2 bg-gray-100 px-4 py-2 text-xs font-medium outline-1 outline-neutral-200/40 hover:bg-gray-200"
           >
             <PencilLine size={14} />
             <span>{t('newUpdate')}</span>
-          </div>
+          </button>
         ) : null}
       </div>
       <div className="">

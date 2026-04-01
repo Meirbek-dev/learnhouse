@@ -49,7 +49,7 @@ export default function PlatformSettingsPage(props: { params: Promise<{ subpage:
 
   const currentTab = useMemo<TabItem>(() => {
     const tab = SETTING_TABS.find((tabItem) => tabItem.id === params.subpage);
-    return tab ?? (SETTING_TABS[0]!);
+    return tab ?? SETTING_TABS[0]!;
   }, [params.subpage]);
   const pageTitle = useMemo(() => t(currentTab.titleKey), [currentTab, t]);
   const pageDescription = useMemo(() => t(currentTab.descriptionKey), [currentTab, t]);

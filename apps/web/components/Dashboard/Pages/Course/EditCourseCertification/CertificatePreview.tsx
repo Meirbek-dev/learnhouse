@@ -6,6 +6,7 @@ import { getLogoMediaDirectory } from '@services/media/media';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
+import Image from 'next/image';
 import type React from 'react';
 import QRCode from 'qrcode';
 
@@ -80,7 +81,7 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
   awardedDate,
   qrCodeLink,
 }) => {
-  const [qrCodeUrl, setQrCodeUrl] = useState<string>('');
+  const [qrCodeUrl, setQrCodeUrl] = useState('');
   const platform = usePlatform();
   const tTypes = useTranslations('Certificates.EditCourseCertification.certificationTypes');
   const t = useTranslations('Certificates.CertificatePreview');
@@ -132,10 +133,13 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
               {layout !== 'split' ? (
                 <div className="flex h-16 w-16 items-center justify-center rounded-md border bg-card p-1 sm:h-24 sm:w-24">
                   {qrCodeUrl ? (
-                    <img
+                    <Image
                       src={qrCodeUrl}
                       alt={t('certificateQRAlt')}
                       className="h-full w-full object-contain"
+                      width={96}
+                      height={96}
+                      unoptimized
                     />
                   ) : (
                     <QrCode className="text-muted-foreground h-10 w-10" />
@@ -178,10 +182,13 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
               <div className="space-y-2 text-center">
                 <div className="flex items-center justify-center">
                   {platform?.logo_image ? (
-                    <img
+                    <Image
                       src={`${getLogoMediaDirectory(platform.logo_image)}`}
                       alt={t('organizationLogoAlt')}
                       className="h-10 w-10 object-contain"
+                      width={40}
+                      height={40}
+                      unoptimized
                     />
                   ) : (
                     <div className="flex h-10 w-10 items-center justify-center rounded-full border bg-muted">
@@ -220,10 +227,13 @@ const CertificatePreview: React.FC<CertificatePreviewProps> = ({
                   </div>
                   <div className="mt-3 flex items-center justify-center">
                     {qrCodeUrl ? (
-                      <img
+                      <Image
                         src={qrCodeUrl}
                         alt={t('certificateQRAlt')}
                         className="h-28 w-28 object-contain"
+                        width={112}
+                        height={112}
+                        unoptimized
                       />
                     ) : (
                       <QrCode className="text-muted-foreground h-14 w-14" />

@@ -203,8 +203,7 @@ const EditCourseCertification = () => {
   useEffect(() => {
     if (!serverValues) return;
     form.reset(serverValues, { keepDirtyValues: true });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [serverValues]);
+  }, [serverValues, form]);
 
   // Subscribe to individual watched fields to avoid over-rendering
   const isEnabled = useWatch({ control: form.control, name: 'enable_certification' });

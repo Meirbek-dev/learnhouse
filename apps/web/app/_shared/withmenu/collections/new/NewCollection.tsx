@@ -14,6 +14,7 @@ import { useMemo, useState, useTransition } from 'react';
 import { useCourseList } from '@/hooks/useCourseList';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
+import NextImage from '@/components/ui/NextImage';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -335,11 +336,15 @@ const NewCollection = () => {
                             />
                             <div className="bg-muted relative h-20 w-32 shrink-0 overflow-hidden rounded-md border">
                               {course.thumbnail_image ? (
-                                <img
-                                  src={getCourseThumbnailMediaDirectory(course.course_uuid, course.thumbnail_image)}
-                                  alt={course.name}
-                                  className="h-full w-full object-cover"
-                                />
+                                <div className="relative h-full w-full">
+                                  <NextImage
+                                    src={getCourseThumbnailMediaDirectory(course.course_uuid, course.thumbnail_image)}
+                                    alt={course.name}
+                                    fill
+                                    className="object-cover"
+                                    sizes="100vw"
+                                  />
+                                </div>
                               ) : (
                                 <div className="flex h-full w-full items-center justify-center">
                                   <ImageIcon className="text-muted-foreground h-8 w-8" />

@@ -9,6 +9,7 @@ import { useCourse } from '@components/Contexts/CourseContext';
 import { Card, CardContent } from '@components/ui/card';
 import { Button } from '@components/ui/button';
 import { useTranslations } from 'next-intl';
+import Image from 'next/image';
 import { toast } from 'sonner';
 import type React from 'react';
 
@@ -189,7 +190,12 @@ const ThumbnailUpdate = ({ thumbnailType, disabled = false, disabledReason }: Th
             }`}
             controls
           >
-            <track kind="captions" srcLang="en" label={t('videoCaptions')} default />
+            <track
+              kind="captions"
+              srcLang="en"
+              label={t('videoCaptions')}
+              default
+            />
           </video>
         </div>
       );
@@ -197,12 +203,15 @@ const ThumbnailUpdate = ({ thumbnailType, disabled = false, disabledReason }: Th
 
     return (
       <div className="mx-auto max-w-[480px]">
-        <img
+        <Image
           src={thumbnailToShow.url}
           alt={localThumbnail ? t('thumbnailPreviewAlt') : t('currentThumbnailAlt')}
           className={`aspect-video w-full rounded-lg border border-border object-cover shadow-sm ${
             isLoading ? 'animate-pulse' : ''
           }`}
+          width={480}
+          height={270}
+          unoptimized
         />
       </div>
     );

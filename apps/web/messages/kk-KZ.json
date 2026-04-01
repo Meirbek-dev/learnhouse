@@ -2071,6 +2071,7 @@
       "deletingActivity": "Белсенділік жойылуда...",
       "editAssignmentButton": "Тапсырманы өңдеу",
       "editPageButton": "Бетті өңдеу",
+      "openEditPage": "Өңдеу бетін ашу",
       "failedToUpdateActivityName": "Белсенділік атауын жаңарту мүмкін болмады",
       "noAccessToken": "Аутентификация қажет",
       "ownerLabel": "Иесі",
@@ -6733,6 +6734,7 @@
       "colMedian": "Медиана",
       "colDifficulty": "Қиындық",
       "colSignals": "Сигналдар",
+      "viewAssessment": "Бағалауды қарау {title}",
       "healthy": "Жақсы",
       "searchPlaceholder": "Бағалаулар бойынша іздеу...",
       "emptyMessage": "Ағымдағы аумаққа сәйкес бағалау ауытқулары жоқ."

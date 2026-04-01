@@ -59,11 +59,11 @@ function buildVideoDetails(details: any): string {
  * Appends subtitle files to FormData
  */
 function appendSubtitleFiles(formData: FormData, subtitles: any[]): void {
-  subtitles.forEach((subtitle: any) => {
+  for (const subtitle of subtitles) {
     if (subtitle.file) {
       formData.append('subtitle_files', subtitle.file);
     }
-  });
+  }
 }
 
 /**

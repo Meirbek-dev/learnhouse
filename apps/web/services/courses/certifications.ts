@@ -29,12 +29,7 @@ export interface CreateCertificationParams {
   options?: CertificationInvalidationOptions;
 }
 
-export async function createCertification({
-  course_id,
-  config,
-  access_token,
-  options,
-}: CreateCertificationParams) {
+export async function createCertification({ course_id, config, access_token, options }: CreateCertificationParams) {
   const result = await fetch(
     `${getAPIUrl()}certifications/`,
     RequestBodyWithAuthHeader(

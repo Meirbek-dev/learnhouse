@@ -208,13 +208,15 @@ const Editor = (props: EditorProps) => {
                   target="_blank"
                   href={`/course/${courseUuid}`}
                 >
-                  <img
-                    className="h-[25px] w-14 object-cover object-top rounded-[7px] ml-[5px] hover:cursor-pointer"
-                    src={`${
+                  <Image
+                    className="rounded-[7px] ml-[5px] hover:cursor-pointer object-cover object-top"
+                    width={56}
+                    height={25}
+                    src={
                       props.course.thumbnail_image
                         ? getCourseThumbnailMediaDirectory(props.course.course_uuid, props.course.thumbnail_image)
                         : getAbsoluteUrl('/empty_thumbnail.webp')
-                    }`}
+                    }
                     alt={`${props.course.name} Thumbnail`}
                   />
                 </Link>

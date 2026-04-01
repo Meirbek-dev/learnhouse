@@ -14,8 +14,8 @@ export function LoginBonusHandler() {
   const [showBadge, setShowBadge] = useState(false);
 
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const isMountedRef = useRef<boolean>(false);
-  const hasAttemptedRef = useRef<boolean>(false);
+  const isMountedRef = useRef(false);
+  const hasAttemptedRef = useRef(false);
 
   useEffect(() => {
     if (!profile) return;

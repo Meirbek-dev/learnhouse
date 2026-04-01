@@ -62,7 +62,7 @@ export default function GradingPanel({
 
   const { submission, isLoading, mutate } = useGradingPanel(submissionUuid);
 
-  const [score, setScore] = useState<string>('');
+  const [score, setScore] = useState('');
   const [feedback, setFeedback] = useState('');
   const [itemFeedbacks, setItemFeedbacks] = useState<ItemFeedbackMap>({});
   const [isSaving, setIsSaving] = useState(false);
@@ -113,8 +113,14 @@ export default function GradingPanel({
     setItemFeedbacks(items);
     initialRef.current = { score: s, feedback: fb, items };
     setDirtyVersion(0);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [submissionId, submissionUuid]);
+  }, [
+    submissionId,
+    submissionUuid,
+    submission,
+    submission?.final_score,
+    submission?.grading_json?.feedback,
+    submission?.grading_json?.items,
+  ]);
 
   // isDirty: compares current state against last-saved ref values.
   // dirtyVersion in deps allows the memo to recompute after a save bumps it.
@@ -203,18 +209,6 @@ export default function GradingPanel({
     return Math.round((totalScore / totalMax) * 100 * 100) / 100;
   }, [submission?.grading_json?.items, itemFeedbacks]);
 
-  const buildItemFeedbackList = (): ItemFeedback[] =>
-    Object.entries(itemFeedbacks)
-      .filter(([item_id, val]) => {
-        const initial = initialRef.current.items[item_id] ?? { score: '', feedback: '' };
-        return val.score !== initial.score || val.feedback !== initial.feedback;
-      })
-      .map(([item_id, val]) => ({
-        item_id,
-        score: val.score !== '' ? Number.parseFloat(val.score) : undefined,
-        feedback: val.feedback,
-      }));
-
   const handleSaveGrade = useCallback(
     async (status: 'GRADED' | 'PUBLISHED' | 'RETURNED') => {
       if (!submissionUuid || !accessToken) return;
@@ -223,11 +217,22 @@ export default function GradingPanel({
         return;
       }
 
+      const item_feedback: ItemFeedback[] = Object.entries(itemFeedbacks)
+        .filter(([item_id, val]) => {
+          const initial = initialRef.current.items[item_id] ?? { score: '', feedback: '' };
+          return val.score !== initial.score || val.feedback !== initial.feedback;
+        })
+        .map(([item_id, val]) => ({
+          item_id,
+          score: val.score !== '' ? Number.parseFloat(val.score) : undefined,
+          feedback: val.feedback,
+        }));
+
       const input: TeacherGradeInput = {
         final_score: scoreNum,
         status,
         feedback,
-        item_feedback: buildItemFeedbackList(),
+        item_feedback,
       };
 
       setIsSaving(true);
@@ -254,8 +259,18 @@ export default function GradingPanel({
         setIsSaving(false);
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [submissionUuid, accessToken, score, scoreNum, scoreInvalid, feedback, itemFeedbacks, t, onGradeSaved, mutate],
+    [
+      submissionUuid,
+      accessToken,
+      score,
+      scoreNum,
+      scoreInvalid,
+      feedback,
+      itemFeedbacks,
+      t,
+      onGradeSaved,
+      mutate,
+    ],
   );
 
   const studentName = submission?.user

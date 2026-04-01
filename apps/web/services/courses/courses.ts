@@ -58,9 +58,9 @@ async function fetchEditableCourses(
   page = 1,
   limit = 20,
   access_token?: string,
-  query?: string,
+  query = '',
   sortBy = 'updated',
-  preset?: string,
+  preset = '',
 ): Promise<{
   courses: any[];
   total: number;
@@ -123,9 +123,9 @@ export async function getEditableCourses(
   access_token?: any,
   page = 1,
   limit = 20,
-  query?: string,
+  query = '',
   sortBy = 'updated',
-  preset?: string,
+  preset = '',
 ) {
   return fetchEditableCourses(page, limit, access_token, query, sortBy, preset);
 }

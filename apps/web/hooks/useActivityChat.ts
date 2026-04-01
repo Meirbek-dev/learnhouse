@@ -82,7 +82,7 @@ export function useActivityChat({
 
   const controllerRef = useRef<AbortController | null>(null);
   const streamingBufferRef = useRef('');
-  const chatUuidRef = useRef<string | null>(chatUuid);
+  const chatUuidRef = useRef(chatUuid);
   // Throttle timer: flush streaming-text state updates at most every 50 ms so
   // high-frequency token events don't trigger a React render per token.
   const flushTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);

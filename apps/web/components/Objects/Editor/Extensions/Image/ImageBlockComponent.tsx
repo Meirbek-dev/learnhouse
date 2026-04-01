@@ -11,6 +11,7 @@ import {
   Upload,
 } from 'lucide-react';
 import { useCallback, useMemo, useRef, useState } from 'react';
+import NextImage from '@components/ui/NextImage';
 import { NodeViewWrapper } from '@tiptap/react';
 import { useTranslations } from 'next-intl';
 
@@ -247,11 +248,15 @@ function DropZone({ onFileSelect, preview, isUploading, error, onUpload, onReset
   if (preview) {
     return (
       <div className="relative rounded-lg border border-gray-200 bg-gray-50 p-4">
-        <img
-          src={preview}
-          alt="Preview"
-          className="mx-auto max-h-48 rounded-md object-contain"
-        />
+        <div className="mx-auto h-48 w-full overflow-hidden rounded-md">
+          <NextImage
+            src={preview}
+            alt="Preview"
+            fill
+            className="object-contain"
+            sizes="100vw"
+          />
+        </div>
         <div className="mt-4 flex justify-center gap-2">
           <button
             type="button"

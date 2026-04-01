@@ -91,7 +91,7 @@ export function CodeChallengeEditor({
 
   // State
   const [code, setCode] = useState(initialCode);
-  const [selectedLanguageId, setSelectedLanguageId] = useState<number>(
+  const [selectedLanguageId, setSelectedLanguageId] = useState(
     initialLanguageId ?? settings?.allowed_languages?.[0] ?? 71, // Default to Python
   );
   const [customInput, setCustomInput] = useState('');
@@ -100,7 +100,7 @@ export function CodeChallengeEditor({
   const [activeSubmissionId, setActiveSubmissionId] = useState<string | null>(null);
   const [isRunning, setIsRunning] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [activeTab, setActiveTab] = useState<string>('testcases');
+  const [activeTab, setActiveTab] = useState('testcases');
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Fetch submissions history

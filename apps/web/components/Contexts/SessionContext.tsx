@@ -1,9 +1,9 @@
 'use client';
 
 import PageLoading from '@components/Objects/Loaders/PageLoading';
+import { createContext, use, useMemo } from 'react';
 import type { Role } from '@/types/permissions';
 import { useSession } from 'next-auth/react';
-import { createContext, use } from 'react';
 import type { ReactNode } from 'react';
 
 // Match the global UserRoleWithPlatform interface from next-auth.d.ts
@@ -54,20 +54,23 @@ export const SessionContext = createContext<SessionContextType | null>(null);
 const PlatformSessionProvider = ({ children }: { children: ReactNode }) => {
   const session = useSession();
 
+  // Type assertion to ensure our extended interface
+  const extendedSession: SessionContextType = useMemo(
+    () => ({
+      ...session,
+      data: session.data as ExtendedSessionData | null,
+      update: session.update as () => Promise<ExtendedSessionData | null>,
+      isLoading: session.status === 'loading',
+    }),
+    [session],
+  );
+
   // Only show loading on initial load, not during session updates/revalidation
   const isInitialLoad = session.status === 'loading' && session.data === undefined;
 
   if (isInitialLoad) {
     return <PageLoading />;
   }
-
-  // Type assertion to ensure our extended interface
-  const extendedSession: SessionContextType = {
-    ...session,
-    data: session.data as ExtendedSessionData | null,
-    update: session.update as () => Promise<ExtendedSessionData | null>,
-    isLoading: session.status === 'loading',
-  };
 
   return <SessionContext value={extendedSession}>{children}</SessionContext>;
 };

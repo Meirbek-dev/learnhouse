@@ -375,19 +375,17 @@ const TaskQuizObject = ({ assignmentTaskUUID }: TaskQuizObjectProps) => {
 
   const initialQuestions = useMemo(
     () => (assignmentTask.contents?.questions as QuizQuestion[] | undefined) ?? [createQuestion()],
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [],
+    [assignmentTask.contents?.questions],
   );
 
   const initialSettings = useMemo(
     () => ({ ...DEFAULT_QUIZ_SETTINGS, ...(assignmentTask.contents?.settings as Record<string, unknown> | undefined) }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [],
+    [assignmentTask.contents?.settings],
   );
 
   const [isSaving, setIsSaving] = useState(false);
-  const [questions, setQuestions] = useState<QuizQuestion[]>(initialQuestions);
-  const [quizSettings, setQuizSettings] = useState<QuizSettings>(initialSettings);
+  const [questions, setQuestions] = useState(initialQuestions);
+  const [quizSettings, setQuizSettings] = useState(initialSettings);
   const [showSettings, setShowSettings] = useState(false);
 
   const canAddQuestion = questions.length < MAX_QUESTIONS;

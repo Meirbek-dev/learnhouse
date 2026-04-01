@@ -7,9 +7,9 @@ import { NodeViewWrapper } from '@tiptap/react';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
 import type { ChangeEvent } from 'react';
+import { renderToString } from 'katex';
 import { motion } from 'motion/react';
 import 'katex/dist/katex.min.css';
-import { renderToString } from 'katex';
 
 // Predefined LaTeX templates
 const mathTemplates = [

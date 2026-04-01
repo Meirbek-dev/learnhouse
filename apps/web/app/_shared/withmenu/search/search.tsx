@@ -8,6 +8,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { getAbsoluteUrl } from '@services/config/config';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { searchContent } from '@services/search/search';
+import NextImage from '@components/ui/NextImage';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
@@ -404,15 +405,17 @@ const SearchPage = () => {
                         href={getAbsoluteUrl(`/course/${removeCoursePrefix(course.course_uuid)}`)}
                         className="soft-shadow group overflow-hidden rounded-xl bg-card border border-border text-card-foreground transition-all hover:shadow-md"
                       >
-                        <div className="aspect-video w-full overflow-hidden">
-                          <img
+                        <div className="relative aspect-video w-full overflow-hidden">
+                          <NextImage
                             src={
                               course.thumbnail_image
                                 ? getCourseThumbnailMediaDirectory(course.course_uuid, course.thumbnail_image)
                                 : '/empty_thumbnail.webp'
                             }
                             alt={course.name}
-                            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                            fill
+                            className="object-cover transition-transform duration-300 group-hover:scale-105"
+                            sizes="100vw"
                           />
                         </div>
                         <div className="p-4">

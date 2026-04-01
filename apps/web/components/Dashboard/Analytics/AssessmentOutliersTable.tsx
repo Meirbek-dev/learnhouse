@@ -91,7 +91,10 @@ export default function AssessmentOutliersTable({ rows, storageKey, serverPagina
         <CardDescription>{t('assessmentOutliers.description')}</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="sr-only" aria-live="polite">
+        <div
+          className="sr-only"
+          aria-live="polite"
+        >
           {t('assessmentOutliers.rowCount', { count: rows.length })}
         </div>
         <AnalyticsDataTable

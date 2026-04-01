@@ -9,13 +9,7 @@ export interface SearchContentParams {
   access_token?: any;
 }
 
-export async function searchContent({
-  query,
-  page = 1,
-  limit = 20,
-  next,
-  access_token,
-}: SearchContentParams) {
+export async function searchContent({ query, page = 1, limit = 20, next, access_token }: SearchContentParams) {
   const result: any = await fetch(
     `${getAPIUrl()}search?query=${encodeURIComponent(query)}&page=${page}&limit=${limit}`,
     RequestBodyWithAuthHeader('GET', null, next, access_token),

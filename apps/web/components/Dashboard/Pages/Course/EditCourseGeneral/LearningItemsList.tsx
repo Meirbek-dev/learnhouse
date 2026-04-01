@@ -89,8 +89,7 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
     return () => {
       if (initialSyncRafRef.current) cancelAnimationFrame(initialSyncRafRef.current);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [onChange, items, value]);
 
   // Cleanup on unmount - cancel any scheduled animation frames
   useEffect(() => {

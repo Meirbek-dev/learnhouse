@@ -19,6 +19,7 @@ import type { ChangeEvent, FC, KeyboardEvent } from 'react';
 import { getAbsoluteUrl } from '@services/config/config';
 import { searchContent } from '@services/search/search';
 import { useDebouncedValue } from '@/hooks/useDebounce';
+import NextImage from '@components/ui/NextImage';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
@@ -304,12 +305,14 @@ export const SearchBar: FC<SearchBarProps> = ({ className = '', isMobile = false
                 href={getAbsoluteUrl(`/course/${removeCoursePrefix(course.course_uuid)}`)}
                 className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-black/2"
               >
-                <div className="relative">
+                <div className="relative h-10 w-10">
                   {course.thumbnail_image ? (
-                    <img
+                    <NextImage
                       src={getCourseThumbnailMediaDirectory(course.course_uuid, course.thumbnail_image)}
                       alt={course.name}
-                      className="h-10 w-10 rounded-lg object-cover"
+                      fill
+                      className="rounded-lg object-cover"
+                      sizes="100vw"
                     />
                   ) : (
                     <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-black/5">

@@ -151,8 +151,7 @@ function EditCourseGeneral() {
     if (!isLoading && courseStructure) {
       form.reset(serverValues, { keepDirtyValues: true });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [courseStructure, isLoading]);
+  }, [courseStructure, isLoading, serverValues, form]);
 
   const handleSubmit = async (values: CourseGeneralValues) => {
     if (!accessToken) {

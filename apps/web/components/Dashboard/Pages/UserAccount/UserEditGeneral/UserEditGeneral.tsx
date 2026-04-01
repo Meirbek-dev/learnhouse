@@ -470,11 +470,11 @@ const UserEditForm = ({ form, profilePicture }: UserEditFormProps) => {
                         const currentIds = new Set(Object.keys(details || {}));
                         const newDetails = { ...details };
 
-                        template.forEach((item) => {
+                        for (const item of template) {
                           if (!currentIds.has(item.id)) {
                             newDetails[item.id] = { ...item };
                           }
-                        });
+                        }
 
                         form.setValue('details', newDetails);
                       }}
@@ -629,12 +629,12 @@ const UserEditGeneral = () => {
   const session = usePlatformSession();
   const access_token = session?.data?.tokens?.access_token;
   const [localAvatar, setLocalAvatar] = useState<File | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | undefined>();
-  const [success, setSuccess] = useState<string>('');
+  const [success, setSuccess] = useState('');
   const [userData, setUserData] = useState<any>(null);
   const [currentLocale, setCurrentLocale] = useState<Locale | null>(null);
-  const [initialLoading, setInitialLoading] = useState<boolean>(true);
+  const [initialLoading, setInitialLoading] = useState(true);
   const t = useTranslations('DashPage.Notifications');
   const validationSchema = createValidationSchema(t);
 

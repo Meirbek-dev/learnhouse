@@ -12,8 +12,8 @@ import { useAssignments } from '@components/Contexts/Assignments/AssignmentConte
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { usePlatform } from '@/components/Contexts/PlatformContext';
 import { getTaskFileSubmissionDir } from '@services/media/media';
-import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
 import { toast } from 'sonner';
 
@@ -238,7 +238,12 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
   // ================= Fetching =================
   async function fetchUserSubmission() {
     if (!accessToken || !assignmentTaskUUID || !assignmentUUID || !user_id) return;
-    const res = await getAssignmentTaskSubmissionsUser({ assignmentTaskUUID, user_id, assignmentUUID, access_token: accessToken });
+    const res = await getAssignmentTaskSubmissionsUser({
+      assignmentTaskUUID,
+      user_id,
+      assignmentUUID,
+      access_token: accessToken,
+    });
     if (res.success && res.data?.task_submission) {
       const sub = {
         ...res.data.task_submission,

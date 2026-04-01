@@ -64,7 +64,7 @@ export default function DiscussionPost({
   onSubmitReply,
 }: DiscussionPostProps) {
   const t = useTranslations('CoursePage');
-  const [replyingTo, setReplyingTo] = useState<boolean>(false);
+  const [replyingTo, setReplyingTo] = useState(false);
   const [replyContent, setReplyContent] = useState('');
   const [editingPost, setEditingPost] = useState(false);
   const [editContent, setEditContent] = useState(post.postMessage);

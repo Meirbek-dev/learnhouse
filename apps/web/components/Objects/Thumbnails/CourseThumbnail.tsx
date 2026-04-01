@@ -37,6 +37,7 @@ import { usePlatform } from '@/components/Contexts/PlatformContext';
 import { Card, CardContent, CardFooter } from '@components/ui/card';
 import { Resources, Actions, Scopes } from '@/types/permissions';
 import UserAvatar from '@components/Objects/UserAvatar';
+import NextImage from '@components/ui/NextImage';
 import { Button } from '@components/ui/button';
 import { Badge } from '@components/ui/badge';
 import Link from '@components/ui/AppLink';
@@ -142,14 +143,16 @@ const CourseImage: FC<CourseImageProps> = ({
     aria-label={t('openCourse', { course: courseName })}
   >
     <div className="bg-muted relative aspect-video w-full overflow-hidden">
-      <img
-        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-        src={thumbnailUrl}
-        alt={courseName}
-        loading={priority ? 'eager' : 'lazy'}
-        decoding={priority ? 'sync' : 'async'}
-        fetchPriority={priority ? 'high' : 'low'}
-      />
+      <div className="relative h-full w-full">
+        <NextImage
+          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+          src={thumbnailUrl}
+          alt={courseName}
+          fill
+          sizes="100vw"
+          priority={priority}
+        />
+      </div>
 
       <div
         className="pointer-events-none absolute inset-0 bg-black/15"

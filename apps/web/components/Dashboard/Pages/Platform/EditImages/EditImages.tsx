@@ -21,6 +21,7 @@ import { SiLoom, SiYoutube } from '@icons-pack/react-simple-icons';
 import { constructAcceptValue } from '@/lib/constants';
 import type { ChangeEvent, MouseEvent } from 'react';
 import type { DropResult } from '@hello-pangea/dnd';
+import NextImage from '@components/ui/NextImage';
 import { useState, useTransition } from 'react';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
@@ -432,19 +433,21 @@ export default function EditImages() {
           <div className="flex w-full flex-col space-y-5">
             <div className="w-full rounded-xl bg-muted/30 py-8 transition-all duration-300">
               <div className="flex flex-col items-center justify-center space-y-8">
-                <div className="group relative">
-                  <img
+                <div className="group relative h-[125px] w-[250px]">
+                  <NextImage
                     src={
                       platform?.logo_image
                         ? localLogo || getLogoMediaDirectory(platform?.logo_image)
                         : '/empty_thumbnail.webp'
                     }
                     alt="Лого организации"
+                    fill
                     className={cn(
-                      'size-auto max-h-[125px] min-h-[100px] min-w-[200px] max-w-[250px] rounded-lg bg-white object-contain shadow-md',
+                      'rounded-lg bg-white object-contain shadow-md',
                       'border-2 border-gray-100 transition-all duration-300 hover:border-blue-200',
                       isLogoUploading && 'opacity-50',
                     )}
+                    sizes="100vw"
                   />
                 </div>
 
@@ -498,16 +501,17 @@ export default function EditImages() {
           <div className="flex w-full flex-col space-y-5">
             <div className="w-full rounded-xl bg-muted/30 py-8 transition-all duration-300">
               <div className="flex flex-col items-center justify-center space-y-8">
-                <div className="group relative">
-                  <img
+                <div className="group relative h-[125px] w-[250px]">
+                  <NextImage
                     src={
                       platform?.thumbnail_image
                         ? localThumbnail || getPlatformThumbnailImage(platform.thumbnail_image)
                         : '/empty_thumbnail.webp'
                     }
                     alt="Platform thumbnail"
+                    fill
                     className={cn(
-                      'size-auto max-h-[125px] min-h-[100px] min-w-[200px] max-w-[250px] rounded-lg bg-white object-contain shadow-md',
+                      'rounded-lg bg-white object-contain shadow-md',
                       'border-2 border-gray-100 transition-all duration-300 hover:border-purple-200',
                       isThumbnailUploading && 'opacity-50',
                     )}
@@ -617,16 +621,20 @@ export default function EditImages() {
                                   <GripVertical size={14} />
                                 </div>
                                 {preview.type === 'image' ? (
-                                  <img
-                                    src={getPreviewMediaDirectory(preview.id)}
-                                    alt={`Preview ${preview.id}`}
+                                  <div
                                     className={cn(
-                                      'size-auto max-h-28 max-w-48 rounded-xl bg-white object-contain',
-                                      'border border-gray-200 hover:border-gray-300',
-                                      'transition-colors duration-200',
+                                      'relative h-28 w-48 rounded-xl bg-white',
                                       snapshot.isDragging ? 'shadow-lg' : 'shadow-xs hover:shadow-md',
                                     )}
-                                  />
+                                  >
+                                    <NextImage
+                                      src={getPreviewMediaDirectory(preview.id)}
+                                      alt={`Preview ${preview.id}`}
+                                      fill
+                                      className="rounded-xl object-contain"
+                                      sizes="100vw"
+                                    />
+                                  </div>
                                 ) : (
                                   <div
                                     className={cn(

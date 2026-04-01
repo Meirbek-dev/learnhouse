@@ -8,7 +8,9 @@ import dynamic from 'next/dynamic';
 
 import AssignmentTasks from '@/app/_shared/dash/assignments/[assignmentuuid]/_components/Tasks';
 
-const AssignmentTaskEditor = dynamic(() => import('@/app/_shared/dash/assignments/[assignmentuuid]/_components/TaskEditor/TaskEditor'));
+const AssignmentTaskEditor = dynamic(
+  () => import('@/app/_shared/dash/assignments/[assignmentuuid]/_components/TaskEditor/TaskEditor'),
+);
 
 const AssignmentEditorSubPage = ({ assignmentuuid }: { assignmentuuid: string }) => {
   const t = useTranslations('DashPage.Assignments');

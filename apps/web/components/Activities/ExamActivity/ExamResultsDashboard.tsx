@@ -21,6 +21,17 @@ import { useTranslations } from 'next-intl';
 import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
+const getDurationSeconds = (
+  a: { duration_seconds?: number | null; duration_minutes?: number | null } | null | undefined,
+): number | null => {
+  if (!a) return null;
+  if (typeof a.duration_seconds === 'number') return a.duration_seconds;
+  if (typeof a.duration_minutes === 'number') return Math.round(a.duration_minutes * 60);
+  return null;
+};
+
+const escapeCsv = (v: any): string => `"${String(v ?? '').replace(/"/g, '""')}"`;
+
 interface AttemptData {
   attempt_uuid: string;
   user_id: number;
@@ -56,8 +67,8 @@ export default function ExamResultsDashboard({
 }: ExamResultsDashboardProps) {
   const t = useTranslations('Components.ExamResultsDashboard');
   const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [sortBy, setSortBy] = useState<string>('started_at');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [sortBy, setSortBy] = useState('started_at');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
   const statusItems = [
@@ -73,17 +84,6 @@ export default function ExamResultsDashboard({
     { value: 'percentage', label: t('score') },
     { value: 'duration_minutes', label: t('duration') },
   ];
-
-  // Helper to safely get duration in seconds (null if unavailable)
-  const getDurationSeconds = (
-    a: { duration_seconds?: number | null; duration_minutes?: number | null } | null | undefined,
-  ) => {
-    if (!a) return null;
-    // use typeof checks to correctly narrow `undefined` and `null` cases
-    if (typeof a.duration_seconds === 'number') return a.duration_seconds;
-    if (typeof a.duration_minutes === 'number') return Math.round(a.duration_minutes * 60);
-    return null;
-  };
 
   // Calculate statistics
   const stats = useMemo(() => {
@@ -160,8 +160,6 @@ export default function ExamResultsDashboard({
       }
     }
   };
-
-  const escapeCsv = (v: any) => `"${String(v ?? '').replace(/"/g, '""')}"`;
 
   const handleExportCSV = () => {
     const headers = [

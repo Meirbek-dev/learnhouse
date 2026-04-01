@@ -107,7 +107,7 @@ const ActivityChatMessageBox = ({ activity }: ActivityChatMessageBoxProps) => {
   const aiChatBotState = useAIChatBot();
   const dispatchAIChatBot = useAIChatBotDispatch();
 
-  const scrollYRef = useRef<number>(0);
+  const scrollYRef = useRef(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // All streaming + send logic is encapsulated in useActivityChat.

@@ -11,6 +11,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 // Gamification imports
 import { LevelProgress } from '@/lib/gamification';
+import NextImage from '@components/ui/NextImage';
 import Link from '@components/ui/ServerLink';
 import confetti from 'canvas-confetti';
 import type { FC } from 'react';
@@ -851,11 +852,15 @@ const CourseEndView: FC<CourseEndViewProps> = ({ courseName, courseUuid, thumbna
         <div className="soft-shadow relative z-10 mb-2 w-full space-y-6 rounded-2xl bg-white p-8">
           <div className="flex flex-col items-center space-y-6">
             {thumbnailImage ? (
-              <img
-                className="h-[114px] w-[200px] rounded-lg object-cover shadow-md"
-                src={`${getCourseThumbnailMediaDirectory(courseUuid, thumbnailImage)}`}
-                alt={courseName}
-              />
+              <div className="relative h-[114px] w-[200px] overflow-hidden rounded-lg shadow-md">
+                <NextImage
+                  src={`${getCourseThumbnailMediaDirectory(courseUuid, thumbnailImage)}`}
+                  alt={courseName}
+                  fill
+                  className="object-cover"
+                  sizes="100vw"
+                />
+              </div>
             ) : null}
 
             <div className="rounded-full bg-emerald-100 p-4">
@@ -991,11 +996,15 @@ const CourseEndView: FC<CourseEndViewProps> = ({ courseName, courseUuid, thumbna
       <div className="soft-shadow w-full max-w-2xl space-y-6 rounded-2xl bg-white p-8">
         <div className="flex flex-col items-center space-y-6">
           {thumbnailImage ? (
-            <img
-              className="h-[114px] w-[200px] rounded-lg object-cover shadow-md"
-              src={`${getCourseThumbnailMediaDirectory(courseUuid, thumbnailImage)}`}
-              alt={courseName}
-            />
+            <div className="relative h-[114px] w-[200px] overflow-hidden rounded-lg shadow-md">
+              <NextImage
+                src={`${getCourseThumbnailMediaDirectory(courseUuid, thumbnailImage)}`}
+                alt={courseName}
+                fill
+                className="object-cover"
+                sizes="100vw"
+              />
+            </div>
           ) : null}
 
           <div className="rounded-full bg-blue-100 p-4">

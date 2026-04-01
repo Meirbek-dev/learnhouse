@@ -26,6 +26,7 @@ import { usePlatform } from '@/components/Contexts/PlatformContext';
 import { getLandingMediaDirectory } from '@services/media/media';
 import { getCourses } from '@services/courses/courses';
 import { Textarea } from '@components/ui/textarea';
+import NextImage from '@components/ui/NextImage';
 
 import { Switch } from '@components/ui/switch';
 import { Button } from '@components/ui/button';
@@ -1201,11 +1202,13 @@ const HeroSectionEditor: FC<{
                     />
                   </div>
                   {section.background.image ? (
-                    <div className="mt-4">
-                      <img
+                    <div className="mt-4 relative h-40 w-full overflow-hidden rounded-lg">
+                      <NextImage
                         src={section.background.image}
                         alt={t('HeroEditor.Background.imagePreviewAlt')}
-                        className="max-h-40 rounded-lg object-cover"
+                        fill
+                        className="object-cover"
+                        sizes="100vw"
                       />
                     </div>
                   ) : null}
@@ -1391,11 +1394,15 @@ const HeroSectionEditor: FC<{
                   t={t}
                 />
                 {section.illustration?.image.url ? (
-                  <img
-                    src={section.illustration?.image.url}
-                    alt={t('HeroEditor.Illustration.imagePreviewAlt')}
-                    className="h-12 object-contain"
-                  />
+                  <div className="relative h-12 w-full">
+                    <NextImage
+                      src={section.illustration?.image.url}
+                      alt={t('HeroEditor.Illustration.imagePreviewAlt')}
+                      fill
+                      className="object-contain"
+                      sizes="100vw"
+                    />
+                  </div>
                 ) : null}
               </div>
 
@@ -1687,11 +1694,13 @@ const TextAndImageSectionEditor: FC<{
             </div>
           </div>
           {section.image.url ? (
-            <div className="mt-4">
-              <img
+            <div className="mt-4 relative h-40 w-full overflow-hidden rounded-lg">
+              <NextImage
                 src={section.image.url}
                 alt={section.image.alt}
-                className="max-h-40 rounded-lg object-cover"
+                fill
+                className="object-cover"
+                sizes="100vw"
               />
             </div>
           ) : null}
@@ -1769,11 +1778,15 @@ const LogosSectionEditor: FC<{
                   placeholder={t('LogosEditor.logoAltPlaceholder')}
                 />
                 {logo.url ? (
-                  <img
-                    src={logo.url}
-                    alt={logo.alt}
-                    className="h-10 object-contain"
-                  />
+                  <div className="relative h-10 w-24 overflow-hidden">
+                    <NextImage
+                      src={logo.url}
+                      alt={logo.alt}
+                      fill
+                      className="object-contain"
+                      sizes="100vw"
+                    />
+                  </div>
                 ) : null}
               </div>
               <Button
@@ -1913,11 +1926,15 @@ const PeopleSectionEditor: FC<{
                       t={t}
                     />
                     {person.image_url ? (
-                      <img
-                        src={person.image_url}
-                        alt={person.name}
-                        className="h-12 w-12 rounded-full object-cover"
-                      />
+                      <div className="relative h-12 w-12 rounded-full overflow-hidden">
+                        <NextImage
+                          src={person.image_url}
+                          alt={person.name}
+                          fill
+                          className="object-cover"
+                          sizes="100vw"
+                        />
+                      </div>
                     ) : null}
                   </div>
                 </div>
@@ -2030,12 +2047,14 @@ const FeaturedCoursesEditor: FC<{
                     className="flex items-center justify-between rounded-lg border p-4"
                   >
                     <div className="flex items-center space-x-3">
-                      <div className="h-12 w-12 overflow-hidden rounded-md bg-gray-100">
+                      <div className="relative h-12 w-12 overflow-hidden rounded-md bg-gray-100">
                         {course.course_thumbnail ? (
-                          <img
+                          <NextImage
                             src={course.course_thumbnail}
                             alt={course.name}
+                            fill
                             className="h-full w-full object-cover"
+                            sizes="100vw"
                           />
                         ) : null}
                       </div>

@@ -8,6 +8,7 @@ import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import type { DashboardData } from '@/types/gamification';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { getCourses } from '@services/courses/courses';
+import NextImage from '@components/ui/NextImage';
 import { useTranslations } from 'next-intl';
 import useSWR from 'swr';
 
@@ -62,11 +63,15 @@ const LandingCustom = ({ landing, gamificationData }: LandingCustomProps) => {
                         : 'sm:w-2/5'
                   }`}
                 >
-                  <img
-                    src={section.illustration.image.url}
-                    alt={section.illustration.image.alt}
-                    className="w-full object-contain"
-                  />
+                  <div className="relative h-full w-full">
+                    <NextImage
+                      src={section.illustration.image.url}
+                      alt={section.illustration.image.alt ?? ''}
+                      fill
+                      className="object-contain"
+                      sizes="100vw"
+                    />
+                  </div>
                 </div>
               ) : null}
 

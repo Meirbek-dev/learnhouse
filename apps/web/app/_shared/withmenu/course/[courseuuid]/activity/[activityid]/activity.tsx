@@ -53,6 +53,7 @@ import { getAbsoluteUrl } from '@services/config/config';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { getTrailSwrKey } from '@services/courses/keys';
 import { AnimatePresence, motion } from 'motion/react';
+import NextImage from '@components/ui/NextImage';
 import { useRouter } from 'next/navigation';
 import Link from '@components/ui/AppLink';
 import useSWR, { mutate } from 'swr';
@@ -630,15 +631,19 @@ const ActivityClient = (props: ActivityClientProps) => {
                             prefetch={false}
                             href={`${getAbsoluteUrl('')}/course/${courseuuid}`}
                           >
-                            <img
-                              className="h-[34px] w-[60px] rounded-md drop-shadow-md"
-                              src={
-                                course.thumbnail_image
-                                  ? `${getCourseThumbnailMediaDirectory(course.course_uuid, course.thumbnail_image)}`
-                                  : '/empty_thumbnail.webp'
-                              }
-                              alt=""
-                            />
+                            <div className="relative h-[34px] w-[60px] rounded-md drop-shadow-md overflow-hidden">
+                              <NextImage
+                                src={
+                                  course.thumbnail_image
+                                    ? `${getCourseThumbnailMediaDirectory(course.course_uuid, course.thumbnail_image)}`
+                                    : '/empty_thumbnail.webp'
+                                }
+                                alt={course.name || ''}
+                                fill
+                                className="h-full w-full object-cover"
+                                sizes="100vw"
+                              />
+                            </div>
                           </Link>
                         </div>
                         <div className="flex flex-col -space-y-1">
@@ -813,15 +818,19 @@ const ActivityClient = (props: ActivityClientProps) => {
                               prefetch={false}
                               href={`${getAbsoluteUrl('')}/course/${courseuuid}`}
                             >
-                              <img
-                                className="h-[57px] w-[100px] rounded-md drop-shadow-md"
-                                src={
-                                  course.thumbnail_image
-                                    ? `${getCourseThumbnailMediaDirectory(course.course_uuid, course.thumbnail_image)}`
-                                    : '/empty_thumbnail.webp'
-                                }
-                                alt=""
-                              />
+                              <div className="relative h-[57px] w-[100px] rounded-md drop-shadow-md overflow-hidden">
+                                <NextImage
+                                  src={
+                                    course.thumbnail_image
+                                      ? `${getCourseThumbnailMediaDirectory(course.course_uuid, course.thumbnail_image)}`
+                                      : '/empty_thumbnail.webp'
+                                  }
+                                  alt={course.name || ''}
+                                  fill
+                                  className="h-full w-full object-cover"
+                                  sizes="100vw"
+                                />
+                              </div>
                             </Link>
                           </div>
                           <div className="flex flex-col -space-y-1">
@@ -1097,7 +1106,7 @@ export const MarkStatus = (props: {
   const refetchGamification = useGamificationStore((s) => s.refetch);
 
   // Track completed activities to prevent duplicate XP toasts
-  const completedActivitiesRef = useRef<Set<string>>(new Set());
+  const completedActivitiesRef = useRef(new Set());
 
   const areAllActivitiesCompleted = () => {
     const run = props.trailData?.runs?.find((run: any) => run.course_uuid === props.course.course_uuid);

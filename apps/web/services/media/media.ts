@@ -23,7 +23,13 @@ export interface ActivityBlockMediaDirectoryParams {
   type: string;
 }
 
-export function getActivityBlockMediaDirectory({ courseId, activityId, blockId, fileId, type }: ActivityBlockMediaDirectoryParams): string {
+export function getActivityBlockMediaDirectory({
+  courseId,
+  activityId,
+  blockId,
+  fileId,
+  type,
+}: ActivityBlockMediaDirectoryParams): string {
   return `${getMediaUrl()}content/platform/courses/${courseId}/activities/${activityId}/dynamic/blocks/${type}/${blockId}/${fileId}`;
 }
 
@@ -35,7 +41,13 @@ export interface TaskRefFileDirParams {
   fileID: string;
 }
 
-export function getTaskRefFileDir({ courseUUID, activityUUID, assignmentUUID, assignmentTaskUUID, fileID }: TaskRefFileDirParams): string {
+export function getTaskRefFileDir({
+  courseUUID,
+  activityUUID,
+  assignmentUUID,
+  assignmentTaskUUID,
+  fileID,
+}: TaskRefFileDirParams): string {
   return `${getMediaUrl()}content/platform/courses/${courseUUID}/activities/${activityUUID}/assignments/${assignmentUUID}/tasks/${assignmentTaskUUID}/${fileID}`;
 }
 

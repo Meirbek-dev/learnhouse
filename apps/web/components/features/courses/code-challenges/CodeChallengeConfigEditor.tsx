@@ -161,17 +161,13 @@ export default function CodeChallengeConfigEditor({ activityUuid, courseId }: Co
   });
 
   // Controlled accordion state to avoid changing defaultValue after initialization
-  const [visibleAccordionValue, setVisibleAccordionValue] = useState<string[]>(
-    visibleTestFields.map((_, i) => `visible-${i}`),
-  );
+  const [visibleAccordionValue, setVisibleAccordionValue] = useState(visibleTestFields.map((_, i) => `visible-${i}`));
   useEffect(() => {
     // Keep panels in sync when fields are added/removed; open all by default
     setVisibleAccordionValue(visibleTestFields.map((_, i) => `visible-${i}`));
   }, [visibleTestFields, visibleTestFields.length]);
 
-  const [hiddenAccordionValue, setHiddenAccordionValue] = useState<string[]>(
-    hiddenTestFields.map((_, i) => `hidden-${i}`),
-  );
+  const [hiddenAccordionValue, setHiddenAccordionValue] = useState(hiddenTestFields.map((_, i) => `hidden-${i}`));
   useEffect(() => {
     setHiddenAccordionValue(hiddenTestFields.map((_, i) => `hidden-${i}`));
   }, [hiddenTestFields, hiddenTestFields.length]);

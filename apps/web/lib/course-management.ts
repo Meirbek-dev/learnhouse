@@ -53,8 +53,7 @@ export function getCourseContentStats(course: any): { chapters: number; activiti
   return { chapters, activities };
 }
 
-const isCourseDetailsComplete = (course: any): boolean =>
-  Boolean(course?.name?.trim() && course?.description?.trim());
+const isCourseDetailsComplete = (course: any): boolean => Boolean(course?.name?.trim() && course?.description?.trim());
 
 const isCourseMediaComplete = (course: any): boolean => Boolean(course?.thumbnail_image);
 

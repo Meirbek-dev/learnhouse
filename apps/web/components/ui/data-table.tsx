@@ -103,7 +103,7 @@ export default function DataTable<TData>({
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [globalFilter, setGlobalFilter] = React.useState('');
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
-  const [pagination, setPagination] = React.useState<PaginationState>({
+  const [pagination, setPagination] = React.useState({
     pageIndex: 0,
     pageSize: serverPaginated ? data.length || pageSize : pageSize,
   });

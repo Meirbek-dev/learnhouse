@@ -65,7 +65,7 @@ const NewAssignment = ({ submitActivity, chapterId, course, closeModal }: any) =
   };
 
   const dateFnsLocale = getDateFnsLocale(locale);
-  const todayRef = useRef<Date>(
+  const todayRef = useRef(
     (() => {
       const d = new Date();
       d.setHours(0, 0, 0, 0);

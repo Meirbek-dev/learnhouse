@@ -4,6 +4,7 @@ import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
 import { getUrlPreview } from '@services/courses/activities';
 import { Checkbox } from '@components/ui/checkbox';
+import NextImage from '@components/ui/NextImage';
 import { NodeViewWrapper } from '@tiptap/react';
 import { Button } from '@components/ui/button';
 import { Label } from '@components/ui/label';
@@ -30,11 +31,13 @@ const ALIGNMENTS = [
 ];
 
 const PreviewImage = ({ src, alt }: { src: string; alt: string }) => (
-  <div className="-mx-6 -mt-6 mb-0 overflow-hidden rounded-t-xl">
-    <img
+  <div className="-mx-6 -mt-6 mb-0 overflow-hidden rounded-t-xl relative h-40 w-full">
+    <NextImage
       src={src}
       alt={alt}
-      className="block h-40 w-full object-cover"
+      fill
+      className="object-cover"
+      sizes="100vw"
     />
   </div>
 );
@@ -42,11 +45,14 @@ const PreviewImage = ({ src, alt }: { src: string; alt: string }) => (
 const FaviconDisplay = ({ favicon, url, faviconAlt }: { favicon?: string; url: string; faviconAlt: string }) => (
   <div className="mt-0 flex items-center border-t border-gray-100 pt-2">
     {favicon ? (
-      <img
-        src={favicon}
-        alt={faviconAlt}
-        className="mr-2 h-[18px] w-[18px] rounded bg-gray-100"
-      />
+      <div className="mr-2 h-[18px] w-[18px] relative rounded bg-gray-100 overflow-hidden">
+        <NextImage
+          src={favicon}
+          alt={faviconAlt}
+          fill
+          className="object-cover"
+        />
+      </div>
     ) : null}
     <span className="truncate text-xs text-gray-500">{url}</span>
   </div>
@@ -96,7 +102,7 @@ const AlignmentControls = ({
 
 // The component logic is intentionally split across helper functions and local state.
 // Complexity is managed by breaking large expressions into isolated helpers.
- 
+
 const WebPreviewComponent = ({ node, updateAttributes, deleteNode }: WebPreviewProps) => {
   const t = useTranslations('Components.WebPreview');
   const [inputUrl, setInputUrl] = useState(node.attrs.url || '');

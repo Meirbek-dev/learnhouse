@@ -1,5 +1,6 @@
 import { ArrowRight, CheckCircle, GitBranch, RefreshCcw, RotateCcw } from 'lucide-react';
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
+import NextImage from '@components/ui/NextImage';
 import { NodeViewWrapper } from '@tiptap/react';
 import ScenariosModal from './ScenariosModal';
 import { useTranslations } from 'next-intl';
@@ -27,9 +28,9 @@ const ScenariosExtension: React.FC = (props: any) => {
   const initialNodeScenarios: Scenario[] = props.node?.attrs?.scenarios || [];
   const initialNodeCurrentId: string = props.node?.attrs?.currentScenarioId || (initialNodeScenarios[0]?.id ?? '1');
 
-  const [title, setTitle] = useState<string>(initialNodeTitle || t('interactiveScenario'));
-  const [scenarios, setScenarios] = useState<Scenario[]>(initialNodeScenarios.length > 0 ? initialNodeScenarios : []);
-  const [currentScenarioId, setCurrentScenarioId] = useState<string>(initialNodeCurrentId);
+  const [title, setTitle] = useState(initialNodeTitle || t('interactiveScenario'));
+  const [scenarios, setScenarios] = useState(initialNodeScenarios.length > 0 ? initialNodeScenarios : []);
+  const [currentScenarioId, setCurrentScenarioId] = useState(initialNodeCurrentId);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [scenarioComplete, setScenarioComplete] = useState(false);
   const editorState = useEditorProvider();
@@ -191,14 +192,14 @@ const ScenariosExtension: React.FC = (props: any) => {
                   {/* Scenario Text */}
                   <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
                     {currentScenario.imageUrl && (
-                      <div className="mb-4">
-                        <img
+                      <div className="mb-4 relative h-48 w-full overflow-hidden rounded-lg border border-slate-200">
+                        <NextImage
                           src={currentScenario.imageUrl}
                           alt={t('scenarioIllustrationAlt')}
-                          className="h-48 w-full rounded-lg border border-slate-200 object-cover"
-                          onError={(e) => {
-                            e.currentTarget.style.display = 'none';
-                          }}
+                          fill
+                          className="object-cover"
+                          sizes="100vw"
+                          onError={() => undefined}
                         />
                       </div>
                     )}

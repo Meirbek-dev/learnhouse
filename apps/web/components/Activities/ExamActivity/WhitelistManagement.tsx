@@ -36,7 +36,7 @@ export default function WhitelistManagement({
 }: WhitelistManagementProps) {
   const t = useTranslations('Components.WhitelistManagement');
   const [students, setStudents] = useState<Student[]>([]);
-  const [selectedUserIds, setSelectedUserIds] = useState<Set<number>>(new Set(currentWhitelist));
+  const [selectedUserIds, setSelectedUserIds] = useState(new Set(currentWhitelist));
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);

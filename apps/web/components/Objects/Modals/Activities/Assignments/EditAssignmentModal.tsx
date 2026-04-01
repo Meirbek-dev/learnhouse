@@ -79,7 +79,7 @@ const EditAssignmentForm: FC<EditAssignmentFormProps> = ({ onClose, assignment, 
   };
 
   const dateFnsLocale = getDateFnsLocale(locale);
-  const todayRef = useRef<Date>(
+  const todayRef = useRef(
     (() => {
       const d = new Date();
       d.setHours(0, 0, 0, 0);

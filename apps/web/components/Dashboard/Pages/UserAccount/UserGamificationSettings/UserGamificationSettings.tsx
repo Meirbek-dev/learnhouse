@@ -37,7 +37,7 @@ export default function UserGamificationSettings() {
   const t = useTranslations('DashPage.UserAccountSettings.Gamification');
   const profile = useGamificationStore((s) => s.profile);
 
-  const [preferences, setPreferences] = useState<GamificationPreferences>(DEFAULT_PREFERENCES);
+  const [preferences, setPreferences] = useState(DEFAULT_PREFERENCES);
   const [isSaving, setIsSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
