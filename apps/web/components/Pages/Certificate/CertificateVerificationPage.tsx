@@ -263,7 +263,9 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
                         {certificateData.course.name}
                       </h4>
                       {certificateData.course.description ? (
-                        <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{certificateData.course.description}</p>
+                        <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
+                          {certificateData.course.description}
+                        </p>
                       ) : null}
                     </div>
 

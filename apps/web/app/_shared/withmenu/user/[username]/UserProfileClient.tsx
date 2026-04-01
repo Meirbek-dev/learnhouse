@@ -327,7 +327,9 @@ const UserProfileClient = ({ userData, profile }: UserProfileClientProps) => {
                                 ) : null}
                                 <div>
                                   <h3 className="font-medium">{affiliation.name}</h3>
-                                  {affiliation.description ? <p className="mt-2 text-muted-foreground">{affiliation.description}</p> : null}
+                                  {affiliation.description ? (
+                                    <p className="mt-2 text-muted-foreground">{affiliation.description}</p>
+                                  ) : null}
                                 </div>
                               </div>
                             </div>
@@ -353,7 +355,9 @@ const UserProfileClient = ({ userData, profile }: UserProfileClientProps) => {
                               ))}
                             </div>
                           ) : (
-                            <div className="py-8 text-center text-muted-foreground">{t('courseSection.noCoursesFound')}</div>
+                            <div className="py-8 text-center text-muted-foreground">
+                              {t('courseSection.noCoursesFound')}
+                            </div>
                           )}
                         </div>
                       )}

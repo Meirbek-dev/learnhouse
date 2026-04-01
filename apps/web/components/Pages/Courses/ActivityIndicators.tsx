@@ -315,9 +315,7 @@ const CertificationBadge = ({ courseid, isCompleted }: { courseid: string; isCom
       >
         <div
           className={`flex h-7 w-7 items-center justify-center rounded-lg transition-all duration-200 ${
-            isCompleted
-              ? 'bg-primary text-primary-foreground shadow-sm hover:scale-105 hover:shadow-md'
-              : 'bg-muted'
+            isCompleted ? 'bg-primary text-primary-foreground shadow-sm hover:scale-105 hover:shadow-md' : 'bg-muted'
           }`}
         >
           <Trophy
@@ -467,7 +465,9 @@ const ActivityIndicators = (props: Props) => {
                   <div className="relative flex shrink-0 items-center justify-center">
                     <div
                       className={`flex h-6 w-6 cursor-not-allowed items-center justify-center rounded-full text-[10px] font-semibold ${
-                        isChapterComplete ? 'bg-primary text-primary-foreground' : 'bg-card text-muted-foreground ring-1 ring-border'
+                        isChapterComplete
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-card text-muted-foreground ring-1 ring-border'
                       }`}
                     >
                       {chapterIndex + 1}
@@ -504,9 +504,7 @@ const ActivityIndicators = (props: Props) => {
                         className="group relative flex flex-1 items-center"
                       >
                         {/* Current activity indicator */}
-                        {isCurrent && (
-                          <span className="absolute inset-0 animate-pulse rounded bg-primary opacity-30" />
-                        )}
+                        {isCurrent && <span className="absolute inset-0 animate-pulse rounded bg-primary opacity-30" />}
                         <span
                           className={`relative block h-2 w-full rounded transition-all duration-200 ${
                             isCurrent

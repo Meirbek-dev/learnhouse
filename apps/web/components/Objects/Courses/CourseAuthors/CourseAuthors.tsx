@@ -10,10 +10,10 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { createCourseUpdate, deleteCourseUpdate } from '@services/courses/updates';
 import { AlertTriangle, Loader2, PencilLine, Rss, TentTree } from 'lucide-react';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
+import { Field, FieldError, FieldLabel } from '@components/ui/field';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
 import { Actions, Resources, Scopes } from '@/types/permissions';
 import { getCourseUpdatesSwrKey } from '@services/courses/keys';
@@ -24,6 +24,7 @@ import { swrFetcher } from '@services/utils/ts/requests';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { usePermissions } from '@/components/Security';
 import { format, formatDistanceToNow } from 'date-fns';
+import { Controller, useForm } from 'react-hook-form';
 import { getAPIUrl } from '@services/config/config';
 import { Textarea } from '@components/ui/textarea';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -31,7 +32,6 @@ import { useState, useTransition } from 'react';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
-import { useForm } from 'react-hook-form';
 import { motion } from 'motion/react';
 import useSWR, { mutate } from 'swr';
 import { toast } from 'sonner';
@@ -257,57 +257,53 @@ const NewUpdateForm = ({ setSelectedView }: { setSelectedView: (view: string) =>
 
   return (
     <div className="space-y-4">
-      <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-4"
-        >
-          <FormField
-            control={form.control}
-            name="title"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t('updateTitle')}</FormLabel>
-                <FormControl>
-                  <Input
-                    type="text"
-                    placeholder={t('updateTitlePlaceholder')}
-                    className="border-neutral-200 bg-white focus:border-neutral-300 focus:ring-neutral-200"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="content"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t('updateContent')}</FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder={t('updateContentPlaceholder')}
-                    className="h-[120px] resize-none border-neutral-200 bg-white focus:border-neutral-300 focus:ring-neutral-200"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <div className="flex justify-end space-x-2 pt-2">
-            <Button
-              type="submit"
-              className="rounded-full px-4 py-1.5 text-xs font-medium text-white transition-colors duration-150"
-              disabled={form.formState.isSubmitting}
-            >
-              {form.formState.isSubmitting ? t('publishing') : t('publishUpdate')}
-            </Button>
-          </div>
-        </form>
-      </Form>
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="space-y-4"
+      >
+        <Controller
+          control={form.control}
+          name="title"
+          render={({ field, fieldState }) => (
+            <Field>
+              <FieldLabel htmlFor={field.name}>{t('updateTitle')}</FieldLabel>
+              <Input
+                type="text"
+                id={field.name}
+                placeholder={t('updateTitlePlaceholder')}
+                className="border-neutral-200 bg-white focus:border-neutral-300 focus:ring-neutral-200"
+                {...field}
+              />
+              <FieldError errors={[fieldState.error]} />
+            </Field>
+          )}
+        />
+        <Controller
+          control={form.control}
+          name="content"
+          render={({ field, fieldState }) => (
+            <Field>
+              <FieldLabel htmlFor={field.name}>{t('updateContent')}</FieldLabel>
+              <Textarea
+                placeholder={t('updateContentPlaceholder')}
+                id={field.name}
+                className="h-[120px] resize-none border-neutral-200 bg-white focus:border-neutral-300 focus:ring-neutral-200"
+                {...field}
+              />
+              <FieldError errors={[fieldState.error]} />
+            </Field>
+          )}
+        />
+        <div className="flex justify-end space-x-2 pt-2">
+          <Button
+            type="submit"
+            className="rounded-full px-4 py-1.5 text-xs font-medium text-white transition-colors duration-150"
+            disabled={form.formState.isSubmitting}
+          >
+            {form.formState.isSubmitting ? t('publishing') : t('publishUpdate')}
+          </Button>
+        </div>
+      </form>
     </div>
   );
 };

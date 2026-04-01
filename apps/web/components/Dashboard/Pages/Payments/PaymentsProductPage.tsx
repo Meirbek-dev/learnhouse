@@ -26,16 +26,17 @@ import {
 } from 'lucide-react';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import UnconfiguredPaymentsDisclaimer from '@components/Pages/Payments/UnconfiguredPaymentsDisclaimer';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { archiveProduct, getProducts, updateProduct } from '@services/payments/products';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import ProductLinkedCourses from './SubComponents/ProductLinkedCourses';
+import { Field, FieldError, FieldLabel } from '@components/ui/field';
 import { getPaymentsProductsSwrKey } from '@services/payments/keys';
 import CreateProductForm from './SubComponents/CreateProductForm';
 import { getPaymentConfigs } from '@services/payments/payments';
 import { usePaymentsEnabled } from '@hooks/usePaymentsEnabled';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
 import { valibotResolver } from '@hookform/resolvers/valibot';
+import { Controller, useForm } from 'react-hook-form';
 import { Textarea } from '@components/ui/textarea';
 import { useState, useTransition } from 'react';
 import { Button } from '@components/ui/button';
@@ -43,7 +44,6 @@ import { Input } from '@components/ui/input';
 import { Badge } from '@components/ui/badge';
 import currencyCodes from '@/lib/currencies';
 import { useTranslations } from 'next-intl';
-import { useForm } from 'react-hook-form';
 import useSWR, { mutate } from 'swr';
 import { toast } from 'sonner';
 import * as v from 'valibot';
@@ -389,141 +389,115 @@ const EditProductForm = ({
   };
 
   return (
-    <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(handleSubmit)}
-        className="space-y-4"
-      >
-        <div className="flex-col space-y-3 px-1.5 py-2">
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t('nameLabel')}</FormLabel>
-                <FormControl>
+    <form
+      onSubmit={form.handleSubmit(handleSubmit)}
+      className="space-y-4"
+    >
+      <div className="flex-col space-y-3 px-1.5 py-2">
+        <Field>
+          <FieldLabel htmlFor="name">{t('nameLabel')}</FieldLabel>
+          <Input
+            id="name"
+            placeholder={t('namePlaceholder')}
+            {...form.register('name')}
+          />
+          <FieldError errors={[form.formState.errors.name]} />
+        </Field>
+
+        <Field>
+          <FieldLabel htmlFor="description">{t('descriptionLabel')}</FieldLabel>
+          <Textarea
+            id="description"
+            placeholder={t('descriptionPlaceholder')}
+            {...form.register('description')}
+          />
+          <FieldError errors={[form.formState.errors.description]} />
+        </Field>
+
+        <div className="flex space-x-2">
+          <div className="grow">
+            <Controller
+              control={form.control}
+              name="amount"
+              render={({ field, fieldState }) => (
+                <Field>
+                  <FieldLabel htmlFor={field.name}>{t('priceLabel')}</FieldLabel>
                   <Input
-                    placeholder={t('namePlaceholder')}
+                    id={field.name}
+                    type="number"
+                    placeholder={t('pricePlaceholder')}
                     {...field}
+                    onChange={(e) => {
+                      field.onChange(Number(e.target.value));
+                    }}
                   />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t('descriptionLabel')}</FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder={t('descriptionPlaceholder')}
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <div className="flex space-x-2">
-            <div className="grow">
-              <FormField
-                control={form.control}
-                name="amount"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t('priceLabel')}</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        placeholder={t('pricePlaceholder')}
-                        {...field}
-                        onChange={(e) => {
-                          field.onChange(Number(e.target.value));
-                        }}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            <div className="w-1/3">
-              <FormField
-                control={form.control}
-                name="currency"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t('currencyLabel')}</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      value={field.value}
-                      items={currencyItems}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder={t('currencyPlaceholder')} />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectGroup>
-                          {currencyItems.map((currency) => (
-                            <SelectItem
-                              key={currency.value}
-                              value={currency.value}
-                            >
-                              {currency.label}
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+                  <FieldError errors={[fieldState.error]} />
+                </Field>
+              )}
+            />
           </div>
+          <div className="w-1/3">
+            <Controller
+              control={form.control}
+              name="currency"
+              render={({ field, fieldState }) => (
+                <Field>
+                  <FieldLabel>{t('currencyLabel')}</FieldLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    value={field.value}
+                    items={currencyItems}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={t('currencyPlaceholder')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        {currencyItems.map((currency) => (
+                          <SelectItem
+                            key={currency.value}
+                            value={currency.value}
+                          >
+                            {currency.label}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                  <FieldError errors={[fieldState.error]} />
+                </Field>
+              )}
+            />
+          </div>
+        </div>
 
-          <FormField
-            control={form.control}
-            name="benefits"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t('benefitsLabel')}</FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder={t('benefitsPlaceholder')}
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
+        <Field>
+          <FieldLabel htmlFor="benefits">{t('benefitsLabel')}</FieldLabel>
+          <Textarea
+            id="benefits"
+            placeholder={t('benefitsPlaceholder')}
+            {...form.register('benefits')}
           />
-        </div>
+          <FieldError errors={[form.formState.errors.benefits]} />
+        </Field>
+      </div>
 
-        <div className="flex justify-end space-x-2">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onCancel}
-          >
-            {t('cancelButton')}
-          </Button>
-          <Button
-            type="submit"
-            disabled={form.formState.isSubmitting}
-          >
-            {form.formState.isSubmitting ? t('savingButton') : t('saveButton')}
-          </Button>
-        </div>
-      </form>
-    </Form>
+      <div className="flex justify-end space-x-2">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onCancel}
+        >
+          {t('cancelButton')}
+        </Button>
+        <Button
+          type="submit"
+          disabled={form.formState.isSubmitting}
+        >
+          {form.formState.isSubmitting ? t('savingButton') : t('saveButton')}
+        </Button>
+      </div>
+    </form>
   );
 };
 

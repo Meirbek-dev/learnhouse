@@ -1,7 +1,7 @@
 'use client';
 
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
+import { Field, FieldError, FieldLabel } from '@components/ui/field';
 import { updateUserGroup } from '@services/usergroups/usergroups';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { getAPIUrl } from '@services/config/config';
@@ -43,6 +43,11 @@ const EditUserGroup = (props: EditUserGroupProps) => {
       description: props.usergroup.description,
     },
   });
+  const {
+    register,
+    handleSubmit: submitWithValidation,
+    formState: { errors, isSubmitting },
+  } = form;
 
   const [isPending, startTransition] = useTransition();
 
@@ -62,56 +67,40 @@ const EditUserGroup = (props: EditUserGroupProps) => {
   };
 
   return (
-    <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(handleSubmit)}
-        className="space-y-4"
-      >
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t('nameLabel')}</FormLabel>
-              <FormControl>
-                <Input
-                  type="text"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+    <form
+      onSubmit={submitWithValidation(handleSubmit)}
+      className="space-y-4"
+    >
+      <Field>
+        <FieldLabel htmlFor="name">{t('nameLabel')}</FieldLabel>
+        <Input
+          id="name"
+          type="text"
+          {...register('name')}
         />
+        <FieldError errors={[errors.name]} />
+      </Field>
 
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t('descriptionLabel')}</FormLabel>
-              <FormControl>
-                <Input
-                  type="text"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
+      <Field>
+        <FieldLabel htmlFor="description">{t('descriptionLabel')}</FieldLabel>
+        <Input
+          id="description"
+          type="text"
+          {...register('description')}
         />
+        <FieldError errors={[errors.description]} />
+      </Field>
 
-        <div className="flex py-4">
-          <Button
-            type="submit"
-            className="w-full rounded-md p-2 text-center font-bold shadow-md hover:cursor-pointer"
-            disabled={isPending || form.formState.isSubmitting}
-          >
-            {isPending || form.formState.isSubmitting ? t('loadingButton') : t('saveButton')}
-          </Button>
-        </div>
-      </form>
-    </Form>
+      <div className="flex py-4">
+        <Button
+          type="submit"
+          className="w-full rounded-md p-2 text-center font-bold shadow-md hover:cursor-pointer"
+          disabled={isPending || isSubmitting}
+        >
+          {isPending || isSubmitting ? t('loadingButton') : t('saveButton')}
+        </Button>
+      </div>
+    </form>
   );
 };
 

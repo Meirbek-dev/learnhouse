@@ -10,10 +10,10 @@ import { toast } from 'sonner';
 import * as v from 'valibot';
 import useSWR from 'swr';
 
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Field, FieldDescription, FieldError, FieldLabel } from '@/components/ui/field';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import ComboboxMultiple from '@/components/ui/custom/multiple-combobox';
 import { JUDGE0_LANGUAGES } from './LanguageSelector';
@@ -23,6 +23,7 @@ import { getAPIUrl } from '@services/config/config';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Controller } from 'react-hook-form';
 
 interface CodeChallengeConfigEditorProps {
   activityUuid: string;
@@ -278,298 +279,425 @@ export default function CodeChallengeConfigEditor({ activityUuid, courseId }: Co
         </div>
       </div>
 
-      <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(onSubmit)}
-          className="space-y-6"
-        >
-          {/* General Settings */}
-          <Card>
-            <CardHeader>
-              <CardTitle>{t('generalSettings')}</CardTitle>
-              <CardDescription>{t('generalSettingsDescription')}</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Allowed Languages */}
-              <FormField
-                control={form.control}
-                name="allowed_languages"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t('allowedLanguages')}</FormLabel>
-                    <div className="space-y-2">
-                      <FormControl>
-                        <ComboboxMultiple<{ id: number; name: string }>
-                          options={JUDGE0_LANGUAGES}
-                          value={field.value}
-                          onChange={(vals) => field.onChange(vals as number[])}
-                          getOptionValue={(o) => o.id}
-                          getOptionLabel={(o) => o.name}
-                          placeholder={t('selectLanguages')}
-                          searchPlaceholder={t('searchLanguages')}
-                          emptyMessage={t('noLanguagesFound')}
-                        />
-                      </FormControl>
-                      <div className="mt-2 flex gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => field.onChange(JUDGE0_LANGUAGES.map((l) => l.id))}
-                          disabled={(field.value ?? []).length >= JUDGE0_LANGUAGES.length}
-                        >
-                          {t('selectAll')}
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => field.onChange([])}
-                          disabled={(field.value ?? []).length === 0}
-                        >
-                          {t('deselectAll')}
-                        </Button>
-                      </div>
-                    </div>
-                    <FormDescription>{t('allowedLanguagesDescription')}</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="grid grid-cols-2 gap-4">
-                {/* Time Limit */}
-                <FormField
-                  control={form.control}
-                  name="time_limit"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t('timeLimit')}</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          min={1}
-                          max={60}
-                          {...field}
-                          onChange={(e) => field.onChange(Number(e.target.value))}
-                        />
-                      </FormControl>
-                      <FormDescription>{t('timeLimitDescription')}</FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {/* Memory Limit */}
-                <FormField
-                  control={form.control}
-                  name="memory_limit"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t('memoryLimit')}</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          min={16}
-                          max={2048}
-                          {...field}
-                          onChange={(e) => field.onChange(Number(e.target.value))}
-                        />
-                      </FormControl>
-                      <FormDescription>{t('memoryLimitDescription')}</FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                {/* Points */}
-                <FormField
-                  control={form.control}
-                  name="points"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t('points')}</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          min={0}
-                          max={10_000}
-                          {...field}
-                          onChange={(e) => field.onChange(Number(e.target.value))}
-                        />
-                      </FormControl>
-                      <FormDescription>{t('pointsDescription')}</FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {/* Grading Strategy */}
-                <FormField
-                  control={form.control}
-                  name="grading_strategy"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>{t('gradingStrategyLabel')}</FormLabel>
-                      <Select
-                        items={gradingStrategyItems}
-                        onValueChange={field.onChange}
-                        value={field.value}
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="space-y-6"
+      >
+        {/* General Settings */}
+        <Card>
+          <CardHeader>
+            <CardTitle>{t('generalSettings')}</CardTitle>
+            <CardDescription>{t('generalSettingsDescription')}</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {/* Allowed Languages */}
+            <Controller
+              control={form.control}
+              name="allowed_languages"
+              render={({ field, fieldState }) => (
+                <Field>
+                  <FieldLabel>{t('allowedLanguages')}</FieldLabel>
+                  <div className="space-y-2">
+                    <ComboboxMultiple<{ id: number; name: string }>
+                      options={JUDGE0_LANGUAGES}
+                      value={field.value}
+                      onChange={(vals) => field.onChange(vals as number[])}
+                      getOptionValue={(o) => o.id}
+                      getOptionLabel={(o) => o.name}
+                      placeholder={t('selectLanguages')}
+                      searchPlaceholder={t('searchLanguages')}
+                      emptyMessage={t('noLanguagesFound')}
+                    />
+                    <div className="mt-2 flex gap-2">
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => field.onChange(JUDGE0_LANGUAGES.map((l) => l.id))}
+                        disabled={(field.value ?? []).length >= JUDGE0_LANGUAGES.length}
                       >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder={t('selectGradingStrategy')} />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectGroup>
-                            {gradingStrategyItems.map((item) => (
-                              <SelectItem
-                                key={item.value}
-                                value={item.value}
-                              >
-                                {item.label}
-                              </SelectItem>
-                            ))}
-                          </SelectGroup>
-                        </SelectContent>
-                      </Select>
-                      <FormDescription>{t('gradingStrategyDescription')}</FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              {/* Allow Custom Input */}
-              <FormField
-                control={form.control}
-                name="allow_custom_input"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                    <div className="space-y-0.5">
-                      <FormLabel className="text-base">{t('allowCustomInput')}</FormLabel>
-                      <FormDescription>{t('allowCustomInputDescription')}</FormDescription>
+                        {t('selectAll')}
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => field.onChange([])}
+                        disabled={(field.value ?? []).length === 0}
+                      >
+                        {t('deselectAll')}
+                      </Button>
                     </div>
-                    <FormControl>
-                      <Switch
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                  </FormItem>
+                  </div>
+                  <FieldDescription>{t('allowedLanguagesDescription')}</FieldDescription>
+                  <FieldError errors={[fieldState.error]} />
+                </Field>
+              )}
+            />
+
+            <div className="grid grid-cols-2 gap-4">
+              {/* Time Limit */}
+              <Controller
+                control={form.control}
+                name="time_limit"
+                render={({ field, fieldState }) => (
+                  <Field>
+                    <FieldLabel htmlFor={field.name}>{t('timeLimit')}</FieldLabel>
+                    <Input
+                      id={field.name}
+                      type="number"
+                      min={1}
+                      max={60}
+                      {...field}
+                      onChange={(e) => field.onChange(Number(e.target.value))}
+                    />
+                    <FieldDescription>{t('timeLimitDescription')}</FieldDescription>
+                    <FieldError errors={[fieldState.error]} />
+                  </Field>
                 )}
               />
-            </CardContent>
-          </Card>
 
-          {/* Visible Test Cases */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="flex items-center gap-2">
-                    <Eye className="h-5 w-5" />
-                    {t('visibleTestCases')}
-                  </CardTitle>
-                  <CardDescription>{t('visibleTestCasesDescription')}</CardDescription>
-                </div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() =>
-                    appendVisibleTest({ input: '', expected_output: '', is_visible: true, description: '', weight: 1 })
-                  }
-                >
-                  <Plus className="mr-2 h-4 w-4" />
-                  {t('addTestCase')}
-                </Button>
+              {/* Memory Limit */}
+              <Controller
+                control={form.control}
+                name="memory_limit"
+                render={({ field, fieldState }) => (
+                  <Field>
+                    <FieldLabel htmlFor={field.name}>{t('memoryLimit')}</FieldLabel>
+                    <Input
+                      id={field.name}
+                      type="number"
+                      min={16}
+                      max={2048}
+                      {...field}
+                      onChange={(e) => field.onChange(Number(e.target.value))}
+                    />
+                    <FieldDescription>{t('memoryLimitDescription')}</FieldDescription>
+                    <FieldError errors={[fieldState.error]} />
+                  </Field>
+                )}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              {/* Points */}
+              <Controller
+                control={form.control}
+                name="points"
+                render={({ field, fieldState }) => (
+                  <Field>
+                    <FieldLabel htmlFor={field.name}>{t('points')}</FieldLabel>
+                    <Input
+                      id={field.name}
+                      type="number"
+                      min={0}
+                      max={10_000}
+                      {...field}
+                      onChange={(e) => field.onChange(Number(e.target.value))}
+                    />
+                    <FieldDescription>{t('pointsDescription')}</FieldDescription>
+                    <FieldError errors={[fieldState.error]} />
+                  </Field>
+                )}
+              />
+
+              {/* Grading Strategy */}
+              <Controller
+                control={form.control}
+                name="grading_strategy"
+                render={({ field, fieldState }) => (
+                  <Field>
+                    <FieldLabel>{t('gradingStrategyLabel')}</FieldLabel>
+                    <Select
+                      items={gradingStrategyItems}
+                      onValueChange={field.onChange}
+                      value={field.value}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder={t('selectGradingStrategy')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          {gradingStrategyItems.map((item) => (
+                            <SelectItem
+                              key={item.value}
+                              value={item.value}
+                            >
+                              {item.label}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                    <FieldDescription>{t('gradingStrategyDescription')}</FieldDescription>
+                    <FieldError errors={[fieldState.error]} />
+                  </Field>
+                )}
+              />
+            </div>
+
+            {/* Allow Custom Input */}
+            <Controller
+              control={form.control}
+              name="allow_custom_input"
+              render={({ field }) => (
+                <Field className="flex flex-row items-center justify-between rounded-lg border p-4">
+                  <div className="space-y-0.5">
+                    <FieldLabel className="text-base">{t('allowCustomInput')}</FieldLabel>
+                    <FieldDescription>{t('allowCustomInputDescription')}</FieldDescription>
+                  </div>
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </Field>
+              )}
+            />
+          </CardContent>
+        </Card>
+
+        {/* Visible Test Cases */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <Eye className="h-5 w-5" />
+                  {t('visibleTestCases')}
+                </CardTitle>
+                <CardDescription>{t('visibleTestCasesDescription')}</CardDescription>
               </div>
-            </CardHeader>
-            <CardContent>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  appendVisibleTest({ input: '', expected_output: '', is_visible: true, description: '', weight: 1 })
+                }
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                {t('addTestCase')}
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <Accordion
+              className="w-full"
+              multiple
+              value={visibleAccordionValue}
+              onValueChange={(v) => setVisibleAccordionValue(Array.isArray(v) ? v : [v])}
+            >
+              {visibleTestFields.map((field, index) => (
+                <AccordionItem
+                  key={field.id}
+                  value={`visible-${index}`}
+                >
+                  <AccordionTrigger className="hover:no-underline">
+                    <div className="flex items-center gap-2">
+                      <span>
+                        {t('testCase')} #{index + 1}
+                      </span>
+                      {form.watch(`visible_tests.${index}.description`) && (
+                        <span className="text-muted-foreground text-sm">
+                          - {form.watch(`visible_tests.${index}.description`)}
+                        </span>
+                      )}
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent className="space-y-4 px-1 pt-4">
+                    <Controller
+                      control={form.control}
+                      name={`visible_tests.${index}.description`}
+                      render={({ field }) => (
+                        <Field>
+                          <FieldLabel htmlFor={field.name}>{t('testDescription')}</FieldLabel>
+                          <Input
+                            id={field.name}
+                            placeholder={t('testDescriptionPlaceholder')}
+                            {...field}
+                          />
+                        </Field>
+                      )}
+                    />
+                    <div className="grid grid-cols-2 gap-4">
+                      <Controller
+                        control={form.control}
+                        name={`visible_tests.${index}.input`}
+                        render={({ field }) => (
+                          <Field>
+                            <FieldLabel htmlFor={field.name}>{t('input')}</FieldLabel>
+                            <Textarea
+                              id={field.name}
+                              placeholder={t('inputPlaceholder')}
+                              className="font-mono"
+                              rows={4}
+                              {...field}
+                            />
+                          </Field>
+                        )}
+                      />
+                      <Controller
+                        control={form.control}
+                        name={`visible_tests.${index}.expected_output`}
+                        render={({ field }) => (
+                          <Field>
+                            <FieldLabel htmlFor={field.name}>{t('expectedOutput')}</FieldLabel>
+                            <Textarea
+                              id={field.name}
+                              placeholder={t('expectedOutputPlaceholder')}
+                              className="font-mono"
+                              rows={4}
+                              {...field}
+                            />
+                          </Field>
+                        )}
+                      />
+                    </div>
+                    <div className="flex justify-end">
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => removeVisibleTest(index)}
+                        disabled={visibleTestFields.length === 1}
+                      >
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        {t('removeTestCase')}
+                      </Button>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          </CardContent>
+        </Card>
+
+        {/* Hidden Test Cases */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <EyeOff className="h-5 w-5" />
+                  {t('hiddenTestCases')}
+                </CardTitle>
+                <CardDescription>{t('hiddenTestCasesDescription')}</CardDescription>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  appendHiddenTest({ input: '', expected_output: '', is_visible: false, description: '', weight: 1 })
+                }
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                {t('addTestCase')}
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {hiddenTestFields.length === 0 ? (
+              <p className="text-muted-foreground py-8 text-center text-sm">{t('noHiddenTestCases')}</p>
+            ) : (
               <Accordion
                 className="w-full"
                 multiple
-                value={visibleAccordionValue}
-                onValueChange={(v) => setVisibleAccordionValue(Array.isArray(v) ? v : [v])}
+                value={hiddenAccordionValue}
+                onValueChange={(v) => setHiddenAccordionValue(Array.isArray(v) ? v : [v])}
               >
-                {visibleTestFields.map((field, index) => (
+                {hiddenTestFields.map((field, index) => (
                   <AccordionItem
                     key={field.id}
-                    value={`visible-${index}`}
+                    value={`hidden-${index}`}
                   >
                     <AccordionTrigger className="hover:no-underline">
                       <div className="flex items-center gap-2">
                         <span>
-                          {t('testCase')} #{index + 1}
+                          {t('hiddenTest')} #{index + 1}
                         </span>
-                        {form.watch(`visible_tests.${index}.description`) && (
+                        {form.watch(`hidden_tests.${index}.description`) && (
                           <span className="text-muted-foreground text-sm">
-                            - {form.watch(`visible_tests.${index}.description`)}
+                            - {form.watch(`hidden_tests.${index}.description`)}
                           </span>
                         )}
                       </div>
                     </AccordionTrigger>
                     <AccordionContent className="space-y-4 px-1 pt-4">
-                      <FormField
+                      <Controller
                         control={form.control}
-                        name={`visible_tests.${index}.description`}
+                        name={`hidden_tests.${index}.description`}
                         render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>{t('testDescription')}</FormLabel>
-                            <FormControl>
-                              <Input
-                                placeholder={t('testDescriptionPlaceholder')}
-                                {...field}
-                              />
-                            </FormControl>
-                          </FormItem>
+                          <Field>
+                            <FieldLabel htmlFor={field.name}>{t('testDescription')}</FieldLabel>
+                            <Input
+                              id={field.name}
+                              placeholder={t('testDescriptionPlaceholder')}
+                              {...field}
+                            />
+                          </Field>
                         )}
                       />
                       <div className="grid grid-cols-2 gap-4">
-                        <FormField
+                        <Controller
                           control={form.control}
-                          name={`visible_tests.${index}.input`}
+                          name={`hidden_tests.${index}.input`}
                           render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>{t('input')}</FormLabel>
-                              <FormControl>
-                                <Textarea
-                                  placeholder={t('inputPlaceholder')}
-                                  className="font-mono"
-                                  rows={4}
-                                  {...field}
-                                />
-                              </FormControl>
-                            </FormItem>
+                            <Field>
+                              <FieldLabel htmlFor={field.name}>{t('input')}</FieldLabel>
+                              <Textarea
+                                id={field.name}
+                                placeholder={t('inputPlaceholder')}
+                                className="font-mono"
+                                rows={4}
+                                {...field}
+                              />
+                            </Field>
                           )}
                         />
-                        <FormField
+                        <Controller
                           control={form.control}
-                          name={`visible_tests.${index}.expected_output`}
+                          name={`hidden_tests.${index}.expected_output`}
                           render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>{t('expectedOutput')}</FormLabel>
-                              <FormControl>
-                                <Textarea
-                                  placeholder={t('expectedOutputPlaceholder')}
-                                  className="font-mono"
-                                  rows={4}
-                                  {...field}
-                                />
-                              </FormControl>
-                            </FormItem>
+                            <Field>
+                              <FieldLabel htmlFor={field.name}>{t('expectedOutput')}</FieldLabel>
+                              <Textarea
+                                id={field.name}
+                                placeholder={t('expectedOutputPlaceholder')}
+                                className="font-mono"
+                                rows={4}
+                                {...field}
+                              />
+                            </Field>
                           )}
                         />
                       </div>
+                      <Controller
+                        control={form.control}
+                        name={`hidden_tests.${index}.weight`}
+                        render={({ field, fieldState }) => (
+                          <Field>
+                            <FieldLabel htmlFor={field.name}>{t('testWeight')}</FieldLabel>
+                            <Input
+                              id={field.name}
+                              type="number"
+                              min={1}
+                              max={100}
+                              className="w-24"
+                              {...field}
+                              onChange={(e) => field.onChange(Number(e.target.value))}
+                            />
+                            <FieldDescription>{t('testWeightDescription')}</FieldDescription>
+                            <FieldError errors={[fieldState.error]} />
+                          </Field>
+                        )}
+                      />
                       <div className="flex justify-end">
                         <Button
                           type="button"
                           variant="destructive"
                           size="sm"
-                          onClick={() => removeVisibleTest(index)}
-                          disabled={visibleTestFields.length === 1}
+                          onClick={() => removeHiddenTest(index)}
                         >
                           <Trash2 className="mr-2 h-4 w-4" />
                           {t('removeTestCase')}
@@ -579,171 +707,29 @@ export default function CodeChallengeConfigEditor({ activityUuid, courseId }: Co
                   </AccordionItem>
                 ))}
               </Accordion>
-            </CardContent>
-          </Card>
+            )}
+          </CardContent>
+        </Card>
 
-          {/* Hidden Test Cases */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="flex items-center gap-2">
-                    <EyeOff className="h-5 w-5" />
-                    {t('hiddenTestCases')}
-                  </CardTitle>
-                  <CardDescription>{t('hiddenTestCasesDescription')}</CardDescription>
-                </div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() =>
-                    appendHiddenTest({ input: '', expected_output: '', is_visible: false, description: '', weight: 1 })
-                  }
-                >
-                  <Plus className="mr-2 h-4 w-4" />
-                  {t('addTestCase')}
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              {hiddenTestFields.length === 0 ? (
-                <p className="text-muted-foreground py-8 text-center text-sm">{t('noHiddenTestCases')}</p>
-              ) : (
-                <Accordion
-                  className="w-full"
-                  multiple
-                  value={hiddenAccordionValue}
-                  onValueChange={(v) => setHiddenAccordionValue(Array.isArray(v) ? v : [v])}
-                >
-                  {hiddenTestFields.map((field, index) => (
-                    <AccordionItem
-                      key={field.id}
-                      value={`hidden-${index}`}
-                    >
-                      <AccordionTrigger className="hover:no-underline">
-                        <div className="flex items-center gap-2">
-                          <span>
-                            {t('hiddenTest')} #{index + 1}
-                          </span>
-                          {form.watch(`hidden_tests.${index}.description`) && (
-                            <span className="text-muted-foreground text-sm">
-                              - {form.watch(`hidden_tests.${index}.description`)}
-                            </span>
-                          )}
-                        </div>
-                      </AccordionTrigger>
-                      <AccordionContent className="space-y-4 px-1 pt-4">
-                        <FormField
-                          control={form.control}
-                          name={`hidden_tests.${index}.description`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>{t('testDescription')}</FormLabel>
-                              <FormControl>
-                                <Input
-                                  placeholder={t('testDescriptionPlaceholder')}
-                                  {...field}
-                                />
-                              </FormControl>
-                            </FormItem>
-                          )}
-                        />
-                        <div className="grid grid-cols-2 gap-4">
-                          <FormField
-                            control={form.control}
-                            name={`hidden_tests.${index}.input`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>{t('input')}</FormLabel>
-                                <FormControl>
-                                  <Textarea
-                                    placeholder={t('inputPlaceholder')}
-                                    className="font-mono"
-                                    rows={4}
-                                    {...field}
-                                  />
-                                </FormControl>
-                              </FormItem>
-                            )}
-                          />
-                          <FormField
-                            control={form.control}
-                            name={`hidden_tests.${index}.expected_output`}
-                            render={({ field }) => (
-                              <FormItem>
-                                <FormLabel>{t('expectedOutput')}</FormLabel>
-                                <FormControl>
-                                  <Textarea
-                                    placeholder={t('expectedOutputPlaceholder')}
-                                    className="font-mono"
-                                    rows={4}
-                                    {...field}
-                                  />
-                                </FormControl>
-                              </FormItem>
-                            )}
-                          />
-                        </div>
-                        <FormField
-                          control={form.control}
-                          name={`hidden_tests.${index}.weight`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>{t('testWeight')}</FormLabel>
-                              <FormControl>
-                                <Input
-                                  type="number"
-                                  min={1}
-                                  max={100}
-                                  className="w-24"
-                                  {...field}
-                                  onChange={(e) => field.onChange(Number(e.target.value))}
-                                />
-                              </FormControl>
-                              <FormDescription>{t('testWeightDescription')}</FormDescription>
-                            </FormItem>
-                          )}
-                        />
-                        <div className="flex justify-end">
-                          <Button
-                            type="button"
-                            variant="destructive"
-                            size="sm"
-                            onClick={() => removeHiddenTest(index)}
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            {t('removeTestCase')}
-                          </Button>
-                        </div>
-                      </AccordionContent>
-                    </AccordionItem>
-                  ))}
-                </Accordion>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Actions */}
-          <div className="flex justify-end gap-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => router.back()}
-              disabled={isSaving}
-            >
-              {t('cancel')}
-            </Button>
-            <Button
-              type="submit"
-              disabled={isSaving}
-            >
-              {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {t('saveConfig')}
-            </Button>
-          </div>
-        </form>
-      </Form>
+        {/* Actions */}
+        <div className="flex justify-end gap-4">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => router.back()}
+            disabled={isSaving}
+          >
+            {t('cancel')}
+          </Button>
+          <Button
+            type="submit"
+            disabled={isSaving}
+          >
+            {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {t('saveConfig')}
+          </Button>
+        </div>
+      </form>
     </div>
   );
 }

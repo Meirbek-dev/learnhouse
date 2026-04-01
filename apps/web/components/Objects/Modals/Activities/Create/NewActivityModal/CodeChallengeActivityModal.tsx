@@ -1,13 +1,13 @@
 'use client';
 
+import { Controller, FormProvider, useForm } from 'react-hook-form';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { Code2, Loader2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useForm } from 'react-hook-form';
 import * as v from 'valibot';
 
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Field, FieldDescription, FieldError, FieldLabel } from '@/components/ui/field';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -84,52 +84,50 @@ export default function CodeChallengeActivityModal({
         </div>
       </div>
 
-      <Form {...form}>
+      <FormProvider {...form}>
         <form
           onSubmit={form.handleSubmit(handleSubmit)}
           className="space-y-4"
         >
-          <FormField
+          <Controller
             control={form.control}
             name="name"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t('name')}</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder={t('namePlaceholder')}
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+            render={({ field, fieldState }) => (
+              <Field>
+                <FieldLabel htmlFor={field.name}>{t('name')}</FieldLabel>
+                <Input
+                  id={field.name}
+                  placeholder={t('namePlaceholder')}
+                  {...field}
+                />
+                <FieldError errors={[fieldState.error]} />
+              </Field>
             )}
           />
 
-          <FormField
+          <Controller
             control={form.control}
             name="description"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t('description')}</FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder={t('descriptionPlaceholder')}
-                    className="min-h-24"
-                    {...field}
-                  />
-                </FormControl>
-                <FormDescription>{t('descriptionHint')}</FormDescription>
-                <FormMessage />
-              </FormItem>
+            render={({ field, fieldState }) => (
+              <Field>
+                <FieldLabel htmlFor={field.name}>{t('description')}</FieldLabel>
+                <Textarea
+                  id={field.name}
+                  placeholder={t('descriptionPlaceholder')}
+                  className="min-h-24"
+                  {...field}
+                />
+                <FieldDescription>{t('descriptionHint')}</FieldDescription>
+                <FieldError errors={[fieldState.error]} />
+              </Field>
             )}
           />
 
           <div className="grid gap-4 md:grid-cols-2">
-            <FormField
+            <Controller
               control={form.control}
               name="difficulty"
-              render={({ field }) => {
+              render={({ field, fieldState }) => {
                 const difficultyItems = [
                   { value: 'easy', label: t('difficultyEasy') },
                   { value: 'medium', label: t('difficultyMedium') },
@@ -137,18 +135,16 @@ export default function CodeChallengeActivityModal({
                 ];
 
                 return (
-                  <FormItem>
-                    <FormLabel>{t('difficulty')}</FormLabel>
+                  <Field>
+                    <FieldLabel>{t('difficulty')}</FieldLabel>
                     <Select
                       items={difficultyItems}
                       value={field.value}
                       onValueChange={field.onChange}
                     >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder={t('selectDifficulty')} />
-                        </SelectTrigger>
-                      </FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder={t('selectDifficulty')} />
+                      </SelectTrigger>
                       <SelectContent>
                         <SelectGroup>
                           {difficultyItems.map((item) => (
@@ -162,34 +158,32 @@ export default function CodeChallengeActivityModal({
                         </SelectGroup>
                       </SelectContent>
                     </Select>
-                    <FormMessage />
-                  </FormItem>
+                    <FieldError errors={[fieldState.error]} />
+                  </Field>
                 );
               }}
             />
 
-            <FormField
+            <Controller
               control={form.control}
               name="subtype"
-              render={({ field }) => {
+              render={({ field, fieldState }) => {
                 const subtypeItems = [
                   { value: 'general', label: t('typeGeneral') },
                   { value: 'competitive', label: t('typeCompetitive') },
                 ];
 
                 return (
-                  <FormItem>
-                    <FormLabel>{t('type')}</FormLabel>
+                  <Field>
+                    <FieldLabel>{t('type')}</FieldLabel>
                     <Select
                       items={subtypeItems}
                       value={field.value}
                       onValueChange={field.onChange}
                     >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder={t('selectType')} />
-                        </SelectTrigger>
-                      </FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder={t('selectType')} />
+                      </SelectTrigger>
                       <SelectContent>
                         <SelectGroup>
                           {subtypeItems.map((item) => (
@@ -203,11 +197,11 @@ export default function CodeChallengeActivityModal({
                         </SelectGroup>
                       </SelectContent>
                     </Select>
-                    <FormDescription>
+                    <FieldDescription>
                       {field.value === 'competitive' ? t('typeCompetitiveHint') : t('typeGeneralHint')}
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
+                    </FieldDescription>
+                    <FieldError errors={[fieldState.error]} />
+                  </Field>
                 );
               }}
             />
@@ -232,7 +226,7 @@ export default function CodeChallengeActivityModal({
             </Button>
           </div>
         </form>
-      </Form>
+      </FormProvider>
     </div>
   );
 }

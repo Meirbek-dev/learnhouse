@@ -12,11 +12,11 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { createCourseUpdate, deleteCourseUpdate } from '@services/courses/updates';
 import { AlertTriangle, Loader2, PencilLine, Rss, TentTree } from 'lucide-react';
 import { useEffectEvent, useLayoutEffect, useState, useTransition } from 'react';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
+import { Field, FieldError, FieldLabel } from '@components/ui/field';
 import { Actions, Resources, Scopes } from '@/types/permissions';
 import { getCourseUpdatesSwrKey } from '@services/courses/keys';
 import { useCourse } from '@components/Contexts/CourseContext';
@@ -25,11 +25,11 @@ import { useDateFnsLocale } from '@/hooks/useDateFnsLocale';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { usePermissions } from '@/components/Security';
 import { format, formatDistanceToNow } from 'date-fns';
+import { Controller, useForm } from 'react-hook-form';
 import { Textarea } from '@components/ui/textarea';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
-import { useForm } from 'react-hook-form';
 import { motion } from 'motion/react';
 import useSWR, { mutate } from 'swr';
 import { toast } from 'sonner';
@@ -201,62 +201,68 @@ const NewUpdateForm = ({ setSelectedView }: any) => {
         <div className="rounded-full px-3 py-0.5 text-lg font-bold text-black">{t('addNewCourseUpdate')}</div>
       </div>
       <div className="-py-2 px-5">
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-4"
-          >
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm font-medium">{t('title')}</FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      style={{ backgroundColor: 'white' }}
-                      type="text"
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="content"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-sm font-medium">{t('content')}</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      {...field}
-                      style={{ backgroundColor: 'white', height: '100px' }}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <div className="flex justify-end py-2">
-              <button
-                type="button"
-                onClick={() => setSelectedView('list')}
-                className="rounded-md px-4 py-2 text-sm font-semibold text-gray-500 antialiased"
-              >
-                {t('cancel')}
-              </button>
-              <Button
-                type="submit"
-                className="rounded-md px-4 py-2 text-sm font-semibold antialiased"
-                disabled={form.formState.isSubmitting}
-              >
-                {form.formState.isSubmitting ? t('adding') : t('addUpdate')}
-              </Button>
-            </div>
-          </form>
-        </Form>
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="space-y-4"
+        >
+          <Controller
+            control={form.control}
+            name="title"
+            render={({ field, fieldState }) => (
+              <Field>
+                <FieldLabel
+                  className="text-sm font-medium"
+                  htmlFor={field.name}
+                >
+                  {t('title')}
+                </FieldLabel>
+                <Input
+                  {...field}
+                  id={field.name}
+                  style={{ backgroundColor: 'white' }}
+                  type="text"
+                />
+                <FieldError errors={[fieldState.error]} />
+              </Field>
+            )}
+          />
+          <Controller
+            control={form.control}
+            name="content"
+            render={({ field, fieldState }) => (
+              <Field>
+                <FieldLabel
+                  className="text-sm font-medium"
+                  htmlFor={field.name}
+                >
+                  {t('content')}
+                </FieldLabel>
+                <Textarea
+                  {...field}
+                  id={field.name}
+                  style={{ backgroundColor: 'white', height: '100px' }}
+                />
+                <FieldError errors={[fieldState.error]} />
+              </Field>
+            )}
+          />
+          <div className="flex justify-end py-2">
+            <button
+              type="button"
+              onClick={() => setSelectedView('list')}
+              className="rounded-md px-4 py-2 text-sm font-semibold text-gray-500 antialiased"
+            >
+              {t('cancel')}
+            </button>
+            <Button
+              type="submit"
+              className="rounded-md px-4 py-2 text-sm font-semibold antialiased"
+              disabled={form.formState.isSubmitting}
+            >
+              {form.formState.isSubmitting ? t('adding') : t('addUpdate')}
+            </Button>
+          </div>
+        </form>
       </div>
     </div>
   );

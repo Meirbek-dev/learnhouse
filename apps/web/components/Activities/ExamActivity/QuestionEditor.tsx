@@ -65,14 +65,14 @@ export default function QuestionEditor({
   useEffect(() => {
     // If parent supplies a different question (e.g., opening for edit/new), update form
     setFormData(
-      (question ?? {
+      question ?? {
         question_text: '',
         question_type: 'SINGLE_CHOICE',
         points: 1,
         explanation: '',
         answer_options: [{ text: '', is_correct: false }],
         order_index: 0,
-      }),
+      },
     );
   }, [question]);
 

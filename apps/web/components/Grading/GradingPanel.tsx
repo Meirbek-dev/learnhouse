@@ -259,18 +259,7 @@ export default function GradingPanel({
         setIsSaving(false);
       }
     },
-    [
-      submissionUuid,
-      accessToken,
-      score,
-      scoreNum,
-      scoreInvalid,
-      feedback,
-      itemFeedbacks,
-      t,
-      onGradeSaved,
-      mutate,
-    ],
+    [submissionUuid, accessToken, score, scoreNum, scoreInvalid, feedback, itemFeedbacks, t, onGradeSaved, mutate],
   );
 
   const studentName = submission?.user

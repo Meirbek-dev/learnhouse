@@ -1,9 +1,10 @@
 'use client';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { createAssignmentWithActivity } from '@services/courses/assignments';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
+import { Field, FieldError, FieldLabel } from '@/components/ui/field';
+import { Controller, FormProvider, useForm } from 'react-hook-form';
 import { BarLoader } from '@components/Objects/Loaders/BarLoader';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { revalidateTags } from '@services/utils/ts/requests';
@@ -16,7 +17,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useRef, useTransition } from 'react';
 import { CalendarIcon } from 'lucide-react';
-import { useForm } from 'react-hook-form';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -138,48 +138,48 @@ const NewAssignment = ({ submitActivity, chapterId, course, closeModal }: any) =
   };
 
   return (
-    <Form {...form}>
+    <FormProvider {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
         className="space-y-4"
       >
-        <FormField
+        <Controller
           control={form.control}
           name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t('assignmentTitle')}</FormLabel>
-              <FormControl>
-                <Input
-                  {...field}
-                  type="text"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
+          render={({ field, fieldState }) => (
+            <Field>
+              <FieldLabel htmlFor={field.name}>{t('assignmentTitle')}</FieldLabel>
+              <Input
+                id={field.name}
+                type="text"
+                {...field}
+              />
+              <FieldError errors={[fieldState.error]} />
+            </Field>
           )}
         />
 
-        <FormField
+        <Controller
           control={form.control}
           name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t('assignmentDescription')}</FormLabel>
-              <FormControl>
-                <Textarea {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
+          render={({ field, fieldState }) => (
+            <Field>
+              <FieldLabel htmlFor={field.name}>{t('assignmentDescription')}</FieldLabel>
+              <Textarea
+                id={field.name}
+                {...field}
+              />
+              <FieldError errors={[fieldState.error]} />
+            </Field>
           )}
         />
 
-        <FormField
+        <Controller
           control={form.control}
           name="dueDate"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t('dueDate')}</FormLabel>
+          render={({ field, fieldState }) => (
+            <Field>
+              <FieldLabel>{t('dueDate')}</FieldLabel>
               <Popover>
                 <PopoverTrigger
                   render={
@@ -223,27 +223,25 @@ const NewAssignment = ({ submitActivity, chapterId, course, closeModal }: any) =
                   />
                 </PopoverContent>
               </Popover>
-              <FormMessage />
-            </FormItem>
+              <FieldError errors={[fieldState.error]} />
+            </Field>
           )}
         />
 
-        <FormField
+        <Controller
           control={form.control}
           name="gradingType"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t('gradingType')}</FormLabel>
+          render={({ field, fieldState }) => (
+            <Field>
+              <FieldLabel>{t('gradingType')}</FieldLabel>
               <Select
                 onValueChange={field.onChange}
                 value={field.value}
                 items={gradingTypeItems}
               >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder={validationT('selectGradingType')} />
-                  </SelectTrigger>
-                </FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder={validationT('selectGradingType')} />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
                     {gradingTypeItems.map((item) => (
@@ -257,8 +255,8 @@ const NewAssignment = ({ submitActivity, chapterId, course, closeModal }: any) =
                   </SelectGroup>
                 </SelectContent>
               </Select>
-              <FormMessage />
-            </FormItem>
+              <FieldError errors={[fieldState.error]} />
+            </Field>
           )}
         />
 
@@ -280,7 +278,7 @@ const NewAssignment = ({ submitActivity, chapterId, course, closeModal }: any) =
           </Button>
         </div>
       </form>
-    </Form>
+    </FormProvider>
   );
 };
 

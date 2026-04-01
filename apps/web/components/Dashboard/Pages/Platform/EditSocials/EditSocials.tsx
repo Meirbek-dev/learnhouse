@@ -1,17 +1,17 @@
 'use client';
 
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { SiFacebook, SiInstagram, SiTiktok, SiX, SiYoutube } from '@icons-pack/react-simple-icons';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { usePlatform } from '@/components/Contexts/PlatformContext';
 import { updatePlatform } from '@/services/settings/platform';
 import { revalidateTags } from '@services/utils/ts/requests';
+import { Field, FieldLabel } from '@components/ui/field';
+import { Controller, useForm } from 'react-hook-form';
 import { getAPIUrl } from '@services/config/config';
 import { Plus, X as XIcon } from 'lucide-react';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
-import { useForm } from 'react-hook-form';
 import { useTransition } from 'react';
 import { toast } from 'sonner';
 import { mutate } from 'swr';
@@ -146,128 +146,123 @@ export default function EditSocials() {
 
   return (
     <div className="soft-shadow mx-0 rounded-xl border border-border bg-card text-card-foreground shadow-sm sm:mx-10">
-      <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit((values) =>
-            startTransition(() => {
-              void updatePlatformSettings(values);
-            }),
-          )}
-        >
-          <div className="flex flex-col gap-0">
-            <div className="mx-3 my-3 flex flex-col gap-1 rounded-md bg-muted px-5 py-3">
-              <h1 className="text-xl font-bold text-foreground">{t('title')}</h1>
-              <h2 className="text-base text-muted-foreground">{t('description')}</h2>
-            </div>
+      <form
+        onSubmit={form.handleSubmit((values) =>
+          startTransition(() => {
+            void updatePlatformSettings(values);
+          }),
+        )}
+      >
+        <div className="flex flex-col gap-0">
+          <div className="mx-3 my-3 flex flex-col gap-1 rounded-md bg-muted px-5 py-3">
+            <h1 className="text-xl font-bold text-foreground">{t('title')}</h1>
+            <h2 className="text-base text-muted-foreground">{t('description')}</h2>
+          </div>
 
-            <div className="mx-5 my-5 mt-0 flex flex-col lg:flex-row lg:space-x-8">
-              <div className="w-full space-y-6">
-                <div>
-                  <FormLabel className="text-lg font-semibold">{t('socialLinksTitle')}</FormLabel>
-                  <div className="soft-shadow mt-2 space-y-3 rounded-lg border border-border bg-muted/50 p-4">
-                    <div className="grid gap-3">
-                      {socialFields.map((field) => (
-                        <FormField
-                          key={field.name}
-                          control={form.control}
-                          name={field.name}
-                          render={({ field: formField }) => (
-                            <FormItem>
-                              <div className="flex items-center gap-3">
-                                <div className={`flex h-8 w-8 items-center justify-center rounded-md ${field.bgColor}`}>
-                                  {field.icon}
-                                </div>
-                                <FormControl>
-                                  <Input
-                                    placeholder={field.placeholder}
-                                    className="h-9 bg-background"
-                                    {...formField}
-                                  />
-                                </FormControl>
+          <div className="mx-5 my-5 mt-0 flex flex-col lg:flex-row lg:space-x-8">
+            <div className="w-full space-y-6">
+              <div>
+                <FieldLabel className="text-lg font-semibold">{t('socialLinksTitle')}</FieldLabel>
+                <div className="soft-shadow mt-2 space-y-3 rounded-lg border border-border bg-muted/50 p-4">
+                  <div className="grid gap-3">
+                    {socialFields.map((field) => (
+                      <Controller
+                        key={field.name}
+                        control={form.control}
+                        name={field.name}
+                        render={({ field: socialField }) => (
+                          <Field>
+                            <div className="flex items-center gap-3">
+                              <div className={`flex h-8 w-8 items-center justify-center rounded-md ${field.bgColor}`}>
+                                {field.icon}
                               </div>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="w-full space-y-6">
-                <div>
-                  <FormLabel className="text-lg font-semibold">{t('customLinksTitle')}</FormLabel>
-                  <div className="soft-shadow mt-2 space-y-3 rounded-lg border border-border bg-muted/50 p-4">
-                    {linksEntries.map(([linkKey, linkValue], index) => (
-                      <div
-                        key={index}
-                        className="flex items-center gap-3"
-                      >
-                        <div className="flex h-8 w-8 items-center justify-center rounded-md bg-muted text-xs font-medium text-muted-foreground">
-                          {index + 1}
-                        </div>
-                        <div className="flex flex-1 gap-2">
-                          <Input
-                            placeholder={t('Form.customLinkLabelPlaceholder')}
-                            value={linkKey}
-                            className="h-9 w-1/3 bg-background"
-                            onChange={(e) => {
-                              handleLinkChange(linkKey, e.target.value, linkValue);
-                            }}
-                          />
-                          <Input
-                            placeholder={t('Form.customLinkUrlPlaceholder')}
-                            value={linkValue}
-                            className="h-9 flex-1 bg-background"
-                            onChange={(e) => {
-                              handleLinkChange(linkKey, linkKey, e.target.value);
-                            }}
-                          />
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => {
-                              removeLink(linkKey);
-                            }}
-                          >
-                            <XIcon className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
+                              <Input
+                                placeholder={field.placeholder}
+                                className="h-9 bg-background"
+                                {...socialField}
+                              />
+                            </div>
+                          </Field>
+                        )}
+                      />
                     ))}
-
-                    {linksEntries.length < 3 && (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        className="mt-2"
-                        onClick={addNewLink}
-                      >
-                        <Plus className="mr-2 h-4 w-4" />
-                        {t('Form.addCustomLinkButton')}
-                      </Button>
-                    )}
-
-                    <p className="mt-2 text-xs text-muted-foreground">{t('Form.customLinkInfo', { count: 3 })}</p>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="mx-5 mt-3 mb-5 flex flex-row-reverse">
-              <Button
-                type="submit"
-                disabled={form.formState.isSubmitting || isPending}
-              >
-                {form.formState.isSubmitting || isPending ? t('Form.savingButton') : t('Form.saveButton')}
-              </Button>
+            <div className="w-full space-y-6">
+              <div>
+                <FieldLabel className="text-lg font-semibold">{t('customLinksTitle')}</FieldLabel>
+                <div className="soft-shadow mt-2 space-y-3 rounded-lg border border-border bg-muted/50 p-4">
+                  {linksEntries.map(([linkKey, linkValue], index) => (
+                    <div
+                      key={index}
+                      className="flex items-center gap-3"
+                    >
+                      <div className="flex h-8 w-8 items-center justify-center rounded-md bg-muted text-xs font-medium text-muted-foreground">
+                        {index + 1}
+                      </div>
+                      <div className="flex flex-1 gap-2">
+                        <Input
+                          placeholder={t('Form.customLinkLabelPlaceholder')}
+                          value={linkKey}
+                          className="h-9 w-1/3 bg-background"
+                          onChange={(e) => {
+                            handleLinkChange(linkKey, e.target.value, linkValue);
+                          }}
+                        />
+                        <Input
+                          placeholder={t('Form.customLinkUrlPlaceholder')}
+                          value={linkValue}
+                          className="h-9 flex-1 bg-background"
+                          onChange={(e) => {
+                            handleLinkChange(linkKey, linkKey, e.target.value);
+                          }}
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            removeLink(linkKey);
+                          }}
+                        >
+                          <XIcon className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+
+                  {linksEntries.length < 3 && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="mt-2"
+                      onClick={addNewLink}
+                    >
+                      <Plus className="mr-2 h-4 w-4" />
+                      {t('Form.addCustomLinkButton')}
+                    </Button>
+                  )}
+
+                  <p className="mt-2 text-xs text-muted-foreground">{t('Form.customLinkInfo', { count: 3 })}</p>
+                </div>
+              </div>
             </div>
           </div>
-        </form>
-      </Form>
+
+          <div className="mx-5 mt-3 mb-5 flex flex-row-reverse">
+            <Button
+              type="submit"
+              disabled={form.formState.isSubmitting || isPending}
+            >
+              {form.formState.isSubmitting || isPending ? t('Form.savingButton') : t('Form.saveButton')}
+            </Button>
+          </div>
+        </div>
+      </form>
     </div>
   );
 }

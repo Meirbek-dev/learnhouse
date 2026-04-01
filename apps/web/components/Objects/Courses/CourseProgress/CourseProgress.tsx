@@ -158,10 +158,7 @@ const CourseProgress: FC<CourseProgressProps> = ({ course, isOpen, onClose, trai
             {/* Progress Bar */}
             <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-muted">
               <div
-                className={cn(
-                  'h-full rounded-full transition-all duration-500 ease-out',
-                  'bg-primary',
-                )}
+                className={cn('h-full rounded-full transition-all duration-500 ease-out', 'bg-primary')}
                 style={{ width: `${progressPercentage}%` }}
               />
             </div>

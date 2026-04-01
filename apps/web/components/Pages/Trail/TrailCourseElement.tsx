@@ -69,9 +69,7 @@ const TrailCourseElement = ({ course, run }: TrailCourseElementProps) => {
   }, [access_token, course_progress, course.course_uuid]);
 
   return (
-    <Card
-      className="trailcoursebox flex rounded-xl border border-border bg-card p-3 text-card-foreground shadow-sm"
-    >
+    <Card className="trailcoursebox flex rounded-xl border border-border bg-card p-3 text-card-foreground shadow-sm">
       <CardContent className="p-0">
         <Link
           prefetch={false}

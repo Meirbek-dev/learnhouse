@@ -83,9 +83,7 @@ const NavigationButtons = ({
       }
     >
       <div className="hidden flex-col items-end sm:flex">
-        <span className="text-xs text-muted-foreground">
-          {t('NavigationButtons.next')}
-        </span>
+        <span className="text-xs text-muted-foreground">{t('NavigationButtons.next')}</span>
         <span className="max-w-[100px] truncate text-right text-sm font-medium sm:max-w-[150px]">
           {nextActivity ? nextActivity.name : t('NavigationButtons.noNextActivity')}
         </span>

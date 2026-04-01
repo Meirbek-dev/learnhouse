@@ -1,17 +1,17 @@
 'use client';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { assignRoleToUser, removeRoleFromUser } from '@/services/rbac';
+import { Field, FieldError, FieldLabel } from '@components/ui/field';
 import { BarLoader } from '@components/Objects/Loaders/BarLoader';
 import { Alert, AlertDescription } from '@components/ui/alert';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { swrFetcher } from '@services/utils/ts/requests';
+import { Controller, useForm } from 'react-hook-form';
 import { getAPIUrl } from '@services/config/config';
 import { useState, useTransition } from 'react';
 import { Button } from '@components/ui/button';
 import { useTranslations } from 'next-intl';
-import { useForm } from 'react-hook-form';
 import useSWR, { mutate } from 'swr';
 import type { FC } from 'react';
 import { toast } from 'sonner';
@@ -100,73 +100,69 @@ const RolesUpdate: FC<Props> = (props) => {
         </Alert>
       )}
 
-      <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit(handleSubmit)}
-          className="space-y-4"
-        >
-          <FormField
-            control={form.control}
-            name="role"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{t('rolesLabel')}</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  value={field.value}
-                  disabled={!roles || rolesError}
-                  items={
-                    !roles || rolesError
-                      ? undefined
-                      : sortedRoles.map((role: any) => ({ value: role.id.toString(), label: role.name }))
-                  }
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder={t('selectRolePlaceholder')} />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {!roles || rolesError ? (
-                      <div className="text-muted-foreground px-3 py-2">{t('loadingRoles')}</div>
-                    ) : (
-                      <SelectGroup>
-                        {sortedRoles.map((role: any) => (
-                          <SelectItem
-                            key={role.id}
-                            value={role.id.toString()}
-                          >
-                            {role.name}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    )}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+      <form
+        onSubmit={form.handleSubmit(handleSubmit)}
+        className="space-y-4"
+      >
+        <Controller
+          control={form.control}
+          name="role"
+          render={({ field, fieldState }) => (
+            <Field>
+              <FieldLabel>{t('rolesLabel')}</FieldLabel>
+              <Select
+                onValueChange={field.onChange}
+                value={field.value}
+                disabled={!roles || rolesError}
+                items={
+                  !roles || rolesError
+                    ? undefined
+                    : sortedRoles.map((role: any) => ({ value: role.id.toString(), label: role.name }))
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={t('selectRolePlaceholder')} />
+                </SelectTrigger>
+                <SelectContent>
+                  {!roles || rolesError ? (
+                    <div className="text-muted-foreground px-3 py-2">{t('loadingRoles')}</div>
+                  ) : (
+                    <SelectGroup>
+                      {sortedRoles.map((role: any) => (
+                        <SelectItem
+                          key={role.id}
+                          value={role.id.toString()}
+                        >
+                          {role.name}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  )}
+                </SelectContent>
+              </Select>
+              <FieldError errors={[fieldState.error]} />
+            </Field>
+          )}
+        />
 
-          <div className="flex justify-end pt-4">
-            <Button
-              type="submit"
-              disabled={isPending || !roles || rolesError}
-              className="min-w-[100px]"
-            >
-              {isPending ? (
-                <BarLoader
-                  cssOverride={{ borderRadius: 60 }}
-                  width={60}
-                  color="#ffffff"
-                />
-              ) : (
-                t('updateButton')
-              )}
-            </Button>
-          </div>
-        </form>
-      </Form>
+        <div className="flex justify-end pt-4">
+          <Button
+            type="submit"
+            disabled={isPending || !roles || rolesError}
+            className="min-w-[100px]"
+          >
+            {isPending ? (
+              <BarLoader
+                cssOverride={{ borderRadius: 60 }}
+                width={60}
+                color="#ffffff"
+              />
+            ) : (
+              t('updateButton')
+            )}
+          </Button>
+        </div>
+      </form>
     </div>
   );
 };

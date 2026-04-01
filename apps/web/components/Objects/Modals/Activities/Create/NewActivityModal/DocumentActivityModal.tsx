@@ -1,12 +1,12 @@
 'use client';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Field, FieldError, FieldLabel } from '@/components/ui/field';
+import { Controller, FormProvider, useForm } from 'react-hook-form';
 import { BarLoader } from '@components/Objects/Loaders/BarLoader';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { constructAcceptValue } from '@/lib/constants';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useTranslations } from 'next-intl';
-import { useForm } from 'react-hook-form';
 import { useTransition } from 'react';
 import * as v from 'valibot';
 
@@ -57,65 +57,63 @@ const DocumentPdfModal = ({ submitFileActivity, chapterId, course }: any) => {
   };
 
   return (
-    <Form {...form}>
+    <FormProvider {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
         className="space-y-4"
       >
-        <FormField
+        <Controller
           control={form.control}
           name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t('pdfDocumentName')}</FormLabel>
-              <FormControl>
-                <Input
-                  {...field}
-                  type="text"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
+          render={({ field, fieldState }) => (
+            <Field>
+              <FieldLabel htmlFor={field.name}>{t('pdfDocumentName')}</FieldLabel>
+              <Input
+                id={field.name}
+                type="text"
+                {...field}
+              />
+              <FieldError errors={[fieldState.error]} />
+            </Field>
           )}
         />
 
-        <FormField
+        <Controller
           control={form.control}
           name="file"
-          render={({ field: { onChange, value, ...field } }) => (
-            <FormItem>
-              <FormLabel>{t('pdfDocumentFile')}</FormLabel>
-              <FormControl>
-                <div className="relative">
-                  <input
-                    {...field}
-                    type="file"
-                    accept={SUPPORTED_FILES}
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        onChange(file);
-                      }
-                    }}
-                    className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
-                    aria-label={t('ariaLabel')}
-                  />
-                  <div className="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full cursor-pointer items-center justify-between rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50">
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="-ml-3"
-                      onClick={() => {}}
-                    >
-                      {t('selectFile')}
-                    </Button>
-                    <span className="text-muted-foreground">{value ? value.name : t('noFileSelected')}</span>
-                  </div>
+          render={({ field: { onChange, value, ...field }, fieldState }) => (
+            <Field>
+              <FieldLabel htmlFor={field.name}>{t('pdfDocumentFile')}</FieldLabel>
+              <div className="relative">
+                <input
+                  {...field}
+                  id={field.name}
+                  type="file"
+                  accept={SUPPORTED_FILES}
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      onChange(file);
+                    }
+                  }}
+                  className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+                  aria-label={t('ariaLabel')}
+                />
+                <div className="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full cursor-pointer items-center justify-between rounded-md border px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="-ml-3"
+                    onClick={() => {}}
+                  >
+                    {t('selectFile')}
+                  </Button>
+                  <span className="text-muted-foreground">{value ? value.name : t('noFileSelected')}</span>
                 </div>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
+              </div>
+              <FieldError errors={[fieldState.error]} />
+            </Field>
           )}
         />
 
@@ -137,7 +135,7 @@ const DocumentPdfModal = ({ submitFileActivity, chapterId, course }: any) => {
           </Button>
         </div>
       </form>
-    </Form>
+    </FormProvider>
   );
 };
 

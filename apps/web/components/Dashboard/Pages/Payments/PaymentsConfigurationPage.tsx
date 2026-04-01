@@ -31,18 +31,18 @@ import {
   Trash2,
   UnplugIcon,
 } from 'lucide-react';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { useEffect, useEffectEvent, useRef, useState, useTransition } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@components/ui/alert';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
+import { Field, FieldError, FieldLabel } from '@components/ui/field';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { SiStripe } from '@icons-pack/react-simple-icons';
 import { getAbsoluteUrl } from '@services/config/config';
+import { Controller, useForm } from 'react-hook-form';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
-import { useForm } from 'react-hook-form';
 import useSWR, { mutate } from 'swr';
 import type { FC } from 'react';
 import { toast } from 'sonner';
@@ -406,39 +406,36 @@ const EditStripeConfigModal: FC<EditStripeConfigModalProps> = ({ configId, acces
       dialogDescription={t('editModalDescription')}
       onOpenChange={onClose}
       dialogContent={
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(handleSubmit)}
-            className="space-y-4"
-          >
-            <FormField
-              control={form.control}
-              name="stripeAccountId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('stripeAccountIdLabel')}</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="text"
-                      placeholder="acct_..."
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <div className="flex justify-end pt-4">
-              <Button
-                type="submit"
-                className="rounded-lg bg-primary px-4 py-2 text-primary-foreground transition duration-300 hover:bg-primary/90"
-                disabled={form.formState.isSubmitting}
-              >
-                {form.formState.isSubmitting ? t('saving') : t('saveButton')}
-              </Button>
-            </div>
-          </form>
-        </Form>
+        <form
+          onSubmit={form.handleSubmit(handleSubmit)}
+          className="space-y-4"
+        >
+          <Controller
+            control={form.control}
+            name="stripeAccountId"
+            render={({ field, fieldState }) => (
+              <Field>
+                <FieldLabel htmlFor={field.name}>{t('stripeAccountIdLabel')}</FieldLabel>
+                <Input
+                  id={field.name}
+                  type="text"
+                  placeholder="acct_..."
+                  {...field}
+                />
+                <FieldError errors={[fieldState.error]} />
+              </Field>
+            )}
+          />
+          <div className="flex justify-end pt-4">
+            <Button
+              type="submit"
+              className="rounded-lg bg-primary px-4 py-2 text-primary-foreground transition duration-300 hover:bg-primary/90"
+              disabled={form.formState.isSubmitting}
+            >
+              {form.formState.isSubmitting ? t('saving') : t('saveButton')}
+            </Button>
+          </div>
+        </form>
       }
     />
   );

@@ -21,8 +21,8 @@ import {
   Users,
 } from 'lucide-react';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@components/ui/form';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
+import { Field, FieldError, FieldLabel } from '@components/ui/field';
 import { getUser, updateUserAvatar } from '@services/users/users';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { updateProfile } from '@services/settings/profile';
@@ -30,6 +30,7 @@ import { useDebouncedCallback } from '@/hooks/useDebounce';
 import { getAbsoluteUrl } from '@services/config/config';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { constructAcceptValue } from '@/lib/constants';
+import { Controller, useForm } from 'react-hook-form';
 import type { ChangeEvent, ElementType } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 import { Textarea } from '@components/ui/textarea';
@@ -41,7 +42,6 @@ import { Input } from '@components/ui/input';
 import type { Locale } from '@/i18n/config';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
 import { signOut } from 'next-auth/react';
 import { toast } from 'sonner';
 import * as v from 'valibot';
@@ -304,117 +304,111 @@ const UserEditForm = ({ form, profilePicture }: UserEditFormProps) => {
         <div className="mx-5 my-5 mt-0 flex flex-col gap-8 lg:flex-row">
           {/* Profile Information Section */}
           <div className="min-w-0 flex-1 space-y-4">
-            <FormField
+            <Controller
               control={form.control}
               name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('email')}</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="email"
-                      placeholder={t('emailPlaceholder')}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
+              render={({ field, fieldState }) => (
+                <Field>
+                  <FieldLabel htmlFor={field.name}>{t('email')}</FieldLabel>
+                  <Input
+                    id={field.name}
+                    type="email"
+                    placeholder={t('emailPlaceholder')}
+                    {...field}
+                  />
+                  <FieldError errors={[fieldState.error]} />
                   <div className="mt-2 flex items-center space-x-2 rounded-md bg-amber-50 p-2 text-amber-600">
                     <AlertTriangle size={16} />
                     <span className="text-sm">{t('emailChangeWarning')}</span>
                   </div>
-                </FormItem>
+                </Field>
               )}
             />
 
-            <FormField
+            <Controller
               control={form.control}
               name="username"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('username')}</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder={t('usernamePlaceholder')}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
+              render={({ field, fieldState }) => (
+                <Field>
+                  <FieldLabel htmlFor={field.name}>{t('username')}</FieldLabel>
+                  <Input
+                    id={field.name}
+                    placeholder={t('usernamePlaceholder')}
+                    {...field}
+                  />
+                  <FieldError errors={[fieldState.error]} />
+                </Field>
               )}
             />
 
-            <FormField
+            <Controller
               control={form.control}
               name="first_name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('firstName')}</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder={t('firstNamePlaceholder')}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
+              render={({ field, fieldState }) => (
+                <Field>
+                  <FieldLabel htmlFor={field.name}>{t('firstName')}</FieldLabel>
+                  <Input
+                    id={field.name}
+                    placeholder={t('firstNamePlaceholder')}
+                    {...field}
+                  />
+                  <FieldError errors={[fieldState.error]} />
+                </Field>
               )}
             />
 
-            <FormField
+            <Controller
               control={form.control}
               name="middle_name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('middleName')}</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder={t('middleNamePlaceholder')}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
+              render={({ field, fieldState }) => (
+                <Field>
+                  <FieldLabel htmlFor={field.name}>{t('middleName')}</FieldLabel>
+                  <Input
+                    id={field.name}
+                    placeholder={t('middleNamePlaceholder')}
+                    {...field}
+                  />
+                  <FieldError errors={[fieldState.error]} />
+                </Field>
               )}
             />
 
-            <FormField
+            <Controller
               control={form.control}
               name="last_name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>{t('lastName')}</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder={t('lastNamePlaceholder')}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
+              render={({ field, fieldState }) => (
+                <Field>
+                  <FieldLabel htmlFor={field.name}>{t('lastName')}</FieldLabel>
+                  <Input
+                    id={field.name}
+                    placeholder={t('lastNamePlaceholder')}
+                    {...field}
+                  />
+                  <FieldError errors={[fieldState.error]} />
+                </Field>
               )}
             />
 
-            <FormField
+            <Controller
               control={form.control}
               name="bio"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>
+              render={({ field, fieldState }) => (
+                <Field>
+                  <FieldLabel htmlFor={field.name}>
                     {t('bio')}
                     <span className="text-sm text-gray-500">
                       ({400 - (field.value?.length || 0)} {t('charactersLeft')})
                     </span>
-                  </FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder={t('bioPlaceholder')}
-                      className="min-h-[150px]"
-                      maxLength={400}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
+                  </FieldLabel>
+                  <Textarea
+                    id={field.name}
+                    placeholder={t('bioPlaceholder')}
+                    className="min-h-[150px]"
+                    maxLength={400}
+                    {...field}
+                  />
+                  <FieldError errors={[fieldState.error]} />
+                </Field>
               )}
             />
 
@@ -773,20 +767,18 @@ const UserEditGeneral = () => {
 
   return (
     <div className="soft-shadow mx-0 rounded-xl bg-white sm:mx-10">
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
-          <UserEditForm
-            form={form}
-            profilePicture={{
-              error,
-              success,
-              isLoading,
-              localAvatar,
-              handleFileChange,
-            }}
-          />
-        </form>
-      </Form>
+      <form onSubmit={form.handleSubmit(onSubmit)}>
+        <UserEditForm
+          form={form}
+          profilePicture={{
+            error,
+            success,
+            isLoading,
+            localAvatar,
+            handleFileChange,
+          }}
+        />
+      </form>
     </div>
   );
 };

@@ -2,12 +2,13 @@
 
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { createCertification, deleteCertification, updateCertification } from '@services/courses/certifications';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Controller, FormProvider, useForm, useWatch } from 'react-hook-form';
 import { SectionHeader } from '@components/Dashboard/Courses/SectionHeader';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { AlertTriangle, Award, FileText, Sparkles } from 'lucide-react';
+import { Field, FieldError, FieldLabel } from '@/components/ui/field';
 import { useSyncDirtySection } from '@/hooks/useSyncDirtySection';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -17,7 +18,6 @@ import { useSaveSection } from '@/hooks/useSaveSection';
 import { Separator } from '@/components/ui/separator';
 import CertificatePreview from './CertificatePreview';
 import { Textarea } from '@/components/ui/textarea';
-import { useForm, useWatch } from 'react-hook-form';
 import { Spinner } from '@components/ui/spinner';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
@@ -339,7 +339,7 @@ const EditCourseCertification = () => {
             )}
 
             {isEnabled && (
-              <Form {...form}>
+              <FormProvider {...form}>
                 <form className="space-y-8">
                   <div className="grid gap-8 lg:grid-cols-5">
                     {/* Configuration */}
@@ -354,39 +354,36 @@ const EditCourseCertification = () => {
                         <Separator />
 
                         <div className="grid gap-4 sm:grid-cols-2">
-                          <FormField
+                          <Controller
                             control={form.control}
                             name="certification_name"
-                            render={({ field }) => (
-                              <FormItem className="sm:col-span-2">
-                                <FormLabel>{t('certificationName')}</FormLabel>
-                                <FormControl>
-                                  <Input
-                                    {...field}
-                                    placeholder={t('certificationNamePlaceholder')}
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
+                            render={({ field, fieldState }) => (
+                              <Field className="sm:col-span-2">
+                                <FieldLabel htmlFor={field.name}>{t('certificationName')}</FieldLabel>
+                                <Input
+                                  id={field.name}
+                                  {...field}
+                                  placeholder={t('certificationNamePlaceholder')}
+                                />
+                                <FieldError errors={[fieldState.error]} />
+                              </Field>
                             )}
                           />
 
-                          <FormField
+                          <Controller
                             control={form.control}
                             name="certification_type"
-                            render={({ field }) => (
-                              <FormItem className="sm:col-span-2">
-                                <FormLabel>{t('certificationType')}</FormLabel>
+                            render={({ field, fieldState }) => (
+                              <Field className="sm:col-span-2">
+                                <FieldLabel>{t('certificationType')}</FieldLabel>
                                 <Select
                                   value={field.value}
                                   onValueChange={field.onChange}
                                   items={certificationTypeItems}
                                 >
-                                  <FormControl>
-                                    <SelectTrigger>
-                                      <SelectValue>{t(`certificationTypes.${field.value}`)}</SelectValue>
-                                    </SelectTrigger>
-                                  </FormControl>
+                                  <SelectTrigger>
+                                    <SelectValue>{t(`certificationTypes.${field.value}`)}</SelectValue>
+                                  </SelectTrigger>
                                   <SelectContent>
                                     <SelectGroup>
                                       {certificationTypeItems.map((item) => (
@@ -400,26 +397,25 @@ const EditCourseCertification = () => {
                                     </SelectGroup>
                                   </SelectContent>
                                 </Select>
-                                <FormMessage />
-                              </FormItem>
+                                <FieldError errors={[fieldState.error]} />
+                              </Field>
                             )}
                           />
 
-                          <FormField
+                          <Controller
                             control={form.control}
                             name="certification_description"
-                            render={({ field }) => (
-                              <FormItem className="sm:col-span-2">
-                                <FormLabel>{t('certificationDescription')}</FormLabel>
-                                <FormControl>
-                                  <Textarea
-                                    {...field}
-                                    placeholder={t('certificationDescriptionPlaceholder')}
-                                    className="min-h-[120px] resize-none"
-                                  />
-                                </FormControl>
-                                <FormMessage />
-                              </FormItem>
+                            render={({ field, fieldState }) => (
+                              <Field className="sm:col-span-2">
+                                <FieldLabel htmlFor={field.name}>{t('certificationDescription')}</FieldLabel>
+                                <Textarea
+                                  id={field.name}
+                                  {...field}
+                                  placeholder={t('certificationDescriptionPlaceholder')}
+                                  className="min-h-[120px] resize-none"
+                                />
+                                <FieldError errors={[fieldState.error]} />
+                              </Field>
                             )}
                           />
                         </div>
@@ -434,66 +430,63 @@ const EditCourseCertification = () => {
                         <p className="text-muted-foreground text-sm">{t('certificateDesignDesc')}</p>
                         <Separator />
 
-                        <FormField
+                        <Controller
                           control={form.control}
                           name="certificate_pattern"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>{t('certificatePattern')}</FormLabel>
-                              <FormControl>
-                                <RadioGroup
-                                  value={field.value}
-                                  onValueChange={field.onChange}
-                                  className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5"
-                                >
-                                  {CERTIFICATE_PATTERNS.map((pattern) => (
-                                    <Label
-                                      key={pattern.value}
-                                      htmlFor={`pattern-${pattern.value}`}
-                                      className={`hover:border-primary/50 relative flex cursor-pointer flex-col items-center gap-2 rounded-lg border-2 p-4 transition-all ${
-                                        field.value === pattern.value ? 'border-primary bg-primary/5' : 'border-border'
-                                      }`}
-                                    >
-                                      <RadioGroupItem
-                                        value={pattern.value}
-                                        id={`pattern-${pattern.value}`}
-                                        className="sr-only"
-                                      />
-                                      <span className="text-2xl">{pattern.icon}</span>
-                                      <span className="text-xs font-medium">
-                                        {t(`certificatePatterns.${pattern.value}`)}
-                                      </span>
-                                      {field.value === pattern.value && (
-                                        <Badge
-                                          variant="secondary"
-                                          className="absolute -top-2 -right-2"
-                                        >
-                                          ✓
-                                        </Badge>
-                                      )}
-                                    </Label>
-                                  ))}
-                                </RadioGroup>
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
+                          render={({ field, fieldState }) => (
+                            <Field>
+                              <FieldLabel>{t('certificatePattern')}</FieldLabel>
+                              <RadioGroup
+                                value={field.value}
+                                onValueChange={field.onChange}
+                                className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5"
+                              >
+                                {CERTIFICATE_PATTERNS.map((pattern) => (
+                                  <Label
+                                    key={pattern.value}
+                                    htmlFor={`pattern-${pattern.value}`}
+                                    className={`hover:border-primary/50 relative flex cursor-pointer flex-col items-center gap-2 rounded-lg border-2 p-4 transition-all ${
+                                      field.value === pattern.value ? 'border-primary bg-primary/5' : 'border-border'
+                                    }`}
+                                  >
+                                    <RadioGroupItem
+                                      value={pattern.value}
+                                      id={`pattern-${pattern.value}`}
+                                      className="sr-only"
+                                    />
+                                    <span className="text-2xl">{pattern.icon}</span>
+                                    <span className="text-xs font-medium">
+                                      {t(`certificatePatterns.${pattern.value}`)}
+                                    </span>
+                                    {field.value === pattern.value && (
+                                      <Badge
+                                        variant="secondary"
+                                        className="absolute -top-2 -right-2"
+                                      >
+                                        ✓
+                                      </Badge>
+                                    )}
+                                  </Label>
+                                ))}
+                              </RadioGroup>
+                              <FieldError errors={[fieldState.error]} />
+                            </Field>
                           )}
                         />
 
-                        <FormField
+                        <Controller
                           control={form.control}
                           name="certificate_instructor"
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>{t('certificateInstructor')}</FormLabel>
-                              <FormControl>
-                                <Input
-                                  {...field}
-                                  placeholder={t('certificateInstructorPlaceholder')}
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
+                          render={({ field, fieldState }) => (
+                            <Field>
+                              <FieldLabel htmlFor={field.name}>{t('certificateInstructor')}</FieldLabel>
+                              <Input
+                                id={field.name}
+                                {...field}
+                                placeholder={t('certificateInstructorPlaceholder')}
+                              />
+                              <FieldError errors={[fieldState.error]} />
+                            </Field>
                           )}
                         />
                       </div>
@@ -524,7 +517,7 @@ const EditCourseCertification = () => {
                     </div>
                   </div>
                 </form>
-              </Form>
+              </FormProvider>
             )}
 
             {!isEnabled && (

@@ -1,9 +1,10 @@
 'use client';
 
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Field, FieldDescription, FieldLabel } from '@/components/ui/field';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Controller, FormProvider, useForm } from 'react-hook-form';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { swrFetcher } from '@services/utils/ts/requests';
 import WhitelistManagement from './WhitelistManagement';
@@ -15,7 +16,6 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { useTranslations } from 'next-intl';
-import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import * as v from 'valibot';
 import useSWR from 'swr';
@@ -194,6 +194,7 @@ export default function ExamSettings({ exam, courseUuid, accessToken, onSettings
     { value: 'WHITELIST', label: t('accessModeWhitelist') },
     { value: 'ALL_ENROLLED', label: t('accessModeAllEnrolled') },
   ];
+
   return (
     <Card>
       <CardHeader>
@@ -201,7 +202,7 @@ export default function ExamSettings({ exam, courseUuid, accessToken, onSettings
         <CardDescription>{t('configureExamBehavior')}</CardDescription>
       </CardHeader>
       <CardContent>
-        <Form {...form}>
+        <FormProvider {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
             className="space-y-8"
@@ -228,24 +229,23 @@ export default function ExamSettings({ exam, courseUuid, accessToken, onSettings
                 </div>
 
                 {hasTimeLimit && (
-                  <FormField
+                  <Controller
                     control={form.control}
                     name="time_limit"
                     render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t('timeLimitMinutes')}</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            min={limits?.time_limit?.min ?? 1}
-                            max={limits?.time_limit?.max ?? 180}
-                            {...field}
-                            value={field.value || ''}
-                            onChange={(e) => field.onChange(e.target.value ? Number.parseInt(e.target.value) : null)}
-                          />
-                        </FormControl>
-                        <FormDescription>{t('timeLimitMinutesDescription')}</FormDescription>
-                      </FormItem>
+                      <Field>
+                        <FieldLabel htmlFor={field.name}>{t('timeLimitMinutes')}</FieldLabel>
+                        <Input
+                          id={field.name}
+                          type="number"
+                          min={limits?.time_limit?.min ?? 1}
+                          max={limits?.time_limit?.max ?? 180}
+                          {...field}
+                          value={field.value || ''}
+                          onChange={(e) => field.onChange(e.target.value ? Number.parseInt(e.target.value) : null)}
+                        />
+                        <FieldDescription>{t('timeLimitMinutesDescription')}</FieldDescription>
+                      </Field>
                     )}
                   />
                 )}
@@ -264,24 +264,23 @@ export default function ExamSettings({ exam, courseUuid, accessToken, onSettings
                 </div>
 
                 {hasAttemptLimit && (
-                  <FormField
+                  <Controller
                     control={form.control}
                     name="attempt_limit"
                     render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t('attemptLimit')}</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            min={limits?.attempt_limit?.min ?? 1}
-                            max={limits?.attempt_limit?.max ?? 5}
-                            {...field}
-                            value={field.value || ''}
-                            onChange={(e) => field.onChange(e.target.value ? Number.parseInt(e.target.value) : null)}
-                          />
-                        </FormControl>
-                        <FormDescription>{t('attemptLimitInputDescription')}</FormDescription>
-                      </FormItem>
+                      <Field>
+                        <FieldLabel htmlFor={field.name}>{t('attemptLimit')}</FieldLabel>
+                        <Input
+                          id={field.name}
+                          type="number"
+                          min={limits?.attempt_limit?.min ?? 1}
+                          max={limits?.attempt_limit?.max ?? 5}
+                          {...field}
+                          value={field.value || ''}
+                          onChange={(e) => field.onChange(e.target.value ? Number.parseInt(e.target.value) : null)}
+                        />
+                        <FieldDescription>{t('attemptLimitInputDescription')}</FieldDescription>
+                      </Field>
                     )}
                   />
                 )}
@@ -298,22 +297,23 @@ export default function ExamSettings({ exam, courseUuid, accessToken, onSettings
               </div>
 
               <div className="space-y-4">
-                <FormField
+                <Controller
                   control={form.control}
                   name="shuffle_questions"
                   render={({ field }) => (
-                    <FormItem className="flex items-center justify-between rounded-lg border p-4">
+                    <Field
+                      orientation="horizontal"
+                      className="justify-between rounded-lg border p-4"
+                    >
                       <div className="space-y-0.5">
-                        <FormLabel>{t('shuffleQuestions')}</FormLabel>
-                        <FormDescription>{t('shuffleQuestionsDescription')}</FormDescription>
+                        <FieldLabel>{t('shuffleQuestions')}</FieldLabel>
+                        <FieldDescription>{t('shuffleQuestionsDescription')}</FieldDescription>
                       </div>
-                      <FormControl>
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                    </FormItem>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </Field>
                   )}
                 />
 
@@ -342,23 +342,22 @@ export default function ExamSettings({ exam, courseUuid, accessToken, onSettings
                 </div>
 
                 {hasQuestionLimit && (
-                  <FormField
+                  <Controller
                     control={form.control}
                     name="question_limit"
                     render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t('questionLimit')}</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            min={limits?.question_limit?.min ?? 1}
-                            {...field}
-                            value={field.value || ''}
-                            onChange={(e) => field.onChange(e.target.value ? Number.parseInt(e.target.value) : null)}
-                          />
-                        </FormControl>
-                        <FormDescription>{t('questionLimitInputDescription')}</FormDescription>
-                      </FormItem>
+                      <Field>
+                        <FieldLabel htmlFor={field.name}>{t('questionLimit')}</FieldLabel>
+                        <Input
+                          id={field.name}
+                          type="number"
+                          min={limits?.question_limit?.min ?? 1}
+                          {...field}
+                          value={field.value || ''}
+                          onChange={(e) => field.onChange(e.target.value ? Number.parseInt(e.target.value) : null)}
+                        />
+                        <FieldDescription>{t('questionLimitInputDescription')}</FieldDescription>
+                      </Field>
                     )}
                   />
                 )}
@@ -374,22 +373,20 @@ export default function ExamSettings({ exam, courseUuid, accessToken, onSettings
                 <p className="text-muted-foreground text-sm">{t('accessControlDescription')}</p>
               </div>
 
-              <FormField
+              <Controller
                 control={form.control}
                 name="access_mode"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t('accessMode')}</FormLabel>
+                  <Field>
+                    <FieldLabel>{t('accessMode')}</FieldLabel>
                     <Select
                       onValueChange={field.onChange}
                       value={field.value ?? 'NO_ACCESS'}
                       items={accessModes}
                     >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder={t('selectAccessMode')} />
-                        </SelectTrigger>
-                      </FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder={t('selectAccessMode')} />
+                      </SelectTrigger>
                       <SelectContent>
                         <SelectGroup>
                           {accessModes.map((item) => (
@@ -403,8 +400,8 @@ export default function ExamSettings({ exam, courseUuid, accessToken, onSettings
                         </SelectGroup>
                       </SelectContent>
                     </Select>
-                    <FormDescription>{t('accessModeDescription')}</FormDescription>
-                  </FormItem>
+                    <FieldDescription>{t('accessModeDescription')}</FieldDescription>
+                  </Field>
                 )}
               />
 
@@ -438,42 +435,44 @@ export default function ExamSettings({ exam, courseUuid, accessToken, onSettings
               </div>
 
               <div className="space-y-4">
-                <FormField
+                <Controller
                   control={form.control}
                   name="allow_result_review"
                   render={({ field }) => (
-                    <FormItem className="flex items-center justify-between rounded-lg border p-4">
+                    <Field
+                      orientation="horizontal"
+                      className="justify-between rounded-lg border p-4"
+                    >
                       <div className="space-y-0.5">
-                        <FormLabel>{t('allowResultReview')}</FormLabel>
-                        <FormDescription>{t('allowResultReviewDescription')}</FormDescription>
+                        <FieldLabel>{t('allowResultReview')}</FieldLabel>
+                        <FieldDescription>{t('allowResultReviewDescription')}</FieldDescription>
                       </div>
-                      <FormControl>
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                    </FormItem>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </Field>
                   )}
                 />
 
                 {form.watch('allow_result_review') && (
-                  <FormField
+                  <Controller
                     control={form.control}
                     name="show_correct_answers"
                     render={({ field }) => (
-                      <FormItem className="ml-6 flex items-center justify-between rounded-lg border p-4">
+                      <Field
+                        orientation="horizontal"
+                        className="ml-6 justify-between rounded-lg border p-4"
+                      >
                         <div className="space-y-0.5">
-                          <FormLabel>{t('showCorrectAnswers')}</FormLabel>
-                          <FormDescription>{t('showCorrectAnswersDescription')}</FormDescription>
+                          <FieldLabel>{t('showCorrectAnswers')}</FieldLabel>
+                          <FieldDescription>{t('showCorrectAnswersDescription')}</FieldDescription>
                         </div>
-                        <FormControl>
-                          <Switch
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
-                        </FormControl>
-                      </FormItem>
+                        <Switch
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </Field>
                     )}
                   />
                 )}
@@ -490,98 +489,103 @@ export default function ExamSettings({ exam, courseUuid, accessToken, onSettings
               </div>
 
               <div className="space-y-4">
-                <FormField
+                <Controller
                   control={form.control}
                   name="copy_paste_protection"
                   render={({ field }) => (
-                    <FormItem className="flex items-center justify-between rounded-lg border p-4">
+                    <Field
+                      orientation="horizontal"
+                      className="justify-between rounded-lg border p-4"
+                    >
                       <div className="space-y-0.5">
-                        <FormLabel>{t('copyPasteProtection')}</FormLabel>
-                        <FormDescription>{t('copyPasteProtectionDescription')}</FormDescription>
+                        <FieldLabel>{t('copyPasteProtection')}</FieldLabel>
+                        <FieldDescription>{t('copyPasteProtectionDescription')}</FieldDescription>
                       </div>
-                      <FormControl>
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                    </FormItem>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </Field>
                   )}
                 />
 
-                <FormField
+                <Controller
                   control={form.control}
                   name="tab_switch_detection"
                   render={({ field }) => (
-                    <FormItem className="flex items-center justify-between rounded-lg border p-4">
+                    <Field
+                      orientation="horizontal"
+                      className="justify-between rounded-lg border p-4"
+                    >
                       <div className="space-y-0.5">
-                        <FormLabel>{t('tabSwitchDetection')}</FormLabel>
-                        <FormDescription>{t('tabSwitchDetectionDescription')}</FormDescription>
+                        <FieldLabel>{t('tabSwitchDetection')}</FieldLabel>
+                        <FieldDescription>{t('tabSwitchDetectionDescription')}</FieldDescription>
                       </div>
-                      <FormControl>
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                    </FormItem>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </Field>
                   )}
                 />
 
-                <FormField
+                <Controller
                   control={form.control}
                   name="devtools_detection"
                   render={({ field }) => (
-                    <FormItem className="flex items-center justify-between rounded-lg border p-4">
+                    <Field
+                      orientation="horizontal"
+                      className="justify-between rounded-lg border p-4"
+                    >
                       <div className="space-y-0.5">
-                        <FormLabel>{t('devtoolsDetection')}</FormLabel>
-                        <FormDescription>{t('devtoolsDetectionDescription')}</FormDescription>
+                        <FieldLabel>{t('devtoolsDetection')}</FieldLabel>
+                        <FieldDescription>{t('devtoolsDetectionDescription')}</FieldDescription>
                       </div>
-                      <FormControl>
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                    </FormItem>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </Field>
                   )}
                 />
 
-                <FormField
+                <Controller
                   control={form.control}
                   name="right_click_disable"
                   render={({ field }) => (
-                    <FormItem className="flex items-center justify-between rounded-lg border p-4">
+                    <Field
+                      orientation="horizontal"
+                      className="justify-between rounded-lg border p-4"
+                    >
                       <div className="space-y-0.5">
-                        <FormLabel>{t('rightClickDisable')}</FormLabel>
-                        <FormDescription>{t('rightClickDisableDescription')}</FormDescription>
+                        <FieldLabel>{t('rightClickDisable')}</FieldLabel>
+                        <FieldDescription>{t('rightClickDisableDescription')}</FieldDescription>
                       </div>
-                      <FormControl>
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                    </FormItem>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </Field>
                   )}
                 />
 
-                <FormField
+                <Controller
                   control={form.control}
                   name="fullscreen_enforcement"
                   render={({ field }) => (
-                    <FormItem className="flex items-center justify-between rounded-lg border p-4">
+                    <Field
+                      orientation="horizontal"
+                      className="justify-between rounded-lg border p-4"
+                    >
                       <div className="space-y-0.5">
-                        <FormLabel>{t('fullscreenEnforcement')}</FormLabel>
-                        <FormDescription>{t('fullscreenEnforcementDescription')}</FormDescription>
+                        <FieldLabel>{t('fullscreenEnforcement')}</FieldLabel>
+                        <FieldDescription>{t('fullscreenEnforcementDescription')}</FieldDescription>
                       </div>
-                      <FormControl>
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                    </FormItem>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </Field>
                   )}
                 />
 
@@ -601,26 +605,23 @@ export default function ExamSettings({ exam, courseUuid, accessToken, onSettings
                     </div>
 
                     {hasViolationThreshold && (
-                      <FormField
+                      <Controller
                         control={form.control}
                         name="violation_threshold"
                         render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>{t('violationThreshold')}</FormLabel>
-                            <FormControl>
-                              <Input
-                                type="number"
-                                min={limits?.violation_threshold?.min ?? 1}
-                                max={limits?.violation_threshold?.max ?? 10}
-                                {...field}
-                                value={field.value || ''}
-                                onChange={(e) =>
-                                  field.onChange(e.target.value ? Number.parseInt(e.target.value) : null)
-                                }
-                              />
-                            </FormControl>
-                            <FormDescription>{t('violationThresholdInputDescription')}</FormDescription>
-                          </FormItem>
+                          <Field>
+                            <FieldLabel htmlFor={field.name}>{t('violationThreshold')}</FieldLabel>
+                            <Input
+                              id={field.name}
+                              type="number"
+                              min={limits?.violation_threshold?.min ?? 1}
+                              max={limits?.violation_threshold?.max ?? 10}
+                              {...field}
+                              value={field.value || ''}
+                              onChange={(e) => field.onChange(e.target.value ? Number.parseInt(e.target.value) : null)}
+                            />
+                            <FieldDescription>{t('violationThresholdInputDescription')}</FieldDescription>
+                          </Field>
                         )}
                       />
                     )}
@@ -644,7 +645,7 @@ export default function ExamSettings({ exam, courseUuid, accessToken, onSettings
               </Button>
             </div>
           </form>
-        </Form>
+        </FormProvider>
       </CardContent>
     </Card>
   );

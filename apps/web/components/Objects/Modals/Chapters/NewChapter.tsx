@@ -1,12 +1,12 @@
 'use client';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Field, FieldError, FieldLabel } from '@/components/ui/field';
+import { Controller, FormProvider, useForm } from 'react-hook-form';
 import { BarLoader } from '@components/Objects/Loaders/BarLoader';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useTranslations } from 'next-intl';
-import { useForm } from 'react-hook-form';
 import { useTransition } from 'react';
 import * as v from 'valibot';
 
@@ -52,39 +52,39 @@ const NewChapterModal = ({ submitChapter, closeModal, course }: any) => {
   };
 
   return (
-    <Form {...form}>
+    <FormProvider {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
         className="space-y-4"
       >
-        <FormField
+        <Controller
           control={form.control}
           name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t('chapterName')}</FormLabel>
-              <FormControl>
-                <Input
-                  {...field}
-                  type="text"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
+          render={({ field, fieldState }) => (
+            <Field>
+              <FieldLabel htmlFor={field.name}>{t('chapterName')}</FieldLabel>
+              <Input
+                id={field.name}
+                type="text"
+                {...field}
+              />
+              <FieldError errors={[fieldState.error]} />
+            </Field>
           )}
         />
 
-        <FormField
+        <Controller
           control={form.control}
           name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t('chapterDescription')}</FormLabel>
-              <FormControl>
-                <Textarea {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
+          render={({ field, fieldState }) => (
+            <Field>
+              <FieldLabel htmlFor={field.name}>{t('chapterDescription')}</FieldLabel>
+              <Textarea
+                id={field.name}
+                {...field}
+              />
+              <FieldError errors={[fieldState.error]} />
+            </Field>
           )}
         />
 
@@ -106,7 +106,7 @@ const NewChapterModal = ({ submitChapter, closeModal, course }: any) => {
           </Button>
         </div>
       </form>
-    </Form>
+    </FormProvider>
   );
 };
 

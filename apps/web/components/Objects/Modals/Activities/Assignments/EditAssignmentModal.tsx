@@ -1,7 +1,8 @@
 'use client';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Field, FieldError, FieldLabel } from '@/components/ui/field';
+import { Controller, FormProvider, useForm } from 'react-hook-form';
 import { BarLoader } from '@components/Objects/Loaders/BarLoader';
 import { updateAssignment } from '@services/courses/assignments';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
@@ -15,7 +16,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useRef, useTransition } from 'react';
 import { CalendarIcon } from 'lucide-react';
-import { useForm } from 'react-hook-form';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import type { FC } from 'react';
@@ -128,48 +128,48 @@ const EditAssignmentForm: FC<EditAssignmentFormProps> = ({ onClose, assignment, 
   ];
 
   return (
-    <Form {...form}>
+    <FormProvider {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
         className="space-y-4"
       >
-        <FormField
+        <Controller
           control={form.control}
           name="title"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t('assignmentTitle')}</FormLabel>
-              <FormControl>
-                <Input
-                  {...field}
-                  type="text"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
+          render={({ field, fieldState }) => (
+            <Field>
+              <FieldLabel htmlFor={field.name}>{t('assignmentTitle')}</FieldLabel>
+              <Input
+                id={field.name}
+                type="text"
+                {...field}
+              />
+              <FieldError errors={[fieldState.error]} />
+            </Field>
           )}
         />
 
-        <FormField
+        <Controller
           control={form.control}
           name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t('assignmentDescription')}</FormLabel>
-              <FormControl>
-                <Textarea {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
+          render={({ field, fieldState }) => (
+            <Field>
+              <FieldLabel htmlFor={field.name}>{t('assignmentDescription')}</FieldLabel>
+              <Textarea
+                id={field.name}
+                {...field}
+              />
+              <FieldError errors={[fieldState.error]} />
+            </Field>
           )}
         />
 
-        <FormField
+        <Controller
           control={form.control}
           name="due_date"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t('dueDate')}</FormLabel>
+          render={({ field, fieldState }) => (
+            <Field>
+              <FieldLabel>{t('dueDate')}</FieldLabel>
               <Popover>
                 <PopoverTrigger
                   render={
@@ -213,27 +213,25 @@ const EditAssignmentForm: FC<EditAssignmentFormProps> = ({ onClose, assignment, 
                   />
                 </PopoverContent>
               </Popover>
-              <FormMessage />
-            </FormItem>
+              <FieldError errors={[fieldState.error]} />
+            </Field>
           )}
         />
 
-        <FormField
+        <Controller
           control={form.control}
           name="grading_type"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>{t('gradingType')}</FormLabel>
+          render={({ field, fieldState }) => (
+            <Field>
+              <FieldLabel>{t('gradingType')}</FieldLabel>
               <Select
                 onValueChange={field.onChange}
                 value={field.value}
                 items={gradingTypes}
               >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder={validationT('selectGradingType')} />
-                  </SelectTrigger>
-                </FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder={validationT('selectGradingType')} />
+                </SelectTrigger>
                 <SelectContent>
                   <SelectGroup>
                     {gradingTypes.map((item) => (
@@ -247,8 +245,8 @@ const EditAssignmentForm: FC<EditAssignmentFormProps> = ({ onClose, assignment, 
                   </SelectGroup>
                 </SelectContent>
               </Select>
-              <FormMessage />
-            </FormItem>
+              <FieldError errors={[fieldState.error]} />
+            </Field>
           )}
         />
 
@@ -276,7 +274,7 @@ const EditAssignmentForm: FC<EditAssignmentFormProps> = ({ onClose, assignment, 
           </Button>
         </div>
       </form>
-    </Form>
+    </FormProvider>
   );
 };
 
