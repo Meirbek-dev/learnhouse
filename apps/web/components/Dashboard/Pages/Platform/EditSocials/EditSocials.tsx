@@ -34,8 +34,20 @@ export default function EditSocials() {
   const platform = usePlatform() as any;
   const t = useTranslations('DashPage.PlatformSettings.Socials');
 
+  const socialDefaults = {
+    twitter: '',
+    facebook: '',
+    instagram: '',
+    linkedin: '',
+    youtube: '',
+    tiktok: '',
+  };
+
   const defaultValues = {
-    socials: platform?.socials || {},
+    socials: {
+      ...socialDefaults,
+      ...platform?.socials,
+    },
     links: platform?.links || {},
   };
 

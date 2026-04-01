@@ -3204,7 +3204,8 @@
       "Tasks": {
         "addTask": "Добавить задание",
         "addTaskModalDescription": "Создайте новое задание",
-        "addTaskModalTitle": "Добавить задание"
+        "addTaskModalTitle": "Добавить задание",
+        "openTask": "Открыть задание"
       },
       "addQuestion": "Добавить вопрос",
       "evaluate": "Оценить",
@@ -6548,7 +6549,16 @@
       "sortCompletion": "Завершение",
       "sortActiveLearners": "Активные учащиеся",
       "sortDifficulty": "Сложность",
-      "sortSignals": "Сигналы"
+      "sortSignals": "Сигналы",
+      "sectionAriaLabel": "Элементы управления фильтром аналитики",
+      "windowSelect": "Выберите период",
+      "compareSelect": "Выберите сравнение",
+      "bucketSelect": "Выберите шаг",
+      "courseSelect": "Выберите курс",
+      "cohortSelect": "Выберите когорту",
+      "timezoneSelect": "Выберите часовой пояс",
+      "sortBySelect": "Выберите поле сортировки",
+      "sortOrderSelect": "Выберите порядок сортировки"
     },
     "labels": {
       "bucket": {
@@ -6737,7 +6747,8 @@
       "viewAssessment": "Просмотр задания {title}",
       "healthy": "В норме",
       "searchPlaceholder": "Поиск по заданиям...",
-      "emptyMessage": "Нет проблемных заданий для текущего охвата."
+      "emptyMessage": "Нет проблемных заданий для текущего охвата.",
+      "rowCount": "{count} проблемных заданий"
     },
     "atRisk": {
       "defaultTitle": "Учащиеся в зоне риска",

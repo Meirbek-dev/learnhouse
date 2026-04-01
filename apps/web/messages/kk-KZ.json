@@ -3204,7 +3204,8 @@
       "Tasks": {
         "addTask": "Тапсырма қосу",
         "addTaskModalDescription": "Жаңа тапсырма жасаңыз",
-        "addTaskModalTitle": "Тапсырма қосу"
+        "addTaskModalTitle": "Тапсырма қосу",
+        "openTask": "Тапсырманы ашу"
       },
       "addQuestion": "Сұрақ қосу",
       "evaluate": "Бағалау",
@@ -6548,7 +6549,16 @@
       "sortCompletion": "Аяқтау",
       "sortActiveLearners": "Белсенді оқушылар",
       "sortDifficulty": "Қиындық",
-      "sortSignals": "Сигналдар"
+      "sortSignals": "Сигналдар",
+      "sectionAriaLabel": "Аналитика сүзгілерінің басқаруы",
+      "windowSelect": "Уақыт аралығын таңдаңыз",
+      "compareSelect": "Салыстыруды таңдаңыз",
+      "bucketSelect": "Шелекті таңдаңыз",
+      "courseSelect": "Курсты таңдаңыз",
+      "cohortSelect": "Когортаны таңдаңыз",
+      "timezoneSelect": "Уақыт белдеуін таңдаңыз",
+      "sortBySelect": "Сұрыптау өрісін таңдаңыз",
+      "sortOrderSelect": "Сұрыптау тәртібін таңдаңыз"
     },
     "labels": {
       "bucket": {
@@ -6737,7 +6747,8 @@
       "viewAssessment": "Бағалауды қарау {title}",
       "healthy": "Жақсы",
       "searchPlaceholder": "Бағалаулар бойынша іздеу...",
-      "emptyMessage": "Ағымдағы аумаққа сәйкес бағалау ауытқулары жоқ."
+      "emptyMessage": "Ағымдағы аумаққа сәйкес бағалау ауытқулары жоқ.",
+      "rowCount": "{count} бағалау ауытқулары"
     },
     "atRisk": {
       "defaultTitle": "Тәуекелдегі оқушылар",
@@ -6945,6 +6956,10 @@
     "mochaMousse": {
       "description": "Бай мокко және кремді реңктері бар кофеден шабыттанған жылы тақырып",
       "name": "Мокко мусс"
+    },
+    "dark": {
+      "description": "Қараңғы тақырып (әзірлеу кезеңінде)",
+      "name": "Қараңғы (бета)"
     },
     "darkBeta": {
       "description": "Түнгі уақытта ыңғайлы жұмысқа арналған терең контрасттар мен жұмсақ акценттері бар эксперименттік қараңғы тақырып",

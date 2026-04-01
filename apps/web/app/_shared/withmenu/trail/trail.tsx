@@ -14,6 +14,8 @@ import { useTranslations } from 'next-intl';
 import { BookOpen } from 'lucide-react';
 import useSWR from 'swr';
 
+const EMPTY_RECENT_TRANSACTIONS: any[] = [];
+
 const Trail = () => {
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
@@ -27,7 +29,7 @@ const Trail = () => {
   } = useSWR(TRAIL_KEY && access_token ? [TRAIL_KEY, access_token] : null, ([url, token]) => swrFetcher(url, token));
 
   const gamificationProfile = useGamificationStore((s) => s.profile);
-  const recentTransactions = useGamificationStore((s) => s.dashboard?.recent_transactions ?? []);
+  const recentTransactions = useGamificationStore((s) => s.dashboard?.recent_transactions ?? EMPTY_RECENT_TRANSACTIONS);
   const userRank = useGamificationStore((s) => s.dashboard?.user_rank);
   const isGamificationLoading = useGamificationStore((s) => s.isLoading);
   const gamificationData = {

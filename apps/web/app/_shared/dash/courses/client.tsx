@@ -82,7 +82,7 @@ const CoursesHome = ({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [searchInput, setSearchInput] = useState(searchQuery);
-  const viewMode = searchParams.get('view') === 'cards' ? 'cards' : 'table';
+  const viewMode = searchParams.get('view') === 'table' ? 'table' : 'cards';
   const { can } = usePermissions();
   const session = usePlatformSession();
   const accessToken = session?.data?.tokens?.access_token;

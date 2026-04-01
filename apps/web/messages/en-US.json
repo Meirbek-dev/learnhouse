@@ -3189,7 +3189,8 @@
       "Tasks": {
         "addTask": "Add Task",
         "addTaskModalDescription": "Create a new task for this assignment",
-        "addTaskModalTitle": "Add task to assignment"
+        "addTaskModalTitle": "Add task to assignment",
+        "openTask": "Open task"
       },
       "addQuestion": "Add Question",
       "evaluate": "Evaluate",
@@ -6533,7 +6534,16 @@
       "sortCompletion": "Completion",
       "sortActiveLearners": "Active learners",
       "sortDifficulty": "Difficulty",
-      "sortSignals": "Signals"
+      "sortSignals": "Signals",
+      "sectionAriaLabel": "Analytics filter controls",
+      "windowSelect": "Select analytics window",
+      "compareSelect": "Select comparison mode",
+      "bucketSelect": "Select bucket",
+      "courseSelect": "Select course",
+      "cohortSelect": "Select cohort",
+      "timezoneSelect": "Select timezone",
+      "sortBySelect": "Select sort field",
+      "sortOrderSelect": "Select sort order"
     },
     "labels": {
       "bucket": {
@@ -6712,7 +6722,8 @@
       "viewAssessment": "View assessment {title}",
       "healthy": "Healthy",
       "searchPlaceholder": "Search assessments...",
-      "emptyMessage": "No assessment outliers match the current scope."
+      "emptyMessage": "No assessment outliers match the current scope.",
+      "rowCount": "{count} assessment outliers"
     },
     "atRisk": {
       "defaultTitle": "At-risk learners",
@@ -6920,6 +6931,10 @@
     "mochaMousse": {
       "description": "Warm coffee-inspired theme with rich mocha and cream tones",
       "name": "Mocha Mousse"
+    },
+    "dark": {
+      "description": "Dark theme (in development)",
+      "name": "Dark (Beta)"
     },
     "darkBeta": {
       "description": "An experimental dark theme with deep contrasts and subtle accents designed for comfortable nighttime use",
