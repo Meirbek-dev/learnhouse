@@ -11,6 +11,7 @@ import {
   Trophy,
   UserPen,
 } from 'lucide-react';
+import type { components } from '@/lib/api/generated';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { useContributorStatus } from '@/hooks/useContributorStatus';
 import { getProductsByCourse } from '@services/payments/products';
@@ -33,6 +34,8 @@ import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { mutate } from 'swr';
+
+type PaymentsProductRead = components['schemas']['PaymentsProductRead'];
 
 interface CourseRun {
   status: string;
@@ -70,7 +73,7 @@ interface CourseActionsProps {
 const CoursesActions = ({ courseuuid, course, trailData }: CourseActionsProps) => {
   const router = useRouter();
   const session = usePlatformSession() as any;
-  const [linkedProducts, setLinkedProducts] = useState<any[]>([]);
+  const [linkedProducts, setLinkedProducts] = useState<PaymentsProductRead[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isActionLoading, setIsActionLoading] = useState(false);
   const [isContributeLoading, setIsContributeLoading] = useState(false);

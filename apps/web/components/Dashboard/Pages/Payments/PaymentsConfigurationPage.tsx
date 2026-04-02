@@ -125,7 +125,7 @@ const PaymentsConfigurationPage: FC = () => {
     const loadingToast = toast.loading(t('enablingStripe'));
     try {
       setIsOnboarding(true);
-      const newConfig = { provider: 'stripe', enabled: true };
+      const newConfig = { provider: 'stripe' as const, enabled: true };
       const _config = await initializePaymentConfig(newConfig, 'stripe', access_token);
       toast.success(t('stripeEnabledSuccess'), { id: loadingToast });
       mutate(['/payments/config', access_token]);
@@ -144,6 +144,10 @@ const PaymentsConfigurationPage: FC = () => {
   const deleteConfig = async () => {
     const loadingToast = toast.loading(t('deletingStripeConfig'));
     try {
+      if (!stripeConfig) {
+        throw new Error('Stripe config not found');
+      }
+
       await deletePaymentConfig(stripeConfig.id, access_token);
       toast.success(t('stripeConfigDeletedSuccess'), { id: loadingToast });
       mutate(['/payments/config', access_token]);
@@ -329,7 +333,7 @@ const PaymentsConfigurationPage: FC = () => {
 };
 
 interface EditStripeConfigModalProps {
-  configId: string;
+  configId: number;
   accessToken: string;
   isOpen: boolean;
   onClose: () => void;

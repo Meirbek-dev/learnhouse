@@ -2,7 +2,16 @@ from datetime import UTC, datetime, timezone
 from enum import Enum, StrEnum
 
 from pydantic import ConfigDict, field_validator, model_validator
-from sqlalchemy import JSON, BigInteger, Column, DateTime, ForeignKey, Integer, String, func
+from sqlalchemy import (
+    JSON,
+    BigInteger,
+    Column,
+    DateTime,
+    ForeignKey,
+    Integer,
+    String,
+    func,
+)
 from sqlmodel import Field
 
 from src.db.strict_base_model import SQLModelStrictBaseModel

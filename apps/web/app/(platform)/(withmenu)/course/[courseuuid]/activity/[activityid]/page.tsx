@@ -26,7 +26,7 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
   const activity = isCourseEnd ? null : await getActivityWithAuthHeader(activityid, undefined, access_token || null);
   const pageTitle = isCourseEnd
     ? t('courseEndTitle', { course: course_meta.name })
-    : t('activityTitle', { activity: activity.name, course: course_meta.name });
+    : t('activityTitle', { activity: activity?.name ?? '', course: course_meta.name });
 
   return {
     title: pageTitle,

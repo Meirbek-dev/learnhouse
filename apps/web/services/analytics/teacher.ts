@@ -1,14 +1,16 @@
 import type {
   AnalyticsQuery,
   AssessmentType,
-  AtRiskLearnersResponse,
-  TeacherAssessmentDetailResponse,
-  TeacherAssessmentListResponse,
-  TeacherCourseDetailResponse,
-  TeacherCourseListResponse,
-  TeacherOverviewResponse,
 } from '@/types/analytics';
+import type { components } from '@/lib/api/generated';
 import { getAPIUrl } from '@services/config/config';
+
+type TeacherOverviewResponse = components['schemas']['TeacherOverviewResponse'];
+type TeacherCourseListResponse = components['schemas']['TeacherCourseListResponse'];
+type TeacherCourseDetailResponse = components['schemas']['TeacherCourseDetailResponse'];
+type TeacherAssessmentListResponse = components['schemas']['TeacherAssessmentListResponse'];
+type TeacherAssessmentDetailResponse = components['schemas']['TeacherAssessmentDetailResponse'];
+type AtRiskLearnersResponse = components['schemas']['AtRiskLearnersResponse'];
 
 const buildQueryString = (query: AnalyticsQuery = {}) => {
   const params = new URLSearchParams();

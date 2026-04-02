@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, Query, Request
 from sqlmodel import Session
 
 from src.core.events.database import get_db_session
+from src.db.courses.courses import CourseRead
 from src.db.payments.payments import (
     PaymentsConfig,
     PaymentsConfigRead,
@@ -14,7 +15,9 @@ from src.db.payments.payments_products import (
     PaymentsProductRead,
     PaymentsProductUpdate,
 )
-from src.db.users import PublicUser
+from src.db.payments.payments_users import PaymentStatusEnum
+from src.db.strict_base_model import PydanticStrictBaseModel
+from src.db.users import PublicUser, UserRead
 from src.security.auth import get_current_user
 from src.security.rbac import PermissionCheckerDep
 from src.services.payments.payments_access import check_course_paid_access
@@ -48,6 +51,42 @@ from src.services.payments.payments_users import get_owned_courses
 from src.services.payments.webhooks.payments_webhooks import handle_stripe_webhook
 
 router = APIRouter()
+
+
+class PaymentsMessageResponse(PydanticStrictBaseModel):
+    message: str
+
+
+class PaymentsCourseAccessResponse(PydanticStrictBaseModel):
+    has_access: bool
+
+
+class PaymentsCheckoutSessionResponse(PydanticStrictBaseModel):
+    checkout_url: str
+    session_id: str
+
+
+class PaymentsConnectLinkResponse(PydanticStrictBaseModel):
+    connect_url: str
+
+
+class PaymentsStripeOAuthCallbackResponse(PydanticStrictBaseModel):
+    success: bool
+    account_id: str
+
+
+class PaymentsWebhookResponse(PydanticStrictBaseModel):
+    status: str
+    message: str | None = None
+
+
+class PaymentsCustomerRead(PydanticStrictBaseModel):
+    payment_user_id: int
+    user: UserRead | None = None
+    product: PaymentsProductRead | None = None
+    status: PaymentStatusEnum
+    creation_date: str | None = None
+    update_date: str | None = None
 
 
 @router.post("/config")
@@ -103,7 +142,7 @@ async def api_update_payments_config(
     )
 
 
-@router.delete("/config")
+@router.delete("/config", response_model=PaymentsMessageResponse)
 async def api_delete_payments_config(
     request: Request,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
@@ -187,7 +226,7 @@ async def api_update_payments_product(
     )
 
 
-@router.delete("/products/{product_id}")
+@router.delete("/products/{product_id}", response_model=PaymentsMessageResponse)
 async def api_delete_payments_product(
     request: Request,
     product_id: int,
@@ -206,7 +245,10 @@ async def api_delete_payments_product(
     return {"message": "Payments product deleted successfully"}
 
 
-@router.post("/products/{product_id}/courses/{course_id}")
+@router.post(
+    "/products/{product_id}/courses/{course_id}",
+    response_model=PaymentsMessageResponse,
+)
 async def api_link_course_to_product(
     request: Request,
     product_id: int,
@@ -219,7 +261,10 @@ async def api_link_course_to_product(
     )
 
 
-@router.delete("/products/{product_id}/courses/{course_id}")
+@router.delete(
+    "/products/{product_id}/courses/{course_id}",
+    response_model=PaymentsMessageResponse,
+)
 async def api_unlink_course_from_product(
     request: Request,
     product_id: int,
@@ -232,7 +277,7 @@ async def api_unlink_course_from_product(
     )
 
 
-@router.get("/products/{product_id}/courses")
+@router.get("/products/{product_id}/courses", response_model=list[CourseRead])
 async def api_get_courses_by_product(
     request: Request,
     product_id: int,
@@ -242,7 +287,7 @@ async def api_get_courses_by_product(
     return await get_courses_by_product(request, product_id, current_user, db_session)
 
 
-@router.get("/courses/{course_id}/products")
+@router.get("/courses/{course_id}/products", response_model=list[PaymentsProductRead])
 async def api_get_products_by_course(
     request: Request,
     course_id: int,
@@ -255,7 +300,7 @@ async def api_get_products_by_course(
 # Payments webhooks
 
 
-@router.post("/stripe/webhook")
+@router.post("/stripe/webhook", response_model=PaymentsWebhookResponse)
 async def api_handle_connected_accounts_stripe_webhook(
     request: Request,
     db_session: Annotated[Session, Depends(get_db_session)],
@@ -263,7 +308,7 @@ async def api_handle_connected_accounts_stripe_webhook(
     return await handle_stripe_webhook(request, "standard", db_session)
 
 
-@router.post("/stripe/webhook/connect")
+@router.post("/stripe/webhook/connect", response_model=PaymentsWebhookResponse)
 async def api_handle_connected_accounts_stripe_webhook_connect(
     request: Request,
     db_session: Annotated[Session, Depends(get_db_session)],
@@ -274,7 +319,10 @@ async def api_handle_connected_accounts_stripe_webhook_connect(
 # Payments checkout
 
 
-@router.post("/stripe/checkout/product/{product_id}")
+@router.post(
+    "/stripe/checkout/product/{product_id}",
+    response_model=PaymentsCheckoutSessionResponse,
+)
 async def api_create_checkout_session(
     request: Request,
     product_id: int,
@@ -287,7 +335,7 @@ async def api_create_checkout_session(
     )
 
 
-@router.get("/courses/{course_id}/access")
+@router.get("/courses/{course_id}/access", response_model=PaymentsCourseAccessResponse)
 async def api_check_course_paid_access(
     request: Request,
     course_id: int,
@@ -304,7 +352,7 @@ async def api_check_course_paid_access(
     }
 
 
-@router.get("/customers")
+@router.get("/customers", response_model=list[PaymentsCustomerRead])
 async def api_get_customers(
     request: Request,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
@@ -316,7 +364,7 @@ async def api_get_customers(
     return await get_customers(request, current_user, db_session)
 
 
-@router.get("/courses/owned")
+@router.get("/courses/owned", response_model=list[CourseRead])
 async def api_get_owned_courses(
     request: Request,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
@@ -325,7 +373,7 @@ async def api_get_owned_courses(
     return await get_owned_courses(request, current_user, db_session)
 
 
-@router.put("/stripe/account")
+@router.put("/stripe/account", response_model=PaymentsMessageResponse)
 async def api_update_stripe_account_id(
     request: Request,
     stripe_account_id: str,
@@ -337,7 +385,7 @@ async def api_update_stripe_account_id(
     )
 
 
-@router.post("/stripe/connect/link")
+@router.post("/stripe/connect/link", response_model=PaymentsConnectLinkResponse)
 async def api_generate_stripe_connect_link(
     request: Request,
     redirect_uri: str,
@@ -352,7 +400,10 @@ async def api_generate_stripe_connect_link(
     )
 
 
-@router.get("/stripe/oauth/callback")
+@router.get(
+    "/stripe/oauth/callback",
+    response_model=PaymentsStripeOAuthCallbackResponse,
+)
 async def stripe_oauth_callback(
     request: Request,
     code: str,

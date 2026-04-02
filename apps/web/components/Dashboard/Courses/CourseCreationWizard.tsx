@@ -149,18 +149,23 @@ export default function CourseCreationWizard() {
             accessToken,
           );
 
-          if (!result.success) {
-            throw new Error(result.data?.detail || t('errors.creationFailed'));
+          const createdCourse = result.data;
+
+          if (!result.success || !createdCourse || !('course_uuid' in createdCourse)) {
+            const detail = createdCourse && typeof createdCourse === 'object' && 'detail' in createdCourse
+              ? createdCourse.detail
+              : undefined;
+            throw new Error((typeof detail === 'string' ? detail : undefined) || t('errors.creationFailed'));
           }
 
           // 'outline' copies chapters from the source course client-side
           // (backend doesn't know which source to copy from)
           if (values.template === 'outline') {
-            await createOutlineFromSource(result.data);
+            await createOutlineFromSource(createdCourse);
           }
 
           toast.success(t('toasts.created'));
-          router.replace(buildCourseWorkspacePath(result.data.course_uuid, 'curriculum'));
+          router.replace(buildCourseWorkspacePath(createdCourse.course_uuid, 'curriculum'));
           router.refresh();
         } catch (error: any) {
           toast.error(error?.message || t('errors.createWorkspace'));

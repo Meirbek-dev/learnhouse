@@ -1544,7 +1544,7 @@ const ImageUploader: FC<ImageUploaderProps> = ({ t, onImageUploaded, className, 
     const loadingToast = toast.loading(tNotify('uploadingImage'));
     try {
       const response = await uploadLandingContent(file, access_token);
-      if (response.status === 200) {
+      if (response.status === 200 && response.data?.filename) {
         const imageUrl = getLandingMediaDirectory(response.data.filename);
         onImageUploaded(imageUrl);
         toast.success(tNotify('imageUploadSuccess'), { id: loadingToast });

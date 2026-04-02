@@ -9,6 +9,7 @@ from src.db.courses.activities import (
     ActivityReadWithPermissions,
     ActivityUpdate,
 )
+from src.db.strict_base_model import PydanticStrictBaseModel
 from src.db.users import PublicUser
 from src.security.auth import get_current_user
 from src.services.courses.activities.activities import (
@@ -25,6 +26,10 @@ from src.services.courses.activities.video import (
 )
 
 router = APIRouter()
+
+
+class ActivityDetailResponse(PydanticStrictBaseModel):
+    detail: str
 
 
 @router.post("")
@@ -62,7 +67,7 @@ async def api_update_activity(
     )
 
 
-@router.delete("/{activity_uuid}")
+@router.delete("/{activity_uuid}", response_model=ActivityDetailResponse)
 async def api_delete_activity(
     request: Request,
     activity_uuid: str,

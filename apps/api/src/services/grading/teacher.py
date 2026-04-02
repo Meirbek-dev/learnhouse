@@ -37,25 +37,33 @@ logger = logging.getLogger(__name__)
 # DRAFT is intentionally absent — teachers should never be able to revert
 # a submitted submission to draft.
 _ALLOWED_TEACHER_TRANSITIONS: dict[SubmissionStatus, frozenset[SubmissionStatus]] = {
-    SubmissionStatus.PENDING: frozenset({
-        SubmissionStatus.GRADED,
-        SubmissionStatus.PUBLISHED,
-        SubmissionStatus.RETURNED,
-    }),
-    SubmissionStatus.GRADED: frozenset({
-        SubmissionStatus.GRADED,   # re-save is a no-op transition, always allowed
-        SubmissionStatus.PUBLISHED,
-        SubmissionStatus.RETURNED,
-    }),
-    SubmissionStatus.RETURNED: frozenset({
-        SubmissionStatus.GRADED,
-        SubmissionStatus.PENDING,
-        SubmissionStatus.PUBLISHED,
-    }),
-    SubmissionStatus.PUBLISHED: frozenset({
-        SubmissionStatus.PUBLISHED,  # Idempotent publish should be allowed
-        SubmissionStatus.RETURNED,   # allow recalling a published grade for correction
-    }),
+    SubmissionStatus.PENDING: frozenset(
+        {
+            SubmissionStatus.GRADED,
+            SubmissionStatus.PUBLISHED,
+            SubmissionStatus.RETURNED,
+        }
+    ),
+    SubmissionStatus.GRADED: frozenset(
+        {
+            SubmissionStatus.GRADED,  # re-save is a no-op transition, always allowed
+            SubmissionStatus.PUBLISHED,
+            SubmissionStatus.RETURNED,
+        }
+    ),
+    SubmissionStatus.RETURNED: frozenset(
+        {
+            SubmissionStatus.GRADED,
+            SubmissionStatus.PENDING,
+            SubmissionStatus.PUBLISHED,
+        }
+    ),
+    SubmissionStatus.PUBLISHED: frozenset(
+        {
+            SubmissionStatus.PUBLISHED,  # Idempotent publish should be allowed
+            SubmissionStatus.RETURNED,  # allow recalling a published grade for correction
+        }
+    ),
 }
 
 # XP source for each assessment type — awarded when a grade is published.
@@ -205,9 +213,8 @@ async def get_submission_stats(
     status_counts: dict[str, int] = {row.status: row.cnt for row in status_rows}
     total = sum(status_counts.values())
     pending_count = status_counts.get(SubmissionStatus.PENDING, 0)
-    graded_count = (
-        status_counts.get(SubmissionStatus.GRADED, 0)
-        + status_counts.get(SubmissionStatus.PUBLISHED, 0)
+    graded_count = status_counts.get(SubmissionStatus.GRADED, 0) + status_counts.get(
+        SubmissionStatus.PUBLISHED, 0
     )
 
     # Query 2: late count — all submitted (non-DRAFT) late submissions, regardless
@@ -224,7 +231,9 @@ async def get_submission_stats(
     graded_scores: list[float] = db_session.exec(
         select(Submission.final_score).where(
             Submission.activity_id == activity_id,
-            Submission.status.in_([SubmissionStatus.GRADED, SubmissionStatus.PUBLISHED]),
+            Submission.status.in_(
+                [SubmissionStatus.GRADED, SubmissionStatus.PUBLISHED]
+            ),
             Submission.final_score.is_not(None),
         )
     ).all()
@@ -293,7 +302,7 @@ def export_grades_csv(
     activity_id: int,
     current_user: PublicUser,
     db_session: Session,
-) -> Generator[str, None, None]:
+) -> Generator[str]:
     """
     Stream CSV rows of all non-draft submissions one batch at a time.
 
@@ -318,7 +327,16 @@ def export_grades_csv(
     writer = csv.writer(buf)
 
     writer.writerow(
-        ["Student Name", "Email", "Attempt", "Status", "Late", "Submitted At", "Auto Score", "Final Score"]
+        [
+            "Student Name",
+            "Email",
+            "Attempt",
+            "Status",
+            "Late",
+            "Submitted At",
+            "Auto Score",
+            "Final Score",
+        ]
     )
     yield buf.getvalue()
     buf.truncate(0)
@@ -359,16 +377,18 @@ def export_grades_csv(
             email = ""
 
         submitted = s.submitted_at.isoformat() if s.submitted_at else ""
-        writer.writerow([
-            name,
-            email,
-            s.attempt_number,
-            s.status,
-            "yes" if s.is_late else "no",
-            submitted,
-            s.auto_score if s.auto_score is not None else "",
-            s.final_score if s.final_score is not None else "",
-        ])
+        writer.writerow(
+            [
+                name,
+                email,
+                s.attempt_number,
+                s.status,
+                "yes" if s.is_late else "no",
+                submitted,
+                s.auto_score if s.auto_score is not None else "",
+                s.final_score if s.final_score is not None else "",
+            ]
+        )
         yield buf.getvalue()
         buf.truncate(0)
         buf.seek(0)
@@ -457,8 +477,7 @@ async def save_grade(
             )
 
     still_needs_review = any(
-        item.needs_manual_review and not item.feedback
-        for item in item_map.values()
+        item.needs_manual_review and not item.feedback for item in item_map.values()
     )
 
     updated_grading = GradingBreakdown(

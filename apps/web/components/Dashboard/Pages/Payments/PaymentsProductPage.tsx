@@ -1,5 +1,7 @@
 'use client';
 
+import type { components } from '@/lib/api/generated';
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -37,6 +39,7 @@ import { usePaymentsEnabled } from '@hooks/usePaymentsEnabled';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { Controller, useForm } from 'react-hook-form';
+import type { SubmitHandler } from 'react-hook-form';
 import { Textarea } from '@components/ui/textarea';
 import { useState, useTransition } from 'react';
 import { Button } from '@components/ui/button';
@@ -47,6 +50,9 @@ import { useTranslations } from 'next-intl';
 import useSWR, { mutate } from 'swr';
 import { toast } from 'sonner';
 import * as v from 'valibot';
+
+type PaymentsConfigRead = components['schemas']['PaymentsConfigRead'];
+type PaymentsProductRead = components['schemas']['PaymentsProductRead'];
 
 const createValidationSchema = (t: (key: string, values?: any) => string) =>
   v.object({
@@ -84,9 +90,9 @@ const createValidationSchema = (t: (key: string, values?: any) => string) =>
 type EditProductFormData = v.InferOutput<ReturnType<typeof createValidationSchema>>;
 
 interface ArchiveProductButtonProps {
-  productId: string;
+  productId: number;
   productName: string;
-  onArchive: (productId: string) => Promise<void>;
+  onArchive: (productId: number) => Promise<void>;
   t: (key: string, values?: Record<string, string>) => string;
 }
 
@@ -144,8 +150,8 @@ const PaymentsProductPage = () => {
   const session = usePlatformSession() as any;
   const accessToken = session?.data?.tokens?.access_token;
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [editingProductId, setEditingProductId] = useState<string | null>(null);
-  const [expandedProducts, setExpandedProducts] = useState<Record<string, boolean>>({});
+  const [editingProductId, setEditingProductId] = useState<number | null>(null);
+  const [expandedProducts, setExpandedProducts] = useState<Record<number, boolean>>({});
   const { isEnabled, isLoading } = usePaymentsEnabled();
   const t = useTranslations('DashPage.Payments.ProductPage');
 
@@ -159,11 +165,9 @@ const PaymentsProductPage = () => {
     ([_url, token]) => getPaymentConfigs(token),
   );
 
-  const isStripeEnabled = paymentConfigs
-    ? Boolean(paymentConfigs.find((config: any) => config.provider === 'stripe'))
-    : false;
+  const isStripeEnabled = paymentConfigs ? Boolean(paymentConfigs.find((config: PaymentsConfigRead) => config.provider === 'stripe')) : false;
 
-  const handleArchiveProduct = async (productId: string) => {
+  const handleArchiveProduct = async (productId: number) => {
     try {
       const res = await archiveProduct(productId, accessToken);
       mutate([getPaymentsProductsSwrKey(), accessToken]);
@@ -172,7 +176,7 @@ const PaymentsProductPage = () => {
       } else {
         toast.error(
           t('errors.archiveProductFailed', {
-            error: res.data?.detail || '',
+            error: res.data?.message || '',
           }),
         );
       }
@@ -181,7 +185,7 @@ const PaymentsProductPage = () => {
     }
   };
 
-  const toggleProductExpansion = (productId: string) => {
+  const toggleProductExpansion = (productId: number) => {
     setExpandedProducts((prev) => ({
       ...prev,
       [productId]: !prev[productId],
@@ -206,6 +210,8 @@ const PaymentsProductPage = () => {
       </div>
     );
 
+  const productItems = products.data ?? [];
+
   return (
     <div className="h-full w-full bg-muted">
       <div className="mx-auto pr-10 pl-10">
@@ -224,7 +230,7 @@ const PaymentsProductPage = () => {
         />
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {products.data.map((product: any) => (
+          {productItems.map((product: PaymentsProductRead) => (
             <div
               key={product.id}
               className="flex h-full flex-col rounded-lg bg-card p-4 shadow-sm ring-1 ring-border"
@@ -321,7 +327,7 @@ const PaymentsProductPage = () => {
             </div>
           ))}
         </div>
-        {products.data.length === 0 && (
+        {productItems.length === 0 && (
           <div className="mx-auto mt-3 flex items-center space-x-2 font-semibold text-muted-foreground">
             <Info size={20} />
             <p>{t('noProducts')}</p>
@@ -352,7 +358,7 @@ const EditProductForm = ({
   onSuccess,
   onCancel,
 }: {
-  product: any;
+  product: PaymentsProductRead;
   onSuccess: () => void;
   onCancel: () => void;
 }) => {
@@ -369,7 +375,7 @@ const EditProductForm = ({
     resolver: valibotResolver(validationSchema),
     defaultValues: {
       name: product.name,
-      description: product.description,
+      description: product.description ?? '',
       amount: product.amount,
       benefits: product.benefits || '',
       currency: product.currency || '',
@@ -377,7 +383,7 @@ const EditProductForm = ({
     mode: 'onChange',
   });
 
-  const handleSubmit = async (values: EditProductFormData) => {
+  const handleSubmit: SubmitHandler<EditProductFormData> = async (values) => {
     try {
       await updateProduct(product.id, values, session.data?.tokens?.access_token);
       mutate([getPaymentsProductsSwrKey(), session.data?.tokens?.access_token]);

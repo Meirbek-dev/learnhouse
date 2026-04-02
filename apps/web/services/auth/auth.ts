@@ -1,22 +1,14 @@
 import { RequestBody, getResponseMetadata } from '@services/utils/ts/requests';
 import { fetchWithRetry } from '@/lib/fetchWithRetry';
 import { getAPIUrl } from '@services/config/config';
+import type { components } from '@/lib/api/generated';
 import type { Role } from '@/types/permissions';
 
-interface LoginResponse {
-  user: AuthUser;
-  tokens: AuthTokens;
-}
-
-interface UserRole {
-  role: Role;
-}
-
-interface UserSessionResponse {
-  user: AuthUser;
-  roles: UserRole[];
-  permissions: string[];
-}
+type AuthTokens = components['schemas']['TokensResponse'];
+type AuthUser = components['schemas']['UserRead'];
+type LoginResponse = components['schemas']['LoginResponse'];
+type UserRole = { role: Role };
+type UserSessionResponse = components['schemas']['UserSession'];
 
 interface AuthError extends Error {
   status?: number;

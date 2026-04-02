@@ -33,7 +33,7 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
   // Localized page title
   const pageTitle = isCourseEnd
     ? t('courseEndTitle', { course: course_meta.name })
-    : t('activityTitle', { activity: activity.name, course: course_meta.name });
+    : t('activityTitle', { activity: activity?.name ?? '', course: course_meta.name });
 
   // SEO
   return {

@@ -78,14 +78,14 @@ async function PlatformAnalyticsCourseDetailPageInner(props: {
           <CompletionFunnelChart
             title={t('pages.courseFunnelTitle')}
             description={t('pages.courseFunnelDesc')}
-            data={detail.funnels.course_completion}
+            data={detail.funnels.course_completion ?? []}
           />
         </div>
 
         <CompletionFunnelChart
           title={t('pages.courseChapterDropoffTitle')}
           description={t('pages.courseChapterDropoffDesc')}
-          data={detail.funnels.chapter_dropoff}
+          data={detail.funnels.chapter_dropoff ?? []}
         />
 
         <Card className="border-slate-200 bg-white/90 shadow-sm">

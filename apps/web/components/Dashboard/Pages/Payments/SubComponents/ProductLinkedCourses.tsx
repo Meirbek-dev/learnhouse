@@ -1,5 +1,7 @@
 'use client';
 
+import type { components } from '@/lib/api/generated';
+
 import { getCoursesLinkedToProduct, unlinkCourseFromProduct } from '@services/payments/products';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
@@ -13,8 +15,10 @@ import { toast } from 'sonner';
 import { getPaymentsProductsSwrKey, getProductLinkedCoursesSwrKey } from '@services/payments/keys';
 import LinkCourseModal from './LinkCourseModal';
 
+type CourseRead = components['schemas']['CourseRead'];
+
 interface ProductLinkedCoursesProps {
-  productId: string;
+  productId: number;
 }
 
 export default function ProductLinkedCourses({ productId }: ProductLinkedCoursesProps) {
@@ -25,7 +29,7 @@ export default function ProductLinkedCourses({ productId }: ProductLinkedCourses
   const t = useTranslations('DashPage.Payments.LinkedCourses');
 
   // Use SWR to fetch linked courses
-  const LINKED_COURSES_KEY = productId ? getProductLinkedCoursesSwrKey(productId) : null;
+  const LINKED_COURSES_KEY = productId ? getProductLinkedCoursesSwrKey(String(productId)) : null;
   const PRODUCTS_KEY = getPaymentsProductsSwrKey();
 
   const {
@@ -44,13 +48,13 @@ export default function ProductLinkedCourses({ productId }: ProductLinkedCourses
     }
   }, [error, tNotify]);
 
-  const handleUnlinkCourse = async (courseId: string) => {
+  const handleUnlinkCourse = async (courseId: number) => {
     if (!linkedCourses) return;
 
     const prev = linkedCourses;
     // Optimistically remove from local list
     await mutateLinkedCourses(
-      prev.filter((c: any) => c.id !== courseId),
+      prev.filter((course: CourseRead) => course.id !== courseId),
       false,
     );
 
@@ -66,7 +70,7 @@ export default function ProductLinkedCourses({ productId }: ProductLinkedCourses
         mutateLinkedCourses(prev, false);
         toast.error(
           tNotify('errors.unlinkCourseFailed', {
-            error: response.data?.detail || '',
+            error: response.data?.message || '',
           }),
         );
       }
@@ -117,7 +121,7 @@ export default function ProductLinkedCourses({ productId }: ProductLinkedCourses
             <span>{t('noCoursesLinked')}</span>
           </div>
         ) : (
-          linkedCourses.map((course: { id: string; name: string }) => (
+          linkedCourses.map((course: CourseRead) => (
             <div
               key={course.id}
               className="flex items-center justify-between rounded-md bg-muted p-2"

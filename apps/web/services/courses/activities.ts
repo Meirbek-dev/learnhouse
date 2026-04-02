@@ -1,10 +1,23 @@
 'use server';
 
-import { RequestBodyWithAuthHeader, getResponseMetadata } from '@services/utils/ts/requests';
+import type { components } from '@/lib/api/generated';
+import { type CustomResponseTyping, RequestBodyWithAuthHeader, getResponseMetadata } from '@services/utils/ts/requests';
 import { shouldUseChunkedUpload, uploadFileChunked } from '@services/utils/chunked-upload';
 import { CacheProfiles, cacheLife, cacheTag } from '@/lib/cache';
 import { getAPIUrl } from '@services/config/config';
 import { tags } from '@/lib/cacheTags';
+
+type ActivityRead = components['schemas']['ActivityRead'];
+type ActivityReadWithPermissions = components['schemas']['ActivityReadWithPermissions'];
+type ActivityDetailResponse = components['schemas']['ActivityDetailResponse'];
+
+type ResponseMetadata<T> = Omit<CustomResponseTyping, 'data'> & {
+  data: T | null;
+};
+
+async function getTypedResponseMetadata<T>(response: Response): Promise<ResponseMetadata<T>> {
+  return (await getResponseMetadata(response)) as ResponseMetadata<T>;
+}
 
 interface UploadProgress {
   percentage: number;
@@ -30,7 +43,7 @@ export async function createActivity(
   data.chapter_id = chapter_id;
 
   const result = await fetch(`${getAPIUrl()}activities/`, RequestBodyWithAuthHeader('POST', data, null, access_token));
-  return getResponseMetadata(result);
+  return getTypedResponseMetadata<ActivityRead>(result);
 }
 
 /**
@@ -74,7 +87,7 @@ async function uploadFormData(
   formData: FormData,
   accessToken: string,
   onProgress?: (progress: UploadProgress) => void,
-): Promise<any> {
+): Promise<ActivityRead> {
   // Server or non-browser environment - use fetch without progress tracking
   if (typeof XMLHttpRequest === 'undefined') {
     const result = await fetch(endpoint, {
@@ -99,7 +112,7 @@ async function uploadFormData(
       throw error;
     }
 
-    const json = await result.json();
+    const json = (await result.json()) as ActivityRead;
     if (onProgress) {
       try {
         onProgress({ percentage: 100 });
@@ -165,7 +178,7 @@ async function createVideoActivityChunked(
   accessToken: string,
   options?: ActivityInvalidationOptions,
   onProgress?: (progress: UploadProgress) => void,
-): Promise<any> {
+): Promise<ActivityRead> {
   const courseUuid = data.course_uuid;
 
   if (!courseUuid) {
@@ -230,7 +243,7 @@ async function createVideoActivityChunked(
     throw error;
   }
 
-  return result.json();
+  return (await result.json()) as ActivityRead;
 }
 
 /**
@@ -243,7 +256,7 @@ async function createVideoActivityStandard(
   accessToken: string,
   options?: ActivityInvalidationOptions,
   onProgress?: (progress: UploadProgress) => void,
-): Promise<any> {
+): Promise<ActivityRead> {
   const formData = new FormData();
   formData.append('chapter_id', chapterId.toString());
   formData.append('name', data.name);
@@ -270,7 +283,7 @@ async function createPdfActivity(
   accessToken: string,
   options?: ActivityInvalidationOptions,
   onProgress?: (progress: UploadProgress) => void,
-): Promise<any> {
+): Promise<ActivityRead> {
   const formData = new FormData();
   formData.append('chapter_id', chapterId.toString());
   formData.append('pdf_file', file);
@@ -290,7 +303,7 @@ export async function createFileActivity(
   accessToken: string,
   options?: ActivityInvalidationOptions,
   onProgress?: (progress: UploadProgress) => void,
-): Promise<any> {
+): Promise<ActivityRead> {
   if (type === 'video') {
     if (shouldUseChunkedUpload(file.size)) {
       console.log('Using chunked upload for video activity');
@@ -337,13 +350,13 @@ export async function createExternalVideoActivity(
     `${getAPIUrl()}activities/external_video`,
     RequestBodyWithAuthHeader('POST', data, null, access_token),
   );
-  return getResponseMetadata(result);
+  return getTypedResponseMetadata<ActivityRead>(result);
 }
 
 /**
  * Cached fetch for activity by UUID
  */
-async function fetchActivity(activity_uuid: string, access_token: string) {
+async function fetchActivity(activity_uuid: string, access_token: string): Promise<ActivityReadWithPermissions> {
   'use cache';
   cacheTag(tags.activities);
   cacheLife(CacheProfiles.activities);
@@ -355,7 +368,7 @@ async function fetchActivity(activity_uuid: string, access_token: string) {
       'Authorization': `Bearer ${access_token}`,
     },
   });
-  return result.json();
+  return (await result.json()) as ActivityReadWithPermissions;
 }
 
 export async function getActivity(activity_uuid: string, _next?: any, access_token?: string) {
@@ -370,13 +383,16 @@ export async function deleteActivity(activity_uuid: string, access_token: string
     `${getAPIUrl()}activities/${activity_uuid}`,
     RequestBodyWithAuthHeader('DELETE', null, null, access_token),
   );
-  return getResponseMetadata(result);
+  return getTypedResponseMetadata<ActivityDetailResponse>(result);
 }
 
 /**
  * Cached fetch for activity with auth header
  */
-async function fetchActivityWithAuth(activity_uuid: string, access_token?: string) {
+async function fetchActivityWithAuth(
+  activity_uuid: string,
+  access_token?: string,
+): Promise<ActivityReadWithPermissions> {
   'use cache';
   cacheTag(tags.activities);
   cacheLife(CacheProfiles.activities);
@@ -394,7 +410,7 @@ async function fetchActivityWithAuth(activity_uuid: string, access_token?: strin
     method: 'GET',
     headers,
   });
-  return result.json();
+  return (await result.json()) as ActivityReadWithPermissions;
 }
 
 export async function getActivityWithAuthHeader(activity_uuid: string, _next?: any, access_token?: string | null) {
@@ -406,7 +422,7 @@ export async function updateActivity(data: any, activity_uuid: string, access_to
     `${getAPIUrl()}activities/${activity_uuid}`,
     RequestBodyWithAuthHeader('PATCH', data, null, access_token),
   );
-  return getResponseMetadata(result);
+  return getTypedResponseMetadata<ActivityRead>(result);
 }
 
 export async function getUrlPreview(url: string) {

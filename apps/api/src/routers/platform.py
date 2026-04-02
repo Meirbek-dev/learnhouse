@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, Request, UploadFile
 from sqlmodel import Session
@@ -9,6 +9,7 @@ from src.db.platform import (
     PlatformRead,
     PlatformUpdate,
 )
+from src.db.strict_base_model import PydanticStrictBaseModel
 from src.db.users import PublicUser
 from src.security.auth import get_current_user
 from src.security.rbac import PermissionCheckerDep
@@ -28,6 +29,19 @@ from src.services.platform_users import (
 )
 
 router = APIRouter()
+
+
+class PlatformDetailResponse(PydanticStrictBaseModel):
+    detail: str
+
+
+class PlatformPreviewUploadResponse(PydanticStrictBaseModel):
+    name_in_disk: str
+
+
+class PlatformLandingUploadResponse(PydanticStrictBaseModel):
+    detail: str
+    filename: str
 
 
 @router.get("/platform")
@@ -64,7 +78,10 @@ async def api_get_platform_users(
     )
 
 
-@router.put("/members/{user_id}/role/{role_id}")
+@router.put(
+    "/members/{user_id}/role/{role_id}",
+    response_model=PlatformDetailResponse,
+)
 async def api_update_platform_user_role(
     request: Request,
     user_id: int,
@@ -90,7 +107,7 @@ async def api_update_platform_user_role(
     )
 
 
-@router.delete("/members/{user_id}")
+@router.delete("/members/{user_id}", response_model=PlatformDetailResponse)
 async def api_remove_user_from_platform(
     request: Request,
     user_id: int,
@@ -110,7 +127,7 @@ async def api_remove_user_from_platform(
     )
 
 
-@router.put("/logo")
+@router.put("/logo", response_model=PlatformDetailResponse)
 async def api_update_platform_logo(
     request: Request,
     logo_file: UploadFile,
@@ -132,7 +149,7 @@ async def api_update_platform_logo(
     )
 
 
-@router.put("/thumbnail")
+@router.put("/thumbnail", response_model=PlatformDetailResponse)
 async def api_update_platform_thumbnail(
     request: Request,
     thumbnail_file: UploadFile,
@@ -154,7 +171,7 @@ async def api_update_platform_thumbnail(
     )
 
 
-@router.put("/preview")
+@router.put("/preview", response_model=PlatformPreviewUploadResponse)
 async def api_update_platform_preview(
     request: Request,
     preview_file: UploadFile,
@@ -193,10 +210,10 @@ async def api_update_platform(
     return await update_platform(request, platform_object, current_user, db_session)
 
 
-@router.put("/landing")
+@router.put("/landing", response_model=PlatformDetailResponse)
 async def api_update_platform_landing(
     request: Request,
-    landing_object: dict,
+    landing_object: dict[str, Any],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session: Annotated[Session, Depends(get_db_session)],
     checker: PermissionCheckerDep,
@@ -212,7 +229,7 @@ async def api_update_platform_landing(
     )
 
 
-@router.post("/landing/content")
+@router.post("/landing/content", response_model=PlatformLandingUploadResponse)
 async def api_upload_platform_landing_content(
     request: Request,
     content_file: UploadFile,

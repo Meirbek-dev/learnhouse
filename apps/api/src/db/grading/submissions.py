@@ -7,18 +7,27 @@ from enum import StrEnum
 from typing import Any
 
 from pydantic import ConfigDict, Field, field_validator
-from sqlalchemy import JSON, Boolean, Column, DateTime, ForeignKey, Index, Integer, String
+from sqlalchemy import (
+    JSON,
+    Boolean,
+    Column,
+    DateTime,
+    ForeignKey,
+    Index,
+    Integer,
+    String,
+)
 from sqlmodel import Field as SQLField
 
 from src.db.strict_base_model import PydanticStrictBaseModel, SQLModelStrictBaseModel
 
 
 class SubmissionStatus(StrEnum):
-    DRAFT = "DRAFT"          # student is working, not yet submitted
-    PENDING = "PENDING"      # submitted, awaiting teacher grading
-    GRADED = "GRADED"        # teacher (or auto-grader) set final_score
+    DRAFT = "DRAFT"  # student is working, not yet submitted
+    PENDING = "PENDING"  # submitted, awaiting teacher grading
+    GRADED = "GRADED"  # teacher (or auto-grader) set final_score
     PUBLISHED = "PUBLISHED"  # grade is finalised and visible to the student
-    RETURNED = "RETURNED"    # teacher sent it back for revision
+    RETURNED = "RETURNED"  # teacher sent it back for revision
 
 
 class AssessmentType(StrEnum):
@@ -260,7 +269,9 @@ class Submission(SubmissionBase, table=True):
     # Schema version for safe JSON evolution
     grading_version: int = SQLField(
         default=1,
-        sa_column=Column("grading_version", Integer, nullable=False, server_default="1"),
+        sa_column=Column(
+            "grading_version", Integer, nullable=False, server_default="1"
+        ),
     )
 
 
@@ -286,6 +297,6 @@ class SubmissionStats(SQLModelStrictBaseModel):
     total: int
     graded_count: int
     needs_grading_count: int  # count of PENDING submissions
-    late_count: int           # count of PENDING submissions where is_late=True
+    late_count: int  # count of PENDING submissions where is_late=True
     avg_score: float | None
-    pass_rate: float | None   # percentage of GRADED/PUBLISHED scoring ≥ 50
+    pass_rate: float | None  # percentage of GRADED/PUBLISHED scoring ≥ 50

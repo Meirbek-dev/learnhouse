@@ -5,8 +5,8 @@ from sqlalchemy import func
 from sqlmodel import Session, and_, or_, select, text
 from ulid import ULID
 
-from src.db.courses.certifications import Certifications
 from src.db.courses.activities import Activity
+from src.db.courses.certifications import Certifications
 from src.db.courses.chapters import Chapter
 from src.db.courses.courses import (
     AuthorWithRole,
@@ -211,9 +211,7 @@ def _ready_sql_condition():
     """SQL expression: course is fully ready to publish."""
     from datetime import timedelta
 
-    has_chapters = (
-        select(Chapter.id).where(Chapter.course_id == Course.id).exists()
-    )
+    has_chapters = select(Chapter.id).where(Chapter.course_id == Course.id).exists()
     has_activities = (
         select(Activity.id)
         .join(Chapter, Chapter.id == Activity.chapter_id)
@@ -235,9 +233,7 @@ def _ready_sql_condition():
         .exists(),
     )
     has_certification = (
-        select(Certifications.id)
-        .where(Certifications.course_id == Course.id)
-        .exists()
+        select(Certifications.id).where(Certifications.course_id == Course.id).exists()
     )
     return and_(
         Course.name.isnot(None),
@@ -833,8 +829,9 @@ def _seed_starter_chapters(
     course: Course, creator_id: int, db_session: Session
 ) -> None:
     """Insert the two default chapters for the 'starter' template."""
-    from src.db.courses.chapters import Chapter
     from ulid import ULID
+
+    from src.db.courses.chapters import Chapter
 
     for index, chapter_data in enumerate(_STARTER_CHAPTERS, start=1):
         chapter = Chapter(

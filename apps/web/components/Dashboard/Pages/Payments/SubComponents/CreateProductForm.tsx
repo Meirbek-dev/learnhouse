@@ -88,7 +88,13 @@ const CreateProductForm: FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
   const handleSubmit = async (values: ProductFormValues) => {
     const loadingToast = toast.loading(tNotify('creatingProduct'));
     try {
-      const res = await createProduct(values, accessToken);
+      const res = await createProduct(
+        {
+          ...values,
+          benefits: values.benefits ?? '',
+        },
+        accessToken,
+      );
       if (res.success) {
         toast.success(tNotify('productCreatedSuccess'), { id: loadingToast });
         mutate([getPaymentsProductsSwrKey(), accessToken]);

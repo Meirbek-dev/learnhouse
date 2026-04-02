@@ -20,6 +20,7 @@ from src.db.courses.courses import (
 )
 from src.db.courses.enhanced_responses import CourseReadWithPermissions
 from src.db.resource_authors import ResourceAuthorshipEnum, ResourceAuthorshipStatusEnum
+from src.db.strict_base_model import PydanticStrictBaseModel
 from src.db.users import AnonymousUser, PublicUser
 from src.security.auth import get_current_user, get_current_user_optional
 from src.security.rbac import PermissionCheckerDep
@@ -54,6 +55,49 @@ from src.services.courses.updates import (
 )
 
 router = APIRouter()
+
+
+class CourseDetailResponse(PydanticStrictBaseModel):
+    detail: str
+
+
+class CourseUserRightsPermissions(PydanticStrictBaseModel):
+    read: bool
+    create: bool
+    update: bool
+    delete: bool
+    create_content: bool
+    update_content: bool
+    delete_content: bool
+    manage_contributors: bool
+    manage_access: bool
+    grade_assignments: bool
+    mark_activities_done: bool
+    create_certifications: bool
+
+
+class CourseUserRightsOwnership(PydanticStrictBaseModel):
+    is_owner: bool
+    is_creator: bool
+    is_maintainer: bool
+    is_contributor: bool
+    authorship_status: ResourceAuthorshipStatusEnum | None = None
+
+
+class CourseUserRightsRoles(PydanticStrictBaseModel):
+    is_admin: bool
+    is_maintainer_role: bool
+    is_instructor: bool
+    is_user: bool
+
+
+class CourseUserRightsResponse(PydanticStrictBaseModel):
+    course_uuid: str
+    user_id: int
+    is_anonymous: bool
+    permissions: CourseUserRightsPermissions
+    ownership: CourseUserRightsOwnership
+    roles: CourseUserRightsRoles
 
 
 # ---------------------------------------------------------------------------
@@ -320,7 +364,7 @@ async def api_update_course_access(
     )
 
 
-@router.delete("/{course_uuid}")
+@router.delete("/{course_uuid}", response_model=CourseDetailResponse)
 async def api_delete_course(
     request: Request,
     course_uuid: str,
@@ -485,7 +529,7 @@ async def api_remove_bulk_course_contributors(
     )
 
 
-@router.get("/{course_uuid}/rights")
+@router.get("/{course_uuid}/rights", response_model=CourseUserRightsResponse)
 async def api_get_course_user_rights(
     request: Request,
     course_uuid: str,

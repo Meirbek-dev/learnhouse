@@ -58,6 +58,27 @@ const deleteSession = (key: string): void => {
   sessionStore.delete(key);
 };
 
+const toOptionalString = (value: string | null | undefined): string | undefined => value ?? undefined;
+
+const normalizeSessionUser = (user: Awaited<ReturnType<typeof getUserSession>>['user']): AuthUser => ({
+  id: user.id,
+  email: user.email,
+  username: user.username,
+  first_name: toOptionalString(user.first_name),
+  middle_name: toOptionalString(user.middle_name),
+  last_name: toOptionalString(user.last_name),
+  avatar_image: toOptionalString(user.avatar_image),
+  bio: toOptionalString(user.bio),
+});
+
+const normalizeSessionRoles = (roles: Awaited<ReturnType<typeof getUserSession>>['roles']): SessionData['roles'] =>
+  roles.map(({ role }) => ({
+    role: {
+      ...role,
+      description: toOptionalString(role.description),
+    },
+  }));
+
 // ─── Cache Key ────────────────────────────────────────────────────────────────
 
 const createCacheKey = (accessToken: string): string | null => {
@@ -355,8 +376,8 @@ const createAuthConfig = (): NextAuthConfig => {
           }
 
           const sessionData: SessionData = {
-            user: apiSession.user,
-            roles: apiSession.roles ?? [],
+            user: normalizeSessionUser(apiSession.user),
+            roles: normalizeSessionRoles(apiSession.roles ?? []),
             tokens,
             permissions: apiSession.permissions ?? [],
           };

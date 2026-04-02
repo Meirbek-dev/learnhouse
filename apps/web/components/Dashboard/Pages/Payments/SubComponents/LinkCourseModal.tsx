@@ -1,5 +1,7 @@
 'use client';
 
+import type { components } from '@/lib/api/generated';
+
 import { getCoursesLinkedToProduct, linkCourseToProduct } from '@services/payments/products';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
@@ -14,19 +16,23 @@ import useSWR, { mutate } from 'swr';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
+type CourseRead = components['schemas']['CourseRead'];
+
+type CoursePreviewData = {
+  id: number;
+  name: string;
+  description: string;
+  thumbnail_image: string;
+  course_uuid: string;
+};
+
 interface LinkCourseModalProps {
-  productId: string;
+  productId: number;
   onSuccess: () => void;
 }
 
 interface CoursePreviewProps {
-  course: {
-    id: number;
-    name: string;
-    description: string;
-    thumbnail_image: string;
-    course_uuid: string;
-  };
+  course: CoursePreviewData;
   onLink: (courseId: number) => void;
   isLinked: boolean;
 }
@@ -50,7 +56,7 @@ const CoursePreview = ({ course, onLink, isLinked }: CoursePreviewProps) => {
       {/* Content */}
       <div className="grow space-y-1">
         <h3 className="line-clamp-1 font-medium text-foreground">{course.name}</h3>
-        <p className="line-clamp-2 text-sm text-muted-foreground">{course.description}</p>
+        <p className="line-clamp-2 text-sm text-muted-foreground">{course.description ?? ''}</p>
       </div>
 
       {/* Action Button */}
@@ -110,7 +116,7 @@ export default function LinkCourseModal({ productId, onSuccess }: LinkCourseModa
       } else {
         toast.error(
           tNotify('errors.linkCourseFailed', {
-            error: response.data?.detail || '',
+            error: response.data?.message || '',
           }),
         );
       }
@@ -119,15 +125,15 @@ export default function LinkCourseModal({ productId, onSuccess }: LinkCourseModa
     }
   };
 
-  const isLinked = (courseId: number): boolean => {
-    return Boolean(linkedCoursesData?.data?.some((course: any) => course.id === courseId));
-  };
+  const linkedCourses = linkedCoursesData?.data ?? [];
+
+  const isLinked = (courseId: number): boolean => Boolean(linkedCourses.some((course) => course.id === courseId));
 
   const filteredCourses =
     courses?.filter(
-      (course: any) =>
+      (course) =>
         course.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        course.description.toLowerCase().includes(searchTerm.toLowerCase()),
+        (course.description ?? '').toLowerCase().includes(searchTerm.toLowerCase()),
     ) || [];
 
   return (
@@ -149,10 +155,16 @@ export default function LinkCourseModal({ productId, onSuccess }: LinkCourseModa
       </div>
 
       <div className="max-h-[400px] space-y-2 overflow-y-auto px-3">
-        {filteredCourses.map((course: any) => (
+        {filteredCourses.map((course) => (
           <CoursePreview
             key={course.course_uuid}
-            course={course}
+            course={{
+              id: course.id,
+              name: course.name,
+              description: course.description,
+              thumbnail_image: course.thumbnail_image,
+              course_uuid: course.course_uuid,
+            }}
             onLink={handleLinkCourse}
             isLinked={isLinked(course.id)}
           />

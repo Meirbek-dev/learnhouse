@@ -5,6 +5,8 @@
   "scripts": {
     "dev": "uv run app.py",
     "format": "uv run ruff format",
-    "lint": "uv run ruff check --fix --unsafe-fixes"
+    "lint": "uv run ruff check --fix --unsafe-fixes",
+    "generate:openapi": "uv run python scripts/export_openapi.py",
+    "generate:contracts": "uv run python scripts/export_openapi.py"
   }
 }

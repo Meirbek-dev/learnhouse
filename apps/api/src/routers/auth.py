@@ -46,6 +46,10 @@ class LoginResponse(PydanticStrictBaseModel):
     tokens: TokensResponse
 
 
+class LogoutResponse(PydanticStrictBaseModel):
+    msg: str
+
+
 COOKIE_TTL_SECONDS = int(timedelta(hours=8).total_seconds())
 REFRESH_COOKIE_TTL_SECONDS = int(timedelta(days=30).total_seconds())
 ACCESS_COOKIE_KEY = "access_token_cookie"
@@ -116,11 +120,11 @@ def _clear_auth_cookies(response: Response) -> None:
     response.delete_cookie(REFRESH_COOKIE_KEY, **delete_kwargs)
 
 
-@router.get("/refresh")
+@router.get("/refresh", response_model=TokensResponse)
 def refresh(
     request: Request,
     response: Response,
-) -> dict[str, str | int]:
+) -> TokensResponse:
     """
     Token refresh with rotation.
 
@@ -242,12 +246,12 @@ async def login(
     }
 
 
-@router.delete("/logout")
+@router.delete("/logout", response_model=LogoutResponse)
 def logout(
     request: Request,
     response: Response,
     token: Annotated[str | None, Depends(oauth2_scheme_optional)],
-) -> dict[str, str]:
+) -> LogoutResponse:
     """
     Because the JWT are stored in an httponly cookie now, we cannot
     log the user out by simply deleting the cookies in the frontend.
@@ -276,7 +280,7 @@ def logout(
     )
 
     _clear_auth_cookies(response)
-    return {"msg": "Successfully logout"}
+    return LogoutResponse(msg="Successfully logout")
 
 
 # ── Backend-driven Google OAuth (Authorization Code flow) ─────────────────────

@@ -1,5 +1,7 @@
 'use client';
 
+import type { components } from '@/lib/api/generated';
+
 import { AlertCircle, BookOpen, Loader2, LogIn, ShoppingCart } from 'lucide-react';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
@@ -16,6 +18,8 @@ import { useTranslations } from 'next-intl';
 import UserAvatar from '../../UserAvatar';
 
 import CoursePaidOptions from './CoursePaidOptions';
+
+type PaymentsProductRead = components['schemas']['PaymentsProductRead'];
 
 interface Author {
   user: {
@@ -150,7 +154,7 @@ const CourseActionsMobile = ({ courseuuid, course, trailData }: CourseActionsMob
   // one-shot guards to avoid repeated requests when context identity changes
   const fetchedLinkedProductsRef = useRef<Record<string, boolean>>({});
   const checkedAccessRef = useRef<Record<string, boolean>>({});
-  const [linkedProducts, setLinkedProducts] = useState<any[]>([]);
+  const [linkedProducts, setLinkedProducts] = useState<PaymentsProductRead[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isActionLoading, setIsActionLoading] = useState(false);
   const [isPending, startTransition] = useTransition();

@@ -74,7 +74,9 @@ async def start_submission(
     if existing_draft:
         return SubmissionRead.model_validate(existing_draft)
 
-    attempt_number = _count_previous_attempts(activity_id, current_user.id, db_session) + 1
+    attempt_number = (
+        _count_previous_attempts(activity_id, current_user.id, db_session) + 1
+    )
     now = datetime.now(UTC)
 
     submission = Submission(
@@ -165,7 +167,9 @@ async def submit_assessment(
 
     passed = (draft.auto_score or 0) >= 50.0
     if passed and not violation_exceeded and not is_late:
-        _award_xp_safe(current_user.id, assessment_type, draft.submission_uuid, db_session)
+        _award_xp_safe(
+            current_user.id, assessment_type, draft.submission_uuid, db_session
+        )
 
     return SubmissionRead.model_validate(draft)
 
@@ -204,7 +208,9 @@ def _get_or_create_draft(
         )
 
     # ASSIGNMENT: create the draft inline (no server-stamped start needed)
-    attempt_number = _count_previous_attempts(activity_id, current_user.id, db_session) + 1
+    attempt_number = (
+        _count_previous_attempts(activity_id, current_user.id, db_session) + 1
+    )
     now = datetime.now(UTC)
     draft = Submission(
         submission_uuid=f"submission_{ULID()}",
@@ -224,7 +230,9 @@ def _get_or_create_draft(
     return draft
 
 
-def _count_previous_attempts(activity_id: int, user_id: int, db_session: Session) -> int:
+def _count_previous_attempts(
+    activity_id: int, user_id: int, db_session: Session
+) -> int:
     """Count all non-DRAFT submissions (including RETURNED) as prior attempts."""
     return len(
         db_session.exec(

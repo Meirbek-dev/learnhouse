@@ -1,5 +1,7 @@
 'use client';
 
+import type { components } from '@/lib/api/generated';
+
 import { getProductsByCourse, getStripeProductCheckoutSession } from '@services/payments/products';
 import { ChevronDown, ChevronUp, Loader2, RefreshCcw, SquareCheck } from 'lucide-react';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
@@ -12,6 +14,8 @@ import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import useSWR from 'swr';
 
+type PaymentsProductRead = components['schemas']['PaymentsProductRead'];
+
 interface CoursePaidOptionsProps {
   course: {
     id: number;
@@ -21,8 +25,8 @@ interface CoursePaidOptionsProps {
 const CoursePaidOptions = ({ course }: CoursePaidOptionsProps) => {
   const t = useTranslations('Courses.CoursePaidOptions');
   const session = usePlatformSession() as any;
-  const [expandedProducts, setExpandedProducts] = useState<Record<string, boolean>>({});
-  const [isProcessing, setIsProcessing] = useState<Record<string, boolean>>({});
+  const [expandedProducts, setExpandedProducts] = useState<Record<number, boolean>>({});
+  const [isProcessing, setIsProcessing] = useState<Record<number, boolean>>({});
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
 
@@ -47,7 +51,7 @@ const CoursePaidOptions = ({ course }: CoursePaidOptionsProps) => {
         session.data?.tokens?.access_token,
       );
 
-      if (response.success) {
+      if (response.success && response.data?.checkout_url) {
         router.push(response.data.checkout_url);
       } else {
         toast.error(t('checkoutError'));
@@ -59,7 +63,7 @@ const CoursePaidOptions = ({ course }: CoursePaidOptionsProps) => {
     }
   };
 
-  const toggleProductExpansion = (productId: string) => {
+  const toggleProductExpansion = (productId: number) => {
     setExpandedProducts((prev) => ({
       ...prev,
       [productId]: !prev[productId],
@@ -80,9 +84,11 @@ const CoursePaidOptions = ({ course }: CoursePaidOptionsProps) => {
       </div>
     );
 
+  const productItems = linkedProducts.data ?? [];
+
   return (
     <div className="space-y-4 p-1">
-      {linkedProducts.data.map((product: any) => (
+      {productItems.map((product: PaymentsProductRead) => (
         <div
           key={product.id}
           className="flex flex-col rounded-lg bg-card p-4 shadow-sm ring-1 ring-border"

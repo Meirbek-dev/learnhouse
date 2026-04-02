@@ -66,7 +66,7 @@ export async function LandingContent() {
         })
       : Promise.resolve(null);
 
-    if (hasCustomLanding) {
+    if (hasCustomLanding && platform?.landing) {
       const gamificationData = await gamificationPromise;
 
       return (

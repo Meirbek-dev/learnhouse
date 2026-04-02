@@ -309,7 +309,6 @@ Useful CI patterns:
 ### Monorepo
 
 - add a shared Turbo task for contract generation
-- wire generation into CI and developer workflows
 
 ## Detailed Standards
 
@@ -370,8 +369,6 @@ Mitigation:
 
 Mitigation:
 
-- add lint or code review guidance
-- document the rule that API transport types come from generated contracts
 - treat handwritten duplicates as migration debt
 
 ## Recommended Initial Slice
@@ -391,7 +388,6 @@ Why these are good candidates:
 - they provide immediate frontend value
 - they let the team validate generation before tackling more complex course editing flows
 
-If the team wants the highest business impact instead, use courses as the first slice, but expect more cleanup work because the service surface is larger and currently includes more handwritten shapes.
 
 ## Suggested Milestones
 

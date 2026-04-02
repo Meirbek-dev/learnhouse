@@ -41,17 +41,17 @@ from src.services.users.users import (
 router = APIRouter()
 
 
-@router.get("/profile")
+@router.get("/profile", response_model=UserRead)
 async def api_get_current_user(
-    current_user: Annotated[User, Depends(get_current_user)],
-):
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
+) -> UserRead:
     """
     Get current user
     """
-    return current_user.model_dump()
+    return current_user
 
 
-@router.get("/session")
+@router.get("/session", response_model=UserSession)
 async def api_get_current_user_session(
     request: Request,
     db_session: Annotated[Session, Depends(get_db_session)],

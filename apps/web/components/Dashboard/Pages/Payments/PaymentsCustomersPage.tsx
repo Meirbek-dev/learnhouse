@@ -1,5 +1,7 @@
 'use client';
 
+import type { components } from '@/lib/api/generated';
+
 import UnconfiguredPaymentsDisclaimer from '@components/Pages/Payments/UnconfiguredPaymentsDisclaimer';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
@@ -14,33 +16,14 @@ import DataTable from '@components/ui/data-table';
 import { Badge } from '@components/ui/badge';
 import useSWR from 'swr';
 
-interface PaymentUserData {
-  payment_user_id: number;
-  user: {
-    username: string;
-    first_name: string;
-    last_name: string;
-    email: string;
-    avatar_image: string;
-    user_uuid: string;
-  };
-  product: {
-    name: string;
-    description: string;
-    product_type: string;
-    amount: number;
-    currency: string;
-  };
-  status: string;
-  creation_date: string;
-}
+type PaymentUserData = components['schemas']['PaymentsCustomerRead'];
 
 const PaymentsUsersTable = ({ data }: { data: PaymentUserData[] }) => {
   const t = useTranslations('Payments.CustomersPage');
   const locale = useLocale();
   const columns: ColumnDef<PaymentUserData>[] = [
     {
-      accessorFn: (item) => [item.user.first_name, item.user.last_name, item.user.username, item.user.email].join(' '),
+      accessorFn: (item) => [item.user?.first_name, item.user?.last_name, item.user?.username, item.user?.email].join(' '),
       id: 'user',
       header: t('userHeader'),
       cell: ({ row }) => (
@@ -48,11 +31,15 @@ const PaymentsUsersTable = ({ data }: { data: PaymentUserData[] }) => {
           <UserAvatar
             size="sm"
             variant="outline"
-            avatar_url={getUserAvatarMediaDirectory(row.original.user.user_uuid, row.original.user.avatar_image)}
+            avatar_url={
+              row.original.user?.user_uuid && row.original.user?.avatar_image
+                ? getUserAvatarMediaDirectory(row.original.user.user_uuid, row.original.user.avatar_image)
+                : ''
+            }
           />
           <div className="flex flex-col">
-            <span className="font-medium">{row.original.user.first_name || row.original.user.username}</span>
-            <span className="text-sm text-muted-foreground">{row.original.user.email}</span>
+            <span className="font-medium">{row.original.user?.first_name || row.original.user?.username || '-'}</span>
+            <span className="text-sm text-muted-foreground">{row.original.user?.email || '-'}</span>
           </div>
         </div>
       ),
@@ -61,16 +48,16 @@ const PaymentsUsersTable = ({ data }: { data: PaymentUserData[] }) => {
       accessorKey: 'product.name',
       id: 'product',
       header: t('productHeader'),
-      accessorFn: (item) => `${item.product.name} ${item.product.description || ''}`,
-      cell: ({ row }) => row.original.product.name,
+      accessorFn: (item) => `${item.product?.name || ''} ${item.product?.description || ''}`,
+      cell: ({ row }) => row.original.product?.name || '-',
     },
     {
-      accessorFn: (item) => item.product.product_type,
+      accessorFn: (item) => item.product?.product_type || '',
       id: 'type',
       header: t('typeHeader'),
       cell: ({ row }) => (
         <div className="flex items-center space-x-2">
-          {row.original.product.product_type === 'subscription' ? (
+          {row.original.product?.product_type === 'subscription' ? (
             <Badge
               variant="outline"
               className="flex items-center gap-1"
@@ -91,14 +78,19 @@ const PaymentsUsersTable = ({ data }: { data: PaymentUserData[] }) => {
       ),
     },
     {
-      accessorFn: (item) => item.product.amount,
+      accessorFn: (item) => item.product?.amount ?? 0,
       id: 'amount',
       header: t('amountHeader'),
-      cell: ({ row }) =>
-        new Intl.NumberFormat('en-US', {
+      cell: ({ row }) => {
+        if (!row.original.product) {
+          return '-';
+        }
+
+        return new Intl.NumberFormat('en-US', {
           style: 'currency',
           currency: row.original.product.currency,
-        }).format(row.original.product.amount),
+        }).format(row.original.product.amount);
+      },
     },
     {
       accessorKey: 'status',
@@ -116,7 +108,8 @@ const PaymentsUsersTable = ({ data }: { data: PaymentUserData[] }) => {
     {
       accessorKey: 'creation_date',
       header: t('purchaseDateHeader'),
-      cell: ({ row }) => new Date(row.original.creation_date).toLocaleDateString(locale),
+      cell: ({ row }) =>
+        row.original.creation_date ? new Date(row.original.creation_date).toLocaleDateString(locale) : '-',
     },
   ];
 
