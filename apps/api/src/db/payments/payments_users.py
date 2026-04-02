@@ -17,13 +17,15 @@ class PaymentStatusEnum(StrEnum):
 
 
 class ProviderSpecificData(PydanticStrictBaseModel):
-    stripe_customer: dict | None = None
-    custom_customer: dict | None = None
+    stripe_customer: dict[str, object] | None = None
+    custom_customer: dict[str, object] | None = None
 
 
 class PaymentsUserBase(SQLModelStrictBaseModel):
     status: PaymentStatusEnum = PaymentStatusEnum.PENDING
-    provider_specific_data: dict = Field(default_factory=dict, sa_column=Column(JSON))
+    provider_specific_data: dict[str, object] = Field(
+        default_factory=dict, sa_column=Column(JSON)
+    )
 
     @field_validator("status", mode="before")
     @classmethod

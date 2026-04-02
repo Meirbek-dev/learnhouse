@@ -132,19 +132,29 @@ class TrueSQLModelStrictBaseModel(SQLModel):
     )
 
 
-# Default aliases selected by environment
+# Default base models selected by environment.
 # Use strict variants during development for maximum feedback
 # and lighter (less-strict) variants in production for robustness.
-PydanticStrictBaseModel: type[
-    FalsePydanticStrictBaseModel | TruePydanticStrictBaseModel
-] = TruePydanticStrictBaseModel if is_dev_mode else FalsePydanticStrictBaseModel
+if is_dev_mode:
 
-SQLModelDefaultBase: type[
-    FalseSQLModelStrictBaseModel | TrueSQLModelStrictBaseModel
-] = TrueSQLModelStrictBaseModel if is_dev_mode else FalseSQLModelStrictBaseModel
+    class PydanticStrictBaseModel(TruePydanticStrictBaseModel):
+        pass
 
-# Backwards-compatible alias: some modules import SQLModelStrictBaseModel
-SQLModelStrictBaseModel = SQLModelDefaultBase
+
+    class SQLModelStrictBaseModel(TrueSQLModelStrictBaseModel):
+        pass
+
+else:
+
+    class PydanticStrictBaseModel(FalsePydanticStrictBaseModel):  # type: ignore[no-redef]
+        pass
+
+
+    class SQLModelStrictBaseModel(FalseSQLModelStrictBaseModel):  # type: ignore[no-redef]
+        pass
+
+
+SQLModelDefaultBase = SQLModelStrictBaseModel
 
 __all__: list[str] = [
     "FalsePydanticStrictBaseModel",

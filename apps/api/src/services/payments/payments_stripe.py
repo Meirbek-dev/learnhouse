@@ -1,5 +1,7 @@
 import logging
 from typing import Literal
+from collections.abc import Sequence
+from typing import Any, TypedDict
 
 import stripe
 from fastapi import HTTPException, Request
@@ -26,11 +28,22 @@ from src.services.payments.payments_users import (
 logger = logging.getLogger(__name__)
 
 
+class _CheckoutSessionParams(TypedDict, total=False):
+    success_url: str
+    cancel_url: str
+    mode: Literal["payment", "subscription"]
+    line_items: list[dict[str, Any]]
+    customer: str
+    metadata: dict[str, str]
+    payment_intent_data: dict[str, dict[str, str]]
+    subscription_data: dict[str, dict[str, str]]
+
+
 async def get_stripe_connected_account_id(
     request: Request,
     current_user: PublicUser | AnonymousUser | InternalUser,
     db_session: Session,
-):
+) -> str:
     # Get payments config
     payments_config = await get_payments_config(request, current_user, db_session)
 
@@ -232,7 +245,9 @@ async def create_checkout_session(
     stripe_product = stripe.Product.retrieve(
         product.provider_product_id, stripe_account=stripe_acc_id
     )
-    line_items = [{"price": stripe_product.default_price, "quantity": 1}]
+    line_items: list[dict[str, Any]] = [
+        {"price": stripe_product.default_price, "quantity": 1}
+    ]
 
     # Create or retrieve Stripe customer
     try:
@@ -276,7 +291,7 @@ async def create_checkout_session(
 
     # Create checkout session with customer
     try:
-        checkout_session_params = {
+        checkout_session_params: _CheckoutSessionParams = {
             "success_url": success_url,
             "cancel_url": cancel_url,
             "mode": (
@@ -310,7 +325,8 @@ async def create_checkout_session(
             }
 
         checkout_session = stripe.checkout.Session.create(
-            **checkout_session_params, stripe_account=stripe_acc_id
+            stripe_account=stripe_acc_id,
+            **checkout_session_params,
         )
 
         return {"checkout_url": checkout_session.url, "session_id": checkout_session.id}
@@ -330,7 +346,7 @@ async def generate_stripe_connect_link(
     redirect_uri: str,
     current_user: PublicUser | AnonymousUser | InternalUser,
     db_session: Session,
-):
+) -> dict[str, str]:
     """
     Generate a Stripe OAuth link for connecting a Stripe account
     """
@@ -360,7 +376,7 @@ async def create_stripe_account(
     ],  # Only standard is supported for now, we'll see if we need express later
     current_user: PublicUser | AnonymousUser | InternalUser,
     db_session: Session,
-):
+) -> str:
     # Get credentials
     creds = await get_stripe_internal_credentials()
     stripe.api_key = creds.get("stripe_secret_key")

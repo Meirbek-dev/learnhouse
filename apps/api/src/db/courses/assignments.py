@@ -118,7 +118,7 @@ class AssignmentTaskBase(SQLModelStrictBaseModel):
     hint: str
     reference_file: str | None = None
     assignment_type: AssignmentTaskTypeEnum
-    contents: dict = Field(default_factory=dict, sa_column=Column(JSON))
+    contents: dict[str, object] = Field(default_factory=dict, sa_column=Column(JSON))
     max_grade_value: int = 0  # Value is always between 0-100
 
     @field_validator("assignment_type", mode="before")
@@ -152,7 +152,7 @@ class AssignmentTaskUpdate(SQLModelStrictBaseModel):
     hint: str | None = None
     reference_file: str | None = None
     assignment_type: AssignmentTaskTypeEnum | None = None
-    contents: dict | None = Field(default=None, sa_column=Column(JSON))
+    contents: dict[str, object] | None = Field(default=None, sa_column=Column(JSON))
     max_grade_value: int | None = None
 
     @field_validator("assignment_type", mode="before")
@@ -200,7 +200,7 @@ class AssignmentTaskSubmissionBase(SQLModelStrictBaseModel):
     model_config = ConfigDict(use_enum_values=True)
 
     assignment_task_submission_uuid: str
-    task_submission: dict = Field(default_factory=dict, sa_column=Column(JSON))
+    task_submission: dict[str, object] = Field(default_factory=dict, sa_column=Column(JSON))
     grade: int = 0  # Value is always between 0-100
     task_submission_grade_feedback: str
     assignment_type: AssignmentTaskTypeEnum
@@ -240,7 +240,7 @@ class AssignmentTaskSubmissionUpdate(SQLModelStrictBaseModel):
 
     assignment_task_id: int | None = None
     assignment_task_submission_uuid: str | None = None
-    task_submission: dict | None = Field(default=None, sa_column=Column(JSON))
+    task_submission: dict[str, object] | None = Field(default=None, sa_column=Column(JSON))
     grade: int | None = None
     task_submission_grade_feedback: str | None = None
     assignment_type: AssignmentTaskTypeEnum | None = None
@@ -258,7 +258,9 @@ class AssignmentTaskSubmission(AssignmentTaskSubmissionBase, table=True):
 
     id: int | None = Field(default=None, primary_key=True)
     assignment_task_submission_uuid: str
-    task_submission: dict = Field(default_factory=dict, sa_column=Column(JSON))
+    task_submission: dict[str, object] = Field(
+        default_factory=dict, sa_column=Column(JSON)
+    )
     grade: int = 0  # Value is always between 0-100
     task_submission_grade_feedback: str
     assignment_type: AssignmentTaskTypeEnum
