@@ -1,6 +1,5 @@
 'use server';
 
-import type { components } from '@/lib/api/generated';
 import {
   type CustomResponseTyping,
   RequestBodyFormWithAuthHeader,
@@ -9,6 +8,7 @@ import {
   getResponseMetadata,
 } from '@services/utils/ts/requests';
 import { CacheProfiles, cacheLife, cacheTag } from '@/lib/cache';
+import type { components } from '@/lib/api/generated';
 import { getAPIUrl } from '@services/config/config';
 import { courseTag, tags } from '@/lib/cacheTags';
 
@@ -64,7 +64,18 @@ type NormalizedCourseWithPermissions = Omit<
 };
 type NormalizedFullCourse = Omit<
   FullCourseRead,
-  'about' | 'authors' | 'chapters' | 'course_uuid' | 'creation_date' | 'description' | 'learnings' | 'tags' | 'thumbnail_image' | 'thumbnail_type' | 'thumbnail_video' | 'update_date'
+  | 'about'
+  | 'authors'
+  | 'chapters'
+  | 'course_uuid'
+  | 'creation_date'
+  | 'description'
+  | 'learnings'
+  | 'tags'
+  | 'thumbnail_image'
+  | 'thumbnail_type'
+  | 'thumbnail_video'
+  | 'update_date'
 > & {
   about: string;
   authors: NormalizedCourseAuthor[];

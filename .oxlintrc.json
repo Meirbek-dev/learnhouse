@@ -43,7 +43,7 @@
     "react",
     "react-perf",
     "typescript",
-    "unicorn",
+    "unicorn"
   ],
   "rules": {
     /* Core Rules (No prefix) */
@@ -133,7 +133,7 @@
     "unicorn/prefer-string-raw": "off",
     "unicorn/no-array-reduce": "off",
     "unicorn/no-nested-ternary": "off",
-    "unicorn/filename-case": "off",
+    "unicorn/filename-case": "off"
   },
   "settings": {}
 }

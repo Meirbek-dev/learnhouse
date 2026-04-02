@@ -2,25 +2,36 @@
 
 ## Document Status
 
-- Scope: establish backend-driven API contracts and generated frontend types for the existing FastAPI + Next.js monorepo
+- Scope: establish backend-driven API contracts and generated frontend types for the existing
+  FastAPI + Next.js monorepo
 - Audience: backend, frontend, platform, and QA contributors working in this repository
-- Goal: make backend request and response models the single source of truth for API contracts, then generate and enforce matching frontend types
+- Goal: make backend request and response models the single source of truth for API contracts, then
+  generate and enforce matching frontend types
 
 ## Executive Summary
 
-The repository already has the right primitives for backend-first typesafety, but they are not yet connected into one contract workflow.
+The repository already has the right primitives for backend-first typesafety, but they are not yet
+connected into one contract workflow.
 
-The backend uses FastAPI with Pydantic and SQLModel models, which means it can already emit an OpenAPI schema. The frontend still relies on many handwritten request and response types, handwritten fetch wrappers, and separate Valibot form schemas. That leaves drift risk in exactly the places that matter most: request bodies, response payloads, pagination metadata, and enum-like fields.
+The backend uses FastAPI with Pydantic and SQLModel models, which means it can already emit an
+OpenAPI schema. The frontend still relies on many handwritten request and response types,
+handwritten fetch wrappers, and separate Valibot form schemas. That leaves drift risk in exactly the
+places that matter most: request bodies, response payloads, pagination metadata, and enum-like
+fields.
 
 The target state is straightforward:
 
 - backend request and response DTOs define the contract
 - FastAPI emits a stable OpenAPI document from those DTOs
 - frontend types and API client helpers are generated from OpenAPI
-- Valibot remains in the frontend for form UX and runtime validation, but not as the primary source of API contract truth
+- Valibot remains in the frontend for form UX and runtime validation, but not as the primary source
+  of API contract truth
 - CI blocks contract drift
 
-This is not a one-step tooling change. The current backend still has routes without explicit `response_model` declarations, and the frontend has many service modules that parse `fetch()` results as `any`. The plan therefore needs explicit contract hardening on the backend before code generation can become authoritative.
+This is not a one-step tooling change. The current backend still has routes without explicit
+`response_model` declarations, and the frontend has many service modules that parse `fetch()`
+results as `any`. The plan therefore needs explicit contract hardening on the backend before code
+generation can become authoritative.
 
 ## Confirmed Current Baseline
 
@@ -28,7 +39,8 @@ This is not a one-step tooling change. The current backend still has routes with
 
 - FastAPI app already exposes docs and Redoc in development mode
 - The codebase already uses strict Pydantic base models and SQLModel base models
-- A large number of domain DTOs already exist under `apps/api/src/db/` and `apps/api/src/services/.../schemas/`
+- A large number of domain DTOs already exist under `apps/api/src/db/` and
+  `apps/api/src/services/.../schemas/`
 - Some routes already use explicit `response_model=` declarations
 - Many routes still return raw dictionaries, implicit models, or mixed response shapes (fix that)
 
@@ -58,7 +70,8 @@ That implies four concrete rules:
 - Backend schema source: FastAPI OpenAPI generated from Pydantic DTOs
 - Type generator: `openapi-typescript`
 - Typed client option: `openapi-fetch` for a lightweight typed fetch wrapper
-- Optional richer generator: `orval` if the team later wants generated SDK modules and hook scaffolding
+- Optional richer generator: `orval` if the team later wants generated SDK modules and hook
+  scaffolding
 
 ### Why this fits this repository
 
@@ -66,7 +79,8 @@ That implies four concrete rules:
 - It avoids inventing a second schema system shared across Python and TypeScript
 - It supports incremental adoption route by route
 - It works cleanly with the current monorepo structure
-- It lets the team keep Valibot where it already adds value: frontend form parsing and runtime checks
+- It lets the team keep Valibot where it already adds value: frontend form parsing and runtime
+  checks
 
 ### What not to do
 
@@ -90,7 +104,8 @@ By the end of this effort:
 
 ### 1. Separate persistence models from transport models
 
-The repository already contains many Pydantic and SQLModel classes, but they are not consistently separated by concern.
+The repository already contains many Pydantic and SQLModel classes, but they are not consistently
+separated by concern.
 
 The rule going forward should be:
 
@@ -117,7 +132,8 @@ Required backend standards:
 - every non-trivial request body uses a named Pydantic DTO
 - every error response uses a documented shared shape where practical
 - inconsistent implicit `dict` responses are replaced with DTOs or typed response classes
-- routes returning lists or paginated results should use named wrapper DTOs where possible instead of relying on out-of-band knowledge
+- routes returning lists or paginated results should use named wrapper DTOs where possible instead
+  of relying on out-of-band knowledge
 
 ### 3. Generate TypeScript artifacts into a dedicated package or folder
 
@@ -130,7 +146,8 @@ Preferred initial choice for lowest friction:
 
 - `apps/web/lib/api/generated/`
 
-That keeps adoption simple and avoids introducing a new workspace package before the contract surface stabilizes.
+That keeps adoption simple and avoids introducing a new workspace package before the contract
+surface stabilizes.
 
 ### 4. Keep frontend runtime validation focused on user input
 
@@ -147,7 +164,8 @@ Generated API types should be responsible for:
 - path parameter typing
 - query parameter typing where the generator supports it
 
-The frontend should stop duplicating server DTOs as Valibot domain schemas unless they truly represent UI-specific input state rather than API transport objects.
+The frontend should stop duplicating server DTOs as Valibot domain schemas unless they truly
+represent UI-specific input state rather than API transport objects.
 
 ## Implementation Phases
 
@@ -225,7 +243,8 @@ Decision on committed artifact:
 
 Reason:
 
-- committed artifacts make contract diffs reviewable in pull requests and simplify frontend generation
+- committed artifacts make contract diffs reviewable in pull requests and simplify frontend
+  generation
 
 ### Phase 3. Frontend type generation
 
@@ -317,27 +336,33 @@ Useful CI patterns:
 - DTO names should reflect API intent, not ORM implementation detail
 - public response DTOs should be stable and explicit
 - request DTOs should use optional fields intentionally for patch semantics
-- list endpoints should prefer named wrappers over undocumented header-plus-array contracts when practical
+- list endpoints should prefer named wrappers over undocumented header-plus-array contracts when
+  practical
 - custom serialization behavior should be centralized and tested
 
 ### Frontend standards
 
 - generated API types are never edited manually
 - generated types are imported through a small stable barrel file
-- service modules may map generated transport types into UI view models, but only after the network boundary
-- form schemas may remain Valibot-based, but submission payloads should satisfy generated backend DTOs
+- service modules may map generated transport types into UI view models, but only after the network
+  boundary
+- form schemas may remain Valibot-based, but submission payloads should satisfy generated backend
+  DTOs
 
 ### Error contract standards
 
-The repository already uses a shared `error_code` + `message` shape in several places. That should become the documented default error contract for JSON error responses where practical.
+The repository already uses a shared `error_code` + `message` shape in several places. That should
+become the documented default error contract for JSON error responses where practical.
 
-For this effort, the key requirement is consistency rather than perfection. A partly standardized error contract is still better than undocumented ad hoc payloads.
+For this effort, the key requirement is consistency rather than perfection. A partly standardized
+error contract is still better than undocumented ad hoc payloads.
 
 ## Risks And Constraints
 
 ### Risk 1. OpenAPI quality may be weaker than expected
 
-FastAPI can only generate useful contracts from explicit route declarations. Existing implicit returns will need cleanup before generation is reliable.
+FastAPI can only generate useful contracts from explicit route declarations. Existing implicit
+returns will need cleanup before generation is reliable.
 
 Mitigation:
 
@@ -363,7 +388,8 @@ If backend field names are inconsistent, generation will faithfully reproduce th
 Mitigation:
 
 - clean the contract at the DTO layer before broad migration
-- use explicit DTO naming and serialization decisions rather than post-processing TypeScript output heavily
+- use explicit DTO naming and serialization decisions rather than post-processing TypeScript output
+  heavily
 
 ### Risk 4. Frontend developers may keep adding parallel handwritten interfaces
 
@@ -373,7 +399,8 @@ Mitigation:
 
 ## Recommended Initial Slice
 
-Do not start with the hardest domain. Start with one vertical that is important, bounded, and already uses explicit Pydantic models in several places.
+Do not start with the hardest domain. Start with one vertical that is important, bounded, and
+already uses explicit Pydantic models in several places.
 
 Recommended first slice:
 
@@ -387,7 +414,6 @@ Why these are good candidates:
 - they have relatively clear response models
 - they provide immediate frontend value
 - they let the team validate generation before tackling more complex course editing flows
-
 
 ## Suggested Milestones
 

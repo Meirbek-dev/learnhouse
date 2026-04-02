@@ -1,9 +1,9 @@
 'use server';
 
-import type { components } from '@/lib/api/generated';
 import { type CustomResponseTyping, RequestBodyWithAuthHeader, getResponseMetadata } from '@services/utils/ts/requests';
 import { shouldUseChunkedUpload, uploadFileChunked } from '@services/utils/chunked-upload';
 import { CacheProfiles, cacheLife, cacheTag } from '@/lib/cache';
+import type { components } from '@/lib/api/generated';
 import { getAPIUrl } from '@services/config/config';
 import { tags } from '@/lib/cacheTags';
 

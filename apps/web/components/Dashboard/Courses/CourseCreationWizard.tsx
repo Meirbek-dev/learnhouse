@@ -152,9 +152,10 @@ export default function CourseCreationWizard() {
           const createdCourse = result.data;
 
           if (!result.success || !createdCourse || !('course_uuid' in createdCourse)) {
-            const detail = createdCourse && typeof createdCourse === 'object' && 'detail' in createdCourse
-              ? createdCourse.detail
-              : undefined;
+            const detail =
+              createdCourse && typeof createdCourse === 'object' && 'detail' in createdCourse
+                ? createdCourse.detail
+                : undefined;
             throw new Error((typeof detail === 'string' ? detail : undefined) || t('errors.creationFailed'));
           }
 

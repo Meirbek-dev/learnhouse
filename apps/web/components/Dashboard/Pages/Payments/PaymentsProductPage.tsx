@@ -165,7 +165,9 @@ const PaymentsProductPage = () => {
     ([_url, token]) => getPaymentConfigs(token),
   );
 
-  const isStripeEnabled = paymentConfigs ? Boolean(paymentConfigs.find((config: PaymentsConfigRead) => config.provider === 'stripe')) : false;
+  const isStripeEnabled = paymentConfigs
+    ? Boolean(paymentConfigs.find((config: PaymentsConfigRead) => config.provider === 'stripe'))
+    : false;
 
   const handleArchiveProduct = async (productId: number) => {
     try {

@@ -1,6 +1,11 @@
 'use server';
+import {
+  type CustomResponseTyping,
+  RequestBodyWithAuthHeader,
+  errorHandling,
+  getResponseMetadata,
+} from '@services/utils/ts/requests';
 import type { components } from '@/lib/api/generated';
-import { type CustomResponseTyping, RequestBodyWithAuthHeader, errorHandling, getResponseMetadata } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
 import { tags } from '@/lib/cacheTags';
 
@@ -132,10 +137,7 @@ export async function verifyStripeConnection(
   return (await errorHandling(result)) as PaymentsStripeOAuthCallbackResponse;
 }
 
-export async function deletePaymentConfig(
-  id: number | string,
-  access_token: string,
-): Promise<PaymentsMessageResponse> {
+export async function deletePaymentConfig(id: number | string, access_token: string): Promise<PaymentsMessageResponse> {
   const result = await fetch(
     `${getAPIUrl()}payments/config?id=${id}`,
     RequestBodyWithAuthHeader('DELETE', null, null, access_token),

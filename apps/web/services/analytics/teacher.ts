@@ -1,7 +1,4 @@
-import type {
-  AnalyticsQuery,
-  AssessmentType,
-} from '@/types/analytics';
+import type { AnalyticsQuery, AssessmentType } from '@/types/analytics';
 import type { components } from '@/lib/api/generated';
 import { getAPIUrl } from '@services/config/config';
 

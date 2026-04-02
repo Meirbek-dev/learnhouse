@@ -57,9 +57,9 @@ export default function AssessmentOutliersTable({ rows, storageKey, serverPagina
       header: t('assessmentOutliers.colDifficulty'),
       cell: ({ row }) => {
         const v = row.original.difficulty_score;
-        if (v == null) return t('atRisk.na');
+        if (v === null) return t('atRisk.na');
         // difficulty_score = round(100 - pass_rate, 2) → already on a 0–100 scale.
-        return `${Math.round(v)}%`;
+        return `${Math.round(v ?? 0)}%`;
       },
     },
     {
@@ -68,15 +68,17 @@ export default function AssessmentOutliersTable({ rows, storageKey, serverPagina
       cell: ({ row }) =>
         row.original.outlier_reason_codes.filter((code): code is string => Boolean(code)).length ? (
           <div className="max-w-[240px] whitespace-normal text-xs text-muted-foreground">
-            {row.original.outlier_reason_codes.filter((code): code is string => Boolean(code)).map((code) => (
-              <Badge
-                key={code}
-                variant="outline"
-                className="mb-1 mr-1"
-              >
-                {getAnalyticsReasonCodeLabel(t, code)}
-              </Badge>
-            ))}
+            {row.original.outlier_reason_codes
+              .filter((code): code is string => Boolean(code))
+              .map((code) => (
+                <Badge
+                  key={code}
+                  variant="outline"
+                  className="mb-1 mr-1"
+                >
+                  {getAnalyticsReasonCodeLabel(t, code)}
+                </Badge>
+              ))}
           </div>
         ) : (
           t('assessmentOutliers.healthy')

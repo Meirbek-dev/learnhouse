@@ -1,7 +1,7 @@
 import { RequestBody, getResponseMetadata } from '@services/utils/ts/requests';
 import { fetchWithRetry } from '@/lib/fetchWithRetry';
-import { getAPIUrl } from '@services/config/config';
 import type { components } from '@/lib/api/generated';
+import { getAPIUrl } from '@services/config/config';
 import type { Role } from '@/types/permissions';
 
 type AuthTokens = components['schemas']['TokensResponse'];

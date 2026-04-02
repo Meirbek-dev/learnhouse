@@ -1,6 +1,5 @@
 'use server';
 
-import type { components } from '@/lib/api/generated';
 import {
   type CustomResponseTyping,
   RequestBodyFormWithAuthHeader,
@@ -10,6 +9,7 @@ import {
 } from '@services/utils/ts/requests';
 import { CacheProfiles, cacheLife, cacheTag } from '@/lib/cache';
 import { getServerAPIUrl } from '@services/config/config';
+import type { components } from '@/lib/api/generated';
 import { tags } from '@/lib/cacheTags';
 
 /*

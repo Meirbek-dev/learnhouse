@@ -11,7 +11,6 @@ import {
   Trophy,
   UserPen,
 } from 'lucide-react';
-import type { components } from '@/lib/api/generated';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { useContributorStatus } from '@/hooks/useContributorStatus';
 import { getProductsByCourse } from '@services/payments/products';
@@ -25,6 +24,7 @@ import { getAbsoluteUrl } from '@services/config/config';
 import { Card, CardContent } from '@/components/ui/card';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { getTrailSwrKey } from '@services/courses/keys';
+import type { components } from '@/lib/api/generated';
 import CoursePaidOptions from './CoursePaidOptions';
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';

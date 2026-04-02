@@ -4934,11 +4934,8 @@ export interface components {
         };
         /** CertificationCreate */
         CertificationCreate: {
-            /**
-             * Config
-             * @default {}
-             */
-            config: {
+            /** Config */
+            config?: {
                 [key: string]: unknown;
             };
             /** Course Id */
@@ -6327,7 +6324,7 @@ export interface components {
             /**
              * Creation Date
              * Format: date-time
-             * @default 2026-04-02T18:19:17.859490
+             * @default 2026-04-02T19:13:44.768169
              */
             creation_date: string;
             /**
@@ -6348,7 +6345,7 @@ export interface components {
             /**
              * Update Date
              * Format: date-time
-             * @default 2026-04-02T18:19:17.859529
+             * @default 2026-04-02T19:13:44.768206
              */
             update_date: string;
         };

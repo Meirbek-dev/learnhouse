@@ -2069,7 +2069,6 @@
         "properties": {
           "config": {
             "additionalProperties": true,
-            "default": {},
             "title": "Config",
             "type": "object"
           },
@@ -5598,7 +5597,7 @@
             "type": "boolean"
           },
           "creation_date": {
-            "default": "2026-04-02T18:19:17.859490",
+            "default": "2026-04-02T19:13:44.768169",
             "format": "date-time",
             "title": "Creation Date",
             "type": "string"
@@ -5640,7 +5639,7 @@
             "title": "Provider Specific Id"
           },
           "update_date": {
-            "default": "2026-04-02T18:19:17.859529",
+            "default": "2026-04-02T19:13:44.768206",
             "format": "date-time",
             "title": "Update Date",
             "type": "string"

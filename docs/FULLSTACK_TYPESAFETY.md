@@ -35,8 +35,10 @@ bun run generate:api-types
 - Backend DTOs are the source of truth for request and response shapes.
 - Frontend transport types should come from generated OpenAPI artifacts, not handwritten interfaces.
 - UI-only state and form validation can still use local types and Valibot schemas.
-- If a backend field is nullable, normalize it at the frontend boundary instead of weakening the generated contract.
-- If a frontend UI model intentionally differs from the transport model, add an explicit mapping function in the service layer.
+- If a backend field is nullable, normalize it at the frontend boundary instead of weakening the
+  generated contract.
+- If a frontend UI model intentionally differs from the transport model, add an explicit mapping
+  function in the service layer.
 
 ## Expected Change Flow
 
@@ -48,4 +50,5 @@ bun run generate:api-types
 
 ## CI Enforcement
 
-The `Contract Sync` workflow regenerates the contract artifacts and fails if `apps/api/openapi.json` or `apps/web/lib/api/generated/schema.ts` are out of date.
+The `Contract Sync` workflow regenerates the contract artifacts and fails if `apps/api/openapi.json`
+or `apps/web/lib/api/generated/schema.ts` are out of date.

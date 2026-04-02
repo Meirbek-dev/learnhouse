@@ -23,7 +23,8 @@ const PaymentsUsersTable = ({ data }: { data: PaymentUserData[] }) => {
   const locale = useLocale();
   const columns: ColumnDef<PaymentUserData>[] = [
     {
-      accessorFn: (item) => [item.user?.first_name, item.user?.last_name, item.user?.username, item.user?.email].join(' '),
+      accessorFn: (item) =>
+        [item.user?.first_name, item.user?.last_name, item.user?.username, item.user?.email].join(' '),
       id: 'user',
       header: t('userHeader'),
       cell: ({ row }) => (

@@ -2,7 +2,8 @@
 
 ## Objective
 
-Migrate all UI components, pages, layouts (Next.js 16 + React 19) to the ShadCN UI design system with full dark mode support, accessibility, and consistency.
+Migrate all UI components, pages, layouts (Next.js 16 + React 19) to the ShadCN UI design system
+with full dark mode support, accessibility, and consistency.
 
 This document is intended for an LLM coding agent. Follow instructions deterministically.
 
@@ -10,12 +11,12 @@ This document is intended for an LLM coding agent. Follow instructions determini
 
 ## Core Principles
 
-* Prefer using shadcn ui components and their variants
-* All styling must use Tailwind CSS utility classes.
-* Use design tokens via CSS variables (from ShadCN theme).
-* No hardcoded colors like `#fff`, `#000`, etc.
-* Preserve ARIA roles, keyboard navigation, focus states.
-* All components must support dark mode via `class` strategy.
+- Prefer using shadcn ui components and their variants
+- All styling must use Tailwind CSS utility classes.
+- Use design tokens via CSS variables (from ShadCN theme).
+- No hardcoded colors like `#fff`, `#000`, etc.
+- Preserve ARIA roles, keyboard navigation, focus states.
+- All components must support dark mode via `class` strategy.
 
 ---
 
@@ -29,13 +30,13 @@ For each component:
 
 ### DO
 
-* Use semantic classes: `bg-background`, `text-foreground`
-* Use spacing scale: `p-4`, `gap-6`
+- Use semantic classes: `bg-background`, `text-foreground`
+- Use spacing scale: `p-4`, `gap-6`
 
 ### DO NOT
 
-* Hardcode colors
-* Use inline styles
+- Hardcode colors
+- Use inline styles
 
 ---
 
@@ -43,8 +44,8 @@ For each component:
 
 Every component must:
 
-* Use semantic tokens
-* Avoid fixed colors
+- Use semantic tokens
+- Avoid fixed colors
 
 Example:
 
@@ -56,20 +57,20 @@ Example:
 
 ## Refactoring Checklist (Per Component)
 
-* [ ] Removed legacy styles
-* [ ] Uses Tailwind only
-* [ ] Supports dark mode
-* [ ] Accessible
-* [ ] No console errors
+- [ ] Removed legacy styles
+- [ ] Uses Tailwind only
+- [ ] Supports dark mode
+- [ ] Accessible
+- [ ] No console errors
 
 ---
 
 ## Anti-Patterns (Strictly Forbidden)
 
-* Mixing UI systems
-* Copy-pasting old CSS
-* Hardcoded colors
-* Recreating components already in ShadCN
+- Mixing UI systems
+- Copy-pasting old CSS
+- Hardcoded colors
+- Recreating components already in ShadCN
 
 ---
 
@@ -86,8 +87,8 @@ For each migrated file:
 
 Output:
 
-* Dark mode compatible
-* Tailwind-only styling
+- Dark mode compatible
+- Tailwind-only styling
 
 ---
 
@@ -95,14 +96,14 @@ Output:
 
 Migration is complete when:
 
-* Dark mode works globally
-* No legacy CSS remains
-* UI is consistent
+- Dark mode works globally
+- No legacy CSS remains
+- UI is consistent
 
 ---
 
 ## Notes
 
-* Prioritize correctness over speed
-* Prefer composition over customization
-* Reuse components aggressively
+- Prioritize correctness over speed
+- Prefer composition over customization
+- Reuse components aggressively
