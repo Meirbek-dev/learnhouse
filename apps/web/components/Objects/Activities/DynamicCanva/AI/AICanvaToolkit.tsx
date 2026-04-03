@@ -3,8 +3,10 @@ import ToolTip from '@/components/Objects/Elements/Tooltip/Tooltip';
 import { BookOpen, FormInput, Languages } from 'lucide-react';
 import platformLogo from '@public/platform_logo.svg';
 import { BubbleMenu } from '@tiptap/react/menus';
+import { Button } from '@components/ui/button';
 import type { Editor } from '@tiptap/react';
 import { useTranslations } from 'next-intl';
+import type { ReactNode } from 'react';
 import Image from 'next/image';
 
 interface AICanvaToolkitProps {
@@ -20,57 +22,48 @@ const AICanvaToolkit = (props: AICanvaToolkitProps) => {
   }
 
   return (
-    <>
-      <BubbleMenu
-        className="w-fit"
-        editor={props.editor}
-        shouldShow={({ editor }: { editor: Editor }) => {
-          // Only show the bubble menu if text is selected
-          return editor.isActive('text') && !editor.state.selection.empty;
-        }}
-      >
-        <div
-          style={{
-            background:
-              'linear-gradient(0deg, rgba(0, 0, 0, 0.25) 0%, rgba(0, 0, 0, 0.25) 100%), radial-gradient(105.16% 105.16% at 50% -5.16%, rgba(255, 255, 255, 0.2) 0%, rgba(0, 0, 0, 0) 100%), rgba(2, 1, 25, 0.98)',
-          }}
-          className="flex h-auto w-max cursor-pointer items-center space-x-3 rounded-xl px-3 py-2 text-white shadow-2xl ring-1 ring-white/10 backdrop-blur-sm"
-        >
-          <div className="flex items-center space-x-2 font-bold text-white/90">
-            <Image
-              className="rounded-lg ring-1 ring-white/10"
-              width={22}
-              src={platformLogo}
-              alt={t('aiIconAlt')}
-              style={{ height: 'auto' }}
-            />
-            <div className="text-sm">{t('aiTitle')}</div>
-          </div>
-          <div
-            className="flex h-4 w-px bg-white/20"
-            aria-hidden="true"
+    <BubbleMenu
+      className="w-fit"
+      editor={props.editor}
+      shouldShow={({ editor }: { editor: Editor }) => {
+        return editor.isActive('text') && !editor.state.selection.empty;
+      }}
+    >
+      <div className="flex h-auto w-max items-center gap-2 rounded-lg border border-zinc-700/60 bg-zinc-900/95 px-3 py-1.5 shadow-lg backdrop-blur-sm">
+        <div className="flex items-center gap-1.5">
+          <Image
+            className="rounded-sm"
+            width={18}
+            src={platformLogo}
+            alt={t('aiIconAlt')}
+            style={{ height: 'auto' }}
           />
-          <div className="flex space-x-2">
-            <AIActionButton
-              editor={props.editor}
-              label="Explain"
-            />
-            <AIActionButton
-              editor={props.editor}
-              label="Summarize"
-            />
-            <AIActionButton
-              editor={props.editor}
-              label="Translate"
-            />
-            <AIActionButton
-              editor={props.editor}
-              label="Examples"
-            />
-          </div>
+          <span className="text-xs font-semibold text-zinc-300">{t('aiTitle')}</span>
         </div>
-      </BubbleMenu>
-    </>
+        <div
+          className="h-4 w-px bg-zinc-700"
+          aria-hidden="true"
+        />
+        <div className="flex items-center gap-0.5">
+          <AIActionButton
+            editor={props.editor}
+            label="Explain"
+          />
+          <AIActionButton
+            editor={props.editor}
+            label="Summarize"
+          />
+          <AIActionButton
+            editor={props.editor}
+            label="Translate"
+          />
+          <AIActionButton
+            editor={props.editor}
+            label="Examples"
+          />
+        </div>
+      </div>
+    </BubbleMenu>
   );
 };
 
@@ -152,43 +145,31 @@ const AIActionButton = (props: { editor: Editor; label: string }) => {
     }
   };
 
+  const iconMap: Record<string, ReactNode> = {
+    Explain: <BookOpen size={13} />,
+    Summarize: <FormInput size={13} />,
+    Translate: <Languages size={13} />,
+    Examples: <span className="text-xs font-bold leading-none">{t('examplesAbbr')}</span>,
+  };
+
   return (
-    <div className="flex space-x-2">
-      <ToolTip
-        sideOffset={10}
-        slateBlack
-        content={getTooltipLabel(props.label)}
+    <ToolTip
+      sideOffset={10}
+      slateBlack
+      content={getTooltipLabel(props.label)}
+    >
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => handleAction(props.label)}
+        aria-label={getButtonLabel(props.label)}
+        className="h-7 gap-1.5 rounded-md px-2 text-xs font-medium text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100"
+        type="button"
       >
-        <button
-          onClick={() => handleAction(props.label)}
-          className="flex items-center space-x-1.5 rounded-lg bg-white/10 px-3 py-1.5 text-sm font-semibold text-white/80 ring-1 ring-white/5 transition-all duration-200 hover:bg-white/20 hover:text-white hover:shadow-lg hover:ring-white/20 focus:ring-2 focus:ring-white/40 focus:outline-none active:scale-95"
-          aria-label={getButtonLabel(props.label)}
-          type="button"
-        >
-          {props.label === 'Explain' && (
-            <BookOpen
-              size={16}
-              className="transition-transform group-hover:scale-110"
-            />
-          )}
-          {props.label === 'Summarize' && (
-            <FormInput
-              size={16}
-              className="transition-transform group-hover:scale-110"
-            />
-          )}
-          {props.label === 'Translate' && (
-            <Languages
-              size={16}
-              className="transition-transform group-hover:scale-110"
-            />
-          )}
-          {props.label === 'Examples' && <div className="text-xs font-bold text-white/60">{t('examplesAbbr')}</div>}
-          <div>{getButtonLabel(props.label)}</div>
-        </button>
-      </ToolTip>
-    </div>
+        {iconMap[props.label]}
+        {getButtonLabel(props.label)}
+      </Button>
+    </ToolTip>
   );
 };
-
 export default AICanvaToolkit;

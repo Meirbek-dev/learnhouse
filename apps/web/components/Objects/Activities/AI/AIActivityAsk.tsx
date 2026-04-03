@@ -1,7 +1,7 @@
 'use client';
 
 import { useActivityAIChat } from '@components/Contexts/AI/ActivityAIChatContext';
-import { AlertTriangle, BadgeInfo, MessageCircle, NotebookTabs, X } from 'lucide-react';
+import { AlertTriangle, BadgeInfo, NotebookTabs, Send, X } from 'lucide-react';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
 
 // for typing the session prop without exporting internal types
@@ -10,6 +10,8 @@ import { Alert, AlertDescription, AlertTitle } from '@components/ui/alert';
 import platformLogoLight from '@public/platform_logo_light.svg';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { ScrollArea } from '@components/ui/scroll-area';
+import { Separator } from '@components/ui/separator';
+import { Spinner } from '@components/ui/spinner';
 import { Card, CardContent } from '@components/ui/card';
 import type { KeyboardEvent } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
@@ -18,6 +20,7 @@ import { Input } from '@components/ui/input';
 import { Badge } from '@components/ui/badge';
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef } from 'react';
+import type { ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
 import type { TextPart } from '@tanstack/ai-client';
@@ -59,30 +62,26 @@ const AIActivityAsk = ({ activity: _activity }: AIActivityAskProps) => {
     <>
       <ActivityChatMessageBox />
       <Button
-        variant="ghost"
+        variant="outline"
         size="sm"
         role="button"
         tabIndex={0}
         aria-pressed={isModalOpen}
         onKeyDown={handleKeyDown}
         onClick={handleToggleModal}
-        style={{
-          background:
-            'linear-gradient(135deg, oklch(0.25 0.15 270) 0%, oklch(0.40 0.18 260) 50%, oklch(0.32 0.16 255) 100%)',
-        }}
         className={cn(
-          'h-10 flex items-center space-x-2 rounded-full px-4 py-2.5 text-sm font-semibold text-white hover:text-white shadow-lg ring-1 ring-white/10 transition-all duration-200 hover:scale-105 hover:shadow-xl hover:ring-white/20 focus:ring-2 focus:ring-white/30 focus:outline-none active:scale-95',
-          { 'ring-2 ring-white/30 shadow-xl': isModalOpen },
+          'h-9 gap-2 rounded-full border-zinc-700 bg-zinc-900 px-4 text-zinc-200 hover:bg-zinc-800 hover:text-white',
+          isModalOpen && 'border-zinc-600 bg-zinc-800 text-white',
         )}
       >
         <Image
-          className="rounded-md"
-          width={20}
-          height={20}
+          className="rounded-sm"
+          width={16}
+          height={16}
           src={platformLogoLight}
           alt={t('askAI')}
         />
-        <span className="text-xs font-bold">{t('askAI')}</span>
+        <span className="text-xs font-semibold">{t('askAI')}</span>
       </Button>
     </>
   );
@@ -182,128 +181,116 @@ const ActivityChatMessageBox = () => {
 
   const closeModal = () => setIsModalOpen(false);
 
-  if (!isModalOpen) {
-    return null;
-  }
-
   return (
     <AnimatePresence>
-      <motion.div
-        initial={{ y: 20, opacity: 0.3, filter: 'blur(5px)' }}
-        animate={{ y: 0, opacity: 1, filter: 'blur(0px)' }}
-        exit={{ y: 50, opacity: 0, filter: 'blur(25px)' }}
-        transition={{
-          type: 'spring',
-          bounce: 0.35,
-          duration: 1.7,
-          mass: 0.2,
-          velocity: 2,
-        }}
-        className="fixed bottom-4 left-1/2 z-50 w-[95%] max-w-4xl -translate-x-1/2"
-        style={{ pointerEvents: 'auto' }}
-      >
-        <Card className="relative h-[300px] overflow-hidden border-white/10 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-0 shadow-2xl ring-1 ring-white/10">
-          <CardContent className="flex h-full flex-col p-4">
-            {/* Header */}
-            <div className="mb-3 flex items-center justify-between">
-              <div className={cn('flex items-center gap-2', isLoading && 'animate-pulse')}>
-                <Image
-                  className="rounded-lg"
-                  width={28}
-                  height={28}
-                  src={platformLogoLight}
-                  alt={t('AI')}
-                />
-                <span className="text-sm font-bold text-white">{t('AI')}</span>
+      {isModalOpen && (
+        <motion.div
+          initial={{ y: 12, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: 8, opacity: 0 }}
+          transition={{ duration: 0.18, ease: 'easeOut' }}
+          className="fixed bottom-4 left-1/2 z-50 w-[95%] max-w-2xl -translate-x-1/2"
+          style={{ pointerEvents: 'auto' }}
+        >
+          <Card className="h-[340px] overflow-hidden border-zinc-700/60 bg-zinc-900 shadow-xl">
+            <CardContent className="flex h-full flex-col p-4">
+              {/* Header */}
+              <div className="mb-3 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Image
+                    className="rounded-sm"
+                    width={20}
+                    height={20}
+                    src={platformLogoLight}
+                    alt={t('AI')}
+                  />
+                  <span className="text-sm font-semibold text-zinc-100">{t('AI')}</span>
+                  {isLoading && <Spinner className="h-3.5 w-3.5 text-zinc-400" />}
+                </div>
+
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={closeModal}
+                  className="h-7 w-7 text-zinc-500 hover:text-zinc-300"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
               </div>
 
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={closeModal}
-                className="h-8 w-8 rounded-full bg-white/10 text-white/50 hover:bg-white/20 hover:text-white"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
+              {/* Status Message */}
+              {statusMessage && <p className="mb-2 text-xs text-zinc-500">{statusMessage}</p>}
 
-            {/* Status Message */}
-            {statusMessage && <p className="mb-2 text-xs text-white/60">{statusMessage}</p>}
-
-            {/* Messages Area */}
-            <div className="mb-3 flex-1 overflow-hidden">
-              {hasMessages && !hasError ? (
-                <ScrollArea className="h-full pr-4">
-                  <div className="space-y-4">
-                    {messages.map((message, index) => {
-                      const text = message.parts
-                        .filter((p): p is TextPart => p.type === 'text')
-                        .map((p) => p.content)
-                        .join('');
-                      return (
+              {/* Messages Area */}
+              <div className="mb-3 flex-1 overflow-hidden">
+                {hasMessages && !hasError ? (
+                  <ScrollArea className="h-full pr-2">
+                    <div className="space-y-3">
+                      {messages.map((message, index) => {
+                        const text = message.parts
+                          .filter((p): p is TextPart => p.type === 'text')
+                          .map((p) => p.content)
+                          .join('');
+                        return (
+                          <AIMessageComponent
+                            key={`${message.role}-${index}`}
+                            role={message.role as 'user' | 'assistant'}
+                            text={text}
+                          />
+                        );
+                      })}
+                      {streamingText && (
                         <AIMessageComponent
-                          key={`${message.role}-${index}`}
-                          role={message.role as 'user' | 'assistant'}
-                          text={text}
-                          animated={message.role === 'assistant'}
+                          role="assistant"
+                          text={streamingText}
                         />
-                      );
-                    })}
-                    {streamingText && (
-                      <AIMessageComponent
-                        role="assistant"
-                        text={streamingText}
-                        animated
-                      />
-                    )}
-                    <div ref={messagesEndRef} />
-                  </div>
-                </ScrollArea>
-              ) : hasError ? (
-                <ErrorDisplay
-                  error={{ isError: true, error_message: error?.message }}
-                  t={t}
-                />
-              ) : (
-                <AIMessagePlaceHolder
-                  sendMessage={(msg) => {
-                    sendMessage(msg);
-                  }}
-                  session={session}
-                />
-              )}
-            </div>
-
-            {/* Input Area */}
-            <div className="flex items-center gap-2">
-              <UserAvatar
-                size="sm"
-                variant="outline"
-              />
-              <Input
-                onKeyDown={handleKeyDown}
-                onChange={(e) => setInputValue(e.currentTarget.value)}
-                disabled={isLoading}
-                value={inputValue}
-                placeholder={t('placeholder')}
-                className={cn(
-                  'flex-1 border-white/10 bg-slate-950/40 text-white placeholder:text-white/30',
-                  isLoading && 'opacity-30',
+                      )}
+                      <div ref={messagesEndRef} />
+                    </div>
+                  </ScrollArea>
+                ) : hasError ? (
+                  <ErrorDisplay
+                    error={{ isError: true, error_message: error?.message }}
+                    t={t}
+                  />
+                ) : (
+                  <AIMessagePlaceHolder
+                    sendMessage={(msg) => sendMessage(msg)}
+                    session={session}
+                  />
                 )}
-              />
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleSend}
-                disabled={isLoading || !inputValue.trim()}
-                className="text-white/50 hover:text-white disabled:opacity-30"
-              >
-                <MessageCircle className="h-5 w-5" />
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </motion.div>
+              </div>
+
+              <Separator className="mb-3 bg-zinc-800" />
+
+              {/* Input Area */}
+              <div className="flex items-center gap-2">
+                <UserAvatar
+                  size="sm"
+                  variant="outline"
+                />
+                <Input
+                  onKeyDown={handleKeyDown}
+                  onChange={(e) => setInputValue(e.currentTarget.value)}
+                  disabled={isLoading}
+                  value={inputValue}
+                  placeholder={t('placeholder')}
+                  className="flex-1 border-zinc-700 bg-zinc-800 text-zinc-100 placeholder:text-zinc-500 focus-visible:ring-zinc-600"
+                />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleSend}
+                  disabled={isLoading || !inputValue.trim()}
+                  className="h-9 w-9 text-zinc-500 hover:text-zinc-300 disabled:opacity-40"
+                >
+                  <Send className="h-4 w-4" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+      )}
     </AnimatePresence>
   );
 };
@@ -312,25 +299,24 @@ const ActivityChatMessageBox = () => {
 interface AIMessageComponentProps {
   role: 'user' | 'assistant';
   text: string;
-  animated: boolean;
 }
 
-const AIMessageComponent = ({ role, text, animated }: AIMessageComponentProps) => {
+const AIMessageComponent = ({ role, text }: AIMessageComponentProps) => {
   return (
-    <div className="flex gap-2">
+    <div className={cn('flex gap-2', role === 'user' && 'flex-row-reverse')}>
       <UserAvatar
         size="sm"
         variant="outline"
         predefined_avatar={role === 'assistant' ? 'ai' : undefined}
       />
-      <motion.div
-        initial={animated ? { opacity: 0 } : false}
-        animate={{ opacity: 1 }}
-        transition={animated ? { duration: 0.25 } : undefined}
-        className="flex-1 rounded-lg bg-white/5 px-3 py-2"
+      <div
+        className={cn(
+          'max-w-[78%] rounded-lg px-3 py-2 text-sm leading-relaxed',
+          role === 'assistant' ? 'bg-zinc-800 text-zinc-100' : 'bg-indigo-600/20 text-zinc-100',
+        )}
       >
-        <p className="text-sm leading-relaxed text-white whitespace-pre-wrap">{text}</p>
-      </motion.div>
+        <p className="whitespace-pre-wrap">{text}</p>
+      </div>
     </div>
   );
 };
@@ -366,42 +352,22 @@ const AIMessagePlaceHolder = ({ sendMessage, session }: AIMessagePlaceHolderProp
   const userName = session?.data?.user?.first_name || session?.data?.user?.username || 'Пользователь';
 
   return (
-    <div className="flex h-full flex-col items-center justify-center space-y-6">
-      <motion.div
-        initial={{ y: 20, opacity: 0, filter: 'blur(5px)' }}
-        animate={{ y: 0, opacity: 1, filter: 'blur(0px)' }}
-        transition={{
-          type: 'spring',
-          bounce: 0.35,
-          duration: 1.7,
-          delay: 0.17,
-        }}
-        className="text-center"
-      >
-        <p className="flex flex-wrap items-center justify-center gap-2 text-xl font-semibold text-white/70">
+    <div className="flex h-full flex-col items-center justify-center gap-5">
+      <div className="text-center">
+        <p className="flex flex-wrap items-center justify-center gap-1.5 text-sm font-medium text-zinc-400">
           <span>{t('hello')}</span>
-          <span className="flex items-center gap-2 capitalize">
+          <span className="flex items-center gap-1.5 capitalize">
             <UserAvatar
               size="sm"
               variant="outline"
             />
-            <span>{userName},</span>
+            <span className="text-zinc-300">{userName},</span>
           </span>
           <span>{t('howCanWeHelp')}</span>
         </p>
-      </motion.div>
+      </div>
 
-      <motion.div
-        initial={{ y: 20, opacity: 0, filter: 'blur(5px)' }}
-        animate={{ y: 0, opacity: 1, filter: 'blur(0px)' }}
-        transition={{
-          type: 'spring',
-          bounce: 0.35,
-          duration: 1.7,
-          delay: 0.27,
-        }}
-        className="flex flex-wrap justify-center gap-2"
-      >
+      <div className="flex flex-wrap justify-center gap-2">
         <AIChatPredefinedQuestion
           sendMessage={sendMessage}
           label="about"
@@ -414,7 +380,7 @@ const AIMessagePlaceHolder = ({ sendMessage, session }: AIMessagePlaceHolderProp
           sendMessage={sendMessage}
           label="examples"
         />
-      </motion.div>
+      </div>
     </div>
   );
 };
@@ -428,33 +394,27 @@ interface AIChatPredefinedQuestionProps {
 const AIChatPredefinedQuestion = ({ sendMessage, label }: AIChatPredefinedQuestionProps) => {
   const t = useTranslations('Activities.AIActivityAsk');
 
-  const getQuestion = (questionLabel: PredefinedQuestionType): string => {
-    const questions = {
-      about: t('questionAbout'),
-      flashcards: t('questionFlashcards'),
-      examples: t('questionExamples'),
-    };
-    return questions[questionLabel] || '';
+  const questions: Record<PredefinedQuestionType, string> = {
+    about: t('questionAbout'),
+    flashcards: t('questionFlashcards'),
+    examples: t('questionExamples'),
   };
 
-  const getIcon = (iconLabel: PredefinedQuestionType) => {
-    const icons = {
-      about: <BadgeInfo className="h-4 w-4" />,
-      flashcards: <NotebookTabs className="h-4 w-4" />,
-      examples: <span className="text-xs font-bold">{t('examplesAbbr')}</span>,
-    };
-    return icons[iconLabel];
+  const icons: Record<PredefinedQuestionType, ReactNode> = {
+    about: <BadgeInfo className="h-3.5 w-3.5" />,
+    flashcards: <NotebookTabs className="h-3.5 w-3.5" />,
+    examples: <span className="text-xs font-bold leading-none">{t('examplesAbbr')}</span>,
   };
 
-  const question = getQuestion(label);
+  const question = questions[label];
 
   return (
     <Badge
       variant="outline"
-      className="cursor-pointer gap-2 border-white/10 bg-white/5 text-white/50 transition-all hover:bg-white/10 hover:text-white/70"
+      className="cursor-pointer gap-1.5 border-zinc-700 bg-zinc-800 py-1 text-zinc-400 transition-colors hover:border-zinc-600 hover:bg-zinc-700 hover:text-zinc-200"
       onClick={() => sendMessage(question)}
     >
-      {getIcon(label)}
+      {icons[label]}
       <span className="text-xs">{question}</span>
     </Badge>
   );
