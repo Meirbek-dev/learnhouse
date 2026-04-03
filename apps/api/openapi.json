@@ -1050,6 +1050,152 @@
         "title": "AssignmentTaskCreate",
         "type": "object"
       },
+      "AssignmentTaskSubmissionRead": {
+        "description": "Model for reading an assignment task submission.",
+        "properties": {
+          "activity_id": {
+            "title": "Activity Id",
+            "type": "integer"
+          },
+          "assignment_task_id": {
+            "title": "Assignment Task Id",
+            "type": "integer"
+          },
+          "assignment_task_submission_uuid": {
+            "title": "Assignment Task Submission Uuid",
+            "type": "string"
+          },
+          "assignment_type": {
+            "$ref": "#/components/schemas/AssignmentTaskTypeEnum"
+          },
+          "chapter_id": {
+            "title": "Chapter Id",
+            "type": "integer"
+          },
+          "course_id": {
+            "title": "Course Id",
+            "type": "integer"
+          },
+          "creation_date": {
+            "title": "Creation Date",
+            "type": "string"
+          },
+          "grade": {
+            "default": 0,
+            "title": "Grade",
+            "type": "integer"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "task_submission": {
+            "additionalProperties": true,
+            "title": "Task Submission",
+            "type": "object"
+          },
+          "task_submission_grade_feedback": {
+            "title": "Task Submission Grade Feedback",
+            "type": "string"
+          },
+          "update_date": {
+            "title": "Update Date",
+            "type": "string"
+          },
+          "user_id": {
+            "title": "User Id",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "assignment_task_submission_uuid",
+          "task_submission_grade_feedback",
+          "assignment_type",
+          "user_id",
+          "activity_id",
+          "course_id",
+          "chapter_id",
+          "assignment_task_id",
+          "id",
+          "creation_date",
+          "update_date"
+        ],
+        "title": "AssignmentTaskSubmissionRead",
+        "type": "object"
+      },
+      "AssignmentTaskSubmissionUpdate": {
+        "description": "Model for updating an assignment task submission.",
+        "properties": {
+          "assignment_task_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Assignment Task Id"
+          },
+          "assignment_task_submission_uuid": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Assignment Task Submission Uuid"
+          },
+          "assignment_type": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AssignmentTaskTypeEnum"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "grade": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Grade"
+          },
+          "task_submission": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Task Submission"
+          },
+          "task_submission_grade_feedback": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Task Submission Grade Feedback"
+          }
+        },
+        "title": "AssignmentTaskSubmissionUpdate",
+        "type": "object"
+      },
       "AssignmentTaskTypeEnum": {
         "enum": [
           "FILE_SUBMISSION",
@@ -1247,6 +1393,165 @@
           }
         },
         "title": "AssignmentUpdate",
+        "type": "object"
+      },
+      "AssignmentUserSubmissionRead": {
+        "description": "Model for reading an assignment user submission.",
+        "properties": {
+          "assignment_id": {
+            "title": "Assignment Id",
+            "type": "integer"
+          },
+          "assignmentusersubmission_uuid": {
+            "title": "Assignmentusersubmission Uuid",
+            "type": "string"
+          },
+          "creation_date": {
+            "title": "Creation Date",
+            "type": "string"
+          },
+          "grade": {
+            "title": "Grade",
+            "type": "integer"
+          },
+          "graded_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Graded At"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "submission_status": {
+            "$ref": "#/components/schemas/AssignmentUserSubmissionStatus",
+            "default": "SUBMITTED"
+          },
+          "submitted_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Submitted At"
+          },
+          "update_date": {
+            "title": "Update Date",
+            "type": "string"
+          },
+          "user_id": {
+            "title": "User Id",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "grade",
+          "user_id",
+          "assignment_id",
+          "id",
+          "assignmentusersubmission_uuid",
+          "creation_date",
+          "update_date"
+        ],
+        "title": "AssignmentUserSubmissionRead",
+        "type": "object"
+      },
+      "AssignmentUserSubmissionStatus": {
+        "enum": [
+          "PENDING",
+          "SUBMITTED",
+          "GRADED",
+          "LATE",
+          "NOT_SUBMITTED"
+        ],
+        "title": "AssignmentUserSubmissionStatus",
+        "type": "string"
+      },
+      "AssignmentUserSubmissionWithUserRead": {
+        "description": "Assignment-level submission status enriched with user information.",
+        "properties": {
+          "assignment_id": {
+            "title": "Assignment Id",
+            "type": "integer"
+          },
+          "assignmentusersubmission_uuid": {
+            "title": "Assignmentusersubmission Uuid",
+            "type": "string"
+          },
+          "creation_date": {
+            "title": "Creation Date",
+            "type": "string"
+          },
+          "grade": {
+            "title": "Grade",
+            "type": "integer"
+          },
+          "graded_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Graded At"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "submission_status": {
+            "$ref": "#/components/schemas/AssignmentUserSubmissionStatus",
+            "default": "SUBMITTED"
+          },
+          "submitted_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Submitted At"
+          },
+          "update_date": {
+            "title": "Update Date",
+            "type": "string"
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserRead"
+          },
+          "user_id": {
+            "title": "User Id",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "grade",
+          "user_id",
+          "assignment_id",
+          "id",
+          "assignmentusersubmission_uuid",
+          "creation_date",
+          "update_date",
+          "user"
+        ],
+        "title": "AssignmentUserSubmissionWithUserRead",
         "type": "object"
       },
       "AtRiskLearnerRow": {
@@ -1984,6 +2289,24 @@
           }
         },
         "title": "Body_api_put_assignment_task_ref_file_api_v1_assignments__assignment_uuid__tasks__assignment_task_uuid__ref_file_post",
+        "type": "object"
+      },
+      "Body_api_put_assignment_task_sub_file_api_v1_assignments__assignment_uuid__tasks__assignment_task_uuid__sub_file_post": {
+        "properties": {
+          "sub_file": {
+            "anyOf": [
+              {
+                "contentMediaType": "application/octet-stream",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sub File"
+          }
+        },
+        "title": "Body_api_put_assignment_task_sub_file_api_v1_assignments__assignment_uuid__tasks__assignment_task_uuid__sub_file_post",
         "type": "object"
       },
       "Body_api_update_avatar_user_api_v1_users_update_avatar__user_id__put": {
@@ -5726,7 +6049,7 @@
             "type": "boolean"
           },
           "creation_date": {
-            "default": "2026-04-03T13:11:13.771036",
+            "default": "2026-04-03T14:41:56.132543",
             "format": "date-time",
             "title": "Creation Date",
             "type": "string"
@@ -5768,7 +6091,7 @@
             "title": "Provider Specific Id"
           },
           "update_date": {
-            "default": "2026-04-03T13:11:13.771136",
+            "default": "2026-04-03T14:41:56.132582",
             "format": "date-time",
             "title": "Update Date",
             "type": "string"
@@ -13651,6 +13974,64 @@
         ]
       }
     },
+    "/api/v1/assignments/submissions/{assignment_task_submission_uuid}": {
+      "put": {
+        "description": "Update an assignment task submission.",
+        "operationId": "api_update_assignment_task_submission_api_v1_assignments_submissions__assignment_task_submission_uuid__put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "assignment_task_submission_uuid",
+            "required": true,
+            "schema": {
+              "title": "Assignment Task Submission Uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignmentTaskSubmissionUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssignmentTaskSubmissionRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Api Update Assignment Task Submission",
+        "tags": [
+          "assignments"
+        ]
+      }
+    },
     "/api/v1/assignments/task/{assignment_task_uuid}": {
       "get": {
         "description": "Read task for an assignment",
@@ -13910,6 +14291,163 @@
         ]
       }
     },
+    "/api/v1/assignments/{assignment_uuid}/submissions": {
+      "get": {
+        "description": "Get assignment-level submission statuses for all course learners.",
+        "operationId": "api_get_assignment_submissions_api_v1_assignments__assignment_uuid__submissions_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "assignment_uuid",
+            "required": true,
+            "schema": {
+              "title": "Assignment Uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AssignmentUserSubmissionWithUserRead"
+                  },
+                  "title": "Response Api Get Assignment Submissions Api V1 Assignments  Assignment Uuid  Submissions Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Api Get Assignment Submissions",
+        "tags": [
+          "assignments"
+        ]
+      }
+    },
+    "/api/v1/assignments/{assignment_uuid}/submissions/me": {
+      "get": {
+        "description": "Get the current user's assignment-level submission status.",
+        "operationId": "api_get_assignment_submission_me_api_v1_assignments__assignment_uuid__submissions_me_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "assignment_uuid",
+            "required": true,
+            "schema": {
+              "title": "Assignment Uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssignmentUserSubmissionRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Api Get Assignment Submission Me",
+        "tags": [
+          "assignments"
+        ]
+      }
+    },
+    "/api/v1/assignments/{assignment_uuid}/submissions/{user_id}": {
+      "get": {
+        "description": "Get a specific user's assignment-level submission status.",
+        "operationId": "api_get_assignment_submission_user_api_v1_assignments__assignment_uuid__submissions__user_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "assignment_uuid",
+            "required": true,
+            "schema": {
+              "title": "Assignment Uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "user_id",
+            "required": true,
+            "schema": {
+              "title": "User Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssignmentUserSubmissionRead"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Api Get Assignment Submission User",
+        "tags": [
+          "assignments"
+        ]
+      }
+    },
     "/api/v1/assignments/{assignment_uuid}/tasks": {
       "get": {
         "description": "Read tasks for an assignment",
@@ -14160,6 +14698,377 @@
           }
         ],
         "summary": "Api Put Assignment Task Ref File",
+        "tags": [
+          "assignments"
+        ]
+      }
+    },
+    "/api/v1/assignments/{assignment_uuid}/tasks/{assignment_task_uuid}/sub_file": {
+      "post": {
+        "description": "Upload a submission file for an assignment task.",
+        "operationId": "api_put_assignment_task_sub_file_api_v1_assignments__assignment_uuid__tasks__assignment_task_uuid__sub_file_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "assignment_uuid",
+            "required": true,
+            "schema": {
+              "title": "Assignment Uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "assignment_task_uuid",
+            "required": true,
+            "schema": {
+              "title": "Assignment Task Uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_api_put_assignment_task_sub_file_api_v1_assignments__assignment_uuid__tasks__assignment_task_uuid__sub_file_post"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Api Put Assignment Task Sub File",
+        "tags": [
+          "assignments"
+        ]
+      }
+    },
+    "/api/v1/assignments/{assignment_uuid}/tasks/{assignment_task_uuid}/submissions": {
+      "get": {
+        "description": "List all submissions for an assignment task.",
+        "operationId": "api_get_assignment_task_submissions_api_v1_assignments__assignment_uuid__tasks__assignment_task_uuid__submissions_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "assignment_uuid",
+            "required": true,
+            "schema": {
+              "title": "Assignment Uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "assignment_task_uuid",
+            "required": true,
+            "schema": {
+              "title": "Assignment Task Uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AssignmentTaskSubmissionRead"
+                  },
+                  "title": "Response Api Get Assignment Task Submissions Api V1 Assignments  Assignment Uuid  Tasks  Assignment Task Uuid  Submissions Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Api Get Assignment Task Submissions",
+        "tags": [
+          "assignments"
+        ]
+      },
+      "put": {
+        "description": "Create or update a submission for an assignment task.",
+        "operationId": "api_handle_assignment_task_submission_api_v1_assignments__assignment_uuid__tasks__assignment_task_uuid__submissions_put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "assignment_uuid",
+            "required": true,
+            "schema": {
+              "title": "Assignment Uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "assignment_task_uuid",
+            "required": true,
+            "schema": {
+              "title": "Assignment Task Uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignmentTaskSubmissionUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Api Handle Assignment Task Submission",
+        "tags": [
+          "assignments"
+        ]
+      }
+    },
+    "/api/v1/assignments/{assignment_uuid}/tasks/{assignment_task_uuid}/submissions/me": {
+      "get": {
+        "description": "Get the current user's submission for an assignment task.",
+        "operationId": "api_get_assignment_task_submission_me_api_v1_assignments__assignment_uuid__tasks__assignment_task_uuid__submissions_me_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "assignment_uuid",
+            "required": true,
+            "schema": {
+              "title": "Assignment Uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "assignment_task_uuid",
+            "required": true,
+            "schema": {
+              "title": "Assignment Task Uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Api Get Assignment Task Submission Me",
+        "tags": [
+          "assignments"
+        ]
+      }
+    },
+    "/api/v1/assignments/{assignment_uuid}/tasks/{assignment_task_uuid}/submissions/user/{user_id}": {
+      "get": {
+        "description": "Get a specific user's submission for an assignment task.",
+        "operationId": "api_get_assignment_task_submission_user_api_v1_assignments__assignment_uuid__tasks__assignment_task_uuid__submissions_user__user_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "assignment_uuid",
+            "required": true,
+            "schema": {
+              "title": "Assignment Uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "assignment_task_uuid",
+            "required": true,
+            "schema": {
+              "title": "Assignment Task Uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "user_id",
+            "required": true,
+            "schema": {
+              "title": "User Id",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Api Get Assignment Task Submission User",
+        "tags": [
+          "assignments"
+        ]
+      }
+    },
+    "/api/v1/assignments/{assignment_uuid}/tasks/{assignment_task_uuid}/submissions/{assignment_task_submission_uuid}": {
+      "delete": {
+        "description": "Delete an assignment task submission.",
+        "operationId": "api_delete_assignment_task_submission_api_v1_assignments__assignment_uuid__tasks__assignment_task_uuid__submissions__assignment_task_submission_uuid__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "assignment_uuid",
+            "required": true,
+            "schema": {
+              "title": "Assignment Uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "assignment_task_uuid",
+            "required": true,
+            "schema": {
+              "title": "Assignment Task Uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "assignment_task_submission_uuid",
+            "required": true,
+            "schema": {
+              "title": "Assignment Task Submission Uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Api Delete Assignment Task Submission",
         "tags": [
           "assignments"
         ]

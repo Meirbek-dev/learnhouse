@@ -535,6 +535,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/assignments/submissions/{assignment_task_submission_uuid}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Api Update Assignment Task Submission
+         * @description Update an assignment task submission.
+         */
+        put: operations["api_update_assignment_task_submission_api_v1_assignments_submissions__assignment_task_submission_uuid__put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/assignments/task/{assignment_task_uuid}": {
         parameters: {
             query?: never;
@@ -603,6 +623,66 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/assignments/{assignment_uuid}/submissions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Api Get Assignment Submissions
+         * @description Get assignment-level submission statuses for all course learners.
+         */
+        get: operations["api_get_assignment_submissions_api_v1_assignments__assignment_uuid__submissions_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/assignments/{assignment_uuid}/submissions/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Api Get Assignment Submission Me
+         * @description Get the current user's assignment-level submission status.
+         */
+        get: operations["api_get_assignment_submission_me_api_v1_assignments__assignment_uuid__submissions_me_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/assignments/{assignment_uuid}/submissions/{user_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Api Get Assignment Submission User
+         * @description Get a specific user's assignment-level submission status.
+         */
+        get: operations["api_get_assignment_submission_user_api_v1_assignments__assignment_uuid__submissions__user_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/assignments/{assignment_uuid}/tasks": {
         parameters: {
             query?: never;
@@ -666,6 +746,110 @@ export interface paths {
          */
         post: operations["api_put_assignment_task_ref_file_api_v1_assignments__assignment_uuid__tasks__assignment_task_uuid__ref_file_post"];
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/assignments/{assignment_uuid}/tasks/{assignment_task_uuid}/sub_file": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Api Put Assignment Task Sub File
+         * @description Upload a submission file for an assignment task.
+         */
+        post: operations["api_put_assignment_task_sub_file_api_v1_assignments__assignment_uuid__tasks__assignment_task_uuid__sub_file_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/assignments/{assignment_uuid}/tasks/{assignment_task_uuid}/submissions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Api Get Assignment Task Submissions
+         * @description List all submissions for an assignment task.
+         */
+        get: operations["api_get_assignment_task_submissions_api_v1_assignments__assignment_uuid__tasks__assignment_task_uuid__submissions_get"];
+        /**
+         * Api Handle Assignment Task Submission
+         * @description Create or update a submission for an assignment task.
+         */
+        put: operations["api_handle_assignment_task_submission_api_v1_assignments__assignment_uuid__tasks__assignment_task_uuid__submissions_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/assignments/{assignment_uuid}/tasks/{assignment_task_uuid}/submissions/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Api Get Assignment Task Submission Me
+         * @description Get the current user's submission for an assignment task.
+         */
+        get: operations["api_get_assignment_task_submission_me_api_v1_assignments__assignment_uuid__tasks__assignment_task_uuid__submissions_me_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/assignments/{assignment_uuid}/tasks/{assignment_task_uuid}/submissions/user/{user_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Api Get Assignment Task Submission User
+         * @description Get a specific user's submission for an assignment task.
+         */
+        get: operations["api_get_assignment_task_submission_user_api_v1_assignments__assignment_uuid__tasks__assignment_task_uuid__submissions_user__user_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/assignments/{assignment_uuid}/tasks/{assignment_task_uuid}/submissions/{assignment_task_submission_uuid}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Api Delete Assignment Task Submission
+         * @description Delete an assignment task submission.
+         */
+        delete: operations["api_delete_assignment_task_submission_api_v1_assignments__assignment_uuid__tasks__assignment_task_uuid__submissions__assignment_task_submission_uuid__delete"];
         options?: never;
         head?: never;
         patch?: never;
@@ -4608,6 +4792,61 @@ export interface components {
             title: string;
         };
         /**
+         * AssignmentTaskSubmissionRead
+         * @description Model for reading an assignment task submission.
+         */
+        AssignmentTaskSubmissionRead: {
+            /** Activity Id */
+            activity_id: number;
+            /** Assignment Task Id */
+            assignment_task_id: number;
+            /** Assignment Task Submission Uuid */
+            assignment_task_submission_uuid: string;
+            assignment_type: components["schemas"]["AssignmentTaskTypeEnum"];
+            /** Chapter Id */
+            chapter_id: number;
+            /** Course Id */
+            course_id: number;
+            /** Creation Date */
+            creation_date: string;
+            /**
+             * Grade
+             * @default 0
+             */
+            grade: number;
+            /** Id */
+            id: number;
+            /** Task Submission */
+            task_submission?: {
+                [key: string]: unknown;
+            };
+            /** Task Submission Grade Feedback */
+            task_submission_grade_feedback: string;
+            /** Update Date */
+            update_date: string;
+            /** User Id */
+            user_id: number;
+        };
+        /**
+         * AssignmentTaskSubmissionUpdate
+         * @description Model for updating an assignment task submission.
+         */
+        AssignmentTaskSubmissionUpdate: {
+            /** Assignment Task Id */
+            assignment_task_id?: number | null;
+            /** Assignment Task Submission Uuid */
+            assignment_task_submission_uuid?: string | null;
+            assignment_type?: components["schemas"]["AssignmentTaskTypeEnum"] | null;
+            /** Grade */
+            grade?: number | null;
+            /** Task Submission */
+            task_submission?: {
+                [key: string]: unknown;
+            } | null;
+            /** Task Submission Grade Feedback */
+            task_submission_grade_feedback?: string | null;
+        };
+        /**
          * AssignmentTaskTypeEnum
          * @enum {string}
          */
@@ -4655,6 +4894,64 @@ export interface components {
             title?: string | null;
             /** Update Date */
             update_date?: string | null;
+        };
+        /**
+         * AssignmentUserSubmissionRead
+         * @description Model for reading an assignment user submission.
+         */
+        AssignmentUserSubmissionRead: {
+            /** Assignment Id */
+            assignment_id: number;
+            /** Assignmentusersubmission Uuid */
+            assignmentusersubmission_uuid: string;
+            /** Creation Date */
+            creation_date: string;
+            /** Grade */
+            grade: number;
+            /** Graded At */
+            graded_at?: string | null;
+            /** Id */
+            id: number;
+            /** @default SUBMITTED */
+            submission_status: components["schemas"]["AssignmentUserSubmissionStatus"];
+            /** Submitted At */
+            submitted_at?: string | null;
+            /** Update Date */
+            update_date: string;
+            /** User Id */
+            user_id: number;
+        };
+        /**
+         * AssignmentUserSubmissionStatus
+         * @enum {string}
+         */
+        AssignmentUserSubmissionStatus: "PENDING" | "SUBMITTED" | "GRADED" | "LATE" | "NOT_SUBMITTED";
+        /**
+         * AssignmentUserSubmissionWithUserRead
+         * @description Assignment-level submission status enriched with user information.
+         */
+        AssignmentUserSubmissionWithUserRead: {
+            /** Assignment Id */
+            assignment_id: number;
+            /** Assignmentusersubmission Uuid */
+            assignmentusersubmission_uuid: string;
+            /** Creation Date */
+            creation_date: string;
+            /** Grade */
+            grade: number;
+            /** Graded At */
+            graded_at?: string | null;
+            /** Id */
+            id: number;
+            /** @default SUBMITTED */
+            submission_status: components["schemas"]["AssignmentUserSubmissionStatus"];
+            /** Submitted At */
+            submitted_at?: string | null;
+            /** Update Date */
+            update_date: string;
+            user: components["schemas"]["UserRead"];
+            /** User Id */
+            user_id: number;
         };
         /** AtRiskLearnerRow */
         AtRiskLearnerRow: {
@@ -4930,6 +5227,11 @@ export interface components {
         Body_api_put_assignment_task_ref_file_api_v1_assignments__assignment_uuid__tasks__assignment_task_uuid__ref_file_post: {
             /** Reference File */
             reference_file?: string | null;
+        };
+        /** Body_api_put_assignment_task_sub_file_api_v1_assignments__assignment_uuid__tasks__assignment_task_uuid__sub_file_post */
+        Body_api_put_assignment_task_sub_file_api_v1_assignments__assignment_uuid__tasks__assignment_task_uuid__sub_file_post: {
+            /** Sub File */
+            sub_file?: string | null;
         };
         /** Body_api_update_avatar_user_api_v1_users_update_avatar__user_id__put */
         Body_api_update_avatar_user_api_v1_users_update_avatar__user_id__put: {
@@ -6401,7 +6703,7 @@ export interface components {
             /**
              * Creation Date
              * Format: date-time
-             * @default 2026-04-03T13:11:13.771036
+             * @default 2026-04-03T14:41:56.132543
              */
             creation_date: string;
             /**
@@ -6422,7 +6724,7 @@ export interface components {
             /**
              * Update Date
              * Format: date-time
-             * @default 2026-04-03T13:11:13.771136
+             * @default 2026-04-03T14:41:56.132582
              */
             update_date: string;
         };
@@ -9253,6 +9555,41 @@ export interface operations {
             };
         };
     };
+    api_update_assignment_task_submission_api_v1_assignments_submissions__assignment_task_submission_uuid__put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                assignment_task_submission_uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssignmentTaskSubmissionUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssignmentTaskSubmissionRead"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     api_read_assignment_task_api_v1_assignments_task__assignment_task_uuid__get: {
         parameters: {
             query?: never;
@@ -9417,6 +9754,100 @@ export interface operations {
             };
         };
     };
+    api_get_assignment_submissions_api_v1_assignments__assignment_uuid__submissions_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                assignment_uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssignmentUserSubmissionWithUserRead"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    api_get_assignment_submission_me_api_v1_assignments__assignment_uuid__submissions_me_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                assignment_uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssignmentUserSubmissionRead"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    api_get_assignment_submission_user_api_v1_assignments__assignment_uuid__submissions__user_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                assignment_uuid: string;
+                user_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssignmentUserSubmissionRead"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     api_read_assignment_tasks_api_v1_assignments__assignment_uuid__tasks_get: {
         parameters: {
             query?: never;
@@ -9563,6 +9994,208 @@ export interface operations {
                 "multipart/form-data": components["schemas"]["Body_api_put_assignment_task_ref_file_api_v1_assignments__assignment_uuid__tasks__assignment_task_uuid__ref_file_post"];
             };
         };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    api_put_assignment_task_sub_file_api_v1_assignments__assignment_uuid__tasks__assignment_task_uuid__sub_file_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                assignment_uuid: string;
+                assignment_task_uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "multipart/form-data": components["schemas"]["Body_api_put_assignment_task_sub_file_api_v1_assignments__assignment_uuid__tasks__assignment_task_uuid__sub_file_post"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    api_get_assignment_task_submissions_api_v1_assignments__assignment_uuid__tasks__assignment_task_uuid__submissions_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                assignment_uuid: string;
+                assignment_task_uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssignmentTaskSubmissionRead"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    api_handle_assignment_task_submission_api_v1_assignments__assignment_uuid__tasks__assignment_task_uuid__submissions_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                assignment_uuid: string;
+                assignment_task_uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssignmentTaskSubmissionUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    api_get_assignment_task_submission_me_api_v1_assignments__assignment_uuid__tasks__assignment_task_uuid__submissions_me_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                assignment_uuid: string;
+                assignment_task_uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    api_get_assignment_task_submission_user_api_v1_assignments__assignment_uuid__tasks__assignment_task_uuid__submissions_user__user_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                assignment_uuid: string;
+                assignment_task_uuid: string;
+                user_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    api_delete_assignment_task_submission_api_v1_assignments__assignment_uuid__tasks__assignment_task_uuid__submissions__assignment_task_submission_uuid__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                assignment_uuid: string;
+                assignment_task_uuid: string;
+                assignment_task_submission_uuid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
         responses: {
             /** @description Successful Response */
             200: {

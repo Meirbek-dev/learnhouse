@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 from enum import Enum, StrEnum
 
 from pydantic import ConfigDict, field_validator
@@ -6,6 +6,33 @@ from sqlalchemy import JSON, Column, DateTime, ForeignKey
 from sqlmodel import Field
 
 from src.db.strict_base_model import SQLModelStrictBaseModel
+from src.db.users import UserRead
+
+
+def _normalize_due_date_value(value: str | None) -> str | None:
+    if value is None:
+        return None
+    normalized = value.strip()
+    if normalized == "":
+        return ""
+
+    try:
+        if "T" in normalized:
+            datetime.fromisoformat(normalized.replace("Z", "+00:00"))
+        else:
+            date.fromisoformat(normalized)
+    except ValueError as exc:
+        raise ValueError("due_date must be a valid ISO 8601 date or datetime string") from exc
+
+    return normalized
+
+
+def _validate_max_grade_value(value: int | None) -> int | None:
+    if value is None:
+        return None
+    if not 0 <= value <= 100:
+        raise ValueError("max_grade_value must be between 0 and 100")
+    return value
 
 
 ## Assignment ##
@@ -35,6 +62,11 @@ class AssignmentBase(SQLModelStrictBaseModel):
         if isinstance(v, str):
             return GradingTypeEnum(v)
         return v
+
+    @field_validator("due_date", mode="before")
+    @classmethod
+    def validate_due_date(cls, v):
+        return _normalize_due_date_value(v)
 
 
 class AssignmentCreate(AssignmentBase):
@@ -75,6 +107,11 @@ class AssignmentUpdate(SQLModelStrictBaseModel):
         if v is not None and isinstance(v, str):
             return GradingTypeEnum(v)
         return v
+
+    @field_validator("due_date", mode="before")
+    @classmethod
+    def validate_due_date(cls, v):
+        return _normalize_due_date_value(v)
 
 
 class Assignment(AssignmentBase, table=True):
@@ -128,6 +165,12 @@ class AssignmentTaskBase(SQLModelStrictBaseModel):
             return AssignmentTaskTypeEnum(v)
         return v
 
+    @field_validator("max_grade_value")
+    @classmethod
+    def validate_max_grade_value(cls, v: int) -> int:
+        validated = _validate_max_grade_value(v)
+        return 0 if validated is None else validated
+
 
 class AssignmentTaskCreate(AssignmentTaskBase):
     """Model for creating a new assignment task."""
@@ -161,6 +204,11 @@ class AssignmentTaskUpdate(SQLModelStrictBaseModel):
         if v is not None and isinstance(v, str):
             return AssignmentTaskTypeEnum(v)
         return v
+
+    @field_validator("max_grade_value")
+    @classmethod
+    def validate_max_grade_value(cls, v: int | None) -> int | None:
+        return _validate_max_grade_value(v)
 
 
 class AssignmentTask(AssignmentTaskBase, table=True):
@@ -332,6 +380,7 @@ class AssignmentUserSubmissionRead(AssignmentUserSubmissionBase):
     """Model for reading an assignment user submission."""
 
     id: int
+    assignmentusersubmission_uuid: str
     creation_date: str
     update_date: str
     submitted_at: datetime | None = None
@@ -355,6 +404,12 @@ class AssignmentUserSubmissionUpdate(SQLModelStrictBaseModel):
     grade: int | None = None
     user_id: int | None = None
     assignment_id: int | None = None
+
+
+class AssignmentUserSubmissionWithUserRead(AssignmentUserSubmissionRead):
+    """Assignment-level submission status enriched with user information."""
+
+    user: UserRead
 
 
 class AssignmentUserSubmission(AssignmentUserSubmissionBase, table=True):
@@ -406,3 +461,8 @@ class AssignmentCreateWithActivity(SQLModelStrictBaseModel):
         if isinstance(v, str):
             return GradingTypeEnum(v)
         return v
+
+    @field_validator("due_date", mode="before")
+    @classmethod
+    def validate_due_date(cls, v):
+        return _normalize_due_date_value(v)
