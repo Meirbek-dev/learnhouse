@@ -87,12 +87,22 @@
     },
     "AssignmentStudentActivity": {
       "assignment": "Задание",
+      "blankLabel": "Поле {index}",
       "descriptionTitle": "Описание задания",
       "dueDate": "Срок сдачи",
+      "emptyOption": "Пустой вариант",
       "hint": "Подсказка",
       "noTasks": "Нет доступных заданий",
+      "points": "{count, plural, =0 {# баллов} one {# балл} few {# балла} many {# баллов} other {# баллов}}",
+      "questionLabel": "Вопрос {index}",
       "referenceDocument": "Справочный документ",
-      "task": "Задание {index}"
+      "task": "Задание {index}",
+      "taskContentUnavailable": "Содержимое этого задания пока недоступно в режиме студента.",
+      "taskTypeFile": "Загрузка файла",
+      "taskTypeForm": "Форма",
+      "taskTypeOther": "Другое",
+      "taskTypeQuiz": "Тест",
+      "untitledQuestion": "Вопрос без текста"
     },
     "CodeChallenges": {
       "actualOutput": "Ваш вывод",
