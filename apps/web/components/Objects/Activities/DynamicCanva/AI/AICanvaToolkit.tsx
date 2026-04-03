@@ -1,13 +1,10 @@
-import { useAIChatBot, useAIChatBotDispatch } from '@components/Contexts/AI/AIChatBotContext';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
+import { useActivityAIChat } from '@components/Contexts/AI/ActivityAIChatContext';
 import ToolTip from '@/components/Objects/Elements/Tooltip/Tooltip';
 import { BookOpen, FormInput, Languages } from 'lucide-react';
-import { useActivityChat } from '@/hooks/useActivityChat';
 import platformLogo from '@public/platform_logo.svg';
 import { BubbleMenu } from '@tiptap/react/menus';
 import type { Editor } from '@tiptap/react';
 import { useTranslations } from 'next-intl';
-import { useEffect } from 'react';
 import Image from 'next/image';
 
 interface AICanvaToolkitProps {
@@ -56,22 +53,18 @@ const AICanvaToolkit = (props: AICanvaToolkitProps) => {
           <div className="flex space-x-2">
             <AIActionButton
               editor={props.editor}
-              activity={props.activity}
               label="Explain"
             />
             <AIActionButton
               editor={props.editor}
-              activity={props.activity}
               label="Summarize"
             />
             <AIActionButton
               editor={props.editor}
-              activity={props.activity}
               label="Translate"
             />
             <AIActionButton
               editor={props.editor}
-              activity={props.activity}
               label="Examples"
             />
           </div>
@@ -81,29 +74,14 @@ const AICanvaToolkit = (props: AICanvaToolkitProps) => {
   );
 };
 
-const AIActionButton = (props: { editor: Editor; label: string; activity: any }) => {
+const AIActionButton = (props: { editor: Editor; label: string }) => {
   const t = useTranslations('Activities.AICanvaToolkit');
-  const session = usePlatformSession() as any;
-  const access_token = session?.data?.tokens?.access_token;
-  const dispatchAIChatBot = useAIChatBotDispatch();
-  const aiChatBotState = useAIChatBot();
-
-  // The streaming display lives in ActivityChatMessageBox (a sibling component),
-  // so localStreamingDisplay is false — chunks are routed through shared context.
-  const { sendMessage, cleanup } = useActivityChat({
-    activityUuid: props.activity.activity_uuid,
-    accessToken: access_token,
-    chatUuid: aiChatBotState.aichat_uuid,
-    dispatch: dispatchAIChatBot as any,
-    localStreamingDisplay: false,
-  });
-
-  useEffect(() => cleanup, [cleanup]);
+  const { sendMessage, setIsModalOpen } = useActivityAIChat();
 
   async function handleAction(label: string) {
     const selection = getTipTapEditorSelectedText();
     const prompt = getPrompt(label, selection);
-    dispatchAIChatBot({ type: 'setIsModalOpen' });
+    setIsModalOpen(true);
     await sendMessage(prompt);
   }
 

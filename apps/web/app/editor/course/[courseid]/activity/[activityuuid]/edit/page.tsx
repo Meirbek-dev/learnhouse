@@ -1,6 +1,5 @@
 import EditorOptionsProvider from '@components/Contexts/Editor/EditorContext';
 import { getActivityWithAuthHeader } from '@services/courses/activities';
-import AIEditorProvider from '@components/Contexts/AI/AIEditorContext';
 import EditorWrapper from '@components/Objects/Editor/EditorWrapper';
 import { getCourseMetadata } from '@services/courses/courses';
 import { getPlatform } from '@/services/platform/platform';
@@ -47,14 +46,12 @@ const EditActivity = async (props: { params: Promise<{ courseid: string; activit
   return (
     <div className={jetBrainsMono.variable}>
       <EditorOptionsProvider options={{ isEditable: true }}>
-        <AIEditorProvider>
-          <EditorWrapper
-            platform={platform}
-            course={courseInfo}
-            activity={activity}
-            content={typeof activity.content === 'string' ? activity.content : JSON.stringify(activity.content ?? '')}
-          />
-        </AIEditorProvider>
+        <EditorWrapper
+          platform={platform}
+          course={courseInfo}
+          activity={activity}
+          content={typeof activity.content === 'string' ? activity.content : JSON.stringify(activity.content ?? '')}
+        />
       </EditorOptionsProvider>
     </div>
   );

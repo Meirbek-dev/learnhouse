@@ -1,6 +1,4 @@
 'use client';
-import { useAIEditor, useAIEditorDispatch } from '@components/Contexts/AI/AIEditorContext';
-import type { AIEditorStateTypes } from '@components/Contexts/AI/AIEditorContext';
 
 import MathEquationBlock from './Extensions/MathEquation/MathEquationBlock';
 import WarningCallout from './Extensions/Callout/Warning/WarningCallout';
@@ -16,7 +14,6 @@ import WebPreview from './Extensions/WebPreview/WebPreview';
 import { ToolbarButtons } from './Toolbar/ToolbarButtons';
 import Scenarios from './Extensions/Scenarios/Scenarios';
 import TableHeader from '@tiptap/extension-table-header';
-import { getAbsoluteUrl } from '@services/config/config';
 import { EditorContent, useEditor } from '@tiptap/react';
 import ts from 'highlight.js/lib/languages/typescript';
 import js from 'highlight.js/lib/languages/javascript';
@@ -70,7 +67,7 @@ import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
 import styles from './Editor.module.css';
 import UserAvatar from '../UserAvatar';
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { motion } from 'motion/react';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
@@ -88,13 +85,7 @@ interface EditorProps {
 
 const Editor = (props: EditorProps) => {
   const t = useTranslations('DashPage.Editor.Editor');
-
-  // Add defensive checks for context hooks
-  let dispatchAIEditor: any = null;
-  let aiEditorState: AIEditorStateTypes | null = null;
-
-  dispatchAIEditor = useAIEditorDispatch();
-  aiEditorState = useAIEditor();
+  const [isAIOpen, setIsAIOpen] = useState(false);
 
   const courseUuid = props.course.course_uuid.slice(7);
   const activityUuid = props.activity.activity_uuid.slice(9);
@@ -215,7 +206,7 @@ const Editor = (props: EditorProps) => {
                     src={
                       props.course.thumbnail_image
                         ? getCourseThumbnailMediaDirectory(props.course.course_uuid, props.course.thumbnail_image)
-                        : getAbsoluteUrl('/empty_thumbnail.webp')
+                        : '/empty_thumbnail.webp'
                     }
                     alt={`${props.course.name} Thumbnail`}
                   />
@@ -231,30 +222,24 @@ const Editor = (props: EditorProps) => {
             <div className="flex justify-center items-center space-x-2">
               <div>
                 <div className="rounded-md text-teal-100 transition-all ease-linear hover:cursor-pointer">
-                  {dispatchAIEditor && aiEditorState ? (
-                    <div
-                      onClick={() =>
-                        dispatchAIEditor({
-                          type: aiEditorState.isModalOpen ? 'setIsModalClose' : 'setIsModalOpen',
-                        })
-                      }
-                      style={{
-                        background:
-                          'linear-gradient(135deg, oklch(0.25 0.15 270) 0%, oklch(0.40 0.18 260) 50%, oklch(0.32 0.16 255) 100%)',
-                      }}
-                      className="flex items-center space-x-1 rounded-md px-3 py-2 text-sm text-white drop-shadow-md transition delay-150 duration-300 ease-in-out hover:scale-105 hover:cursor-pointer"
-                      title={t('aiEditor')}
-                    >
-                      <Image
-                        className=""
-                        width={16}
-                        height={16}
-                        src={platformLogoLight}
-                        alt="AI Editor Icon"
-                      />
-                      <i className="text-xs font-bold not-italic">{t('aiEditor')}</i>
-                    </div>
-                  ) : null}
+                  <div
+                    onClick={() => setIsAIOpen((prev) => !prev)}
+                    style={{
+                      background:
+                        'linear-gradient(135deg, oklch(0.25 0.15 270) 0%, oklch(0.40 0.18 260) 50%, oklch(0.32 0.16 255) 100%)',
+                    }}
+                    className="flex items-center space-x-1 rounded-md px-3 py-2 text-sm text-white drop-shadow-md transition delay-150 duration-300 ease-in-out hover:scale-105 hover:cursor-pointer"
+                    title={t('aiEditor')}
+                  >
+                    <Image
+                      className=""
+                      width={16}
+                      height={16}
+                      src={platformLogoLight}
+                      alt="AI Editor Icon"
+                    />
+                    <i className="text-xs font-bold not-italic">{t('aiEditor')}</i>
+                  </div>
                 </div>
               </div>
               <DividerVerticalIcon
@@ -329,6 +314,8 @@ const Editor = (props: EditorProps) => {
             <AIEditorToolkit
               activity={props.activity}
               editor={editor}
+              isOpen={isAIOpen}
+              onClose={() => setIsAIOpen(false)}
             />
             <EditorContent editor={editor} />
           </div>

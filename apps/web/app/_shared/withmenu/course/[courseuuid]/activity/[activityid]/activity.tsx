@@ -38,7 +38,7 @@ import ActivityBreadcrumbs from '@components/Pages/Activity/ActivityBreadcrumbs'
 import ActivityIndicators from '@components/Pages/Courses/ActivityIndicators';
 import { getAssignmentFromActivityUUID } from '@services/courses/assignments';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
-import AIChatBotProvider from '@components/Contexts/AI/AIChatBotContext';
+import { ActivityAIChatProvider } from '@components/Contexts/AI/ActivityAIChatContext';
 import CourseEndView from '@components/Pages/Activity/CourseEndView';
 import { useFormatter, useLocale, useTranslations } from 'next-intl';
 import ToolTip from '@/components/Objects/Elements/Tooltip/Tooltip';
@@ -530,7 +530,7 @@ const ActivityClient = (props: ActivityClientProps) => {
   return (
     <CourseProvider courseuuid={course?.course_uuid}>
       <Suspense fallback={<LoadingFallback />}>
-        <AIChatBotProvider>
+        <ActivityAIChatProvider activityUuid={activity?.activity_uuid ?? ''}>
           {isFocusMode ? (
             <AnimatePresence>
               <motion.div
@@ -1083,7 +1083,7 @@ const ActivityClient = (props: ActivityClientProps) => {
               )}
             </GeneralWrapper>
           )}
-        </AIChatBotProvider>
+        </ActivityAIChatProvider>
       </Suspense>
     </CourseProvider>
   );

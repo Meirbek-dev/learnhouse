@@ -1,6 +1,6 @@
 'use client';
 
-import { useAIChatBot, useAIChatBotDispatch } from '@components/Contexts/AI/AIChatBotContext';
+import { useActivityAIChat } from '@components/Contexts/AI/ActivityAIChatContext';
 import { AlertTriangle, BadgeInfo, MessageCircle, NotebookTabs, X } from 'lucide-react';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
 
@@ -8,11 +8,10 @@ import { usePlatformSession } from '@/components/Contexts/SessionContext';
 export type PlatformSession = ReturnType<typeof usePlatformSession>;
 import { Alert, AlertDescription, AlertTitle } from '@components/ui/alert';
 import platformLogoLight from '@public/platform_logo_light.svg';
-import { useActivityChat } from '@/hooks/useActivityChat';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { ScrollArea } from '@components/ui/scroll-area';
 import { Card, CardContent } from '@components/ui/card';
-import type { ChangeEvent, KeyboardEvent } from 'react';
+import type { KeyboardEvent } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
@@ -21,8 +20,7 @@ import { useTranslations } from 'next-intl';
 import { useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
-
-import type { AIMessage } from '@components/Contexts/AI/AIBaseContext';
+import type { TextPart } from '@tanstack/ai-client';
 
 // Type definitions
 interface Activity {
@@ -43,16 +41,11 @@ interface ErrorState {
 type PredefinedQuestionType = 'about' | 'flashcards' | 'examples';
 
 // Main Component
-const AIActivityAsk = ({ activity }: AIActivityAskProps) => {
+const AIActivityAsk = ({ activity: _activity }: AIActivityAskProps) => {
   const t = useTranslations('Activities.AIActivityAsk');
-  const dispatchAIChatBot = useAIChatBotDispatch();
-  const aiChatBotState = useAIChatBot();
+  const { isModalOpen, setIsModalOpen } = useActivityAIChat();
 
-  const handleToggleModal = () => {
-    dispatchAIChatBot({
-      type: aiChatBotState.isModalOpen ? 'setIsModalClose' : 'setIsModalOpen',
-    });
-  };
+  const handleToggleModal = () => setIsModalOpen(!isModalOpen);
 
   const handleKeyDown = (e: any) => {
     const key = e?.key ?? e?.nativeEvent?.key;
@@ -64,13 +57,13 @@ const AIActivityAsk = ({ activity }: AIActivityAskProps) => {
 
   return (
     <>
-      <ActivityChatMessageBox activity={activity} />
+      <ActivityChatMessageBox />
       <Button
         variant="ghost"
         size="sm"
         role="button"
         tabIndex={0}
-        aria-pressed={aiChatBotState.isModalOpen}
+        aria-pressed={isModalOpen}
         onKeyDown={handleKeyDown}
         onClick={handleToggleModal}
         style={{
@@ -79,7 +72,7 @@ const AIActivityAsk = ({ activity }: AIActivityAskProps) => {
         }}
         className={cn(
           'h-10 flex items-center space-x-2 rounded-full px-4 py-2.5 text-sm font-semibold text-white hover:text-white shadow-lg ring-1 ring-white/10 transition-all duration-200 hover:scale-105 hover:shadow-xl hover:ring-white/20 focus:ring-2 focus:ring-white/30 focus:outline-none active:scale-95',
-          { 'ring-2 ring-white/30 shadow-xl': aiChatBotState.isModalOpen },
+          { 'ring-2 ring-white/30 shadow-xl': isModalOpen },
         )}
       >
         <Image
@@ -96,44 +89,36 @@ const AIActivityAsk = ({ activity }: AIActivityAskProps) => {
 };
 
 // Chat Message Box Component
-interface ActivityChatMessageBoxProps {
-  activity: Activity;
-}
-
-const ActivityChatMessageBox = ({ activity }: ActivityChatMessageBoxProps) => {
+const ActivityChatMessageBox = () => {
   const t = useTranslations('Activities.AIActivityAsk');
   const session = usePlatformSession();
-  const access_token = session?.data?.tokens?.access_token;
-  const aiChatBotState = useAIChatBot();
-  const dispatchAIChatBot = useAIChatBotDispatch();
+
+  const { messages, sendMessage, isLoading, stop, error, statusMessage, isModalOpen, setIsModalOpen, inputValue, setInputValue } =
+    useActivityAIChat();
 
   const scrollYRef = useRef(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // All streaming + send logic is encapsulated in useActivityChat.
-  // `localStreamingDisplay: true` keeps live token updates in component-local
-  // state so only THIS component re-renders during streaming, not every
-  // consumer of AIChatBotContext.
-  const { sendMessage, localStreamingText, statusMessage, cleanup } = useActivityChat({
-    activityUuid: activity.activity_uuid,
-    accessToken: access_token,
-    chatUuid: aiChatBotState.aichat_uuid,
-    dispatch: dispatchAIChatBot as any,
-    localStreamingDisplay: true,
-  });
+  // Extract streaming text from the last assistant message during generation.
+  const lastMsg = messages.at(-1);
+  const streamingText =
+    isLoading && lastMsg?.role === 'assistant'
+      ? lastMsg.parts
+          .filter((p): p is TextPart => p.type === 'text')
+          .map((p) => p.content)
+          .join('')
+      : '';
 
-  // Show local streaming text when this component triggered the stream;
-  // fall back to context's streamingMessage when AICanvaToolkit did.
-  const activeStreamingText = localStreamingText || aiChatBotState.streamingMessage;
-  const activeStatusMessage = statusMessage || aiChatBotState.statusMessage;
+  const hasMessages = messages.length > 0;
+  const hasError = error !== undefined;
 
-  // Lock scroll on mobile when modal is open
+  // Lock scroll on mobile when modal is open.
   useEffect(() => {
     if (typeof globalThis.window === 'undefined') return;
 
     const isSmallViewport = globalThis.matchMedia('(max-width: 767px)').matches;
 
-    if (aiChatBotState.isModalOpen && isSmallViewport) {
+    if (isModalOpen && isSmallViewport) {
       scrollYRef.current = window.scrollY || window.pageYOffset || 0;
       document.body.style.position = 'fixed';
       document.body.style.top = `-${scrollYRef.current}px`;
@@ -147,7 +132,7 @@ const ActivityChatMessageBox = ({ activity }: ActivityChatMessageBoxProps) => {
       document.body.style.right = '';
       document.body.style.overflow = '';
 
-      if (!aiChatBotState.isModalOpen && isSmallViewport) {
+      if (!isModalOpen && isSmallViewport) {
         window.scrollTo(0, scrollYRef.current || 0);
       }
     }
@@ -160,57 +145,46 @@ const ActivityChatMessageBox = ({ activity }: ActivityChatMessageBoxProps) => {
       document.body.style.overflow = '';
       if (isSmallViewport) window.scrollTo(0, scrollYRef.current || 0);
     };
-  }, [aiChatBotState.isModalOpen]);
+  }, [isModalOpen]);
 
-  // Auto-scroll: instant during streaming (avoids repeated layout animation),
-  // smooth scroll when a new committed message arrives.
+  // Auto-scroll: instant during streaming, smooth on committed messages.
   useEffect(() => {
-    if (activeStreamingText) {
+    if (streamingText) {
       messagesEndRef.current?.scrollIntoView({ behavior: 'instant' as ScrollBehavior });
     }
-  }, [activeStreamingText]);
+  }, [streamingText]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [aiChatBotState.messages]);
+  }, [messages]);
 
-  // Abort stream on unmount.
-  useEffect(() => cleanup, [cleanup]);
-
-  // Abort and clear when the modal closes.
+  // Abort stream and clear input when the modal closes.
   useEffect(() => {
-    if (!aiChatBotState.isModalOpen) {
-      cleanup();
-      dispatchAIChatBot({ type: 'clearStreamingMessage' });
-      dispatchAIChatBot({ type: 'setStatusMessage', payload: null });
-      // Always clear waiting state so the input is not stuck as disabled.
-      dispatchAIChatBot({ type: 'setIsNoLongerWaitingForResponse' });
+    if (!isModalOpen) {
+      stop();
+      setInputValue('');
     }
-  }, [aiChatBotState.isModalOpen, cleanup, dispatchAIChatBot]);
+  }, [isModalOpen, stop, setInputValue]);
 
   const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === 'Enter' && !aiChatBotState.isWaitingForResponse) {
-      sendMessage(event.currentTarget.value);
+    if (event.key === 'Enter' && !isLoading && inputValue.trim()) {
+      sendMessage(inputValue);
+      setInputValue('');
     }
   };
 
-  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    dispatchAIChatBot({
-      type: 'setChatInputValue',
-      payload: event.currentTarget.value,
-    });
+  const handleSend = () => {
+    if (!isLoading && inputValue.trim()) {
+      sendMessage(inputValue);
+      setInputValue('');
+    }
   };
 
-  const closeModal = () => {
-    dispatchAIChatBot({ type: 'setIsModalClose' });
-  };
+  const closeModal = () => setIsModalOpen(false);
 
-  if (!aiChatBotState.isModalOpen) {
+  if (!isModalOpen) {
     return null;
   }
-
-  const hasMessages = aiChatBotState.messages.length > 0;
-  const isDisabled = aiChatBotState.isWaitingForResponse;
 
   return (
     <AnimatePresence>
@@ -232,7 +206,7 @@ const ActivityChatMessageBox = ({ activity }: ActivityChatMessageBoxProps) => {
           <CardContent className="flex h-full flex-col p-4">
             {/* Header */}
             <div className="mb-3 flex items-center justify-between">
-              <div className={cn('flex items-center gap-2', aiChatBotState.isWaitingForResponse && 'animate-pulse')}>
+              <div className={cn('flex items-center gap-2', isLoading && 'animate-pulse')}>
                 <Image
                   className="rounded-lg"
                   width={28}
@@ -254,41 +228,47 @@ const ActivityChatMessageBox = ({ activity }: ActivityChatMessageBoxProps) => {
             </div>
 
             {/* Status Message */}
-            {activeStatusMessage && <p className="mb-2 text-xs text-white/60">{activeStatusMessage}</p>}
+            {statusMessage && <p className="mb-2 text-xs text-white/60">{statusMessage}</p>}
 
             {/* Messages Area */}
             <div className="mb-3 flex-1 overflow-hidden">
-              {hasMessages && !aiChatBotState.error.isError ? (
+              {hasMessages && !hasError ? (
                 <ScrollArea className="h-full pr-4">
                   <div className="space-y-4">
-                    {aiChatBotState.messages.map((message: AIMessage, index: number) => (
+                    {messages.map((message, index) => {
+                      const text = message.parts
+                        .filter((p): p is TextPart => p.type === 'text')
+                        .map((p) => p.content)
+                        .join('');
+                      return (
+                        <AIMessageComponent
+                          key={`${message.role}-${index}`}
+                          role={message.role as 'user' | 'assistant'}
+                          text={text}
+                          animated={message.role === 'assistant'}
+                        />
+                      );
+                    })}
+                    {streamingText && (
                       <AIMessageComponent
-                        key={`${message.sender}-${index}`}
-                        message={message}
-                        animated={message.sender === 'ai'}
-                      />
-                    ))}
-                    {activeStreamingText && (
-                      <AIMessageComponent
-                        message={{
-                          sender: 'ai',
-                          message: activeStreamingText,
-                        }}
+                        role="assistant"
+                        text={streamingText}
                         animated
                       />
                     )}
                     <div ref={messagesEndRef} />
                   </div>
                 </ScrollArea>
-              ) : aiChatBotState.error.isError ? (
+              ) : hasError ? (
                 <ErrorDisplay
-                  error={aiChatBotState.error}
+                  error={{ isError: true, error_message: error?.message }}
                   t={t}
                 />
               ) : (
                 <AIMessagePlaceHolder
-                  sendMessage={sendMessage}
-                  activity={activity}
+                  sendMessage={(msg) => {
+                    sendMessage(msg);
+                  }}
                   session={session}
                 />
               )}
@@ -302,20 +282,20 @@ const ActivityChatMessageBox = ({ activity }: ActivityChatMessageBoxProps) => {
               />
               <Input
                 onKeyDown={handleKeyDown}
-                onChange={handleChange}
-                disabled={isDisabled}
-                value={aiChatBotState.chatInputValue}
+                onChange={(e) => setInputValue(e.currentTarget.value)}
+                disabled={isLoading}
+                value={inputValue}
                 placeholder={t('placeholder')}
                 className={cn(
                   'flex-1 border-white/10 bg-slate-950/40 text-white placeholder:text-white/30',
-                  isDisabled && 'opacity-30',
+                  isLoading && 'opacity-30',
                 )}
               />
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => sendMessage(aiChatBotState.chatInputValue)}
-                disabled={isDisabled || !aiChatBotState.chatInputValue.trim()}
+                onClick={handleSend}
+                disabled={isLoading || !inputValue.trim()}
                 className="text-white/50 hover:text-white disabled:opacity-30"
               >
                 <MessageCircle className="h-5 w-5" />
@@ -330,17 +310,18 @@ const ActivityChatMessageBox = ({ activity }: ActivityChatMessageBoxProps) => {
 
 // AI Message Component
 interface AIMessageComponentProps {
-  message: AIMessage;
+  role: 'user' | 'assistant';
+  text: string;
   animated: boolean;
 }
 
-const AIMessageComponent = ({ message, animated }: AIMessageComponentProps) => {
+const AIMessageComponent = ({ role, text, animated }: AIMessageComponentProps) => {
   return (
     <div className="flex gap-2">
       <UserAvatar
         size="sm"
         variant="outline"
-        predefined_avatar={message.sender === 'ai' ? 'ai' : undefined}
+        predefined_avatar={role === 'assistant' ? 'ai' : undefined}
       />
       <motion.div
         initial={animated ? { opacity: 0 } : false}
@@ -348,7 +329,7 @@ const AIMessageComponent = ({ message, animated }: AIMessageComponentProps) => {
         transition={animated ? { duration: 0.25 } : undefined}
         className="flex-1 rounded-lg bg-white/5 px-3 py-2"
       >
-        <p className="text-sm leading-relaxed text-white whitespace-pre-wrap">{message.message}</p>
+        <p className="text-sm leading-relaxed text-white whitespace-pre-wrap">{text}</p>
       </motion.div>
     </div>
   );
@@ -375,9 +356,7 @@ const ErrorDisplay = ({ error, t }: ErrorDisplayProps) => (
 
 // Placeholder Component
 interface AIMessagePlaceHolderProps {
-  activity: Activity;
   sendMessage: (message: string) => void;
-  // use ReturnType of hook for accurate session shape
   session: PlatformSession | null;
 }
 
