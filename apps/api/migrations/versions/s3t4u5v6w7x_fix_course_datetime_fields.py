@@ -1,7 +1,7 @@
 """Fix course creation_date/update_date columns from VARCHAR/TIMESTRING to TIMESTAMPTZ
 
 Revision ID: s3t4u5v6w7x
-Revises: r2s3t4u5v6w
+Revises: None
 Create Date: 2026-03-28
 """
 
