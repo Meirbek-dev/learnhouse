@@ -32,7 +32,9 @@ def _map_ai_errors_to_http(exc: Exception) -> HTTPException:
     if isinstance(exc, AITimeoutError):
         return HTTPException(status_code=504, detail=exc.message)
     if isinstance(exc, (AIProcessingError, RetrievalError, ChatSessionError)):
-        return HTTPException(status_code=500, detail=f"AI processing failed: {exc.message}")
+        return HTTPException(
+            status_code=500, detail=f"AI processing failed: {exc.message}"
+        )
     return HTTPException(
         status_code=500,
         detail="An unexpected error occurred. Please try again later.",
@@ -79,6 +81,7 @@ async def ai_start_activity_chat_session(
             message=chat_session_object.message,
             db_session=db_session,
             user_id=current_user.id,
+            locale=current_user.locale,
             request=request,
             cancel_event=cancel_event,
         )
@@ -108,6 +111,7 @@ async def ai_send_activity_chat_message(
             message=chat_session_object.message,
             db_session=db_session,
             user_id=current_user.id,
+            locale=current_user.locale,
             request=request,
             cancel_event=cancel_event,
         )
@@ -137,6 +141,7 @@ async def ai_start_activity_chat_session_stream(
             message=chat_session_object.message,
             db_session=db_session,
             user_id=current_user.id,
+            locale=current_user.locale,
             request=request,
             cancel_event=cancel_event,
         ):
@@ -162,6 +167,7 @@ async def ai_send_activity_chat_message_stream(
             message=chat_session_object.message,
             db_session=db_session,
             user_id=current_user.id,
+            locale=current_user.locale,
             request=request,
             cancel_event=cancel_event,
         ):

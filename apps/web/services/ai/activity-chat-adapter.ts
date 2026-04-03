@@ -27,23 +27,6 @@ export const ACTIVITY_CHAT_PROTOCOL_VERSION = 1;
 
 let hasLoggedProtocolVersionMismatch = false;
 
-export function getActivityChatStatusMessage(status: string): string | null {
-  switch (status) {
-    case 'processing':
-      return 'Preparing your request.';
-    case 'retrieving':
-      return 'Retrieving relevant course context.';
-    case 'analyzing':
-      return 'Analyzing your request.';
-    case 'generating':
-      return 'Generating the response.';
-    case 'aborted':
-      return 'Request cancelled.';
-    default:
-      return null;
-  }
-}
-
 export function parseActivitySseDataLine(line: string): Record<string, unknown> | null {
   if (!line.startsWith('data: ')) return null;
 
@@ -67,6 +50,7 @@ export function reconcileFinalMessageDelta(streamedText: string, finalContent: s
 interface ActivityChatAdapterOptions {
   activityUuid: string;
   getAccessToken: () => string | undefined;
+  getStatusMessage: (status: string) => string | null;
   /**
    * Provides the current session UUID from an external store (e.g. a React
    * ref in ActivityAIChatProvider) so it survives provider remounts.
@@ -96,6 +80,7 @@ export interface ActivityChatAdapter {
 export function createActivityChatAdapter({
   activityUuid,
   getAccessToken,
+  getStatusMessage,
   getSessionUuid,
   setSessionUuid,
 }: ActivityChatAdapterOptions): ActivityChatAdapter {
@@ -204,7 +189,7 @@ export function createActivityChatAdapter({
                 typeof event.message === 'string' && event.message.trim().length > 0
                   ? event.message
                   : typeof event.status === 'string'
-                    ? getActivityChatStatusMessage(event.status)
+                    ? getStatusMessage(event.status)
                     : null;
               if (message) {
                 yield {

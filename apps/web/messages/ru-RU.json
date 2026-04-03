@@ -21,6 +21,14 @@
       "stopGeneration": "Остановить генерацию",
       "usernameComma": "{username},"
     },
+    "AIStatus": {
+      "aborted": "Запрос отменён.",
+      "analyzing": "Анализируем ваш запрос без дополнительного поиска.",
+      "generating": "Формируем ответ.",
+      "processing": "Подготавливаем ваш запрос.",
+      "retrieving": "Подбираем релевантный контекст курса.",
+      "working": "Обрабатываем ваш запрос."
+    },
     "AICanvaToolkit": {
       "aiIconAlt": "Иконка ИИ",
       "aiTitle": "ИИ",

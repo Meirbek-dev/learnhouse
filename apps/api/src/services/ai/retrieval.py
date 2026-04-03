@@ -34,8 +34,12 @@ _document_chunks = Table(
     Column("document", Text, nullable=False),
     Column("embedding", Vector(), nullable=False),
     Column("metadata", JSONB, nullable=False),
-    Column("inserted_at", TIMESTAMP(timezone=True), nullable=False,
-           server_default=text("now()")),
+    Column(
+        "inserted_at",
+        TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=text("now()"),
+    ),
 )
 
 
@@ -43,8 +47,11 @@ _document_chunks = Table(
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _content_hash(documents: list[str]) -> str:
-    normalized = sorted(" ".join(document.split()) for document in documents if document.strip())
+    normalized = sorted(
+        " ".join(document.split()) for document in documents if document.strip()
+    )
     return hashlib.sha256("||".join(normalized).encode()).hexdigest()
 
 
@@ -57,6 +64,7 @@ def _collection_name(name: str | None, content_hash: str) -> str:
 # ---------------------------------------------------------------------------
 # Sync DB operations (run via asyncio.to_thread)
 # ---------------------------------------------------------------------------
+
 
 def _sync_upsert_collection(
     collection_name: str,
@@ -112,7 +120,9 @@ def _sync_query_collection(
 ) -> list[RetrievedChunk]:
     """Return the top-k chunks ordered by cosine distance (ascending)."""
     engine = get_database_engine()
-    distance = _document_chunks.c.embedding.cosine_distance(query_embedding).label("distance")
+    distance = _document_chunks.c.embedding.cosine_distance(query_embedding).label(
+        "distance"
+    )
     stmt = (
         select(
             _document_chunks.c.id,
@@ -155,6 +165,7 @@ def delete_expired_chunks(retention_seconds: int) -> int:
 # ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
+
 
 async def ensure_collection(
     *,

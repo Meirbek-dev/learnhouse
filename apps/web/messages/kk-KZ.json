@@ -21,6 +21,14 @@
       "stopGeneration": "Генерацияны тоқтату",
       "usernameComma": "{username},"
     },
+    "AIStatus": {
+      "aborted": "Сұрау тоқтатылды.",
+      "analyzing": "Сұрағыңызды қосымша іздеусіз талдап жатырмыз.",
+      "generating": "Жауапты құрастырып жатырмыз.",
+      "processing": "Сұрағыңызды дайындап жатырмыз.",
+      "retrieving": "Курс контекстін іздеп жатырмыз.",
+      "working": "Сұрағыңызды өңдеп жатырмыз."
+    },
     "AICanvaToolkit": {
       "aiIconAlt": "ЖИ белгішесі",
       "aiTitle": "ЖИ",

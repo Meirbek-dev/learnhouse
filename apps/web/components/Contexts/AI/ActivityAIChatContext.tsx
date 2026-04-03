@@ -16,6 +16,7 @@ import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import type { TextPart } from '@tanstack/ai-client';
 import type { UseChatReturn } from '@tanstack/ai-react';
 import { useChat } from '@tanstack/ai-react';
+import { useTranslations } from 'next-intl';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -46,6 +47,7 @@ const ActivityAIChatContext = createContext<ActivityAIChatContextValue | null>(n
 
 export function ActivityAIChatProvider({ activityUuid, children }: PropsWithChildren<{ activityUuid: string }>) {
   const session = usePlatformSession();
+  const tStatus = useTranslations('Activities.AIStatus');
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
@@ -63,6 +65,22 @@ export function ActivityAIChatProvider({ activityUuid, children }: PropsWithChil
       createActivityChatAdapter({
         activityUuid,
         getAccessToken: () => session?.data?.tokens?.access_token,
+        getStatusMessage: (status) => {
+          switch (status) {
+            case 'processing':
+              return tStatus('processing');
+            case 'retrieving':
+              return tStatus('retrieving');
+            case 'analyzing':
+              return tStatus('analyzing');
+            case 'generating':
+              return tStatus('generating');
+            case 'aborted':
+              return tStatus('aborted');
+            default:
+              return tStatus('working');
+          }
+        },
         getSessionUuid: () => sessionUuidRef.current,
         setSessionUuid: (uuid) => {
           sessionUuidRef.current = uuid;

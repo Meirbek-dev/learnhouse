@@ -21,6 +21,14 @@
       "stopGeneration": "Stop generation",
       "usernameComma": "{username},"
     },
+    "AIStatus": {
+      "aborted": "Request cancelled.",
+      "analyzing": "Analyzing your request without additional retrieval.",
+      "generating": "Generating the response.",
+      "processing": "Preparing your request.",
+      "retrieving": "Retrieving relevant course context.",
+      "working": "Working on your request."
+    },
     "AICanvaToolkit": {
       "aiIconAlt": "AI Icon",
       "aiTitle": "AI",

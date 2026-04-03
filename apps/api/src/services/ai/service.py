@@ -13,11 +13,26 @@ from src.db.courses.activities import Activity, ActivityRead
 from src.db.courses.courses import Course, CourseRead
 from src.services.ai.agent import get_agent, get_model
 from src.services.ai.cache_manager import get_ai_cache_manager
-from src.services.ai.exceptions import AIProcessingError, AITimeoutError, ActivityNotFoundError, RetrievalError
-from src.services.ai.models import AgentAnswer, AgentDependencies, DeltaEvent, FinalEvent, StatusEvent
+from src.services.ai.exceptions import (
+    AIProcessingError,
+    AITimeoutError,
+    ActivityNotFoundError,
+    RetrievalError,
+)
+from src.services.ai.models import (
+    AgentAnswer,
+    AgentDependencies,
+    DeltaEvent,
+    FinalEvent,
+    StatusEvent,
+)
 from src.services.ai.retrieval import retrieve_chunks
 from src.services.ai.schemas.ai import ActivityAIChatSessionResponse
-from src.services.ai.session_store import append_messages, build_chat_messages, load_chat_session
+from src.services.ai.session_store import (
+    append_messages,
+    build_chat_messages,
+    load_chat_session,
+)
 from src.services.courses.activities.utils import (
     serialize_activity_text_to_ai_comprehensible_text,
     structure_activity_content_by_type,
@@ -54,6 +69,34 @@ _INSTRUCTIONAL_HINTS = (
     "мысал",
 )
 
+_STATUS_MESSAGES = {
+    "en-US": {
+        "processing": "Preparing your request.",
+        "retrieving": "Retrieving relevant course context.",
+        "analyzing": "Analyzing your request without additional retrieval.",
+        "generating": "Generating the response.",
+        "aborted": "Request cancelled.",
+        "working": "Working on your request.",
+    },
+    "ru-RU": {
+        "processing": "Подготавливаем ваш запрос.",
+        "retrieving": "Подбираем релевантный контекст курса.",
+        "analyzing": "Анализируем ваш запрос без дополнительного поиска.",
+        "generating": "Формируем ответ.",
+        "aborted": "Запрос отменён.",
+        "working": "Обрабатываем ваш запрос.",
+    },
+    "kk-KZ": {
+        "processing": "Сұрағыңызды дайындап жатырмыз.",
+        "retrieving": "Курс контекстін іздеп жатырмыз.",
+        "analyzing": "Сұрағыңызды қосымша іздеусіз талдап жатырмыз.",
+        "generating": "Жауапты құрастырып жатырмыз.",
+        "aborted": "Сұрау тоқтатылды.",
+        "working": "Сұрағыңызды өңдеп жатырмыз.",
+    },
+}
+_DEFAULT_LOCALE = "ru-RU"
+
 
 class RequestMode(StrEnum):
     INSTRUCTIONAL = "instructional"
@@ -73,6 +116,7 @@ class _ChatContext:
     conversation_summary: str | None
     user_id: int | None
     request_id: str | None
+    locale: str
 
 
 @dataclass(frozen=True, slots=True)
@@ -88,6 +132,21 @@ def _normalized_question(question: str) -> str:
 
 def _documents_are_small(documents: list[str]) -> bool:
     return sum(len(document) for document in documents) <= 800
+
+
+def _normalize_locale(locale: str | None) -> str:
+    normalized = (locale or "").strip().replace("_", "-")
+    if not normalized:
+        return _DEFAULT_LOCALE
+
+    lowered = normalized.lower()
+    if lowered.startswith("en"):
+        return "en-US"
+    if lowered.startswith("ru"):
+        return "ru-RU"
+    if lowered.startswith("kk") or lowered.startswith("kz"):
+        return "kk-KZ"
+    return _DEFAULT_LOCALE
 
 
 def _detect_request_mode(question: str, *, has_session_history: bool) -> RequestMode:
@@ -152,20 +211,24 @@ def _build_request_policy(ctx: _ChatContext, question: str) -> _RequestPolicy:
     return _RequestPolicy(mode=mode, retrieval_enabled=True)
 
 
-def _status_message(status: str, *, retrieval_enabled: bool) -> str:
+def _status_message(status: str, *, retrieval_enabled: bool, locale: str) -> str:
+    messages = _STATUS_MESSAGES.get(
+        _normalize_locale(locale), _STATUS_MESSAGES[_DEFAULT_LOCALE]
+    )
+
     if status == "processing":
-        return "Preparing your request."
+        return messages["processing"]
     if status == "retrieving":
-        return "Retrieving relevant course context."
+        return messages["retrieving"]
     if status == "analyzing":
-        return "Analyzing your request without additional retrieval."
+        return messages["analyzing"]
     if status == "generating":
-        return "Generating the response."
+        return messages["generating"]
     if status == "aborted":
-        return "Request cancelled."
+        return messages["aborted"]
     if not retrieval_enabled:
-        return "Processing your request."
-    return "Working on your request."
+        return messages["working"]
+    return messages["working"]
 
 
 async def _retrieve_chunks_for_policy(
@@ -208,11 +271,13 @@ async def _get_activity_data(
 
         course = db_session.get(Course, activity.course_id)
         if not course:
-            raise ActivityNotFoundError(activity_uuid, details={"course_not_found": True})
+            raise ActivityNotFoundError(
+                activity_uuid, details={"course_not_found": True}
+            )
 
         cache_manager.db_cache.set(cache_key, (activity, course))
         return activity, course
-    except (ActivityNotFoundError, RetrievalError):
+    except ActivityNotFoundError, RetrievalError:
         raise
     except Exception as exc:
         raise ActivityNotFoundError(
@@ -255,6 +320,7 @@ async def build_chat_context(
     aichat_uuid: str | None,
     db_session: Session,
     user_id: int | None,
+    locale: str | None,
     request: Request | None,
 ) -> _ChatContext:
     activity, course = await _get_activity_data(activity_uuid, db_session)
@@ -271,6 +337,7 @@ async def build_chat_context(
         conversation_summary=session_window.conversation_summary,
         user_id=user_id,
         request_id=request_id,
+        locale=_normalize_locale(locale),
     )
 
 
@@ -341,10 +408,12 @@ async def generate_chat_answer(
                 message_history=ctx.session_history,
             )
     except TimeoutError as exc:
-        raise AITimeoutError(timeout_seconds, details={"activity_uuid": ctx.activity.activity_uuid}) from exc
+        raise AITimeoutError(
+            timeout_seconds, details={"activity_uuid": ctx.activity.activity_uuid}
+        ) from exc
     except ActivityNotFoundError:
         raise
-    except (AITimeoutError, RetrievalError):
+    except AITimeoutError, RetrievalError:
         raise
     except Exception as exc:
         raise AIProcessingError(
@@ -394,7 +463,9 @@ async def stream_chat_answer(
         status="processing",
         aichat_uuid=ctx.session_id,
         activity_uuid=ctx.activity.activity_uuid,
-        message=_status_message("processing", retrieval_enabled=True),
+        message=_status_message(
+            "processing", retrieval_enabled=True, locale=ctx.locale
+        ),
     )
 
     try:
@@ -414,7 +485,9 @@ async def stream_chat_answer(
                     status="retrieving",
                     aichat_uuid=ctx.session_id,
                     activity_uuid=ctx.activity.activity_uuid,
-                    message=_status_message("retrieving", retrieval_enabled=True),
+                    message=_status_message(
+                        "retrieving", retrieval_enabled=True, locale=ctx.locale
+                    ),
                 )
                 retrieved_chunks, retrieval_ms = await _retrieve_chunks_for_policy(
                     ctx=ctx,
@@ -433,7 +506,9 @@ async def stream_chat_answer(
                     status="analyzing",
                     aichat_uuid=ctx.session_id,
                     activity_uuid=ctx.activity.activity_uuid,
-                    message=_status_message("analyzing", retrieval_enabled=False),
+                    message=_status_message(
+                        "analyzing", retrieval_enabled=False, locale=ctx.locale
+                    ),
                 )
                 retrieved_chunks = []
 
@@ -443,7 +518,11 @@ async def stream_chat_answer(
                 status="generating",
                 aichat_uuid=ctx.session_id,
                 activity_uuid=ctx.activity.activity_uuid,
-                message=_status_message("generating", retrieval_enabled=policy.retrieval_enabled),
+                message=_status_message(
+                    "generating",
+                    retrieval_enabled=policy.retrieval_enabled,
+                    locale=ctx.locale,
+                ),
             )
 
             full_response = ""
@@ -460,7 +539,11 @@ async def stream_chat_answer(
                             status="aborted",
                             aichat_uuid=ctx.session_id,
                             activity_uuid=ctx.activity.activity_uuid,
-                            message=_status_message("aborted", retrieval_enabled=policy.retrieval_enabled),
+                            message=_status_message(
+                                "aborted",
+                                retrieval_enabled=policy.retrieval_enabled,
+                                locale=ctx.locale,
+                            ),
                         )
                         return
 
@@ -475,7 +558,9 @@ async def stream_chat_answer(
                     full_response = output
 
     except TimeoutError as exc:
-        raise AITimeoutError(timeout_seconds, details={"activity_uuid": ctx.activity.activity_uuid}) from exc
+        raise AITimeoutError(
+            timeout_seconds, details={"activity_uuid": ctx.activity.activity_uuid}
+        ) from exc
     except AITimeoutError:
         raise
     except Exception as exc:
@@ -513,6 +598,7 @@ async def run_activity_chat(
     message: str,
     db_session: Session,
     user_id: int | None,
+    locale: str | None,
     request: Request | None,
     cancel_event: asyncio.Event | None = None,
 ) -> ActivityAIChatSessionResponse:
@@ -522,9 +608,12 @@ async def run_activity_chat(
         aichat_uuid=aichat_uuid,
         db_session=db_session,
         user_id=user_id,
+        locale=locale,
         request=request,
     )
-    answer = await generate_chat_answer(ctx=ctx, question=message, cancel_event=cancel_event)
+    answer = await generate_chat_answer(
+        ctx=ctx, question=message, cancel_event=cancel_event
+    )
     logger.info(
         "AI chat %s completed in %.1fms",
         ctx.session_id,
@@ -544,6 +633,7 @@ async def run_activity_chat_stream(
     message: str,
     db_session: Session,
     user_id: int | None,
+    locale: str | None,
     request: Request | None,
     cancel_event: asyncio.Event | None = None,
 ) -> AsyncGenerator[StatusEvent | DeltaEvent | FinalEvent, None]:
@@ -552,6 +642,7 @@ async def run_activity_chat_stream(
         aichat_uuid=aichat_uuid,
         db_session=db_session,
         user_id=user_id,
+        locale=locale,
         request=request,
     )
     async for event in stream_chat_answer(

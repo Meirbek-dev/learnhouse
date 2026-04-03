@@ -5,6 +5,7 @@ Revises: t9u0v1w2x3y4
 Create Date: 2026-04-03 22:40:54.999271
 
 """
+
 from typing import Sequence, Union
 
 from alembic import op
@@ -12,8 +13,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'a7aca90f424a'
-down_revision: Union[str, None] = 't9u0v1w2x3y4'
+revision: str = "a7aca90f424a"
+down_revision: Union[str, None] = "t9u0v1w2x3y4"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -50,8 +51,7 @@ def upgrade() -> None:
         "ON document_chunks (collection_name)"
     )
     op.execute(
-        "CREATE INDEX document_chunks_inserted_at_idx "
-        "ON document_chunks (inserted_at)"
+        "CREATE INDEX document_chunks_inserted_at_idx ON document_chunks (inserted_at)"
     )
 
 

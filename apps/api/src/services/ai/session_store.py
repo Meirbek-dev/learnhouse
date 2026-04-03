@@ -8,7 +8,12 @@ from ulid import ULID
 from config.config import get_settings
 from src.core.platform import PLATFORM_CHAT_KEY_PREFIX
 from src.services.ai.exceptions import ChatSessionError
-from src.services.ai.models import ChatMessage, ChatMessageMetadata, ChatRole, ChatSessionWindow
+from src.services.ai.models import (
+    ChatMessage,
+    ChatMessageMetadata,
+    ChatRole,
+    ChatSessionWindow,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -101,7 +106,8 @@ def load_chat_session(
                 older_start = max(0, older_end - _SUMMARY_SOURCE_MESSAGE_COUNT + 1)
                 raw_summary_messages = client.lrange(key, older_start, older_end)
                 summary_messages = [
-                    ChatMessage.model_validate_json(item) for item in raw_summary_messages
+                    ChatMessage.model_validate_json(item)
+                    for item in raw_summary_messages
                 ]
                 conversation_summary = _summarize_messages(summary_messages)
         except Exception as exc:
@@ -130,7 +136,9 @@ def append_messages(
     settings = get_settings()
     client = _get_redis_client()
     if client is None:
-        logger.warning("Redis unavailable, AI chat persistence disabled for session %s", session_id)
+        logger.warning(
+            "Redis unavailable, AI chat persistence disabled for session %s", session_id
+        )
         return
 
     key = _redis_key(session_id)
@@ -164,6 +172,10 @@ def build_chat_messages(
         request_id=request_id,
     )
     return [
-        ChatMessage(id=str(ULID()), role=ChatRole.USER, content=question, metadata=metadata),
-        ChatMessage(id=str(ULID()), role=ChatRole.ASSISTANT, content=answer, metadata=metadata),
+        ChatMessage(
+            id=str(ULID()), role=ChatRole.USER, content=question, metadata=metadata
+        ),
+        ChatMessage(
+            id=str(ULID()), role=ChatRole.ASSISTANT, content=answer, metadata=metadata
+        ),
     ]

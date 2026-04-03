@@ -10,8 +10,20 @@ from pydantic_ai.providers.openai import OpenAIProvider
 
 from src.services.ai.agent import get_model
 from src.services.ai.chunking import chunk_documents
-from src.services.ai.models import ChatMessage, ChatMessageMetadata, ChatRole, DeltaEvent, FinalEvent, RetrievedChunk, StatusEvent
-from src.services.ai.service import _ChatContext, generate_chat_answer, stream_chat_answer
+from src.services.ai.models import (
+    ChatMessage,
+    ChatMessageMetadata,
+    ChatRole,
+    DeltaEvent,
+    FinalEvent,
+    RetrievedChunk,
+    StatusEvent,
+)
+from src.services.ai.service import (
+    _ChatContext,
+    generate_chat_answer,
+    stream_chat_answer,
+)
 from src.services.ai.session_store import append_messages, load_chat_session
 from src.services.ai.streaming import format_sse_message
 
@@ -81,9 +93,13 @@ def test_chunk_documents_are_deterministic() -> None:
     assert all(chunk.token_count > 0 for chunk in first)
 
 
-def test_session_store_appends_and_loads_window(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_session_store_appends_and_loads_window(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     fake_redis = _FakeRedis()
-    monkeypatch.setattr("src.services.ai.session_store._get_redis_client", lambda: fake_redis)
+    monkeypatch.setattr(
+        "src.services.ai.session_store._get_redis_client", lambda: fake_redis
+    )
 
     messages = [
         ChatMessage(
@@ -115,7 +131,9 @@ def test_format_sse_message_serializes_typed_events() -> None:
     assert '"aichat_uuid": "s-1"' in payload
 
 
-def test_get_model_uses_platform_openai_api_key(monkeypatch: pytest.MonkeyPatch) -> None:
+def test_get_model_uses_platform_openai_api_key(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     fake_ai_config = type(
         "AIConfig",
         (),
@@ -152,7 +170,9 @@ class _FakeAgent:
 
 
 class _FakeStreamResult:
-    async def stream_text(self, *, delta: bool = False, debounce_by: float | None = None):
+    async def stream_text(
+        self, *, delta: bool = False, debounce_by: float | None = None
+    ):
         assert delta is True
         assert debounce_by is None
         for part in ["Answer ", "from ", "agent"]:
@@ -172,8 +192,10 @@ class _FakeModel:
     pass
 
 
-def _chat_context() -> _ChatContext:
-    activity = type("Activity", (), {"activity_uuid": "activity-1", "name": "Lecture 1"})()
+def _chat_context(locale: str = "ru-RU") -> _ChatContext:
+    activity = type(
+        "Activity", (), {"activity_uuid": "activity-1", "name": "Lecture 1"}
+    )()
     course = type("Course", (), {"name": "Physics"})()
     return _ChatContext(
         activity=activity,
@@ -184,17 +206,22 @@ def _chat_context() -> _ChatContext:
         conversation_summary="User: Earlier asked for a concise explanation.",
         user_id=7,
         request_id="req-1",
+        locale=locale,
     )
 
 
 @pytest.mark.asyncio
-async def test_generate_chat_answer_persists_messages(monkeypatch: pytest.MonkeyPatch) -> None:
+async def test_generate_chat_answer_persists_messages(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     persisted: list[ChatMessage] = []
 
     async def _fake_retrieve_chunks(**_kwargs):
         return [RetrievedChunk(id="c1", document="Gravity explains falling bodies.")]
 
-    monkeypatch.setattr("src.services.ai.service.retrieve_chunks", _fake_retrieve_chunks)
+    monkeypatch.setattr(
+        "src.services.ai.service.retrieve_chunks", _fake_retrieve_chunks
+    )
     monkeypatch.setattr("src.services.ai.service.get_agent", lambda: _FakeAgent())
     monkeypatch.setattr("src.services.ai.service.get_model", lambda: _FakeModel())
     monkeypatch.setattr(
@@ -209,18 +236,27 @@ async def test_generate_chat_answer_persists_messages(monkeypatch: pytest.Monkey
 
     assert answer.message == "Answer from agent"
     assert answer.chunk_count == 1
-    assert [message.role for message in persisted] == [ChatRole.USER, ChatRole.ASSISTANT]
+    assert [message.role for message in persisted] == [
+        ChatRole.USER,
+        ChatRole.ASSISTANT,
+    ]
 
 
 @pytest.mark.asyncio
-async def test_stream_chat_answer_yields_status_delta_and_final(monkeypatch: pytest.MonkeyPatch) -> None:
+async def test_stream_chat_answer_yields_status_delta_and_final(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     persisted: list[ChatMessage] = []
 
     async def _fake_retrieve_chunks(**_kwargs):
         return [RetrievedChunk(id="c1", document="Gravity explains falling bodies.")]
 
-    monkeypatch.setattr("src.services.ai.service.retrieve_chunks", _fake_retrieve_chunks)
-    monkeypatch.setattr("src.services.ai.service.get_agent", lambda: _FakeStreamingAgent())
+    monkeypatch.setattr(
+        "src.services.ai.service.retrieve_chunks", _fake_retrieve_chunks
+    )
+    monkeypatch.setattr(
+        "src.services.ai.service.get_agent", lambda: _FakeStreamingAgent()
+    )
     monkeypatch.setattr("src.services.ai.service.get_model", lambda: _FakeModel())
     monkeypatch.setattr(
         "src.services.ai.service.append_messages",
@@ -244,17 +280,24 @@ async def test_stream_chat_answer_yields_status_delta_and_final(monkeypatch: pyt
     assert any(isinstance(event, DeltaEvent) for event in events)
     assert isinstance(events[-1], FinalEvent)
     assert events[-1].content == "Answer from agent"
-    assert [message.role for message in persisted] == [ChatRole.USER, ChatRole.ASSISTANT]
+    assert [message.role for message in persisted] == [
+        ChatRole.USER,
+        ChatRole.ASSISTANT,
+    ]
 
 
 @pytest.mark.asyncio
-async def test_generate_chat_answer_skips_retrieval_for_translation(monkeypatch: pytest.MonkeyPatch) -> None:
+async def test_generate_chat_answer_skips_retrieval_for_translation(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     persisted: list[ChatMessage] = []
 
     async def _unexpected_retrieve_chunks(**_kwargs):
         raise AssertionError("retrieve_chunks should not run for translation prompts")
 
-    monkeypatch.setattr("src.services.ai.service.retrieve_chunks", _unexpected_retrieve_chunks)
+    monkeypatch.setattr(
+        "src.services.ai.service.retrieve_chunks", _unexpected_retrieve_chunks
+    )
     monkeypatch.setattr("src.services.ai.service.get_agent", lambda: _FakeAgent())
     monkeypatch.setattr("src.services.ai.service.get_model", lambda: _FakeModel())
     monkeypatch.setattr(
@@ -269,18 +312,27 @@ async def test_generate_chat_answer_skips_retrieval_for_translation(monkeypatch:
 
     assert answer.message == "Answer from agent"
     assert answer.chunk_count == 0
-    assert [message.role for message in persisted] == [ChatRole.USER, ChatRole.ASSISTANT]
+    assert [message.role for message in persisted] == [
+        ChatRole.USER,
+        ChatRole.ASSISTANT,
+    ]
 
 
 @pytest.mark.asyncio
-async def test_stream_chat_answer_uses_analyzing_status_without_retrieval(monkeypatch: pytest.MonkeyPatch) -> None:
+async def test_stream_chat_answer_uses_analyzing_status_without_retrieval(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     persisted: list[ChatMessage] = []
 
     async def _unexpected_retrieve_chunks(**_kwargs):
         raise AssertionError("retrieve_chunks should not run for critique prompts")
 
-    monkeypatch.setattr("src.services.ai.service.retrieve_chunks", _unexpected_retrieve_chunks)
-    monkeypatch.setattr("src.services.ai.service.get_agent", lambda: _FakeStreamingAgent())
+    monkeypatch.setattr(
+        "src.services.ai.service.retrieve_chunks", _unexpected_retrieve_chunks
+    )
+    monkeypatch.setattr(
+        "src.services.ai.service.get_agent", lambda: _FakeStreamingAgent()
+    )
     monkeypatch.setattr("src.services.ai.service.get_model", lambda: _FakeModel())
     monkeypatch.setattr(
         "src.services.ai.service.append_messages",
@@ -299,3 +351,34 @@ async def test_stream_chat_answer_uses_analyzing_status_without_retrieval(monkey
     assert events[1].status == "analyzing"
     assert events[1].message == "Analyzing your request without additional retrieval."
     assert isinstance(events[-1], FinalEvent)
+
+
+@pytest.mark.asyncio
+async def test_stream_chat_answer_localizes_status_messages(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    async def _fake_retrieve_chunks(**_kwargs):
+        return [RetrievedChunk(id="c1", document="Gravity explains falling bodies.")]
+
+    monkeypatch.setattr(
+        "src.services.ai.service.retrieve_chunks", _fake_retrieve_chunks
+    )
+    monkeypatch.setattr(
+        "src.services.ai.service.get_agent", lambda: _FakeStreamingAgent()
+    )
+    monkeypatch.setattr("src.services.ai.service.get_model", lambda: _FakeModel())
+
+    events = [
+        event
+        async for event in stream_chat_answer(
+            ctx=_chat_context(locale="ru-RU"),
+            question="Объясните гравитацию, закон всемирного тяготения и то, как это влияет на падение тел в классической механике.",
+        )
+    ]
+
+    assert isinstance(events[0], StatusEvent)
+    assert events[0].message == "Подготавливаем ваш запрос."
+    assert isinstance(events[1], StatusEvent)
+    assert events[1].message == "Подбираем релевантный контекст курса."
+    assert isinstance(events[2], StatusEvent)
+    assert events[2].message == "Формируем ответ."

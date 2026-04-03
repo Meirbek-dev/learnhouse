@@ -3,7 +3,13 @@ from enum import StrEnum
 from typing import Any, Literal
 
 from pydantic import Field
-from pydantic_ai.messages import ModelMessage, ModelRequest, ModelResponse, TextPart, UserPromptPart
+from pydantic_ai.messages import (
+    ModelMessage,
+    ModelRequest,
+    ModelResponse,
+    TextPart,
+    UserPromptPart,
+)
 
 from src.db.strict_base_model import PydanticStrictBaseModel
 
