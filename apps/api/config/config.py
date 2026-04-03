@@ -160,29 +160,90 @@ class AIConfig(PlatformSectionSettings):
         validation_alias="PLATFORM_OPENAI_API_KEY",
     )
     chromadb_config: ChromaDBConfig = Field(default_factory=ChromaDBConfig)
+    chat_model: str = Field(
+        default="gpt-5.4-nano",
+        validation_alias="PLATFORM_AI_CHAT_MODEL",
+    )
+    embedding_model: str = Field(
+        default="text-embedding-3-small",
+        validation_alias="PLATFORM_AI_EMBEDDING_MODEL",
+    )
+    embedding_dimensions: int = Field(
+        default=512,
+        validation_alias="PLATFORM_AI_EMBEDDING_DIMENSIONS",
+    )
 
     # Performance
-    streaming_enabled: bool = True
-    max_concurrent_requests: int = 50
-    request_timeout: int = 60
+    streaming_enabled: bool = Field(
+        default=True,
+        validation_alias="PLATFORM_AI_STREAMING_ENABLED",
+    )
+    max_concurrent_requests: int = Field(
+        default=50,
+        validation_alias="PLATFORM_AI_MAX_CONCURRENT_REQUESTS",
+    )
+    request_timeout: int = Field(
+        default=60,
+        validation_alias="PLATFORM_AI_REQUEST_TIMEOUT",
+    )
+    max_output_tokens: int = Field(
+        default=4000,
+        validation_alias="PLATFORM_AI_MAX_OUTPUT_TOKENS",
+    )
 
     # Cache TTLs (seconds)
-    vector_store_ttl: int = 3600
-    response_cache_ttl: int = 1800
-    embedding_cache_ttl: int = 7200
+    retrieval_cache_ttl: int = Field(
+        default=3600,
+        validation_alias="PLATFORM_AI_RETRIEVAL_CACHE_TTL",
+    )
+    response_cache_ttl: int = Field(
+        default=1800,
+        validation_alias="PLATFORM_AI_RESPONSE_CACHE_TTL",
+    )
+    embedding_cache_ttl: int = Field(
+        default=7200,
+        validation_alias="PLATFORM_AI_EMBEDDING_CACHE_TTL",
+    )
 
     # Vector store
-    collection_retention: int = 86400
-    embedding_batch_size: int = 8191
+    collection_retention: int = Field(
+        default=86400,
+        validation_alias="PLATFORM_AI_COLLECTION_RETENTION",
+    )
+    embedding_batch_size: int = Field(
+        default=8191,
+        validation_alias="PLATFORM_AI_EMBEDDING_BATCH_SIZE",
+    )
+    retrieval_top_k: int = Field(
+        default=5,
+        validation_alias="PLATFORM_AI_RETRIEVAL_TOP_K",
+    )
 
     # Chat history
-    history_window_size: int = 10
-    max_history_length: int = 100
-    message_retention: int = 86400
+    history_window_size: int = Field(
+        default=10,
+        validation_alias="PLATFORM_AI_HISTORY_WINDOW_SIZE",
+    )
+    max_history_length: int = Field(
+        default=100,
+        validation_alias="PLATFORM_AI_MAX_HISTORY_LENGTH",
+    )
+    message_retention: int = Field(
+        default=86400,
+        validation_alias="PLATFORM_AI_MESSAGE_RETENTION",
+    )
+    chunk_size: int = Field(
+        default=1000,
+        validation_alias="PLATFORM_AI_CHUNK_SIZE",
+    )
+    chunk_overlap: int = Field(
+        default=200,
+        validation_alias="PLATFORM_AI_CHUNK_OVERLAP",
+    )
 
-    @field_validator("openai_api_key", mode="before")
+    @field_validator("openai_api_key", "chat_model", "embedding_model", mode="before")
     @classmethod
-    def normalize_openai_api_key(cls, value: str | None) -> str | None:
+    def normalize_optional_ai_strings(cls, value: str | None) -> str | None:
         return _strip_optional_string(value)
 
 

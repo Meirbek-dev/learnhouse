@@ -1,7 +1,7 @@
 """
 Cache manager for AI services.
 
-AICacheManager holds TTL caches for vector stores, agents, and DB query results.
+AICacheManager holds TTL caches for retrieval collections, agents, and DB query results.
 It also tracks which cache keys belong to which activity so they can be
 invalidated atomically when content changes.
 """
@@ -52,21 +52,21 @@ class AICacheManager:
 
     def __init__(self) -> None:
         settings = get_settings()
-        vector_ttl = settings.ai_config.collection_retention
-        self.vector_store_cache = _Cache(maxsize=100, ttl=vector_ttl)
+        retrieval_ttl = settings.ai_config.collection_retention
+        self.retrieval_cache = _Cache(maxsize=100, ttl=retrieval_ttl)
         self.agent_cache = _Cache(maxsize=100, ttl=1800)  # 30 min
         self.db_cache = _Cache(maxsize=200, ttl=300)  # 5 min
 
         # Secondary index: activity_uuid → set of cache keys for targeted invalidation
-        self._vector_key_index: dict[str, set[str]] = {}
+        self._retrieval_key_index: dict[str, set[str]] = {}
         self._agent_key_index: dict[str, set[str]] = {}
         self._index_lock = Lock()
 
         logger.info("AI Cache Manager initialized")
 
-    def register_vector_cache_key(self, activity_uuid: str, cache_key: str) -> None:
+    def register_retrieval_cache_key(self, activity_uuid: str, cache_key: str) -> None:
         with self._index_lock:
-            self._vector_key_index.setdefault(activity_uuid, set()).add(cache_key)
+            self._retrieval_key_index.setdefault(activity_uuid, set()).add(cache_key)
 
     def register_agent_cache_key(self, activity_uuid: str, cache_key: str) -> None:
         with self._index_lock:
@@ -78,39 +78,39 @@ class AICacheManager:
         self.db_cache.delete(f"context_text_{activity_uuid}")
 
         with self._index_lock:
-            vector_keys = self._vector_key_index.pop(activity_uuid, set())
+            retrieval_keys = self._retrieval_key_index.pop(activity_uuid, set())
             agent_keys = self._agent_key_index.pop(activity_uuid, set())
 
-        for key in vector_keys:
-            self.vector_store_cache.delete(key)
+        for key in retrieval_keys:
+            self.retrieval_cache.delete(key)
         for key in agent_keys:
             self.agent_cache.delete(key)
 
         logger.info(
-            "Invalidated caches for activity %s: %d vector, %d agent entries cleared",
+            "Invalidated caches for activity %s: %d retrieval, %d agent entries cleared",
             activity_uuid,
-            len(vector_keys),
+            len(retrieval_keys),
             len(agent_keys),
         )
 
     def clear_all(self) -> None:
-        self.vector_store_cache.clear()
+        self.retrieval_cache.clear()
         self.agent_cache.clear()
         self.db_cache.clear()
         with self._index_lock:
-            self._vector_key_index.clear()
+            self._retrieval_key_index.clear()
             self._agent_key_index.clear()
         logger.info("All AI caches cleared")
 
     def get_all_stats(self) -> dict[str, Any]:
         with self._index_lock:
-            vector_index_size = sum(len(v) for v in self._vector_key_index.values())
+            retrieval_index_size = sum(len(v) for v in self._retrieval_key_index.values())
             agent_index_size = sum(len(v) for v in self._agent_key_index.values())
         return {
-            "vector_store": {"size": len(self.vector_store_cache)},
+            "retrieval": {"size": len(self.retrieval_cache)},
             "agent": {"size": len(self.agent_cache)},
             "database": {"size": len(self.db_cache)},
-            "vector_key_index_entries": vector_index_size,
+            "retrieval_key_index_entries": retrieval_index_size,
             "agent_key_index_entries": agent_index_size,
         }
 

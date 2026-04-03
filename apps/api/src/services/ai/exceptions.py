@@ -43,11 +43,11 @@ class AITimeoutError(AIServiceException):
         super().__init__(message, "AI_TIMEOUT_ERROR", details)
 
 
-class VectorStoreError(AIServiceException):
-    """Raised when vector store or embedding operations fail (maps to HTTP 500)."""
+class RetrievalError(AIServiceException):
+    """Raised when retrieval or embedding operations fail (maps to HTTP 500)."""
 
     def __init__(self, message: str, details: dict[str, Any] | None = None) -> None:
-        super().__init__(message, "VECTOR_STORE_ERROR", details)
+        super().__init__(message, "RETRIEVAL_ERROR", details)
 
 
 class ChatSessionError(AIServiceException):
