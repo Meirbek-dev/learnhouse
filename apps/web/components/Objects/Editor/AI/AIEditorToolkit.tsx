@@ -4,7 +4,6 @@ import {
   FastForward,
   Feather,
   FileStack,
-  HelpCircle,
   Languages,
   Lightbulb,
   X,
@@ -13,6 +12,7 @@ import { useChat } from '@tanstack/ai-react';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import type { ChangeEvent, KeyboardEvent } from 'react';
 import platformLogoLight from '@public/platform_logo_light.svg';
+import { AiMarkdownRenderer } from '@components/Shared/AI/AiMarkdownRenderer';
 import { ScrollArea } from '@components/ui/scroll-area';
 import { Spinner } from '@components/ui/spinner';
 import { Button } from '@components/ui/button';
@@ -33,7 +33,8 @@ import { cn } from '@/lib/utils';
 // Types
 // ============================================================================
 
-type ToolLabel = 'Writer' | 'ContinueWriting' | 'MakeLonger' | 'GenerateQuiz' | 'Translate' | 'Critisize';
+// NOTE: 'GenerateQuiz' was removed — it was in TOOL_ICONS but never rendered.
+type ToolLabel = 'Writer' | 'ContinueWriting' | 'MakeLonger' | 'Translate' | 'Critisize';
 type CritisizeScope = 'selection' | 'lecture';
 
 interface AIEditorToolkitProps {
@@ -66,7 +67,6 @@ const TOOL_ICONS: Record<ToolLabel, typeof Feather> = {
   Writer: Feather,
   ContinueWriting: FastForward,
   MakeLonger: FileStack,
-  GenerateQuiz: HelpCircle,
   Translate: Languages,
   Critisize: Lightbulb,
 };
@@ -191,6 +191,8 @@ interface ActionScreenProps {
   chatInputValue: string;
   onInputChange: (value: string) => void;
   lastAiResponse: string;
+  /** Partial text arriving during a streaming generation. */
+  streamingPreview: string;
 }
 
 function AiEditorActionScreen({
@@ -204,6 +206,7 @@ function AiEditorActionScreen({
   chatInputValue,
   onInputChange,
   lastAiResponse,
+  streamingPreview,
 }: ActionScreenProps) {
   const t = useTranslations('Activities.AIEditorToolkit');
 
@@ -235,9 +238,21 @@ function AiEditorActionScreen({
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center gap-2">
-        <Spinner className="h-5 w-5 text-zinc-400" />
-        <p className="text-sm text-zinc-400">{t('thinking')}</p>
+      <div className="flex w-full flex-col gap-3">
+        <div className="flex items-center gap-2">
+          <Spinner className="h-4 w-4 text-zinc-400" />
+          <p className="text-sm text-zinc-400">{t('thinking')}</p>
+        </div>
+        {streamingPreview && (
+          <ScrollArea className="max-h-40 w-full rounded-md border border-zinc-700/60 bg-zinc-800/50">
+            <div className="p-3">
+              <AiMarkdownRenderer
+                content={streamingPreview}
+                isStreaming
+              />
+            </div>
+          </ScrollArea>
+        )}
       </div>
     );
   }
@@ -290,8 +305,10 @@ function AiEditorActionScreen({
   if (selectedTool === 'Critisize') {
     if (hasAiResponse) {
       return (
-        <ScrollArea className="h-32 w-full rounded-md border border-zinc-700/60 bg-zinc-800/50">
-          <div className="p-3 text-sm leading-relaxed whitespace-pre-wrap text-zinc-200">{lastAiResponse}</div>
+        <ScrollArea className="max-h-48 w-full rounded-md border border-zinc-700/60 bg-zinc-800/50">
+          <div className="p-3">
+            <AiMarkdownRenderer content={lastAiResponse} />
+          </div>
         </ScrollArea>
       );
     }
@@ -368,6 +385,7 @@ interface FeedbackModalProps {
   isLoading: boolean;
   error: Error | undefined;
   lastAiResponse: string;
+  streamingPreview: string;
   onToolChange: (tool: ToolLabel) => void;
   onUserInputEnabledChange: (enabled: boolean) => void;
   onInputChange: (value: string) => void;
@@ -386,6 +404,7 @@ function UserFeedbackModal({
   isLoading,
   error,
   lastAiResponse,
+  streamingPreview,
   onToolChange,
   onUserInputEnabledChange,
   onInputChange,
@@ -529,7 +548,7 @@ function UserFeedbackModal({
       animate="visible"
       exit="exit"
       transition={SPRING_TRANSITION}
-      className="fixed bottom-20 left-1/2 z-50 w-[calc(100vw-2rem)] max-w-[600px] -translate-x-1/2"
+      className="fixed bottom-24 left-1/2 z-50 w-[calc(100vw-2rem)] max-w-[600px] -translate-x-1/2"
       style={{ pointerEvents: 'auto' }}
     >
       <div className="rounded-xl border border-zinc-700/60 bg-zinc-900 p-4 shadow-xl">
@@ -558,6 +577,7 @@ function UserFeedbackModal({
             chatInputValue={chatInputValue}
             onInputChange={onInputChange}
             lastAiResponse={lastAiResponse}
+            streamingPreview={streamingPreview}
           />
         </div>
 
@@ -607,9 +627,9 @@ export default function AIEditorToolkit({ editor, activity, isOpen, onClose }: A
   const [chatInputValue, setChatInputValue] = useState('');
 
   // ── TanStack AI chat ───────────────────────────────────────────────────────
-  // Capture the last AI response text via onFinish so it can be used in
-  // Promise-returning operations (typeText expects a complete string).
-  const lastResponseRef = useRef('');
+  // A Promise resolver stored in a ref so onFinish can resolve the
+  // sendMessageAndGetResponse promise after streaming completes.
+  const responseResolverRef = useRef<((text: string) => void) | null>(null);
 
   const connection = useMemo(
     () =>
@@ -629,30 +649,44 @@ export default function AIEditorToolkit({ editor, activity, isOpen, onClose }: A
         .filter((p): p is TextPart => p.type === 'text')
         .map((p) => p.content)
         .join('');
-      lastResponseRef.current = text;
+      // Resolve the pending promise from sendMessageAndGetResponse.
+      responseResolverRef.current?.(text);
+      responseResolverRef.current = null;
     },
   });
 
-  // Wraps sendMessage to return the complete response as a string — needed
-  // by editor operations that insert text immediately after the AI responds.
+  // Returns a Promise that resolves with the full response text once
+  // onFinish fires — fixing the previous race condition.
   const sendMessageAndGetResponse = useCallback(
-    async (prompt: string): Promise<string> => {
-      lastResponseRef.current = '';
-      await sendMessage(prompt);
-      return lastResponseRef.current;
-    },
+    (prompt: string): Promise<string> =>
+      new Promise((resolve) => {
+        responseResolverRef.current = resolve;
+        sendMessage(prompt);
+      }),
     [sendMessage],
   );
 
-  // Derive the last AI text for Critisize display.
+  // Derive the last AI text: committed response (for Critisize display)
+  // and in-flight streaming preview (for all tools while loading).
   const lastAiResponse = useMemo(() => {
+    if (isLoading) return '';
     const lastAssistant = [...messages].reverse().find((m) => m.role === 'assistant');
     if (!lastAssistant) return '';
     return lastAssistant.parts
       .filter((p): p is TextPart => p.type === 'text')
       .map((p) => p.content)
       .join('');
-  }, [messages]);
+  }, [messages, isLoading]);
+
+  const streamingPreview = useMemo(() => {
+    if (!isLoading) return '';
+    const lastAssistant = [...messages].reverse().find((m) => m.role === 'assistant');
+    if (!lastAssistant) return '';
+    return lastAssistant.parts
+      .filter((p): p is TextPart => p.type === 'text')
+      .map((p) => p.content)
+      .join('');
+  }, [messages, isLoading]);
 
   // ── Handlers ──────────────────────────────────────────────────────────────
 
@@ -697,6 +731,7 @@ export default function AIEditorToolkit({ editor, activity, isOpen, onClose }: A
               isLoading={isLoading}
               error={error}
               lastAiResponse={lastAiResponse}
+              streamingPreview={streamingPreview}
               onToolChange={setSelectedTool}
               onUserInputEnabledChange={setIsUserInputEnabled}
               onInputChange={setChatInputValue}

@@ -19,6 +19,13 @@ import type { TextPart } from '@tanstack/ai-client';
 interface ActivityChatAdapterOptions {
   activityUuid: string;
   getAccessToken: () => string | undefined;
+  /**
+   * Provides the current session UUID from an external store (e.g. a React
+   * ref in ActivityAIChatProvider) so it survives provider remounts.
+   */
+  getSessionUuid?: () => string | null;
+  /** Persists the session UUID after the backend returns it. */
+  setSessionUuid?: (uuid: string) => void;
 }
 
 /**
@@ -28,9 +35,19 @@ interface ActivityChatAdapterOptions {
  * Session UUID is managed internally — the adapter automatically routes
  * to `/start` on first call and `/send` on subsequent calls.
  */
-export function createActivityChatAdapter({ activityUuid, getAccessToken }: ActivityChatAdapterOptions) {
-  // Persists across sendMessage calls for the lifetime of this adapter instance.
-  let sessionUuid: string | null = null;
+export function createActivityChatAdapter({ activityUuid, getAccessToken, getSessionUuid, setSessionUuid }: ActivityChatAdapterOptions) {
+  // Fallback: keep a local closure variable for callers that don’t provide
+  // external getter/setter (e.g. AIEditorToolkit’s standalone useChat).
+  let _localSessionUuid: string | null = null;
+
+  const readUuid = (): string | null => getSessionUuid ? getSessionUuid() : _localSessionUuid;
+  const writeUuid = (uuid: string) => {
+    if (setSessionUuid) {
+      setSessionUuid(uuid);
+    } else {
+      _localSessionUuid = uuid;
+    }
+  };
 
   return stream(async function* (messages, _data) {
     const accessToken = getAccessToken();
@@ -48,6 +65,7 @@ export function createActivityChatAdapter({ activityUuid, getAccessToken }: Acti
     if (!text.trim()) return;
 
     // Route to the correct endpoint based on whether we have an active session.
+    const sessionUuid = readUuid();
     const url = sessionUuid
       ? `${getAPIUrl()}ai/send/activity_chat_message_stream`
       : `${getAPIUrl()}ai/start/activity_chat_session_stream`;
@@ -94,7 +112,7 @@ export function createActivityChatAdapter({ activityUuid, getAccessToken }: Acti
 
           switch (event.type) {
             case 'status': {
-              if (event.aichat_uuid) sessionUuid = event.aichat_uuid as string;
+              if (event.aichat_uuid) writeUuid(event.aichat_uuid as string);
               // Surface the backend status message as a CUSTOM event so UI
               // components can display it via the onChunk callback.
               if (event.message) {
@@ -125,7 +143,7 @@ export function createActivityChatAdapter({ activityUuid, getAccessToken }: Acti
             }
 
             case 'final': {
-              if (event.aichat_uuid) sessionUuid = event.aichat_uuid as string;
+              if (event.aichat_uuid) writeUuid(event.aichat_uuid as string);
               if (!messageStarted) {
                 yield { type: 'TEXT_MESSAGE_START', messageId, role: 'assistant', timestamp: now() };
                 messageStarted = true;

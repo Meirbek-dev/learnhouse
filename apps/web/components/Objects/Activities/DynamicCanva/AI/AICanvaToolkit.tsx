@@ -1,11 +1,12 @@
 import { useActivityAIChat } from '@components/Contexts/AI/ActivityAIChatContext';
 import ToolTip from '@/components/Objects/Elements/Tooltip/Tooltip';
-import { BookOpen, FormInput, Languages } from 'lucide-react';
+import { BookOpen, Check, FormInput, Languages, Loader2 } from 'lucide-react';
 import platformLogo from '@public/platform_logo.svg';
 import { BubbleMenu } from '@tiptap/react/menus';
 import { Button } from '@components/ui/button';
 import type { Editor } from '@tiptap/react';
 import { useTranslations } from 'next-intl';
+import { useState } from 'react';
 import type { ReactNode } from 'react';
 import Image from 'next/image';
 
@@ -26,7 +27,7 @@ const AICanvaToolkit = (props: AICanvaToolkitProps) => {
       className="w-fit"
       editor={props.editor}
       shouldShow={({ editor }: { editor: Editor }) => {
-        return editor.isActive('text') && !editor.state.selection.empty;
+        return !editor.state.selection.empty;
       }}
     >
       <div className="flex h-auto w-max items-center gap-2 rounded-lg border border-zinc-700/60 bg-zinc-900/95 px-3 py-1.5 shadow-lg backdrop-blur-sm">
@@ -67,15 +68,31 @@ const AICanvaToolkit = (props: AICanvaToolkitProps) => {
   );
 };
 
+type ActionState = 'idle' | 'loading' | 'done' | 'error';
+
 const AIActionButton = (props: { editor: Editor; label: string }) => {
   const t = useTranslations('Activities.AICanvaToolkit');
   const { sendMessage, setIsModalOpen } = useActivityAIChat();
+  const [actionState, setActionState] = useState<ActionState>('idle');
 
   async function handleAction(label: string) {
-    const selection = getTipTapEditorSelectedText();
-    const prompt = getPrompt(label, selection);
-    setIsModalOpen(true);
-    await sendMessage(prompt);
+    if (actionState === 'loading') return;
+    setActionState('loading');
+    try {
+      const selection = getTipTapEditorSelectedText();
+      if (!selection.trim()) {
+        setActionState('idle');
+        return;
+      }
+      const prompt = getPrompt(label, selection);
+      setIsModalOpen(true);
+      await sendMessage(prompt);
+      setActionState('done');
+    } catch {
+      setActionState('error');
+    } finally {
+      setTimeout(() => setActionState('idle'), 1500);
+    }
   }
 
   const getTipTapEditorSelectedText = () => {
@@ -152,6 +169,9 @@ const AIActionButton = (props: { editor: Editor; label: string }) => {
     Examples: <span className="text-xs font-bold leading-none">{t('examplesAbbr')}</span>,
   };
 
+  const isLoading = actionState === 'loading';
+  const isDone = actionState === 'done';
+
   return (
     <ToolTip
       sideOffset={10}
@@ -163,10 +183,23 @@ const AIActionButton = (props: { editor: Editor; label: string }) => {
         size="sm"
         onClick={() => handleAction(props.label)}
         aria-label={getButtonLabel(props.label)}
-        className="h-7 gap-1.5 rounded-md px-2 text-xs font-medium text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100"
+        disabled={isLoading}
+        className="h-7 gap-1.5 rounded-md px-2 text-xs font-medium text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 disabled:opacity-60"
         type="button"
       >
-        {iconMap[props.label]}
+        {isLoading ? (
+          <Loader2
+            size={13}
+            className="animate-spin"
+          />
+        ) : isDone ? (
+          <Check
+            size={13}
+            className="text-emerald-400"
+          />
+        ) : (
+          iconMap[props.label]
+        )}
         {getButtonLabel(props.label)}
       </Button>
     </ToolTip>

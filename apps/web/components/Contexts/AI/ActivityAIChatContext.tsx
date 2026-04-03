@@ -10,7 +10,7 @@
  */
 
 import { useChat } from '@tanstack/ai-react';
-import { createContext, useContext, useMemo, useState, type PropsWithChildren } from 'react';
+import { createContext, useContext, useMemo, useRef, useState, type PropsWithChildren } from 'react';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { createActivityChatAdapter } from '@services/ai/activity-chat-adapter';
 import type { UseChatReturn } from '@tanstack/ai-react';
@@ -43,14 +43,22 @@ export function ActivityAIChatProvider({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
 
+  // Keep the session UUID in a ref so it survives React Fast Refresh and
+  // Strict-Mode double-mounts without starting a new backend session.
+  const sessionUuidRef = useRef<string | null>(null);
+
   const connection = useMemo(
     () =>
       createActivityChatAdapter({
         activityUuid,
         getAccessToken: () => session?.data?.tokens?.access_token,
+        getSessionUuid: () => sessionUuidRef.current,
+        setSessionUuid: (uuid) => {
+          sessionUuidRef.current = uuid;
+        },
       }),
-    // Recreate adapter only when the activity changes — access token changes
-    // are handled inside the factory via the getter function.
+    // Recreate adapter only when the activity changes — access token and
+    // session UUID changes are handled inside the factory via getter/setter.
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [activityUuid],
   );
