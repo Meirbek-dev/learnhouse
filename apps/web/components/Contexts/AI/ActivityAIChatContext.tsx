@@ -13,6 +13,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import type { PropsWithChildren } from 'react';
 import { createActivityChatAdapter } from '@services/ai/activity-chat-adapter';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
+import type { TextPart } from '@tanstack/ai-client';
 import type { UseChatReturn } from '@tanstack/ai-react';
 import { useChat } from '@tanstack/ai-react';
 
@@ -23,12 +24,18 @@ interface ActivityAIChatContextValue extends UseChatReturn {
   statusMessage: string | null;
   /** Whether the chat panel is visible. */
   isModalOpen: boolean;
-  /** Opens the panel, clearing any previous error/messages from useChat. */
+  /** Opens the panel without forcing a new backend session. */
   openModal: () => void;
   setIsModalOpen: (open: boolean) => void;
   /** Current text input value. */
   inputValue: string;
   setInputValue: (value: string) => void;
+  /** Aborts the current in-flight backend request. */
+  abort: () => void;
+  /** Clears local chat state and resets the backend session UUID. */
+  resetConversation: () => void;
+  /** Sends a prompt and resolves with the final assistant text for that run. */
+  sendMessageAndGetResponse: (message: string) => Promise<string>;
 }
 
 // ── Context ───────────────────────────────────────────────────────────────────
@@ -49,6 +56,7 @@ export function ActivityAIChatProvider({ activityUuid, children }: PropsWithChil
 
   // Store the adapter's abort function so we can cancel in-flight requests.
   const abortRef = useRef<(() => void) | null>(null);
+  const resolverQueueRef = useRef<Array<(value: string) => void>>([]);
 
   const adapter = useMemo(
     () =>
@@ -74,36 +82,112 @@ export function ActivityAIChatProvider({ activityUuid, children }: PropsWithChil
     };
   }, [adapter]);
 
+  const settleNextPendingResponse = useCallback((value: string) => {
+    resolverQueueRef.current.shift()?.(value);
+  }, []);
+
   const chat = useChat({
     connection: adapter.connection,
     onChunk: (chunk) => {
       if (chunk.type === 'CUSTOM' && chunk.name === 'ai_status') {
-        setStatusMessage((chunk.value as { message: string }).message ?? null);
+        setStatusMessage((chunk.value as { message?: string }).message ?? null);
       }
     },
-    onFinish: () => setStatusMessage(null),
-    onError: () => setStatusMessage(null),
+    onFinish: (message) => {
+      setStatusMessage(null);
+      const text = message.parts
+        .filter((part): part is TextPart => part.type === 'text')
+        .map((part) => part.content)
+        .join('');
+      settleNextPendingResponse(text);
+    },
+    onError: () => {
+      setStatusMessage(null);
+      settleNextPendingResponse('');
+    },
   });
 
-  // Opens the panel and clears any stale error / messages from a previous session.
+  const chatStopRef = useRef(chat.stop);
+  const chatClearRef = useRef(chat.clear);
+  const chatSendMessageRef = useRef(chat.sendMessage);
+
+  useEffect(() => {
+    chatStopRef.current = chat.stop;
+    chatClearRef.current = chat.clear;
+    chatSendMessageRef.current = chat.sendMessage;
+  }, [chat.stop, chat.clear, chat.sendMessage]);
+
+  const abort = useCallback(() => {
+    abortRef.current?.();
+  }, []);
+
+  const resetConversation = useCallback(() => {
+    abort();
+    chatStopRef.current();
+    chatClearRef.current();
+    setStatusMessage(null);
+    setInputValue('');
+    sessionUuidRef.current = null;
+
+    while (resolverQueueRef.current.length) {
+      resolverQueueRef.current.shift()?.('');
+    }
+  }, [abort]);
+
   const openModal = useCallback(() => {
-    chat.clear();
     setIsModalOpen(true);
-  }, [chat]);
+  }, []);
+
+  const sendMessageAndGetResponse = useCallback(
+    (message: string): Promise<string> => {
+      if (!message.trim()) {
+        return Promise.resolve('');
+      }
+
+      return new Promise((resolve) => {
+        resolverQueueRef.current.push(resolve);
+        chatSendMessageRef.current(message);
+      });
+    },
+    [],
+  );
+
+  useEffect(() => {
+    resetConversation();
+    setIsModalOpen(false);
+  }, [activityUuid, resetConversation]);
+
+  useEffect(() => {
+    return () => {
+      while (resolverQueueRef.current.length) {
+        resolverQueueRef.current.shift()?.('');
+      }
+    };
+  }, []);
 
   // Abort stream and clear input when the panel closes.
   useEffect(() => {
     if (!isModalOpen) {
-      abortRef.current?.();
-      chat.stop();
+      abort();
+      chatStopRef.current();
       setInputValue('');
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isModalOpen]);
+  }, [abort, isModalOpen]);
 
   const value = useMemo(
-    () => ({ ...chat, statusMessage, isModalOpen, openModal, setIsModalOpen, inputValue, setInputValue }),
-    [chat, statusMessage, isModalOpen, openModal, inputValue],
+    () => ({
+      ...chat,
+      statusMessage,
+      isModalOpen,
+      openModal,
+      setIsModalOpen,
+      inputValue,
+      setInputValue,
+      abort,
+      resetConversation,
+      sendMessageAndGetResponse,
+    }),
+    [chat, statusMessage, isModalOpen, openModal, inputValue, abort, resetConversation, sendMessageAndGetResponse],
   );
 
   return <ActivityAIChatContext.Provider value={value}>{children}</ActivityAIChatContext.Provider>;

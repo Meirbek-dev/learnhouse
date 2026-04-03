@@ -18,6 +18,14 @@ _BASE_SYSTEM_PROMPT = (
     "and prefer clear, structured explanations."
 )
 
+_MODE_INSTRUCTIONS = {
+    "instructional": "Answer using the activity and course context when it helps. Prefer grounded explanations over generic ones.",
+    "editorial": "Treat the request as an editorial writing task. Focus on transforming or extending the user's provided text without inventing course facts unless explicitly requested.",
+    "translation": "Treat the request as a translation task. Preserve meaning, tone, and formatting. Do not add explanation unless the user asks for it.",
+    "critique": "Treat the request as a critique task. Provide constructive feedback, identify weaknesses precisely, and suggest concrete improvements.",
+    "follow_up": "Treat the request as a conversational follow-up. Prefer the recent chat history and summarized prior context before reaching for general knowledge.",
+}
+
 _AGENT = Agent(
     system_prompt=_BASE_SYSTEM_PROMPT,
     deps_type=AgentDependencies,
@@ -34,7 +42,18 @@ def _build_instructions(ctx: RunContext[AgentDependencies]) -> str:
         f"Course: {deps.course_name}",
         f"Activity: {deps.activity_name}",
         f"Activity UUID: {deps.activity_uuid}",
+        f"Request mode: {deps.request_mode}",
     ]
+
+    mode_instruction = _MODE_INSTRUCTIONS.get(deps.request_mode)
+    if mode_instruction:
+        context_blocks.append(f"Task policy: {mode_instruction}")
+
+    if deps.task_instruction:
+        context_blocks.append(f"Task details: {deps.task_instruction}")
+
+    if deps.conversation_summary:
+        context_blocks.append("Earlier conversation summary:\n" + deps.conversation_summary)
 
     if deps.retrieved_chunks:
         rendered_chunks = []

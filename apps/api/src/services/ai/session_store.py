@@ -14,6 +14,8 @@ logger = logging.getLogger(__name__)
 
 _redis_client: Redis | None = None
 _redis_lock = Lock()
+_SUMMARY_SOURCE_MESSAGE_COUNT = 6
+_SUMMARY_CONTENT_LIMIT = 180
 
 
 def _session_id(aichat_uuid: str | None, user_id: int | None) -> str:
@@ -53,6 +55,25 @@ def _get_redis_client() -> Redis | None:
     return _redis_client
 
 
+def _truncate_message_content(content: str) -> str:
+    compact = " ".join(content.split())
+    if len(compact) <= _SUMMARY_CONTENT_LIMIT:
+        return compact
+    return f"{compact[:_SUMMARY_CONTENT_LIMIT].rstrip()}..."
+
+
+def _summarize_messages(messages: list[ChatMessage]) -> str | None:
+    if not messages:
+        return None
+
+    summary_lines = []
+    for message in messages:
+        role = "User" if message.role == ChatRole.USER else "Assistant"
+        summary_lines.append(f"{role}: {_truncate_message_content(message.content)}")
+
+    return "\n".join(summary_lines)
+
+
 def load_chat_session(
     aichat_uuid: str | None = None,
     user_id: int | None = None,
@@ -63,6 +84,7 @@ def load_chat_session(
     storage_type = "memory"
     messages: list[ChatMessage] = []
     total_messages = 0
+    conversation_summary: str | None = None
 
     client = _get_redis_client()
     if client is not None:
@@ -72,6 +94,16 @@ def load_chat_session(
             total_messages = client.llen(key)
             raw_messages = client.lrange(key, -window_size, -1)
             messages = [ChatMessage.model_validate_json(item) for item in raw_messages]
+
+            older_message_count = max(total_messages - len(messages), 0)
+            if older_message_count > 0:
+                older_end = older_message_count - 1
+                older_start = max(0, older_end - _SUMMARY_SOURCE_MESSAGE_COUNT + 1)
+                raw_summary_messages = client.lrange(key, older_start, older_end)
+                summary_messages = [
+                    ChatMessage.model_validate_json(item) for item in raw_summary_messages
+                ]
+                conversation_summary = _summarize_messages(summary_messages)
         except Exception as exc:
             raise ChatSessionError(
                 f"Failed to load chat session: {exc!s}",
@@ -84,6 +116,7 @@ def load_chat_session(
         total_messages=total_messages,
         window_size=window_size,
         storage_type=storage_type,
+        conversation_summary=conversation_summary,
     )
 
 
@@ -97,6 +130,7 @@ def append_messages(
     settings = get_settings()
     client = _get_redis_client()
     if client is None:
+        logger.warning("Redis unavailable, AI chat persistence disabled for session %s", session_id)
         return
 
     key = _redis_key(session_id)

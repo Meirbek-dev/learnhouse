@@ -9,10 +9,8 @@ import {
   Square,
   X,
 } from 'lucide-react';
-import { createActivityChatAdapter } from '@services/ai/activity-chat-adapter';
+import { useActivityAIChat } from '@components/Contexts/AI/ActivityAIChatContext';
 import { AiMarkdownRenderer } from '@components/Shared/AI/AiMarkdownRenderer';
-import type { ActivityChatAdapter } from '@services/ai/activity-chat-adapter';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import platformLogoLight from '@public/platform_logo_light.svg';
 import type { ChangeEvent, KeyboardEvent } from 'react';
@@ -21,7 +19,6 @@ import type { TextPart } from '@tanstack/ai-client';
 import { Spinner } from '@components/ui/spinner';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
-import { useChat } from '@tanstack/ai-react';
 import type { Variants } from 'motion/react';
 import type { Editor } from '@tiptap/react';
 import { useTranslations } from 'next-intl';
@@ -633,8 +630,8 @@ function UserFeedbackModal({
 
 export default function AIEditorToolkit({ editor, activity, isOpen, onClose }: AIEditorToolkitProps) {
   const t = useTranslations('Activities.AIEditorToolkit');
-  const session = usePlatformSession() as { data?: { tokens?: { access_token?: string } } };
-  const accessToken = session?.data?.tokens?.access_token;
+  const { messages, sendMessageAndGetResponse, isLoading, error, clear, stop, abort, resetConversation } =
+    useActivityAIChat();
 
   // ── Local UI state ────────────────────────────────────────────────────────
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
@@ -644,68 +641,15 @@ export default function AIEditorToolkit({ editor, activity, isOpen, onClose }: A
   const [critisizeScope, setCritisizeScope] = useState<CritisizeScope>('selection');
   const [chatInputValue, setChatInputValue] = useState('');
 
-  // ── Adapter + abort ref ───────────────────────────────────────────────────
-  const adapterRef = useRef<ActivityChatAdapter | null>(null);
-
-  const adapter = useMemo(() => {
-    const a = createActivityChatAdapter({
-      activityUuid: activity.activity_uuid,
-      getAccessToken: () => accessToken,
-    });
-    adapterRef.current = a;
-    return a;
-    // Recreate only when the activity changes.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activity.activity_uuid]);
-
   // Abort any in-flight request when the toolkit is closed or unmounted.
   useEffect(() => {
     if (!isOpen) {
-      adapterRef.current?.abort();
+      abort();
     }
     return () => {
-      adapterRef.current?.abort();
+      abort();
     };
-  }, [isOpen]);
-
-  // ── TanStack AI chat ───────────────────────────────────────────────────────
-  /**
-   * Instead of a single ref, use a FIFO queue of resolvers.
-   * sendMessageAndGetResponse pushes a resolve function; onFinish shifts
-   * the oldest one. This prevents the previous single-ref race condition
-   * where a second call would overwrite the first resolver.
-   */
-  const resolverQueueRef = useRef<((text: string) => void)[]>([]);
-
-  const { messages, sendMessage, isLoading, error, clear, stop } = useChat({
-    connection: adapter.connection,
-    onFinish: (message) => {
-      const text = message.parts
-        .filter((p): p is TextPart => p.type === 'text')
-        .map((p) => p.content)
-        .join('');
-      resolverQueueRef.current.shift()?.(text);
-    },
-  });
-
-  // Drain pending resolvers and abort on unmount to prevent leaked promises.
-  useEffect(() => {
-    const resolverQueue = resolverQueueRef.current;
-
-    return () => {
-      while (resolverQueue.length) resolverQueue.shift()?.('');
-    };
-  }, []);
-
-  /** Returns a Promise that resolves with the full response text once onFinish fires. */
-  const sendMessageAndGetResponse = useCallback(
-    (prompt: string): Promise<string> =>
-      new Promise((resolve) => {
-        resolverQueueRef.current.push(resolve);
-        sendMessage(prompt);
-      }),
-    [sendMessage],
-  );
+  }, [abort, isOpen]);
 
   // Derive the last AI text: committed response (for Critisize display)
   // and in-flight streaming preview (for all tools while loading).
@@ -732,28 +676,22 @@ export default function AIEditorToolkit({ editor, activity, isOpen, onClose }: A
 
   const handleToolSelect = useCallback(
     (label: ToolLabel) => {
-      // Drain any pending resolvers from the previous operation with an empty
-      // string so those promises don't leak.
-      while (resolverQueueRef.current.length) resolverQueueRef.current.shift()?.('');
-      // Abort the in-flight adapter request so the old stream's onFinish
-      // cannot shift a resolver that belongs to the new operation.
-      adapterRef.current?.abort();
+      abort();
       stop();
-      clear();
+      resetConversation();
 
       setSelectedTool(label);
       setIsFeedbackModalOpen(true);
       // The Writer tool has a free-text input; all other tools don't need it.
       setIsUserInputEnabled(label === 'Writer');
     },
-    [clear, stop],
+    [abort, resetConversation, stop],
   );
 
   const handleCancel = useCallback(() => {
-    while (resolverQueueRef.current.length) resolverQueueRef.current.shift()?.('');
-    adapterRef.current?.abort();
+    abort();
     stop();
-  }, [stop]);
+  }, [abort, stop]);
 
   const handleDismissError = useCallback(() => {
     clear();

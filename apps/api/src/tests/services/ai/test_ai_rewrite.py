@@ -103,12 +103,14 @@ def test_session_store_appends_and_loads_window(monkeypatch: pytest.MonkeyPatch)
     assert len(session.messages) == 10
     assert session.messages[0].content == "message-2"
     assert session.messages[-1].content == "message-11"
+    assert session.conversation_summary == "User: message-0\nAssistant: message-1"
 
 
 def test_format_sse_message_serializes_typed_events() -> None:
     payload = format_sse_message(StatusEvent(status="processing", aichat_uuid="s-1"))
 
     assert payload.startswith("data: ")
+    assert '"version": 1' in payload
     assert '"type": "status"' in payload
     assert '"aichat_uuid": "s-1"' in payload
 
@@ -166,6 +168,10 @@ class _FakeStreamingAgent:
         yield _FakeStreamResult()
 
 
+class _FakeModel:
+    pass
+
+
 def _chat_context() -> _ChatContext:
     activity = type("Activity", (), {"activity_uuid": "activity-1", "name": "Lecture 1"})()
     course = type("Course", (), {"name": "Physics"})()
@@ -175,6 +181,7 @@ def _chat_context() -> _ChatContext:
         documents=["Gravity is an attractive force between masses."],
         session_id="user_7_session",
         session_history=[],
+        conversation_summary="User: Earlier asked for a concise explanation.",
         user_id=7,
         request_id="req-1",
     )
@@ -189,12 +196,16 @@ async def test_generate_chat_answer_persists_messages(monkeypatch: pytest.Monkey
 
     monkeypatch.setattr("src.services.ai.service.retrieve_chunks", _fake_retrieve_chunks)
     monkeypatch.setattr("src.services.ai.service.get_agent", lambda: _FakeAgent())
+    monkeypatch.setattr("src.services.ai.service.get_model", lambda: _FakeModel())
     monkeypatch.setattr(
         "src.services.ai.service.append_messages",
         lambda _session_id, messages: persisted.extend(messages),
     )
 
-    answer = await generate_chat_answer(ctx=_chat_context(), question="What is gravity?")
+    answer = await generate_chat_answer(
+        ctx=_chat_context(),
+        question="What is gravity and how does it affect falling bodies in classical mechanics when teaching the relationship between force, mass, and acceleration in a full lesson explanation?",
+    )
 
     assert answer.message == "Answer from agent"
     assert answer.chunk_count == 1
@@ -210,6 +221,7 @@ async def test_stream_chat_answer_yields_status_delta_and_final(monkeypatch: pyt
 
     monkeypatch.setattr("src.services.ai.service.retrieve_chunks", _fake_retrieve_chunks)
     monkeypatch.setattr("src.services.ai.service.get_agent", lambda: _FakeStreamingAgent())
+    monkeypatch.setattr("src.services.ai.service.get_model", lambda: _FakeModel())
     monkeypatch.setattr(
         "src.services.ai.service.append_messages",
         lambda _session_id, messages: persisted.extend(messages),
@@ -219,14 +231,71 @@ async def test_stream_chat_answer_yields_status_delta_and_final(monkeypatch: pyt
         event
         async for event in stream_chat_answer(
             ctx=_chat_context(),
-            question="Explain gravity",
+            question="Explain gravity in enough detail to connect the force with falling bodies in a physics lesson.",
         )
     ]
 
     assert isinstance(events[0], StatusEvent)
     assert isinstance(events[1], StatusEvent)
     assert isinstance(events[2], StatusEvent)
+    assert events[0].message == "Preparing your request."
+    assert events[1].message == "Retrieving relevant course context."
+    assert events[2].message == "Generating the response."
     assert any(isinstance(event, DeltaEvent) for event in events)
     assert isinstance(events[-1], FinalEvent)
     assert events[-1].content == "Answer from agent"
     assert [message.role for message in persisted] == [ChatRole.USER, ChatRole.ASSISTANT]
+
+
+@pytest.mark.asyncio
+async def test_generate_chat_answer_skips_retrieval_for_translation(monkeypatch: pytest.MonkeyPatch) -> None:
+    persisted: list[ChatMessage] = []
+
+    async def _unexpected_retrieve_chunks(**_kwargs):
+        raise AssertionError("retrieve_chunks should not run for translation prompts")
+
+    monkeypatch.setattr("src.services.ai.service.retrieve_chunks", _unexpected_retrieve_chunks)
+    monkeypatch.setattr("src.services.ai.service.get_agent", lambda: _FakeAgent())
+    monkeypatch.setattr("src.services.ai.service.get_model", lambda: _FakeModel())
+    monkeypatch.setattr(
+        "src.services.ai.service.append_messages",
+        lambda _session_id, messages: persisted.extend(messages),
+    )
+
+    answer = await generate_chat_answer(
+        ctx=_chat_context(),
+        question="Translate to German: Hello world",
+    )
+
+    assert answer.message == "Answer from agent"
+    assert answer.chunk_count == 0
+    assert [message.role for message in persisted] == [ChatRole.USER, ChatRole.ASSISTANT]
+
+
+@pytest.mark.asyncio
+async def test_stream_chat_answer_uses_analyzing_status_without_retrieval(monkeypatch: pytest.MonkeyPatch) -> None:
+    persisted: list[ChatMessage] = []
+
+    async def _unexpected_retrieve_chunks(**_kwargs):
+        raise AssertionError("retrieve_chunks should not run for critique prompts")
+
+    monkeypatch.setattr("src.services.ai.service.retrieve_chunks", _unexpected_retrieve_chunks)
+    monkeypatch.setattr("src.services.ai.service.get_agent", lambda: _FakeStreamingAgent())
+    monkeypatch.setattr("src.services.ai.service.get_model", lambda: _FakeModel())
+    monkeypatch.setattr(
+        "src.services.ai.service.append_messages",
+        lambda _session_id, messages: persisted.extend(messages),
+    )
+
+    events = [
+        event
+        async for event in stream_chat_answer(
+            ctx=_chat_context(),
+            question="Critique this lecture section and suggest improvements: Gravity acts at a distance.",
+        )
+    ]
+
+    assert isinstance(events[1], StatusEvent)
+    assert events[1].status == "analyzing"
+    assert events[1].message == "Analyzing your request without additional retrieval."
+    assert isinstance(events[-1], FinalEvent)

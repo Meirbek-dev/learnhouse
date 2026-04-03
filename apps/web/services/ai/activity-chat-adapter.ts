@@ -3,7 +3,7 @@
  *
  * The backend emits a proprietary SSE format:
  *   data: {"type":"status","aichat_uuid":"...","message":"..."}
- *   data: {"type":"chunk","content":"token"}
+ *   data: {"type":"delta","content":"token"}
  *   data: {"type":"final","content":"full text","aichat_uuid":"..."}
  *   data: {"type":"error","error":"msg","error_code":"CODE"}
  *
@@ -21,6 +21,48 @@ const MAX_BUFFER_BYTES = 65_536;
 
 /** Request timeout in milliseconds. */
 const REQUEST_TIMEOUT_MS = 30_000;
+
+/** Supported SSE protocol version. */
+export const ACTIVITY_CHAT_PROTOCOL_VERSION = 1;
+
+let hasLoggedProtocolVersionMismatch = false;
+
+export function getActivityChatStatusMessage(status: string): string | null {
+  switch (status) {
+    case 'processing':
+      return 'Preparing your request.';
+    case 'retrieving':
+      return 'Retrieving relevant course context.';
+    case 'analyzing':
+      return 'Analyzing your request.';
+    case 'generating':
+      return 'Generating the response.';
+    case 'aborted':
+      return 'Request cancelled.';
+    default:
+      return null;
+  }
+}
+
+export function parseActivitySseDataLine(line: string): Record<string, unknown> | null {
+  if (!line.startsWith('data: ')) return null;
+
+  try {
+    return JSON.parse(line.slice(6)) as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+}
+
+export function reconcileFinalMessageDelta(streamedText: string, finalContent: string): string {
+  if (!finalContent) return '';
+  if (!streamedText) return finalContent;
+  if (finalContent === streamedText) return '';
+  if (finalContent.startsWith(streamedText)) {
+    return finalContent.slice(streamedText.length);
+  }
+  return '';
+}
 
 interface ActivityChatAdapterOptions {
   activityUuid: string;
@@ -116,6 +158,7 @@ export function createActivityChatAdapter({
     const now = () => Date.now();
 
     let messageStarted = false;
+    let streamedText = '';
 
     yield { type: 'RUN_STARTED', runId, timestamp: now() };
 
@@ -140,36 +183,51 @@ export function createActivityChatAdapter({
         buffer = lines.pop() ?? '';
 
         for (const line of lines) {
-          if (!line.startsWith('data: ')) continue;
-          let event: Record<string, unknown>;
-          try {
-            event = JSON.parse(line.slice(6));
-          } catch {
-            continue;
+          const event = parseActivitySseDataLine(line);
+          if (!event) continue;
+
+          if (
+            typeof event.version === 'number' &&
+            event.version !== ACTIVITY_CHAT_PROTOCOL_VERSION &&
+            !hasLoggedProtocolVersionMismatch
+          ) {
+            hasLoggedProtocolVersionMismatch = true;
+            console.warn(
+              `Unsupported activity chat protocol version: ${String(event.version)}. Expected ${ACTIVITY_CHAT_PROTOCOL_VERSION}.`,
+            );
           }
 
           switch (event.type) {
             case 'status': {
               if (event.aichat_uuid) writeUuid(event.aichat_uuid as string);
-              // Surface the backend status message as a CUSTOM event so UI
-              // components can display it via the onChunk callback.
-              if (event.message) {
+              const message =
+                typeof event.message === 'string' && event.message.trim().length > 0
+                  ? event.message
+                  : typeof event.status === 'string'
+                    ? getActivityChatStatusMessage(event.status)
+                    : null;
+              if (message) {
                 yield {
                   type: 'CUSTOM',
                   name: 'ai_status',
-                  value: { message: event.message as string },
+                  value: {
+                    status: typeof event.status === 'string' ? event.status : null,
+                    message,
+                  },
                   timestamp: now(),
                 };
               }
               break;
             }
 
+            case 'delta':
             case 'chunk': {
               if (!messageStarted) {
                 yield { type: 'TEXT_MESSAGE_START', messageId, role: 'assistant', timestamp: now() };
                 messageStarted = true;
               }
               if (event.content) {
+                streamedText += event.content as string;
                 yield {
                   type: 'TEXT_MESSAGE_CONTENT',
                   messageId,
@@ -186,11 +244,12 @@ export function createActivityChatAdapter({
                 yield { type: 'TEXT_MESSAGE_START', messageId, role: 'assistant', timestamp: now() };
                 messageStarted = true;
               }
-              if (event.content) {
+              const finalDelta = reconcileFinalMessageDelta(streamedText, (event.content as string) ?? '');
+              if (finalDelta) {
                 yield {
                   type: 'TEXT_MESSAGE_CONTENT',
                   messageId,
-                  delta: event.content as string,
+                  delta: finalDelta,
                   timestamp: now(),
                 };
               }
@@ -231,6 +290,7 @@ export function createActivityChatAdapter({
       yield { type: 'RUN_FINISHED', runId, finishReason: 'stop', timestamp: now() };
     } finally {
       reader.releaseLock();
+      currentController = null;
     }
   });
 

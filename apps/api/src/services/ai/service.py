@@ -3,6 +3,7 @@ import logging
 import time
 from collections.abc import AsyncGenerator
 from dataclasses import dataclass
+from enum import StrEnum
 
 from fastapi import Request
 from sqlmodel import Session, select
@@ -24,6 +25,43 @@ from src.services.courses.activities.utils import (
 
 logger = logging.getLogger(__name__)
 
+_TRANSLATION_HINTS = (
+    "translate ",
+    "translate to ",
+    "перевести",
+    "аудару",
+)
+_CRITIQUE_HINTS = ("critique ", "раскритикуй", "сынап")
+_EDITORIAL_HINTS = (
+    "write about ",
+    "continue writing",
+    "make this text longer",
+    "написать о ",
+    "продолжить писать",
+    "ұзарту",
+)
+_INSTRUCTIONAL_HINTS = (
+    "explain ",
+    "summarize ",
+    "give examples",
+    "flashcards",
+    "explain this",
+    "объясните",
+    "суммируйте",
+    "приведите примеры",
+    "түсіндір",
+    "қорытынды",
+    "мысал",
+)
+
+
+class RequestMode(StrEnum):
+    INSTRUCTIONAL = "instructional"
+    EDITORIAL = "editorial"
+    TRANSLATION = "translation"
+    CRITIQUE = "critique"
+    FOLLOW_UP = "follow_up"
+
 
 @dataclass(frozen=True, slots=True)
 class _ChatContext:
@@ -32,8 +70,122 @@ class _ChatContext:
     documents: list[str]
     session_id: str
     session_history: list
+    conversation_summary: str | None
     user_id: int | None
     request_id: str | None
+
+
+@dataclass(frozen=True, slots=True)
+class _RequestPolicy:
+    mode: RequestMode
+    retrieval_enabled: bool
+    task_instruction: str | None = None
+
+
+def _normalized_question(question: str) -> str:
+    return " ".join(question.strip().lower().split())
+
+
+def _documents_are_small(documents: list[str]) -> bool:
+    return sum(len(document) for document in documents) <= 800
+
+
+def _detect_request_mode(question: str, *, has_session_history: bool) -> RequestMode:
+    normalized = _normalized_question(question)
+
+    if normalized.startswith(_TRANSLATION_HINTS):
+        return RequestMode.TRANSLATION
+
+    if normalized.startswith(_CRITIQUE_HINTS):
+        return RequestMode.CRITIQUE
+
+    if normalized.startswith(_EDITORIAL_HINTS):
+        return RequestMode.EDITORIAL
+
+    if normalized.startswith(_INSTRUCTIONAL_HINTS):
+        return RequestMode.INSTRUCTIONAL
+
+    if has_session_history and len(normalized) <= 120:
+        return RequestMode.FOLLOW_UP
+
+    return RequestMode.INSTRUCTIONAL
+
+
+def _build_request_policy(ctx: _ChatContext, question: str) -> _RequestPolicy:
+    mode = _detect_request_mode(question, has_session_history=bool(ctx.session_history))
+
+    if mode == RequestMode.TRANSLATION:
+        return _RequestPolicy(
+            mode=mode,
+            retrieval_enabled=False,
+            task_instruction="Use the user-provided text as the primary source. Preserve structure and do not invent extra content.",
+        )
+
+    if mode == RequestMode.CRITIQUE:
+        return _RequestPolicy(
+            mode=mode,
+            retrieval_enabled=False,
+            task_instruction="Focus on precise critique and revision suggestions for the text provided in the user's message.",
+        )
+
+    if mode == RequestMode.EDITORIAL:
+        return _RequestPolicy(
+            mode=mode,
+            retrieval_enabled=False,
+            task_instruction="Focus on writing quality, clarity, and continuity based on the user-provided text.",
+        )
+
+    if mode == RequestMode.FOLLOW_UP:
+        return _RequestPolicy(
+            mode=mode,
+            retrieval_enabled=False,
+            task_instruction="Use recent conversation context first. Only rely on general knowledge if the recent exchange is insufficient.",
+        )
+
+    if _documents_are_small(ctx.documents) and len(question.strip()) <= 80:
+        return _RequestPolicy(
+            mode=mode,
+            retrieval_enabled=False,
+            task_instruction="The activity context is small. Prefer the provided request and recent context before expanding into retrieval.",
+        )
+
+    return _RequestPolicy(mode=mode, retrieval_enabled=True)
+
+
+def _status_message(status: str, *, retrieval_enabled: bool) -> str:
+    if status == "processing":
+        return "Preparing your request."
+    if status == "retrieving":
+        return "Retrieving relevant course context."
+    if status == "analyzing":
+        return "Analyzing your request without additional retrieval."
+    if status == "generating":
+        return "Generating the response."
+    if status == "aborted":
+        return "Request cancelled."
+    if not retrieval_enabled:
+        return "Processing your request."
+    return "Working on your request."
+
+
+async def _retrieve_chunks_for_policy(
+    *,
+    ctx: _ChatContext,
+    question: str,
+    embedding_model_name: str,
+    retrieval_enabled: bool,
+) -> tuple[list, float]:
+    if not retrieval_enabled:
+        return [], 0.0
+
+    started_at = time.perf_counter()
+    retrieved_chunks = await retrieve_chunks(
+        query=question.strip(),
+        documents=ctx.documents,
+        embedding_model_name=embedding_model_name,
+        collection_name=f"activity_{ctx.activity.activity_uuid}",
+    )
+    return retrieved_chunks, (time.perf_counter() - started_at) * 1000
 
 
 async def _get_activity_data(
@@ -116,12 +268,17 @@ async def build_chat_context(
         documents=documents,
         session_id=session_window.session_id,
         session_history=session_window.to_model_messages(),
+        conversation_summary=session_window.conversation_summary,
         user_id=user_id,
         request_id=request_id,
     )
 
 
-def _build_agent_deps(ctx: _ChatContext, retrieved_chunks: list) -> AgentDependencies:
+def _build_agent_deps(
+    ctx: _ChatContext,
+    policy: _RequestPolicy,
+    retrieved_chunks: list,
+) -> AgentDependencies:
     return AgentDependencies(
         activity_uuid=ctx.activity.activity_uuid,
         activity_name=ctx.activity.name,
@@ -129,6 +286,9 @@ def _build_agent_deps(ctx: _ChatContext, retrieved_chunks: list) -> AgentDepende
         session_id=ctx.session_id,
         user_id=ctx.user_id,
         request_id=ctx.request_id,
+        request_mode=policy.mode.value,
+        task_instruction=policy.task_instruction,
+        conversation_summary=ctx.conversation_summary,
         retrieved_chunks=retrieved_chunks,
     )
 
@@ -150,14 +310,30 @@ async def generate_chat_answer(
 
     try:
         async with asyncio.timeout(timeout_seconds):
-            retrieved_chunks = await retrieve_chunks(
-                query=question.strip(),
-                documents=ctx.documents,
-                embedding_model_name=settings.embedding_model,
-                collection_name=f"activity_{ctx.activity.activity_uuid}",
+            policy = _build_request_policy(ctx, question)
+            logger.info(
+                "AI request policy: session=%s mode=%s retrieval=%s summary=%s question_chars=%d",
+                ctx.session_id,
+                policy.mode.value,
+                policy.retrieval_enabled,
+                bool(ctx.conversation_summary),
+                len(question.strip()),
             )
+            retrieved_chunks, retrieval_ms = await _retrieve_chunks_for_policy(
+                ctx=ctx,
+                question=question,
+                embedding_model_name=settings.embedding_model,
+                retrieval_enabled=policy.retrieval_enabled,
+            )
+            if policy.retrieval_enabled:
+                logger.info(
+                    "AI retrieval complete: session=%s chunks=%d duration_ms=%.1f",
+                    ctx.session_id,
+                    len(retrieved_chunks),
+                    retrieval_ms,
+                )
 
-            deps = _build_agent_deps(ctx, retrieved_chunks)
+            deps = _build_agent_deps(ctx, policy, retrieved_chunks)
             result = await get_agent().run(
                 question.strip(),
                 deps=deps,
@@ -218,27 +394,56 @@ async def stream_chat_answer(
         status="processing",
         aichat_uuid=ctx.session_id,
         activity_uuid=ctx.activity.activity_uuid,
-    )
-    yield StatusEvent(
-        status="retrieving",
-        aichat_uuid=ctx.session_id,
-        activity_uuid=ctx.activity.activity_uuid,
+        message=_status_message("processing", retrieval_enabled=True),
     )
 
     try:
         async with asyncio.timeout(timeout_seconds):
-            retrieved_chunks = await retrieve_chunks(
-                query=question.strip(),
-                documents=ctx.documents,
-                embedding_model_name=settings.embedding_model,
-                collection_name=f"activity_{ctx.activity.activity_uuid}",
+            policy = _build_request_policy(ctx, question)
+            logger.info(
+                "AI streaming request policy: session=%s mode=%s retrieval=%s summary=%s question_chars=%d",
+                ctx.session_id,
+                policy.mode.value,
+                policy.retrieval_enabled,
+                bool(ctx.conversation_summary),
+                len(question.strip()),
             )
-            deps = _build_agent_deps(ctx, retrieved_chunks)
+
+            if policy.retrieval_enabled:
+                yield StatusEvent(
+                    status="retrieving",
+                    aichat_uuid=ctx.session_id,
+                    activity_uuid=ctx.activity.activity_uuid,
+                    message=_status_message("retrieving", retrieval_enabled=True),
+                )
+                retrieved_chunks, retrieval_ms = await _retrieve_chunks_for_policy(
+                    ctx=ctx,
+                    question=question,
+                    embedding_model_name=settings.embedding_model,
+                    retrieval_enabled=True,
+                )
+                logger.info(
+                    "AI streaming retrieval complete: session=%s chunks=%d duration_ms=%.1f",
+                    ctx.session_id,
+                    len(retrieved_chunks),
+                    retrieval_ms,
+                )
+            else:
+                yield StatusEvent(
+                    status="analyzing",
+                    aichat_uuid=ctx.session_id,
+                    activity_uuid=ctx.activity.activity_uuid,
+                    message=_status_message("analyzing", retrieval_enabled=False),
+                )
+                retrieved_chunks = []
+
+            deps = _build_agent_deps(ctx, policy, retrieved_chunks)
 
             yield StatusEvent(
                 status="generating",
                 aichat_uuid=ctx.session_id,
                 activity_uuid=ctx.activity.activity_uuid,
+                message=_status_message("generating", retrieval_enabled=policy.retrieval_enabled),
             )
 
             full_response = ""
@@ -255,7 +460,7 @@ async def stream_chat_answer(
                             status="aborted",
                             aichat_uuid=ctx.session_id,
                             activity_uuid=ctx.activity.activity_uuid,
-                            message="Request cancelled",
+                            message=_status_message("aborted", retrieval_enabled=policy.retrieval_enabled),
                         )
                         return
 

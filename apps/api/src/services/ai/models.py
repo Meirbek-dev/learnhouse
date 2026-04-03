@@ -52,6 +52,7 @@ class ChatSessionWindow(PydanticStrictBaseModel):
     total_messages: int = 0
     window_size: int
     storage_type: Literal["redis", "memory"]
+    conversation_summary: str | None = None
 
     def to_model_messages(self) -> list[ModelMessage]:
         return [message.to_model_message() for message in self.messages]
@@ -80,6 +81,9 @@ class AgentDependencies(PydanticStrictBaseModel):
     session_id: str
     user_id: int | None = None
     request_id: str | None = None
+    request_mode: str = "instructional"
+    task_instruction: str | None = None
+    conversation_summary: str | None = None
     retrieved_chunks: list[RetrievedChunk] = Field(default_factory=list)
 
 
@@ -91,6 +95,7 @@ class AgentAnswer(PydanticStrictBaseModel):
 
 
 class StatusEvent(PydanticStrictBaseModel):
+    version: Literal[1] = 1
     type: Literal["status"] = "status"
     status: str
     aichat_uuid: str | None = None
@@ -99,12 +104,14 @@ class StatusEvent(PydanticStrictBaseModel):
 
 
 class DeltaEvent(PydanticStrictBaseModel):
+    version: Literal[1] = 1
     type: Literal["delta"] = "delta"
     content: str = Field(min_length=1)
     chunk_id: int
 
 
 class FinalEvent(PydanticStrictBaseModel):
+    version: Literal[1] = 1
     type: Literal["final"] = "final"
     content: str
     aichat_uuid: str
@@ -113,6 +120,7 @@ class FinalEvent(PydanticStrictBaseModel):
 
 
 class ErrorEvent(PydanticStrictBaseModel):
+    version: Literal[1] = 1
     type: Literal["error"] = "error"
     error: str
     error_code: str
