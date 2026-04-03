@@ -21,6 +21,7 @@ declare global {
     id: number;
     email: string;
     username: string;
+    user_uuid?: string;
     first_name?: string;
     middle_name?: string;
     last_name?: string;

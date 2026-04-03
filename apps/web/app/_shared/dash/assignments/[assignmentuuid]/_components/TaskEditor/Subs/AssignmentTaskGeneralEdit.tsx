@@ -316,7 +316,7 @@ const UpdateTaskRef = () => {
       }
 
       reload();
-      toast.success(t('fileUploadSuccess'));
+      toast.success(t('refFileUpdateSuccess'));
     } catch (error) {
       console.error(error);
       setError(t('uploadFailed'));

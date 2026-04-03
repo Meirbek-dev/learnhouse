@@ -64,6 +64,7 @@ const normalizeSessionUser = (user: Awaited<ReturnType<typeof getUserSession>>['
   id: user.id,
   email: user.email,
   username: user.username,
+  user_uuid: user.user_uuid,
   first_name: toOptionalString(user.first_name),
   middle_name: toOptionalString(user.middle_name),
   last_name: toOptionalString(user.last_name),

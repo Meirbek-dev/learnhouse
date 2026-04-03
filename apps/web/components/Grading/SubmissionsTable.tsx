@@ -496,7 +496,7 @@ function SubmissionRow({
                 }
               }}
               disabled={isSavingScore}
-              className={cn('h-8 w-16 text-right', scoreInvalid && 'border-destructive focus-visible:ring-destructive')}
+              className={cn('h-8 w-20 text-right', scoreInvalid && 'border-destructive focus-visible:ring-destructive')}
             />
             <Button
               type="button"

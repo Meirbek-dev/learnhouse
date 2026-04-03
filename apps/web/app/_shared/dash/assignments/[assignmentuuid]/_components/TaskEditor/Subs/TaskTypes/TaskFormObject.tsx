@@ -142,7 +142,7 @@ function BlankInputTeacher({
             </div>
             <Collapsible>
               <CollapsibleTrigger
-                nativeButton={false}
+                nativeButton
                 render={
                   <button
                     type="button"

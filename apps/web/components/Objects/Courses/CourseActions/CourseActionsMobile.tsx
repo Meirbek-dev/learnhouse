@@ -95,7 +95,7 @@ const MultipleAuthors = ({ authors }: { authors: Author[] }) => {
               size="sm"
               variant="outline"
               avatar_url={
-                author.user.avatar_image
+                author.user.avatar_image && author.user.user_uuid
                   ? getUserAvatarMediaDirectory(author.user.user_uuid, author.user.avatar_image)
                   : ''
               }
