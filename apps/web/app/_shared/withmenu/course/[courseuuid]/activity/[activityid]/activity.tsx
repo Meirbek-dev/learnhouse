@@ -1404,6 +1404,15 @@ const AssignmentTools = (props: {
     );
   }
 
+  if (submission.status === 'DRAFT' || submission.status === 'RETURNED') {
+    return (
+      <SubmitAssignmentDialog
+        onSubmit={submitForGradingUI}
+        t={t}
+      />
+    );
+  }
+
   if (submission.status === 'PENDING') {
     return (
       <div className="soft-shadow flex flex-col rounded-md bg-amber-800 p-2.5 px-4 text-white transition delay-150 duration-300 ease-in-out">
@@ -1416,7 +1425,7 @@ const AssignmentTools = (props: {
     );
   }
 
-  if (submission.status === 'GRADED') {
+  if (submission.status === 'GRADED' || submission.status === 'PUBLISHED') {
     const displayScore =
       submission.final_score !== null && submission.final_score !== undefined ? `${submission.final_score}%` : null;
 
@@ -1434,7 +1443,7 @@ const AssignmentTools = (props: {
     );
   }
 
-  // Handles DRAFT / LATE / RETURNED statuses
+  // Handles any unknown future statuses conservatively by leaving no action visible.
   return null;
 };
 

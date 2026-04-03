@@ -1,16 +1,22 @@
 'use client';
 
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
+import { Button } from '@components/ui/button';
+import { Alert, AlertDescription } from '@components/ui/alert';
 import TaskFileObject from '@/app/_shared/dash/assignments/[assignmentuuid]/_components/TaskEditor/Subs/TaskTypes/TaskFileObject';
 import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
 import { Popover, PopoverContent, PopoverTrigger } from '@components/ui/popover';
-import { Backpack, Calendar, Download, Info } from 'lucide-react';
+import { getAssignmentTaskSubmissionsMe, handleAssignmentTaskSubmission } from '@services/courses/assignments';
+import { AlertCircle, Backpack, Calendar, CheckCircle2, Download, Info, Loader2 } from 'lucide-react';
 import { getTaskRefFileDir } from '@services/media/media';
 import { Card, CardContent } from '@components/ui/card';
 import { Separator } from '@components/ui/separator';
 import { Badge } from '@components/ui/badge';
+import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { toast } from 'sonner';
 
 // Type definitions
 type AssignmentType = 'QUIZ' | 'FILE_SUBMISSION' | 'FORM' | 'OTHER' | string;
@@ -39,6 +45,19 @@ interface FormQuestion {
 
 interface AssignmentTaskContents {
   questions?: QuizQuestion[] | FormQuestion[];
+}
+
+interface TaskSubmissionRead {
+  assignment_task_submission_uuid?: string;
+  task_submission?: Record<string, unknown> | null;
+}
+
+interface QuizSubmissionState {
+  answers: Record<string, string[]>;
+}
+
+interface FormSubmissionState {
+  answers: Record<string, string>;
 }
 
 interface AssignmentTask {
@@ -72,6 +91,86 @@ interface AssignmentsData {
   assignment_tasks?: AssignmentTask[] | null;
   course_object?: CourseObject | null;
   activity_object?: ActivityObject | null;
+}
+
+const EMPTY_QUIZ_SUBMISSION: QuizSubmissionState = { answers: {} };
+const EMPTY_FORM_SUBMISSION: FormSubmissionState = { answers: {} };
+
+function normalizeQuizSubmission(value: unknown): QuizSubmissionState {
+  const answers =
+    value && typeof value === 'object' && 'answers' in value && value.answers && typeof value.answers === 'object'
+      ? Object.fromEntries(
+          Object.entries(value.answers as Record<string, unknown>).map(([questionId, selected]) => [
+            questionId,
+            Array.isArray(selected) ? selected.filter((item): item is string => typeof item === 'string') : [],
+          ]),
+        )
+      : {};
+
+  return { answers };
+}
+
+function normalizeFormSubmission(value: unknown): FormSubmissionState {
+  const answers =
+    value && typeof value === 'object' && 'answers' in value && value.answers && typeof value.answers === 'object'
+      ? Object.fromEntries(
+          Object.entries(value.answers as Record<string, unknown>).map(([blankId, answer]) => [
+            blankId,
+            typeof answer === 'string' ? answer : '',
+          ]),
+        )
+      : {};
+
+  return { answers };
+}
+
+async function loadTaskSubmission({
+  assignmentTaskUUID,
+  assignmentUUID,
+  accessToken,
+}: {
+  assignmentTaskUUID: string;
+  assignmentUUID: string;
+  accessToken: string;
+}): Promise<TaskSubmissionRead | null> {
+  const res = await getAssignmentTaskSubmissionsMe(assignmentTaskUUID, assignmentUUID, accessToken);
+  if (!res.success || !res.data) {
+    return null;
+  }
+
+  return res.data as TaskSubmissionRead;
+}
+
+async function saveTaskSubmission({
+  assignmentTaskUUID,
+  assignmentUUID,
+  accessToken,
+  submissionUUID,
+  taskSubmission,
+}: {
+  assignmentTaskUUID: string;
+  assignmentUUID: string;
+  accessToken: string;
+  submissionUUID?: string;
+  taskSubmission: Record<string, unknown>;
+}): Promise<TaskSubmissionRead | null> {
+  const body = {
+    ...(submissionUUID ? { assignment_task_submission_uuid: submissionUUID } : {}),
+    task_submission: taskSubmission,
+  };
+
+  const res = await handleAssignmentTaskSubmission({
+    body,
+    assignmentTaskUUID,
+    assignmentUUID,
+    access_token: accessToken,
+  });
+
+  if (!res.success || !res.data) {
+    throw new Error(res.data?.detail || 'save_failed');
+  }
+
+  return res.data as TaskSubmissionRead;
 }
 
 const AssignmentStudentActivity = () => {
@@ -319,7 +418,8 @@ const TaskContent = ({ task, t }: TaskContentProps) => {
 
   if (task.assignment_type === 'QUIZ') {
     return (
-      <ReadonlyQuizTask
+      <InteractiveQuizTask
+        task={task}
         questions={task.contents?.questions as QuizQuestion[] | undefined}
         t={t}
       />
@@ -328,7 +428,8 @@ const TaskContent = ({ task, t }: TaskContentProps) => {
 
   if (task.assignment_type === 'FORM') {
     return (
-      <ReadonlyFormTask
+      <InteractiveFormTask
+        task={task}
         questions={task.contents?.questions as FormQuestion[] | undefined}
         t={t}
       />
@@ -342,22 +443,135 @@ const TaskPlaceholder = ({ message }: { message: string }) => (
   <div className="rounded-lg border border-dashed border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">{message}</div>
 );
 
-interface ReadonlyQuizTaskProps {
+interface InteractiveQuizTaskProps {
+  task: AssignmentTask;
   questions?: QuizQuestion[];
   t: ReturnType<typeof useTranslations>;
 }
 
-const ReadonlyQuizTask = ({ questions, t }: ReadonlyQuizTaskProps) => {
+const InteractiveQuizTask = ({ task, questions, t }: InteractiveQuizTaskProps) => {
+  const assignments = useAssignments();
+  const session = usePlatformSession() as { data?: { tokens?: { access_token?: string } } };
+  const accessToken = session?.data?.tokens?.access_token;
   const normalizedQuestions = Array.isArray(questions) ? questions : [];
+  const [submissionUUID, setSubmissionUUID] = useState<string | undefined>();
+  const [answers, setAnswers] = useState<Record<string, string[]>>({});
+  const [initialAnswers, setInitialAnswers] = useState<Record<string, string[]>>({});
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const assignmentUUID = assignments.assignment_object?.assignment_uuid;
+    if (!accessToken || !assignmentUUID || !task.assignment_task_uuid) {
+      setSubmissionUUID(undefined);
+      setAnswers({});
+      setInitialAnswers({});
+      return;
+    }
+
+    const run = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const submission = await loadTaskSubmission({
+          assignmentTaskUUID: task.assignment_task_uuid,
+          assignmentUUID,
+          accessToken,
+        });
+        if (cancelled) return;
+        const normalized = normalizeQuizSubmission(submission?.task_submission);
+        setSubmissionUUID(submission?.assignment_task_submission_uuid);
+        setAnswers(normalized.answers);
+        setInitialAnswers(normalized.answers);
+      } catch (loadError) {
+        if (!cancelled) {
+          setError(t('loadSubmissionError'));
+          console.error(loadError);
+        }
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+    };
+
+    void run();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [accessToken, assignments.assignment_object?.assignment_uuid, task.assignment_task_uuid, t]);
 
   if (normalizedQuestions.length === 0) {
     return <TaskPlaceholder message={t('taskContentUnavailable')} />;
   }
 
+  const isDirty = JSON.stringify(answers) !== JSON.stringify(initialAnswers);
+
+  const toggleOption = (questionId: string, optionId: string) => {
+    setAnswers((current) => {
+      const previous = current[questionId] ?? [];
+      const next = previous.includes(optionId)
+        ? previous.filter((value) => value !== optionId)
+        : [...previous, optionId];
+
+      return {
+        ...current,
+        [questionId]: next,
+      };
+    });
+  };
+
+  const handleSave = async () => {
+    const assignmentUUID = assignments.assignment_object?.assignment_uuid;
+    if (!accessToken || !assignmentUUID) {
+      toast.error(t('signInToSave'));
+      return;
+    }
+
+    setIsSaving(true);
+    setError(null);
+    try {
+      const saved = await saveTaskSubmission({
+        assignmentTaskUUID: task.assignment_task_uuid,
+        assignmentUUID,
+        accessToken,
+        submissionUUID,
+        taskSubmission: { answers },
+      });
+      const normalized = normalizeQuizSubmission(saved?.task_submission);
+      setSubmissionUUID(saved?.assignment_task_submission_uuid);
+      setAnswers(normalized.answers);
+      setInitialAnswers(normalized.answers);
+      toast.success(t('progressSaved'));
+    } catch (saveError) {
+      setError(t('saveSubmissionError'));
+      console.error(saveError);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   return (
     <div className="space-y-4">
+      {!accessToken ? (
+        <Alert>
+          <Info className="h-4 w-4" />
+          <AlertDescription>{t('signInToSave')}</AlertDescription>
+        </Alert>
+      ) : null}
+
+      {error ? (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      ) : null}
+
       {normalizedQuestions.map((question, questionIndex) => {
         const options = Array.isArray(question.options) ? question.options : [];
+        const questionId = question.questionUUID ?? `question_${questionIndex}`;
 
         return (
           <div
@@ -372,15 +586,24 @@ const ReadonlyQuizTask = ({ questions, t }: ReadonlyQuizTaskProps) => {
             {options.length > 0 ? (
               <div className="space-y-2">
                 {options.map((option, optionIndex) => (
-                  <div
+                  <button
                     key={option.optionUUID ?? optionIndex}
-                    className="flex items-center gap-3 rounded-lg border border-slate-200 bg-white px-3 py-2"
+                    type="button"
+                    onClick={() => toggleOption(questionId, option.optionUUID ?? `option_${optionIndex}`)}
+                    className={`flex w-full items-center gap-3 rounded-lg border px-3 py-2 text-left transition ${
+                      (answers[questionId] ?? []).includes(option.optionUUID ?? `option_${optionIndex}`)
+                        ? 'border-cyan-500 bg-cyan-50'
+                        : 'border-slate-200 bg-white hover:border-slate-300'
+                    }`}
                   >
                     <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-semibold text-slate-600">
                       {String.fromCodePoint(65 + optionIndex)}
                     </span>
-                    <span className="text-sm text-slate-700">{option.text || t('emptyOption')}</span>
-                  </div>
+                    <span className="flex-1 text-sm text-slate-700">{option.text || t('emptyOption')}</span>
+                    {(answers[questionId] ?? []).includes(option.optionUUID ?? `option_${optionIndex}`) ? (
+                      <CheckCircle2 className="h-4 w-4 text-cyan-600" />
+                    ) : null}
+                  </button>
                 ))}
               </div>
             ) : (
@@ -389,24 +612,141 @@ const ReadonlyQuizTask = ({ questions, t }: ReadonlyQuizTaskProps) => {
           </div>
         );
       })}
+
+      <div className="flex items-center justify-end gap-3">
+        {isDirty ? <span className="text-xs text-amber-700">{t('unsavedChanges')}</span> : null}
+        <Button
+          type="button"
+          onClick={handleSave}
+          disabled={!accessToken || isLoading || isSaving || !isDirty}
+        >
+          {isSaving || isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+          {t('saveProgress')}
+        </Button>
+      </div>
     </div>
   );
 };
 
-interface ReadonlyFormTaskProps {
+interface InteractiveFormTaskProps {
+  task: AssignmentTask;
   questions?: FormQuestion[];
   t: ReturnType<typeof useTranslations>;
 }
 
-const ReadonlyFormTask = ({ questions, t }: ReadonlyFormTaskProps) => {
+const InteractiveFormTask = ({ task, questions, t }: InteractiveFormTaskProps) => {
+  const assignments = useAssignments();
+  const session = usePlatformSession() as { data?: { tokens?: { access_token?: string } } };
+  const accessToken = session?.data?.tokens?.access_token;
   const normalizedQuestions = Array.isArray(questions) ? questions : [];
+  const [submissionUUID, setSubmissionUUID] = useState<string | undefined>();
+  const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [initialAnswers, setInitialAnswers] = useState<Record<string, string>>({});
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const assignmentUUID = assignments.assignment_object?.assignment_uuid;
+    if (!accessToken || !assignmentUUID || !task.assignment_task_uuid) {
+      setSubmissionUUID(undefined);
+      setAnswers({});
+      setInitialAnswers({});
+      return;
+    }
+
+    const run = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const submission = await loadTaskSubmission({
+          assignmentTaskUUID: task.assignment_task_uuid,
+          assignmentUUID,
+          accessToken,
+        });
+        if (cancelled) return;
+        const normalized = normalizeFormSubmission(submission?.task_submission);
+        setSubmissionUUID(submission?.assignment_task_submission_uuid);
+        setAnswers(normalized.answers);
+        setInitialAnswers(normalized.answers);
+      } catch (loadError) {
+        if (!cancelled) {
+          setError(t('loadSubmissionError'));
+          console.error(loadError);
+        }
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+    };
+
+    void run();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [accessToken, assignments.assignment_object?.assignment_uuid, task.assignment_task_uuid, t]);
 
   if (normalizedQuestions.length === 0) {
     return <TaskPlaceholder message={t('taskContentUnavailable')} />;
   }
 
+  const isDirty = JSON.stringify(answers) !== JSON.stringify(initialAnswers);
+
+  const handleInputChange = (blankId: string, value: string) => {
+    setAnswers((current) => ({
+      ...current,
+      [blankId]: value,
+    }));
+  };
+
+  const handleSave = async () => {
+    const assignmentUUID = assignments.assignment_object?.assignment_uuid;
+    if (!accessToken || !assignmentUUID) {
+      toast.error(t('signInToSave'));
+      return;
+    }
+
+    setIsSaving(true);
+    setError(null);
+    try {
+      const saved = await saveTaskSubmission({
+        assignmentTaskUUID: task.assignment_task_uuid,
+        assignmentUUID,
+        accessToken,
+        submissionUUID,
+        taskSubmission: { answers },
+      });
+      const normalized = normalizeFormSubmission(saved?.task_submission);
+      setSubmissionUUID(saved?.assignment_task_submission_uuid);
+      setAnswers(normalized.answers);
+      setInitialAnswers(normalized.answers);
+      toast.success(t('progressSaved'));
+    } catch (saveError) {
+      setError(t('saveSubmissionError'));
+      console.error(saveError);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   return (
     <div className="space-y-4">
+      {!accessToken ? (
+        <Alert>
+          <Info className="h-4 w-4" />
+          <AlertDescription>{t('signInToSave')}</AlertDescription>
+        </Alert>
+      ) : null}
+
+      {error ? (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      ) : null}
+
       {normalizedQuestions.map((question, questionIndex) => {
         const blanks = Array.isArray(question.blanks) ? question.blanks : [];
 
@@ -421,15 +761,23 @@ const ReadonlyFormTask = ({ questions, t }: ReadonlyFormTaskProps) => {
             </div>
 
             {blanks.length > 0 ? (
-              <div className="flex flex-wrap gap-2">
+              <div className="space-y-3">
                 {blanks.map((blank, blankIndex) => (
-                  <Badge
+                  <div
                     key={blank.blankUUID ?? blankIndex}
-                    variant="outline"
-                    className="rounded-md px-3 py-1 text-sm"
+                    className="space-y-2"
                   >
-                    {blank.placeholder || t('blankLabel', { index: blankIndex + 1 })}
-                  </Badge>
+                    <label className="text-sm font-medium text-slate-700">
+                      {blank.placeholder || t('blankLabel', { index: blankIndex + 1 })}
+                    </label>
+                    <Input
+                      value={answers[blank.blankUUID ?? `blank_${blankIndex}`] ?? ''}
+                      onChange={(event) =>
+                        handleInputChange(blank.blankUUID ?? `blank_${blankIndex}`, event.target.value)
+                      }
+                      placeholder={blank.placeholder || t('blankLabel', { index: blankIndex + 1 })}
+                    />
+                  </div>
                 ))}
               </div>
             ) : (
@@ -438,6 +786,18 @@ const ReadonlyFormTask = ({ questions, t }: ReadonlyFormTaskProps) => {
           </div>
         );
       })}
+
+      <div className="flex items-center justify-end gap-3">
+        {isDirty ? <span className="text-xs text-amber-700">{t('unsavedChanges')}</span> : null}
+        <Button
+          type="button"
+          onClick={handleSave}
+          disabled={!accessToken || isLoading || isSaving || !isDirty}
+        >
+          {isSaving || isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+          {t('saveProgress')}
+        </Button>
+      </div>
     </div>
   );
 };
