@@ -73,7 +73,7 @@ import { cn } from '@/lib/utils';
 import Image from 'next/image';
 
 interface EditorProps {
-  content: string;
+  content: string | object;
   activity: any;
   course: any;
   platform: any;

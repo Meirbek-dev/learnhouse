@@ -11,7 +11,7 @@ import { toast } from 'sonner';
 import Editor from './Editor';
 
 interface EditorWrapperProps {
-  content: string;
+  content: string | object;
   activity: any;
   course: any;
   platform: any;

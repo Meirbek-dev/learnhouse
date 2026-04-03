@@ -300,6 +300,13 @@ const ActivityActions = ({ activity, activityid, course, assignment, showNavigat
 
 // Helper to ensure Tiptap always receives a valid document
 function getValidTiptapContent(content: any): any {
+  if (typeof content === 'string') {
+    try {
+      content = JSON.parse(content);
+    } catch {
+      // not valid JSON, fall through to return empty doc
+    }
+  }
   if (content && typeof content === 'object' && content.type === 'doc' && Array.isArray(content.content)) {
     return content;
   }

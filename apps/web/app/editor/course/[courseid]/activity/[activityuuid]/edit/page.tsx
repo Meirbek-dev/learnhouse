@@ -50,7 +50,7 @@ const EditActivity = async (props: { params: Promise<{ courseid: string; activit
           platform={platform}
           course={courseInfo}
           activity={activity}
-          content={typeof activity.content === 'string' ? activity.content : JSON.stringify(activity.content ?? '')}
+          content={typeof activity.content === 'string' ? JSON.parse(activity.content) : activity.content}
         />
       </EditorOptionsProvider>
     </div>
