@@ -6,7 +6,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@components/ui/dropdown-menu';
-import { ChevronDown, Crown, LogOut, Shield, User, User as UserIcon, Users } from 'lucide-react';
+import { ChevronDown, Crown, LogOut, Shield, User as UserIcon, Users, Star } from 'lucide-react'; // Added Star
 import { Tooltip, TooltipContent, TooltipTrigger } from '@components/ui/tooltip';
 import { useNavigationPermissions } from '@/hooks/useNavigationPermissions';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
@@ -21,6 +21,7 @@ import { signOut } from 'next-auth/react';
 import type { ReactNode } from 'react';
 
 interface RoleInfo {
+  slug: string; // Added slug to help with conditional rendering
   name: string;
   icon: ReactNode;
   bgColor: string;
@@ -52,6 +53,7 @@ export const HeaderProfileBox = () => {
       const roleSlug = highestRole.role?.slug || '';
       const roleConfigs: Record<string, RoleInfo> = {
         [RoleSlugs.ADMIN]: {
+          slug: RoleSlugs.ADMIN,
           name: t('profile.roles.admin.name'),
           icon: <Crown size={12} />,
           bgColor: 'bg-purple-600',
@@ -59,6 +61,7 @@ export const HeaderProfileBox = () => {
           description: t('profile.roles.admin.description'),
         },
         [RoleSlugs.MAINTAINER]: {
+          slug: RoleSlugs.MAINTAINER,
           name: t('profile.roles.maintainer.name'),
           icon: <Shield size={12} />,
           bgColor: 'bg-blue-600',
@@ -66,6 +69,7 @@ export const HeaderProfileBox = () => {
           description: t('profile.roles.maintainer.description'),
         },
         [RoleSlugs.INSTRUCTOR]: {
+          slug: RoleSlugs.INSTRUCTOR,
           name: t('profile.roles.instructor.name'),
           icon: <Users size={12} />,
           bgColor: 'bg-green-600',
@@ -73,8 +77,9 @@ export const HeaderProfileBox = () => {
           description: t('profile.roles.instructor.description'),
         },
         [RoleSlugs.USER]: {
+          slug: RoleSlugs.USER,
           name: t('profile.roles.user.name'),
-          icon: <User size={12} />,
+          icon: <Star size={12} />,
           bgColor: 'bg-gray-500',
           textColor: 'text-white',
           description: t('profile.roles.user.description'),
@@ -85,12 +90,14 @@ export const HeaderProfileBox = () => {
     }
   }
 
+  // Logic to determine if we should show the badge
+  // We hide it if it's the standard USER role to reduce clutter
+  const shouldShowBadge = userRoleInfo !== null && userRoleInfo.slug !== RoleSlugs.USER;
+
   const customRoles: CustomRoleInfo[] =
     userRoles && userRoles.length > 0
       ? userRoles
-          .filter((role: any) => {
-            return !role.role?.is_system;
-          })
+          .filter((role: any) => !role.role?.is_system)
           .map((role: any) => ({
             name: (role.role.name as string) || t('profile.customRole'),
             description: role.role.description,
@@ -140,16 +147,17 @@ export const HeaderProfileBox = () => {
                 }
               >
                 <UserAvatar size="sm" />
-                <div className="flex flex-col space-y-0">
+                <div className="flex flex-col space-y-0 text-start">
                   <div className="flex items-center space-x-2">
                     <p className="text-sm font-semibold text-foreground capitalize">{session.data.user.username}</p>
-                    {userRoleInfo && userRoleInfo.name !== 'USER' && (
+                    {/* Updated condition here */}
+                    {shouldShowBadge && userRoleInfo && (
                       <Tooltip>
                         <TooltipTrigger
                           render={
                             <Badge
                               variant="secondary"
-                              className={`text-[8px] ${userRoleInfo.bgColor} ${userRoleInfo.textColor} flex w-fit items-center gap-0.5 px-1 py-0.5 font-medium`}
+                              className={`text-[10px] ${userRoleInfo.bgColor} ${userRoleInfo.textColor} flex w-fit items-center gap-1 px-1.5 py-0 rounded-sm font-bold uppercase tracking-wider`}
                             >
                               {userRoleInfo.icon}
                               {userRoleInfo.name}
@@ -159,7 +167,7 @@ export const HeaderProfileBox = () => {
                         <TooltipContent
                           side="bottom"
                           sideOffset={15}
-                          className="max-w-56 text-wrap"
+                          className="max-w-56"
                         >
                           {userRoleInfo.description}
                         </TooltipContent>
@@ -172,9 +180,9 @@ export const HeaderProfileBox = () => {
                           render={
                             <Badge
                               variant="secondary"
-                              className="flex w-fit items-center gap-0.5 bg-gray-500 px-1 py-0.5 text-[8px] font-medium text-white"
+                              className="flex w-fit items-center gap-0.5 bg-slate-500 px-1 py-0.5 text-[8px] font-medium text-white"
                             >
-                              <Shield size={12} />
+                              <Shield size={10} />
                               {customRole.name}
                             </Badge>
                           }
@@ -182,14 +190,14 @@ export const HeaderProfileBox = () => {
                         <TooltipContent
                           side="bottom"
                           sideOffset={15}
-                          className="max-w-56 text-wrap"
+                          className="max-w-56"
                         >
                           {customRole.description || `Custom role: ${customRole.name}`}
                         </TooltipContent>
                       </Tooltip>
                     ))}
                   </div>
-                  <p className="text-muted-foreground text-start text-xs">{session.data.user.email}</p>
+                  <p className="text-muted-foreground text-xs">{session.data.user.email}</p>
                 </div>
                 <ChevronDown
                   size={16}

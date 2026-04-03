@@ -13,9 +13,12 @@
       "howCanWeHelp": "чем могу помочь?",
       "logoAlt": "Логотип Ashyq Bilim AI",
       "placeholder": "Спросите ИИ об этой лекции",
+      "defaultUser": "Пользователь",
+      "dismiss": "Закрыть",
       "questionAbout": "О чём эта активность?",
       "questionExamples": "Объясните эту активность на практических примерах",
       "questionFlashcards": "Создайте карточки по этой активности",
+      "stopGeneration": "Остановить генерацию",
       "usernameComma": "{username},"
     },
     "AICanvaToolkit": {
@@ -69,10 +72,11 @@
       "sendMessage": "Отправить сообщение",
       "thinking": "Думаю...",
       "translateExample": "Японский, арабский, немецкий и т.д.",
-      "translatePlaceholder": "Перевести выбранный текст на",
+      "translatePlaceholder": "Перевести выделенный текст",
       "translateToLanguageMissing": "Пожалуйста, введите язык для перевода",
       "typePromptBelow": "Введите ваш запрос ниже",
       "userInputPlaceholder": "Спросить ИИ",
+      "stop": "Остановить",
       "writerPlaceholder": "Написать о..."
     },
     "AssignmentBoxUI": {

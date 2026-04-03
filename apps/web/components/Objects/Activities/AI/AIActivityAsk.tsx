@@ -16,7 +16,7 @@ import { Button } from '@components/ui/button';
 import { Badge } from '@components/ui/badge';
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef } from 'react';
-import type { ReactNode } from 'react';
+import type { KeyboardEvent, ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
 import type { TextPart } from '@tanstack/ai-client';
@@ -25,17 +25,11 @@ import type { TextPart } from '@tanstack/ai-client';
 
 interface Activity {
   activity_uuid: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 interface AIActivityAskProps {
   activity: Activity;
-}
-
-interface ErrorState {
-  isError: boolean;
-  status?: number;
-  error_message?: string;
 }
 
 type PredefinedQuestionType = 'about' | 'flashcards' | 'examples';
@@ -44,15 +38,13 @@ type PredefinedQuestionType = 'about' | 'flashcards' | 'examples';
 
 const AIActivityAsk = ({ activity: _activity }: AIActivityAskProps) => {
   const t = useTranslations('Activities.AIActivityAsk');
-  const { isModalOpen, setIsModalOpen } = useActivityAIChat();
+  const { isModalOpen, openModal, setIsModalOpen } = useActivityAIChat();
 
-  const handleToggleModal = () => setIsModalOpen(!isModalOpen);
-
-  const handleKeyDown = (e: any) => {
-    const key = e?.key ?? e?.nativeEvent?.key;
-    if (key === 'Enter' || key === ' ') {
-      e?.preventDefault?.();
-      handleToggleModal();
+  const handleToggleModal = () => {
+    if (isModalOpen) {
+      setIsModalOpen(false);
+    } else {
+      openModal();
     }
   };
 
@@ -62,10 +54,7 @@ const AIActivityAsk = ({ activity: _activity }: AIActivityAskProps) => {
       <Button
         variant="outline"
         size="sm"
-        role="button"
-        tabIndex={0}
         aria-pressed={isModalOpen}
-        onKeyDown={handleKeyDown}
         onClick={handleToggleModal}
         className={cn(
           'h-9 gap-2 rounded-full border-zinc-700 bg-zinc-900 px-4 text-zinc-200 hover:bg-zinc-800 hover:text-white',
@@ -97,6 +86,7 @@ const ActivityChatPanel = () => {
     isLoading,
     stop,
     error,
+    clear,
     statusMessage,
     isModalOpen,
     setIsModalOpen,
@@ -113,14 +103,6 @@ const ActivityChatPanel = () => {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isLoading]);
-
-  // Abort stream and clear input when the panel closes.
-  useEffect(() => {
-    if (!isModalOpen) {
-      stop();
-      setInputValue('');
-    }
-  }, [isModalOpen, stop, setInputValue]);
 
   const handleSend = () => {
     if (!isLoading && inputValue.trim()) {
@@ -159,7 +141,9 @@ const ActivityChatPanel = () => {
               'border border-zinc-700/60 bg-zinc-900 shadow-2xl',
               'inset-x-0 bottom-0 rounded-t-2xl',
               'h-[62dvh]',
-              'md:bottom-4 md:left-1/2 md:h-auto md:max-h-[620px] md:min-h-[380px] md:w-[min(680px,95vw)] md:-translate-x-1/2 md:rounded-xl',
+              // Definite height (not h-auto + max-h) so that the inner flex-1
+              // messages container and ScrollArea h-full resolve correctly.
+              'md:bottom-4 md:left-1/2 md:h-[min(620px,85dvh)] md:min-h-[380px] md:w-[min(680px,95vw)] md:-translate-x-1/2 md:rounded-xl',
             )}
             style={{ pointerEvents: 'auto' }}
             role="dialog"
@@ -186,15 +170,29 @@ const ActivityChatPanel = () => {
                   <span className="text-sm font-semibold text-zinc-100">{t('AI')}</span>
                   {isLoading && <Spinner className="h-3.5 w-3.5 text-zinc-400" />}
                 </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={closePanel}
-                  aria-label={t('closePanel')}
-                  className="h-7 w-7 text-zinc-500 hover:text-zinc-300"
-                >
-                  <X className="h-4 w-4" />
-                </Button>
+                <div className="flex items-center gap-1">
+                  {/* Stop button — shown while streaming so user can cancel */}
+                  {isLoading && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={stop}
+                      aria-label={t('stopGeneration')}
+                      className="h-7 w-7 text-zinc-500 hover:text-red-400"
+                    >
+                      <span className="flex h-3 w-3 items-center justify-center rounded-sm bg-current" />
+                    </Button>
+                  )}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={closePanel}
+                    aria-label={t('closePanel')}
+                    className="h-7 w-7 text-zinc-500 hover:text-zinc-300"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
 
               {/* Status hint */}
@@ -228,7 +226,8 @@ const ActivityChatPanel = () => {
                   </ScrollArea>
                 ) : hasError ? (
                   <ErrorDisplay
-                    error={{ isError: true, error_message: error?.message }}
+                    errorMessage={error?.message}
+                    onDismiss={clear}
                     t={t}
                   />
                 ) : (
@@ -249,6 +248,7 @@ const ActivityChatPanel = () => {
                   value={inputValue}
                   onChange={setInputValue}
                   onSend={handleSend}
+                  onStop={stop}
                   disabled={isLoading}
                   placeholder={t('placeholder')}
                   showAvatar
@@ -265,19 +265,35 @@ const ActivityChatPanel = () => {
 // ── Error Display ──────────────────────────────────────────────────────────────
 
 interface ErrorDisplayProps {
-  error: ErrorState;
+  errorMessage?: string;
+  onDismiss: () => void;
   t: (key: string) => string;
 }
 
-const ErrorDisplay = ({ error, t }: ErrorDisplayProps) => (
-  <div className="flex h-full items-center justify-center">
+const ErrorDisplay = ({ errorMessage, onDismiss, t }: ErrorDisplayProps) => (
+  <div
+    className="flex h-full items-center justify-center"
+    role="alert"
+  >
     <Alert
       variant="destructive"
       className="max-w-md"
     >
       <AlertTriangle className="h-4 w-4" />
       <AlertTitle>{t('errorTitle')}</AlertTitle>
-      <AlertDescription>{error.error_message}</AlertDescription>
+      <AlertDescription className="mt-1">
+        {errorMessage || t('errorTitle')}
+      </AlertDescription>
+      <div className="mt-3">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onDismiss}
+          className="h-7 border-red-800 bg-transparent text-xs text-red-400 hover:bg-red-950/40 hover:text-red-300"
+        >
+          {t('dismiss')}
+        </Button>
+      </div>
     </Alert>
   </div>
 );
@@ -293,7 +309,7 @@ const AIMessagePlaceHolder = ({ sendMessage, session }: AIMessagePlaceHolderProp
   const t = useTranslations('Activities.AIActivityAsk');
 
   const userName =
-    session?.data?.user?.first_name || session?.data?.user?.username || '\u041f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u0435\u043b\u044c';
+    session?.data?.user?.first_name || session?.data?.user?.username || t('defaultUser');
 
   return (
     <div className="flex h-full flex-col items-center justify-center gap-5">
@@ -353,11 +369,21 @@ const AIChatPredefinedQuestion = ({ sendMessage, label }: AIChatPredefinedQuesti
 
   const question = questions[label];
 
+  const handleKeyDown = (e: KeyboardEvent<HTMLSpanElement>) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      sendMessage(question);
+    }
+  };
+
   return (
     <Badge
+      role="button"
+      tabIndex={0}
       variant="outline"
-      className="cursor-pointer gap-1.5 border-zinc-700 bg-zinc-800 py-1 text-zinc-400 transition-colors hover:border-zinc-600 hover:bg-zinc-700 hover:text-zinc-200"
+      className="cursor-pointer gap-1.5 border-zinc-700 bg-zinc-800 py-1 text-zinc-400 transition-colors hover:border-zinc-600 hover:bg-zinc-700 hover:text-zinc-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
       onClick={() => sendMessage(question)}
+      onKeyDown={handleKeyDown}
     >
       {icons[label]}
       <span className="text-xs">{question}</span>

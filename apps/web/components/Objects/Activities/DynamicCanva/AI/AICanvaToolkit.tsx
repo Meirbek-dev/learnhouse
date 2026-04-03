@@ -1,6 +1,6 @@
 import { useActivityAIChat } from '@components/Contexts/AI/ActivityAIChatContext';
 import ToolTip from '@/components/Objects/Elements/Tooltip/Tooltip';
-import { BookOpen, Check, FormInput, Languages, Loader2 } from 'lucide-react';
+import { AlertTriangle, BookOpen, Check, FormInput, Languages, Loader2 } from 'lucide-react';
 import platformLogo from '@public/platform_logo.svg';
 import { BubbleMenu } from '@tiptap/react/menus';
 import { Button } from '@components/ui/button';
@@ -10,10 +10,17 @@ import { useState } from 'react';
 import type { ReactNode } from 'react';
 import Image from 'next/image';
 
+// ── Types ─────────────────────────────────────────────────────────────────────
+
+type ActionLabel = 'Explain' | 'Summarize' | 'Translate' | 'Examples';
+type ActionState = 'idle' | 'loading' | 'done' | 'error';
+
 interface AICanvaToolkitProps {
   editor: Editor;
-  activity: any;
+  activity: { activity_uuid: string };
 }
+
+// ── Toolkit Container ─────────────────────────────────────────────────────────
 
 const AICanvaToolkit = (props: AICanvaToolkitProps) => {
   const t = useTranslations('Activities.AICanvaToolkit');
@@ -68,14 +75,14 @@ const AICanvaToolkit = (props: AICanvaToolkitProps) => {
   );
 };
 
-type ActionState = 'idle' | 'loading' | 'done' | 'error';
+// ── Action Button ─────────────────────────────────────────────────────────────
 
-const AIActionButton = (props: { editor: Editor; label: string }) => {
+const AIActionButton = (props: { editor: Editor; label: ActionLabel }) => {
   const t = useTranslations('Activities.AICanvaToolkit');
   const { sendMessage, setIsModalOpen } = useActivityAIChat();
   const [actionState, setActionState] = useState<ActionState>('idle');
 
-  async function handleAction(label: string) {
+  async function handleAction(label: ActionLabel) {
     if (actionState === 'loading') return;
     setActionState('loading');
     try {
@@ -85,6 +92,10 @@ const AIActionButton = (props: { editor: Editor; label: string }) => {
         return;
       }
       const prompt = getPrompt(label, selection);
+      if (!prompt) {
+        setActionState('idle');
+        return;
+      }
       setIsModalOpen(true);
       await sendMessage(prompt);
       setActionState('done');
@@ -97,72 +108,50 @@ const AIActionButton = (props: { editor: Editor; label: string }) => {
 
   const getTipTapEditorSelectedText = () => {
     const { selection } = props.editor.state;
-    const { from } = selection;
-    const { to } = selection;
+    const { from, to } = selection;
     return props.editor.state.doc.textBetween(from, to);
   };
 
-  const getPrompt = (label: string, selection: string) => {
+  const getPrompt = (label: ActionLabel, selection: string): string => {
     switch (label) {
-      case 'Explain': {
+      case 'Explain':
         return t('explainPrompt', { selection });
-      }
-      case 'Summarize': {
+      case 'Summarize':
         return t('summarizePrompt', { selection });
-      }
-      case 'Translate': {
+      case 'Translate':
         return t('translatePrompt', { selection });
-      }
-      case 'Examples': {
+      case 'Examples':
         return t('examplesPrompt', { selection });
-      }
-      default: {
-        return '';
-      }
     }
   };
 
-  const getTooltipLabel = (label: string) => {
+  const getTooltipLabel = (label: ActionLabel): string => {
     switch (label) {
-      case 'Explain': {
+      case 'Explain':
         return t('explainTooltip');
-      }
-      case 'Summarize': {
+      case 'Summarize':
         return t('summarizeTooltip');
-      }
-      case 'Translate': {
+      case 'Translate':
         return t('translateTooltip');
-      }
-      case 'Examples': {
+      case 'Examples':
         return t('examplesTooltip');
-      }
-      default: {
-        return '';
-      }
     }
   };
 
-  const getButtonLabel = (label: string) => {
+  const getButtonLabel = (label: ActionLabel): string => {
     switch (label) {
-      case 'Explain': {
+      case 'Explain':
         return t('explainLabel');
-      }
-      case 'Summarize': {
+      case 'Summarize':
         return t('summarizeLabel');
-      }
-      case 'Translate': {
+      case 'Translate':
         return t('translateLabel');
-      }
-      case 'Examples': {
+      case 'Examples':
         return t('examplesLabel');
-      }
-      default: {
-        return label;
-      }
     }
   };
 
-  const iconMap: Record<string, ReactNode> = {
+  const iconMap: Record<ActionLabel, ReactNode> = {
     Explain: <BookOpen size={13} />,
     Summarize: <FormInput size={13} />,
     Translate: <Languages size={13} />,
@@ -171,6 +160,7 @@ const AIActionButton = (props: { editor: Editor; label: string }) => {
 
   const isLoading = actionState === 'loading';
   const isDone = actionState === 'done';
+  const isError = actionState === 'error';
 
   return (
     <ToolTip
@@ -197,6 +187,11 @@ const AIActionButton = (props: { editor: Editor; label: string }) => {
             size={13}
             className="text-emerald-400"
           />
+        ) : isError ? (
+          <AlertTriangle
+            size={13}
+            className="text-red-400"
+          />
         ) : (
           iconMap[props.label]
         )}
@@ -205,4 +200,5 @@ const AIActionButton = (props: { editor: Editor; label: string }) => {
     </ToolTip>
   );
 };
+
 export default AICanvaToolkit;

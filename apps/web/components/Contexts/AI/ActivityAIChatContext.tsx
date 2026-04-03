@@ -10,7 +10,16 @@
  */
 
 import { useChat } from '@tanstack/ai-react';
-import { createContext, useContext, useMemo, useRef, useState, type PropsWithChildren } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type PropsWithChildren,
+} from 'react';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { createActivityChatAdapter } from '@services/ai/activity-chat-adapter';
 import type { UseChatReturn } from '@tanstack/ai-react';
@@ -22,6 +31,8 @@ interface ActivityAIChatContextValue extends UseChatReturn {
   statusMessage: string | null;
   /** Whether the chat panel is visible. */
   isModalOpen: boolean;
+  /** Opens the panel, clearing any previous error/messages from useChat. */
+  openModal: () => void;
   setIsModalOpen: (open: boolean) => void;
   /** Current text input value. */
   inputValue: string;
@@ -47,7 +58,10 @@ export function ActivityAIChatProvider({
   // Strict-Mode double-mounts without starting a new backend session.
   const sessionUuidRef = useRef<string | null>(null);
 
-  const connection = useMemo(
+  // Store the adapter's abort function so we can cancel in-flight requests.
+  const abortRef = useRef<(() => void) | null>(null);
+
+  const adapter = useMemo(
     () =>
       createActivityChatAdapter({
         activityUuid,
@@ -63,8 +77,16 @@ export function ActivityAIChatProvider({
     [activityUuid],
   );
 
+  // Keep the abort ref in sync whenever the adapter is recreated.
+  useEffect(() => {
+    abortRef.current = adapter.abort;
+    return () => {
+      adapter.abort();
+    };
+  }, [adapter]);
+
   const chat = useChat({
-    connection,
+    connection: adapter.connection,
     onChunk: (chunk) => {
       if (chunk.type === 'CUSTOM' && chunk.name === 'ai_status') {
         setStatusMessage((chunk.value as { message: string }).message ?? null);
@@ -74,9 +96,26 @@ export function ActivityAIChatProvider({
     onError: () => setStatusMessage(null),
   });
 
+  // Opens the panel and clears any stale error / messages from a previous session.
+  const openModal = useCallback(() => {
+    chat.clear();
+    setIsModalOpen(true);
+  }, [chat]);
+
+  // Abort stream and clear input when the panel closes.
+  useEffect(() => {
+    if (!isModalOpen) {
+      abortRef.current?.();
+      chat.stop();
+      setInputValue('');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isModalOpen]);
+
   const value = useMemo(
-    () => ({ ...chat, statusMessage, isModalOpen, setIsModalOpen, inputValue, setInputValue }),
-    [chat, statusMessage, isModalOpen, inputValue],
+    () => ({ ...chat, statusMessage, isModalOpen, openModal, setIsModalOpen, inputValue, setInputValue }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [chat, statusMessage, isModalOpen, openModal, inputValue],
   );
 
   return <ActivityAIChatContext.Provider value={value}>{children}</ActivityAIChatContext.Provider>;

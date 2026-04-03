@@ -13,9 +13,12 @@
       "howCanWeHelp": "қалай көмектесе аламын?",
       "logoAlt": "Ashyq Bilim AI логотипі",
       "placeholder": "Осы дәріс туралы ЖИ-дан сұраңыз",
+      "defaultUser": "Пайдаланушы",
+      "dismiss": "Жабу",
       "questionAbout": "Бұл белсенділік не туралы?",
       "questionExamples": "Осы белсенділікті практикалық мысалдармен түсіндіріңіз",
       "questionFlashcards": "Осы белсенділік бойынша флеш-карталар жасаңыз",
+      "stopGeneration": "Генерацияны тоқтату",
       "usernameComma": "{username},"
     },
     "AICanvaToolkit": {
@@ -73,6 +76,7 @@
       "translateToLanguageMissing": "Аудару үшін тілді енгізіңіз",
       "typePromptBelow": "Сұрауыңызды төменде теріңіз",
       "userInputPlaceholder": "ЖИ-дан сұрау",
+      "stop": "Тоқтату",
       "writerPlaceholder": "Мынау туралы жазу..."
     },
     "AssignmentBoxUI": {

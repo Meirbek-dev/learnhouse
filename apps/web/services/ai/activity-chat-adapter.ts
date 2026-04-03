@@ -16,6 +16,12 @@ import { getAPIUrl } from '@services/config/config';
 import { RequestBodyWithAuthHeader } from '@services/utils/ts/requests';
 import type { TextPart } from '@tanstack/ai-client';
 
+/** Maximum buffer size (64 KB) to guard against a pathological server sending partial lines. */
+const MAX_BUFFER_BYTES = 65_536;
+
+/** Request timeout in milliseconds. */
+const REQUEST_TIMEOUT_MS = 30_000;
+
 interface ActivityChatAdapterOptions {
   activityUuid: string;
   getAccessToken: () => string | undefined;
@@ -28,19 +34,34 @@ interface ActivityChatAdapterOptions {
   setSessionUuid?: (uuid: string) => void;
 }
 
+export interface ActivityChatAdapter {
+  /** The TanStack AI connection object to pass to `useChat`. */
+  connection: ReturnType<typeof stream>;
+  /** Aborts the current in-flight request (no-op if idle). */
+  abort: () => void;
+}
+
 /**
  * Creates a stateful connection adapter that bridges the Python backend's
  * SSE events to the AG-UI StreamChunk protocol used by TanStack AI.
  *
  * Session UUID is managed internally — the adapter automatically routes
  * to `/start` on first call and `/send` on subsequent calls.
+ *
+ * Returns both the TanStack `connection` and an `abort()` function so callers
+ * can cancel in-flight requests on unmount or panel close.
  */
-export function createActivityChatAdapter({ activityUuid, getAccessToken, getSessionUuid, setSessionUuid }: ActivityChatAdapterOptions) {
-  // Fallback: keep a local closure variable for callers that don’t provide
-  // external getter/setter (e.g. AIEditorToolkit’s standalone useChat).
+export function createActivityChatAdapter({
+  activityUuid,
+  getAccessToken,
+  getSessionUuid,
+  setSessionUuid,
+}: ActivityChatAdapterOptions): ActivityChatAdapter {
+  // Fallback: keep a local closure variable for callers that don't provide
+  // external getter/setter (e.g. AIEditorToolkit's standalone useChat).
   let _localSessionUuid: string | null = null;
 
-  const readUuid = (): string | null => getSessionUuid ? getSessionUuid() : _localSessionUuid;
+  const readUuid = (): string | null => (getSessionUuid ? getSessionUuid() : _localSessionUuid);
   const writeUuid = (uuid: string) => {
     if (setSessionUuid) {
       setSessionUuid(uuid);
@@ -49,7 +70,12 @@ export function createActivityChatAdapter({ activityUuid, getAccessToken, getSes
     }
   };
 
-  return stream(async function* (messages, _data) {
+  // A single AbortController shared per-request. Recreated on each invocation.
+  let currentController: AbortController | null = null;
+
+  const abort = () => currentController?.abort();
+
+  const connection = stream(async function* (messages, _data) {
     const accessToken = getAccessToken();
     if (!accessToken) throw new Error('Not authenticated');
 
@@ -75,7 +101,12 @@ export function createActivityChatAdapter({ activityUuid, getAccessToken, getSes
 
     const req = RequestBodyWithAuthHeader('POST', body, null, accessToken);
 
-    const response = await fetch(url, req);
+    // Compose user-abort + 30 s timeout into a single signal.
+    currentController = new AbortController();
+    const timeoutSignal = AbortSignal.timeout(REQUEST_TIMEOUT_MS);
+    const signal = AbortSignal.any([currentController.signal, timeoutSignal]);
+
+    const response = await fetch(url, { ...req, signal });
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
@@ -98,12 +129,19 @@ export function createActivityChatAdapter({ activityUuid, getAccessToken, getSes
         if (done) break;
 
         buffer += decoder.decode(value, { stream: true });
+
+        // Guard against pathologically large buffers.
+        if (buffer.length > MAX_BUFFER_BYTES) {
+          buffer = '';
+          continue;
+        }
+
         const lines = buffer.split('\n');
         buffer = lines.pop() ?? '';
 
         for (const line of lines) {
           if (!line.startsWith('data: ')) continue;
-          let event: Record<string, any>;
+          let event: Record<string, unknown>;
           try {
             event = JSON.parse(line.slice(6));
           } catch {
@@ -162,6 +200,10 @@ export function createActivityChatAdapter({ activityUuid, getAccessToken, getSes
             }
 
             case 'error': {
+              // Close an open message before signalling the error.
+              if (messageStarted) {
+                yield { type: 'TEXT_MESSAGE_END', messageId, timestamp: now() };
+              }
               yield {
                 type: 'RUN_ERROR',
                 runId,
@@ -179,8 +221,17 @@ export function createActivityChatAdapter({ activityUuid, getAccessToken, getSes
           }
         }
       }
+
+      // Stream ended without a `final` or `error` event (server closed connection
+      // unexpectedly). Emit the missing protocol events so useChat doesn't hang.
+      if (messageStarted) {
+        yield { type: 'TEXT_MESSAGE_END', messageId, timestamp: now() };
+      }
+      yield { type: 'RUN_FINISHED', runId, finishReason: 'stop', timestamp: now() };
     } finally {
       reader.releaseLock();
     }
   });
+
+  return { connection, abort };
 }

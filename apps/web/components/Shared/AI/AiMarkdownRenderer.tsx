@@ -14,16 +14,19 @@ interface AiMarkdownRendererProps {
 }
 
 /**
- * Renders AI markdown output as safe JSX — no dangerouslySetInnerHTML.
+ * Renders AI markdown output as safe JSX.
  * Supports GFM (tables, strikethrough, task lists), fenced code with
  * syntax highlighting via highlight.js, and opens external links safely.
+ *
+ * Streaming cursor logic: the cursor is placed after the very last character
+ * of streamed content. We compare each node's end offset to the total content
+ * length to find the last rendered element. Only one cursor is ever shown.
  */
 export function AiMarkdownRenderer({ content, isStreaming = false, className }: AiMarkdownRendererProps) {
   return (
     <div
       className={cn('prose prose-sm prose-invert max-w-none', className)}
       aria-live={isStreaming ? 'polite' : undefined}
-      aria-atomic={isStreaming ? 'false' : undefined}
     >
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
@@ -41,20 +44,20 @@ export function AiMarkdownRenderer({ content, isStreaming = false, className }: 
 
           // ── Paragraphs ────────────────────────────────────────────────
           p: ({ children, node }) => {
-            // For the very last paragraph, append the streaming cursor if needed.
-            const isLastNode =
-              isStreaming && node?.position?.end?.offset !== undefined;
+            // Show the cursor only after the last paragraph — identified by
+            // its AST end offset matching the total content length.
+            const isLastParagraph =
+              isStreaming && node?.position?.end?.offset === content.length;
             return (
               <p className="mb-2 text-sm leading-relaxed text-zinc-200 last:mb-0">
                 {children}
-                {isStreaming && isLastNode ? <AiStreamingCursor /> : null}
+                {isLastParagraph && <AiStreamingCursor />}
               </p>
             );
           },
 
           // ── Code ──────────────────────────────────────────────────────
           code: ({ className: langClass, children, ...rest }) => {
-            const isBlock = 'node' in rest && (rest as any).node?.type === 'element';
             const match = /language-(\w+)/.exec(langClass ?? '');
             const lang = match ? match[1] : '';
             const raw = String(children).replace(/\n$/, '');
@@ -68,10 +71,11 @@ export function AiMarkdownRenderer({ content, isStreaming = false, className }: 
                   highlighted = hljs.highlightAuto(raw).value;
                 }
               } catch {
-                // fall back to raw text
+                // fall back to raw text on highlight failure
               }
               return (
                 <pre className="my-2 overflow-x-auto rounded-lg border border-zinc-700/60 bg-zinc-950 p-3 text-xs leading-relaxed">
+                  {/* highlight.js output is escape-safe — no user-controlled HTML */}
                   <code
                     className={cn('font-mono text-zinc-200', langClass)}
                     dangerouslySetInnerHTML={{ __html: highlighted }}
@@ -95,7 +99,17 @@ export function AiMarkdownRenderer({ content, isStreaming = false, className }: 
           ol: ({ children }) => (
             <ol className="mb-2 ml-4 list-decimal space-y-1 text-sm text-zinc-200">{children}</ol>
           ),
-          li: ({ children }) => <li className="leading-relaxed">{children}</li>,
+          li: ({ children, node }) => {
+            // Show cursor inside the last list item when content ends mid-list.
+            const isLastItem =
+              isStreaming && node?.position?.end?.offset === content.length;
+            return (
+              <li className="leading-relaxed">
+                {children}
+                {isLastItem && <AiStreamingCursor />}
+              </li>
+            );
+          },
 
           // ── Blockquote ────────────────────────────────────────────────
           blockquote: ({ children }) => (
@@ -137,9 +151,6 @@ export function AiMarkdownRenderer({ content, isStreaming = false, className }: 
       >
         {content}
       </ReactMarkdown>
-      {/* Append cursor after the whole tree when content ends mid-stream and
-          the last node isn't a paragraph (e.g. ends in a list item). */}
-      {isStreaming && !content.endsWith('\n') && <AiStreamingCursor />}
     </div>
   );
 }

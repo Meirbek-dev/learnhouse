@@ -6,6 +6,7 @@ import {
   FileStack,
   Languages,
   Lightbulb,
+  Square,
   X,
 } from 'lucide-react';
 import { useChat } from '@tanstack/ai-react';
@@ -13,12 +14,11 @@ import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import type { ChangeEvent, KeyboardEvent } from 'react';
 import platformLogoLight from '@public/platform_logo_light.svg';
 import { AiMarkdownRenderer } from '@components/Shared/AI/AiMarkdownRenderer';
-import { ScrollArea } from '@components/ui/scroll-area';
 import { Spinner } from '@components/ui/spinner';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
 import { AnimatePresence, motion } from 'motion/react';
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Variants } from 'motion/react';
 import type { Editor } from '@tiptap/react';
 import { useTranslations } from 'next-intl';
@@ -26,6 +26,7 @@ import { marked } from 'marked';
 import Image from 'next/image';
 import { toast } from 'sonner';
 import { createActivityChatAdapter } from '@services/ai/activity-chat-adapter';
+import type { ActivityChatAdapter } from '@services/ai/activity-chat-adapter';
 import type { TextPart } from '@tanstack/ai-client';
 import { cn } from '@/lib/utils';
 
@@ -79,7 +80,8 @@ function escapeRegex(str: string): string {
   return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-function removeSentences(textToRemove: string, originalText: string): string {
+/** Removes all occurrences of `textToRemove` from `originalText`. */
+function removeOccurrences(textToRemove: string, originalText: string): string {
   if (!textToRemove) return originalText;
   try {
     const regex = new RegExp(escapeRegex(textToRemove), 'gi');
@@ -244,14 +246,16 @@ function AiEditorActionScreen({
           <p className="text-sm text-zinc-400">{t('thinking')}</p>
         </div>
         {streamingPreview && (
-          <ScrollArea className="max-h-40 w-full rounded-md border border-zinc-700/60 bg-zinc-800/50">
+          // Plain div instead of ScrollArea: max-height alone doesn't give a
+          // "definite" height for ScrollArea's internal height:100% viewport.
+          <div className="max-h-40 w-full overflow-y-auto rounded-md border border-zinc-700/60 bg-zinc-800/50">
             <div className="p-3">
               <AiMarkdownRenderer
                 content={streamingPreview}
                 isStreaming
               />
             </div>
-          </ScrollArea>
+          </div>
         )}
       </div>
     );
@@ -273,7 +277,6 @@ function AiEditorActionScreen({
   if (selectedTool === 'ContinueWriting') {
     return (
       <div className="flex flex-col items-center gap-3 text-center">
-        <p className="text-sm text-zinc-400">{t('continuePlaceholder')}</p>
         <Button
           size="sm"
           onClick={onExecute}
@@ -289,7 +292,6 @@ function AiEditorActionScreen({
   if (selectedTool === 'MakeLonger') {
     return (
       <div className="flex flex-col items-center gap-3 text-center">
-        <p className="text-sm text-zinc-400">{t('longerPlaceholder')}</p>
         <Button
           size="sm"
           onClick={onExecute}
@@ -305,17 +307,16 @@ function AiEditorActionScreen({
   if (selectedTool === 'Critisize') {
     if (hasAiResponse) {
       return (
-        <ScrollArea className="max-h-48 w-full rounded-md border border-zinc-700/60 bg-zinc-800/50">
+        <div className="max-h-48 w-full overflow-y-auto rounded-md border border-zinc-700/60 bg-zinc-800/50">
           <div className="p-3">
             <AiMarkdownRenderer content={lastAiResponse} />
           </div>
-        </ScrollArea>
+        </div>
       );
     }
 
     return (
       <div className="flex w-full flex-col items-center gap-3">
-        <p className="text-sm text-zinc-400">{t('critisizePlaceholder')}</p>
         <div className="flex items-center gap-2">
           <span className="text-xs text-zinc-500">{t('critisizeScopeLabel')}:</span>
           {(['selection', 'lecture'] as const).map((scope) => (
@@ -349,7 +350,6 @@ function AiEditorActionScreen({
   if (selectedTool === 'Translate') {
     return (
       <div className="flex w-full flex-col items-center gap-3">
-        <p className="text-sm text-zinc-400">{t('translatePlaceholder')}</p>
         <Input
           value={chatInputValue}
           onChange={(e: ChangeEvent<HTMLInputElement>) => onInputChange(e.target.value)}
@@ -391,12 +391,13 @@ interface FeedbackModalProps {
   onInputChange: (value: string) => void;
   onCritisizeScopeChange: (scope: CritisizeScope) => void;
   onDismissError: () => void;
+  onCancel: () => void;
   sendMessageAndGetResponse: (prompt: string) => Promise<string>;
 }
 
 function UserFeedbackModal({
   editor,
-  activity,
+  activity: _activity,
   selectedTool,
   isUserInputEnabled,
   chatInputValue,
@@ -410,6 +411,7 @@ function UserFeedbackModal({
   onInputChange,
   onCritisizeScopeChange,
   onDismissError,
+  onCancel,
   sendMessageAndGetResponse,
 }: FeedbackModalProps) {
   const t = useTranslations('Activities.AIEditorToolkit');
@@ -421,26 +423,18 @@ function UserFeedbackModal({
       if (!selection) return '';
 
       switch (label) {
-        case 'Writer': {
+        case 'Writer':
           return t('prompt_writer', { selection });
-        }
-        case 'ContinueWriting': {
+        case 'ContinueWriting':
           return t('prompt_continueWriting', { selection });
-        }
-        case 'MakeLonger': {
+        case 'MakeLonger':
           return t('prompt_makeLonger', { selection });
-        }
-        case 'Critisize': {
+        case 'Critisize':
           return scope === 'lecture'
             ? t('prompt_critisizeLecture', { selection })
             : t('prompt_critisize', { selection });
-        }
-        case 'Translate': {
+        case 'Translate':
           return targetLanguage ? t('prompt_translateTo', { language: targetLanguage, selection }) : '';
-        }
-        default: {
-          return '';
-        }
       }
     },
     [t],
@@ -457,7 +451,7 @@ function UserFeedbackModal({
 
           onUserInputEnabledChange(false);
           const response = await sendMessageAndGetResponse(prompt);
-          await typeText(response);
+          if (response) await typeText(response);
           onUserInputEnabledChange(true);
           break;
         }
@@ -468,8 +462,8 @@ function UserFeedbackModal({
           if (!prompt) return;
 
           const response = await sendMessageAndGetResponse(prompt);
-          const cleanedResponse = removeSentences(selection, response);
-          await typeText(cleanedResponse);
+          const cleanedResponse = removeOccurrences(selection, response);
+          if (cleanedResponse) await typeText(cleanedResponse);
           break;
         }
 
@@ -479,7 +473,7 @@ function UserFeedbackModal({
           if (!prompt) return;
 
           const response = await sendMessageAndGetResponse(prompt);
-          await typeText(response, true);
+          if (response) await typeText(response, true);
           break;
         }
 
@@ -553,15 +547,30 @@ function UserFeedbackModal({
     >
       <div className="rounded-xl border border-zinc-700/60 bg-zinc-900 p-4 shadow-xl">
         {/* Header */}
-        <div className="mb-3 flex items-center gap-2">
-          <Image
-            width={18}
-            height={18}
-            src={platformLogoLight}
-            alt={t('platformLogoAlt')}
-            className="rounded-sm"
-          />
-          <span className="text-sm font-semibold text-zinc-100">{t('aiEditorTitle')}</span>
+        <div className="mb-3 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <Image
+              width={18}
+              height={18}
+              src={platformLogoLight}
+              alt={t('platformLogoAlt')}
+              className="rounded-sm"
+            />
+            <span className="text-sm font-semibold text-zinc-100">{t('aiEditorTitle')}</span>
+          </div>
+          {/* Cancel button — visible while generating */}
+          {isLoading && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onCancel}
+              className="h-7 gap-1.5 px-2 text-xs text-zinc-500 hover:text-red-400"
+              aria-label={t('stop')}
+            >
+              <Square size={11} className="fill-current" />
+              {t('stop')}
+            </Button>
+          )}
         </div>
 
         {/* Content */}
@@ -581,7 +590,7 @@ function UserFeedbackModal({
           />
         </div>
 
-        {/* Input */}
+        {/* Input — only for Writer tool */}
         {isUserInputEnabled && (
           <div className="flex items-center gap-2">
             <Input
@@ -622,45 +631,67 @@ export default function AIEditorToolkit({ editor, activity, isOpen, onClose }: A
   // ── Local UI state ────────────────────────────────────────────────────────
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
   const [selectedTool, setSelectedTool] = useState<ToolLabel>('Writer');
-  const [isUserInputEnabled, setIsUserInputEnabled] = useState(true);
+  // Hidden by default — only shown for the Writer tool.
+  const [isUserInputEnabled, setIsUserInputEnabled] = useState(false);
   const [critisizeScope, setCritisizeScope] = useState<CritisizeScope>('selection');
   const [chatInputValue, setChatInputValue] = useState('');
 
-  // ── TanStack AI chat ───────────────────────────────────────────────────────
-  // A Promise resolver stored in a ref so onFinish can resolve the
-  // sendMessageAndGetResponse promise after streaming completes.
-  const responseResolverRef = useRef<((text: string) => void) | null>(null);
+  // ── Adapter + abort ref ───────────────────────────────────────────────────
+  const adapterRef = useRef<ActivityChatAdapter | null>(null);
 
-  const connection = useMemo(
-    () =>
-      createActivityChatAdapter({
-        activityUuid: activity.activity_uuid,
-        getAccessToken: () => accessToken,
-      }),
+  const adapter = useMemo(() => {
+    const a = createActivityChatAdapter({
+      activityUuid: activity.activity_uuid,
+      getAccessToken: () => accessToken,
+    });
+    adapterRef.current = a;
+    return a;
     // Recreate only when the activity changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [activity.activity_uuid],
-  );
+  }, [activity.activity_uuid]);
 
-  const { messages, sendMessage, isLoading, error, clear } = useChat({
-    connection,
+  // Abort any in-flight request when the toolkit is closed or unmounted.
+  useEffect(() => {
+    if (!isOpen) {
+      adapterRef.current?.abort();
+    }
+    return () => {
+      adapterRef.current?.abort();
+    };
+  }, [isOpen]);
+
+  // ── TanStack AI chat ───────────────────────────────────────────────────────
+  /**
+   * Instead of a single ref, use a FIFO queue of resolvers.
+   * sendMessageAndGetResponse pushes a resolve function; onFinish shifts
+   * the oldest one. This prevents the previous single-ref race condition
+   * where a second call would overwrite the first resolver.
+   */
+  const resolverQueueRef = useRef<Array<(text: string) => void>>([]);
+
+  const { messages, sendMessage, isLoading, error, clear, stop } = useChat({
+    connection: adapter.connection,
     onFinish: (message) => {
       const text = message.parts
         .filter((p): p is TextPart => p.type === 'text')
         .map((p) => p.content)
         .join('');
-      // Resolve the pending promise from sendMessageAndGetResponse.
-      responseResolverRef.current?.(text);
-      responseResolverRef.current = null;
+      resolverQueueRef.current.shift()?.(text);
     },
   });
 
-  // Returns a Promise that resolves with the full response text once
-  // onFinish fires — fixing the previous race condition.
+  // Drain pending resolvers and abort on unmount to prevent leaked promises.
+  useEffect(() => {
+    return () => {
+      while (resolverQueueRef.current.length) resolverQueueRef.current.shift()?.('');
+    };
+  }, []);
+
+  /** Returns a Promise that resolves with the full response text once onFinish fires. */
   const sendMessageAndGetResponse = useCallback(
     (prompt: string): Promise<string> =>
       new Promise((resolve) => {
-        responseResolverRef.current = resolve;
+        resolverQueueRef.current.push(resolve);
         sendMessage(prompt);
       }),
     [sendMessage],
@@ -668,24 +699,18 @@ export default function AIEditorToolkit({ editor, activity, isOpen, onClose }: A
 
   // Derive the last AI text: committed response (for Critisize display)
   // and in-flight streaming preview (for all tools while loading).
-  const lastAiResponse = useMemo(() => {
-    if (isLoading) return '';
+  // Both come from the same message — combined into one useMemo.
+  const { lastAiResponse, streamingPreview } = useMemo(() => {
     const lastAssistant = [...messages].reverse().find((m) => m.role === 'assistant');
-    if (!lastAssistant) return '';
-    return lastAssistant.parts
-      .filter((p): p is TextPart => p.type === 'text')
-      .map((p) => p.content)
-      .join('');
-  }, [messages, isLoading]);
-
-  const streamingPreview = useMemo(() => {
-    if (!isLoading) return '';
-    const lastAssistant = [...messages].reverse().find((m) => m.role === 'assistant');
-    if (!lastAssistant) return '';
-    return lastAssistant.parts
-      .filter((p): p is TextPart => p.type === 'text')
-      .map((p) => p.content)
-      .join('');
+    const text =
+      lastAssistant?.parts
+        .filter((p): p is TextPart => p.type === 'text')
+        .map((p) => p.content)
+        .join('') ?? '';
+    return {
+      lastAiResponse: isLoading ? '' : text,
+      streamingPreview: isLoading ? text : '',
+    };
   }, [messages, isLoading]);
 
   // ── Handlers ──────────────────────────────────────────────────────────────
@@ -695,16 +720,32 @@ export default function AIEditorToolkit({ editor, activity, isOpen, onClose }: A
     onClose();
   }, [onClose]);
 
-  const handleToolSelect = useCallback((label: ToolLabel) => {
-    setSelectedTool(label);
-    setIsFeedbackModalOpen(true);
-    setIsUserInputEnabled(label === 'Writer');
-    // Reset messages when switching tools so stale responses don't show.
-    clear();
-  }, [clear]);
+  const handleToolSelect = useCallback(
+    (label: ToolLabel) => {
+      // Drain any pending resolvers from the previous operation with an empty
+      // string so those promises don't leak.
+      while (resolverQueueRef.current.length) resolverQueueRef.current.shift()?.('');
+      // Abort the in-flight adapter request so the old stream's onFinish
+      // cannot shift a resolver that belongs to the new operation.
+      adapterRef.current?.abort();
+      stop();
+      clear();
+
+      setSelectedTool(label);
+      setIsFeedbackModalOpen(true);
+      // The Writer tool has a free-text input; all other tools don't need it.
+      setIsUserInputEnabled(label === 'Writer');
+    },
+    [clear, stop],
+  );
+
+  const handleCancel = useCallback(() => {
+    while (resolverQueueRef.current.length) resolverQueueRef.current.shift()?.('');
+    adapterRef.current?.abort();
+    stop();
+  }, [stop]);
 
   const handleDismissError = useCallback(() => {
-    // Error is managed by useChat; calling clear() resets the error state.
     clear();
   }, [clear]);
 
@@ -720,26 +761,29 @@ export default function AIEditorToolkit({ editor, activity, isOpen, onClose }: A
           className="fixed inset-0 z-50"
           style={{ pointerEvents: 'none' }}
         >
-          {isFeedbackModalOpen && (
-            <UserFeedbackModal
-              activity={activity}
-              editor={editor}
-              selectedTool={selectedTool}
-              isUserInputEnabled={isUserInputEnabled}
-              chatInputValue={chatInputValue}
-              critisizeScope={critisizeScope}
-              isLoading={isLoading}
-              error={error}
-              lastAiResponse={lastAiResponse}
-              streamingPreview={streamingPreview}
-              onToolChange={setSelectedTool}
-              onUserInputEnabledChange={setIsUserInputEnabled}
-              onInputChange={setChatInputValue}
-              onCritisizeScopeChange={setCritisizeScope}
-              onDismissError={handleDismissError}
-              sendMessageAndGetResponse={sendMessageAndGetResponse}
-            />
-          )}
+          <AnimatePresence>
+            {isFeedbackModalOpen && (
+              <UserFeedbackModal
+                activity={activity}
+                editor={editor}
+                selectedTool={selectedTool}
+                isUserInputEnabled={isUserInputEnabled}
+                chatInputValue={chatInputValue}
+                critisizeScope={critisizeScope}
+                isLoading={isLoading}
+                error={error}
+                lastAiResponse={lastAiResponse}
+                streamingPreview={streamingPreview}
+                onToolChange={setSelectedTool}
+                onUserInputEnabledChange={setIsUserInputEnabled}
+                onInputChange={setChatInputValue}
+                onCritisizeScopeChange={setCritisizeScope}
+                onDismissError={handleDismissError}
+                onCancel={handleCancel}
+                sendMessageAndGetResponse={sendMessageAndGetResponse}
+              />
+            )}
+          </AnimatePresence>
 
           {/* Toolbar */}
           <div

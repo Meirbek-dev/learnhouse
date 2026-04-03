@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Check, Copy } from 'lucide-react';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { AiMarkdownRenderer } from './AiMarkdownRenderer';
@@ -20,12 +20,22 @@ interface AiMessageBubbleProps {
  */
 export function AiMessageBubble({ role, content, isStreaming = false }: AiMessageBubbleProps) {
   const [copied, setCopied] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Clear the reset-timer on unmount to prevent state updates on an
+  // unmounted component if the user copies and then quickly navigates away.
+  useEffect(() => {
+    return () => {
+      if (timerRef.current !== null) clearTimeout(timerRef.current);
+    };
+  }, []);
 
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(content);
       setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
+      if (timerRef.current !== null) clearTimeout(timerRef.current);
+      timerRef.current = setTimeout(() => setCopied(false), 1500);
     } catch {
       // clipboard access denied — silently ignore
     }
