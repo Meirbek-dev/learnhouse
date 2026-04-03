@@ -117,36 +117,6 @@ class SecurityConfig(PlatformSectionSettings):
         return stripped
 
 
-class ChromaDBConfig(PlatformSectionSettings):
-    separate_db_enabled: bool = Field(
-        default=False,
-        validation_alias="PLATFORM_CHROMADB_SEPARATE",
-    )
-    db_host: str | None = Field(default=None, validation_alias="PLATFORM_CHROMADB_HOST")
-    db_port: int = Field(default=8000, validation_alias="PLATFORM_CHROMADB_PORT")
-    persist_path: str = Field(
-        default="./chromadb_data",
-        validation_alias="PLATFORM_CHROMADB_PERSIST_PATH",
-    )
-
-    @field_validator("db_host", mode="before")
-    @classmethod
-    def normalize_db_host(cls, value: str | None) -> str | None:
-        return _strip_optional_string(value)
-
-    @field_validator("persist_path", mode="before")
-    @classmethod
-    def normalize_persist_path(cls, value: str) -> str:
-        if not isinstance(value, str):
-            return value
-
-        stripped = value.strip()
-        if not stripped:
-            raise ValueError("PLATFORM_CHROMADB_PERSIST_PATH must not be empty")
-
-        return stripped
-
-
 class AIConfig(PlatformSectionSettings):
     """All AI-related configuration in one flat class.
 
@@ -159,7 +129,6 @@ class AIConfig(PlatformSectionSettings):
         default=None,
         validation_alias="PLATFORM_OPENAI_API_KEY",
     )
-    chromadb_config: ChromaDBConfig = Field(default_factory=ChromaDBConfig)
     chat_model: str = Field(
         default="gpt-5.4-nano",
         validation_alias="PLATFORM_AI_CHAT_MODEL",
@@ -513,7 +482,7 @@ def get_settings() -> AppSettings:
         database_config=DatabaseConfig(),
         redis_config=RedisConfig(),
         security_config=SecurityConfig(),
-        ai_config=AIConfig(chromadb_config=ChromaDBConfig()),
+        ai_config=AIConfig(),
         mailing_config=MailingConfig(),
         payments_config=InternalPaymentsConfig(stripe=InternalStripeConfig()),
         bootstrap=BootstrapConfig(),

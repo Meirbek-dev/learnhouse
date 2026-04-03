@@ -1,14 +1,15 @@
 import asyncio
 import hashlib
 import logging
-from threading import Lock
-from typing import Any
 
-import chromadb
-from chromadb.api import ClientAPI
-from chromadb.config import Settings
+from sqlalchemy import Column, MetaData, Table, Text, delete, select, text
+from sqlalchemy.dialects.postgresql import JSONB, insert as pg_insert
+from sqlalchemy.dialects.postgresql import TIMESTAMP
+from pgvector.sqlalchemy import Vector
+from sqlmodel import Session
 
 from config.config import get_settings
+from src.core.events.database import get_database_engine
 from src.services.ai.cache_manager import get_ai_cache_manager
 from src.services.ai.chunking import chunk_documents
 from src.services.ai.embeddings import embed_texts
@@ -17,55 +18,30 @@ from src.services.ai.models import DocumentChunk, RetrievedChunk
 
 logger = logging.getLogger(__name__)
 
-_chroma_client: ClientAPI | None = None
-_chroma_lock = Lock()
+# ---------------------------------------------------------------------------
+# Table definition — mirrors the migration schema exactly.
+# Importing Vector from pgvector.sqlalchemy registers the psycopg type codec
+# via SQLAlchemy pool-connect event listeners, so no manual registration needed.
+# ---------------------------------------------------------------------------
+
+_metadata = MetaData()
+
+_document_chunks = Table(
+    "document_chunks",
+    _metadata,
+    Column("id", Text, primary_key=True),
+    Column("collection_name", Text, nullable=False),
+    Column("document", Text, nullable=False),
+    Column("embedding", Vector(), nullable=False),
+    Column("metadata", JSONB, nullable=False),
+    Column("inserted_at", TIMESTAMP(timezone=True), nullable=False,
+           server_default=text("now()")),
+)
 
 
-def _create_chroma_client() -> ClientAPI:
-    settings = get_settings()
-    chromadb_config = settings.ai_config.chromadb_config
-    chroma_settings = Settings(
-        anonymized_telemetry=False,
-        allow_reset=True,
-        is_persistent=True,
-    )
-
-    is_remote = bool(
-        chromadb_config.separate_db_enabled and chromadb_config.db_host
-    )
-    if is_remote:
-        port = chromadb_config.db_port
-        logger.info(
-            "Connecting to remote ChromaDB at %s:%d",
-            chromadb_config.db_host,
-            port,
-        )
-        client = chromadb.HttpClient(
-            host=chromadb_config.db_host,
-            port=port,
-            settings=chroma_settings,
-        )
-        client.heartbeat()
-        return client
-
-    logger.info(
-        "Using local ChromaDB PersistentClient at %s",
-        chromadb_config.persist_path,
-    )
-    return chromadb.PersistentClient(
-        path=chromadb_config.persist_path,
-        settings=chroma_settings,
-    )
-
-
-def get_chroma_client() -> ClientAPI:
-    global _chroma_client
-    if _chroma_client is None:
-        with _chroma_lock:
-            if _chroma_client is None:
-                _chroma_client = _create_chroma_client()
-    return _chroma_client
-
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
 
 def _content_hash(documents: list[str]) -> str:
     normalized = sorted(" ".join(document.split()) for document in documents if document.strip())
@@ -77,6 +53,108 @@ def _collection_name(name: str | None, content_hash: str) -> str:
         return name
     return f"doc_collection_{content_hash[:16]}"
 
+
+# ---------------------------------------------------------------------------
+# Sync DB operations (run via asyncio.to_thread)
+# ---------------------------------------------------------------------------
+
+def _sync_upsert_collection(
+    collection_name: str,
+    chunks: list[DocumentChunk],
+    embeddings: list[list[float]],
+) -> None:
+    """Replace all chunks for *collection_name* with the given data."""
+    engine = get_database_engine()
+    with Session(engine) as session:
+        # Delete stale rows first so a full replacement is always clean.
+        session.execute(
+            delete(_document_chunks).where(
+                _document_chunks.c.collection_name == collection_name
+            )
+        )
+
+        rows = [
+            {
+                "id": chunk.id,
+                "collection_name": collection_name,
+                "document": chunk.document,
+                "embedding": embedding,
+                "metadata": chunk.metadata,
+            }
+            for chunk, embedding in zip(chunks, embeddings, strict=True)
+        ]
+
+        stmt = pg_insert(_document_chunks).values(rows)
+        stmt = stmt.on_conflict_do_update(
+            index_elements=["id"],
+            set_={
+                "collection_name": stmt.excluded.collection_name,
+                "document": stmt.excluded.document,
+                "embedding": stmt.excluded.embedding,
+                "metadata": stmt.excluded.metadata,
+                "inserted_at": text("now()"),
+            },
+        )
+        session.execute(stmt)
+        session.commit()
+
+    logger.info(
+        "Upserted %d chunks into pgvector collection %s",
+        len(chunks),
+        collection_name,
+    )
+
+
+def _sync_query_collection(
+    collection_name: str,
+    query_embedding: list[float],
+    top_k: int,
+) -> list[RetrievedChunk]:
+    """Return the top-k chunks ordered by cosine distance (ascending)."""
+    engine = get_database_engine()
+    distance = _document_chunks.c.embedding.cosine_distance(query_embedding).label("distance")
+    stmt = (
+        select(
+            _document_chunks.c.id,
+            _document_chunks.c.document,
+            _document_chunks.c.metadata,
+            distance,
+        )
+        .where(_document_chunks.c.collection_name == collection_name)
+        .order_by(distance)
+        .limit(top_k)
+    )
+    with Session(engine) as session:
+        rows = session.execute(stmt).fetchall()
+
+    return [
+        RetrievedChunk(
+            id=row.id,
+            document=row.document,
+            score=float(row.distance),
+            metadata=row.metadata or {},
+        )
+        for row in rows
+    ]
+
+
+def delete_expired_chunks(retention_seconds: int) -> int:
+    """Delete chunks older than *retention_seconds*. Returns the row count removed."""
+    engine = get_database_engine()
+    with Session(engine) as session:
+        result = session.execute(
+            delete(_document_chunks).where(
+                _document_chunks.c.inserted_at
+                < text(f"now() - interval '{retention_seconds} seconds'")
+            )
+        )
+        session.commit()
+        return result.rowcount
+
+
+# ---------------------------------------------------------------------------
+# Public API
+# ---------------------------------------------------------------------------
 
 async def ensure_collection(
     *,
@@ -114,12 +192,10 @@ async def ensure_collection(
         )
 
     await asyncio.to_thread(
-        _upsert_collection,
+        _sync_upsert_collection,
         resolved_name,
-        content_hash,
         chunks,
         embeddings,
-        settings.collection_retention,
     )
 
     cache_manager.retrieval_cache.set(cache_key, resolved_name)
@@ -127,44 +203,6 @@ async def ensure_collection(
         activity_uuid = collection_name.removeprefix("activity_")
         cache_manager.register_retrieval_cache_key(activity_uuid, cache_key)
     return resolved_name
-
-
-def _upsert_collection(
-    collection_name: str,
-    content_hash: str,
-    chunks: list[DocumentChunk],
-    embeddings: list[list[float]],
-    collection_retention: int,
-) -> None:
-    client = get_chroma_client()
-    try:
-        collection = client.get_collection(collection_name)
-        existing_hash = (collection.metadata or {}).get("content_hash")
-        if existing_hash == content_hash:
-            logger.info("Reusing existing Chroma collection: %s", collection_name)
-            return
-        client.delete_collection(collection_name)
-    except Exception:
-        pass
-
-    collection = client.get_or_create_collection(
-        name=collection_name,
-        metadata={
-            "content_hash": content_hash,
-            "collection_retention": collection_retention,
-        },
-    )
-    collection.upsert(
-        ids=[chunk.id for chunk in chunks],
-        documents=[chunk.document for chunk in chunks],
-        embeddings=embeddings,
-        metadatas=[chunk.metadata for chunk in chunks],
-    )
-    logger.info(
-        "Upserted %d chunks into Chroma collection %s",
-        len(chunks),
-        collection_name,
-    )
 
 
 async def retrieve_chunks(
@@ -185,52 +223,16 @@ async def retrieve_chunks(
         raise RetrievalError("Failed to create query embedding")
 
     settings = get_settings().ai_config
-    result = await asyncio.to_thread(
-        _query_collection,
+    retrieved = await asyncio.to_thread(
+        _sync_query_collection,
         resolved_name,
         query_embedding[0],
         settings.retrieval_top_k,
     )
 
-    documents_result = result.get("documents", [[]])
-    ids_result = result.get("ids", [[]])
-    distances_result = result.get("distances", [[]])
-    metadatas_result = result.get("metadatas", [[]])
-
-    retrieved: list[RetrievedChunk] = []
-    for chunk_id, document, distance, metadata in zip(
-        ids_result[0],
-        documents_result[0],
-        distances_result[0] if distances_result else [],
-        metadatas_result[0] if metadatas_result else [],
-        strict=False,
-    ):
-        retrieved.append(
-            RetrievedChunk(
-                id=chunk_id,
-                document=document,
-                score=None if distance is None else float(distance),
-                metadata=metadata or {},
-            )
-        )
-
     logger.info(
-        "Retrieved %d chunks from collection %s",
+        "Retrieved %d chunks from pgvector collection %s",
         len(retrieved),
         resolved_name,
     )
     return retrieved
-
-
-def _query_collection(
-    collection_name: str,
-    query_embedding: list[float],
-    top_k: int,
-) -> dict[str, Any]:
-    client = get_chroma_client()
-    collection = client.get_collection(collection_name)
-    return collection.query(
-        query_embeddings=[query_embedding],
-        n_results=top_k,
-        include=["documents", "distances", "metadatas"],
-    )

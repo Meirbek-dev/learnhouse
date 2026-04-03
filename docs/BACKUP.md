@@ -13,9 +13,8 @@ Azure, Dropbox, etc.).
 
 The following Docker volumes are included in backups:
 
-- **postgres_data** - PostgreSQL database
+- **postgres_data** - PostgreSQL database (includes pgvector document_chunks)
 - **redis_data** - Redis cache and session data
-- **chromadb_data** - ChromaDB vector database
 - **app_content** - User uploads and organization data
 - **app_logs** - Application logs
 
@@ -41,7 +40,6 @@ backup:
   volumes:
     - postgres_data:/backup/postgres:ro
     - redis_data:/backup/redis:ro
-    - chromadb_data:/backup/chromadb:ro
     - app_content:/backup/app_content:ro
     - app_logs:/backup/app_logs:ro
     - /var/run/docker.sock:/var/run/docker.sock:ro
@@ -63,7 +61,6 @@ To ensure data consistency, the following containers are stopped during backup:
 
 - PostgreSQL database (`db`)
 - Redis cache (`redis`)
-- ChromaDB vector database (`chromadb`)
 
 These containers are automatically restarted after the backup completes.
 
@@ -119,9 +116,6 @@ docker run --rm -v openu-dev_postgres_data:/data -v ${PWD}/temp-restore/backup/p
 
 # Restore Redis data
 docker run --rm -v openu-dev_redis_data:/data -v ${PWD}/temp-restore/backup/redis:/backup alpine sh -c "cd /data && cp -a /backup/* ."
-
-# Restore ChromaDB data
-docker run --rm -v openu-dev_chromadb_data:/data -v ${PWD}/temp-restore/backup/chromadb:/backup alpine sh -c "cd /data && cp -a /backup/* ."
 
 # Restore app content
 docker run --rm -v openu-dev_app_content:/data -v ${PWD}/temp-restore/backup/app_content:/backup alpine sh -c "cd /data && cp -a /backup/* ."
@@ -239,7 +233,6 @@ temp-restore/
   backup/
     postgres/
     redis/
-    chromadb/
     app_content/
     app_logs/
     judge0_box/
@@ -256,7 +249,6 @@ docker volume ls
 # Look for volumes like:
 # ashyq-bilim_postgres_data
 # ashyq-bilim_redis_data
-# ashyq-bilim_chromadb_data
 # ashyq-bilim_app_content
 # ashyq-bilim_app_logs
 # ashyq-bilim_judge0_box
@@ -282,12 +274,6 @@ docker run --rm `
 docker run --rm `
   -v ashyq-bilim_redis_data:/data `
   -v "${backupPath}\redis:/backup" `
-  alpine sh -c "cd /data && cp -a /backup/* ."
-
-# Restore ChromaDB data
-docker run --rm `
-  -v ashyq-bilim_chromadb_data:/data `
-  -v "${backupPath}\chromadb:/backup" `
   alpine sh -c "cd /data && cp -a /backup/* ."
 
 # Restore app content (user uploads, org data)

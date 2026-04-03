@@ -2,7 +2,6 @@ import pytest
 
 from config.config import (
     AIConfig,
-    ChromaDBConfig,
     CookieConfig,
     DatabaseConfig,
     GeneralConfig,
@@ -13,14 +12,6 @@ from config.config import (
     RedisConfig,
     SecurityConfig,
 )
-
-
-def test_chromadb_false_string_stays_false(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("PLATFORM_CHROMADB_SEPARATE", "false")
-
-    cfg = ChromaDBConfig(_env_file=None)
-
-    assert cfg.separate_db_enabled is False
 
 
 def test_hosting_config_parses_comma_separated_origins(

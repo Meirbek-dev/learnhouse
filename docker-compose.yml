@@ -59,7 +59,9 @@ services:
           cpus: "0.5"
           memory: 512M
   db:
-    image: postgres:18.3-trixie
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.db
     restart: unless-stopped
     ports:
       - "5432:5432"
@@ -106,24 +108,6 @@ services:
         reservations:
           cpus: "0.1"
           memory: 64M
-  chromadb:
-    image: chromadb/chroma:1.5.5
-    restart: unless-stopped
-    ports:
-      - "8001:8000"
-    volumes:
-      - chromadb_data:/chroma/chroma
-    labels:
-      - docker-volume-backup.stop-during-backup=true
-    deploy:
-      resources:
-        limits:
-          cpus: "1.0"
-          memory: 1G
-        reservations:
-          cpus: "0.1"
-          memory: 256M
-
   # Judge0 - code runner for coding activities
   judge0_server:
     image: judge0/judge0:1.13.1
@@ -176,7 +160,6 @@ services:
       # Database volumes
       - postgres_data:/backup/postgres:ro
       - redis_data:/backup/redis:ro
-      - chromadb_data:/backup/chromadb:ro
       # Application data volumes
       - app_content:/backup/app_content:ro
       - app_logs:/backup/app_logs:ro
@@ -189,7 +172,6 @@ services:
 volumes:
   postgres_data:
   redis_data:
-  chromadb_data:
   app_content:
   app_logs:
   judge0_box:
