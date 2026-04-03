@@ -1,9 +1,9 @@
 'use client';
 
+import { AiMarkdownRenderer } from './AiMarkdownRenderer';
+import UserAvatar from '@components/Objects/UserAvatar';
 import { useEffect, useRef, useState } from 'react';
 import { Check, Copy } from 'lucide-react';
-import UserAvatar from '@components/Objects/UserAvatar';
-import { AiMarkdownRenderer } from './AiMarkdownRenderer';
 import { cn } from '@/lib/utils';
 
 interface AiMessageBubbleProps {

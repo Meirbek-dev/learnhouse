@@ -1,9 +1,9 @@
 'use client';
 
-import { Send, Square } from 'lucide-react';
+import UserAvatar from '@components/Objects/UserAvatar';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
-import UserAvatar from '@components/Objects/UserAvatar';
+import { Send, Square } from 'lucide-react';
 import type { KeyboardEvent } from 'react';
 
 interface AiChatInputProps {

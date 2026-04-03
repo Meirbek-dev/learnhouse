@@ -11,9 +11,9 @@
  * that TanStack AI's ChatClient expects.
  */
 
+import { RequestBodyWithAuthHeader } from '@services/utils/ts/requests';
 import { normalizeToUIMessage, stream } from '@tanstack/ai-client';
 import { getAPIUrl } from '@services/config/config';
-import { RequestBodyWithAuthHeader } from '@services/utils/ts/requests';
 import type { TextPart } from '@tanstack/ai-client';
 
 /** Maximum buffer size (64 KB) to guard against a pathological server sending partial lines. */
@@ -75,12 +75,12 @@ export function createActivityChatAdapter({
 
   const abort = () => currentController?.abort();
 
-  const connection = stream(async function* (messages, _data) {
+  const connection = stream(async function*  connection(messages, _data) {
     const accessToken = getAccessToken();
     if (!accessToken) throw new Error('Not authenticated');
 
     // Extract the last user message text from the UIMessage parts array.
-    const lastUser = [...messages].reverse().find((m) => m.role === 'user');
+    const lastUser = [...messages].toReversed().find((m) => m.role === 'user');
     const normalizedLastUser = lastUser ? normalizeToUIMessage(lastUser, () => crypto.randomUUID()) : null;
     const text =
       normalizedLastUser?.parts
@@ -216,8 +216,9 @@ export function createActivityChatAdapter({
               return;
             }
 
-            default:
+            default: {
               break;
+            }
           }
         }
       }

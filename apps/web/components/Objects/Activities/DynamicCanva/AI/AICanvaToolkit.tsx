@@ -1,13 +1,13 @@
+import { AlertTriangle, BookOpen, Check, FormInput, Languages, Loader2 } from 'lucide-react';
 import { useActivityAIChat } from '@components/Contexts/AI/ActivityAIChatContext';
 import ToolTip from '@/components/Objects/Elements/Tooltip/Tooltip';
-import { AlertTriangle, BookOpen, Check, FormInput, Languages, Loader2 } from 'lucide-react';
 import platformLogo from '@public/platform_logo.svg';
 import { BubbleMenu } from '@tiptap/react/menus';
 import { Button } from '@components/ui/button';
 import type { Editor } from '@tiptap/react';
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
 import type { ReactNode } from 'react';
+import { useState } from 'react';
 import Image from 'next/image';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -114,40 +114,52 @@ const AIActionButton = (props: { editor: Editor; label: ActionLabel }) => {
 
   const getPrompt = (label: ActionLabel, selection: string): string => {
     switch (label) {
-      case 'Explain':
+      case 'Explain': {
         return t('explainPrompt', { selection });
-      case 'Summarize':
+      }
+      case 'Summarize': {
         return t('summarizePrompt', { selection });
-      case 'Translate':
+      }
+      case 'Translate': {
         return t('translatePrompt', { selection });
-      case 'Examples':
+      }
+      case 'Examples': {
         return t('examplesPrompt', { selection });
+      }
     }
   };
 
   const getTooltipLabel = (label: ActionLabel): string => {
     switch (label) {
-      case 'Explain':
+      case 'Explain': {
         return t('explainTooltip');
-      case 'Summarize':
+      }
+      case 'Summarize': {
         return t('summarizeTooltip');
-      case 'Translate':
+      }
+      case 'Translate': {
         return t('translateTooltip');
-      case 'Examples':
+      }
+      case 'Examples': {
         return t('examplesTooltip');
+      }
     }
   };
 
   const getButtonLabel = (label: ActionLabel): string => {
     switch (label) {
-      case 'Explain':
+      case 'Explain': {
         return t('explainLabel');
-      case 'Summarize':
+      }
+      case 'Summarize': {
         return t('summarizeLabel');
-      case 'Translate':
+      }
+      case 'Translate': {
         return t('translateLabel');
-      case 'Examples':
+      }
+      case 'Examples': {
         return t('examplesLabel');
+      }
     }
   };
 

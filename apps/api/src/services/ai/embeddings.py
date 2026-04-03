@@ -2,6 +2,8 @@ import asyncio
 import logging
 from threading import Lock
 
+# Direct openai SDK — PydanticAI's openai extra only wraps chat completions,
+# not the embeddings API, so we need the SDK directly here.
 from openai import AsyncOpenAI
 
 from config.config import get_settings

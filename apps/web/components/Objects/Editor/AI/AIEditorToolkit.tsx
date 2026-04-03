@@ -9,26 +9,26 @@ import {
   Square,
   X,
 } from 'lucide-react';
-import { useChat } from '@tanstack/ai-react';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
-import type { ChangeEvent, KeyboardEvent } from 'react';
-import platformLogoLight from '@public/platform_logo_light.svg';
+import { createActivityChatAdapter } from '@services/ai/activity-chat-adapter';
 import { AiMarkdownRenderer } from '@components/Shared/AI/AiMarkdownRenderer';
+import type { ActivityChatAdapter } from '@services/ai/activity-chat-adapter';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import platformLogoLight from '@public/platform_logo_light.svg';
+import type { ChangeEvent, KeyboardEvent } from 'react';
+import { AnimatePresence, motion } from 'motion/react';
+import type { TextPart } from '@tanstack/ai-client';
 import { Spinner } from '@components/ui/spinner';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
-import { AnimatePresence, motion } from 'motion/react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useChat } from '@tanstack/ai-react';
 import type { Variants } from 'motion/react';
 import type { Editor } from '@tiptap/react';
 import { useTranslations } from 'next-intl';
+import { cn } from '@/lib/utils';
 import { marked } from 'marked';
 import Image from 'next/image';
 import { toast } from 'sonner';
-import { createActivityChatAdapter } from '@services/ai/activity-chat-adapter';
-import type { ActivityChatAdapter } from '@services/ai/activity-chat-adapter';
-import type { TextPart } from '@tanstack/ai-client';
-import { cn } from '@/lib/utils';
 
 // ============================================================================
 // Types
@@ -423,18 +423,23 @@ function UserFeedbackModal({
       if (!selection) return '';
 
       switch (label) {
-        case 'Writer':
+        case 'Writer': {
           return t('prompt_writer', { selection });
-        case 'ContinueWriting':
+        }
+        case 'ContinueWriting': {
           return t('prompt_continueWriting', { selection });
-        case 'MakeLonger':
+        }
+        case 'MakeLonger': {
           return t('prompt_makeLonger', { selection });
-        case 'Critisize':
+        }
+        case 'Critisize': {
           return scope === 'lecture'
             ? t('prompt_critisizeLecture', { selection })
             : t('prompt_critisize', { selection });
-        case 'Translate':
+        }
+        case 'Translate': {
           return targetLanguage ? t('prompt_translateTo', { language: targetLanguage, selection }) : '';
+        }
       }
     },
     [t],
@@ -567,7 +572,10 @@ function UserFeedbackModal({
               className="h-7 gap-1.5 px-2 text-xs text-zinc-500 hover:text-red-400"
               aria-label={t('stop')}
             >
-              <Square size={11} className="fill-current" />
+              <Square
+                size={11}
+                className="fill-current"
+              />
               {t('stop')}
             </Button>
           )}
@@ -667,7 +675,7 @@ export default function AIEditorToolkit({ editor, activity, isOpen, onClose }: A
    * the oldest one. This prevents the previous single-ref race condition
    * where a second call would overwrite the first resolver.
    */
-  const resolverQueueRef = useRef<Array<(text: string) => void>>([]);
+  const resolverQueueRef = useRef<((text: string) => void)[]>([]);
 
   const { messages, sendMessage, isLoading, error, clear, stop } = useChat({
     connection: adapter.connection,
@@ -682,8 +690,10 @@ export default function AIEditorToolkit({ editor, activity, isOpen, onClose }: A
 
   // Drain pending resolvers and abort on unmount to prevent leaked promises.
   useEffect(() => {
+    const resolverQueue = resolverQueueRef.current;
+
     return () => {
-      while (resolverQueueRef.current.length) resolverQueueRef.current.shift()?.('');
+      while (resolverQueue.length) resolverQueue.shift()?.('');
     };
   }, []);
 
@@ -701,7 +711,7 @@ export default function AIEditorToolkit({ editor, activity, isOpen, onClose }: A
   // and in-flight streaming preview (for all tools while loading).
   // Both come from the same message — combined into one useMemo.
   const { lastAiResponse, streamingPreview } = useMemo(() => {
-    const lastAssistant = [...messages].reverse().find((m) => m.role === 'assistant');
+    const lastAssistant = [...messages].toReversed().find((m) => m.role === 'assistant');
     const text =
       lastAssistant?.parts
         .filter((p): p is TextPart => p.type === 'text')

@@ -1,25 +1,25 @@
 'use client';
 
 import { useActivityAIChat } from '@components/Contexts/AI/ActivityAIChatContext';
-import { AlertTriangle, BadgeInfo, NotebookTabs, X } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@components/ui/alert';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
+import { AlertTriangle, BadgeInfo, NotebookTabs, X } from 'lucide-react';
 import { AiMessageBubble } from '@components/Shared/AI/AiMessageBubble';
 import { AiChatInput } from '@components/Shared/AI/AiChatInput';
-import { Alert, AlertDescription, AlertTitle } from '@components/ui/alert';
 import platformLogoLight from '@public/platform_logo_light.svg';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { ScrollArea } from '@components/ui/scroll-area';
-import { Separator } from '@components/ui/separator';
-import { Spinner } from '@components/ui/spinner';
 import { AnimatePresence, motion } from 'motion/react';
+import type { KeyboardEvent, ReactNode } from 'react';
+import { Separator } from '@components/ui/separator';
+import type { TextPart } from '@tanstack/ai-client';
+import { Spinner } from '@components/ui/spinner';
 import { Button } from '@components/ui/button';
 import { Badge } from '@components/ui/badge';
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef } from 'react';
-import type { KeyboardEvent, ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
-import type { TextPart } from '@tanstack/ai-client';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -196,9 +196,7 @@ const ActivityChatPanel = () => {
               </div>
 
               {/* Status hint */}
-              {statusMessage && (
-                <p className="mb-2 flex-shrink-0 text-xs text-zinc-500">{statusMessage}</p>
-              )}
+              {statusMessage && <p className="mb-2 flex-shrink-0 text-xs text-zinc-500">{statusMessage}</p>}
 
               {/* Messages area */}
               <div className="mb-3 min-h-0 flex-1 overflow-hidden">
@@ -281,9 +279,7 @@ const ErrorDisplay = ({ errorMessage, onDismiss, t }: ErrorDisplayProps) => (
     >
       <AlertTriangle className="h-4 w-4" />
       <AlertTitle>{t('errorTitle')}</AlertTitle>
-      <AlertDescription className="mt-1">
-        {errorMessage || t('errorTitle')}
-      </AlertDescription>
+      <AlertDescription className="mt-1">{errorMessage || t('errorTitle')}</AlertDescription>
       <div className="mt-3">
         <Button
           variant="outline"
@@ -308,8 +304,7 @@ interface AIMessagePlaceHolderProps {
 const AIMessagePlaceHolder = ({ sendMessage, session }: AIMessagePlaceHolderProps) => {
   const t = useTranslations('Activities.AIActivityAsk');
 
-  const userName =
-    session?.data?.user?.first_name || session?.data?.user?.username || t('defaultUser');
+  const userName = session?.data?.user?.first_name || session?.data?.user?.username || t('defaultUser');
 
   return (
     <div className="flex h-full flex-col items-center justify-center gap-5">

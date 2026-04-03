@@ -32,13 +32,13 @@ import FixedActivitySecondaryBar from '@components/Pages/Activity/FixedActivityS
 import type { Activity, Chapter, CourseStructure } from '@components/Contexts/CourseContext';
 import ActivityChapterDropdown from '@components/Pages/Activity/ActivityChapterDropdown';
 import { AssignmentProvider } from '@components/Contexts/Assignments/AssignmentContext';
+import { ActivityAIChatProvider } from '@components/Contexts/AI/ActivityAIChatContext';
 import GeneralWrapper from '@/components/Objects/Elements/Wrappers/GeneralWrapper';
 import { Suspense, lazy, useEffect, useRef, useState, useTransition } from 'react';
 import ActivityBreadcrumbs from '@components/Pages/Activity/ActivityBreadcrumbs';
 import ActivityIndicators from '@components/Pages/Courses/ActivityIndicators';
 import { getAssignmentFromActivityUUID } from '@services/courses/assignments';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
-import { ActivityAIChatProvider } from '@components/Contexts/AI/ActivityAIChatContext';
 import CourseEndView from '@components/Pages/Activity/CourseEndView';
 import { useFormatter, useLocale, useTranslations } from 'next-intl';
 import ToolTip from '@/components/Objects/Elements/Tooltip/Tooltip';

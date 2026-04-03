@@ -1,8 +1,8 @@
 'use client';
 
+import { AiStreamingCursor } from './AiStreamingCursor';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { AiStreamingCursor } from './AiStreamingCursor';
 import { cn } from '@/lib/utils';
 import hljs from 'highlight.js';
 
@@ -32,9 +32,7 @@ export function AiMarkdownRenderer({ content, isStreaming = false, className }: 
         remarkPlugins={[remarkGfm]}
         components={{
           // ── Headings ─────────────────────────────────────────────────
-          h1: ({ children }) => (
-            <h1 className="mb-3 mt-4 text-base font-bold text-zinc-100 first:mt-0">{children}</h1>
-          ),
+          h1: ({ children }) => <h1 className="mb-3 mt-4 text-base font-bold text-zinc-100 first:mt-0">{children}</h1>,
           h2: ({ children }) => (
             <h2 className="mb-2 mt-3 text-sm font-semibold text-zinc-100 first:mt-0">{children}</h2>
           ),
@@ -46,8 +44,7 @@ export function AiMarkdownRenderer({ content, isStreaming = false, className }: 
           p: ({ children, node }) => {
             // Show the cursor only after the last paragraph — identified by
             // its AST end offset matching the total content length.
-            const isLastParagraph =
-              isStreaming && node?.position?.end?.offset === content.length;
+            const isLastParagraph = isStreaming && node?.position?.end?.offset === content.length;
             return (
               <p className="mb-2 text-sm leading-relaxed text-zinc-200 last:mb-0">
                 {children}
@@ -86,23 +83,16 @@ export function AiMarkdownRenderer({ content, isStreaming = false, className }: 
 
             // Inline code
             return (
-              <code className="rounded bg-zinc-700/60 px-1 py-0.5 font-mono text-xs text-zinc-200">
-                {children}
-              </code>
+              <code className="rounded bg-zinc-700/60 px-1 py-0.5 font-mono text-xs text-zinc-200">{children}</code>
             );
           },
 
           // ── Lists ─────────────────────────────────────────────────────
-          ul: ({ children }) => (
-            <ul className="mb-2 ml-4 list-disc space-y-1 text-sm text-zinc-200">{children}</ul>
-          ),
-          ol: ({ children }) => (
-            <ol className="mb-2 ml-4 list-decimal space-y-1 text-sm text-zinc-200">{children}</ol>
-          ),
+          ul: ({ children }) => <ul className="mb-2 ml-4 list-disc space-y-1 text-sm text-zinc-200">{children}</ul>,
+          ol: ({ children }) => <ol className="mb-2 ml-4 list-decimal space-y-1 text-sm text-zinc-200">{children}</ol>,
           li: ({ children, node }) => {
             // Show cursor inside the last list item when content ends mid-list.
-            const isLastItem =
-              isStreaming && node?.position?.end?.offset === content.length;
+            const isLastItem = isStreaming && node?.position?.end?.offset === content.length;
             return (
               <li className="leading-relaxed">
                 {children}
@@ -113,9 +103,7 @@ export function AiMarkdownRenderer({ content, isStreaming = false, className }: 
 
           // ── Blockquote ────────────────────────────────────────────────
           blockquote: ({ children }) => (
-            <blockquote className="my-2 border-l-2 border-zinc-600 pl-3 italic text-zinc-400">
-              {children}
-            </blockquote>
+            <blockquote className="my-2 border-l-2 border-zinc-600 pl-3 italic text-zinc-400">{children}</blockquote>
           ),
 
           // ── Links ─────────────────────────────────────────────────────

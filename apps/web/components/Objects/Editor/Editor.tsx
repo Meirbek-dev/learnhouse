@@ -63,11 +63,12 @@ const EDITOR_EXTENSIONS = [
   }),
   // other extensions can be added here if needed
 ];
+import { useState } from 'react';
+import type { ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
 import styles from './Editor.module.css';
 import UserAvatar from '../UserAvatar';
-import { useState, type ReactNode } from 'react';
 import { motion } from 'motion/react';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
@@ -85,6 +86,7 @@ interface EditorProps {
 
 const Editor = (props: EditorProps) => {
   const t = useTranslations('DashPage.Editor.Editor');
+  const tWrapper = useTranslations('DashPage.Editor.EditorWrapper');
   const [isAIOpen, setIsAIOpen] = useState(false);
 
   const courseUuid = props.course.course_uuid.slice(7);
@@ -253,11 +255,11 @@ const Editor = (props: EditorProps) => {
               <div className="flex justify-center items-center space-x-2">
                 <div className="rounded-lg border border-border bg-muted px-3 py-2 text-xs font-semibold text-muted-foreground">
                   {props.saveState === 'saving'
-                    ? t('saving')
+                    ? tWrapper('saving')
                     : props.saveState === 'saved'
-                      ? t('saveSuccess')
+                      ? tWrapper('saveSuccess')
                       : props.saveState === 'error'
-                        ? t('saveError')
+                        ? tWrapper('saveError')
                         : t('save')}
                 </div>
                 <div

@@ -1,21 +1,21 @@
 'use client';
 
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
-import { Button } from '@components/ui/button';
-import { Alert, AlertDescription } from '@components/ui/alert';
 import TaskFileObject from '@/app/_shared/dash/assignments/[assignmentuuid]/_components/TaskEditor/Subs/TaskTypes/TaskFileObject';
-import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
-import { Popover, PopoverContent, PopoverTrigger } from '@components/ui/popover';
 import { getAssignmentTaskSubmissionsMe, handleAssignmentTaskSubmission } from '@services/courses/assignments';
 import { AlertCircle, Backpack, Calendar, CheckCircle2, Download, Info, Loader2 } from 'lucide-react';
+import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
+import { Popover, PopoverContent, PopoverTrigger } from '@components/ui/popover';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
+import { Alert, AlertDescription } from '@components/ui/alert';
 import { getTaskRefFileDir } from '@services/media/media';
 import { Card, CardContent } from '@components/ui/card';
 import { Separator } from '@components/ui/separator';
-import { Badge } from '@components/ui/badge';
+import { useEffect, useMemo, useState } from 'react';
+import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
+import { Badge } from '@components/ui/badge';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
-import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
 // Type definitions
@@ -440,7 +440,9 @@ const TaskContent = ({ task, t }: TaskContentProps) => {
 };
 
 const TaskPlaceholder = ({ message }: { message: string }) => (
-  <div className="rounded-lg border border-dashed border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">{message}</div>
+  <div className="rounded-lg border border-dashed border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">
+    {message}
+  </div>
 );
 
 interface InteractiveQuizTaskProps {

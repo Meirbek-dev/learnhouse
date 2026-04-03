@@ -6660,7 +6660,7 @@ export interface components {
       /**
        * Creation Date
        * Format: date-time
-       * @default 2026-04-03T14:41:56.132543
+       * @default 2026-04-03T22:03:00.726113
        */
       creation_date: string;
       /**
@@ -6679,7 +6679,7 @@ export interface components {
       /**
        * Update Date
        * Format: date-time
-       * @default 2026-04-03T14:41:56.132582
+       * @default 2026-04-03T22:03:00.726151
        */
       update_date: string;
     };
@@ -7109,7 +7109,9 @@ export interface components {
      */
     QuestionUpdate: {
       /** Answer Options */
-      answer_options?: Record<string, unknown>[] | null;
+      answer_options?:
+        | Record<string, unknown>[]
+        | null;
       /** Explanation */
       explanation?: string | null;
       /** Order Index */
@@ -7428,7 +7430,9 @@ export interface components {
       execution_mode?: components['schemas']['ExecutionMode'] | null;
       grading_strategy?: components['schemas']['GradingStrategy'] | null;
       /** Hidden Tests */
-      hidden_tests?: Record<string, unknown>[] | null;
+      hidden_tests?:
+        | Record<string, unknown>[]
+        | null;
       /** Memory Limit */
       memory_limit?: number | null;
       /** Points */
@@ -7438,7 +7442,9 @@ export interface components {
       /** Time Limit */
       time_limit?: number | null;
       /** Visible Tests */
-      visible_tests?: Record<string, unknown>[] | null;
+      visible_tests?:
+        | Record<string, unknown>[]
+        | null;
     };
     /** StartActivityAIChatSession */
     StartActivityAIChatSession: {

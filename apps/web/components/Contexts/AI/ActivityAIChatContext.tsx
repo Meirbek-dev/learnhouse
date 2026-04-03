@@ -9,20 +9,12 @@
  * without prop drilling.
  */
 
-import { useChat } from '@tanstack/ai-react';
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type PropsWithChildren,
-} from 'react';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import type { PropsWithChildren } from 'react';
 import { createActivityChatAdapter } from '@services/ai/activity-chat-adapter';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import type { UseChatReturn } from '@tanstack/ai-react';
+import { useChat } from '@tanstack/ai-react';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -45,10 +37,7 @@ const ActivityAIChatContext = createContext<ActivityAIChatContextValue | null>(n
 
 // ── Provider ──────────────────────────────────────────────────────────────────
 
-export function ActivityAIChatProvider({
-  activityUuid,
-  children,
-}: PropsWithChildren<{ activityUuid: string }>) {
+export function ActivityAIChatProvider({ activityUuid, children }: PropsWithChildren<{ activityUuid: string }>) {
   const session = usePlatformSession();
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -114,7 +103,6 @@ export function ActivityAIChatProvider({
 
   const value = useMemo(
     () => ({ ...chat, statusMessage, isModalOpen, openModal, setIsModalOpen, inputValue, setInputValue }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [chat, statusMessage, isModalOpen, openModal, inputValue],
   );
 
