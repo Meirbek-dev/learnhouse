@@ -14,6 +14,7 @@ from typing import Any, Literal
 from pydantic import Field
 
 from src.db.strict_base_model import PydanticStrictBaseModel
+from src.db.grading.submissions import ItemFeedback
 
 # ── Quiz ──────────────────────────────────────────────────────────────────────
 
@@ -100,3 +101,38 @@ class CodeChallengeSubmissionPayload(PydanticStrictBaseModel):
         "PARTIAL_CREDIT",
     ] = "BEST_SUBMISSION"
     source_code: str | None = None  # Stored for teacher review, not graded directly
+
+
+# ── Teacher batch grading ────────────────────────────────────────────────────
+
+
+class BatchGradeItem(PydanticStrictBaseModel):
+    """Single submission grade payload for batch teacher grading."""
+
+    submission_uuid: str
+    final_score: float = Field(..., ge=0, le=100)
+    status: Literal["GRADED", "PUBLISHED", "RETURNED"]
+    feedback: str | None = None
+    item_feedback: list[ItemFeedback] | None = None
+
+
+class BatchGradeRequest(PydanticStrictBaseModel):
+    """Batch teacher grading request."""
+
+    grades: list[BatchGradeItem] = Field(min_length=1, max_length=100)
+
+
+class BatchGradeResultItem(PydanticStrictBaseModel):
+    """Per-submission batch grading result."""
+
+    submission_uuid: str
+    success: bool
+    error: str | None = None
+
+
+class BatchGradeResponse(PydanticStrictBaseModel):
+    """Batch teacher grading response."""
+
+    results: list[BatchGradeResultItem] = Field(default_factory=list)
+    succeeded: int = 0
+    failed: int = 0

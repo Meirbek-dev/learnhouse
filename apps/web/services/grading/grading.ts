@@ -4,7 +4,15 @@
  * Grading API service — v2.
  */
 
-import type { AssessmentType, Submission, SubmissionsPage, SubmissionStats, TeacherGradeInput } from '@/types/grading';
+import type {
+  AssessmentType,
+  BatchGradeItem,
+  BatchGradeResponse,
+  Submission,
+  SubmissionsPage,
+  SubmissionStats,
+  TeacherGradeInput,
+} from '@/types/grading';
 import { RequestBodyWithAuthHeader, getResponseMetadata } from '@services/utils/ts/requests';
 import { getServerAPIUrl } from '@services/config/config';
 import { revalidateTag } from 'next/cache';
@@ -114,6 +122,16 @@ export async function saveGrade(
 
   revalidateTag('submissions', 'max');
   return meta.data as Submission;
+}
+
+export async function batchGradeSubmissions(grades: BatchGradeItem[], accessToken: string): Promise<BatchGradeResponse> {
+  const url = `${API()}grading/submissions/batch`;
+  const res = await fetch(url, RequestBodyWithAuthHeader('PATCH', { grades }, null, accessToken));
+  const meta = await getResponseMetadata(res);
+  if (!meta.success) throw new Error(meta.data?.detail ?? 'Failed to submit batch grades');
+
+  revalidateTag('submissions', 'max');
+  return meta.data as BatchGradeResponse;
 }
 
 /**

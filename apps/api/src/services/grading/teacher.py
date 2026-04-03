@@ -14,6 +14,11 @@ from sqlmodel import Session, select
 
 from src.db.courses.activities import Activity
 from src.db.gamification import XPSource
+from src.db.grading.schemas import (
+    BatchGradeRequest,
+    BatchGradeResponse,
+    BatchGradeResultItem,
+)
 from src.db.grading.submissions import (
     AssessmentType,
     GradedItem,
@@ -401,25 +406,7 @@ async def save_grade(
     db_session: Session,
 ) -> SubmissionRead:
     """Apply a teacher-entered final score and optional per-item feedback."""
-    submission = db_session.exec(
-        select(Submission).where(Submission.submission_uuid == submission_uuid)
-    ).first()
-
-    if not submission:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Submission not found",
-        )
-
-    activity = db_session.exec(
-        select(Activity).where(Activity.id == submission.activity_id)
-    ).first()
-
-    if not activity:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Activity not found",
-        )
+    submission, activity = _get_submission_with_activity(submission_uuid, db_session)
 
     checker = PermissionChecker(db_session)
     checker.require(
@@ -427,6 +414,127 @@ async def save_grade(
         "assignment:grade",
         resource_owner_id=activity.creator_id,
     )
+
+    return _save_teacher_grade(
+        submission=submission,
+        grade_input=grade_input,
+        submission_uuid=submission_uuid,
+        db_session=db_session,
+    )
+
+
+async def batch_grade_submissions(
+    batch_request: BatchGradeRequest,
+    current_user: PublicUser,
+    db_session: Session,
+) -> BatchGradeResponse:
+    """Apply teacher grades to multiple submissions in one request."""
+    if len(batch_request.grades) > 100:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Batch grading supports at most 100 submissions per request",
+        )
+
+    requested_uuids = [grade.submission_uuid for grade in batch_request.grades]
+    rows = db_session.exec(
+        select(Submission, Activity)
+        .join(Activity, Activity.id == Submission.activity_id)
+        .where(Submission.submission_uuid.in_(requested_uuids))
+    ).all()
+
+    submissions_by_uuid = {
+        submission.submission_uuid: (submission, activity)
+        for submission, activity in rows
+    }
+    missing_uuids = [uuid for uuid in requested_uuids if uuid not in submissions_by_uuid]
+    if missing_uuids:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail={
+                "message": "One or more submission UUIDs are invalid or inaccessible",
+                "submission_uuids": missing_uuids,
+            },
+        )
+
+    checker = PermissionChecker(db_session)
+    unauthorized_uuids = [
+        submission_uuid
+        for submission_uuid, (_, activity) in submissions_by_uuid.items()
+        if not checker.check(
+            current_user.id,
+            "assignment:grade",
+            resource_owner_id=activity.creator_id,
+        )
+    ]
+    if unauthorized_uuids:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail={
+                "message": "One or more submission UUIDs are not owned by the requesting teacher",
+                "submission_uuids": unauthorized_uuids,
+            },
+        )
+
+    results: list[BatchGradeResultItem] = []
+    succeeded = 0
+    failed = 0
+
+    for grade in batch_request.grades:
+        submission, _activity = submissions_by_uuid[grade.submission_uuid]
+        try:
+            grade_input = TeacherGradeInput(
+                final_score=grade.final_score,
+                status=grade.status,
+                feedback=grade.feedback or "",
+                item_feedback=grade.item_feedback or [],
+            )
+            _save_teacher_grade(
+                submission=submission,
+                grade_input=grade_input,
+                submission_uuid=grade.submission_uuid,
+                db_session=db_session,
+            )
+            results.append(
+                BatchGradeResultItem(
+                    submission_uuid=grade.submission_uuid,
+                    success=True,
+                )
+            )
+            succeeded += 1
+        except HTTPException as exc:
+            results.append(
+                BatchGradeResultItem(
+                    submission_uuid=grade.submission_uuid,
+                    success=False,
+                    error=_stringify_http_exception_detail(exc.detail),
+                )
+            )
+            failed += 1
+        except Exception as exc:  # noqa: BLE001
+            logger.exception(
+                "Unexpected batch grading failure for submission %s",
+                grade.submission_uuid,
+            )
+            results.append(
+                BatchGradeResultItem(
+                    submission_uuid=grade.submission_uuid,
+                    success=False,
+                    error=str(exc),
+                )
+            )
+            failed += 1
+
+    return BatchGradeResponse(results=results, succeeded=succeeded, failed=failed)
+
+
+def _save_teacher_grade(
+    *,
+    submission: Submission,
+    grade_input: TeacherGradeInput,
+    submission_uuid: str,
+    db_session: Session,
+) -> SubmissionRead:
+    """Persist a teacher-entered grade after the caller has validated access."""
 
     # Validate status transition against the state machine.
     requested_status = SubmissionStatus(grade_input.status)
@@ -514,6 +622,34 @@ async def save_grade(
         )
 
     return SubmissionRead.model_validate(submission)
+
+
+def _get_submission_with_activity(
+    submission_uuid: str,
+    db_session: Session,
+) -> tuple[Submission, Activity]:
+    row = db_session.exec(
+        select(Submission, Activity)
+        .join(Activity, Activity.id == Submission.activity_id)
+        .where(Submission.submission_uuid == submission_uuid)
+    ).first()
+    if not row:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Submission not found",
+        )
+    return row
+
+
+def _stringify_http_exception_detail(detail: object) -> str:
+    if isinstance(detail, dict):
+        message = detail.get("message")
+        if isinstance(message, str) and message:
+            return message
+        return str(detail)
+    if isinstance(detail, list):
+        return "; ".join(str(item) for item in detail)
+    return str(detail)
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────

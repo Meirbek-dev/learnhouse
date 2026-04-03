@@ -15,6 +15,7 @@ from fastapi.responses import StreamingResponse
 from sqlmodel import Session
 
 from src.core.events.database import get_db_session
+from src.db.grading.schemas import BatchGradeRequest, BatchGradeResponse
 from src.db.grading.submissions import (
     SubmissionListResponse,
     SubmissionRead,
@@ -24,6 +25,7 @@ from src.db.grading.submissions import (
 from src.db.users import PublicUser
 from src.security.auth import get_current_user
 from src.services.grading.teacher import (
+    batch_grade_submissions,
     export_grades_csv,
     get_submission_for_teacher,
     get_submission_stats,
@@ -109,6 +111,20 @@ def api_export_submissions_csv(
         headers={
             "Content-Disposition": f"attachment; filename=grades-activity-{activity_id}.csv"
         },
+    )
+
+
+@router.patch("/submissions/batch", response_model=BatchGradeResponse)
+async def api_batch_grade_submissions(
+    batch_request: BatchGradeRequest,
+    db_session: Annotated[Session, Depends(get_db_session)],
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
+) -> BatchGradeResponse:
+    """Save teacher grades for multiple submissions in a single request."""
+    return await batch_grade_submissions(
+        batch_request=batch_request,
+        current_user=current_user,
+        db_session=db_session,
     )
 
 

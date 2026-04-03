@@ -15,14 +15,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerDescription,
-  DrawerFooter,
-} from '@/components/ui/drawer';
+import { Drawer, DrawerContent, DrawerTitle } from '@/components/ui/drawer';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
@@ -33,11 +26,11 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 import type { GradedItem, ItemFeedback, Submission, TeacherGradeInput } from '@/types/grading';
+import { canTeacherEditGrade } from '@/types/grading';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import SubmissionStatusBadge from './SubmissionStatusBadge';
 import { useGradingPanel } from '@/hooks/useGradingPanel';
 import { saveGrade } from '@services/grading/grading';
-import { needsTeacherAction } from '@/types/grading';
 
 interface GradingPanelProps {
   submissionUuid: string | null;
@@ -47,116 +40,275 @@ interface GradingPanelProps {
   onNavigate?: (uuid: string) => void;
 }
 
-type ItemFeedbackMap = Record<string, { score: string; feedback: string }>;
+export type ItemFeedbackMap = Record<string, { score: string; feedback: string }>;
 
-export default function GradingPanel({
-  submissionUuid,
-  allSubmissionUuids,
-  onClose,
-  onGradeSaved,
-  onNavigate,
-}: GradingPanelProps) {
+export interface GradingDraftState {
+  score: string;
+  feedback: string;
+  itemFeedbacks: ItemFeedbackMap;
+}
+
+export function createItemFeedbackMap(items: GradedItem[] = []): ItemFeedbackMap {
+  const map: ItemFeedbackMap = {};
+  for (const item of items) {
+    map[item.item_id] = {
+      score: item.score !== null ? String(item.score) : '',
+      feedback: item.feedback ?? '',
+    };
+  }
+  return map;
+}
+
+export function createGradingDraftState(submission: Submission | null | undefined): GradingDraftState {
+  if (!submission) {
+    return { score: '', feedback: '', itemFeedbacks: {} };
+  }
+
+  return {
+    score: submission.final_score !== null ? String(submission.final_score) : '',
+    feedback: submission.grading_json?.feedback ?? '',
+    itemFeedbacks: createItemFeedbackMap(submission.grading_json?.items ?? []),
+  };
+}
+
+export function buildChangedItemFeedbacks(current: ItemFeedbackMap, initial: ItemFeedbackMap): ItemFeedback[] {
+  return Object.entries(current)
+    .filter(([itemId, value]) => {
+      const initialValue = initial[itemId] ?? { score: '', feedback: '' };
+      return value.score !== initialValue.score || value.feedback !== initialValue.feedback;
+    })
+    .map(([item_id, value]) => ({
+      item_id,
+      score: value.score !== '' ? Number.parseFloat(value.score) : undefined,
+      feedback: value.feedback,
+    }));
+}
+
+export function parseDraftScore(score: string): number | null {
+  if (score === '') return null;
+  const parsed = Number.parseFloat(score);
+  if (Number.isNaN(parsed) || parsed < 0 || parsed > 100) {
+    return null;
+  }
+  return parsed;
+}
+
+export function isDraftDirty(current: GradingDraftState, initial: GradingDraftState): boolean {
+  if (current.score !== initial.score) return true;
+  if (current.feedback !== initial.feedback) return true;
+
+  const itemIds = new Set([...Object.keys(initial.itemFeedbacks), ...Object.keys(current.itemFeedbacks)]);
+  for (const itemId of itemIds) {
+    const currentValue = current.itemFeedbacks[itemId] ?? { score: '', feedback: '' };
+    const initialValue = initial.itemFeedbacks[itemId] ?? { score: '', feedback: '' };
+    if (currentValue.score !== initialValue.score || currentValue.feedback !== initialValue.feedback) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+export function getSubmissionDisplayName(submission: Submission | null | undefined): string {
+  if (!submission?.user) return '—';
+  return (
+    [submission.user.first_name, submission.user.middle_name, submission.user.last_name].filter(Boolean).join(' ') ||
+    `@${submission.user.username}`
+  );
+}
+
+function getScoreInvalid(score: string): boolean {
+  return score !== '' && parseDraftScore(score) === null;
+}
+
+interface GradingEditorProps {
+  submission: Submission | null;
+  isLoading: boolean;
+  draft: GradingDraftState;
+  onScoreChange: (value: string) => void;
+  onFeedbackChange: (value: string) => void;
+  onItemFeedbackChange: (itemId: string, field: 'score' | 'feedback', value: string) => void;
+  t: ReturnType<typeof useTranslations<'Grading.Panel'>>;
+}
+
+export function GradingEditor({
+  submission,
+  isLoading,
+  draft,
+  onScoreChange,
+  onFeedbackChange,
+  onItemFeedbackChange,
+  t,
+}: GradingEditorProps) {
+  const scoreInvalid = getScoreInvalid(draft.score);
+
+  const autoSumScore = useMemo(() => {
+    const items = submission?.grading_json?.items ?? [];
+    if (!items.length) return null;
+    const totalMax = items.reduce((sum, item) => sum + item.max_score, 0);
+    if (!totalMax) return null;
+
+    const totalScore = items.reduce((sum, item) => {
+      const raw = draft.itemFeedbacks[item.item_id]?.score;
+      const parsed = raw !== undefined && raw !== '' ? Number.parseFloat(raw) : item.score;
+      return sum + (Number.isNaN(parsed) ? 0 : parsed);
+    }, 0);
+
+    return Math.round((totalScore / totalMax) * 100 * 100) / 100;
+  }, [draft.itemFeedbacks, submission?.grading_json?.items]);
+
+  return (
+    <>
+      <div className="border-b px-6 py-4 space-y-4">
+        <div className="flex items-end gap-6 pt-1 flex-wrap">
+          <div className="space-y-1.5">
+            <Label
+              htmlFor="final-score"
+              className="text-sm font-medium"
+            >
+              {t('finalScore')}
+            </Label>
+            <div className="flex items-center gap-2">
+              <Input
+                id="final-score"
+                type="number"
+                min={0}
+                max={100}
+                step={0.5}
+                placeholder="0–100"
+                value={draft.score}
+                onChange={(event) => onScoreChange(event.target.value)}
+                className={cn(
+                  'w-28 text-center font-semibold',
+                  scoreInvalid && 'border-destructive focus-visible:ring-destructive',
+                )}
+              />
+              <span className="text-sm text-muted-foreground">/ 100</span>
+            </div>
+            {scoreInvalid ? <p className="text-xs text-destructive">{t('invalidScore')}</p> : null}
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            {submission?.auto_score !== null && submission?.auto_score !== undefined ? (
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground">
+                  {t('autoScore')}: <strong>{submission.auto_score}/100</strong>
+                </span>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 gap-1 px-2 text-xs"
+                  onClick={() => onScoreChange(String(submission.auto_score))}
+                >
+                  <Wand2 className="h-3 w-3" />
+                  {t('useAutoScore')}
+                </Button>
+              </div>
+            ) : null}
+
+            {autoSumScore !== null ? (
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground">
+                  {t('autoSum')}: <strong>{autoSumScore}/100</strong>
+                </span>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 gap-1 px-2 text-xs"
+                  onClick={() => onScoreChange(String(autoSumScore))}
+                >
+                  <Wand2 className="h-3 w-3" />
+                  {t('useAutoSum')}
+                </Button>
+              </div>
+            ) : null}
+          </div>
+        </div>
+      </div>
+
+      <ScrollArea className="flex-1 px-6 py-4">
+        {isLoading ? (
+          <div className="flex h-32 items-center justify-center text-sm text-muted-foreground">{t('loading')}</div>
+        ) : submission ? (
+          <SubmissionAnswers
+            submission={submission}
+            itemFeedbacks={draft.itemFeedbacks}
+            onItemFeedbackChange={onItemFeedbackChange}
+            t={t}
+          />
+        ) : (
+          <div className="flex h-32 items-center justify-center text-sm text-muted-foreground">{t('noData')}</div>
+        )}
+      </ScrollArea>
+
+      <div className="border-t bg-muted px-6 py-4 gap-4">
+        <div className="space-y-1.5">
+          <Label
+            htmlFor="feedback"
+            className="text-sm font-medium"
+          >
+            {t('feedback')} <span className="text-muted-foreground font-normal">({t('optional')})</span>
+          </Label>
+          <Textarea
+            id="feedback"
+            rows={2}
+            placeholder={t('feedbackPlaceholder')}
+            value={draft.feedback}
+            onChange={(event) => onFeedbackChange(event.target.value)}
+          />
+        </div>
+      </div>
+    </>
+  );
+}
+
+export default function GradingPanel({ submissionUuid, allSubmissionUuids, onClose, onGradeSaved, onNavigate }: GradingPanelProps) {
   const t = useTranslations('Grading.Panel');
   const session = usePlatformSession();
   const accessToken = session?.data?.tokens?.access_token ?? '';
 
   const { submission, isLoading, mutate } = useGradingPanel(submissionUuid);
 
-  const [score, setScore] = useState('');
-  const [feedback, setFeedback] = useState('');
-  const [itemFeedbacks, setItemFeedbacks] = useState<ItemFeedbackMap>({});
+  const [draft, setDraft] = useState<GradingDraftState>({ score: '', feedback: '', itemFeedbacks: {} });
   const [isSaving, setIsSaving] = useState(false);
+  const initialRef = useRef<GradingDraftState>({ score: '', feedback: '', itemFeedbacks: {} });
 
-  // Dirty-state tracking.
-  // We store the last-saved values in a ref so SWR revalidation never resets isDirty.
-  // dirtyVersion is bumped after a successful save to force the memo to recompute.
-  const initialRef = useRef<{ score: string; feedback: string; items: ItemFeedbackMap }>({
-    score: '',
-    feedback: '',
-    items: {},
-  });
-  const [dirtyVersion, setDirtyVersion] = useState(0);
-
-  // Unsaved-changes navigation guard
   const [pendingNavigate, setPendingNavigate] = useState<string | null>(null);
   const [pendingClose, setPendingClose] = useState(false);
-
-  // Confirmation dialogs for destructive actions
   const [publishOpen, setPublishOpen] = useState(false);
   const [returnOpen, setReturnOpen] = useState(false);
 
-  // Effect 1: reset everything when a different submission is opened (uuid changes).
   useEffect(() => {
-    setScore('');
-    setFeedback('');
-    setItemFeedbacks({});
-    initialRef.current = { score: '', feedback: '', items: {} };
-    setDirtyVersion(0);
-  }, [submissionUuid]);
+    const initialDraft = createGradingDraftState(submission);
+    setDraft(initialDraft);
+    initialRef.current = initialDraft;
+  }, [submission?.id, submissionUuid, submission]);
 
-  // Effect 2: pre-fill form from loaded data. Keyed on submission.id so that SWR
-  // revalidation (same id, same uuid) does NOT re-run and wipe in-progress edits.
-  const submissionId = submission?.id;
-  useEffect(() => {
-    if (!submission) return;
-    const s = submission.final_score !== null ? String(submission.final_score) : '';
-    const fb = submission.grading_json?.feedback ?? '';
-    const items: ItemFeedbackMap = {};
-    for (const item of submission.grading_json?.items ?? []) {
-      items[item.item_id] = {
-        score: item.score !== null ? String(item.score) : '',
-        feedback: item.feedback ?? '',
-      };
-    }
-    setScore(s);
-    setFeedback(fb);
-    setItemFeedbacks(items);
-    initialRef.current = { score: s, feedback: fb, items };
-    setDirtyVersion(0);
-  }, [
-    submissionId,
-    submissionUuid,
-    submission,
-    submission?.final_score,
-    submission?.grading_json?.feedback,
-    submission?.grading_json?.items,
-  ]);
+  const isDirty = useMemo(() => isDraftDirty(draft, initialRef.current), [draft]);
+  const scoreInvalid = getScoreInvalid(draft.score);
 
-  // isDirty: compares current state against last-saved ref values.
-  // dirtyVersion in deps allows the memo to recompute after a save bumps it.
-  const isDirty = useMemo(() => {
-    void dirtyVersion;
-    if (score !== initialRef.current.score) return true;
-    if (feedback !== initialRef.current.feedback) return true;
-
-    const itemIds = new Set([...Object.keys(initialRef.current.items), ...Object.keys(itemFeedbacks)]);
-    for (const id of itemIds) {
-      const current = itemFeedbacks[id] ?? { score: '', feedback: '' };
-      const saved = initialRef.current.items[id] ?? { score: '', feedback: '' };
-      if (current.score !== saved.score || current.feedback !== saved.feedback) return true;
-    }
-
-    return false;
-  }, [score, feedback, itemFeedbacks, dirtyVersion]);
-
-  // Navigation helpers with unsaved-changes guard
   const currentIndex = submissionUuid ? allSubmissionUuids.indexOf(submissionUuid) : -1;
   const hasPrev = currentIndex > 0;
-  const hasNext = currentIndex < allSubmissionUuids.length - 1;
+  const hasNext = currentIndex >= 0 && currentIndex < allSubmissionUuids.length - 1;
 
-  function tryNavigate(uuid: string) {
-    if (isSaving || publishOpen || returnOpen) {
-      return;
-    }
+  const tryNavigate = useCallback(
+    (uuid: string) => {
+      if (isSaving || publishOpen || returnOpen) {
+        return;
+      }
 
-    if (isDirty) {
-      setPendingNavigate(uuid);
-    } else {
-      onNavigate?.(uuid);
-    }
-  }
+      if (isDirty) {
+        setPendingNavigate(uuid);
+      } else {
+        onNavigate?.(uuid);
+      }
+    },
+    [isDirty, isSaving, onNavigate, publishOpen, returnOpen],
+  );
 
-  function tryClose() {
+  const tryClose = useCallback(() => {
     if (isSaving || publishOpen || returnOpen) {
       return;
     }
@@ -166,11 +318,9 @@ export default function GradingPanel({
     } else {
       onClose();
     }
-  }
+  }, [isDirty, isSaving, onClose, publishOpen, returnOpen]);
 
-  const unsavedOpen = (pendingNavigate !== null || pendingClose) && !isSaving && !publishOpen && !returnOpen;
-
-  function handleDiscardAndContinue() {
+  const handleDiscardAndContinue = useCallback(() => {
     if (pendingNavigate) {
       onNavigate?.(pendingNavigate);
       setPendingNavigate(null);
@@ -181,58 +331,30 @@ export default function GradingPanel({
 
     setPublishOpen(false);
     setReturnOpen(false);
-  }
+  }, [onClose, onNavigate, pendingNavigate]);
 
-  function handleCancelDiscard() {
+  const handleCancelDiscard = useCallback(() => {
     setPendingNavigate(null);
     setPendingClose(false);
     setPublishOpen(false);
     setReturnOpen(false);
-  }
-
-  // Score validation
-  const scoreNum = Number.parseFloat(score);
-  const scoreInvalid = score !== '' && (Number.isNaN(scoreNum) || scoreNum < 0 || scoreNum > 100);
-
-  // Auto-sum score: Σ(item.score) / Σ(item.max_score) × 100
-  // Uses teacher-entered per-item values if present, otherwise falls back to auto-graded scores.
-  const autoSumScore = useMemo(() => {
-    const items = submission?.grading_json?.items ?? [];
-    if (!items.length) return null;
-    const totalMax = items.reduce((sum, it) => sum + it.max_score, 0);
-    if (!totalMax) return null;
-    const totalScore = items.reduce((sum, it) => {
-      const raw = itemFeedbacks[it.item_id]?.score;
-      const s = raw !== undefined && raw !== '' ? Number.parseFloat(raw) : it.score;
-      return sum + (Number.isNaN(s) ? 0 : s);
-    }, 0);
-    return Math.round((totalScore / totalMax) * 100 * 100) / 100;
-  }, [submission?.grading_json?.items, itemFeedbacks]);
+  }, []);
 
   const handleSaveGrade = useCallback(
-    async (status: 'GRADED' | 'PUBLISHED' | 'RETURNED') => {
+    async (status: TeacherGradeInput['status']) => {
       if (!submissionUuid || !accessToken) return;
-      if (scoreInvalid || score === '') {
+
+      const score = parseDraftScore(draft.score);
+      if (scoreInvalid || score === null) {
         toast.error(t('invalidScore'));
         return;
       }
 
-      const item_feedback: ItemFeedback[] = Object.entries(itemFeedbacks)
-        .filter(([item_id, val]) => {
-          const initial = initialRef.current.items[item_id] ?? { score: '', feedback: '' };
-          return val.score !== initial.score || val.feedback !== initial.feedback;
-        })
-        .map(([item_id, val]) => ({
-          item_id,
-          score: val.score !== '' ? Number.parseFloat(val.score) : undefined,
-          feedback: val.feedback,
-        }));
-
       const input: TeacherGradeInput = {
-        final_score: scoreNum,
+        final_score: score,
         status,
-        feedback,
-        item_feedback,
+        feedback: draft.feedback,
+        item_feedback: buildChangedItemFeedbacks(draft.itemFeedbacks, initialRef.current.itemFeedbacks),
       };
 
       setIsSaving(true);
@@ -241,37 +363,32 @@ export default function GradingPanel({
         const msgKey = status === 'PUBLISHED' ? 'gradePublished' : status === 'RETURNED' ? 'returned' : 'gradeSaved';
         toast.success(t(msgKey));
 
-        // Reset navigation guard and close confirmation dialogs to avoid stale modal overlap.
+        const nextInitial = createGradingDraftState(updated);
+        initialRef.current = nextInitial;
+        setDraft(nextInitial);
+
         setPendingNavigate(null);
         setPendingClose(false);
         setPublishOpen(false);
         setReturnOpen(false);
 
-        // Mark form clean by updating the ref and bumping dirtyVersion.
-        initialRef.current = { score, feedback, items: { ...itemFeedbacks } };
-        setDirtyVersion((v) => v + 1);
-
         onGradeSaved?.(updated);
-        mutate();
+        void mutate();
       } catch {
         toast.error(t('saveFailed'));
       } finally {
         setIsSaving(false);
       }
     },
-    [submissionUuid, accessToken, score, scoreNum, scoreInvalid, feedback, itemFeedbacks, t, onGradeSaved, mutate],
+    [accessToken, draft, mutate, onGradeSaved, scoreInvalid, submissionUuid, t],
   );
 
-  const studentName = submission?.user
-    ? [submission.user.first_name, submission.user.middle_name, submission.user.last_name].filter(Boolean).join(' ') ||
-      `@${submission.user.username}`
-    : '—';
-
-  const canSave = !isSaving && score !== '' && !scoreInvalid;
+  const studentName = getSubmissionDisplayName(submission);
+  const canSave = !isSaving && draft.score !== '' && !scoreInvalid;
+  const unsavedOpen = (pendingNavigate !== null || pendingClose) && !isSaving && !publishOpen && !returnOpen;
 
   return (
     <>
-      {/* Unsaved-changes confirmation dialog */}
       <AlertDialog
         open={unsavedOpen}
         onOpenChange={(open) => !open && handleCancelDiscard()}
@@ -297,40 +414,39 @@ export default function GradingPanel({
           className="flex flex-col p-0"
           style={{ maxWidth: '48rem' }}
         >
-          {/* Header — always visible, contains score entry */}
-          <DrawerHeader className="border-b px-6 py-4 gap-0 space-y-3">
-            {/* Student name + status + late badge */}
+          <DrawerTitle className="sr-only">{t('title')}</DrawerTitle>
+          <div className="border-b px-6 py-4 space-y-3">
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2 flex-1 min-w-0">
-                <DrawerTitle className="text-base truncate">{studentName}</DrawerTitle>
-                {submission?.is_late && (
+                <h2 className="text-base font-semibold truncate">{studentName}</h2>
+                {submission?.is_late ? (
                   <Badge
                     variant="outline"
                     className="shrink-0 border-destructive bg-destructive/20 text-destructive text-xs"
                   >
                     {t('late')}
                   </Badge>
-                )}
+                ) : null}
               </div>
-              {submission && <SubmissionStatusBadge status={submission.status} />}
+              {submission ? <SubmissionStatusBadge status={submission.status} /> : null}
             </div>
 
-            {/* Meta: attempt + submitted date */}
-            <DrawerDescription className="text-xs">
+            <p className="text-xs text-muted-foreground">
               {t('attempt')} #{submission?.attempt_number ?? '—'} ·{' '}
               {submission?.submitted_at ? new Date(submission.submitted_at).toLocaleString() : t('notYetSubmitted')}
-            </DrawerDescription>
+            </p>
 
-            {/* Navigation buttons */}
-            {allSubmissionUuids.length > 1 && (
+            {allSubmissionUuids.length > 1 ? (
               <div className="flex items-center gap-2">
                 <Button
                   variant="outline"
                   size="sm"
                   disabled={!hasPrev}
                   onClick={() => {
-                    const prevUuid = allSubmissionUuids[currentIndex - 1];
-                    if (prevUuid) tryNavigate(prevUuid);
+                    const previousUuid = allSubmissionUuids[currentIndex - 1];
+                    if (previousUuid) {
+                      tryNavigate(previousUuid);
+                    }
                   }}
                 >
                   <ChevronLeft className="h-4 w-4" />
@@ -345,133 +461,40 @@ export default function GradingPanel({
                   disabled={!hasNext}
                   onClick={() => {
                     const nextUuid = allSubmissionUuids[currentIndex + 1];
-                    if (nextUuid) tryNavigate(nextUuid);
+                    if (nextUuid) {
+                      tryNavigate(nextUuid);
+                    }
                   }}
                 >
                   {t('next')}
                   <ChevronRight className="h-4 w-4" />
                 </Button>
               </div>
-            )}
+            ) : null}
+          </div>
 
-            <Separator />
+          <GradingEditor
+            submission={submission}
+            isLoading={isLoading}
+            draft={draft}
+            onScoreChange={(value) => setDraft((current) => ({ ...current, score: value }))}
+            onFeedbackChange={(value) => setDraft((current) => ({ ...current, feedback: value }))}
+            onItemFeedbackChange={(itemId, field, value) =>
+              setDraft((current) => ({
+                ...current,
+                itemFeedbacks: {
+                  ...current.itemFeedbacks,
+                  [itemId]: { ...(current.itemFeedbacks[itemId] ?? { score: '', feedback: '' }), [field]: value },
+                },
+              }))
+            }
+            t={t}
+          />
 
-            {/* Score entry — always visible without scrolling */}
-            <div className="flex items-end gap-6 pt-1">
-              <div className="space-y-1.5">
-                <Label
-                  htmlFor="final-score"
-                  className="text-sm font-medium"
-                >
-                  {t('finalScore')}
-                </Label>
-                <div className="flex items-center gap-2">
-                  <Input
-                    id="final-score"
-                    type="number"
-                    min={0}
-                    max={100}
-                    step={0.5}
-                    placeholder="0–100"
-                    value={score}
-                    onChange={(e) => setScore(e.target.value)}
-                    className={cn(
-                      'w-28 text-center font-semibold',
-                      scoreInvalid && 'border-destructive focus-visible:ring-destructive',
-                    )}
-                  />
-                  <span className="text-sm text-muted-foreground">/ 100</span>
-                </div>
-                {scoreInvalid && <p className="text-xs text-destructive">{t('invalidScore')}</p>}
-              </div>
-
-              {/* Auto-score reference + one-click fill buttons */}
-              <div className="flex flex-col gap-1.5">
-                {(() => {
-                  const autoScore = submission?.auto_score ?? null;
-                  if (autoScore === null) return null;
-                  return (
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-muted-foreground">
-                        {t('autoScore')}: <strong>{autoScore}/100</strong>
-                      </span>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="h-6 gap-1 px-2 text-xs"
-                        onClick={() => setScore(String(autoScore))}
-                      >
-                        <Wand2 className="h-3 w-3" />
-                        {t('useAutoScore')}
-                      </Button>
-                    </div>
-                  );
-                })()}
-                {autoSumScore !== null && (
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-muted-foreground">
-                      {t('autoSum')}: <strong>{autoSumScore}/100</strong>
-                    </span>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="h-6 gap-1 px-2 text-xs"
-                      onClick={() => setScore(String(autoSumScore))}
-                    >
-                      <Wand2 className="h-3 w-3" />
-                      {t('useAutoSum')}
-                    </Button>
-                  </div>
-                )}
-              </div>
-            </div>
-          </DrawerHeader>
-
-          {/* Scrollable body — answers with per-item scoring */}
-          <ScrollArea className="flex-1 px-6 py-4">
-            {isLoading ? (
-              <div className="flex h-32 items-center justify-center text-sm text-muted-foreground">{t('loading')}</div>
-            ) : submission ? (
-              <SubmissionAnswers
-                submission={submission}
-                itemFeedbacks={itemFeedbacks}
-                onItemFeedbackChange={(itemId, field, value) =>
-                  setItemFeedbacks((prev) => ({
-                    ...prev,
-                    [itemId]: { ...(prev[itemId] ?? { score: '', feedback: '' }), [field]: value },
-                  }))
-                }
-                t={t}
-              />
-            ) : (
-              <div className="flex h-32 items-center justify-center text-sm text-muted-foreground">{t('noData')}</div>
-            )}
-          </ScrollArea>
-
-          {/* Footer — overall feedback + action buttons */}
-          <DrawerFooter className="border-t bg-muted px-6 py-4 gap-4">
-            <div className="space-y-1.5">
-              <Label
-                htmlFor="feedback"
-                className="text-sm font-medium"
-              >
-                {t('feedback')} <span className="text-muted-foreground font-normal">({t('optional')})</span>
-              </Label>
-              <Textarea
-                id="feedback"
-                rows={2}
-                placeholder={t('feedbackPlaceholder')}
-                value={feedback}
-                onChange={(e) => setFeedback(e.target.value)}
-              />
-            </div>
-
+          <div className="border-t bg-muted px-6 py-4 space-y-4">
             <Separator />
 
             <div className="flex items-center justify-between gap-2 flex-wrap">
-              {/* Return to student — requires confirmation */}
               <AlertDialog
                 open={returnOpen}
                 onOpenChange={setReturnOpen}
@@ -499,7 +522,6 @@ export default function GradingPanel({
               </AlertDialog>
 
               <div className="flex items-center gap-2">
-                {/* Save draft — teacher-visible only */}
                 <Button
                   variant="outline"
                   disabled={!canSave}
@@ -510,7 +532,6 @@ export default function GradingPanel({
                   {isSaving ? t('saving') : t('saveDraft')}
                 </Button>
 
-                {/* Publish — requires confirmation */}
                 <AlertDialog
                   open={publishOpen}
                   onOpenChange={setPublishOpen}
@@ -536,14 +557,12 @@ export default function GradingPanel({
                 </AlertDialog>
               </div>
             </div>
-          </DrawerFooter>
+          </div>
         </DrawerContent>
       </Drawer>
     </>
   );
 }
-
-// ── Sub-components ────────────────────────────────────────────────────────────
 
 interface SubmissionAnswersProps {
   submission: Submission;
@@ -554,7 +573,7 @@ interface SubmissionAnswersProps {
 
 function SubmissionAnswers({ submission, itemFeedbacks, onItemFeedbackChange, t }: SubmissionAnswersProps) {
   const breakdown = submission.grading_json;
-  const isEditable = needsTeacherAction(submission.status) || submission.status === 'GRADED';
+  const isEditable = canTeacherEditGrade(submission.status);
 
   if (!breakdown?.items?.length) {
     return <p className="text-sm text-muted-foreground">{t('noBreakdown')}</p>;
@@ -562,16 +581,16 @@ function SubmissionAnswers({ submission, itemFeedbacks, onItemFeedbackChange, t 
 
   return (
     <div className="space-y-4">
-      {breakdown.needs_manual_review && (
+      {breakdown.needs_manual_review ? (
         <div className="rounded-md border border-secondary/50 bg-secondary/10 px-4 py-2 text-sm text-primary">
           {t('manualReviewRequired')}
         </div>
-      )}
-      {breakdown.items.map((item, i) => (
+      ) : null}
+      {breakdown.items.map((item, index) => (
         <AnswerItem
           key={item.item_id}
           item={item}
-          index={i}
+          index={index}
           itemFeedback={itemFeedbacks[item.item_id] ?? { score: '', feedback: '' }}
           isEditable={isEditable}
           onFeedbackChange={(field, value) => onItemFeedbackChange(item.item_id, field, value)}
@@ -600,14 +619,14 @@ function AnswerItem({ item, index, itemFeedback, isEditable, onFeedbackChange, t
     <div className="rounded-lg border bg-white p-4 space-y-3">
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-center gap-2">
-          {item.needs_manual_review && (
+          {item.needs_manual_review ? (
             <Badge
               variant="outline"
               className="border-secondary/20 bg-secondary/10 text-secondary-foreground text-xs"
             >
               {t('needsReview')}
             </Badge>
-          )}
+          ) : null}
           <p className="text-sm font-medium text-foreground">
             {index + 1}. {item.item_text || item.item_id}
           </p>
@@ -617,25 +636,23 @@ function AnswerItem({ item, index, itemFeedback, isEditable, onFeedbackChange, t
         </span>
       </div>
 
-      {item.user_answer !== null && (
+      {item.user_answer !== null ? (
         <div className="rounded bg-muted/70 px-3 py-2 text-sm text-muted-foreground">
           <span className="text-xs font-medium text-muted-foreground mr-1">{t('studentAnswer')}:</span>
           {typeof item.user_answer === 'string' ? item.user_answer : JSON.stringify(item.user_answer, null, 2)}
         </div>
-      )}
+      ) : null}
 
-      {item.correct === false && item.correct_answer !== null && (
+      {item.correct === false && item.correct_answer !== null ? (
         <div className="rounded bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
           <span className="text-xs font-medium text-emerald-600 mr-1">{t('correctAnswer')}:</span>
           {typeof item.correct_answer === 'string' ? item.correct_answer : JSON.stringify(item.correct_answer)}
         </div>
-      )}
+      ) : null}
 
-      {item.feedback && !item.needs_manual_review && (
-        <p className="text-xs text-muted-foreground italic">{item.feedback}</p>
-      )}
+      {item.feedback && !item.needs_manual_review ? <p className="text-xs text-muted-foreground italic">{item.feedback}</p> : null}
 
-      {isEditable && (
+      {isEditable ? (
         <div className="space-y-2 border-t pt-3">
           <div className="flex items-center gap-3">
             <div className="space-y-1">
@@ -648,7 +665,7 @@ function AnswerItem({ item, index, itemFeedback, isEditable, onFeedbackChange, t
                   step={0.5}
                   placeholder="0"
                   value={itemFeedback.score}
-                  onChange={(e) => onFeedbackChange('score', e.target.value)}
+                  onChange={(event) => onFeedbackChange('score', event.target.value)}
                   className={cn('w-20 text-center text-xs', itemScoreInvalid && 'border-destructive')}
                 />
                 <span className="text-xs text-muted-foreground">/ {item.max_score}</span>
@@ -661,14 +678,12 @@ function AnswerItem({ item, index, itemFeedback, isEditable, onFeedbackChange, t
               rows={1}
               placeholder={t('itemFeedbackPlaceholder')}
               value={itemFeedback.feedback}
-              onChange={(e) => onFeedbackChange('feedback', e.target.value)}
+              onChange={(event) => onFeedbackChange('feedback', event.target.value)}
               className="text-xs resize-none"
             />
           </div>
         </div>
-      )}
-
-      <Separator />
+      ) : null}
     </div>
   );
 }

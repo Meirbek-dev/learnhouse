@@ -1457,6 +1457,135 @@
         "title": "AuthorWithRole",
         "type": "object"
       },
+      "BatchGradeItem": {
+        "description": "Single submission grade payload for batch teacher grading.",
+        "properties": {
+          "feedback": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Feedback"
+          },
+          "final_score": {
+            "maximum": 100.0,
+            "minimum": 0.0,
+            "title": "Final Score",
+            "type": "number"
+          },
+          "item_feedback": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ItemFeedback"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Item Feedback"
+          },
+          "status": {
+            "enum": [
+              "GRADED",
+              "PUBLISHED",
+              "RETURNED"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "submission_uuid": {
+            "title": "Submission Uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "submission_uuid",
+          "final_score",
+          "status"
+        ],
+        "title": "BatchGradeItem",
+        "type": "object"
+      },
+      "BatchGradeRequest": {
+        "description": "Batch teacher grading request.",
+        "properties": {
+          "grades": {
+            "items": {
+              "$ref": "#/components/schemas/BatchGradeItem"
+            },
+            "maxItems": 100,
+            "minItems": 1,
+            "title": "Grades",
+            "type": "array"
+          }
+        },
+        "required": [
+          "grades"
+        ],
+        "title": "BatchGradeRequest",
+        "type": "object"
+      },
+      "BatchGradeResponse": {
+        "description": "Batch teacher grading response.",
+        "properties": {
+          "failed": {
+            "default": 0,
+            "title": "Failed",
+            "type": "integer"
+          },
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/BatchGradeResultItem"
+            },
+            "title": "Results",
+            "type": "array"
+          },
+          "succeeded": {
+            "default": 0,
+            "title": "Succeeded",
+            "type": "integer"
+          }
+        },
+        "title": "BatchGradeResponse",
+        "type": "object"
+      },
+      "BatchGradeResultItem": {
+        "description": "Per-submission batch grading result.",
+        "properties": {
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "submission_uuid": {
+            "title": "Submission Uuid",
+            "type": "string"
+          },
+          "success": {
+            "title": "Success",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "submission_uuid",
+          "success"
+        ],
+        "title": "BatchGradeResultItem",
+        "type": "object"
+      },
       "BatchPermissionCheckRequest": {
         "properties": {
           "checks": {
@@ -5597,7 +5726,7 @@
             "type": "boolean"
           },
           "creation_date": {
-            "default": "2026-04-02T19:13:44.768169",
+            "default": "2026-04-03T13:11:13.771036",
             "format": "date-time",
             "title": "Creation Date",
             "type": "string"
@@ -5639,7 +5768,7 @@
             "title": "Provider Specific Id"
           },
           "update_date": {
-            "default": "2026-04-02T19:13:44.768206",
+            "default": "2026-04-03T13:11:13.771136",
             "format": "date-time",
             "title": "Update Date",
             "type": "string"
@@ -19666,6 +19795,53 @@
           }
         ],
         "summary": "Api List Submissions",
+        "tags": [
+          "grading"
+        ]
+      }
+    },
+    "/api/v1/grading/submissions/batch": {
+      "patch": {
+        "description": "Save teacher grades for multiple submissions in a single request.",
+        "operationId": "api_batch_grade_submissions_api_v1_grading_submissions_batch_patch",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchGradeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchGradeResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Api Batch Grade Submissions",
         "tags": [
           "grading"
         ]

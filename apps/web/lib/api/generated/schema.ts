@@ -2492,6 +2492,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/grading/submissions/batch": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Api Batch Grade Submissions
+         * @description Save teacher grades for multiple submissions in a single request.
+         */
+        patch: operations["api_batch_grade_submissions_api_v1_grading_submissions_batch_patch"];
+        trace?: never;
+    };
     "/api/v1/grading/submissions/export": {
         parameters: {
             query?: never;
@@ -4723,6 +4743,63 @@ export interface components {
             update_date: string;
             user: components["schemas"]["UserRead"];
         };
+        /**
+         * BatchGradeItem
+         * @description Single submission grade payload for batch teacher grading.
+         */
+        BatchGradeItem: {
+            /** Feedback */
+            feedback?: string | null;
+            /** Final Score */
+            final_score: number;
+            /** Item Feedback */
+            item_feedback?: components["schemas"]["ItemFeedback"][] | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "GRADED" | "PUBLISHED" | "RETURNED";
+            /** Submission Uuid */
+            submission_uuid: string;
+        };
+        /**
+         * BatchGradeRequest
+         * @description Batch teacher grading request.
+         */
+        BatchGradeRequest: {
+            /** Grades */
+            grades: components["schemas"]["BatchGradeItem"][];
+        };
+        /**
+         * BatchGradeResponse
+         * @description Batch teacher grading response.
+         */
+        BatchGradeResponse: {
+            /**
+             * Failed
+             * @default 0
+             */
+            failed: number;
+            /** Results */
+            results?: components["schemas"]["BatchGradeResultItem"][];
+            /**
+             * Succeeded
+             * @default 0
+             */
+            succeeded: number;
+        };
+        /**
+         * BatchGradeResultItem
+         * @description Per-submission batch grading result.
+         */
+        BatchGradeResultItem: {
+            /** Error */
+            error?: string | null;
+            /** Submission Uuid */
+            submission_uuid: string;
+            /** Success */
+            success: boolean;
+        };
         /** BatchPermissionCheckRequest */
         BatchPermissionCheckRequest: {
             /** Checks */
@@ -6324,7 +6401,7 @@ export interface components {
             /**
              * Creation Date
              * Format: date-time
-             * @default 2026-04-02T19:13:44.768169
+             * @default 2026-04-03T13:11:13.771036
              */
             creation_date: string;
             /**
@@ -6345,7 +6422,7 @@ export interface components {
             /**
              * Update Date
              * Format: date-time
-             * @default 2026-04-02T19:13:44.768206
+             * @default 2026-04-03T13:11:13.771136
              */
             update_date: string;
         };
@@ -12903,6 +12980,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SubmissionListResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    api_batch_grade_submissions_api_v1_grading_submissions_batch_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BatchGradeRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BatchGradeResponse"];
                 };
             };
             /** @description Validation Error */

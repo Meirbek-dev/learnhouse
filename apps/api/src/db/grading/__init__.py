@@ -1,6 +1,10 @@
 from src.db.grading.schemas import (
     AssignmentAnswers,
     AssignmentTaskAnswer,
+    BatchGradeItem,
+    BatchGradeRequest,
+    BatchGradeResponse,
+    BatchGradeResultItem,
     QuizAnswer,
     QuizAnswers,
 )
@@ -23,6 +27,10 @@ __all__ = [
     "AssessmentType",
     "AssignmentAnswers",
     "AssignmentTaskAnswer",
+    "BatchGradeItem",
+    "BatchGradeRequest",
+    "BatchGradeResponse",
+    "BatchGradeResultItem",
     "GradedItem",
     "GradingBreakdown",
     "ItemFeedback",

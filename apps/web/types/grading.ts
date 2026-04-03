@@ -166,6 +166,30 @@ export interface TeacherGradeInput {
   feedback?: string;
 }
 
+export interface BatchGradeItem {
+  submission_uuid: string;
+  final_score: number;
+  status: 'GRADED' | 'PUBLISHED' | 'RETURNED';
+  feedback?: string | null;
+  item_feedback?: ItemFeedback[] | null;
+}
+
+export interface BatchGradeRequest {
+  grades: BatchGradeItem[];
+}
+
+export interface BatchGradeResultItem {
+  submission_uuid: string;
+  success: boolean;
+  error?: string | null;
+}
+
+export interface BatchGradeResponse {
+  results: BatchGradeResultItem[];
+  succeeded: number;
+  failed: number;
+}
+
 // ── Status display helpers ────────────────────────────────────────────────────
 
 export const STATUS_LABELS: Record<SubmissionStatus, string> = {
@@ -187,6 +211,16 @@ export const STATUS_COLORS: Record<SubmissionStatus, string> = {
 /** True when the submission needs teacher action */
 export function needsTeacherAction(status: SubmissionStatus): boolean {
   return status === 'PENDING';
+}
+
+/** True when a teacher can still edit and resubmit a grade. */
+export function canTeacherEditGrade(status: SubmissionStatus): boolean {
+  return status === 'PENDING' || status === 'GRADED' || status === 'RETURNED';
+}
+
+/** True when the submission can be selected for batch grading. */
+export function canSelectForBatchGrading(status: SubmissionStatus): boolean {
+  return canTeacherEditGrade(status);
 }
 
 /** True when the grade is visible to the student */
