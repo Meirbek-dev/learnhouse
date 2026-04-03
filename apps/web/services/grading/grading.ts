@@ -124,7 +124,10 @@ export async function saveGrade(
   return meta.data as Submission;
 }
 
-export async function batchGradeSubmissions(grades: BatchGradeItem[], accessToken: string): Promise<BatchGradeResponse> {
+export async function batchGradeSubmissions(
+  grades: BatchGradeItem[],
+  accessToken: string,
+): Promise<BatchGradeResponse> {
   const url = `${API()}grading/submissions/batch`;
   const res = await fetch(url, RequestBodyWithAuthHeader('PATCH', { grades }, null, accessToken));
   const meta = await getResponseMetadata(res);

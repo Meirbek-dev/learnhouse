@@ -3,7 +3,6 @@ import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { AlertTriangle, Download, Expand, FileText } from 'lucide-react';
 import { getActivityBlockMediaDirectory } from '@services/media/media';
-import { usePlatform } from '@/components/Contexts/PlatformContext';
 import { useCourse } from '@components/Contexts/CourseContext';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
 import { uploadNewPDFFile } from '@services/blocks/Pdf/pdf';
@@ -16,7 +15,6 @@ const SUPPORTED_FILES = constructAcceptValue(['pdf']);
 
 const PDFBlockComponent = (props: any) => {
   const t = useTranslations('DashPage.Editor.PDFBlock');
-  const platform = usePlatform() as any;
   const course = useCourse();
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;

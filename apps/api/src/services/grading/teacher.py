@@ -446,7 +446,9 @@ async def batch_grade_submissions(
         submission.submission_uuid: (submission, activity)
         for submission, activity in rows
     }
-    missing_uuids = [uuid for uuid in requested_uuids if uuid not in submissions_by_uuid]
+    missing_uuids = [
+        uuid for uuid in requested_uuids if uuid not in submissions_by_uuid
+    ]
     if missing_uuids:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,

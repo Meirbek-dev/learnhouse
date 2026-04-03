@@ -243,7 +243,9 @@ async def api_get_assignment_task_submission_me(
     )
 
 
-@router.get("/{assignment_uuid}/tasks/{assignment_task_uuid}/submissions/user/{user_id}")
+@router.get(
+    "/{assignment_uuid}/tasks/{assignment_task_uuid}/submissions/user/{user_id}"
+)
 async def api_get_assignment_task_submission_user(
     request: Request,
     assignment_uuid: str,
@@ -283,7 +285,11 @@ async def api_handle_assignment_task_submission(
 ):
     """Create or update a submission for an assignment task."""
     return await handle_assignment_task_submission(
-        request, assignment_task_uuid, assignment_task_submission_object, current_user, db_session
+        request,
+        assignment_task_uuid,
+        assignment_task_submission_object,
+        current_user,
+        db_session,
     )
 
 
@@ -305,7 +311,9 @@ async def api_update_assignment_task_submission(
     )
 
 
-@router.delete("/{assignment_uuid}/tasks/{assignment_task_uuid}/submissions/{assignment_task_submission_uuid}")
+@router.delete(
+    "/{assignment_uuid}/tasks/{assignment_task_uuid}/submissions/{assignment_task_submission_uuid}"
+)
 async def api_delete_assignment_task_submission(
     request: Request,
     assignment_uuid: str,

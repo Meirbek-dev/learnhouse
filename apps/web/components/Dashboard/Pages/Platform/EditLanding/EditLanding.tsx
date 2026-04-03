@@ -1519,7 +1519,6 @@ interface ImageUploaderProps {
 }
 
 const ImageUploader: FC<ImageUploaderProps> = ({ t, onImageUploaded, className, buttonText, id }) => {
-  const platform = usePlatform() as any;
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const [isUploading, setIsUploading] = useState(false);
@@ -2003,7 +2002,6 @@ const FeaturedCoursesEditor: FC<{
   section: LandingFeaturedCourses;
   onChange: (section: LandingFeaturedCourses) => void;
 }> = ({ t, section, onChange }) => {
-  const platform = usePlatform() as any;
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
 

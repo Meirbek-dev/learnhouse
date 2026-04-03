@@ -140,7 +140,6 @@ if is_dev_mode:
     class PydanticStrictBaseModel(TruePydanticStrictBaseModel):
         pass
 
-
     class SQLModelStrictBaseModel(TrueSQLModelStrictBaseModel):
         pass
 
@@ -148,7 +147,6 @@ else:
 
     class PydanticStrictBaseModel(FalsePydanticStrictBaseModel):  # type: ignore[no-redef]
         pass
-
 
     class SQLModelStrictBaseModel(FalseSQLModelStrictBaseModel):  # type: ignore[no-redef]
         pass

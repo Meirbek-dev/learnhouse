@@ -5,7 +5,6 @@ import { updateAssignmentTask, updateReferenceFile } from '@services/courses/ass
 import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { Field, FieldError, FieldLabel } from '@components/ui/field';
-import { usePlatform } from '@/components/Contexts/PlatformContext';
 import { useEffect, useRef, useState, useTransition } from 'react';
 import { Alert, AlertDescription } from '@components/ui/alert';
 import { valibotResolver } from '@hookform/resolvers/valibot';
@@ -230,7 +229,6 @@ export const AssignmentTaskGeneralEdit = () => {
 const UpdateTaskRef = () => {
   const t = useTranslations('DashPage.Assignments.TaskGeneralEdit');
   const session = usePlatformSession();
-  const platform = usePlatform() as any;
   const access_token = session?.data?.tokens?.access_token;
   const assignmentTask = useAssignmentsTaskStore((s) => s.assignmentTask);
   const reload = useAssignmentsTaskStore((s) => s.reload);

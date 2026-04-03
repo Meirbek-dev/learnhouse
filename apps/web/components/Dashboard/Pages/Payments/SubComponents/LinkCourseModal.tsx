@@ -5,7 +5,6 @@ import type { components } from '@/lib/api/generated';
 import { getCoursesLinkedToProduct, linkCourseToProduct } from '@services/payments/products';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
-import { usePlatform } from '@/components/Contexts/PlatformContext';
 import { getPaymentsProductsSwrKey } from '@services/payments/keys';
 import { getCourses } from '@services/courses/courses';
 import { Button } from '@components/ui/button';
@@ -18,13 +17,13 @@ import { toast } from 'sonner';
 
 type CourseRead = components['schemas']['CourseRead'];
 
-type CoursePreviewData = {
+interface CoursePreviewData {
   id: number;
   name: string;
   description: string;
   thumbnail_image: string;
   course_uuid: string;
-};
+}
 
 interface LinkCourseModalProps {
   productId: number;
@@ -38,7 +37,6 @@ interface CoursePreviewProps {
 }
 
 const CoursePreview = ({ course, onLink, isLinked }: CoursePreviewProps) => {
-  const platform = usePlatform() as any;
   const t = useTranslations('Payments.LinkCourseModal');
 
   const thumbnailImage = course.thumbnail_image
@@ -127,7 +125,7 @@ export default function LinkCourseModal({ productId, onSuccess }: LinkCourseModa
 
   const linkedCourses = linkedCoursesData?.data ?? [];
 
-  const isLinked = (courseId: number): boolean => Boolean(linkedCourses.some((course) => course.id === courseId));
+  const isLinked = (courseId: number): boolean => linkedCourses.some((course) => course.id === courseId);
 
   const filteredCourses =
     courses?.filter(

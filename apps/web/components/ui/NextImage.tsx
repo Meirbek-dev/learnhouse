@@ -1,4 +1,5 @@
-import Image, { type ImageLoaderProps, type ImageProps } from 'next/image';
+import type { ImageLoaderProps, ImageProps } from 'next/image';
+import Image from 'next/image';
 
 const directLoader = ({ src }: ImageLoaderProps) => src;
 

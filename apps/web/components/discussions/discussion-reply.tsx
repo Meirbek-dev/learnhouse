@@ -1,7 +1,6 @@
 'use client';
 
 import { ArrowBigDown, ArrowBigUp, Clock, Edit, Trash2 } from 'lucide-react';
-import { usePlatform } from '@/components/Contexts/PlatformContext';
 import { useFormatter, useNow, useTranslations } from 'next-intl';
 import { Actions, Resources, Scopes } from '@/types/permissions';
 import RichContentRenderer from './rich-content-renderer';
@@ -41,7 +40,6 @@ export default function DiscussionReply({
   const [_isPending, startTransition] = useTransition();
   const format = useFormatter();
   const now = useNow();
-  const platform = usePlatform();
   const { can } = usePermissions();
   const canModerateDiscussion = can(Actions.MODERATE, Resources.DISCUSSION, Scopes.PLATFORM);
 

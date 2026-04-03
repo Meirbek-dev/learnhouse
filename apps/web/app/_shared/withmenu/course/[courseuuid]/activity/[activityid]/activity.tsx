@@ -42,7 +42,6 @@ import AIChatBotProvider from '@components/Contexts/AI/AIChatBotContext';
 import CourseEndView from '@components/Pages/Activity/CourseEndView';
 import { useFormatter, useLocale, useTranslations } from 'next-intl';
 import ToolTip from '@/components/Objects/Elements/Tooltip/Tooltip';
-import { usePlatform } from '@/components/Contexts/PlatformContext';
 import { CourseProvider } from '@components/Contexts/CourseContext';
 import { useContributorStatus } from '@/hooks/useContributorStatus';
 import { submitAssessment } from '@services/grading/grading';
@@ -315,7 +314,6 @@ const ActivityClient = (props: ActivityClientProps) => {
   const session = usePlatformSession() as any;
   const access_token = session?.data?.tokens?.access_token;
   const isAuthenticated = session.status === 'authenticated';
-  const platform = usePlatform();
   const [assignment, setAssignment] = useState(null) as any;
   const [isFocusMode, setIsFocusMode] = useState(() => {
     if (typeof globalThis.window !== 'undefined') {

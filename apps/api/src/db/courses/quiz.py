@@ -54,7 +54,9 @@ class QuizAttempt(SQLModelStrictBaseModel, table=True):
 
     # Submission data
     answers: dict[str, object] = Field(default_factory=dict, sa_column=Column(JSON))
-    grading_result: dict[str, object] = Field(default_factory=dict, sa_column=Column(JSON))
+    grading_result: dict[str, object] = Field(
+        default_factory=dict, sa_column=Column(JSON)
+    )
 
     # Idempotency
     idempotency_key: str | None = Field(default=None, index=True)

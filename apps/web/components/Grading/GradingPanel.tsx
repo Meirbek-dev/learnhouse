@@ -26,11 +26,11 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 import type { GradedItem, ItemFeedback, Submission, TeacherGradeInput } from '@/types/grading';
-import { canTeacherEditGrade } from '@/types/grading';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import SubmissionStatusBadge from './SubmissionStatusBadge';
 import { useGradingPanel } from '@/hooks/useGradingPanel';
 import { saveGrade } from '@services/grading/grading';
+import { canTeacherEditGrade } from '@/types/grading';
 
 interface GradingPanelProps {
   submissionUuid: string | null;
@@ -264,7 +264,13 @@ export function GradingEditor({
   );
 }
 
-export default function GradingPanel({ submissionUuid, allSubmissionUuids, onClose, onGradeSaved, onNavigate }: GradingPanelProps) {
+export default function GradingPanel({
+  submissionUuid,
+  allSubmissionUuids,
+  onClose,
+  onGradeSaved,
+  onNavigate,
+}: GradingPanelProps) {
   const t = useTranslations('Grading.Panel');
   const session = usePlatformSession();
   const accessToken = session?.data?.tokens?.access_token ?? '';
@@ -650,7 +656,9 @@ function AnswerItem({ item, index, itemFeedback, isEditable, onFeedbackChange, t
         </div>
       ) : null}
 
-      {item.feedback && !item.needs_manual_review ? <p className="text-xs text-muted-foreground italic">{item.feedback}</p> : null}
+      {item.feedback && !item.needs_manual_review ? (
+        <p className="text-xs text-muted-foreground italic">{item.feedback}</p>
+      ) : null}
 
       {isEditable ? (
         <div className="space-y-2 border-t pt-3">

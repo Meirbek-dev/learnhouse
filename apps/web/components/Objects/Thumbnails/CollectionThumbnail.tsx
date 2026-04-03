@@ -15,7 +15,6 @@ import {
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { PermissionTooltip } from '@/components/Utils/PermissionTooltip';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
-import { usePlatform } from '@/components/Contexts/PlatformContext';
 import { deleteCollection } from '@services/courses/collections';
 import { AlertTriangle, Crown, Loader2, X } from 'lucide-react';
 import { revalidateTags } from '@services/utils/ts/requests';
@@ -37,7 +36,6 @@ const removeCollectionPrefix = (collectionid: string) => {
 const CollectionThumbnail = (props: PropsType) => {
   const t = useTranslations('Components.CollectionThumbnail');
   const tCommon = useTranslations('Common');
-  const platform = usePlatform() as any;
 
   // Use backend metadata for ownership and permissions
   const isOwner = props.collection.is_owner ?? false;

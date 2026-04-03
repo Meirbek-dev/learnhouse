@@ -18,7 +18,9 @@ class PaymentsConfigBase(SQLModelStrictBaseModel):
     active: bool = False
     provider: PaymentProviderEnum = PaymentProviderEnum.STRIPE
     provider_specific_id: str | None = None
-    provider_config: dict[str, object] = Field(default_factory=dict, sa_column=Column(JSON))
+    provider_config: dict[str, object] = Field(
+        default_factory=dict, sa_column=Column(JSON)
+    )
 
     @field_validator("provider", mode="before")
     @classmethod

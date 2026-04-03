@@ -1,8 +1,8 @@
 import type { SubmissionStatus } from '@/types/grading';
 import { STATUS_LABELS } from '@/types/grading';
 import { Badge } from '@components/ui/badge';
-import { cn } from '@/lib/utils';
 import { useTranslations } from 'next-intl';
+import { cn } from '@/lib/utils';
 
 interface SubmissionStatusBadgeProps {
   status: SubmissionStatus;

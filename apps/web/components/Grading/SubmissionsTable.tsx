@@ -6,26 +6,26 @@ import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Checkbox } from '@/components/ui/checkbox';
-import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select';
 import { cn } from '@/lib/utils';
 
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
-import type { Submission, SubmissionStatus, TeacherGradeInput } from '@/types/grading';
 import { canSelectForBatchGrading, canTeacherEditGrade, needsTeacherAction } from '@/types/grading';
-import { useSubmissionStats } from '@/hooks/useSubmissionStats';
+import type { Submission, SubmissionStatus, TeacherGradeInput } from '@/types/grading';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { exportGradesCSV, saveGrade } from '@services/grading/grading';
+import { useSubmissionStats } from '@/hooks/useSubmissionStats';
 import SubmissionStatusBadge from './SubmissionStatusBadge';
 import { useSubmissions } from '@/hooks/useSubmissions';
-import GradingStats from './GradingStats';
-import GradingPanel from './GradingPanel';
 import BatchGradingPanel from './BatchGradingPanel';
 import { parseDraftScore } from './GradingPanel';
+import GradingStats from './GradingStats';
+import GradingPanel from './GradingPanel';
 
 interface SubmissionsTableProps {
   activityId: number;
@@ -71,10 +71,12 @@ export default function SubmissionsTable({ activityId, title }: SubmissionsTable
 
   useEffect(() => {
     const selectableOnPage = new Set(
-      submissions.filter((submission) => canSelectForBatchGrading(submission.status)).map((submission) => submission.submission_uuid),
+      submissions
+        .filter((submission) => canSelectForBatchGrading(submission.status))
+        .map((submission) => submission.submission_uuid),
     );
     setSelectedSubmissionUuids((current) => {
-      const next = new Set(Array.from(current).filter((uuid) => selectableOnPage.has(uuid)));
+      const next = new Set([...current].filter((uuid) => selectableOnPage.has(uuid)));
       return next.size === current.size ? current : next;
     });
   }, [submissions]);
@@ -89,9 +91,16 @@ export default function SubmissionsTable({ activityId, title }: SubmissionsTable
   );
   const selectedCount = selectedSubmissions.length;
   const allSelectableSelected =
-    selectableSubmissions.length > 0 && selectableSubmissions.every((submission) => selectedSubmissionUuids.has(submission.submission_uuid));
-  const someSelectableSelected = selectableSubmissions.some((submission) => selectedSubmissionUuids.has(submission.submission_uuid));
-  const headerCheckboxState = allSelectableSelected ? true : someSelectableSelected ? ('indeterminate' as const) : false;
+    selectableSubmissions.length > 0 &&
+    selectableSubmissions.every((submission) => selectedSubmissionUuids.has(submission.submission_uuid));
+  const someSelectableSelected = selectableSubmissions.some((submission) =>
+    selectedSubmissionUuids.has(submission.submission_uuid),
+  );
+  const headerCheckboxState = allSelectableSelected
+    ? true
+    : someSelectableSelected
+      ? ('indeterminate' as const)
+      : false;
 
   const handleGradeSaved = useCallback(
     async (updated: Submission) => {
@@ -105,7 +114,9 @@ export default function SubmissionsTable({ activityId, title }: SubmissionsTable
         refreshedUuids
           .slice(currentIndex + 1)
           .find((uuid) =>
-            needsTeacherAction(refreshedSubmissions.find((submission) => submission.submission_uuid === uuid)?.status ?? 'GRADED'),
+            needsTeacherAction(
+              refreshedSubmissions.find((submission) => submission.submission_uuid === uuid)?.status ?? 'GRADED',
+            ),
           ) ?? null;
 
       setOpenSubmissionUuid(nextUuid);
@@ -507,7 +518,11 @@ function SubmissionRow({
               onClick={() => void handleInlineSave()}
               aria-label={t('quickSaveAria', { student: displayName })}
             >
-              {isSavingScore ? <LoaderCircle className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
+              {isSavingScore ? (
+                <LoaderCircle className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Check className="h-3.5 w-3.5" />
+              )}
             </Button>
           </div>
         ) : submission.final_score !== null ? (

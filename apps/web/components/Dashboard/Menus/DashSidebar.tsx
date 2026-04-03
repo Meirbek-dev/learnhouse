@@ -27,7 +27,6 @@ import {
 } from 'lucide-react';
 import { useNavigationPermissions } from '@/hooks/useNavigationPermissions';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
-import { usePlatform } from '@/components/Contexts/PlatformContext';
 import platformLogoLight from '@public/platform_logo_light.svg';
 import { getAbsoluteUrl } from '@services/config/config';
 import { Separator } from '@/components/ui/separator';
@@ -238,7 +237,6 @@ const NavItem = ({ item, isCollapsed }: { item: NavigationItem; isCollapsed: boo
 );
 
 const DashSidebar = ({ className }: SidebarProps) => {
-  const platform = usePlatform();
   const session = usePlatformSession();
   const { state, toggleSidebar } = useSidebar();
   const t = useTranslations('SidebarMenu');
@@ -316,9 +314,7 @@ const DashSidebar = ({ className }: SidebarProps) => {
                 isCollapsed ? 'w-0 opacity-0' : 'w-auto opacity-100'
               }`}
             >
-              <h2 className="text-sidebar-foreground text-lg leading-tight font-semibold">
-                {platform?.name || t('platformName')}
-              </h2>
+              <h2 className="text-sidebar-foreground text-lg leading-tight font-semibold">{t('platformName')}</h2>
             </div>
           </AppLink>
 

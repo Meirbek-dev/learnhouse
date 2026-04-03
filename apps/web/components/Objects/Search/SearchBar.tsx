@@ -12,7 +12,6 @@ import {
 } from 'lucide-react';
 import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
-import { usePlatform } from '@/components/Contexts/PlatformContext';
 import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import { removeCoursePrefix } from '../Thumbnails/CourseThumbnail';
 import type { ChangeEvent, FC, KeyboardEvent } from 'react';
@@ -120,7 +119,6 @@ export const SearchBar: FC<SearchBarProps> = ({ className = '', isMobile = false
   const searchRef = useRef<HTMLDivElement>(null);
   const session = usePlatformSession();
   const accessToken = session?.data?.tokens?.access_token;
-  const platform = usePlatform();
   const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   // Debounce the search query value

@@ -1,10 +1,6 @@
 'use server';
-import {
-  type CustomResponseTyping,
-  RequestBodyWithAuthHeader,
-  errorHandling,
-  getResponseMetadata,
-} from '@services/utils/ts/requests';
+import { RequestBodyWithAuthHeader, errorHandling, getResponseMetadata } from '@services/utils/ts/requests';
+import type { CustomResponseTyping } from '@services/utils/ts/requests';
 import type { components } from '@/lib/api/generated';
 import { getAPIUrl } from '@services/config/config';
 import { tags } from '@/lib/cacheTags';
@@ -24,17 +20,17 @@ type ResponseMetadata<T> = Omit<CustomResponseTyping, 'data'> & {
   data: T | null;
 };
 
-type PaymentsConfigCreateInput = {
+interface PaymentsConfigCreateInput {
   provider: PaymentProviderEnum;
   enabled: boolean;
   active?: boolean;
   provider_config?: Record<string, unknown>;
   provider_specific_id?: string | null;
-};
+}
 
-type StripeAccountInput = {
+interface StripeAccountInput {
   stripe_account_id: string;
-};
+}
 
 async function getTypedResponseMetadata<T>(response: Response): Promise<ResponseMetadata<T>> {
   return (await getResponseMetadata(response)) as ResponseMetadata<T>;

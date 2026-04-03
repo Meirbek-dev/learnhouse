@@ -1,5 +1,6 @@
 'use server';
-import { type CustomResponseTyping, RequestBodyWithAuthHeader, getResponseMetadata } from '@services/utils/ts/requests';
+import { RequestBodyWithAuthHeader, getResponseMetadata } from '@services/utils/ts/requests';
+import type { CustomResponseTyping } from '@services/utils/ts/requests';
 import type { components } from '@/lib/api/generated';
 import { getAPIUrl } from '@services/config/config';
 import { tags } from '@/lib/cacheTags';

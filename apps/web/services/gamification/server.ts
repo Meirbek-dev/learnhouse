@@ -77,7 +77,7 @@ function normalizeTransactions(transactions: ApiTransactionResponse[] | undefine
     amount: numberOr(transaction.amount),
     source: typeof transaction.source === 'string' ? transaction.source : 'unknown',
     source_id: transaction.source_id ?? null,
-    triggered_level_up: Boolean(transaction.triggered_level_up),
+    triggered_level_up: transaction.triggered_level_up,
     previous_level: numberOr(transaction.previous_level),
     created_at: stringOrNull(transaction.created_at) ?? fallbackDate,
   }));
@@ -272,7 +272,7 @@ const normalizeAwardXpResponse = (payload: ApiXPAwardResponse): XPAwardResponse 
     previous_level: payload.transaction.previous_level,
     created_at: payload.transaction.created_at,
   },
-  profile: normalizeProfile(payload.profile) as UserGamificationProfile,
+  profile: normalizeProfile(payload.profile)!,
   triggered_level_up: payload.level_up_occurred,
   previous_level: payload.previous_level,
 });

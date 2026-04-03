@@ -7,7 +7,9 @@ import type { Role } from '@/types/permissions';
 type AuthTokens = components['schemas']['TokensResponse'];
 type AuthUser = components['schemas']['UserRead'];
 type LoginResponse = components['schemas']['LoginResponse'];
-type UserRole = { role: Role };
+interface UserRole {
+  role: Role;
+}
 type UserSessionResponse = components['schemas']['UserSession'];
 
 interface AuthError extends Error {

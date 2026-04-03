@@ -1,12 +1,12 @@
 'use server';
 
 import {
-  type CustomResponseTyping,
   RequestBodyFormWithAuthHeader,
   RequestBodyWithAuthHeader,
   errorHandling,
   getResponseMetadata,
 } from '@services/utils/ts/requests';
+import type { CustomResponseTyping } from '@services/utils/ts/requests';
 import { CacheProfiles, cacheLife, cacheTag } from '@/lib/cache';
 import { getServerAPIUrl } from '@services/config/config';
 import type { components } from '@/lib/api/generated';

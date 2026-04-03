@@ -15,23 +15,23 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Drawer, DrawerContent, DrawerTitle } from '@/components/ui/drawer';
-import { Separator } from '@/components/ui/separator';
-import { cn } from '@/lib/utils';
-import { batchGradeSubmissions } from '@services/grading/grading';
-import type { BatchGradeItem, Submission, TeacherGradeInput } from '@/types/grading';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
-import SubmissionStatusBadge from './SubmissionStatusBadge';
 import {
   buildChangedItemFeedbacks,
   createGradingDraftState,
   getSubmissionDisplayName,
   GradingEditor,
   parseDraftScore,
-  type GradingDraftState,
 } from './GradingPanel';
+import type { BatchGradeItem, Submission, TeacherGradeInput } from '@/types/grading';
+import { Drawer, DrawerContent, DrawerTitle } from '@/components/ui/drawer';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
+import { batchGradeSubmissions } from '@services/grading/grading';
+import SubmissionStatusBadge from './SubmissionStatusBadge';
+import type { GradingDraftState } from './GradingPanel';
+import { Separator } from '@/components/ui/separator';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
 interface BatchGradingPanelProps {
   open: boolean;
@@ -66,12 +66,15 @@ export default function BatchGradingPanel({ open, submissions, onClose, onSubmit
   const accessToken = session?.data?.tokens?.access_token ?? '';
 
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [drafts, setDrafts] = useState<Map<string, LocalGrade>>(new Map());
+  const [drafts, setDrafts] = useState(new Map());
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [pendingClose, setPendingClose] = useState(false);
   const [confirmSubmitOpen, setConfirmSubmitOpen] = useState(false);
 
-  const submissionKey = useMemo(() => submissions.map((submission) => submission.submission_uuid).join('|'), [submissions]);
+  const submissionKey = useMemo(
+    () => submissions.map((submission) => submission.submission_uuid).join('|'),
+    [submissions],
+  );
 
   useEffect(() => {
     if (!open) return;
@@ -79,13 +82,12 @@ export default function BatchGradingPanel({ open, submissions, onClose, onSubmit
     setDrafts(new Map(submissions.map((submission) => [submission.submission_uuid, createLocalGrade(submission)])));
   }, [open, submissionKey, submissions]);
 
-  const dirtyCount = useMemo(
-    () => Array.from(drafts.values()).filter((draft) => draft.dirty).length,
-    [drafts],
-  );
+  const dirtyCount = useMemo(() => [...drafts.values()].filter((draft) => draft.dirty).length, [drafts]);
 
   const currentSubmission = submissions[currentIndex] ?? null;
-  const currentDraft = currentSubmission ? drafts.get(currentSubmission.submission_uuid) ?? createLocalGrade(currentSubmission) : null;
+  const currentDraft = currentSubmission
+    ? (drafts.get(currentSubmission.submission_uuid) ?? createLocalGrade(currentSubmission))
+    : null;
   const studentName = getSubmissionDisplayName(currentSubmission);
 
   const updateCurrentDraft = useCallback(
@@ -219,7 +221,9 @@ export default function BatchGradingPanel({ open, submissions, onClose, onSubmit
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>{panelT('cancel')}</AlertDialogCancel>
-            <AlertDialogAction onClick={() => void handleSubmitAll()}>{t('confirmSubmitAction', { count: dirtyCount })}</AlertDialogAction>
+            <AlertDialogAction onClick={() => void handleSubmitAll()}>
+              {t('confirmSubmitAction', { count: dirtyCount })}
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -256,7 +260,9 @@ export default function BatchGradingPanel({ open, submissions, onClose, onSubmit
             <div className="flex items-center justify-between gap-3 flex-wrap">
               <div className="space-y-1">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-sm font-medium">{t('position', { current: currentIndex + 1, total: submissions.length, student: studentName })}</span>
+                  <span className="text-sm font-medium">
+                    {t('position', { current: currentIndex + 1, total: submissions.length, student: studentName })}
+                  </span>
                   {currentSubmission.is_late ? (
                     <Badge
                       variant="outline"

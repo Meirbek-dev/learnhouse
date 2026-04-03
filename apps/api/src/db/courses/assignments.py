@@ -22,7 +22,9 @@ def _normalize_due_date_value(value: str | None) -> str | None:
         else:
             date.fromisoformat(normalized)
     except ValueError as exc:
-        raise ValueError("due_date must be a valid ISO 8601 date or datetime string") from exc
+        raise ValueError(
+            "due_date must be a valid ISO 8601 date or datetime string"
+        ) from exc
 
     return normalized
 
@@ -248,7 +250,9 @@ class AssignmentTaskSubmissionBase(SQLModelStrictBaseModel):
     model_config = ConfigDict(use_enum_values=True)
 
     assignment_task_submission_uuid: str
-    task_submission: dict[str, object] = Field(default_factory=dict, sa_column=Column(JSON))
+    task_submission: dict[str, object] = Field(
+        default_factory=dict, sa_column=Column(JSON)
+    )
     grade: int = 0  # Value is always between 0-100
     task_submission_grade_feedback: str
     assignment_type: AssignmentTaskTypeEnum
@@ -288,7 +292,9 @@ class AssignmentTaskSubmissionUpdate(SQLModelStrictBaseModel):
 
     assignment_task_id: int | None = None
     assignment_task_submission_uuid: str | None = None
-    task_submission: dict[str, object] | None = Field(default=None, sa_column=Column(JSON))
+    task_submission: dict[str, object] | None = Field(
+        default=None, sa_column=Column(JSON)
+    )
     grade: int | None = None
     task_submission_grade_feedback: str | None = None
     assignment_type: AssignmentTaskTypeEnum | None = None

@@ -1,12 +1,12 @@
 'use server';
 
 import {
-  type CustomResponseTyping,
   RequestBodyFormWithAuthHeader,
   RequestBodyWithAuthHeader,
   errorHandling,
   getResponseMetadata,
 } from '@services/utils/ts/requests';
+import type { CustomResponseTyping } from '@services/utils/ts/requests';
 import { CacheProfiles, cacheLife, cacheTag } from '@/lib/cache';
 import type { components } from '@/lib/api/generated';
 import { getAPIUrl } from '@services/config/config';
@@ -96,12 +96,12 @@ type ResponseMetadata<T> = Omit<CustomResponseTyping, 'data'> & {
   data: T | null;
 };
 
-type EditableCoursesSummary = {
+interface EditableCoursesSummary {
   total: number;
   ready: number;
   private: number;
   attention: number;
-};
+}
 
 async function getTypedResponseMetadata<T>(response: Response): Promise<ResponseMetadata<T>> {
   return (await getResponseMetadata(response)) as ResponseMetadata<T>;
@@ -128,17 +128,18 @@ function normalizeTags(tags: string | null | undefined): string[] {
 }
 
 function normalizeAuthors(authors: AuthorWithRole[] | undefined): NormalizedCourseAuthor[] {
-  return (authors ?? []).map((author) => ({
-    ...author,
-    user: {
-      ...author.user,
-      avatar_image: author.user.avatar_image ?? '',
-      first_name: author.user.first_name ?? '',
-      last_name: author.user.last_name ?? '',
-      middle_name: author.user.middle_name ?? undefined,
-      user_uuid: author.user.user_uuid ?? '',
-    },
-  }));
+  return (authors ?? []).map((author) =>
+    Object.assign(author, {
+      user: {
+        ...author.user,
+        avatar_image: author.user.avatar_image ?? ``,
+        first_name: author.user.first_name ?? ``,
+        last_name: author.user.last_name ?? ``,
+        middle_name: author.user.middle_name ?? undefined,
+        user_uuid: author.user.user_uuid ?? ``,
+      },
+    }),
+  );
 }
 
 function normalizeCourse(course: CourseRead): NormalizedCourse {

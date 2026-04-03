@@ -52,7 +52,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import type { Permission, RoleAuditEvent, RoleWithPermissions } from '@/types/permissions';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
-import { usePlatform } from '@/components/Contexts/PlatformContext';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ColumnDef } from '@tanstack/react-table';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -70,7 +69,6 @@ type RoleDialogMode = 'create' | 'edit' | 'clone';
 
 export default function RBACAdminClient() {
   const session = usePlatformSession();
-  const platform = usePlatform();
   const { can } = usePermissions();
   const t = useTranslations('Components.Roles');
 

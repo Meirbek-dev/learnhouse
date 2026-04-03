@@ -68,7 +68,9 @@ def _build_assignment_user_submission_with_user_read(
     )
 
 
-def _coerce_datetime(value: str | datetime | None, *, end_of_day: bool = False) -> datetime | None:
+def _coerce_datetime(
+    value: str | datetime | None, *, end_of_day: bool = False
+) -> datetime | None:
     if value is None:
         return None
 
@@ -186,7 +188,9 @@ async def create_or_update_assignment_user_submission(
     else:
         aggregate_grade = 0
 
-    has_any_submission = any(bool(submission.task_submission) for submission in submissions)
+    has_any_submission = any(
+        bool(submission.task_submission) for submission in submissions
+    )
     all_tasks_graded = bool(task_ids) and all(
         task_id in submission_by_task_id
         and (submission_by_task_id[task_id].grade or 0) > 0
@@ -273,7 +277,9 @@ async def get_assignment_user_submission(
     if not assignment:
         raise HTTPException(status_code=404, detail="Assignment not found")
 
-    course = db_session.exec(select(Course).where(Course.id == assignment.course_id)).first()
+    course = db_session.exec(
+        select(Course).where(Course.id == assignment.course_id)
+    ).first()
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")
 
@@ -319,7 +325,9 @@ async def get_all_assignment_user_submissions(
     if not assignment:
         raise HTTPException(status_code=404, detail="Assignment not found")
 
-    course = db_session.exec(select(Course).where(Course.id == assignment.course_id)).first()
+    course = db_session.exec(
+        select(Course).where(Course.id == assignment.course_id)
+    ).first()
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")
 
@@ -331,12 +339,16 @@ async def get_all_assignment_user_submissions(
     )
 
     author_user_ids = _get_active_course_author_user_ids(course, db_session)
-    candidate_user_ids = _get_course_member_user_ids(course, db_session) - author_user_ids
+    candidate_user_ids = (
+        _get_course_member_user_ids(course, db_session) - author_user_ids
+    )
 
     task_ids = [
         task_id
         for task_id in db_session.exec(
-            select(AssignmentTask.id).where(AssignmentTask.assignment_id == assignment.id)
+            select(AssignmentTask.id).where(
+                AssignmentTask.assignment_id == assignment.id
+            )
         ).all()
         if task_id is not None
     ]
@@ -367,7 +379,9 @@ async def get_all_assignment_user_submissions(
         return []
 
     submissions = [
-        await create_or_update_assignment_user_submission(assignment.id, user_id, db_session)
+        await create_or_update_assignment_user_submission(
+            assignment.id, user_id, db_session
+        )
         for user_id in sorted(candidate_user_ids)
     ]
 
@@ -379,7 +393,9 @@ async def get_all_assignment_user_submissions(
         user = users_by_id.get(submission.user_id)
         if user is None:
             continue
-        results.append(_build_assignment_user_submission_with_user_read(submission, user))
+        results.append(
+            _build_assignment_user_submission_with_user_read(submission, user)
+        )
 
     return results
 
@@ -1189,9 +1205,7 @@ async def handle_assignment_task_submission(
             )
 
         # SECURITY: Regular users cannot update grades - only check if actual values are being set
-        if (
-            assignment_task_submission_object.grade is not None
-        ) or (
+        if (assignment_task_submission_object.grade is not None) or (
             assignment_task_submission_object.task_submission_grade_feedback is not None
         ):
             raise HTTPException(
@@ -1776,7 +1790,9 @@ async def get_assignments_from_course(
     )
 
     # return assignments read
-    activities_by_id = {activity.id: activity for activity in activities if activity.id is not None}
+    activities_by_id = {
+        activity.id: activity for activity in activities if activity.id is not None
+    }
 
     return [
         _build_assignment_read(
@@ -1908,7 +1924,9 @@ async def get_editable_assignments_from_courses(
     activity_id_to_course_uuid = {
         a.id: course_id_to_uuid.get(a.course_id) for a in activities
     }
-    activity_id_to_uuid = {a.id: a.activity_uuid for a in activities if a.id is not None}
+    activity_id_to_uuid = {
+        a.id: a.activity_uuid for a in activities if a.id is not None
+    }
     activity_ids = list(activity_id_to_course_uuid.keys())
 
     if not activity_ids:

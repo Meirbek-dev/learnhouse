@@ -14,7 +14,6 @@ import {
 import OnBoardAssignments from '@public/onboarding/OnBoardAssignments.png';
 import OnBoardActivities from '@public/onboarding/OnBoardActivities.png';
 import OnBoardPayments from '@public/onboarding/OnBoardPayments.png';
-import { usePlatform } from '@/components/Contexts/PlatformContext';
 import OnBoardWelcome from '@public/onboarding/OnBoardWelcome.png';
 import OnBoardCourses from '@public/onboarding/OnBoardCourses.png';
 import OnBoardEditor from '@public/onboarding/OnBoardEditor.png';
@@ -96,7 +95,6 @@ const Onboarding: FC = () => {
   });
   const isMobile = useIsMobile();
   const router = useRouter();
-  const platform = usePlatform();
   const { can } = usePermissions();
   const canManagePlatform =
     can(Actions.MANAGE, Resources.PLATFORM, Scopes.OWN) || can(Actions.MANAGE, Resources.PLATFORM, Scopes.PLATFORM);
