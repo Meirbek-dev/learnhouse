@@ -66,7 +66,7 @@ const ICON_MAP = {
 const IconComponent = ({ iconName }: { iconName: string }) => {
   const IconElement = ICON_MAP[iconName as keyof typeof ICON_MAP];
   if (!IconElement) return null;
-  return <IconElement className="h-4 w-4 text-muted-foreground" />;
+  return <IconElement className="text-muted-foreground h-4 w-4" />;
 };
 
 const UserProfilePopup = ({ children, userId }: UserProfilePopupProps) => {
@@ -103,19 +103,19 @@ const UserProfilePopup = ({ children, userId }: UserProfilePopupProps) => {
   return (
     <HoverCard onOpenChange={fetchOnOpen}>
       <HoverCardTrigger render={<span />}>{children}</HoverCardTrigger>
-      <HoverCardContent className="soft-shadow w-auto max-w-196 min-w-96 border border-border bg-card p-0 text-card-foreground shadow-sm backdrop-blur-md">
+      <HoverCardContent className="soft-shadow border-border bg-card text-card-foreground w-auto max-w-196 min-w-96 border p-0 shadow-sm backdrop-blur-md">
         {isLoading ? (
           <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            <Loader2 className="text-muted-foreground h-6 w-6 animate-spin" />
           </div>
         ) : error ? (
-          <div className="p-4 text-sm text-destructive">{error}</div>
+          <div className="text-destructive p-4 text-sm">{error}</div>
         ) : userData ? (
           <div>
             {/* Header with Avatar and Name */}
             <div className="relative">
               {/* Background gradient */}
-              <div className="absolute inset-0 h-28 rounded-t-lg bg-linear-to-b from-muted/60 to-transparent" />
+              <div className="from-muted/60 absolute inset-0 h-28 rounded-t-lg bg-linear-to-b to-transparent" />
 
               {/* Content */}
               <div className="relative px-5 pt-5 pb-4">
@@ -129,13 +129,13 @@ const UserProfilePopup = ({ children, userId }: UserProfilePopupProps) => {
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-2">
                       <div className="flex min-w-0 items-center gap-2">
-                        <h4 className="truncate font-semibold text-foreground">
+                        <h4 className="text-foreground truncate font-semibold">
                           {[userData.first_name, userData.middle_name, userData.last_name].filter(Boolean).join(' ')}
                         </h4>
                         {userData.username ? (
                           <Badge
                             variant="outline"
-                            className="truncate px-2 text-xs font-normal text-muted-foreground"
+                            className="text-muted-foreground truncate px-2 text-xs font-normal"
                           >
                             @{userData.username}
                           </Badge>
@@ -144,14 +144,14 @@ const UserProfilePopup = ({ children, userId }: UserProfilePopupProps) => {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-6 w-6 shrink-0 text-muted-foreground hover:text-foreground"
+                        className="text-muted-foreground hover:text-foreground h-6 w-6 shrink-0"
                         onClick={() => userData.username && router.push(`/user/${userData.username}`)}
                       >
                         <ExternalLink className="h-4 w-4" />
                       </Button>
                     </div>
                     {userData.bio ? (
-                      <p className="mt-1.5 line-clamp-4 text-sm leading-normal text-muted-foreground">{userData.bio}</p>
+                      <p className="text-muted-foreground mt-1.5 line-clamp-4 text-sm leading-normal">{userData.bio}</p>
                     ) : null}
                   </div>
                 </div>
@@ -160,7 +160,7 @@ const UserProfilePopup = ({ children, userId }: UserProfilePopupProps) => {
 
             {/* Details */}
             {userData.details && Object.values(userData.details).length > 0 ? (
-              <div className="space-y-2.5 border-t border-border px-5 pt-3.5 pb-4">
+              <div className="border-border space-y-2.5 border-t px-5 pt-3.5 pb-4">
                 {Object.values(userData.details).map((detail) => (
                   <div
                     key={detail.id}
@@ -168,8 +168,8 @@ const UserProfilePopup = ({ children, userId }: UserProfilePopupProps) => {
                   >
                     <IconComponent iconName={detail.icon} />
                     <div className="flex flex-col">
-                      <span className="text-xs text-muted-foreground">{detail.label}</span>
-                      <span className="text-sm text-foreground">{detail.text}</span>
+                      <span className="text-muted-foreground text-xs">{detail.label}</span>
+                      <span className="text-foreground text-sm">{detail.text}</span>
                     </div>
                   </div>
                 ))}

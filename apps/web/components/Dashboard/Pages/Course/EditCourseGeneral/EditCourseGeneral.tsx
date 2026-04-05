@@ -183,7 +183,7 @@ function EditCourseGeneral() {
   if (isLoading || !courseStructure) {
     return (
       <div className="flex h-64 items-center justify-center">
-        <div className="text-muted-foreground flex animate-pulse items-center rounded-md border bg-muted px-4 py-2 text-sm font-medium">
+        <div className="text-muted-foreground bg-muted flex animate-pulse items-center rounded-md border px-4 py-2 text-sm font-medium">
           <Loader2
             size={16}
             className="text-primary mr-2 animate-spin"
@@ -340,8 +340,8 @@ function EditCourseGeneral() {
         <Card>
           <CardHeader>
             <div className="space-y-1">
-              <h2 className="text-2xl font-bold tracking-tight text-foreground">{t('thumbnail.label')}</h2>
-              <p className="text-sm text-muted-foreground">{t('thumbnail.mediaUpdatesIsolated')}</p>
+              <h2 className="text-foreground text-2xl font-bold tracking-tight">{t('thumbnail.label')}</h2>
+              <p className="text-muted-foreground text-sm">{t('thumbnail.mediaUpdatesIsolated')}</p>
             </div>
           </CardHeader>
           <CardContent className="space-y-6">

@@ -176,10 +176,10 @@ export default function CourseCreationWizard() {
   });
 
   const summaryContent = (
-    <div className="space-y-4 text-sm text-muted-foreground">
+    <div className="text-muted-foreground space-y-4 text-sm">
       <div>
         <div className="text-muted-foreground">{t('summary.title')}</div>
-        <div className="mt-1 text-base font-semibold text-foreground">{name.trim() || t('summary.untitledCourse')}</div>
+        <div className="text-foreground mt-1 text-base font-semibold">{name.trim() || t('summary.untitledCourse')}</div>
       </div>
       <div>
         <div className="text-muted-foreground">{t('summary.visibility')}</div>
@@ -205,14 +205,14 @@ export default function CourseCreationWizard() {
   );
 
   return (
-    <div className="min-h-screen bg-background px-4 py-8 lg:px-8">
+    <div className="bg-background min-h-screen px-4 py-8 lg:px-8">
       <div className="mx-auto max-w-5xl space-y-6">
-        <div className="rounded-xl border bg-card p-6 shadow-sm">
-          <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+        <div className="bg-card rounded-xl border p-6 shadow-sm">
+          <div className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
             {t('header.label')}
           </div>
-          <h1 className="mt-2 text-4xl font-semibold tracking-tight text-foreground">{t('header.title')}</h1>
-          <p className="mt-3 max-w-3xl text-sm leading-6 text-muted-foreground">{t('header.description')}</p>
+          <h1 className="text-foreground mt-2 text-4xl font-semibold tracking-tight">{t('header.title')}</h1>
+          <p className="text-muted-foreground mt-3 max-w-3xl text-sm leading-6">{t('header.description')}</p>
         </div>
 
         <div className="xl:hidden">
@@ -221,30 +221,30 @@ export default function CourseCreationWizard() {
               render={
                 <button
                   type="button"
-                  className="group flex w-full items-center justify-between rounded-t-xl border bg-card px-5 py-4 text-foreground"
+                  className="group bg-card text-foreground flex w-full items-center justify-between rounded-t-xl border px-5 py-4"
                 />
               }
             >
               <span className="text-sm font-semibold">{t('summary.heading')}</span>
-              <ChevronDown className="size-4 text-muted-foreground transition-transform group-data-open:rotate-180" />
+              <ChevronDown className="text-muted-foreground size-4 transition-transform group-data-open:rotate-180" />
             </CollapsibleTrigger>
-            <CollapsibleContent className="rounded-b-xl border border-t-0 bg-card px-5 pb-5 text-foreground">
+            <CollapsibleContent className="bg-card text-foreground rounded-b-xl border border-t-0 px-5 pb-5">
               {summaryContent}
             </CollapsibleContent>
           </Collapsible>
         </div>
 
         <div className="grid gap-6 xl:grid-cols-[1.3fr_0.8fr]">
-          <div className="rounded-xl border bg-card p-6 shadow-sm">
+          <div className="bg-card rounded-xl border p-6 shadow-sm">
             <div className="space-y-5">
               <div>
-                <div className="text-sm font-semibold text-foreground">{t('steps.basics')}</div>
-                <div className="mt-1 text-sm text-muted-foreground">{t('basics.description')}</div>
+                <div className="text-foreground text-sm font-semibold">{t('steps.basics')}</div>
+                <div className="text-muted-foreground mt-1 text-sm">{t('basics.description')}</div>
               </div>
               <div className="space-y-2">
                 <label
                   htmlFor="course-title"
-                  className="text-sm font-medium text-foreground"
+                  className="text-foreground text-sm font-medium"
                 >
                   {t('basics.courseTitle')}
                 </label>
@@ -257,7 +257,7 @@ export default function CourseCreationWizard() {
               <div className="space-y-2">
                 <label
                   htmlFor="course-description"
-                  className="text-sm font-medium text-foreground"
+                  className="text-foreground text-sm font-medium"
                 >
                   {t('basics.shortDescription')}
                 </label>
@@ -270,7 +270,7 @@ export default function CourseCreationWizard() {
               </div>
 
               <fieldset className="space-y-3">
-                <legend className="text-sm font-medium text-foreground">{t('basics.audienceDefault')}</legend>
+                <legend className="text-foreground text-sm font-medium">{t('basics.audienceDefault')}</legend>
                 <RadioGroup
                   value={isPublic ? 'public' : 'private'}
                   onValueChange={(val) => form.setValue('public', val === 'public')}
@@ -310,17 +310,17 @@ export default function CourseCreationWizard() {
                   render={
                     <button
                       type="button"
-                      className="group flex w-full items-center justify-between rounded-xl border bg-muted/30 px-4 py-3 text-left"
+                      className="group bg-muted/30 flex w-full items-center justify-between rounded-xl border px-4 py-3 text-left"
                     />
                   }
                 >
                   <div>
-                    <div className="text-sm font-semibold text-foreground">{t('steps.template')}</div>
-                    <div className="text-sm text-muted-foreground">{t('template.description')}</div>
+                    <div className="text-foreground text-sm font-semibold">{t('steps.template')}</div>
+                    <div className="text-muted-foreground text-sm">{t('template.description')}</div>
                   </div>
-                  <ChevronDown className="size-4 text-muted-foreground transition-transform group-data-open:rotate-180" />
+                  <ChevronDown className="text-muted-foreground size-4 transition-transform group-data-open:rotate-180" />
                 </CollapsibleTrigger>
-                <CollapsibleContent className="mt-4 space-y-5 rounded-xl border bg-card p-4">
+                <CollapsibleContent className="bg-card mt-4 space-y-5 rounded-xl border p-4">
                   <RadioGroup
                     value={template}
                     onValueChange={(val) => form.setValue('template', val as CourseWizardValues['template'])}
@@ -366,14 +366,14 @@ export default function CourseCreationWizard() {
                     <div className="space-y-2">
                       <label
                         htmlFor="source-course-search"
-                        className="text-sm font-medium text-foreground"
+                        className="text-foreground text-sm font-medium"
                       >
                         {t('template.sourceCourse')}
                       </label>
 
                       {/* Async search input */}
                       <div className="relative">
-                        <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                        <Search className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2" />
                         <Input
                           id="source-course-search"
                           value={sourceQuery}
@@ -382,13 +382,13 @@ export default function CourseCreationWizard() {
                           className="pl-9"
                         />
                         {isSearching && (
-                          <Loader2 className="absolute right-3 top-1/2 size-4 -translate-y-1/2 animate-spin text-muted-foreground" />
+                          <Loader2 className="text-muted-foreground absolute top-1/2 right-3 size-4 -translate-y-1/2 animate-spin" />
                         )}
                       </div>
 
                       {/* Results list */}
                       {sourceOptions.length > 0 && (
-                        <div className="max-h-48 overflow-y-auto rounded-lg border bg-popover shadow-md">
+                        <div className="bg-popover max-h-48 overflow-y-auto rounded-lg border shadow-md">
                           {sourceOptions.map((course) => (
                             <button
                               key={course.course_uuid}
@@ -410,7 +410,7 @@ export default function CourseCreationWizard() {
                       )}
 
                       {sourceCourseUuid && (
-                        <p className="text-xs text-muted-foreground">{t('template.sourceCourseHelp')}</p>
+                        <p className="text-muted-foreground text-xs">{t('template.sourceCourseHelp')}</p>
                       )}
                     </div>
                   ) : null}
@@ -441,7 +441,7 @@ export default function CourseCreationWizard() {
 
           <div className="hidden xl:block">
             <div className={cn('sticky top-6', courseWorkflowSummaryCardClass)}>
-              <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <div className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
                 {t('summary.heading')}
               </div>
               <div className="mt-4">{summaryContent}</div>

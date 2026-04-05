@@ -162,8 +162,8 @@ const Canva = (props: Editor) => {
 
   return (
     <EditorOptionsProvider options={{ isEditable: false }}>
-      <div className="w-full mx-auto relative">
-        <div className="absolute inset-0 pointer-events-none z-[1000] [&>*]:pointer-events-auto">
+      <div className="relative mx-auto w-full">
+        <div className="pointer-events-none absolute inset-0 z-[1000] [&>*]:pointer-events-auto">
           <AICanvaToolkit
             activity={props.activity}
             editor={editor}

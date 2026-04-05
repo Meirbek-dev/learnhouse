@@ -248,7 +248,9 @@ export default function CodeChallengeConfigEditor({ activityUuid, courseId }: Co
       router.back();
     } catch (error) {
       console.error('Error saving configuration:', error);
-      toast.error(error instanceof Error ? error.message : t('configSaveFailed'), { id: loadingToast });
+      toast.error(error instanceof Error ? error.message : t('configSaveFailed'), {
+        id: loadingToast,
+      });
     } finally {
       setIsSaving(false);
     }
@@ -472,7 +474,13 @@ export default function CodeChallengeConfigEditor({ activityUuid, courseId }: Co
                 variant="outline"
                 size="sm"
                 onClick={() =>
-                  appendVisibleTest({ input: '', expected_output: '', is_visible: true, description: '', weight: 1 })
+                  appendVisibleTest({
+                    input: '',
+                    expected_output: '',
+                    is_visible: true,
+                    description: '',
+                    weight: 1,
+                  })
                 }
               >
                 <Plus className="mr-2 h-4 w-4" />
@@ -588,7 +596,13 @@ export default function CodeChallengeConfigEditor({ activityUuid, courseId }: Co
                 variant="outline"
                 size="sm"
                 onClick={() =>
-                  appendHiddenTest({ input: '', expected_output: '', is_visible: false, description: '', weight: 1 })
+                  appendHiddenTest({
+                    input: '',
+                    expected_output: '',
+                    is_visible: false,
+                    description: '',
+                    weight: 1,
+                  })
                 }
               >
                 <Plus className="mr-2 h-4 w-4" />

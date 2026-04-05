@@ -50,7 +50,7 @@ const AssignmentTasks = ({ assignment_uuid }: any) => {
           return (
             <Card
               key={task.id}
-              className={`w-[250px] cursor-pointer ${task.assignment_task_uuid === selectedAssignmentTaskUUID ? 'ring-2 ring-primary' : ''}`}
+              className={`w-[250px] cursor-pointer ${task.assignment_task_uuid === selectedAssignmentTaskUUID ? 'ring-primary ring-2' : ''}`}
               onClick={() => {
                 setSelectedTaskUUID(task.assignment_task_uuid);
                 setAssignmentTask(task);

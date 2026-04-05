@@ -145,7 +145,14 @@ const CourseEndView: FC<CourseEndViewProps> = ({ courseName, courseUuid, thumbna
     const colors = ['#6366f1', '#10b981', '#3b82f6', '#f59e0b', '#ec4899', '#ffffff'];
 
     // Big opening bursts
-    confetti({ particleCount: 140, spread: 100, origin: { y: 0.4 }, scalar: 1.6, ticks: 400, colors });
+    confetti({
+      particleCount: 140,
+      spread: 100,
+      origin: { y: 0.4 },
+      scalar: 1.6,
+      ticks: 400,
+      colors,
+    });
     const t1 = setTimeout(() => {
       confetti({
         particleCount: 90,
@@ -158,8 +165,22 @@ const CourseEndView: FC<CourseEndViewProps> = ({ courseName, courseUuid, thumbna
       });
     }, 200);
     const t2 = setTimeout(() => {
-      confetti({ particleCount: 80, spread: 70, origin: { x: 0.2, y: 0.5 }, scalar: 1.5, ticks: 300, colors });
-      confetti({ particleCount: 80, spread: 70, origin: { x: 0.8, y: 0.5 }, scalar: 1.5, ticks: 300, colors });
+      confetti({
+        particleCount: 80,
+        spread: 70,
+        origin: { x: 0.2, y: 0.5 },
+        scalar: 1.5,
+        ticks: 300,
+        colors,
+      });
+      confetti({
+        particleCount: 80,
+        spread: 70,
+        origin: { x: 0.8, y: 0.5 },
+        scalar: 1.5,
+        ticks: 300,
+        colors,
+      });
     }, 500);
 
     // Continuous cannons from both sides for 3 seconds
@@ -169,7 +190,15 @@ const CourseEndView: FC<CourseEndViewProps> = ({ courseName, courseUuid, thumbna
         clearInterval(interval);
         return;
       }
-      confetti({ particleCount: 7, angle: 60, spread: 58, origin: { x: 0, y: 0.65 }, scalar: 1.4, ticks: 300, colors });
+      confetti({
+        particleCount: 7,
+        angle: 60,
+        spread: 58,
+        origin: { x: 0, y: 0.65 },
+        scalar: 1.4,
+        ticks: 300,
+        colors,
+      });
       confetti({
         particleCount: 7,
         angle: 120,
@@ -1040,7 +1069,10 @@ const CourseEndView: FC<CourseEndViewProps> = ({ courseName, courseUuid, thumbna
               </div>
 
               <div className="text-sm text-gray-500">
-                {t('progressCompleted', { completed: progressInfo.completed, total: progressInfo.total })}
+                {t('progressCompleted', {
+                  completed: progressInfo.completed,
+                  total: progressInfo.total,
+                })}
               </div>
             </div>
           </div>

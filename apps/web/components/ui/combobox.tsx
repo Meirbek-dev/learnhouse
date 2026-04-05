@@ -27,7 +27,7 @@ function ComboboxTrigger({ className, children, ...props }: ComboboxPrimitive.Tr
       {...props}
     >
       {children}
-      <ChevronDownIcon className="pointer-events-none size-4 text-muted-foreground" />
+      <ChevronDownIcon className="text-muted-foreground pointer-events-none size-4" />
     </ComboboxPrimitive.Trigger>
   );
 }

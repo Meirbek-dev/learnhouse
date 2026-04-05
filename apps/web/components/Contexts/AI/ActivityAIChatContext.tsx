@@ -10,11 +10,11 @@
  */
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import type { PropsWithChildren } from 'react';
 import { createActivityChatAdapter } from '@services/ai/activity-chat-adapter';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
-import type { TextPart } from '@tanstack/ai-client';
 import type { UseChatReturn } from '@tanstack/ai-react';
+import type { TextPart } from '@tanstack/ai-client';
+import type { PropsWithChildren } from 'react';
 import { useChat } from '@tanstack/ai-react';
 import { useTranslations } from 'next-intl';
 
@@ -156,19 +156,16 @@ export function ActivityAIChatProvider({ activityUuid, children }: PropsWithChil
     setIsModalOpen(true);
   }, []);
 
-  const sendMessageAndGetResponse = useCallback(
-    (message: string): Promise<string> => {
-      if (!message.trim()) {
-        return Promise.resolve('');
-      }
+  const sendMessageAndGetResponse = useCallback((message: string): Promise<string> => {
+    if (!message.trim()) {
+      return Promise.resolve('');
+    }
 
-      return new Promise((resolve) => {
-        resolverQueueRef.current.push(resolve);
-        chatSendMessageRef.current(message);
-      });
-    },
-    [],
-  );
+    return new Promise((resolve) => {
+      resolverQueueRef.current.push(resolve);
+      chatSendMessageRef.current(message);
+    });
+  }, []);
 
   useEffect(() => {
     resetConversation();

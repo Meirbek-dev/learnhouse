@@ -169,8 +169,14 @@ export const useGamificationStore = create<GamificationState & GamificationActio
             ? {
                 ...s.profile,
                 ...(type === 'login'
-                  ? { login_streak: result.current_streak, longest_login_streak: result.longest_streak }
-                  : { learning_streak: result.current_streak, longest_learning_streak: result.longest_streak }),
+                  ? {
+                      login_streak: result.current_streak,
+                      longest_login_streak: result.longest_streak,
+                    }
+                  : {
+                      learning_streak: result.current_streak,
+                      longest_learning_streak: result.longest_streak,
+                    }),
               }
             : null,
         }));

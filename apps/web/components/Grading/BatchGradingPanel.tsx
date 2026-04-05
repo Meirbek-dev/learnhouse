@@ -238,11 +238,11 @@ export default function BatchGradingPanel({ open, submissions, onClose, onSubmit
           style={{ maxWidth: '56rem' }}
         >
           <DrawerTitle className="sr-only">{t('title', { count: submissions.length })}</DrawerTitle>
-          <div className="border-b px-6 py-4 space-y-4">
+          <div className="space-y-4 border-b px-6 py-4">
             <div className="flex items-center justify-between gap-4">
               <div>
                 <h2 className="text-base font-semibold">{t('title', { count: submissions.length })}</h2>
-                <p className="text-sm text-muted-foreground">{t('subtitle', { count: dirtyCount })}</p>
+                <p className="text-muted-foreground text-sm">{t('subtitle', { count: dirtyCount })}</p>
               </div>
               <Button
                 type="button"
@@ -257,11 +257,15 @@ export default function BatchGradingPanel({ open, submissions, onClose, onSubmit
 
             <Separator />
 
-            <div className="flex items-center justify-between gap-3 flex-wrap">
+            <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="space-y-1">
-                <div className="flex items-center gap-2 flex-wrap">
+                <div className="flex flex-wrap items-center gap-2">
                   <span className="text-sm font-medium">
-                    {t('position', { current: currentIndex + 1, total: submissions.length, student: studentName })}
+                    {t('position', {
+                      current: currentIndex + 1,
+                      total: submissions.length,
+                      student: studentName,
+                    })}
                   </span>
                   {currentSubmission.is_late ? (
                     <Badge
@@ -273,7 +277,7 @@ export default function BatchGradingPanel({ open, submissions, onClose, onSubmit
                   ) : null}
                   <SubmissionStatusBadge status={currentSubmission.status} />
                 </div>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-muted-foreground text-xs">
                   {panelT('attempt')} #{currentSubmission.attempt_number} ·{' '}
                   {currentSubmission.submitted_at
                     ? new Date(currentSubmission.submitted_at).toLocaleString()
@@ -316,15 +320,18 @@ export default function BatchGradingPanel({ open, submissions, onClose, onSubmit
                 dirty: true,
                 itemFeedbacks: {
                   ...draft.itemFeedbacks,
-                  [itemId]: { ...(draft.itemFeedbacks[itemId] ?? { score: '', feedback: '' }), [field]: value },
+                  [itemId]: {
+                    ...(draft.itemFeedbacks[itemId] ?? { score: '', feedback: '' }),
+                    [field]: value,
+                  },
                 },
               }))
             }
             t={panelT}
           />
 
-          <div className="border-t px-6 py-4 space-y-4 bg-muted">
-            <div className="flex items-center gap-2 flex-wrap text-xs text-muted-foreground">
+          <div className="bg-muted space-y-4 border-t px-6 py-4">
+            <div className="text-muted-foreground flex flex-wrap items-center gap-2 text-xs">
               <span>{t('indicatorNotEdited')}</span>
               <span className="inline-flex items-center gap-1.5">
                 {submissions.map((submission) => {
@@ -344,7 +351,7 @@ export default function BatchGradingPanel({ open, submissions, onClose, onSubmit
               <span>{t('indicatorEdited')}</span>
             </div>
 
-            <div className="flex items-center justify-between gap-2 flex-wrap">
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <Button
                 type="button"
                 variant="outline"

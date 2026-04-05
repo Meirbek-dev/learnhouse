@@ -141,7 +141,7 @@ const CurriculumEditor = () => {
   return (
     <div className="min-w-0">
       {structureStatus !== 'idle' && (
-        <Alert className="mb-4 border-border bg-muted/40">
+        <Alert className="border-border bg-muted/40 mb-4">
           {structureStatus === 'saving' ? (
             <Loader2 className="size-4 animate-spin" />
           ) : structureStatus === 'error' ? (
@@ -163,12 +163,12 @@ const CurriculumEditor = () => {
       )}
 
       {course_structure.chapters.length === 0 && !showChapterInput ? (
-        <div className="mb-4 flex flex-col items-center rounded-xl border border-dashed bg-muted/20 px-6 py-12 text-center">
-          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-muted">
-            <BookOpen className="h-6 w-6 text-muted-foreground" />
+        <div className="bg-muted/20 mb-4 flex flex-col items-center rounded-xl border border-dashed px-6 py-12 text-center">
+          <div className="bg-muted mb-4 flex h-12 w-12 items-center justify-center rounded-xl">
+            <BookOpen className="text-muted-foreground h-6 w-6" />
           </div>
-          <p className="mb-1 text-sm font-semibold text-foreground">{tStructure('emptyStateTitle')}</p>
-          <p className="mb-4 max-w-xs text-sm text-muted-foreground">{tStructure('emptyStateDescription')}</p>
+          <p className="text-foreground mb-1 text-sm font-semibold">{tStructure('emptyStateTitle')}</p>
+          <p className="text-muted-foreground mb-4 max-w-xs text-sm">{tStructure('emptyStateDescription')}</p>
           <Button
             variant="default"
             size="sm"
@@ -212,9 +212,9 @@ const CurriculumEditor = () => {
       {/* Inline chapter creation */}
       <div className="mt-4">
         {showChapterInput ? (
-          <div className="flex items-center gap-2 rounded-xl border border-dashed border-primary/50 bg-muted/30 px-4 py-3">
+          <div className="border-primary/50 bg-muted/30 flex items-center gap-2 rounded-xl border border-dashed px-4 py-3">
             <Hexagon
-              className="size-4 shrink-0 text-muted-foreground"
+              className="text-muted-foreground size-4 shrink-0"
               strokeWidth={2.5}
             />
             <Input

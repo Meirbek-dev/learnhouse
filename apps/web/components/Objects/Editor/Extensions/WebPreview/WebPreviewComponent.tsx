@@ -31,7 +31,7 @@ const ALIGNMENTS = [
 ];
 
 const PreviewImage = ({ src, alt }: { src: string; alt: string }) => (
-  <div className="-mx-6 -mt-6 mb-0 overflow-hidden rounded-t-xl relative h-40 w-full">
+  <div className="relative -mx-6 -mt-6 mb-0 h-40 w-full overflow-hidden rounded-t-xl">
     <NextImage
       src={src}
       alt={alt}
@@ -45,7 +45,7 @@ const PreviewImage = ({ src, alt }: { src: string; alt: string }) => (
 const FaviconDisplay = ({ favicon, url, faviconAlt }: { favicon?: string; url: string; faviconAlt: string }) => (
   <div className="mt-0 flex items-center border-t border-gray-100 pt-2">
     {favicon ? (
-      <div className="mr-2 h-[18px] w-[18px] relative rounded bg-gray-100 overflow-hidden">
+      <div className="relative mr-2 h-[18px] w-[18px] overflow-hidden rounded bg-gray-100">
         <NextImage
           src={favicon}
           alt={faviconAlt}
@@ -434,7 +434,7 @@ const WebPreviewComponent = ({ node, updateAttributes, deleteNode }: WebPreviewP
                 ) : null}
                 <div className="pt-4 pb-2">
                   <span
-                    className="mb-1.5 text-lg leading-tight font-semibold text-foreground no-underline hover:no-underline focus:no-underline active:no-underline"
+                    className="text-foreground mb-1.5 text-lg leading-tight font-semibold no-underline hover:no-underline focus:no-underline active:no-underline"
                     style={{ textDecoration: 'none', borderBottom: 'none' }}
                   >
                     {previewData.title}

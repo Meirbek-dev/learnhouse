@@ -642,15 +642,15 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ courseid, qrCodeLink 
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
+      <div className="bg-background flex min-h-screen items-center justify-center">
         <div className="flex flex-col items-center space-y-4">
-          <div className="rounded-full border border-border bg-card p-6 shadow-lg">
+          <div className="border-border bg-card rounded-full border p-6 shadow-lg">
             <Loader2
               size={32}
-              className="animate-spin text-primary"
+              className="text-primary animate-spin"
             />
           </div>
-          <span className="text-lg font-medium text-foreground">{t('loading')}</span>
+          <span className="text-foreground text-lg font-medium">{t('loading')}</span>
         </div>
       </div>
     );
@@ -658,10 +658,10 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ courseid, qrCodeLink 
 
   if (error) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
+      <div className="bg-background flex min-h-screen items-center justify-center">
         <div className="mx-auto max-w-md p-6 text-center">
-          <div className="rounded-2xl border border-destructive/20 bg-card p-8 shadow-xl">
-            <div className="mb-4 inline-flex rounded-full bg-destructive/10 p-4 text-destructive">
+          <div className="border-destructive/20 bg-card rounded-2xl border p-8 shadow-xl">
+            <div className="bg-destructive/10 text-destructive mb-4 inline-flex rounded-full p-4">
               <svg
                 className="h-8 w-8"
                 fill="none"
@@ -676,11 +676,11 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ courseid, qrCodeLink 
                 />
               </svg>
             </div>
-            <h2 className="mb-3 text-2xl font-bold text-foreground">{t('errorNonAvailable')}</h2>
-            <p className="mb-6 text-base text-muted-foreground">{error}</p>
+            <h2 className="text-foreground mb-3 text-2xl font-bold">{t('errorNonAvailable')}</h2>
+            <p className="text-muted-foreground mb-6 text-base">{error}</p>
             <Link
               href={`${getAbsoluteUrl('')}/course/${courseid}`}
-              className="inline-flex items-center space-x-2 rounded-xl bg-primary px-8 py-3.5 font-medium text-primary-foreground shadow-lg transition-all duration-200 hover:scale-105 hover:opacity-90"
+              className="bg-primary text-primary-foreground inline-flex items-center space-x-2 rounded-xl px-8 py-3.5 font-medium shadow-lg transition-all duration-200 hover:scale-105 hover:opacity-90"
             >
               <ArrowLeft className="h-5 w-5" />
               <span>{t('backToHome')}</span>
@@ -693,10 +693,10 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ courseid, qrCodeLink 
 
   if (!userCertificate) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
+      <div className="bg-background flex min-h-screen items-center justify-center">
         <div className="mx-auto max-w-md p-6 text-center">
-          <div className="rounded-2xl border border-border bg-card p-8 shadow-xl">
-            <div className="mb-4 inline-flex rounded-full bg-muted p-4 text-muted-foreground">
+          <div className="border-border bg-card rounded-2xl border p-8 shadow-xl">
+            <div className="bg-muted text-muted-foreground mb-4 inline-flex rounded-full p-4">
               <svg
                 className="h-8 w-8"
                 fill="none"
@@ -711,11 +711,11 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ courseid, qrCodeLink 
                 />
               </svg>
             </div>
-            <h2 className="mb-3 text-2xl font-bold text-foreground">{t('noCertificate')}</h2>
-            <p className="mb-6 text-base text-muted-foreground">{t('noCertificate')}</p>
+            <h2 className="text-foreground mb-3 text-2xl font-bold">{t('noCertificate')}</h2>
+            <p className="text-muted-foreground mb-6 text-base">{t('noCertificate')}</p>
             <Link
               href={`${getAbsoluteUrl('')}/course/${courseid}`}
-              className="inline-flex items-center space-x-2 rounded-xl bg-primary px-8 py-3.5 font-medium text-primary-foreground shadow-lg transition-all duration-200 hover:scale-105 hover:opacity-90"
+              className="bg-primary text-primary-foreground inline-flex items-center space-x-2 rounded-xl px-8 py-3.5 font-medium shadow-lg transition-all duration-200 hover:scale-105 hover:opacity-90"
             >
               <ArrowLeft className="h-5 w-5" />
               <span>{t('backToHome')}</span>
@@ -727,7 +727,7 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ courseid, qrCodeLink 
   }
 
   return (
-    <div className="min-h-screen bg-background py-12">
+    <div className="bg-background min-h-screen py-12">
       <SimpleAlertDialog
         open={dialogAlertOpen}
         onOpenChange={setDialogAlertOpen}

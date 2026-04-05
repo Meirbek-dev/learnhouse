@@ -47,7 +47,7 @@ async function PlatformAnalyticsCourseDetailPageInner(props: {
       <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-6 px-4 py-6 md:px-6 xl:px-8">
         <Card className="border-slate-200 bg-white/90 shadow-sm">
           <CardHeader>
-            <div className="flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.18em] text-slate-500">
+            <div className="flex flex-wrap items-center gap-2 text-xs tracking-[0.18em] text-slate-500 uppercase">
               <Badge variant="outline">{t('pages.courseDetailBadge')}</Badge>
               <Badge variant="outline">{detail.course.course_uuid}</Badge>
             </div>
@@ -55,15 +55,15 @@ async function PlatformAnalyticsCourseDetailPageInner(props: {
           </CardHeader>
           <CardContent className="grid gap-3 md:grid-cols-3">
             <div className="rounded-2xl border border-slate-200 p-4">
-              <div className="text-xs uppercase tracking-wide text-slate-500">{t('pages.courseStatCompletion')}</div>
+              <div className="text-xs tracking-wide text-slate-500 uppercase">{t('pages.courseStatCompletion')}</div>
               <div className="mt-2 text-3xl font-semibold">{detail.summary.completion_rate}%</div>
             </div>
             <div className="rounded-2xl border border-slate-200 p-4">
-              <div className="text-xs uppercase tracking-wide text-slate-500">{t('pages.courseStatAvgProgress')}</div>
+              <div className="text-xs tracking-wide text-slate-500 uppercase">{t('pages.courseStatAvgProgress')}</div>
               <div className="mt-2 text-3xl font-semibold">{detail.summary.avg_progress_pct}%</div>
             </div>
             <div className="rounded-2xl border border-slate-200 p-4">
-              <div className="text-xs uppercase tracking-wide text-slate-500">{t('pages.courseStatUngraded')}</div>
+              <div className="text-xs tracking-wide text-slate-500 uppercase">{t('pages.courseStatUngraded')}</div>
               <div className="mt-2 text-3xl font-semibold">{detail.summary.ungraded_submissions}</div>
             </div>
           </CardContent>

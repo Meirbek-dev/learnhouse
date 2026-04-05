@@ -14,7 +14,7 @@ import { cn } from '@/lib/utils';
 
 const RichTextEditor = dynamic(() => import('./rich-text-editor'), {
   ssr: false,
-  loading: () => <div className="h-[80px] w-full animate-pulse rounded-lg border bg-muted/40" />,
+  loading: () => <div className="bg-muted/40 h-[80px] w-full animate-pulse rounded-lg border" />,
 });
 
 interface DiscussionReplyProps {
@@ -79,9 +79,9 @@ export default function DiscussionReply({
   };
 
   return (
-    <div className="group relative ml-6 border-l-2 border-border py-4 pl-6 transition-colors hover:border-muted-foreground">
+    <div className="group border-border hover:border-muted-foreground relative ml-6 border-l-2 py-4 pl-6 transition-colors">
       {/* Connection line dot */}
-      <div className="absolute top-6 left-[-5px] h-2 w-2 rounded-full bg-border transition-colors group-hover:bg-foreground" />
+      <div className="bg-border group-hover:bg-foreground absolute top-6 left-[-5px] h-2 w-2 rounded-full transition-colors" />
 
       <div className="flex gap-3">
         <UserAvatar
@@ -95,10 +95,10 @@ export default function DiscussionReply({
           {/* Header */}
           <div className="mb-2 flex items-center justify-between gap-3">
             <div className="flex min-w-0 items-center gap-2">
-              <span className="truncate font-medium text-foreground">
+              <span className="text-foreground truncate font-medium">
                 {getUserDisplayName(reply.firstName, reply.lastName)}
               </span>
-              <span className="truncate text-sm text-muted-foreground">@{reply.username}</span>
+              <span className="text-muted-foreground truncate text-sm">@{reply.username}</span>
               {isAuthorAdmin(reply.username) && (
                 <Badge
                   variant="destructive"
@@ -107,13 +107,13 @@ export default function DiscussionReply({
                   {t('admin')}
                 </Badge>
               )}
-              <div className="flex shrink-0 items-center gap-1 text-xs text-muted-foreground">
+              <div className="text-muted-foreground flex shrink-0 items-center gap-1 text-xs">
                 <Clock size={12} />
                 <span>{format.relativeTime(new Date(reply.createDate), now)}</span>
                 {reply.updateDate &&
                   reply.createDate &&
                   new Date(reply.updateDate).getTime() !== new Date(reply.createDate).getTime() && (
-                    <span className="text-xs text-muted-foreground">({t('edited')})</span>
+                    <span className="text-muted-foreground text-xs">({t('edited')})</span>
                   )}
               </div>
             </div>
@@ -129,7 +129,7 @@ export default function DiscussionReply({
                       setEditing(true);
                       setEditContent(reply.replyMessage);
                     }}
-                    className="h-7 w-7 p-0 text-muted-foreground hover:bg-primary/10 hover:text-primary"
+                    className="text-muted-foreground hover:bg-primary/10 hover:text-primary h-7 w-7 p-0"
                   >
                     <Edit size={12} />
                   </Button>
@@ -138,7 +138,7 @@ export default function DiscussionReply({
                   variant="ghost"
                   size="sm"
                   onClick={() => onDeleteReply(postId, reply.id)}
-                  className="h-7 w-7 p-0 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                  className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive h-7 w-7 p-0"
                 >
                   <Trash2 size={12} />
                 </Button>
@@ -188,13 +188,13 @@ export default function DiscussionReply({
               <div className="mb-3">
                 <RichContentRenderer
                   content={reply.replyMessage}
-                  className="text-sm leading-relaxed text-muted-foreground"
+                  className="text-muted-foreground text-sm leading-relaxed"
                 />
               </div>
 
               {/* Voting section */}
               <div className="flex items-center gap-3">
-                <div className="flex items-center overflow-hidden rounded-lg border border-border bg-muted">
+                <div className="border-border bg-muted flex items-center overflow-hidden rounded-lg border">
                   <Button
                     variant="ghost"
                     size="sm"

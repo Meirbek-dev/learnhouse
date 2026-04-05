@@ -202,7 +202,7 @@ const AssignmentStudentActivity = () => {
   const hasTasks = sortedTasks.length > 0;
 
   return (
-    <Card className="bg-background border border-border">
+    <Card className="bg-background border-border border">
       <CardContent className="flex flex-col gap-6">
         {/* Header Section */}
         <Card className="border-slate-200 bg-gradient-to-br from-slate-50 to-white">

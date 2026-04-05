@@ -139,9 +139,9 @@ const CourseProgress: FC<CourseProgressProps> = ({ course, isOpen, onClose, trai
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
               {isCompleted ? (
-                <Trophy className="size-6 text-primary" />
+                <Trophy className="text-primary size-6" />
               ) : (
-                <span className="text-lg font-bold text-foreground tabular-nums">{progressPercentage}%</span>
+                <span className="text-foreground text-lg font-bold tabular-nums">{progressPercentage}%</span>
               )}
             </div>
           </div>
@@ -151,12 +151,12 @@ const CourseProgress: FC<CourseProgressProps> = ({ course, isOpen, onClose, trai
             <p className={cn('text-lg font-semibold', isCompleted ? 'text-primary' : 'text-foreground')}>
               {isCompleted ? t('progressCard.courseCompleted') : `${completedActivities} of ${totalActivities}`}
             </p>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               {isCompleted ? t('progressCard.completedAllActivities') : t('progressCard.activitiesCompletedLabel')}
             </p>
 
             {/* Progress Bar */}
-            <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-muted">
+            <div className="bg-muted mt-2 h-2 w-full overflow-hidden rounded-full">
               <div
                 className={cn('h-full rounded-full transition-all duration-500 ease-out', 'bg-primary')}
                 style={{ width: `${progressPercentage}%` }}
@@ -181,7 +181,7 @@ const CourseProgress: FC<CourseProgressProps> = ({ course, isOpen, onClose, trai
             return (
               <div
                 key={chapter.chapter_uuid}
-                className="overflow-hidden rounded-xl border border-border transition-shadow hover:border-border/80"
+                className="border-border hover:border-border/80 overflow-hidden rounded-xl border transition-shadow"
               >
                 {/* Chapter Header */}
                 <button
@@ -204,7 +204,7 @@ const CourseProgress: FC<CourseProgressProps> = ({ course, isOpen, onClose, trai
 
                   {/* Chapter Info */}
                   <div className="flex flex-1 flex-col gap-10.5 overflow-hidden">
-                    <span className="truncate font-medium text-foreground">{chapter.name}</span>
+                    <span className="text-foreground truncate font-medium">{chapter.name}</span>
                     <div className="flex items-center gap-2">
                       <span className="text-muted-foreground text-xs">
                         {t('progressCard.chapterActivitiesCount', {
@@ -315,7 +315,10 @@ const CourseProgress: FC<CourseProgressProps> = ({ course, isOpen, onClose, trai
       onOpenChange={onClose}
       dialogContent={dialogContent}
       dialogTitle={t('courseProgress')}
-      dialogDescription={t('activitiesCompleted', { completed: completedActivities, total: totalActivities })}
+      dialogDescription={t('activitiesCompleted', {
+        completed: completedActivities,
+        total: totalActivities,
+      })}
       minWidth="md"
     />
   );

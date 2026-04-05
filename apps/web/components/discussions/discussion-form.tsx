@@ -9,7 +9,7 @@ import { useState } from 'react';
 
 const RichTextEditor = dynamic(() => import('./rich-text-editor'), {
   ssr: false,
-  loading: () => <div className="h-[120px] w-full animate-pulse rounded-lg border bg-muted/40" />,
+  loading: () => <div className="bg-muted/40 h-[120px] w-full animate-pulse rounded-lg border" />,
 });
 
 interface DiscussionFormProps {

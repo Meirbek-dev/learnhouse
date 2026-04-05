@@ -218,7 +218,7 @@ function ChartTooltipContent({
                         <span className="text-muted-foreground">{itemConfig?.label ?? item.name}</span>
                       </div>
                       {item.value !== null && (
-                        <span className="font-mono font-medium text-foreground tabular-nums">
+                        <span className="text-foreground font-mono font-medium tabular-nums">
                           {itemConfig?.valueFormatter
                             ? itemConfig.valueFormatter(item.value as number | string)
                             : typeof item.value === 'number'
@@ -312,7 +312,7 @@ function getPayloadConfigFromPayload(config: ChartConfig, payload: unknown, key:
 }
 
 function ChartEmptyState({ description }: { description: string }) {
-  return <div className="flex h-[280px] items-center justify-center text-sm text-muted-foreground">{description}</div>;
+  return <div className="text-muted-foreground flex h-[280px] items-center justify-center text-sm">{description}</div>;
 }
 
 export {

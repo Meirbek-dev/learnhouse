@@ -7,7 +7,10 @@ import { twMerge } from 'tailwind-merge';
 import dynamic from 'next/dynamic';
 import type { FC } from 'react';
 
-const EmojiPicker = dynamic(() => import('emoji-picker-react'), { ssr: false, loading: () => null });
+const EmojiPicker = dynamic(() => import('emoji-picker-react'), {
+  ssr: false,
+  loading: () => null,
+});
 
 const BadgesExtension: FC = (props: any) => {
   const t = useTranslations('DashPage.Editor.BadgesExtension');

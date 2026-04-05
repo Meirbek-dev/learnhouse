@@ -7,7 +7,10 @@ import { useTranslations } from 'next-intl';
 import { twMerge } from 'tailwind-merge';
 import dynamic from 'next/dynamic';
 
-const EmojiPicker = dynamic(() => import('emoji-picker-react'), { ssr: false, loading: () => null });
+const EmojiPicker = dynamic(() => import('emoji-picker-react'), {
+  ssr: false,
+  loading: () => null,
+});
 
 const ButtonsExtension: FC = (props: any) => {
   const t = useTranslations('DashPage.Editor.ButtonsExtension');

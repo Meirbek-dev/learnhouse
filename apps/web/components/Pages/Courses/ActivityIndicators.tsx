@@ -179,7 +179,7 @@ const ActivityTooltipContent = ({
 }) => {
   const t = useTranslations('ActivityIndicators');
   return (
-    <div className="min-w-[220px] rounded-xl border border-border bg-card p-4 text-card-foreground shadow-lg">
+    <div className="border-border bg-card text-card-foreground min-w-[220px] rounded-xl border p-4 shadow-lg">
       <div className="flex items-start gap-3">
         <div
           className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${getActivityTypeBadgeColor(activity.activity_type).split(' ')[0]}`}
@@ -190,11 +190,11 @@ const ActivityTooltipContent = ({
           />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-medium text-foreground">{activity.name}</p>
-          <p className="mt-0.5 text-xs text-muted-foreground">{getActivityTypeLabel(activity.activity_type, t)}</p>
+          <p className="text-foreground truncate text-sm font-medium">{activity.name}</p>
+          <p className="text-muted-foreground mt-0.5 text-xs">{getActivityTypeLabel(activity.activity_type, t)}</p>
         </div>
       </div>
-      <div className="mt-3 flex items-center justify-between border-t border-border pt-3">
+      <div className="border-border mt-3 flex items-center justify-between border-t pt-3">
         <span
           className={`inline-flex items-center gap-1.5 rounded-full px-2 py-1 text-xs font-medium ${
             isCurrent
@@ -233,7 +233,7 @@ const ChapterTooltipContent = ({
   const isComplete = completedActivities === totalActivities;
 
   return (
-    <div className="min-w-[200px] rounded-xl border border-border bg-card p-4 text-card-foreground shadow-lg">
+    <div className="border-border bg-card text-card-foreground min-w-[200px] rounded-xl border p-4 shadow-lg">
       <div className="flex items-center gap-3">
         <div
           className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-sm font-semibold ${
@@ -250,10 +250,10 @@ const ChapterTooltipContent = ({
           )}
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-xs font-medium text-muted-foreground">
+          <p className="text-muted-foreground text-xs font-medium">
             {t('chapter')} {chapterNumber}
           </p>
-          <p className="truncate text-sm font-medium text-foreground">{chapter.name}</p>
+          <p className="text-foreground truncate text-sm font-medium">{chapter.name}</p>
         </div>
       </div>
       <div className="mt-3 space-y-2">
@@ -263,7 +263,7 @@ const ChapterTooltipContent = ({
             {completedActivities}/{totalActivities} {t('completed')}
           </span>
         </div>
-        <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+        <div className="bg-muted h-1.5 w-full overflow-hidden rounded-full">
           <div
             className={`h-full rounded-full transition-all duration-300 ${isComplete ? 'bg-primary' : 'bg-primary/70'}`}
             style={{ width: `${progress}%` }}
@@ -281,7 +281,7 @@ const CertificationBadge = ({ courseid, isCompleted }: { courseid: string; isCom
       sideOffset={8}
       unstyled
       content={
-        <div className="min-w-[200px] rounded-xl border border-border bg-card p-4 text-card-foreground shadow-lg">
+        <div className="border-border bg-card text-card-foreground min-w-[200px] rounded-xl border p-4 shadow-lg">
           <div className="flex items-center gap-3">
             <div
               className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
@@ -294,10 +294,10 @@ const CertificationBadge = ({ courseid, isCompleted }: { courseid: string; isCom
               />
             </div>
             <div>
-              <p className="text-sm font-medium text-foreground">
+              <p className="text-foreground text-sm font-medium">
                 {isCompleted ? t('certificationAvailable') : t('earnCertificate')}
               </p>
-              <p className="mt-0.5 text-xs text-muted-foreground">
+              <p className="text-muted-foreground mt-0.5 text-xs">
                 {isCompleted ? t('viewCertificate') : t('completeAllActivities')}
               </p>
             </div>
@@ -403,7 +403,7 @@ const ActivityIndicators = (props: Props) => {
         <button
           onClick={navigateToPrevious}
           disabled={currentActivityIndex <= 0}
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted transition-all duration-200 hover:bg-muted/80 disabled:cursor-not-allowed disabled:opacity-40"
+          className="bg-muted hover:bg-muted/80 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-40"
           aria-label={t('previousActivity')}
         >
           <ChevronLeft
@@ -413,7 +413,7 @@ const ActivityIndicators = (props: Props) => {
         </button>
       ) : null}
 
-      <div className="flex flex-1 items-center gap-1 overflow-hidden rounded-full bg-muted p-1">
+      <div className="bg-muted flex flex-1 items-center gap-1 overflow-hidden rounded-full p-1">
         {course.chapters.map((chapter: any, chapterIndex: number) => {
           const completedActivities = getChapterProgress(chapter.activities);
           const isChapterComplete = completedActivities === chapter.activities.length;
@@ -448,7 +448,7 @@ const ActivityIndicators = (props: Props) => {
                       className={`flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-semibold transition-all duration-200 group-hover:scale-110 ${
                         isChapterComplete
                           ? 'bg-primary text-primary-foreground shadow-sm'
-                          : 'bg-card text-muted-foreground shadow-sm ring-1 ring-border'
+                          : 'bg-card text-muted-foreground ring-border shadow-sm ring-1'
                       }`}
                     >
                       {isChapterComplete ? (
@@ -467,7 +467,7 @@ const ActivityIndicators = (props: Props) => {
                       className={`flex h-6 w-6 cursor-not-allowed items-center justify-center rounded-full text-[10px] font-semibold ${
                         isChapterComplete
                           ? 'bg-primary text-primary-foreground'
-                          : 'bg-card text-muted-foreground ring-1 ring-border'
+                          : 'bg-card text-muted-foreground ring-border ring-1'
                       }`}
                     >
                       {chapterIndex + 1}
@@ -504,11 +504,11 @@ const ActivityIndicators = (props: Props) => {
                         className="group relative flex flex-1 items-center"
                       >
                         {/* Current activity indicator */}
-                        {isCurrent && <span className="absolute inset-0 animate-pulse rounded bg-primary opacity-30" />}
+                        {isCurrent && <span className="bg-primary absolute inset-0 animate-pulse rounded opacity-30" />}
                         <span
                           className={`relative block h-2 w-full rounded transition-all duration-200 ${
                             isCurrent
-                              ? 'bg-primary ring-2 ring-primary/30'
+                              ? 'bg-primary ring-primary/30 ring-2'
                               : isDone
                                 ? 'bg-primary group-hover:bg-primary/90'
                                 : 'bg-muted-foreground/30 group-hover:bg-muted-foreground/40'
@@ -534,7 +534,7 @@ const ActivityIndicators = (props: Props) => {
         <button
           onClick={navigateToNext}
           disabled={currentActivityIndex >= allActivities.length - 1}
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted transition-all duration-200 hover:bg-muted/80 disabled:cursor-not-allowed disabled:opacity-40"
+          className="bg-muted hover:bg-muted/80 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-40"
           aria-label={t('nextActivity')}
         >
           <ChevronRight

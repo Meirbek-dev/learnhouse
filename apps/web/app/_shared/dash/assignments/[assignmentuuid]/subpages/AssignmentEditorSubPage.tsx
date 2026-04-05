@@ -26,7 +26,7 @@ const AssignmentEditorSubPage = ({ assignmentuuid }: { assignmentuuid: string })
           <AssignmentTasks assignment_uuid={`assignment_${assignmentuuid}`} />
         </div>
       </div>
-      <div className="soft-shadow flex h-full min-h-0 w-full flex-1 bg-background">
+      <div className="soft-shadow bg-background flex h-full min-h-0 w-full flex-1">
         <AssignmentProvider assignment_uuid={`assignment_${assignmentuuid}`}>
           <AssignmentTaskEditor page="general" />
         </AssignmentProvider>

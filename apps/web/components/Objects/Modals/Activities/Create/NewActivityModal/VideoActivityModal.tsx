@@ -694,7 +694,9 @@ const VideoSettingsForm = ({
                 <div>
                   <p className="text-sm font-medium text-amber-800">{t('invalidTimeRange')}</p>
                   <p className="mt-1 text-xs text-amber-700">
-                    {t('endTimeGreaterThanStartTime', { startTime: formatTime(videoDetails.startTime) })}
+                    {t('endTimeGreaterThanStartTime', {
+                      startTime: formatTime(videoDetails.startTime),
+                    })}
                   </p>
                 </div>
               </motion.div>

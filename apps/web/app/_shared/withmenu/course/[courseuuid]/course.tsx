@@ -226,10 +226,10 @@ const CourseClient = (props: any) => {
                     !course.thumbnail_type;
                   if (showVideo && course.thumbnail_video) {
                     return (
-                      <div className="relative w-full overflow-hidden rounded-lg shadow-xl ring-1 focus:ring-primary/20/10 ring-inset">
+                      <div className="focus:ring-primary/20/10 relative w-full overflow-hidden rounded-lg shadow-xl ring-1 ring-inset">
                         {course.thumbnail_type === 'both' && (
                           <div className="absolute top-3 right-3 z-10">
-                            <div className="flex space-x-1 rounded-lg bg-muted/20 p-1 backdrop-blur-sm">
+                            <div className="bg-muted/20 flex space-x-1 rounded-lg p-1 backdrop-blur-sm">
                               <Button
                                 variant="ghost"
                                 size="sm"
@@ -285,7 +285,7 @@ const CourseClient = (props: any) => {
                   }
                   if (showImage && course.thumbnail_image) {
                     return (
-                      <div className="relative max-h-192 w-full overflow-hidden rounded-lg shadow-xl ring-1 focus:ring-primary/20/10 ring-inset">
+                      <div className="focus:ring-primary/20/10 relative max-h-192 w-full overflow-hidden rounded-lg shadow-xl ring-1 ring-inset">
                         <div className="relative h-full w-full">
                           <NextImage
                             src={getCourseThumbnailMediaDirectory(course?.course_uuid, course?.thumbnail_image)}
@@ -297,7 +297,7 @@ const CourseClient = (props: any) => {
                         </div>
                         {course.thumbnail_type === 'both' && (
                           <div className="absolute top-3 right-3 z-10">
-                            <div className="flex space-x-1 rounded-lg bg-muted/20 p-1 backdrop-blur-sm">
+                            <div className="bg-muted/20 flex space-x-1 rounded-lg p-1 backdrop-blur-sm">
                               <Button
                                 variant="ghost"
                                 size="sm"
@@ -344,7 +344,7 @@ const CourseClient = (props: any) => {
                   }
                   return (
                     <div
-                      className="relative h-auto w-full overflow-hidden rounded-lg bg-cover bg-center shadow-xl ring-1 focus:ring-primary/20/10 ring-inset"
+                      className="focus:ring-primary/20/10 relative h-auto w-full overflow-hidden rounded-lg bg-cover bg-center shadow-xl ring-1 ring-inset"
                       style={{
                         backgroundImage: `url('../empty_thumbnail.webp')`,
                         backgroundSize: 'auto',
@@ -407,7 +407,7 @@ const CourseClient = (props: any) => {
                       return (
                         <div
                           key={learningId}
-                          className="flex items-center space-x-2 font-semibold text-muted-foreground"
+                          className="text-muted-foreground flex items-center space-x-2 font-semibold"
                         >
                           <div className="rounded-full px-2 py-2">
                             {learningEmoji ? (
@@ -497,7 +497,7 @@ const CourseClient = (props: any) => {
                                 href={`${getAbsoluteUrl('')}/course/${courseuuid}/activity/${activity.activity_uuid.replace('activity_', '')}`}
                                 rel="noopener noreferrer"
                                 prefetch={false}
-                                className="activity-container group block px-4 py-4 transition-all duration-200 hover:bg-muted"
+                                className="activity-container group hover:bg-muted block px-4 py-4 transition-all duration-200"
                               >
                                 <div className="flex items-center space-x-3">
                                   <div className="flex items-center">
@@ -527,7 +527,7 @@ const CourseClient = (props: any) => {
                                       {isActivityCurrent(activity) && (
                                         <Badge
                                           variant="secondary"
-                                          className="text-primary-foreground animate-pulse bg-primary/10"
+                                          className="text-primary-foreground bg-primary/10 animate-pulse"
                                         >
                                           {t('current')}
                                         </Badge>

@@ -106,7 +106,9 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
   const [error, setError] = useState<string | null>(null);
   const [assignmentTask, setAssignmentTask] = useState<AssignmentTask | null>(null);
   const [userSubmissions, setUserSubmissions] = useState<FileSubmission>({ fileUUID: '' });
-  const [initialUserSubmissions, setInitialUserSubmissions] = useState<FileSubmission>({ fileUUID: '' });
+  const [initialUserSubmissions, setInitialUserSubmissions] = useState<FileSubmission>({
+    fileUUID: '',
+  });
   const [userSubmissionObject, setUserSubmissionObject] = useState<UserSubmissionObject | null>(null);
 
   const showSavingDisclaimer = userSubmissions.fileUUID !== initialUserSubmissions.fileUUID;
@@ -134,7 +136,12 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
     setError(null);
 
     try {
-      const res = await updateSubFile({ file, assignmentTaskUUID, assignmentUUID, access_token: accessToken });
+      const res = await updateSubFile({
+        file,
+        assignmentTaskUUID,
+        assignmentUUID,
+        access_token: accessToken,
+      });
 
       if (!res.success) {
         setError(res.data?.detail || t('uploadFailed'));

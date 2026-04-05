@@ -88,18 +88,18 @@ interface SearchBarProps {
 const CourseResultsSkeleton = () => (
   <div className="p-2">
     <div className="flex items-center gap-2 px-2 py-2">
-      <div className="h-4 w-4 animate-pulse rounded bg-muted" />
-      <div className="h-4 w-20 animate-pulse rounded bg-muted" />
+      <div className="bg-muted h-4 w-4 animate-pulse rounded" />
+      <div className="bg-muted h-4 w-20 animate-pulse rounded" />
     </div>
     {[1, 2].map((i) => (
       <div
         key={i}
         className="flex items-center gap-3 p-2"
       >
-        <div className="h-10 w-10 animate-pulse rounded-lg bg-muted" />
+        <div className="bg-muted h-10 w-10 animate-pulse rounded-lg" />
         <div className="flex-1">
-          <div className="mb-2 h-4 w-48 animate-pulse rounded bg-muted" />
-          <div className="h-3 w-32 animate-pulse rounded bg-muted" />
+          <div className="bg-muted mb-2 h-4 w-48 animate-pulse rounded" />
+          <div className="bg-muted h-3 w-32 animate-pulse rounded" />
         </div>
       </div>
     ))}
@@ -193,11 +193,11 @@ export const SearchBar: FC<SearchBarProps> = ({ className = '', isMobile = false
   const MemoizedEmptyState = !searchQuery.trim() ? (
     <div className="px-4 py-8">
       <div className="flex flex-col items-center text-center">
-        <div className="mb-4 rounded-full bg-muted p-3">
-          <Sparkles className="h-6 w-6 text-muted-foreground" />
+        <div className="bg-muted mb-4 rounded-full p-3">
+          <Sparkles className="text-muted-foreground h-6 w-6" />
         </div>
-        <h3 className="mb-1 text-sm font-medium text-foreground">{t('discoverTitle')}</h3>
-        <p className="max-w-[240px] text-xs text-muted-foreground">{t('discoverSubtitle')}</p>
+        <h3 className="text-foreground mb-1 text-sm font-medium">{t('discoverTitle')}</h3>
+        <p className="text-muted-foreground max-w-[240px] text-xs">{t('discoverSubtitle')}</p>
       </div>
     </div>
   ) : null;
@@ -250,7 +250,7 @@ export const SearchBar: FC<SearchBarProps> = ({ className = '', isMobile = false
 
   const MemoizedSearchSuggestions = searchQuery.trim() ? (
     <div className="p-2">
-      <div className="flex items-center gap-2 px-2 py-2 text-sm text-muted-foreground">
+      <div className="text-muted-foreground flex items-center gap-2 px-2 py-2 text-sm">
         <ScanSearch size={16} />
         <span className="font-medium">{t('suggestionsTitle')}</span>
       </div>
@@ -260,15 +260,15 @@ export const SearchBar: FC<SearchBarProps> = ({ className = '', isMobile = false
             prefetch={false}
             key={`${term}-${type}`}
             href={getAbsoluteUrl(`/search?q=${encodeURIComponent(term)}`)}
-            className="group flex items-center rounded-lg px-3 py-2 transition-colors hover:bg-accent"
+            className="group hover:bg-accent flex items-center rounded-lg px-3 py-2 transition-colors"
           >
             <div className="flex flex-1 items-center gap-2">
               {icon}
-              <span className="text-sm text-foreground">{term}</span>
+              <span className="text-foreground text-sm">{term}</span>
             </div>
             <ArrowUpRight
               size={14}
-              className="text-muted-foreground transition-colors group-hover:text-foreground"
+              className="text-muted-foreground group-hover:text-foreground transition-colors"
             />
           </Link>
         ))}
@@ -284,14 +284,14 @@ export const SearchBar: FC<SearchBarProps> = ({ className = '', isMobile = false
 
     return (
       <div className="p-2">
-        <div className="flex items-center gap-2 px-2 py-2 text-sm text-muted-foreground">
+        <div className="text-muted-foreground flex items-center gap-2 px-2 py-2 text-sm">
           <TextSearch size={16} />
           <span className="font-medium">{t('quickResultsTitle')}</span>
         </div>
 
         {searchResults.courses.length > 0 ? (
           <div className="mb-2">
-            <div className="flex items-center gap-2 px-2 py-1 text-xs text-muted-foreground">
+            <div className="text-muted-foreground flex items-center gap-2 px-2 py-1 text-xs">
               <GraduationCap size={12} />
               <span>{t('coursesSection')}</span>
             </div>
@@ -300,7 +300,7 @@ export const SearchBar: FC<SearchBarProps> = ({ className = '', isMobile = false
                 prefetch={false}
                 key={course.course_uuid}
                 href={getAbsoluteUrl(`/course/${removeCoursePrefix(course.course_uuid)}`)}
-                className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-accent"
+                className="hover:bg-accent flex items-center gap-3 rounded-lg p-2 transition-colors"
               >
                 <div className="relative h-10 w-10">
                   {course.thumbnail_image ? (
@@ -312,14 +312,14 @@ export const SearchBar: FC<SearchBarProps> = ({ className = '', isMobile = false
                       sizes="100vw"
                     />
                   ) : (
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
+                    <div className="bg-muted flex h-10 w-10 items-center justify-center rounded-lg">
                       <Book
                         size={20}
                         className="text-muted-foreground"
                       />
                     </div>
                   )}
-                  <div className="absolute -right-1 -bottom-1 rounded-full bg-background p-1 shadow-sm ring-1 ring-border">
+                  <div className="bg-background ring-border absolute -right-1 -bottom-1 rounded-full p-1 shadow-sm ring-1">
                     <GraduationCap
                       size={11}
                       className="text-muted-foreground"
@@ -328,12 +328,12 @@ export const SearchBar: FC<SearchBarProps> = ({ className = '', isMobile = false
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <h3 className="truncate text-sm font-medium text-foreground">{course.name}</h3>
-                    <span className="whitespace-nowrap text-[10px] font-medium tracking-wide uppercase text-muted-foreground">
+                    <h3 className="text-foreground truncate text-sm font-medium">{course.name}</h3>
+                    <span className="text-muted-foreground text-[10px] font-medium tracking-wide whitespace-nowrap uppercase">
                       {t('courseType')}
                     </span>
                   </div>
-                  <p className="truncate text-xs text-muted-foreground">{course.description}</p>
+                  <p className="text-muted-foreground truncate text-xs">{course.description}</p>
                 </div>
               </Link>
             ))}
@@ -342,7 +342,7 @@ export const SearchBar: FC<SearchBarProps> = ({ className = '', isMobile = false
 
         {searchResults.collections.length > 0 ? (
           <div className="mb-2">
-            <div className="flex items-center gap-2 px-2 py-1 text-xs text-muted-foreground">
+            <div className="text-muted-foreground flex items-center gap-2 px-2 py-1 text-xs">
               <Book size={12} />
               <span>{t('collectionsSection')}</span>
             </div>
@@ -351,9 +351,9 @@ export const SearchBar: FC<SearchBarProps> = ({ className = '', isMobile = false
                 prefetch={false}
                 key={collection.collection_uuid}
                 href={getAbsoluteUrl(`/collection/${collection.collection_uuid}`)}
-                className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-accent"
+                className="hover:bg-accent flex items-center gap-3 rounded-lg p-2 transition-colors"
               >
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
+                <div className="bg-muted flex h-10 w-10 items-center justify-center rounded-lg">
                   <Book
                     size={20}
                     className="text-muted-foreground"
@@ -361,12 +361,12 @@ export const SearchBar: FC<SearchBarProps> = ({ className = '', isMobile = false
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <h3 className="truncate text-sm font-medium text-foreground">{collection.name}</h3>
-                    <span className="whitespace-nowrap text-[10px] font-medium tracking-wide uppercase text-muted-foreground">
+                    <h3 className="text-foreground truncate text-sm font-medium">{collection.name}</h3>
+                    <span className="text-muted-foreground text-[10px] font-medium tracking-wide whitespace-nowrap uppercase">
                       {t('collectionType')}
                     </span>
                   </div>
-                  <p className="truncate text-xs text-muted-foreground">{collection.description}</p>
+                  <p className="text-muted-foreground truncate text-xs">{collection.description}</p>
                 </div>
               </Link>
             ))}
@@ -375,7 +375,7 @@ export const SearchBar: FC<SearchBarProps> = ({ className = '', isMobile = false
 
         {searchResults.users.length > 0 ? (
           <div className="mb-2">
-            <div className="flex items-center gap-2 px-2 py-1 text-xs text-muted-foreground">
+            <div className="text-muted-foreground flex items-center gap-2 px-2 py-1 text-xs">
               <Users size={12} />
               <span>{t('usersSection')}</span>
             </div>
@@ -384,7 +384,7 @@ export const SearchBar: FC<SearchBarProps> = ({ className = '', isMobile = false
                 prefetch={false}
                 key={user.user_uuid}
                 href={getAbsoluteUrl(`/user/${user.username}`)}
-                className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-accent"
+                className="hover:bg-accent flex items-center gap-3 rounded-lg p-2 transition-colors"
               >
                 <UserAvatar
                   size="md"
@@ -395,14 +395,14 @@ export const SearchBar: FC<SearchBarProps> = ({ className = '', isMobile = false
                 />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <h3 className="truncate text-sm font-medium text-foreground">
+                    <h3 className="text-foreground truncate text-sm font-medium">
                       {[user.first_name, user.middle_name, user.last_name].filter(Boolean).join(' ')}
                     </h3>
-                    <span className="whitespace-nowrap text-[10px] font-medium tracking-wide uppercase text-muted-foreground">
+                    <span className="text-muted-foreground text-[10px] font-medium tracking-wide whitespace-nowrap uppercase">
                       {t('userType')}
                     </span>
                   </div>
-                  <p className="truncate text-xs text-muted-foreground">@{user.username}</p>
+                  <p className="text-muted-foreground truncate text-xs">@{user.username}</p>
                 </div>
               </Link>
             ))}
@@ -443,14 +443,14 @@ export const SearchBar: FC<SearchBarProps> = ({ className = '', isMobile = false
         />
         <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5">
           <Search
-            className="text-muted-foreground transition-colors group-focus-within:text-foreground"
+            className="text-muted-foreground group-focus-within:text-foreground transition-colors"
             size={16}
           />
         </div>
       </div>
 
       <div
-        className={`soft-shadow absolute z-50 mt-2 w-full divide-y divide-border overflow-hidden rounded-xl border border-border bg-card text-card-foreground transition-all duration-200 ease-in-out ${shouldShowDropdown ? 'translate-y-0 opacity-100' : 'pointer-events-none -translate-y-2 opacity-0'} ${isMobile ? 'max-w-full' : 'min-w-[240px]'}`}
+        className={`soft-shadow divide-border border-border bg-card text-card-foreground absolute z-50 mt-2 w-full divide-y overflow-hidden rounded-xl border transition-all duration-200 ease-in-out ${shouldShowDropdown ? 'translate-y-0 opacity-100' : 'pointer-events-none -translate-y-2 opacity-0'} ${isMobile ? 'max-w-full' : 'min-w-[240px]'}`}
       >
         {shouldShowDropdown &&
           (!searchQuery.trim() || isInitialLoad ? (
@@ -470,7 +470,7 @@ export const SearchBar: FC<SearchBarProps> = ({ className = '', isMobile = false
                     <Link
                       prefetch={false}
                       href={getAbsoluteUrl(`/search?q=${encodeURIComponent(searchQuery)}`)}
-                      className="flex items-center justify-between px-4 py-2.5 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                      className="text-muted-foreground hover:bg-accent hover:text-foreground flex items-center justify-between px-4 py-2.5 text-xs transition-colors"
                     >
                       <span>{t('viewAllResults')}</span>
                       <ArrowRight size={14} />

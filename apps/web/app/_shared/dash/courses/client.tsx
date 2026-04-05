@@ -119,10 +119,26 @@ const CoursesHome = ({
 
   const summaryCards = useMemo(() => {
     return [
-      { label: t('summary.total.label'), value: summaryCounts.total, detail: t('summary.total.detail') },
-      { label: t('summary.ready.label'), value: summaryCounts.ready, detail: t('summary.ready.detail') },
-      { label: t('summary.private.label'), value: summaryCounts.private, detail: t('summary.private.detail') },
-      { label: t('summary.attention.label'), value: summaryCounts.attention, detail: t('summary.attention.detail') },
+      {
+        label: t('summary.total.label'),
+        value: summaryCounts.total,
+        detail: t('summary.total.detail'),
+      },
+      {
+        label: t('summary.ready.label'),
+        value: summaryCounts.ready,
+        detail: t('summary.ready.detail'),
+      },
+      {
+        label: t('summary.private.label'),
+        value: summaryCounts.private,
+        detail: t('summary.private.detail'),
+      },
+      {
+        label: t('summary.attention.label'),
+        value: summaryCounts.attention,
+        detail: t('summary.attention.detail'),
+      },
     ];
   }, [summaryCounts, t]);
 
@@ -314,7 +330,7 @@ const CoursesHome = ({
 
   const bulkToolbar =
     selectedCourses.length > 0 ? (
-      <div className="flex flex-wrap items-center gap-2 rounded-lg border bg-muted px-3 py-2">
+      <div className="bg-muted flex flex-wrap items-center gap-2 rounded-lg border px-3 py-2">
         <Badge variant="outline">{t('bulk.selectedCount', { count: selectedCourses.length })}</Badge>
         <Button
           type="button"
@@ -395,15 +411,18 @@ const CoursesHome = ({
             <div className="space-y-1">
               <AppLink
                 href={buildCourseWorkspacePath(removeCoursePrefix(course.course_uuid))}
-                className="font-semibold text-foreground hover:text-foreground/70"
+                className="text-foreground hover:text-foreground/70 font-semibold"
               >
                 {course.name}
               </AppLink>
-              <div className="line-clamp-2 text-sm text-muted-foreground">
+              <div className="text-muted-foreground line-clamp-2 text-sm">
                 {course.description?.trim() || t('table.noDescription')}
               </div>
-              <div className="text-xs text-muted-foreground">
-                {t('table.structureSummary', { chapters: stats.chapters, activities: stats.activities })}
+              <div className="text-muted-foreground text-xs">
+                {t('table.structureSummary', {
+                  chapters: stats.chapters,
+                  activities: stats.activities,
+                })}
               </div>
             </div>
           );
@@ -432,7 +451,7 @@ const CoursesHome = ({
         header: t('table.updated'),
         meta: { label: t('table.updated') },
         cell: ({ row }) => (
-          <div className="text-sm text-muted-foreground">
+          <div className="text-muted-foreground text-sm">
             {row.original.update_date
               ? new Date(row.original.update_date).toLocaleDateString()
               : t('table.unknownDate')}
@@ -468,18 +487,18 @@ const CoursesHome = ({
   ];
 
   return (
-    <div className="min-h-screen w-full bg-background px-4 py-6 lg:px-8">
+    <div className="bg-background min-h-screen w-full px-4 py-6 lg:px-8">
       <div className="mb-6">
         <BreadCrumbs type="courses" />
 
-        <div className="mt-4 rounded-xl border bg-card p-6 shadow-sm">
+        <div className="bg-card mt-4 rounded-xl border p-6 shadow-sm">
           <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
             <div className="max-w-3xl">
-              <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <div className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
                 {t('header.label')}
               </div>
-              <h1 className="mt-2 text-4xl font-semibold tracking-tight text-foreground">{t('header.title')}</h1>
-              <p className="mt-3 text-sm leading-6 text-muted-foreground">{t('header.description')}</p>
+              <h1 className="text-foreground mt-2 text-4xl font-semibold tracking-tight">{t('header.title')}</h1>
+              <p className="text-muted-foreground mt-3 text-sm leading-6">{t('header.description')}</p>
             </div>
 
             <div className="flex flex-wrap gap-3">
@@ -508,11 +527,11 @@ const CoursesHome = ({
                 key={card.label}
                 className={courseWorkflowSummaryCardClass}
               >
-                <div className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                <div className="text-muted-foreground text-xs font-semibold tracking-[0.18em] uppercase">
                   {card.label}
                 </div>
-                <div className="mt-2 text-3xl font-semibold text-foreground">{card.value}</div>
-                <div className="mt-1 text-sm text-muted-foreground">{card.detail}</div>
+                <div className="text-foreground mt-2 text-3xl font-semibold">{card.value}</div>
+                <div className="text-muted-foreground mt-1 text-sm">{card.detail}</div>
               </div>
             ))}
           </div>
@@ -532,7 +551,7 @@ const CoursesHome = ({
           ))}
         </div>
 
-        <div className="mt-4 flex flex-col gap-4 rounded-xl border bg-card p-4 shadow-sm lg:flex-row lg:items-center lg:justify-between">
+        <div className="bg-card mt-4 flex flex-col gap-4 rounded-xl border p-4 shadow-sm lg:flex-row lg:items-center lg:justify-between">
           <form
             className="flex w-full max-w-2xl items-center gap-2"
             onSubmit={(event) => {
@@ -566,7 +585,7 @@ const CoursesHome = ({
           </form>
 
           <div className="flex items-center gap-3">
-            <label className="text-sm font-medium text-muted-foreground">{t('sort.label')}</label>
+            <label className="text-muted-foreground text-sm font-medium">{t('sort.label')}</label>
             <Select
               value={sortBy}
               onValueChange={(value) => updateRoute({ sort: value, page: '1' })}
@@ -586,17 +605,17 @@ const CoursesHome = ({
           </div>
         </div>
 
-        <div className="mt-3 text-sm text-muted-foreground">
+        <div className="text-muted-foreground mt-3 text-sm">
           {t('resultsSummary', { visible: courses.length, total: totalCourses })}
         </div>
       </div>
 
       {courses.length === 0 ? (
-        <div className="rounded-xl border border-dashed bg-card py-12 shadow-sm">
+        <div className="bg-card rounded-xl border border-dashed py-12 shadow-sm">
           <div className="flex items-center justify-center py-8">
             <div className="text-center">
-              <h2 className="mb-2 text-2xl font-bold text-muted-foreground">{t('empty.title')}</h2>
-              <p className="text-lg text-muted-foreground">
+              <h2 className="text-muted-foreground mb-2 text-2xl font-bold">{t('empty.title')}</h2>
+              <p className="text-muted-foreground text-lg">
                 {hasQuery ? t('empty.withQuery') : t('empty.withoutQuery')}
               </p>
               {canCreateCourse ? (
@@ -628,7 +647,7 @@ const CoursesHome = ({
           ))}
         </div>
       ) : (
-        <div className="rounded-xl border bg-card p-4 shadow-sm">
+        <div className="bg-card rounded-xl border p-4 shadow-sm">
           <DataTable
             columns={columns}
             data={courses}
@@ -648,7 +667,7 @@ const CoursesHome = ({
 
       {hasPagination ? (
         <div className="flex items-center justify-between border-t py-6">
-          <div className="text-sm text-muted-foreground">
+          <div className="text-muted-foreground text-sm">
             {t('pagination.page', { current: currentPage, total: totalPages })}
           </div>
           <div className="flex items-center gap-2">

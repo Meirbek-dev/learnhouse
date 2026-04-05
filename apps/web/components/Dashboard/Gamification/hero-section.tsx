@@ -176,7 +176,10 @@ export function HeroSection({ profile, userRank, className }: HeroSectionProps) 
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground font-medium">{t('progress.levelProgress')}</span>
                 <span className="text-base font-bold">
-                  {t('progress.levelTransition', { current: profile.level, next: profile.level + 1 })}
+                  {t('progress.levelTransition', {
+                    current: profile.level,
+                    next: profile.level + 1,
+                  })}
                 </span>
               </div>
               <div className="relative">

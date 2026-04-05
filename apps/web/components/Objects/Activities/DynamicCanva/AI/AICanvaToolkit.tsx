@@ -167,7 +167,7 @@ const AIActionButton = (props: { editor: Editor; label: ActionLabel }) => {
     Explain: <BookOpen size={13} />,
     Summarize: <FormInput size={13} />,
     Translate: <Languages size={13} />,
-    Examples: <span className="text-xs font-bold leading-none">{t('examplesAbbr')}</span>,
+    Examples: <span className="text-xs leading-none font-bold">{t('examplesAbbr')}</span>,
   };
 
   const isLoading = actionState === 'loading';

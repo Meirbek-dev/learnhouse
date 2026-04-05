@@ -32,8 +32,8 @@ const PlatformAssignmentPage = () => {
 
   if (isMobile) {
     return (
-      <div className="flex h-screen w-full items-center justify-center bg-muted p-4">
-        <div className="rounded-lg border border-border bg-card p-6 text-center text-card-foreground shadow-sm">
+      <div className="bg-muted flex h-screen w-full items-center justify-center p-4">
+        <div className="border-border bg-card text-card-foreground rounded-lg border p-6 text-center shadow-sm">
           <h2 className="mb-4 text-xl font-bold">{t('desktopOnlyTitle')}</h2>
           <Monitor
             className="mx-auto my-5"
@@ -49,7 +49,7 @@ const PlatformAssignmentPage = () => {
   return (
     <div className="flex h-screen w-full flex-col">
       <AssignmentProvider assignment_uuid={`assignment_${params.assignmentuuid}`}>
-        <div className="soft-shadow z-10 flex shrink-0 flex-col border-b border-border bg-card text-card-foreground shadow-sm">
+        <div className="soft-shadow border-border bg-card text-card-foreground z-10 flex shrink-0 flex-col border-b shadow-sm">
           <div className="mr-10 flex h-full justify-between">
             <div className="mr-10 pl-10 tracking-tighter">
               <BrdCmpx />
@@ -172,7 +172,7 @@ const PublishingState = () => {
             onClick={() => {
               setIsEditModalOpen(true);
             }}
-            className="flex items-center space-x-2 rounded-md border bg-background px-3 py-2 font-medium text-foreground shadow-sm hover:bg-accent"
+            className="bg-background text-foreground hover:bg-accent flex items-center space-x-2 rounded-md border px-3 py-2 font-medium shadow-sm"
           >
             <Pencil size={18} />
             <p className="text-sm font-bold">{t('edit')}</p>
@@ -188,7 +188,7 @@ const PublishingState = () => {
           <Link
             target="_blank"
             href={`/course/${assignment?.course_object?.course_uuid.replace('course_', '')}/activity/${assignment?.activity_object?.activity_uuid.replace('activity_', '')}`}
-            className="flex cursor-pointer items-center space-x-2 rounded-md border bg-background px-3 py-2 font-medium text-foreground shadow-sm hover:bg-accent"
+            className="bg-background text-foreground hover:bg-accent flex cursor-pointer items-center space-x-2 rounded-md border px-3 py-2 font-medium shadow-sm"
           >
             <Eye size={18} />
             <p className="text-sm font-bold">{t('preview')}</p>
@@ -204,7 +204,7 @@ const PublishingState = () => {
             <button
               type="button"
               onClick={() => updateAssignmentPublishState(assignment?.assignment_object?.assignment_uuid)}
-              className="flex items-center space-x-2 rounded-md border bg-background px-3 py-2 font-medium text-foreground shadow-sm hover:bg-accent"
+              className="bg-background text-foreground hover:bg-accent flex items-center space-x-2 rounded-md border px-3 py-2 font-medium shadow-sm"
             >
               <BookX size={18} />
               <p className="text-sm font-bold">{t('unpublish')}</p>
@@ -221,7 +221,7 @@ const PublishingState = () => {
             <button
               type="button"
               onClick={() => updateAssignmentPublishState(assignment?.assignment_object?.assignment_uuid)}
-              className="flex items-center space-x-2 rounded-md bg-primary px-3 py-2 font-medium text-primary-foreground shadow-sm hover:bg-primary/90"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 flex items-center space-x-2 rounded-md px-3 py-2 font-medium shadow-sm"
             >
               <BookOpen size={18} />
               <p className="text-sm font-bold">{t('publish')}</p>

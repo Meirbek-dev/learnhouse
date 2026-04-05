@@ -102,7 +102,7 @@ export function createActivityChatAdapter({
 
   const abort = () => currentController?.abort();
 
-  const connection = stream(async function*  connection(messages, _data) {
+  const connection = stream(async function* connection(messages, _data) {
     const accessToken = getAccessToken();
     if (!accessToken) throw new Error('Not authenticated');
 
@@ -208,7 +208,12 @@ export function createActivityChatAdapter({
             case 'delta':
             case 'chunk': {
               if (!messageStarted) {
-                yield { type: 'TEXT_MESSAGE_START', messageId, role: 'assistant', timestamp: now() };
+                yield {
+                  type: 'TEXT_MESSAGE_START',
+                  messageId,
+                  role: 'assistant',
+                  timestamp: now(),
+                };
                 messageStarted = true;
               }
               if (event.content) {
@@ -226,7 +231,12 @@ export function createActivityChatAdapter({
             case 'final': {
               if (event.aichat_uuid) writeUuid(event.aichat_uuid as string);
               if (!messageStarted) {
-                yield { type: 'TEXT_MESSAGE_START', messageId, role: 'assistant', timestamp: now() };
+                yield {
+                  type: 'TEXT_MESSAGE_START',
+                  messageId,
+                  role: 'assistant',
+                  timestamp: now(),
+                };
                 messageStarted = true;
               }
               const finalDelta = reconcileFinalMessageDelta(streamedText, (event.content as string) ?? '');

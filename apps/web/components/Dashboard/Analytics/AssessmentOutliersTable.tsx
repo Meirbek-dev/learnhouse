@@ -25,12 +25,12 @@ export default function AssessmentOutliersTable({ rows, storageKey, serverPagina
         <div>
           <Link
             href={`/dash/analytics/assessments/${row.original.assessment_type}/${row.original.assessment_id}`}
-            className="font-medium text-foreground hover:text-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:ring-offset-background dark:focus-visible:ring-offset-slate-900"
+            className="text-foreground focus-visible:ring-offset-background font-medium hover:text-emerald-700 focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:outline-none dark:focus-visible:ring-offset-slate-900"
             aria-label={t('assessmentOutliers.viewAssessment', { title: row.original.title })}
           >
             {row.original.title}
           </Link>
-          <div className="text-xs uppercase tracking-wide text-muted-foreground">
+          <div className="text-muted-foreground text-xs tracking-wide uppercase">
             {getAnalyticsAssessmentTypeLabel(t, row.original.assessment_type)}
           </div>
         </div>
@@ -67,14 +67,14 @@ export default function AssessmentOutliersTable({ rows, storageKey, serverPagina
       header: t('assessmentOutliers.colSignals'),
       cell: ({ row }) =>
         row.original.outlier_reason_codes.filter((code): code is string => Boolean(code)).length ? (
-          <div className="max-w-[240px] whitespace-normal text-xs text-muted-foreground">
+          <div className="text-muted-foreground max-w-[240px] text-xs whitespace-normal">
             {row.original.outlier_reason_codes
               .filter((code): code is string => Boolean(code))
               .map((code) => (
                 <Badge
                   key={code}
                   variant="outline"
-                  className="mb-1 mr-1"
+                  className="mr-1 mb-1"
                 >
                   {getAnalyticsReasonCodeLabel(t, code)}
                 </Badge>

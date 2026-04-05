@@ -142,7 +142,7 @@ function ContextMenuSubTrigger({
       {...props}
     >
       {children}
-      <ChevronRightIcon className="rtl:rotate-180 ms-auto" />
+      <ChevronRightIcon className="ms-auto rtl:rotate-180" />
     </ContextMenuPrimitive.SubmenuTrigger>
   );
 }

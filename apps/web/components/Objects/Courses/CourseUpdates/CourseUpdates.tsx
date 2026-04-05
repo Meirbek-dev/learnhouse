@@ -301,7 +301,10 @@ const UpdatesListView = () => {
                     }
                     className="text-xs font-semibold text-gray-300"
                   >
-                    {formatDistanceToNow(new Date(update.creation_date), { addSuffix: true, locale })}
+                    {formatDistanceToNow(new Date(update.creation_date), {
+                      addSuffix: true,
+                      locale,
+                    })}
                   </span>
                 </div>
                 {canUpdateCourse ? <DeleteUpdateButton update={update} /> : null}

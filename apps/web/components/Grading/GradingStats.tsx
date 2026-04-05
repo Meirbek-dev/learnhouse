@@ -32,7 +32,7 @@ function StatCard({ label, value, icon: Icon, accent = 'default' }: StatCardProp
         <Icon className={cn('h-5 w-5 shrink-0', colorMap[accent])} />
         <div>
           <p className="text-xs text-slate-500">{label}</p>
-          <p className="text-lg font-semibold leading-tight">{value}</p>
+          <p className="text-lg leading-tight font-semibold">{value}</p>
         </div>
       </CardContent>
     </Card>

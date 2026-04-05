@@ -49,12 +49,12 @@ const Trail = () => {
     <GeneralWrapper>
       <div className="space-y-8">
         {/* Progress Section */}
-        <div className="rounded-xl bg-card p-6 shadow-sm">
+        <div className="bg-card rounded-xl p-6 shadow-sm">
           <div className="mb-6 flex items-center space-x-3">
-            <BookOpen className="h-6 w-6 text-primary" />
-            <h2 className="text-xl font-semibold text-foreground">{t('myProgress')}</h2>
+            <BookOpen className="text-primary h-6 w-6" />
+            <h2 className="text-foreground text-xl font-semibold">{t('myProgress')}</h2>
             {trail?.runs ? (
-              <span className="rounded-full bg-primary/20 px-2.5 py-0.5 text-xs font-medium text-primary-foreground">
+              <span className="bg-primary/20 text-primary-foreground rounded-full px-2.5 py-0.5 text-xs font-medium">
                 {trail.runs.length}
               </span>
             ) : null}
@@ -64,9 +64,9 @@ const Trail = () => {
             <PageLoading />
           ) : trail.runs.length === 0 ? (
             <div className="py-8 text-center">
-              <BookOpen className="mx-auto mb-3 h-12 w-12 text-muted-foreground" />
+              <BookOpen className="text-muted-foreground mx-auto mb-3 h-12 w-12" />
               <p className="text-muted-foreground">{t('noCoursesInProgress')}</p>
-              <p className="mt-1 text-sm text-muted-foreground">{t('startACourseToSeeYourProgress')}</p>
+              <p className="text-muted-foreground mt-1 text-sm">{t('startACourseToSeeYourProgress')}</p>
             </div>
           ) : (
             <div className="space-y-6">

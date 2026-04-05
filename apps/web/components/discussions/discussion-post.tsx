@@ -16,7 +16,7 @@ import { useState } from 'react';
 
 const RichTextEditor = dynamic(() => import('./rich-text-editor'), {
   ssr: false,
-  loading: () => <div className="h-[120px] w-full animate-pulse rounded-lg border bg-muted/40" />,
+  loading: () => <div className="bg-muted/40 h-[120px] w-full animate-pulse rounded-lg border" />,
 });
 
 interface DiscussionPostData {
@@ -123,8 +123,8 @@ export default function DiscussionPost({
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex flex-wrap items-center gap-2">
-                  <h4 className="font-semibold text-foreground">{getUserDisplayName(post.firstName, post.lastName)}</h4>
-                  <span className="text-sm text-muted-foreground">@{post.username}</span>
+                  <h4 className="text-foreground font-semibold">{getUserDisplayName(post.firstName, post.lastName)}</h4>
+                  <span className="text-muted-foreground text-sm">@{post.username}</span>
                   {canModerate && (
                     <Badge
                       variant="destructive"
@@ -141,13 +141,13 @@ export default function DiscussionPost({
                       {t('author')}
                     </Badge>
                   )}
-                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <div className="text-muted-foreground flex items-center gap-1 text-xs">
                     <Clock size={12} />
                     <span>{format.relativeTime(new Date(post.createDate), now)}</span>
                     {post.updateDate &&
                       post.createDate &&
                       new Date(post.updateDate).getTime() !== new Date(post.createDate).getTime() && (
-                        <span className="text-xs text-muted-foreground">({t('edited')})</span>
+                        <span className="text-muted-foreground text-xs">({t('edited')})</span>
                       )}
                   </div>
                 </div>
@@ -165,7 +165,7 @@ export default function DiscussionPost({
                           setEditContent(post.postMessage);
                         }}
                         disabled={!canUpdate}
-                        className="h-7 w-7 p-0 text-muted-foreground hover:bg-primary/10 hover:text-primary"
+                        className="text-muted-foreground hover:bg-primary/10 hover:text-primary h-7 w-7 p-0"
                       >
                         <Edit size={12} />
                       </Button>
@@ -179,7 +179,7 @@ export default function DiscussionPost({
                         size="sm"
                         onClick={() => onDeletePost(post.id)}
                         disabled={!canDelete}
-                        className="h-7 w-7 p-0 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                        className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive h-7 w-7 p-0"
                       >
                         <Trash2 size={12} />
                       </Button>
@@ -232,7 +232,7 @@ export default function DiscussionPost({
 
               <div className="mt-4 flex flex-wrap items-center gap-4">
                 <div className="flex items-center gap-3">
-                  <div className="flex items-center overflow-hidden rounded-lg border border-border bg-muted">
+                  <div className="border-border bg-muted flex items-center overflow-hidden rounded-lg border">
                     <Button
                       variant="ghost"
                       size="sm"
@@ -301,7 +301,7 @@ export default function DiscussionPost({
                   />
                   <span>{t('reply')}</span>
                   {post.replies && post.replies.length > 0 && (
-                    <span className="ml-1 rounded-full bg-secondary/20 px-1.5 py-0.5 text-xs font-medium text-muted-foreground">
+                    <span className="bg-secondary/20 text-muted-foreground ml-1 rounded-full px-1.5 py-0.5 text-xs font-medium">
                       {post.replies.length}
                     </span>
                   )}

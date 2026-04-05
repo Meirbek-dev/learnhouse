@@ -83,7 +83,10 @@ const CreateProductForm: FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
         ]
       : [{ value: 'fixed_price', label: t('priceTypes.fixed_price') }];
 
-  const currencyItems = currencies.map((currency) => ({ value: currency.code, label: currency.name }));
+  const currencyItems = currencies.map((currency) => ({
+    value: currency.code,
+    label: currency.name,
+  }));
 
   const handleSubmit = async (values: ProductFormValues) => {
     const loadingToast = toast.loading(tNotify('creatingProduct'));

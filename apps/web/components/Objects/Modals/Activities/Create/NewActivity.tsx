@@ -122,7 +122,7 @@ export default function NewActivityModal({
     return (
       <div className="w-full space-y-4">
         <div>
-          <p className="text-xs font-medium uppercase tracking-widest text-gray-400">{t('chooseType')}</p>
+          <p className="text-xs font-medium tracking-widest text-gray-400 uppercase">{t('chooseType')}</p>
         </div>
 
         <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">

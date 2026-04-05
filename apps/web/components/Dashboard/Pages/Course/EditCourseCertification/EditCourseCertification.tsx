@@ -208,7 +208,10 @@ const EditCourseCertification = () => {
   // Subscribe to individual watched fields to avoid over-rendering
   const isEnabled = useWatch({ control: form.control, name: 'enable_certification' });
   const certificationName = useWatch({ control: form.control, name: 'certification_name' });
-  const certificationDescription = useWatch({ control: form.control, name: 'certification_description' });
+  const certificationDescription = useWatch({
+    control: form.control,
+    name: 'certification_description',
+  });
   const certificationType = useWatch({ control: form.control, name: 'certification_type' });
   const certificatePattern = useWatch({ control: form.control, name: 'certificate_pattern' });
   const certificateInstructor = useWatch({ control: form.control, name: 'certificate_instructor' });

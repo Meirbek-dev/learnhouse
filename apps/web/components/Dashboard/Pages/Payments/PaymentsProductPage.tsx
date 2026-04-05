@@ -202,7 +202,7 @@ const PaymentsProductPage = () => {
   if (!products)
     return (
       <div className="flex h-64 items-center justify-center">
-        <div className="flex animate-pulse items-center rounded-md bg-muted px-4 py-2 text-sm font-medium text-muted-foreground">
+        <div className="bg-muted text-muted-foreground flex animate-pulse items-center rounded-md px-4 py-2 text-sm font-medium">
           <Loader2
             size={16}
             className="mr-2 animate-spin"
@@ -215,7 +215,7 @@ const PaymentsProductPage = () => {
   const productItems = products.data ?? [];
 
   return (
-    <div className="h-full w-full bg-muted">
+    <div className="bg-muted h-full w-full">
       <div className="mx-auto pr-10 pl-10">
         <Modal
           isDialogOpen={isCreateModalOpen}
@@ -235,7 +235,7 @@ const PaymentsProductPage = () => {
           {productItems.map((product: PaymentsProductRead) => (
             <div
               key={product.id}
-              className="flex h-full flex-col rounded-lg bg-card p-4 shadow-sm ring-1 ring-border"
+              className="bg-card ring-border flex h-full flex-col rounded-lg p-4 shadow-sm ring-1"
             >
               {editingProductId === product.id ? (
                 <EditProductForm
@@ -288,8 +288,8 @@ const PaymentsProductPage = () => {
                       <p className="text-muted-foreground">{product.description}</p>
                       {product.benefits ? (
                         <div className="mt-2">
-                          <h4 className="text-sm font-semibold text-foreground">{t('benefitsLabel')}</h4>
-                          <p className="text-sm text-muted-foreground">{product.benefits}</p>
+                          <h4 className="text-foreground text-sm font-semibold">{t('benefitsLabel')}</h4>
+                          <p className="text-muted-foreground text-sm">{product.benefits}</p>
                         </div>
                       ) : null}
                     </div>
@@ -299,7 +299,7 @@ const PaymentsProductPage = () => {
                       onClick={() => {
                         toggleProductExpansion(product.id);
                       }}
-                      className="flex items-center text-sm text-muted-foreground hover:text-foreground"
+                      className="text-muted-foreground hover:text-foreground flex items-center text-sm"
                     >
                       {expandedProducts[product.id] ? (
                         <>
@@ -315,9 +315,9 @@ const PaymentsProductPage = () => {
                     </button>
                   </div>
                   <ProductLinkedCourses productId={product.id} />
-                  <div className="mt-2 flex items-center justify-between rounded-md bg-secondary/10 p-2">
-                    <span className="text-sm text-muted-foreground">{t('priceLabel')}</span>
-                    <span className="text-lg font-semibold text-foreground">
+                  <div className="bg-secondary/10 mt-2 flex items-center justify-between rounded-md p-2">
+                    <span className="text-muted-foreground text-sm">{t('priceLabel')}</span>
+                    <span className="text-foreground text-lg font-semibold">
                       {new Intl.NumberFormat(navigator.language, {
                         style: 'currency',
                         currency: product.currency,
@@ -330,7 +330,7 @@ const PaymentsProductPage = () => {
           ))}
         </div>
         {productItems.length === 0 && (
-          <div className="mx-auto mt-3 flex items-center space-x-2 font-semibold text-muted-foreground">
+          <div className="text-muted-foreground mx-auto mt-3 flex items-center space-x-2 font-semibold">
             <Info size={20} />
             <p>{t('noProducts')}</p>
           </div>
@@ -341,7 +341,7 @@ const PaymentsProductPage = () => {
             onClick={() => {
               setIsCreateModalOpen(true);
             }}
-            className={`mb-4 flex items-center space-x-2 rounded-lg border bg-primary px-3 py-1.5 font-medium text-primary-foreground transition duration-300 ${
+            className={`bg-primary text-primary-foreground mb-4 flex items-center space-x-2 rounded-lg border px-3 py-1.5 font-medium transition duration-300 ${
               isStripeEnabled ? 'hover:bg-primary/90' : 'cursor-not-allowed opacity-50'
             }`}
             disabled={!isStripeEnabled}
@@ -369,7 +369,10 @@ const EditProductForm = ({
     code: currency.code,
     name: `${currency.code} - ${currency.currency}`,
   }));
-  const currencyItems = currencies.map((currency) => ({ value: currency.code, label: currency.name }));
+  const currencyItems = currencies.map((currency) => ({
+    value: currency.code,
+    label: currency.name,
+  }));
   const t = useTranslations('DashPage.Payments.ProductPage.editForm');
   const validationSchema = createValidationSchema(t);
 

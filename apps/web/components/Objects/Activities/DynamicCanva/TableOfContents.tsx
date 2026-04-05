@@ -56,15 +56,15 @@ const TableOfContents = ({ editor }: TableOfContentsProps) => {
   if (headings.length === 0) return <div style={{ display: 'none' }} />;
 
   return (
-    <div className="w-full bg-transparent border-0 shadow-none p-0 m-0 flex flex-col items-stretch h-fit">
-      <ul className="!list-none !p-0 m-0">
+    <div className="m-0 flex h-fit w-full flex-col items-stretch border-0 bg-transparent p-0 shadow-none">
+      <ul className="m-0 !list-none !p-0">
         {headings.map((heading, index) => (
           <li
             key={index}
             style={{ paddingLeft: `${(heading.level - 1) * 1.2}rem` }}
-            className="my-2 !list-none flex items-start gap-2"
+            className="my-2 flex !list-none items-start gap-2"
           >
-            <span className="flex shrink-0 items-center mt-[0.1rem] text-foreground">
+            <span className="text-foreground mt-[0.1rem] flex shrink-0 items-center">
               <Check
                 size={15}
                 strokeWidth={1.7}
@@ -75,7 +75,7 @@ const TableOfContents = ({ editor }: TableOfContentsProps) => {
                 fontWeight: heading.level === 1 ? 500 : 400,
                 fontSize: heading.level === 1 ? '1rem' : heading.level === 2 ? '0.97rem' : '0.95rem',
               }}
-              className="block flex-1 min-w-0 p-0 text-foreground leading-[1.4] no-underline break-words hyphens-auto bg-transparent transition-none hover:text-primary"
+              className="text-foreground hover:text-primary block min-w-0 flex-1 bg-transparent p-0 leading-[1.4] break-words hyphens-auto no-underline transition-none"
               href={`#${heading.id}`}
             >
               {heading.text}

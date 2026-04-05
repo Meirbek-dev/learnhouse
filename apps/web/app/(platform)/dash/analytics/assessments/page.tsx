@@ -50,7 +50,7 @@ async function PlatformAnalyticsAssessmentsPageInner(props: {
         role="main"
         className="mx-auto flex w-full max-w-[1440px] flex-col gap-6 px-4 py-6 md:px-6 xl:px-8"
       >
-        <Card className="border-slate-200 bg-card text-card-foreground shadow-sm dark:border-slate-700 dark:bg-slate-800">
+        <Card className="bg-card text-card-foreground border-slate-200 shadow-sm dark:border-slate-700 dark:bg-slate-800">
           <CardContent className="space-y-4">
             <TeacherFilterBar
               path="/dash/analytics/assessments"

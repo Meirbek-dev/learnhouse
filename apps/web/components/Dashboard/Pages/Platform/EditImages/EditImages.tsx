@@ -393,33 +393,33 @@ export default function EditImages() {
   };
 
   return (
-    <div className="soft-shadow mx-0 mb-16 rounded-xl border border-border bg-card px-3 py-3 text-card-foreground shadow-sm sm:mx-10 sm:mb-0">
-      <div className="mb-2 flex flex-col gap-1 rounded-md bg-muted px-5 py-3">
-        <h1 className="text-xl font-bold text-foreground">{t('title')}</h1>
-        <h2 className="text-base text-muted-foreground">{t('description')}</h2>
+    <div className="soft-shadow border-border bg-card text-card-foreground mx-0 mb-16 rounded-xl border px-3 py-3 shadow-sm sm:mx-10 sm:mb-0">
+      <div className="bg-muted mb-2 flex flex-col gap-1 rounded-md px-5 py-3">
+        <h1 className="text-foreground text-xl font-bold">{t('title')}</h1>
+        <h2 className="text-muted-foreground text-base">{t('description')}</h2>
       </div>
       <Tabs
         defaultValue="logo"
         className="w-full"
       >
-        <TabsList className="grid w-full grid-cols-3 rounded-lg bg-muted p-1">
+        <TabsList className="bg-muted grid w-full grid-cols-3 rounded-lg p-1">
           <TabsTrigger
             value="logo"
-            className="flex items-center gap-2 transition-all data-[state=active]:bg-background data-[state=active]:shadow-xs"
+            className="data-[state=active]:bg-background flex items-center gap-2 transition-all data-[state=active]:shadow-xs"
           >
             <StarIcon size={16} />
             <span>{t('Tabs.logo')}</span>
           </TabsTrigger>
           <TabsTrigger
             value="thumbnail"
-            className="flex items-center gap-2 transition-all data-[state=active]:bg-background data-[state=active]:shadow-xs"
+            className="data-[state=active]:bg-background flex items-center gap-2 transition-all data-[state=active]:shadow-xs"
           >
             <ImageIcon size={16} />
             <span>{t('Tabs.thumbnail')}</span>
           </TabsTrigger>
           <TabsTrigger
             value="previews"
-            className="flex items-center gap-2 transition-all data-[state=active]:bg-background data-[state=active]:shadow-xs"
+            className="data-[state=active]:bg-background flex items-center gap-2 transition-all data-[state=active]:shadow-xs"
           >
             <Images size={16} />
             <span>{t('Tabs.previews')}</span>
@@ -431,7 +431,7 @@ export default function EditImages() {
           className="mt-2"
         >
           <div className="flex w-full flex-col space-y-5">
-            <div className="w-full rounded-xl bg-muted/30 py-8 transition-all duration-300">
+            <div className="bg-muted/30 w-full rounded-xl py-8 transition-all duration-300">
               <div className="flex flex-col items-center justify-center gap-8">
                 <div className="group relative h-[125px] w-[250px]">
                   <NextImage
@@ -499,7 +499,7 @@ export default function EditImages() {
           className="mt-2"
         >
           <div className="flex w-full flex-col space-y-5">
-            <div className="w-full rounded-xl bg-muted/30 py-8 transition-all duration-300">
+            <div className="bg-muted/30 w-full rounded-xl py-8 transition-all duration-300">
               <div className="flex flex-col items-center justify-center space-y-8">
                 <div className="group relative h-[125px] w-[250px]">
                   <NextImage
@@ -568,7 +568,7 @@ export default function EditImages() {
           className="mt-4"
         >
           <div className="flex w-full flex-col space-y-5">
-            <div className="w-full rounded-xl bg-muted/30 py-6 transition-all duration-300">
+            <div className="bg-muted/30 w-full rounded-xl py-6 transition-all duration-300">
               <div className="flex flex-col items-center justify-center space-y-6">
                 <DragDropContext onDragEnd={handleDragEnd}>
                   <Droppable

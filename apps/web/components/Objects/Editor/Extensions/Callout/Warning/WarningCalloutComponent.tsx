@@ -73,7 +73,7 @@ const WarningCalloutComponent = (props: any) => {
         >
           <AlertTriangle />
         </div>
-        <div className="w-full break-words grow">
+        <div className="w-full grow break-words">
           <NodeViewContent
             className={cn(
               'm-[5px] p-2 rounded-lg',
@@ -86,7 +86,7 @@ const WarningCalloutComponent = (props: any) => {
         </div>
         {options.dismissible && !isEditable ? (
           <button
-            className="bg-transparent border-0 cursor-pointer flex items-center justify-center p-1 ml-2 rounded-full hover:bg-black/10"
+            className="ml-2 flex cursor-pointer items-center justify-center rounded-full border-0 bg-transparent p-1 hover:bg-black/10"
             onClick={() => {
               setDismissed(true);
             }}

@@ -159,8 +159,8 @@ export function GradingEditor({
 
   return (
     <>
-      <div className="border-b px-6 py-4 space-y-4">
-        <div className="flex items-end gap-6 pt-1 flex-wrap">
+      <div className="space-y-4 border-b px-6 py-4">
+        <div className="flex flex-wrap items-end gap-6 pt-1">
           <div className="space-y-1.5">
             <Label
               htmlFor="final-score"
@@ -183,15 +183,15 @@ export function GradingEditor({
                   scoreInvalid && 'border-destructive focus-visible:ring-destructive',
                 )}
               />
-              <span className="text-sm text-muted-foreground">/ 100</span>
+              <span className="text-muted-foreground text-sm">/ 100</span>
             </div>
-            {scoreInvalid ? <p className="text-xs text-destructive">{t('invalidScore')}</p> : null}
+            {scoreInvalid ? <p className="text-destructive text-xs">{t('invalidScore')}</p> : null}
           </div>
 
           <div className="flex flex-col gap-1.5">
             {submission?.auto_score !== null && submission?.auto_score !== undefined ? (
               <div className="flex items-center gap-2">
-                <span className="text-xs text-muted-foreground">
+                <span className="text-muted-foreground text-xs">
                   {t('autoScore')}: <strong>{submission.auto_score}/100</strong>
                 </span>
                 <Button
@@ -209,7 +209,7 @@ export function GradingEditor({
 
             {autoSumScore !== null ? (
               <div className="flex items-center gap-2">
-                <span className="text-xs text-muted-foreground">
+                <span className="text-muted-foreground text-xs">
                   {t('autoSum')}: <strong>{autoSumScore}/100</strong>
                 </span>
                 <Button
@@ -230,7 +230,7 @@ export function GradingEditor({
 
       <ScrollArea className="flex-1 px-6 py-4">
         {isLoading ? (
-          <div className="flex h-32 items-center justify-center text-sm text-muted-foreground">{t('loading')}</div>
+          <div className="text-muted-foreground flex h-32 items-center justify-center text-sm">{t('loading')}</div>
         ) : submission ? (
           <SubmissionAnswers
             submission={submission}
@@ -239,11 +239,11 @@ export function GradingEditor({
             t={t}
           />
         ) : (
-          <div className="flex h-32 items-center justify-center text-sm text-muted-foreground">{t('noData')}</div>
+          <div className="text-muted-foreground flex h-32 items-center justify-center text-sm">{t('noData')}</div>
         )}
       </ScrollArea>
 
-      <div className="border-t bg-muted px-6 py-4 gap-4">
+      <div className="bg-muted gap-4 border-t px-6 py-4">
         <div className="space-y-1.5">
           <Label
             htmlFor="feedback"
@@ -277,7 +277,11 @@ export default function GradingPanel({
 
   const { submission, isLoading, mutate } = useGradingPanel(submissionUuid);
 
-  const [draft, setDraft] = useState<GradingDraftState>({ score: '', feedback: '', itemFeedbacks: {} });
+  const [draft, setDraft] = useState<GradingDraftState>({
+    score: '',
+    feedback: '',
+    itemFeedbacks: {},
+  });
   const [isSaving, setIsSaving] = useState(false);
   const initialRef = useRef<GradingDraftState>({ score: '', feedback: '', itemFeedbacks: {} });
 
@@ -421,14 +425,14 @@ export default function GradingPanel({
           style={{ maxWidth: '48rem' }}
         >
           <DrawerTitle className="sr-only">{t('title')}</DrawerTitle>
-          <div className="border-b px-6 py-4 space-y-3">
+          <div className="space-y-3 border-b px-6 py-4">
             <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2 flex-1 min-w-0">
-                <h2 className="text-base font-semibold truncate">{studentName}</h2>
+              <div className="flex min-w-0 flex-1 items-center gap-2">
+                <h2 className="truncate text-base font-semibold">{studentName}</h2>
                 {submission?.is_late ? (
                   <Badge
                     variant="outline"
-                    className="shrink-0 border-destructive bg-destructive/20 text-destructive text-xs"
+                    className="border-destructive bg-destructive/20 text-destructive shrink-0 text-xs"
                   >
                     {t('late')}
                   </Badge>
@@ -437,7 +441,7 @@ export default function GradingPanel({
               {submission ? <SubmissionStatusBadge status={submission.status} /> : null}
             </div>
 
-            <p className="text-xs text-muted-foreground">
+            <p className="text-muted-foreground text-xs">
               {t('attempt')} #{submission?.attempt_number ?? '—'} ·{' '}
               {submission?.submitted_at ? new Date(submission.submitted_at).toLocaleString() : t('notYetSubmitted')}
             </p>
@@ -458,7 +462,7 @@ export default function GradingPanel({
                   <ChevronLeft className="h-4 w-4" />
                   {t('previous')}
                 </Button>
-                <span className="text-xs text-muted-foreground">
+                <span className="text-muted-foreground text-xs">
                   {currentIndex + 1} / {allSubmissionUuids.length}
                 </span>
                 <Button
@@ -490,17 +494,20 @@ export default function GradingPanel({
                 ...current,
                 itemFeedbacks: {
                   ...current.itemFeedbacks,
-                  [itemId]: { ...(current.itemFeedbacks[itemId] ?? { score: '', feedback: '' }), [field]: value },
+                  [itemId]: {
+                    ...(current.itemFeedbacks[itemId] ?? { score: '', feedback: '' }),
+                    [field]: value,
+                  },
                 },
               }))
             }
             t={t}
           />
 
-          <div className="border-t bg-muted px-6 py-4 space-y-4">
+          <div className="bg-muted space-y-4 border-t px-6 py-4">
             <Separator />
 
-            <div className="flex items-center justify-between gap-2 flex-wrap">
+            <div className="flex flex-wrap items-center justify-between gap-2">
               <AlertDialog
                 open={returnOpen}
                 onOpenChange={setReturnOpen}
@@ -582,13 +589,13 @@ function SubmissionAnswers({ submission, itemFeedbacks, onItemFeedbackChange, t 
   const isEditable = canTeacherEditGrade(submission.status);
 
   if (!breakdown?.items?.length) {
-    return <p className="text-sm text-muted-foreground">{t('noBreakdown')}</p>;
+    return <p className="text-muted-foreground text-sm">{t('noBreakdown')}</p>;
   }
 
   return (
     <div className="space-y-4">
       {breakdown.needs_manual_review ? (
-        <div className="rounded-md border border-secondary/50 bg-secondary/10 px-4 py-2 text-sm text-primary">
+        <div className="border-secondary/50 bg-secondary/10 text-primary rounded-md border px-4 py-2 text-sm">
           {t('manualReviewRequired')}
         </div>
       ) : null}
@@ -622,7 +629,7 @@ function AnswerItem({ item, index, itemFeedback, isEditable, onFeedbackChange, t
     itemFeedback.score !== '' && (Number.isNaN(scoreNum) || scoreNum < 0 || scoreNum > item.max_score);
 
   return (
-    <div className="rounded-lg border bg-white p-4 space-y-3">
+    <div className="space-y-3 rounded-lg border bg-white p-4">
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-center gap-2">
           {item.needs_manual_review ? (
@@ -633,31 +640,31 @@ function AnswerItem({ item, index, itemFeedback, isEditable, onFeedbackChange, t
               {t('needsReview')}
             </Badge>
           ) : null}
-          <p className="text-sm font-medium text-foreground">
+          <p className="text-foreground text-sm font-medium">
             {index + 1}. {item.item_text || item.item_id}
           </p>
         </div>
-        <span className="shrink-0 text-xs font-semibold text-muted-foreground">
+        <span className="text-muted-foreground shrink-0 text-xs font-semibold">
           {item.score} / {item.max_score}
         </span>
       </div>
 
       {item.user_answer !== null ? (
-        <div className="rounded bg-muted/70 px-3 py-2 text-sm text-muted-foreground">
-          <span className="text-xs font-medium text-muted-foreground mr-1">{t('studentAnswer')}:</span>
+        <div className="bg-muted/70 text-muted-foreground rounded px-3 py-2 text-sm">
+          <span className="text-muted-foreground mr-1 text-xs font-medium">{t('studentAnswer')}:</span>
           {typeof item.user_answer === 'string' ? item.user_answer : JSON.stringify(item.user_answer, null, 2)}
         </div>
       ) : null}
 
       {item.correct === false && item.correct_answer !== null ? (
         <div className="rounded bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
-          <span className="text-xs font-medium text-emerald-600 mr-1">{t('correctAnswer')}:</span>
+          <span className="mr-1 text-xs font-medium text-emerald-600">{t('correctAnswer')}:</span>
           {typeof item.correct_answer === 'string' ? item.correct_answer : JSON.stringify(item.correct_answer)}
         </div>
       ) : null}
 
       {item.feedback && !item.needs_manual_review ? (
-        <p className="text-xs text-muted-foreground italic">{item.feedback}</p>
+        <p className="text-muted-foreground text-xs italic">{item.feedback}</p>
       ) : null}
 
       {isEditable ? (
@@ -676,7 +683,7 @@ function AnswerItem({ item, index, itemFeedback, isEditable, onFeedbackChange, t
                   onChange={(event) => onFeedbackChange('score', event.target.value)}
                   className={cn('w-20 text-center text-xs', itemScoreInvalid && 'border-destructive')}
                 />
-                <span className="text-xs text-muted-foreground">/ {item.max_score}</span>
+                <span className="text-muted-foreground text-xs">/ {item.max_score}</span>
               </div>
             </div>
           </div>
@@ -687,7 +694,7 @@ function AnswerItem({ item, index, itemFeedback, isEditable, onFeedbackChange, t
               placeholder={t('itemFeedbackPlaceholder')}
               value={itemFeedback.feedback}
               onChange={(event) => onFeedbackChange('feedback', event.target.value)}
-              className="text-xs resize-none"
+              className="resize-none text-xs"
             />
           </div>
         </div>

@@ -201,7 +201,10 @@ export default function QuestionEditor({
         if (firstCorrect === -1) return prev;
         return {
           ...prev,
-          answer_options: prev.answer_options.map((o, i) => ({ ...o, is_correct: i === firstCorrect })),
+          answer_options: prev.answer_options.map((o, i) => ({
+            ...o,
+            is_correct: i === firstCorrect,
+          })),
         };
       }
 
@@ -384,7 +387,10 @@ export default function QuestionEditor({
                 })()}
                 onValueChange={(value: any) => {
                   const i = Number.parseInt(String(value), 10);
-                  const newOptions = formData.answer_options.map((opt, idx) => ({ ...opt, is_correct: idx === i }));
+                  const newOptions = formData.answer_options.map((opt, idx) => ({
+                    ...opt,
+                    is_correct: idx === i,
+                  }));
                   setFormData({ ...formData, answer_options: newOptions });
                 }}
                 className="flex flex-col gap-2"

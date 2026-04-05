@@ -561,7 +561,7 @@ const EditCourseContributors = () => {
                 <Command>
                   <CommandList>
                     {isSearching ? (
-                      <div className="p-4 text-center text-sm text-muted-foreground">{t('searchingMessage')}</div>
+                      <div className="text-muted-foreground p-4 text-center text-sm">{t('searchingMessage')}</div>
                     ) : (
                       <>
                         <CommandEmpty>{t('noUsersFoundMessage')}</CommandEmpty>
@@ -590,13 +590,13 @@ const EditCourseContributors = () => {
                                   showProfilePopup
                                 />
                                 <div className="min-w-0 flex-1">
-                                  <div className="truncate font-medium text-foreground">
+                                  <div className="text-foreground truncate font-medium">
                                     {[user.first_name, user.middle_name, user.last_name].filter(Boolean).join(' ')}
                                   </div>
-                                  <div className="text-xs text-muted-foreground">@{user.username}</div>
+                                  <div className="text-muted-foreground text-xs">@{user.username}</div>
                                 </div>
                                 {isExisting && (
-                                  <span className="shrink-0 rounded border bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+                                  <span className="bg-muted text-muted-foreground shrink-0 rounded border px-2 py-0.5 text-xs">
                                     {t('alreadyContributorMessage')}
                                   </span>
                                 )}
@@ -613,7 +613,7 @@ const EditCourseContributors = () => {
 
             {selectedUsers.length > 0 && (
               <div className={courseWorkflowMutedPanelClass + ' flex items-center justify-between'}>
-                <span className="text-sm text-foreground">
+                <span className="text-foreground text-sm">
                   {t('usersSelectedMessage', { count: selectedUsers.length })}
                 </span>
                 <div className="flex gap-2">
@@ -636,10 +636,10 @@ const EditCourseContributors = () => {
             )}
           </div>
 
-          <div className="rounded-xl border bg-card">
+          <div className="bg-card rounded-xl border">
             {selectedContributors.length > 0 && (
-              <div className="flex items-center justify-between rounded-t-xl border-b bg-muted/60 px-4 py-3">
-                <span className="text-sm text-foreground">
+              <div className="bg-muted/60 flex items-center justify-between rounded-t-xl border-b px-4 py-3">
+                <span className="text-foreground text-sm">
                   {t('contributorsSelectedMessage', { count: selectedContributors.length })}
                 </span>
                 <div className="flex gap-2">
@@ -662,7 +662,7 @@ const EditCourseContributors = () => {
             )}
 
             {isContributorsLoading ? (
-              <div className="px-4 py-6 text-center text-sm text-muted-foreground">{t('loadingContributors')}</div>
+              <div className="text-muted-foreground px-4 py-6 text-center text-sm">{t('loadingContributors')}</div>
             ) : (
               <ScrollArea className="max-h-[520px]">
                 <Table>
@@ -696,7 +696,7 @@ const EditCourseContributors = () => {
                       <TableRow
                         key={`${contributor.user_id}-${contributor.id}`}
                         className={`${selectedContributors.includes(contributor.user_id) ? 'bg-muted/60' : ''} ${
-                          contributor.authorship !== 'CREATOR' ? 'cursor-pointer hover:bg-muted/50' : ''
+                          contributor.authorship !== 'CREATOR' ? 'hover:bg-muted/50 cursor-pointer' : ''
                         }`}
                         onClick={(e) => {
                           if (
@@ -751,7 +751,7 @@ const EditCourseContributors = () => {
                             getStatusStyle={getStatusStyle}
                           />
                         </TableCell>
-                        <TableCell className="text-sm text-muted-foreground">
+                        <TableCell className="text-muted-foreground text-sm">
                           {formatDate(contributor.creation_date, locale)}
                         </TableCell>
                       </TableRow>

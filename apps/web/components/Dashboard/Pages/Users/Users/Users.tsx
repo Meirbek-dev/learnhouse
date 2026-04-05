@@ -294,10 +294,10 @@ const Users = () => {
       ) : (
         <>
           <div className="h-6" />
-          <div className="mx-auto mr-10 ml-10 rounded-xl border border-border bg-card px-4 py-4 shadow-xs">
-            <div className="mb-3 flex flex-col -space-y-1 rounded-md bg-muted px-5 py-3">
-              <h1 className="text-xl font-bold text-foreground">{t('activeUsersTitle')}</h1>
-              <h2 className="text-base text-muted-foreground"> {t('description')}</h2>
+          <div className="border-border bg-card mx-auto mr-10 ml-10 rounded-xl border px-4 py-4 shadow-xs">
+            <div className="bg-muted mb-3 flex flex-col -space-y-1 rounded-md px-5 py-3">
+              <h1 className="text-foreground text-xl font-bold">{t('activeUsersTitle')}</h1>
+              <h2 className="text-muted-foreground text-base"> {t('description')}</h2>
             </div>
             <DataTable
               columns={columns}

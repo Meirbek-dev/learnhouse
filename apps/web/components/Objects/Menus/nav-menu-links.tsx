@@ -37,7 +37,7 @@ const LinkItem = async (props: any) => {
       prefetch={false}
       href={getAbsoluteUrl(link)}
     >
-      <li className="flex items-center space-x-2 font-medium text-muted-foreground">
+      <li className="text-muted-foreground flex items-center space-x-2 font-medium">
         {props.type === 'courses' && (
           <>
             <BookCopy size={20} /> <span>{t('courses')}</span>

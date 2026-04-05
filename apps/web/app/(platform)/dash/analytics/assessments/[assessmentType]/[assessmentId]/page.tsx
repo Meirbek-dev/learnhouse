@@ -61,7 +61,7 @@ async function PlatformAnalyticsAssessmentDetailPageInner(props: {
           </CardHeader>
           <CardContent className="grid gap-3 md:grid-cols-4">
             <div className="rounded-2xl border border-slate-200 p-4">
-              <div className="text-xs uppercase tracking-wide text-slate-500">
+              <div className="text-xs tracking-wide text-slate-500 uppercase">
                 {t('pages.assessmentStatSubmissionRate')}
               </div>
               <div className="mt-2 text-3xl font-semibold">
@@ -70,14 +70,14 @@ async function PlatformAnalyticsAssessmentDetailPageInner(props: {
               </div>
             </div>
             <div className="rounded-2xl border border-slate-200 p-4">
-              <div className="text-xs uppercase tracking-wide text-slate-500">{t('pages.assessmentStatPassRate')}</div>
+              <div className="text-xs tracking-wide text-slate-500 uppercase">{t('pages.assessmentStatPassRate')}</div>
               <div className="mt-2 text-3xl font-semibold">
                 {detail.summary.pass_rate ?? t('atRisk.na')}
                 {detail.summary.pass_rate !== null ? '%' : ''}
               </div>
             </div>
             <div className="rounded-2xl border border-slate-200 p-4">
-              <div className="text-xs uppercase tracking-wide text-slate-500">
+              <div className="text-xs tracking-wide text-slate-500 uppercase">
                 {t('pages.assessmentStatMedianScore')}
               </div>
               <div className="mt-2 text-3xl font-semibold">
@@ -86,7 +86,7 @@ async function PlatformAnalyticsAssessmentDetailPageInner(props: {
               </div>
             </div>
             <div className="rounded-2xl border border-slate-200 p-4">
-              <div className="text-xs uppercase tracking-wide text-slate-500">{t('pages.assessmentStatGenerated')}</div>
+              <div className="text-xs tracking-wide text-slate-500 uppercase">{t('pages.assessmentStatGenerated')}</div>
               <div className="mt-2 text-lg font-semibold">{new Date(detail.generated_at).toLocaleString(locale)}</div>
             </div>
           </CardContent>

@@ -141,12 +141,12 @@ const LoadingState = () => (
     {[1, 2, 3, 4, 5, 6].map((i) => (
       <div
         key={i}
-        className="soft-shadow animate-pulse rounded-xl bg-card p-4"
+        className="soft-shadow bg-card animate-pulse rounded-xl p-4"
       >
-        <div className="mb-4 h-32 w-full rounded-lg bg-muted/40" />
+        <div className="bg-muted/40 mb-4 h-32 w-full rounded-lg" />
         <div className="space-y-2">
-          <div className="h-4 w-3/4 rounded bg-muted/40" />
-          <div className="h-3 w-1/2 rounded bg-muted/40" />
+          <div className="bg-muted/40 h-4 w-3/4 rounded" />
+          <div className="bg-muted/40 h-3 w-1/2 rounded" />
         </div>
       </div>
     ))}
@@ -154,12 +154,12 @@ const LoadingState = () => (
 );
 
 const EmptyState = ({ query, t }: { query: string; t: (key: string, params?: any) => string }) => (
-  <div className="flex flex-col items-center justify-center py-16 text-center text-muted-foreground">
-    <div className="mb-4 rounded-full bg-primary/10 p-4">
-      <Search className="h-8 w-8 text-primary" />
+  <div className="text-muted-foreground flex flex-col items-center justify-center py-16 text-center">
+    <div className="bg-primary/10 mb-4 rounded-full p-4">
+      <Search className="text-primary h-8 w-8" />
     </div>
-    <h3 className="mb-2 text-lg font-medium text-foreground">{t('noResultsTitle')}</h3>
-    <p className="max-w-md text-sm text-muted-foreground">{t('noResultsMessage', { query })}</p>
+    <h3 className="text-foreground mb-2 text-lg font-medium">{t('noResultsTitle')}</h3>
+    <p className="text-muted-foreground max-w-md text-sm">{t('noResultsMessage', { query })}</p>
   </div>
 );
 
@@ -270,12 +270,12 @@ const SearchPage = () => {
   const totalPages = Math.ceil(totalResults / perPage);
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="bg-background text-foreground min-h-screen">
       {/* Search Header */}
-      <div className="border-b border-border bg-card text-card-foreground">
+      <div className="border-border bg-card text-card-foreground border-b">
         <div className="container mx-auto px-4 py-6">
           <div className="mx-auto max-w-2xl">
-            <h1 className="mb-6 text-2xl font-semibold text-foreground">{t('searchTitle')}</h1>
+            <h1 className="text-foreground mb-6 text-2xl font-semibold">{t('searchTitle')}</h1>
 
             {/* Search Input */}
             <form
@@ -290,17 +290,17 @@ const SearchPage = () => {
                   setSearchQuery(e.target.value);
                 }}
                 placeholder={t('searchInputPlaceholder')}
-                className="soft-shadow h-12 w-full rounded-xl border border-border bg-background text-foreground pr-4 pl-12 text-sm transition-all placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary/20 focus:outline-none"
+                className="soft-shadow border-border bg-background text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-primary/20 h-12 w-full rounded-xl border pr-4 pl-12 text-sm transition-all focus:ring-1 focus:outline-none"
               />
               <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
                 <Search
-                  className="text-muted-foreground transition-colors group-focus-within:text-foreground"
+                  className="text-muted-foreground group-focus-within:text-foreground transition-colors"
                   size={20}
                 />
               </div>
               <button
                 type="submit"
-                className="absolute inset-y-0 right-0 flex items-center px-4 text-sm text-muted-foreground hover:text-foreground"
+                className="text-muted-foreground hover:text-foreground absolute inset-y-0 right-0 flex items-center px-4 text-sm"
               >
                 {t('searchButton')}
               </button>
@@ -373,7 +373,7 @@ const SearchPage = () => {
       <div className="container mx-auto px-4 py-8">
         <div className="mx-auto max-w-7xl">
           {query ? (
-            <div className="mb-6 text-sm text-muted-foreground">
+            <div className="text-muted-foreground mb-6 text-sm">
               {t('resultsFound', { count: totalResults, query })}
             </div>
           ) : null}
@@ -390,7 +390,7 @@ const SearchPage = () => {
               {/* Courses Grid */}
               {(selectedType === 'all' || selectedType === 'courses') && searchResults.courses.length > 0 && (
                 <div>
-                  <h2 className="mb-4 flex items-center gap-2 text-lg font-medium text-foreground">
+                  <h2 className="text-foreground mb-4 flex items-center gap-2 text-lg font-medium">
                     <GraduationCap
                       size={20}
                       className="text-muted-foreground"
@@ -403,7 +403,7 @@ const SearchPage = () => {
                         prefetch={false}
                         key={course.course_uuid}
                         href={getAbsoluteUrl(`/course/${removeCoursePrefix(course.course_uuid)}`)}
-                        className="soft-shadow group overflow-hidden rounded-xl border border-border bg-card text-card-foreground transition-all hover:shadow-md"
+                        className="soft-shadow group border-border bg-card text-card-foreground overflow-hidden rounded-xl border transition-all hover:shadow-md"
                       >
                         <div className="relative aspect-video w-full overflow-hidden">
                           <NextImage
@@ -419,8 +419,8 @@ const SearchPage = () => {
                           />
                         </div>
                         <div className="p-4">
-                          <h3 className="mb-1 text-sm font-medium text-foreground">{course.name}</h3>
-                          <p className="line-clamp-2 text-xs text-muted-foreground">{course.description}</p>
+                          <h3 className="text-foreground mb-1 text-sm font-medium">{course.name}</h3>
+                          <p className="text-muted-foreground line-clamp-2 text-xs">{course.description}</p>
                           {course.authors && course.authors.length > 0 && course.authors[0]?.user ? (
                             <div className="mt-3 flex items-center gap-2">
                               <UserAvatar
@@ -437,7 +437,7 @@ const SearchPage = () => {
                                 userId={course.authors[0].user.id}
                                 showProfilePopup={false}
                               />
-                              <span className="text-xs text-muted-foreground">
+                              <span className="text-muted-foreground text-xs">
                                 {[
                                   course.authors[0].user.first_name,
                                   course.authors[0].user.middle_name,
@@ -458,7 +458,7 @@ const SearchPage = () => {
               {/* Collections Grid */}
               {(selectedType === 'all' || selectedType === 'collections') && searchResults.collections.length > 0 && (
                 <div>
-                  <h2 className="mb-4 flex items-center gap-2 text-lg font-medium text-foreground">
+                  <h2 className="text-foreground mb-4 flex items-center gap-2 text-lg font-medium">
                     <Book
                       size={20}
                       className="text-muted-foreground"
@@ -471,18 +471,18 @@ const SearchPage = () => {
                         prefetch={false}
                         key={collection.collection_uuid}
                         href={getAbsoluteUrl(`/collection/${collection.collection_uuid.replace('collection_', '')}`)}
-                        className="soft-shadow flex items-start gap-4 rounded-xl border border-border bg-card p-4 text-card-foreground transition-all hover:shadow-md"
+                        className="soft-shadow border-border bg-card text-card-foreground flex items-start gap-4 rounded-xl border p-4 transition-all hover:shadow-md"
                       >
-                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-muted/20">
+                        <div className="bg-muted/20 flex h-12 w-12 shrink-0 items-center justify-center rounded-lg">
                           <Book
                             size={24}
                             className="text-muted-foreground"
                           />
                         </div>
                         <div>
-                          <h3 className="mb-1 text-sm font-medium text-foreground">{collection.name}</h3>
-                          <p className="line-clamp-2 text-xs text-muted-foreground">{collection.description}</p>
-                          <p className="text-xs text-muted-foreground">
+                          <h3 className="text-foreground mb-1 text-sm font-medium">{collection.name}</h3>
+                          <p className="text-muted-foreground line-clamp-2 text-xs">{collection.description}</p>
+                          <p className="text-muted-foreground text-xs">
                             {t('coursesCount', { count: collection.courses.length })}
                           </p>
                         </div>
@@ -495,7 +495,7 @@ const SearchPage = () => {
               {/* Users Grid */}
               {(selectedType === 'all' || selectedType === 'users') && searchResults.users.length > 0 && (
                 <div>
-                  <h2 className="mb-4 flex items-center gap-2 text-lg font-medium text-foreground">
+                  <h2 className="text-foreground mb-4 flex items-center gap-2 text-lg font-medium">
                     <Users
                       size={20}
                       className="text-muted-foreground"
@@ -508,7 +508,7 @@ const SearchPage = () => {
                         prefetch={false}
                         key={user.user_uuid}
                         href={getAbsoluteUrl(`/user/${user.username}`)}
-                        className="soft-shadow flex items-center gap-4 rounded-xl border border-border bg-card p-4 text-card-foreground transition-all hover:shadow-md"
+                        className="soft-shadow border-border bg-card text-card-foreground flex items-center gap-4 rounded-xl border p-4 transition-all hover:shadow-md"
                       >
                         <UserAvatar
                           size="lg"
@@ -520,12 +520,12 @@ const SearchPage = () => {
                           showProfilePopup
                         />
                         <div>
-                          <h3 className="text-sm font-medium text-foreground">
+                          <h3 className="text-foreground text-sm font-medium">
                             {[user.first_name, user.middle_name, user.last_name].filter(Boolean).join(' ')}
                           </h3>
-                          <p className="text-xs text-muted-foreground">@{user.username}</p>
+                          <p className="text-muted-foreground text-xs">@{user.username}</p>
                           {user.details?.title?.text ? (
-                            <p className="mt-1 text-xs text-muted-foreground">{user.details.title.text}</p>
+                            <p className="text-muted-foreground mt-1 text-xs">{user.details.title.text}</p>
                           ) : null}
                         </div>
                       </Link>

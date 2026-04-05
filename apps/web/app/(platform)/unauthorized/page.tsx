@@ -5,7 +5,7 @@ export default function UnauthorizedPage() {
   const t = useTranslations('UnauthorizedPage');
   return (
     <div className="flex min-h-[60vh] items-center justify-center px-6">
-      <div className="max-w-md rounded-2xl border bg-card p-8 text-center shadow-sm">
+      <div className="bg-card max-w-md rounded-2xl border p-8 text-center shadow-sm">
         <h1 className="text-2xl font-semibold">{t('title')}</h1>
         <p className="text-muted-foreground mt-3 text-sm">{t('message')}</p>
         <Link

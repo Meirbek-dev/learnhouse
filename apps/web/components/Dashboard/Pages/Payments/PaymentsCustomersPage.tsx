@@ -40,7 +40,7 @@ const PaymentsUsersTable = ({ data }: { data: PaymentUserData[] }) => {
           />
           <div className="flex flex-col">
             <span className="font-medium">{row.original.user?.first_name || row.original.user?.username || '-'}</span>
-            <span className="text-sm text-muted-foreground">{row.original.user?.email || '-'}</span>
+            <span className="text-muted-foreground text-sm">{row.original.user?.email || '-'}</span>
           </div>
         </div>
       ),
@@ -146,10 +146,10 @@ const PaymentsCustomersPage = () => {
   if (!customers) return <div>{t('noCustomerData')}</div>;
 
   return (
-    <div className="soft-shadow mx-auto mr-10 ml-10 rounded-xl border border-border bg-card px-4 py-4 text-card-foreground shadow-sm">
-      <div className="mb-3 flex flex-col gap-1 rounded-md bg-muted px-5 py-3">
-        <h1 className="text-xl font-bold text-foreground">{t('title')}</h1>
-        <h2 className="text-base text-muted-foreground">{t('description')}</h2>
+    <div className="soft-shadow border-border bg-card text-card-foreground mx-auto mr-10 ml-10 rounded-xl border px-4 py-4 shadow-sm">
+      <div className="bg-muted mb-3 flex flex-col gap-1 rounded-md px-5 py-3">
+        <h1 className="text-foreground text-xl font-bold">{t('title')}</h1>
+        <h2 className="text-muted-foreground text-base">{t('description')}</h2>
       </div>
 
       <PaymentsUsersTable data={customers} />

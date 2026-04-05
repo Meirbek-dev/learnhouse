@@ -253,7 +253,7 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
           {/* Drag Handle */}
           <div
             {...provided.dragHandleProps}
-            className="flex-shrink-0 cursor-grab text-muted-foreground hover:text-foreground active:cursor-grabbing"
+            className="text-muted-foreground hover:text-foreground flex-shrink-0 cursor-grab active:cursor-grabbing"
           >
             <GripVertical className="h-5 w-5" />
           </div>
@@ -305,7 +305,7 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
               </div>
             ) : (
               <div className="flex items-center gap-2">
-                <span className="truncate text-sm font-medium text-foreground">{activity.name}</span>
+                <span className="text-foreground truncate text-sm font-medium">{activity.name}</span>
                 {activity.published ? (
                   <span className="shrink-0 rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400">
                     {t('liveBadge')}
@@ -328,7 +328,7 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
                     <Button
                       size="sm"
                       variant="ghost"
-                      className="h-7 w-7 flex-shrink-0 p-0 text-muted-foreground hover:text-foreground"
+                      className="text-muted-foreground hover:text-foreground h-7 w-7 flex-shrink-0 p-0"
                       onClick={handleStartEdit}
                     >
                       <Pencil className="h-3.5 w-3.5" />
@@ -359,7 +359,7 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
                 <Button
                   size="sm"
                   variant="ghost"
-                  className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+                  className="text-muted-foreground hover:text-foreground h-8 w-8 p-0"
                   onClick={() =>
                     window.open(
                       `${getAbsoluteUrl('')}/course/${cleanCourseUuid(course_uuid)}/activity/${cleanActivityUuid(activity.activity_uuid)}`,
@@ -381,7 +381,7 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
                   <Button
                     size="sm"
                     variant="ghost"
-                    className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+                    className="text-muted-foreground hover:text-foreground h-8 w-8 p-0"
                     onClick={handleTogglePublish}
                     disabled={isUpdatingPublish}
                   >
@@ -405,7 +405,7 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
                   <Button
                     size="sm"
                     variant="ghost"
-                    className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
+                    className="text-muted-foreground hover:text-destructive h-8 w-8 p-0"
                     onClick={() => setIsDeleteDialogOpen(true)}
                   >
                     <Trash2 className="h-4 w-4" />
@@ -491,7 +491,7 @@ const ActivityEditButton = ({
         <Button
           size="sm"
           variant="ghost"
-          className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+          className="text-muted-foreground hover:text-foreground h-8 w-8 p-0"
           nativeButton={false}
           render={
             <a
@@ -531,7 +531,7 @@ const ActivityEditButton = ({
           <Button
             size="sm"
             variant="ghost"
-            className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+            className="text-muted-foreground hover:text-foreground h-8 w-8 p-0"
             onMouseEnter={onRequestAssignment}
             onClick={onRequestAssignment}
           >
@@ -549,7 +549,7 @@ const ActivityEditButton = ({
         <Button
           size="sm"
           variant="ghost"
-          className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+          className="text-muted-foreground hover:text-foreground h-8 w-8 p-0"
           nativeButton={false}
           render={
             <a
@@ -577,7 +577,7 @@ const ActivityEditButton = ({
         <Button
           size="sm"
           variant="ghost"
-          className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+          className="text-muted-foreground hover:text-foreground h-8 w-8 p-0"
           nativeButton={false}
           render={
             <a

@@ -370,7 +370,7 @@ const VideoBlockComponent = (props: ExtendedNodeViewProps) => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
       >
-        <div className="flex flex-col space-y-4 rounded-lg px-5 py-6 [transition:all_0.2s_ease] bg-muted border border-border">
+        <div className="bg-muted border-border flex flex-col space-y-4 rounded-lg border px-5 py-6 [transition:all_0.2s_ease]">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2 text-sm text-zinc-500">
               <Video size={16} />
@@ -501,7 +501,7 @@ const VideoBlockComponent = (props: ExtendedNodeViewProps) => {
                 </motion.button>
               </div>
 
-              <div className="flex justify-center items-center w-full">
+              <div className="flex w-full items-center justify-center">
                 <div
                   style={{
                     maxWidth:

@@ -73,7 +73,11 @@ export default function TeacherKpiCharts({ metrics, trends }: TeacherKpiChartsPr
 
   // ── Bar chart data ────────────────────────────────────────────────────────
   const barData = [
-    { metric: t('kpiCharts.activeLearners'), current: m.active_learners.value, previous: prevValue(m.active_learners) },
+    {
+      metric: t('kpiCharts.activeLearners'),
+      current: m.active_learners.value,
+      previous: prevValue(m.active_learners),
+    },
     {
       metric: t('kpiCharts.returningLearners'),
       current: m.returning_learners.value,

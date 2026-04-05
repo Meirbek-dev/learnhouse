@@ -249,7 +249,7 @@ export const ToolbarButtons = ({ editor, props }: any) => {
           <ChevronDown size={18} />
         </ToolBtn>
         {showListMenu ? (
-          <div className="absolute top-full left-0 bg-white border border-[rgba(217,217,217,0.5)] rounded-[6px] shadow-[0_2px_4px_rgba(0,0,0,0.1)] z-[1000] min-w-[180px] mt-1">
+          <div className="absolute top-full left-0 z-[1000] mt-1 min-w-[180px] rounded-[6px] border border-[rgba(217,217,217,0.5)] bg-white shadow-[0_2px_4px_rgba(0,0,0,0.1)]">
             {listOptions.map((option, index) => (
               <div
                 key={index}
@@ -257,14 +257,14 @@ export const ToolbarButtons = ({ editor, props }: any) => {
                   option.action();
                   setShowListMenu(false);
                 }}
-                className={`flex items-center py-2 px-3 cursor-pointer [transition:background_0.2s] hover:bg-[rgba(217,217,217,0.24)] ${
+                className={`flex cursor-pointer items-center px-3 py-2 [transition:background_0.2s] hover:bg-[rgba(217,217,217,0.24)] ${
                   editor.isActive(option.label === 'Bullet List' ? 'bulletList' : 'orderedList')
                     ? 'bg-[rgba(176,176,176,0.5)]'
                     : ''
                 }`}
               >
-                <span className="flex items-center mr-2">{option.icon}</span>
-                <span className="text-xs [font-family:Inter,sans-serif]">{option.label}</span>
+                <span className="mr-2 flex items-center">{option.icon}</span>
+                <span className="[font-family:Inter,sans-serif] text-xs">{option.label}</span>
               </div>
             ))}
           </div>
@@ -340,7 +340,7 @@ export const ToolbarButtons = ({ editor, props }: any) => {
           </ToolBtn>
         </ToolTip>
         {showTableMenu ? (
-          <div className="absolute top-full left-0 bg-white border border-[rgba(217,217,217,0.5)] rounded-[6px] shadow-[0_2px_4px_rgba(0,0,0,0.1)] z-[1000] min-w-[180px] mt-1">
+          <div className="absolute top-full left-0 z-[1000] mt-1 min-w-[180px] rounded-[6px] border border-[rgba(217,217,217,0.5)] bg-white shadow-[0_2px_4px_rgba(0,0,0,0.1)]">
             {tableOptions.map((option, index) => (
               <div
                 key={index}
@@ -348,10 +348,10 @@ export const ToolbarButtons = ({ editor, props }: any) => {
                   option.action();
                   setShowTableMenu(false);
                 }}
-                className="flex items-center py-2 px-3 cursor-pointer [transition:background_0.2s] hover:bg-[rgba(217,217,217,0.24)]"
+                className="flex cursor-pointer items-center px-3 py-2 [transition:background_0.2s] hover:bg-[rgba(217,217,217,0.24)]"
               >
-                <span className="flex items-center mr-2">{option.icon}</span>
-                <span className="text-xs [font-family:Inter,sans-serif]">{option.label}</span>
+                <span className="mr-2 flex items-center">{option.icon}</span>
+                <span className="[font-family:Inter,sans-serif] text-xs">{option.label}</span>
               </div>
             ))}
           </div>
@@ -611,8 +611,16 @@ export const ToolbarButtons = ({ editor, props }: any) => {
                       text: t('defaultScenario.scenarios.1.text'),
                       imageUrl: '',
                       options: [
-                        { id: 'opt1', text: t('defaultScenario.scenarios.1.options.opt1'), nextScenarioId: '2' },
-                        { id: 'opt2', text: t('defaultScenario.scenarios.1.options.opt2'), nextScenarioId: '3' },
+                        {
+                          id: 'opt1',
+                          text: t('defaultScenario.scenarios.1.options.opt1'),
+                          nextScenarioId: '2',
+                        },
+                        {
+                          id: 'opt2',
+                          text: t('defaultScenario.scenarios.1.options.opt2'),
+                          nextScenarioId: '3',
+                        },
                       ],
                     },
                     {
@@ -620,8 +628,16 @@ export const ToolbarButtons = ({ editor, props }: any) => {
                       text: t('defaultScenario.scenarios.2.text'),
                       imageUrl: '',
                       options: [
-                        { id: 'opt3', text: t('defaultScenario.scenarios.2.options.opt3'), nextScenarioId: '1' },
-                        { id: 'opt4', text: t('defaultScenario.scenarios.2.options.opt4'), nextScenarioId: null },
+                        {
+                          id: 'opt3',
+                          text: t('defaultScenario.scenarios.2.options.opt3'),
+                          nextScenarioId: '1',
+                        },
+                        {
+                          id: 'opt4',
+                          text: t('defaultScenario.scenarios.2.options.opt4'),
+                          nextScenarioId: null,
+                        },
                       ],
                     },
                     {
@@ -629,8 +645,16 @@ export const ToolbarButtons = ({ editor, props }: any) => {
                       text: t('defaultScenario.scenarios.3.text'),
                       imageUrl: '',
                       options: [
-                        { id: 'opt5', text: t('defaultScenario.scenarios.3.options.opt5'), nextScenarioId: '1' },
-                        { id: 'opt6', text: t('defaultScenario.scenarios.3.options.opt6'), nextScenarioId: null },
+                        {
+                          id: 'opt5',
+                          text: t('defaultScenario.scenarios.3.options.opt5'),
+                          nextScenarioId: '1',
+                        },
+                        {
+                          id: 'opt6',
+                          text: t('defaultScenario.scenarios.3.options.opt6'),
+                          nextScenarioId: null,
+                        },
                       ],
                     },
                   ],

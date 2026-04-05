@@ -32,12 +32,12 @@ export function AiMarkdownRenderer({ content, isStreaming = false, className }: 
         remarkPlugins={[remarkGfm]}
         components={{
           // ── Headings ─────────────────────────────────────────────────
-          h1: ({ children }) => <h1 className="mb-3 mt-4 text-base font-bold text-zinc-100 first:mt-0">{children}</h1>,
+          h1: ({ children }) => <h1 className="mt-4 mb-3 text-base font-bold text-zinc-100 first:mt-0">{children}</h1>,
           h2: ({ children }) => (
-            <h2 className="mb-2 mt-3 text-sm font-semibold text-zinc-100 first:mt-0">{children}</h2>
+            <h2 className="mt-3 mb-2 text-sm font-semibold text-zinc-100 first:mt-0">{children}</h2>
           ),
           h3: ({ children }) => (
-            <h3 className="mb-1.5 mt-2 text-sm font-medium text-zinc-200 first:mt-0">{children}</h3>
+            <h3 className="mt-2 mb-1.5 text-sm font-medium text-zinc-200 first:mt-0">{children}</h3>
           ),
 
           // ── Paragraphs ────────────────────────────────────────────────
@@ -103,7 +103,7 @@ export function AiMarkdownRenderer({ content, isStreaming = false, className }: 
 
           // ── Blockquote ────────────────────────────────────────────────
           blockquote: ({ children }) => (
-            <blockquote className="my-2 border-l-2 border-zinc-600 pl-3 italic text-zinc-400">{children}</blockquote>
+            <blockquote className="my-2 border-l-2 border-zinc-600 pl-3 text-zinc-400 italic">{children}</blockquote>
           ),
 
           // ── Links ─────────────────────────────────────────────────────
@@ -134,7 +134,7 @@ export function AiMarkdownRenderer({ content, isStreaming = false, className }: 
 
           // ── Strong / Em ───────────────────────────────────────────────
           strong: ({ children }) => <strong className="font-semibold text-zinc-100">{children}</strong>,
-          em: ({ children }) => <em className="italic text-zinc-300">{children}</em>,
+          em: ({ children }) => <em className="text-zinc-300 italic">{children}</em>,
         }}
       >
         {content}

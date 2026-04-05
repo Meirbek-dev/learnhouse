@@ -172,7 +172,7 @@ const MathEquationBlockComponent = (props: any) => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
       >
-        <div className="flex flex-col space-y-3 rounded-lg px-5 py-6 [transition:all_0.2s_ease] bg-muted border border-border">
+        <div className="bg-muted border-border flex flex-col space-y-3 rounded-lg border px-5 py-6 [transition:all_0.2s_ease]">
           <div className="mb-1 flex items-center space-x-2 text-sm text-zinc-500">
             <Sigma size={16} />
             <span className="font-medium">{t('title')}</span>
@@ -202,7 +202,7 @@ const MathEquationBlockComponent = (props: any) => {
                     onClick={() => {
                       setShowTemplates(!showTemplates);
                     }}
-                    className="flex items-center space-x-1 py-[6px] px-[10px] bg-muted/40 rounded-[6px] border-0 text-[13px] text-foreground cursor-pointer"
+                    className="bg-muted/40 text-foreground flex cursor-pointer items-center space-x-1 rounded-[6px] border-0 px-[10px] py-[6px] text-[13px]"
                   >
                     <BookOpen size={14} />
                     <span>{t('templates')}</span>
@@ -213,7 +213,7 @@ const MathEquationBlockComponent = (props: any) => {
                   </button>
 
                   {showTemplates ? (
-                    <div className="absolute left-0 z-10 mt-1 max-h-80 w-64 overflow-y-auto bg-white rounded-[8px] border border-border shadow-lg">
+                    <div className="border-border absolute left-0 z-10 mt-1 max-h-80 w-64 overflow-y-auto rounded-[8px] border bg-white shadow-lg">
                       <div className="border-b p-2 text-xs text-zinc-500">{t('selectTemplate')}</div>
                       {mathTemplates.map((template, index) => (
                         <button
@@ -222,7 +222,7 @@ const MathEquationBlockComponent = (props: any) => {
                           onClick={() => {
                             insertTemplate(template.latex);
                           }}
-                          className="w-full text-left py-2 px-3 [transition:background_0.15s] hover:bg-muted/20"
+                          className="hover:bg-muted/20 w-full px-3 py-2 text-left [transition:background_0.15s]"
                         >
                           <div className="flex flex-col">
                             <span className="font-medium">{t(template.name)}</span>
@@ -242,7 +242,7 @@ const MathEquationBlockComponent = (props: any) => {
                     onClick={() => {
                       setShowSymbols(!showSymbols);
                     }}
-                    className="flex items-center space-x-1 py-[6px] px-[10px] bg-muted/40 rounded-[6px] border-0 text-[13px] text-foreground cursor-pointer"
+                    className="bg-muted/40 text-foreground flex cursor-pointer items-center space-x-1 rounded-[6px] border-0 px-[10px] py-[6px] text-[13px]"
                   >
                     <Sigma size={14} />
                     <span>{t('symbols')}</span>
@@ -253,7 +253,7 @@ const MathEquationBlockComponent = (props: any) => {
                   </button>
 
                   {showSymbols ? (
-                    <div className="absolute left-0 z-10 mt-1 w-64 bg-white rounded-[8px] border border-border shadow-lg overflow-hidden">
+                    <div className="border-border absolute left-0 z-10 mt-1 w-64 overflow-hidden rounded-[8px] border bg-white shadow-lg">
                       <div className="border-b p-2 text-xs text-zinc-500">{t('insertSymbol')}</div>
                       <div className="flex flex-wrap p-2">
                         {mathSymbols.map((symbol, index) => (
@@ -263,7 +263,7 @@ const MathEquationBlockComponent = (props: any) => {
                               insertSymbol(symbol.symbol);
                             }}
                             title={symbol.symbol}
-                            className="flex items-center justify-center w-8 h-8 m-[2px] bg-muted/30 rounded-[4px] border-0 text-base text-foreground cursor-pointer"
+                            className="bg-muted/30 text-foreground m-[2px] flex h-8 w-8 cursor-pointer items-center justify-center rounded-[4px] border-0 text-base"
                           >
                             {symbol.display}
                           </button>
@@ -281,7 +281,7 @@ const MathEquationBlockComponent = (props: any) => {
                     onClick={() => {
                       setShowHelp(!showHelp);
                     }}
-                    className="flex items-center space-x-1 py-[6px] px-[10px] bg-muted/40 rounded-[6px] border-0 text-[13px] text-foreground cursor-pointer"
+                    className="bg-muted/40 text-foreground flex cursor-pointer items-center space-x-1 rounded-[6px] border-0 px-[10px] py-[6px] text-[13px]"
                   >
                     <Lightbulb size={14} />
                     <span>{t('help')}</span>
@@ -292,7 +292,7 @@ const MathEquationBlockComponent = (props: any) => {
                   </button>
 
                   {showHelp ? (
-                    <div className="absolute left-0 z-10 mt-1 w-72 bg-white rounded-[8px] border border-border shadow-lg overflow-hidden">
+                    <div className="border-border absolute left-0 z-10 mt-1 w-72 overflow-hidden rounded-[8px] border bg-white shadow-lg">
                       <div className="border-b p-2 text-xs font-medium text-zinc-700">{t('quickReference')}</div>
                       <div className="space-y-2 p-3 text-xs">
                         <div>
@@ -342,7 +342,7 @@ const MathEquationBlockComponent = (props: any) => {
                 </div>
               </div>
 
-              <div className="flex justify-between rounded-lg px-[5px] pl-3 bg-white text-muted-foreground items-center h-[45px] border border-border transition-all duration-200 focus-within:border-border focus-within:ring-2 focus-within:ring-slate-200/40 [&>input]:w-full [&>input]:text-foreground [&>input]:text-sm [&>input]:font-sans [&>input]:bg-transparent [&>input]:border-none [&>input]:outline-none [&>input::placeholder]:text-muted-foreground">
+              <div className="text-muted-foreground border-border focus-within:border-border [&>input]:text-foreground [&>input::placeholder]:text-muted-foreground flex h-[45px] items-center justify-between rounded-lg border bg-white px-[5px] pl-3 transition-all duration-200 focus-within:ring-2 focus-within:ring-slate-200/40 [&>input]:w-full [&>input]:border-none [&>input]:bg-transparent [&>input]:font-sans [&>input]:text-sm [&>input]:outline-none">
                 <input
                   ref={inputRef}
                   value={equation}
@@ -352,7 +352,7 @@ const MathEquationBlockComponent = (props: any) => {
                   className="focus:ring-1 focus:ring-blue-300"
                 />
                 <motion.button
-                  className="flex items-center justify-center w-[30px] h-[30px] rounded-[6px] border-0 bg-muted/50 text-foreground cursor-pointer"
+                  className="bg-muted/50 text-foreground flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded-[6px] border-0"
                   onClick={() => {
                     saveEquation();
                   }}
@@ -364,7 +364,7 @@ const MathEquationBlockComponent = (props: any) => {
                 </motion.button>
               </div>
 
-              <div className="flex items-center text-sm text-zinc-500 pl-[2px]">
+              <div className="flex items-center pl-[2px] text-sm text-zinc-500">
                 <span>{t('referTo')}</span>
                 <Link
                   className="mx-1 inline-flex items-center font-medium text-blue-600 hover:text-blue-800"

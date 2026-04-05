@@ -145,7 +145,7 @@ export default function EditSocials() {
   ];
 
   return (
-    <div className="soft-shadow mx-0 rounded-xl border border-border bg-card text-card-foreground shadow-sm sm:mx-10">
+    <div className="soft-shadow border-border bg-card text-card-foreground mx-0 rounded-xl border shadow-sm sm:mx-10">
       <form
         onSubmit={form.handleSubmit((values) =>
           startTransition(() => {
@@ -154,16 +154,16 @@ export default function EditSocials() {
         )}
       >
         <div className="flex flex-col gap-0">
-          <div className="mx-3 my-3 flex flex-col gap-1 rounded-md bg-muted px-5 py-3">
-            <h1 className="text-xl font-bold text-foreground">{t('title')}</h1>
-            <h2 className="text-base text-muted-foreground">{t('description')}</h2>
+          <div className="bg-muted mx-3 my-3 flex flex-col gap-1 rounded-md px-5 py-3">
+            <h1 className="text-foreground text-xl font-bold">{t('title')}</h1>
+            <h2 className="text-muted-foreground text-base">{t('description')}</h2>
           </div>
 
           <div className="mx-5 my-5 mt-0 flex flex-col lg:flex-row lg:space-x-8">
             <div className="w-full space-y-6">
               <div>
                 <FieldLabel className="text-lg font-semibold">{t('socialLinksTitle')}</FieldLabel>
-                <div className="soft-shadow mt-2 space-y-3 rounded-lg border border-border bg-muted/50 p-4">
+                <div className="soft-shadow border-border bg-muted/50 mt-2 space-y-3 rounded-lg border p-4">
                   <div className="grid gap-3">
                     {socialFields.map((field) => (
                       <Controller
@@ -178,7 +178,7 @@ export default function EditSocials() {
                               </div>
                               <Input
                                 placeholder={field.placeholder}
-                                className="h-9 bg-background"
+                                className="bg-background h-9"
                                 {...socialField}
                               />
                             </div>
@@ -194,20 +194,20 @@ export default function EditSocials() {
             <div className="w-full space-y-6">
               <div>
                 <FieldLabel className="text-lg font-semibold">{t('customLinksTitle')}</FieldLabel>
-                <div className="soft-shadow mt-2 space-y-3 rounded-lg border border-border bg-muted/50 p-4">
+                <div className="soft-shadow border-border bg-muted/50 mt-2 space-y-3 rounded-lg border p-4">
                   {linksEntries.map(([linkKey, linkValue], index) => (
                     <div
                       key={index}
                       className="flex items-center gap-3"
                     >
-                      <div className="flex h-8 w-8 items-center justify-center rounded-md bg-muted text-xs font-medium text-muted-foreground">
+                      <div className="bg-muted text-muted-foreground flex h-8 w-8 items-center justify-center rounded-md text-xs font-medium">
                         {index + 1}
                       </div>
                       <div className="flex flex-1 gap-2">
                         <Input
                           placeholder={t('Form.customLinkLabelPlaceholder')}
                           value={linkKey}
-                          className="h-9 w-1/3 bg-background"
+                          className="bg-background h-9 w-1/3"
                           onChange={(e) => {
                             handleLinkChange(linkKey, e.target.value, linkValue);
                           }}
@@ -215,7 +215,7 @@ export default function EditSocials() {
                         <Input
                           placeholder={t('Form.customLinkUrlPlaceholder')}
                           value={linkValue}
-                          className="h-9 flex-1 bg-background"
+                          className="bg-background h-9 flex-1"
                           onChange={(e) => {
                             handleLinkChange(linkKey, linkKey, e.target.value);
                           }}
@@ -247,7 +247,7 @@ export default function EditSocials() {
                     </Button>
                   )}
 
-                  <p className="mt-2 text-xs text-muted-foreground">{t('Form.customLinkInfo', { count: 3 })}</p>
+                  <p className="text-muted-foreground mt-2 text-xs">{t('Form.customLinkInfo', { count: 3 })}</p>
                 </div>
               </div>
             </div>

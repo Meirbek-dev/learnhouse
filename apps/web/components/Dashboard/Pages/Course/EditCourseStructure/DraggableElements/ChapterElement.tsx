@@ -165,15 +165,15 @@ const ChapterElement = ({ chapter, chapterIndex, course_uuid }: ChapterElementPr
             {/* Drag Handle */}
             <div
               {...provided.dragHandleProps}
-              className="flex-shrink-0 cursor-grab text-muted-foreground hover:text-foreground active:cursor-grabbing"
+              className="text-muted-foreground hover:text-foreground flex-shrink-0 cursor-grab active:cursor-grabbing"
             >
               <GripVertical className="h-5 w-5" />
             </div>
 
             {/* Chapter Icon */}
-            <div className="flex-shrink-0 rounded-lg bg-muted p-2">
+            <div className="bg-muted flex-shrink-0 rounded-lg p-2">
               <Hexagon
-                className="h-4 w-4 text-muted-foreground"
+                className="text-muted-foreground h-4 w-4"
                 strokeWidth={2.5}
               />
             </div>
@@ -222,8 +222,8 @@ const ChapterElement = ({ chapter, chapterIndex, course_uuid }: ChapterElementPr
                 </div>
               ) : (
                 <div className="flex items-center gap-2">
-                  <span className="truncate text-sm font-medium text-foreground sm:text-base">{chapter.name}</span>
-                  <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                  <span className="text-foreground truncate text-sm font-medium sm:text-base">{chapter.name}</span>
+                  <span className="bg-muted text-muted-foreground rounded-full px-2 py-0.5 text-xs font-medium">
                     {activities.length}
                   </span>
                   <ToolTip
@@ -233,7 +233,7 @@ const ChapterElement = ({ chapter, chapterIndex, course_uuid }: ChapterElementPr
                     <Button
                       size="sm"
                       variant="ghost"
-                      className="h-7 w-7 flex-shrink-0 p-0 text-muted-foreground hover:text-foreground"
+                      className="text-muted-foreground hover:text-foreground h-7 w-7 flex-shrink-0 p-0"
                       onClick={handleStartEdit}
                     >
                       <Pencil className="h-3.5 w-3.5" />
@@ -252,7 +252,7 @@ const ChapterElement = ({ chapter, chapterIndex, course_uuid }: ChapterElementPr
                 <Button
                   size="sm"
                   variant="ghost"
-                  className="h-8 w-8 flex-shrink-0 p-0 text-muted-foreground hover:text-destructive"
+                  className="text-muted-foreground hover:text-destructive h-8 w-8 flex-shrink-0 p-0"
                   onClick={() => setIsDeleteDialogOpen(true)}
                 >
                   <Trash2 className="h-4 w-4" />
@@ -326,8 +326,8 @@ const ChapterElement = ({ chapter, chapterIndex, course_uuid }: ChapterElementPr
                   ))
                 ) : (
                   <div className="flex min-h-[60px] flex-col items-center justify-center gap-1 py-4 text-center">
-                    <p className="text-sm font-medium text-muted-foreground">{t('noActivities')}</p>
-                    <p className="text-xs text-muted-foreground/70">{t('noActivitiesHint')}</p>
+                    <p className="text-muted-foreground text-sm font-medium">{t('noActivities')}</p>
+                    <p className="text-muted-foreground/70 text-xs">{t('noActivitiesHint')}</p>
                   </div>
                 )}
                 {provided.placeholder}

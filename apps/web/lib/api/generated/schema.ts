@@ -7109,9 +7109,7 @@ export interface components {
      */
     QuestionUpdate: {
       /** Answer Options */
-      answer_options?:
-        | Record<string, unknown>[]
-        | null;
+      answer_options?: Record<string, unknown>[] | null;
       /** Explanation */
       explanation?: string | null;
       /** Order Index */
@@ -7430,9 +7428,7 @@ export interface components {
       execution_mode?: components['schemas']['ExecutionMode'] | null;
       grading_strategy?: components['schemas']['GradingStrategy'] | null;
       /** Hidden Tests */
-      hidden_tests?:
-        | Record<string, unknown>[]
-        | null;
+      hidden_tests?: Record<string, unknown>[] | null;
       /** Memory Limit */
       memory_limit?: number | null;
       /** Points */
@@ -7442,9 +7438,7 @@ export interface components {
       /** Time Limit */
       time_limit?: number | null;
       /** Visible Tests */
-      visible_tests?:
-        | Record<string, unknown>[]
-        | null;
+      visible_tests?: Record<string, unknown>[] | null;
     };
     /** StartActivityAIChatSession */
     StartActivityAIChatSession: {

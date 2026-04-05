@@ -84,7 +84,7 @@ export default function ProductLinkedCourses({ productId }: ProductLinkedCourses
   return (
     <div className="mt-4">
       <div className="mb-2 flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-foreground">{t('title')}</h3>
+        <h3 className="text-foreground text-sm font-semibold">{t('title')}</h3>
         <Modal
           isDialogOpen={isLinkModalOpen}
           onOpenChange={setIsLinkModalOpen}
@@ -116,7 +116,7 @@ export default function ProductLinkedCourses({ productId }: ProductLinkedCourses
 
       <div className="space-y-2">
         {!linkedCourses || linkedCourses.length === 0 ? (
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <div className="text-muted-foreground flex items-center gap-2 text-sm">
             <BookOpen size={16} />
             <span>{t('noCoursesLinked')}</span>
           </div>
@@ -124,7 +124,7 @@ export default function ProductLinkedCourses({ productId }: ProductLinkedCourses
           linkedCourses.map((course: CourseRead) => (
             <div
               key={course.id}
-              className="flex items-center justify-between rounded-md bg-muted p-2"
+              className="bg-muted flex items-center justify-between rounded-md p-2"
             >
               <span className="text-sm font-medium">{course.name}</span>
               <Button

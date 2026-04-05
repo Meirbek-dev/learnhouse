@@ -145,7 +145,7 @@ export default function SubmissionShell({
           <Separator />
           <Card>
             <CardContent className="flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">{t('readyToSubmit')}</p>
+              <p className="text-muted-foreground text-sm">{t('readyToSubmit')}</p>
               <SubmitButton
                 activityId={activityId}
                 assessmentType={assessmentType}
@@ -165,7 +165,7 @@ export default function SubmissionShell({
           <Separator />
           <Card className="border-secondary/20 bg-secondary/10">
             <CardContent className="flex items-center justify-between">
-              <p className="text-sm text-warning">{t('returnedResubmit')}</p>
+              <p className="text-warning text-sm">{t('returnedResubmit')}</p>
               <SubmitButton
                 activityId={activityId}
                 assessmentType={assessmentType}

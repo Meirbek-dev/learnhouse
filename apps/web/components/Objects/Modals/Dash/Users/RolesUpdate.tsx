@@ -117,7 +117,10 @@ const RolesUpdate: FC<Props> = (props) => {
                 items={
                   !roles || rolesError
                     ? undefined
-                    : sortedRoles.map((role: any) => ({ value: role.id.toString(), label: role.name }))
+                    : sortedRoles.map((role: any) => ({
+                        value: role.id.toString(),
+                        label: role.name,
+                      }))
                 }
               >
                 <SelectTrigger>

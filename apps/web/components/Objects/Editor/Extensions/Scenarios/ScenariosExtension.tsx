@@ -135,7 +135,7 @@ const ScenariosExtension: React.FC = (props: any) => {
                       setTitle(e.target.value);
                       props.updateAttributes({ title: e.target.value });
                     }}
-                    className="text-md w-full rounded-md border-2 border-dotted border-gray-200 bg-primary/10 p-2 font-bold text-slate-800"
+                    className="text-md bg-primary/10 w-full rounded-md border-2 border-dotted border-gray-200 p-2 font-bold text-slate-800"
                   />
                 </div>
               </div>
@@ -192,7 +192,7 @@ const ScenariosExtension: React.FC = (props: any) => {
                   {/* Scenario Text */}
                   <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
                     {currentScenario.imageUrl && (
-                      <div className="mb-4 relative h-48 w-full overflow-hidden rounded-lg border border-slate-200">
+                      <div className="relative mb-4 h-48 w-full overflow-hidden rounded-lg border border-slate-200">
                         <NextImage
                           src={currentScenario.imageUrl}
                           alt={t('scenarioIllustrationAlt')}

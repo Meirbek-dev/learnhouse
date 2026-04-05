@@ -42,7 +42,7 @@ export function LoadingSkeleton({
     ),
 
     card: (
-      <div className={`${baseClasses} rounded-lg border border-border p-4 dark:border-border ${className}`}>
+      <div className={`${baseClasses} border-border dark:border-border rounded-lg border p-4 ${className}`}>
         <div className={`h-6 w-1/3 rounded-md ${skeletonBg} mb-4`} />
         {renderLines(lines)}
         <div className={`h-10 w-24 rounded-md ${skeletonBg} mt-4`} />
@@ -148,7 +148,7 @@ export async function PageTransitionLoader({
           {[0, 1, 2].map((i) => (
             <div
               key={i}
-              className={`${sizeClasses[size]} animate-pulse rounded-full bg-primary/80`}
+              className={`${sizeClasses[size]} bg-primary/80 animate-pulse rounded-full`}
               style={{
                 animationDelay: `${i * 0.2}s`,
                 animationDuration: '1s',
@@ -158,7 +158,7 @@ export async function PageTransitionLoader({
         </div>
 
         {/* Optional loading text */}
-        <div className="text-sm font-medium text-muted-foreground dark:text-muted-foreground">{t('loading')}</div>
+        <div className="text-muted-foreground dark:text-muted-foreground text-sm font-medium">{t('loading')}</div>
       </div>
     </div>
   );

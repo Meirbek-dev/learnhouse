@@ -52,7 +52,7 @@ async function PlatformAnalyticsCoursesPageInner(props: {
           </CardHeader>
           <CardContent className="text-sm text-slate-600">{t('pages.courseRankingDescription')}</CardContent>
         </Card>
-        <Card className="border-slate-200 bg-background shadow-sm">
+        <Card className="bg-background border-slate-200 shadow-sm">
           <CardContent>
             <TeacherFilterBar
               path="/dash/analytics/courses"

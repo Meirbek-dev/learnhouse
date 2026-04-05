@@ -26,8 +26,8 @@ export default function PlatformOwnedCoursesPage() {
   if (isLoading) return <PageLoading />;
   if (error) {
     return (
-      <div className="h-full w-full bg-muted pt-5 pr-10 pl-10">
-        <div className="soft-shadow mb-6 flex flex-col rounded-lg border border-red-100 bg-card px-6 py-4">
+      <div className="bg-muted h-full w-full pt-5 pr-10 pl-10">
+        <div className="soft-shadow bg-card mb-6 flex flex-col rounded-lg border border-red-100 px-6 py-4">
           <div className="flex items-center gap-4">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-50">
               <Package2 className="h-6 w-6 text-red-500" />
@@ -43,8 +43,8 @@ export default function PlatformOwnedCoursesPage() {
   }
 
   return (
-    <div className="h-full w-full bg-muted pt-5 pr-10 pl-10">
-      <div className="soft-shadow mb-8 flex flex-col rounded-lg border border-gray-100 bg-card px-6 py-5">
+    <div className="bg-muted h-full w-full pt-5 pr-10 pl-10">
+      <div className="soft-shadow bg-card mb-8 flex flex-col rounded-lg border border-gray-100 px-6 py-5">
         <div className="flex items-center gap-4">
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-linear-to-br from-blue-50 to-indigo-100">
             <Package2 className="text-primary h-6 w-6" />
@@ -76,8 +76,8 @@ const EmptyState = ({ t }: { t: any }) => (
           <ShoppingCart className="text-primary h-10 w-10" />
         </div>
       </div>
-      <h2 className="mb-3 text-2xl font-bold text-foreground">{t('noPurchasedCourses')}</h2>
-      <p className="text-lg leading-relaxed text-muted-foreground">{t('noPurchasedCoursesDesc')}</p>
+      <h2 className="text-foreground mb-3 text-2xl font-bold">{t('noPurchasedCourses')}</h2>
+      <p className="text-muted-foreground text-lg leading-relaxed">{t('noPurchasedCoursesDesc')}</p>
     </div>
   </div>
 );

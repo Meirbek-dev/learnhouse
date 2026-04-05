@@ -92,9 +92,11 @@ export default function RBACAdminClient() {
   const [roleToDelete, setRoleToDelete] = useState<RoleWithPermissions | null>(null);
 
   const [auditPage, setAuditPage] = useState(1);
-  const [auditData, setAuditData] = useState<{ items: RoleAuditEvent[]; total: number; page_size: number } | null>(
-    null,
-  );
+  const [auditData, setAuditData] = useState<{
+    items: RoleAuditEvent[];
+    total: number;
+    page_size: number;
+  } | null>(null);
   const [isAuditLoading, setIsAuditLoading] = useState(false);
 
   const accessToken = session?.data?.tokens?.access_token;
@@ -920,14 +922,14 @@ export default function RBACAdminClient() {
             }
           }}
         >
-          <DialogContent className="max-h-[80vh] lg:min-w-2xl w-2xl overflow-y-auto">
+          <DialogContent className="max-h-[80vh] w-2xl overflow-y-auto lg:min-w-2xl">
             <DialogHeader>
               <DialogTitle>{t('managePermissionsTitle', { roleName: permissionsRole.name })}</DialogTitle>
               <DialogDescription>{t('managePermissionsDescription')}</DialogDescription>
             </DialogHeader>
 
             {permissionsRole.is_system && !isSuperAdmin && (
-              <div className="rounded-md border bg-muted p-3 text-sm">{t('systemRoleReadOnlyBanner')}</div>
+              <div className="bg-muted rounded-md border p-3 text-sm">{t('systemRoleReadOnlyBanner')}</div>
             )}
 
             <div className="flex flex-col gap-3 py-2 md:flex-row">

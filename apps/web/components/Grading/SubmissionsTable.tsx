@@ -211,7 +211,7 @@ export default function SubmissionsTable({ activityId, title }: SubmissionsTable
             onClick={handleExportCSV}
             disabled={isExporting || total === 0}
           >
-            <Download className="h-4 w-4 mr-1.5" />
+            <Download className="mr-1.5 h-4 w-4" />
             {t('exportCSV')}
           </Button>
         </div>
@@ -219,7 +219,7 @@ export default function SubmissionsTable({ activityId, title }: SubmissionsTable
 
       <div className="flex items-center gap-2">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+          <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
           <Input
             placeholder={t('searchPlaceholder')}
             value={search}
@@ -252,7 +252,7 @@ export default function SubmissionsTable({ activityId, title }: SubmissionsTable
           setPage(1);
         }}
       >
-        <TabsList className="flex-wrap h-auto gap-1">
+        <TabsList className="h-auto flex-wrap gap-1">
           {filterOptions.map((option) => (
             <TabsTrigger
               key={option.value}
@@ -265,8 +265,8 @@ export default function SubmissionsTable({ activityId, title }: SubmissionsTable
       </Tabs>
 
       {selectedCount > 0 ? (
-        <div className="flex items-center justify-between gap-3 rounded-md border bg-muted/50 px-4 py-3 flex-wrap">
-          <div className="flex items-center gap-3 flex-wrap">
+        <div className="bg-muted/50 flex flex-wrap items-center justify-between gap-3 rounded-md border px-4 py-3">
+          <div className="flex flex-wrap items-center gap-3">
             <span className="text-sm font-medium">{t('selectedCount', { count: selectedCount })}</span>
             <Button
               type="button"
@@ -474,7 +474,7 @@ function SubmissionRow({
       </TableCell>
       <TableCell>
         <div className={cn(!selectable && 'opacity-60')}>
-          <p className="font-medium text-sm">{displayName}</p>
+          <p className="text-sm font-medium">{displayName}</p>
           {submission.user?.email ? <p className="text-xs text-slate-400">{submission.user.email}</p> : null}
         </div>
       </TableCell>

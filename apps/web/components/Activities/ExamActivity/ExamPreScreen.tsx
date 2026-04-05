@@ -92,31 +92,31 @@ export default function ExamPreScreen({
             <CardContent className="space-y-8">
               {/* Exam Information with modern grid */}
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                <div className="group relative overflow-hidden rounded-xl border border-border bg-gradient-to-br from-blue-50 to-blue-100/50 p-5 transition-all duration-200 hover:shadow-lg hover:shadow-blue-100">
+                <div className="group border-border relative overflow-hidden rounded-xl border bg-gradient-to-br from-blue-50 to-blue-100/50 p-5 transition-all duration-200 hover:shadow-lg hover:shadow-blue-100">
                   <div className="flex items-start gap-4">
                     <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg bg-blue-600 text-white shadow-lg">
                       <FileText className="h-6 w-6" />
                     </div>
                     <div className="flex-1">
                       <p className="text-sm font-medium text-gray-600">{t('totalQuestions')}</p>
-                      <p className="mt-1 text-3xl font-bold text-foreground">{questionCount}</p>
+                      <p className="text-foreground mt-1 text-3xl font-bold">{questionCount}</p>
                     </div>
                   </div>
                   <div className="absolute right-0 bottom-0 h-20 w-20 translate-x-8 translate-y-8 rounded-full bg-blue-600/10" />
                 </div>
 
-                <div className="group relative overflow-hidden rounded-xl border border-border bg-gradient-to-br from-orange-50 to-orange-100/50 p-5 transition-all duration-200 hover:shadow-lg hover:shadow-orange-100">
+                <div className="group border-border relative overflow-hidden rounded-xl border bg-gradient-to-br from-orange-50 to-orange-100/50 p-5 transition-all duration-200 hover:shadow-lg hover:shadow-orange-100">
                   <div className="flex items-start gap-4">
                     <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg bg-orange-600 text-white shadow-lg">
                       <Clock className="h-6 w-6" />
                     </div>
                     <div className="flex-1">
                       <p className="text-sm font-medium text-gray-600">{t('timeLimit')}</p>
-                      <p className="mt-1 text-3xl font-bold text-foreground">
+                      <p className="text-foreground mt-1 text-3xl font-bold">
                         {timeLimit || <span className="text-2xl">{t('unlimited')}</span>}
                       </p>
                       {timeLimit && (
-                        <p className="text-xs text-muted-foreground">{t('minutes', { count: timeLimit })}</p>
+                        <p className="text-muted-foreground text-xs">{t('minutes', { count: timeLimit })}</p>
                       )}
                     </div>
                   </div>
@@ -124,14 +124,14 @@ export default function ExamPreScreen({
                 </div>
 
                 {attemptLimit && attemptLimit > 0 && !isTeacher && (
-                  <div className="group relative overflow-hidden rounded-xl border border-border bg-gradient-to-br from-purple-50 to-purple-100/50 p-5 transition-all duration-200 hover:shadow-lg hover:shadow-purple-100">
+                  <div className="group border-border relative overflow-hidden rounded-xl border bg-gradient-to-br from-purple-50 to-purple-100/50 p-5 transition-all duration-200 hover:shadow-lg hover:shadow-purple-100">
                     <div className="flex items-start gap-4">
                       <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg bg-purple-600 text-white shadow-lg">
                         <Users className="h-6 w-6" />
                       </div>
                       <div className="flex-1">
                         <p className="text-sm font-medium text-gray-600">{t('attemptsRemaining')}</p>
-                        <p className="mt-1 text-3xl font-bold text-foreground">
+                        <p className="text-foreground mt-1 text-3xl font-bold">
                           {remainingAttempts !== null ? remainingAttempts : t('unlimited')}
                         </p>
                       </div>
@@ -161,45 +161,45 @@ export default function ExamPreScreen({
                   <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-950 text-white">
                     <CircleAlertIcon className="m-1.5" />
                   </div>
-                  <h3 className="text-lg font-bold text-foreground">{t('instructions')}</h3>
+                  <h3 className="text-foreground text-lg font-bold">{t('instructions')}</h3>
                 </div>
                 <ul className="space-y-3">
-                  <li className="flex items-start gap-3 rounded-lg bg-card p-3 shadow-sm">
+                  <li className="bg-card flex items-start gap-3 rounded-lg p-3 shadow-sm">
                     <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-green-100">
                       <CheckCircle className="h-4 w-4 text-green-600" />
                     </div>
-                    <span className="flex-1 text-sm leading-relaxed text-foreground">{t('instruction1')}</span>
+                    <span className="text-foreground flex-1 text-sm leading-relaxed">{t('instruction1')}</span>
                   </li>
                   {timeLimit && (
-                    <li className="flex items-start gap-3 rounded-lg bg-card p-3 shadow-sm">
+                    <li className="bg-card flex items-start gap-3 rounded-lg p-3 shadow-sm">
                       <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-green-100">
                         <CheckCircle className="h-4 w-4 text-green-600" />
                       </div>
-                      <span className="flex-1 text-sm leading-relaxed text-foreground">
+                      <span className="text-foreground flex-1 text-sm leading-relaxed">
                         {t('instruction3', { minutes: timeLimit })}
                       </span>
                     </li>
                   )}
-                  <li className="flex items-start gap-3 rounded-lg bg-card p-3 shadow-sm">
+                  <li className="bg-card flex items-start gap-3 rounded-lg p-3 shadow-sm">
                     <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-amber-100">
                       <AlertCircle className="h-4 w-4 text-amber-600" />
                     </div>
-                    <span className="flex-1 text-sm leading-relaxed text-foreground">{t('instruction2')}</span>
+                    <span className="text-foreground flex-1 text-sm leading-relaxed">{t('instruction2')}</span>
                   </li>
                   {settings.tab_switch_detection && (
-                    <li className="flex items-start gap-3 rounded-lg bg-card p-3 shadow-sm">
+                    <li className="bg-card flex items-start gap-3 rounded-lg p-3 shadow-sm">
                       <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-amber-100">
                         <AlertCircle className="h-4 w-4 text-amber-600" />
                       </div>
-                      <span className="flex-1 text-sm leading-relaxed text-foreground">{t('instruction4')}</span>
+                      <span className="text-foreground flex-1 text-sm leading-relaxed">{t('instruction4')}</span>
                     </li>
                   )}
                   {settings.copy_paste_protection && (
-                    <li className="flex items-start gap-3 rounded-lg bg-card p-3 shadow-sm">
+                    <li className="bg-card flex items-start gap-3 rounded-lg p-3 shadow-sm">
                       <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-amber-100">
                         <AlertCircle className="h-4 w-4 text-amber-600" />
                       </div>
-                      <span className="flex-1 text-sm leading-relaxed text-foreground">{t('instruction5')}</span>
+                      <span className="text-foreground flex-1 text-sm leading-relaxed">{t('instruction5')}</span>
                     </li>
                   )}
                 </ul>
@@ -304,13 +304,13 @@ export default function ExamPreScreen({
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-muted-foreground">{t('timeLimit')}</p>
+                  <p className="text-muted-foreground text-sm">{t('timeLimit')}</p>
                   <p className="text-lg font-semibold text-orange-600">
                     {timeLimit ? t('minutes', { count: timeLimit }) : t('unlimited')}
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm text-muted-foreground">{t('questions')}</p>
+                  <p className="text-muted-foreground text-sm">{t('questions')}</p>
                   <p className="text-lg font-semibold text-blue-600">{questionCount}</p>
                 </div>
               </div>
@@ -319,7 +319,7 @@ export default function ExamPreScreen({
                 {canTakeExam ? (
                   <Button
                     size="lg"
-                    className="w-full "
+                    className="w-full"
                     onClick={handleStartExam}
                     disabled={isStarting}
                   >

@@ -299,7 +299,7 @@ export default function ExamTakingInterface({
             {question.answer_options.map((option, index) => (
               <div
                 key={index}
-                className="flex items-center space-x-3 rounded-lg border border-border p-4 transition-colors hover:border-gray-300 hover:bg-muted"
+                className="border-border hover:bg-muted flex items-center space-x-3 rounded-lg border p-4 transition-colors hover:border-gray-300"
               >
                 <RadioGroupItem
                   value={index.toString()}
@@ -328,7 +328,7 @@ export default function ExamTakingInterface({
             {question.answer_options.map((option, index) => (
               <div
                 key={index}
-                className="flex items-center space-x-3 rounded-lg border border-border p-4 transition-colors hover:border-gray-300 hover:bg-muted"
+                className="border-border hover:bg-muted flex items-center space-x-3 rounded-lg border p-4 transition-colors hover:border-gray-300"
               >
                 <Checkbox
                   id={`q${questionId}-${index}`}
@@ -357,11 +357,14 @@ export default function ExamTakingInterface({
         return (
           <div className="space-y-3">
             {question.answer_options.map((option, index) => {
-              const matchOptions = question.answer_options.map((opt) => ({ value: opt.right ?? '', label: opt.right }));
+              const matchOptions = question.answer_options.map((opt) => ({
+                value: opt.right ?? '',
+                label: opt.right,
+              }));
               return (
                 <div
                   key={index}
-                  className="flex items-center gap-4 rounded-lg border border-border p-4"
+                  className="border-border flex items-center gap-4 rounded-lg border p-4"
                 >
                   <span className="min-w-[200px] text-base font-medium">{option.left}</span>
                   <span className="text-gray-400">→</span>
@@ -476,7 +479,10 @@ export default function ExamTakingInterface({
         aria-valuenow={Math.round(progress)}
         aria-valuemin={0}
         aria-valuemax={100}
-        aria-label={t('questionProgress', { current: currentIndex + 1, total: orderedQuestions.length })}
+        aria-label={t('questionProgress', {
+          current: currentIndex + 1,
+          total: orderedQuestions.length,
+        })}
       />
 
       {/* Violation Warning */}
@@ -583,12 +589,12 @@ export default function ExamTakingInterface({
                   {t('questionNumber', { number: currentIndex + 1 })}
                 </span>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-normal text-muted-foreground">
+                  <span className="text-muted-foreground text-sm font-normal">
                     {t('points', { count: currentQuestion?.points ?? 0 })}
                   </span>
                 </div>
               </CardTitle>
-              <CardDescription className="mt-4 text-xl leading-relaxed text-foreground">
+              <CardDescription className="text-foreground mt-4 text-xl leading-relaxed">
                 {currentQuestion?.question_text}
               </CardDescription>
             </CardHeader>
@@ -664,7 +670,10 @@ export default function ExamTakingInterface({
                       key={question.id}
                       onClick={() => dispatch({ type: 'NAVIGATE_TO_QUESTION', index })}
                       className={`relative flex h-10 w-10 items-center justify-center rounded-lg text-sm font-medium transition-colors ${bgColor} ${textColor}`}
-                      aria-label={t('questionAriaLabel', { number: index + 1, answered: answered ? 'true' : 'false' })}
+                      aria-label={t('questionAriaLabel', {
+                        number: index + 1,
+                        answered: answered ? 'true' : 'false',
+                      })}
                     >
                       {index + 1}
                     </button>
@@ -683,7 +692,7 @@ export default function ExamTakingInterface({
                   <span className="text-gray-600">{t('current')}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="h-4 w-4 rounded bg-muted" />
+                  <div className="bg-muted h-4 w-4 rounded" />
                   <span className="text-gray-600">{t('unanswered')}</span>
                 </div>
               </div>
@@ -693,7 +702,7 @@ export default function ExamTakingInterface({
       </div>
 
       {/* Mobile bottom nav */}
-      <div className="fixed right-0 bottom-0 left-0 z-50 border-t bg-card lg:hidden">
+      <div className="bg-card fixed right-0 bottom-0 left-0 z-50 border-t lg:hidden">
         <div className="px-4 py-3">
           <div className="flex items-center gap-2">
             <Button
@@ -747,7 +756,7 @@ export default function ExamTakingInterface({
             <AlertDialogDescription>{t('confirmSubmissionMessage')}</AlertDialogDescription>
 
             <div className="space-y-3">
-              <div className="rounded-lg border bg-muted p-4">
+              <div className="bg-muted rounded-lg border p-4">
                 <div className="grid gap-2 text-sm">
                   <div className="flex justify-between">
                     <span className="text-gray-600">{t('totalQuestions')}:</span>
@@ -765,7 +774,10 @@ export default function ExamTakingInterface({
               </div>
               {answeredCount < orderedQuestions.length && (
                 <p className="text-sm text-orange-600">
-                  ⚠️ {t('unansweredQuestionsWarning', { count: orderedQuestions.length - answeredCount })}
+                  ⚠️{' '}
+                  {t('unansweredQuestionsWarning', {
+                    count: orderedQuestions.length - answeredCount,
+                  })}
                 </p>
               )}
             </div>

@@ -359,7 +359,7 @@ const AIChatPredefinedQuestion = ({ sendMessage, label }: AIChatPredefinedQuesti
   const icons: Record<PredefinedQuestionType, ReactNode> = {
     about: <BadgeInfo className="h-3.5 w-3.5" />,
     flashcards: <NotebookTabs className="h-3.5 w-3.5" />,
-    examples: <span className="text-xs font-bold leading-none">{t('examplesAbbr')}</span>,
+    examples: <span className="text-xs leading-none font-bold">{t('examplesAbbr')}</span>,
   };
 
   const question = questions[label];
@@ -376,7 +376,7 @@ const AIChatPredefinedQuestion = ({ sendMessage, label }: AIChatPredefinedQuesti
       role="button"
       tabIndex={0}
       variant="outline"
-      className="cursor-pointer gap-1.5 border-zinc-700 bg-zinc-800 py-1 text-zinc-400 transition-colors hover:border-zinc-600 hover:bg-zinc-700 hover:text-zinc-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500"
+      className="cursor-pointer gap-1.5 border-zinc-700 bg-zinc-800 py-1 text-zinc-400 transition-colors hover:border-zinc-600 hover:bg-zinc-700 hover:text-zinc-200 focus-visible:ring-2 focus-visible:ring-zinc-500 focus-visible:outline-none"
       onClick={() => sendMessage(question)}
       onKeyDown={handleKeyDown}
     >

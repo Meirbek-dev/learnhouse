@@ -101,13 +101,13 @@ export default function CourseReviewPublish({
       <div className={`${courseWorkflowCardClass} p-6`}>
         <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
           <div>
-            <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            <div className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
               {t('sectionLabel')}
             </div>
-            <h2 className="mt-2 text-2xl font-semibold tracking-tight text-foreground">
+            <h2 className="text-foreground mt-2 text-2xl font-semibold tracking-tight">
               {readiness.readyToPublish ? t('readyTitle') : t('notReadyTitle')}
             </h2>
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">{t('description')}</p>
+            <p className="text-muted-foreground mt-2 max-w-3xl text-sm leading-6">{t('description')}</p>
           </div>
 
           <div className="flex flex-wrap gap-3">
@@ -140,16 +140,16 @@ export default function CourseReviewPublish({
 
       <div className="grid gap-4 xl:grid-cols-[1.5fr_1fr]">
         <div className={`${courseWorkflowCardClass} p-5`}>
-          <div className="text-sm font-semibold text-foreground">{t('readinessChecklist')}</div>
+          <div className="text-foreground text-sm font-semibold">{t('readinessChecklist')}</div>
           <div className="mt-4 space-y-3">
             {readiness.checklist.map((item) => (
               <div
                 key={item.id}
-                className="flex items-start justify-between gap-4 rounded-lg border bg-muted/40 p-4"
+                className="bg-muted/40 flex items-start justify-between gap-4 rounded-lg border p-4"
               >
                 <div>
-                  <div className="font-medium text-foreground">{tReadiness(`checklist.${item.id}.title`)}</div>
-                  <div className="mt-1 text-sm text-muted-foreground">
+                  <div className="text-foreground font-medium">{tReadiness(`checklist.${item.id}.title`)}</div>
+                  <div className="text-muted-foreground mt-1 text-sm">
                     {tReadiness(`checklist.${item.id}.description`)}
                   </div>
                 </div>
@@ -174,43 +174,43 @@ export default function CourseReviewPublish({
         <div className="space-y-4">
           <div className={courseWorkflowSummaryCardClass}>
             <div className="flex items-center justify-between gap-3">
-              <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <div className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
                 {t('launchState')}
               </div>
               <CourseStatusBadge status={course.courseStructure.public ? 'live' : 'private'} />
             </div>
-            <div className="mt-3 text-3xl font-semibold text-foreground">
+            <div className="text-foreground mt-3 text-3xl font-semibold">
               {course.courseStructure.public ? t('launchStates.live') : t('launchStates.private')}
             </div>
-            <div className="mt-2 text-sm text-muted-foreground">
+            <div className="text-muted-foreground mt-2 text-sm">
               {course.courseStructure.public ? t('launchStateDescriptions.live') : t('launchStateDescriptions.private')}
             </div>
           </div>
 
           <div className={courseWorkflowSummaryCardClass}>
-            <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            <div className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
               {tOverview('workspacePulse')}
             </div>
             <div className="mt-4 grid gap-3">
               <div className={courseWorkflowMutedPanelClass}>
-                <div className="flex items-center gap-2 text-muted-foreground">
+                <div className="text-muted-foreground flex items-center gap-2">
                   <FileStack className="size-4" />
                   {tOverview('curriculumSnapshot')}
                 </div>
-                <div className="mt-2 text-2xl font-semibold text-foreground">
+                <div className="text-foreground mt-2 text-2xl font-semibold">
                   {tOverview('chapterCount', { count: stats.chapters })}
                 </div>
-                <div className="mt-1 text-sm text-muted-foreground">
+                <div className="text-muted-foreground mt-1 text-sm">
                   {tOverview('activityCountDescription', { count: stats.activities })}
                 </div>
               </div>
               <div className={courseWorkflowMutedPanelClass}>
-                <div className="flex items-center gap-2 text-muted-foreground">
+                <div className="text-muted-foreground flex items-center gap-2">
                   <Users className="size-4" />
                   {tOverview('sections.collaboration')}
                 </div>
-                <div className="mt-2 text-2xl font-semibold text-foreground">{contributors.length}</div>
-                <div className="mt-1 text-sm text-muted-foreground">
+                <div className="text-foreground mt-2 text-2xl font-semibold">{contributors.length}</div>
+                <div className="text-muted-foreground mt-1 text-sm">
                   {tOverview('collaboration.loadedRecords', { count: contributors.length })}
                 </div>
                 {contributorNames.length > 0 ? (
@@ -218,7 +218,7 @@ export default function CourseReviewPublish({
                     {contributorNames.map((name) => (
                       <span
                         key={name}
-                        className="rounded-full border bg-background px-2.5 py-1 text-xs text-foreground"
+                        className="bg-background text-foreground rounded-full border px-2.5 py-1 text-xs"
                       >
                         {name}
                       </span>
@@ -230,8 +230,8 @@ export default function CourseReviewPublish({
           </div>
 
           <div className={`${courseWorkflowCardClass} p-5`}>
-            <div className="text-sm font-semibold text-foreground">{t('publishingNotes')}</div>
-            <div className="mt-3 space-y-3 text-sm leading-6 text-muted-foreground">
+            <div className="text-foreground text-sm font-semibold">{t('publishingNotes')}</div>
+            <div className="text-muted-foreground mt-3 space-y-3 text-sm leading-6">
               <div className={courseWorkflowMutedPanelClass}>{t('notes.visibility')}</div>
               <div className={courseWorkflowMutedPanelClass}>{t('notes.curriculum')}</div>
               <div className={courseWorkflowMutedPanelClass}>{t('notes.review')}</div>

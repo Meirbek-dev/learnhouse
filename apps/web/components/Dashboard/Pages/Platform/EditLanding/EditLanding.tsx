@@ -1202,7 +1202,7 @@ const HeroSectionEditor: FC<{
                     />
                   </div>
                   {section.background.image ? (
-                    <div className="mt-4 relative h-40 w-full overflow-hidden rounded-lg">
+                    <div className="relative mt-4 h-40 w-full overflow-hidden rounded-lg">
                       <NextImage
                         src={section.background.image}
                         alt={t('HeroEditor.Background.imagePreviewAlt')}
@@ -1693,7 +1693,7 @@ const TextAndImageSectionEditor: FC<{
             </div>
           </div>
           {section.image.url ? (
-            <div className="mt-4 relative h-40 w-full overflow-hidden rounded-lg">
+            <div className="relative mt-4 h-40 w-full overflow-hidden rounded-lg">
               <NextImage
                 src={section.image.url}
                 alt={section.image.alt}
@@ -1925,7 +1925,7 @@ const PeopleSectionEditor: FC<{
                       t={t}
                     />
                     {person.image_url ? (
-                      <div className="relative h-12 w-12 rounded-full overflow-hidden">
+                      <div className="relative h-12 w-12 overflow-hidden rounded-full">
                         <NextImage
                           src={person.image_url}
                           alt={person.name}

@@ -38,7 +38,10 @@ const LinkToUserGroup = (props: LinkToUserGroupProps) => {
   // Use first usergroup as default if not explicitly set
   const effectiveUserGroup = selectedUserGroup ?? usergroups?.[0]?.id ?? null;
 
-  const usergroupItems = (usergroups || []).map((group: UserGroup) => ({ value: String(group.id), label: group.name }));
+  const usergroupItems = (usergroups || []).map((group: UserGroup) => ({
+    value: String(group.id),
+    label: group.name,
+  }));
 
   const handleLink = async () => {
     if (!effectiveUserGroup) {

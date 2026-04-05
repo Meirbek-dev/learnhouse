@@ -40,7 +40,13 @@ const SETTING_TABS: TabItem[] = [
     titleKey: 'previewsTitle',
     descriptionKey: 'previewsDescription',
   },
-  { id: 'socials', label: 'socials', icon: Share2Icon, titleKey: 'socialsTitle', descriptionKey: 'socialsDescription' },
+  {
+    id: 'socials',
+    label: 'socials',
+    icon: Share2Icon,
+    titleKey: 'socialsTitle',
+    descriptionKey: 'socialsDescription',
+  },
 ];
 
 export default function PlatformSettingsPage(props: { params: Promise<{ subpage: string }> }) {

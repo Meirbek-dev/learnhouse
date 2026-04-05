@@ -22,11 +22,11 @@ export default function ConflictAlert() {
   };
 
   return (
-    <Alert className="mx-4 mb-4 border-destructive/50 bg-destructive/5 lg:mx-8">
-      <AlertTriangle className="size-4 text-destructive" />
+    <Alert className="border-destructive/50 bg-destructive/5 mx-4 mb-4 lg:mx-8">
+      <AlertTriangle className="text-destructive size-4" />
       <AlertTitle className="text-destructive">{t('title')}</AlertTitle>
       <AlertDescription className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <span className="text-sm text-muted-foreground">{conflict.message || t('description')}</span>
+        <span className="text-muted-foreground text-sm">{conflict.message || t('description')}</span>
         <div className="flex shrink-0 gap-2">
           <Button
             size="sm"

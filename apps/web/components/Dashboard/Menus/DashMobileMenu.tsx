@@ -31,7 +31,7 @@ const DashMobileMenu = () => {
   } = useNavigationPermissions();
 
   return (
-    <div className="fixed right-0 bottom-0 left-0 z-50 border-t border-sidebar-border bg-sidebar text-sidebar-foreground shadow-lg supports-[backdrop-filter]:bg-sidebar/90 supports-[backdrop-filter]:backdrop-blur-md">
+    <div className="border-sidebar-border bg-sidebar text-sidebar-foreground supports-[backdrop-filter]:bg-sidebar/90 fixed right-0 bottom-0 left-0 z-50 border-t shadow-lg supports-[backdrop-filter]:backdrop-blur-md">
       <div className="flex h-16 items-center justify-around px-2">
         <ToolTip
           content={t('tooltips.home')}

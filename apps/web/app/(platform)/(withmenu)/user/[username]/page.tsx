@@ -59,7 +59,7 @@ export default async function PlatformUserPage({ params }: UserPageProps) {
   if (hasError) {
     return (
       <div className="container mx-auto py-8">
-        <div className="soft-shadow rounded-xl border border-border bg-card p-6 text-card-foreground shadow-sm">
+        <div className="soft-shadow border-border bg-card text-card-foreground rounded-xl border p-6 shadow-sm">
           <p className="text-destructive">{t('profileLoadError')}</p>
         </div>
       </div>

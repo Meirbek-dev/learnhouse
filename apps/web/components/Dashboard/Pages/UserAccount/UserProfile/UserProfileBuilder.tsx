@@ -559,7 +559,10 @@ const UserProfileBuilder = () => {
                     addSection(value as keyof typeof SECTION_TYPE_KEYS);
                   }
                 }}
-                items={Object.entries(getSectionTypesConfig(t)).map(([type, { label }]) => ({ value: type, label }))}
+                items={Object.entries(getSectionTypesConfig(t)).map(([type, { label }]) => ({
+                  value: type,
+                  label,
+                }))}
               >
                 <SelectTrigger
                   className="bg-primary w-full border-0 p-0"

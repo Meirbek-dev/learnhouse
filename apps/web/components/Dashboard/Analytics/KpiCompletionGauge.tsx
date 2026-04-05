@@ -73,7 +73,7 @@ export default function KpiCompletionGauge({ completionPct, deltaPct, direction 
           </ChartContainer>
           <div className="pointer-events-none absolute inset-0 flex items-end justify-center pb-6">
             <div className="text-center">
-              <div className="text-4xl font-bold text-foreground">{completionPct.toLocaleString()}%</div>
+              <div className="text-foreground text-4xl font-bold">{completionPct.toLocaleString()}%</div>
               {deltaPct !== null && (
                 <div className={`mt-0.5 text-sm font-medium ${deltaColor}`}>
                   {deltaPct > 0 ? '+' : ''}

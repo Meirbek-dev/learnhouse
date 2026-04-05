@@ -72,7 +72,7 @@ function ConfirmDeleteStripeConfig({ onDelete, t }: ConfirmDeleteStripeConfigPro
       <AlertDialogTrigger
         nativeButton
         render={
-          <Button className="flex items-center space-x-2 rounded-full bg-destructive text-sm text-destructive-foreground transition duration-300 hover:bg-destructive/90 disabled:cursor-not-allowed disabled:opacity-50">
+          <Button className="bg-destructive text-destructive-foreground hover:bg-destructive/90 flex items-center space-x-2 rounded-full text-sm transition duration-300 disabled:cursor-not-allowed disabled:opacity-50">
             <Trash2 size={16} />
             <span>{t('removeConnectionButton')}</span>
           </Button>
@@ -182,7 +182,7 @@ const PaymentsConfigurationPage: FC = () => {
   if (isLoading) {
     return (
       <div className="flex h-64 items-center justify-center">
-        <div className="flex animate-pulse items-center rounded-md bg-muted px-4 py-2 text-sm font-medium text-muted-foreground">
+        <div className="bg-muted text-muted-foreground flex animate-pulse items-center rounded-md px-4 py-2 text-sm font-medium">
           <Loader2
             size={16}
             className="mr-2 animate-spin"
@@ -199,20 +199,20 @@ const PaymentsConfigurationPage: FC = () => {
 
   return (
     <div>
-      <div className="mx-auto mr-10 ml-10 rounded-xl bg-card p-4 shadow-sm ring-1 ring-border">
-        <div className="mb-3 flex flex-col -space-y-1 rounded-md bg-muted px-5 py-3">
-          <h1 className="text-xl font-bold text-foreground">{t('pageTitle')}</h1>
-          <h2 className="text-base text-muted-foreground">{t('pageDescription')}</h2>
+      <div className="bg-card ring-border mx-auto mr-10 ml-10 rounded-xl p-4 shadow-sm ring-1">
+        <div className="bg-muted mb-3 flex flex-col -space-y-1 rounded-md px-5 py-3">
+          <h1 className="text-foreground text-xl font-bold">{t('pageTitle')}</h1>
+          <h2 className="text-muted-foreground text-base">{t('pageDescription')}</h2>
         </div>
 
-        <Alert className="mb-3 border border-primary/20 bg-primary/10 p-6">
+        <Alert className="border-primary/20 bg-primary/10 mb-3 border p-6">
           <AlertTitle className="mb-2 flex items-center space-x-2 text-lg font-semibold">
             <Info className="h-5 w-5" />
             <span>{t('aboutStripe.title')}</span>
           </AlertTitle>
           <AlertDescription className="space-y-5">
             <div className="pl-2">
-              <ul className="list-inside list-disc space-y-1 pl-2 text-muted-foreground">
+              <ul className="text-muted-foreground list-inside list-disc space-y-1 pl-2">
                 <li className="flex items-center space-x-2">
                   <CreditCard className="h-4 w-4" />
                   <span>{t('aboutStripe.acceptPayments')}</span>
@@ -235,7 +235,7 @@ const PaymentsConfigurationPage: FC = () => {
               href="https://stripe.com/docs"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center pl-2 font-medium text-primary transition-colors duration-200 hover:text-primary/80"
+              className="text-primary hover:text-primary/80 inline-flex items-center pl-2 font-medium transition-colors duration-200"
             >
               {t('aboutStripe.learnMore')}
               <ExternalLink className="ml-1.5 h-4 w-4" />
@@ -245,7 +245,7 @@ const PaymentsConfigurationPage: FC = () => {
 
         <div className="subtle-shadow flex flex-col rounded-lg">
           {stripeConfig ? (
-            <div className="flex items-center justify-between rounded-lg border bg-card p-6 shadow-sm">
+            <div className="bg-card flex items-center justify-between rounded-lg border p-6 shadow-sm">
               <div className="flex items-center space-x-3">
                 <SiStripe
                   className="text-foreground"
@@ -253,20 +253,20 @@ const PaymentsConfigurationPage: FC = () => {
                 />
                 <div className="flex flex-col">
                   <div className="flex items-center space-x-2">
-                    <span className="text-xl font-semibold text-foreground">Stripe</span>
+                    <span className="text-foreground text-xl font-semibold">Stripe</span>
                     {stripeConfig.provider_specific_id && stripeConfig.active ? (
                       <div className="flex items-center space-x-1 rounded-full bg-emerald-500/20 px-2 py-0.5">
                         <div className="h-2 w-2 rounded-full bg-emerald-500" />
-                        <span className="text-xs text-foreground">{t('connectedStatus')}</span>
+                        <span className="text-foreground text-xs">{t('connectedStatus')}</span>
                       </div>
                     ) : (
-                      <div className="flex items-center space-x-1 rounded-full bg-destructive/20 px-2 py-0.5">
-                        <div className="h-2 w-2 rounded-full bg-destructive" />
-                        <span className="text-xs text-destructive-foreground">{t('notConnectedStatus')}</span>
+                      <div className="bg-destructive/20 flex items-center space-x-1 rounded-full px-2 py-0.5">
+                        <div className="bg-destructive h-2 w-2 rounded-full" />
+                        <span className="text-destructive-foreground text-xs">{t('notConnectedStatus')}</span>
                       </div>
                     )}
                   </div>
-                  <span className="text-sm text-muted-foreground">
+                  <span className="text-muted-foreground text-sm">
                     {stripeConfig.provider_specific_id
                       ? `${t('linkedAccountLabel')}: ${stripeConfig.provider_specific_id}`
                       : t('accountNotConfigured')}
@@ -277,7 +277,7 @@ const PaymentsConfigurationPage: FC = () => {
                 {!(stripeConfig.provider_specific_id && stripeConfig.active) && (
                   <Button
                     onClick={handleStripeOnboarding}
-                    className="flex items-center space-x-2 rounded-full border border-primary/30 bg-primary px-4 py-2 text-sm text-primary-foreground shadow-md transition duration-300 hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="border-primary/30 bg-primary text-primary-foreground hover:bg-primary/90 flex items-center space-x-2 rounded-full border px-4 py-2 text-sm shadow-md transition duration-300 disabled:cursor-not-allowed disabled:opacity-50"
                     disabled={isOnboardingLoading}
                   >
                     {isOnboardingLoading ? (
@@ -297,7 +297,7 @@ const PaymentsConfigurationPage: FC = () => {
           ) : (
             <Button
               onClick={enableStripe}
-              className="flex items-center justify-center space-x-2 rounded-lg bg-primary p-3 px-6 text-primary-foreground shadow-sm transition duration-300 hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 flex items-center justify-center space-x-2 rounded-lg p-3 px-6 shadow-sm transition duration-300 disabled:cursor-not-allowed disabled:opacity-50"
               disabled={isOnboarding}
             >
               {isOnboarding ? (
@@ -433,7 +433,7 @@ const EditStripeConfigModal: FC<EditStripeConfigModalProps> = ({ configId, acces
           <div className="flex justify-end pt-4">
             <Button
               type="submit"
-              className="rounded-lg bg-primary px-4 py-2 text-primary-foreground transition duration-300 hover:bg-primary/90"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg px-4 py-2 transition duration-300"
               disabled={form.formState.isSubmitting}
             >
               {form.formState.isSubmitting ? t('saving') : t('saveButton')}

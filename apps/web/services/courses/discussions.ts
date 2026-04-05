@@ -147,7 +147,13 @@ export async function toggleDiscussionLike(
   course_uuid: string,
   discussion_uuid: string,
   access_token: string,
-): Promise<{ message: string; is_liked: boolean; is_disliked: boolean; likes_count: number; dislikes_count: number }> {
+): Promise<{
+  message: string;
+  is_liked: boolean;
+  is_disliked: boolean;
+  likes_count: number;
+  dislikes_count: number;
+}> {
   const result = await fetch(
     `${getAPIUrl()}courses/${course_uuid}/discussions/${discussion_uuid}/like`,
     RequestBodyWithAuthHeader('PUT', null, null, access_token),
@@ -170,7 +176,13 @@ export async function toggleDiscussionDislike(
   course_uuid: string,
   discussion_uuid: string,
   access_token: string,
-): Promise<{ message: string; is_liked: boolean; is_disliked: boolean; likes_count: number; dislikes_count: number }> {
+): Promise<{
+  message: string;
+  is_liked: boolean;
+  is_disliked: boolean;
+  likes_count: number;
+  dislikes_count: number;
+}> {
   const result = await fetch(
     `${getAPIUrl()}courses/${course_uuid}/discussions/${discussion_uuid}/dislike`,
     RequestBodyWithAuthHeader('PUT', null, null, access_token),

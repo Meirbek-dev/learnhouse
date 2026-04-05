@@ -115,22 +115,22 @@ export default async function PlatformDashHomePage() {
 
       {/* Footer */}
       <div className="mt-6 flex flex-col gap-6 sm:mt-10 sm:gap-10">
-        <div className="mx-auto h-1 w-[100px] rounded-full bg-muted/40 dark:bg-muted/80" />
+        <div className="bg-muted/40 dark:bg-muted/80 mx-auto h-1 w-[100px] rounded-full" />
         <div className="flex items-center justify-center">
           <ServerLink
             href="https://tou.edu.kz/ru/"
             target="_blank"
-            className="mt-4 flex cursor-pointer items-center gap-2 rounded-lg bg-primary px-7 py-3 shadow-lg transition-all ease-linear hover:scale-105 sm:mt-[40px]"
+            className="bg-primary mt-4 flex cursor-pointer items-center gap-2 rounded-lg px-7 py-3 shadow-lg transition-all ease-linear hover:scale-105 sm:mt-[40px]"
           >
             <Image
               width={26}
               src={touEmblemLight}
               alt={t('touUniversity')}
             />
-            <div className="text-sm font-bold text-primary-foreground">{t('touUniversity')}</div>
+            <div className="text-primary-foreground text-sm font-bold">{t('touUniversity')}</div>
           </ServerLink>
         </div>
-        <div className="mx-auto mt-4 h-1 w-28 rounded-full bg-muted/40 dark:bg-muted/80 sm:mt-[40px]" />
+        <div className="bg-muted/40 dark:bg-muted/80 mx-auto mt-4 h-1 w-28 rounded-full sm:mt-[40px]" />
 
         <ServerLink
           href="/dash/user-account/settings/general"
@@ -142,8 +142,8 @@ export default async function PlatformDashHomePage() {
               size={20}
             />
             <div>
-              <div className="font-bold text-muted-foreground">{t('AccountSettings.title')}</div>
-              <p className="text-sm text-muted-foreground">{t('AccountSettings.description')}</p>
+              <div className="text-muted-foreground font-bold">{t('AccountSettings.title')}</div>
+              <p className="text-muted-foreground text-sm">{t('AccountSettings.description')}</p>
             </div>
           </div>
         </ServerLink>
@@ -170,7 +170,7 @@ const DashboardCard = ({
       href={href}
       className="group block"
     >
-      <Card className="h-full transition-colors duration-150 hover:bg-accent hover:text-accent-foreground">
+      <Card className="hover:bg-accent hover:text-accent-foreground h-full transition-colors duration-150">
         <CardHeader className="pb-2">
           <div className="flex items-start justify-between">
             <div className="bg-muted text-muted-foreground group-hover:bg-background rounded-md p-2 transition-colors duration-150">

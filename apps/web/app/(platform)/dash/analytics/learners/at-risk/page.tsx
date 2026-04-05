@@ -46,7 +46,7 @@ async function PlatformAnalyticsAtRiskPageInner(props: {
 
     return (
       <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-6 px-4 py-6 md:px-6 xl:px-8">
-        <Card className="border-slate-200 bg-background shadow-sm">
+        <Card className="bg-background border-slate-200 shadow-sm">
           <CardContent>
             <TeacherFilterBar
               path="/dash/analytics/learners/at-risk"

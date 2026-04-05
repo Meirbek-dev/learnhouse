@@ -38,7 +38,7 @@ const NavigationButtons = ({
         navigateToActivity(prevActivity);
       }}
       className={`flex items-center space-x-1 rounded-md px-1.5 py-1.5 transition-all duration-200 sm:space-x-2 sm:px-2 ${
-        prevActivity ? 'text-foreground hover:bg-muted' : 'cursor-not-allowed text-muted-foreground/40'
+        prevActivity ? 'text-foreground hover:bg-muted' : 'text-muted-foreground/40 cursor-not-allowed'
       }`}
       disabled={!prevActivity}
       title={
@@ -54,14 +54,14 @@ const NavigationButtons = ({
         className="shrink-0 sm:h-5 sm:w-5"
       />
       <div className="hidden flex-col items-start sm:flex">
-        <span className="text-xs text-muted-foreground">{t('NavigationButtons.previous')}</span>
+        <span className="text-muted-foreground text-xs">{t('NavigationButtons.previous')}</span>
         <span className="max-w-[100px] truncate text-left text-sm font-medium sm:max-w-[150px]">
           {prevActivity ? prevActivity.name : t('NavigationButtons.noPreviousActivity')}
         </span>
       </div>
     </button>
 
-    <span className="px-1 text-sm font-medium text-muted-foreground sm:px-2">
+    <span className="text-muted-foreground px-1 text-sm font-medium sm:px-2">
       {t('NavigationButtons.currentOfTotal', {
         currentIndex: currentIndex + 1,
         totalActivities: allActivities.length,
@@ -83,7 +83,7 @@ const NavigationButtons = ({
       }
     >
       <div className="hidden flex-col items-end sm:flex">
-        <span className="text-xs text-muted-foreground">{t('NavigationButtons.next')}</span>
+        <span className="text-muted-foreground text-xs">{t('NavigationButtons.next')}</span>
         <span className="max-w-[100px] truncate text-right text-sm font-medium sm:max-w-[150px]">
           {nextActivity ? nextActivity.name : t('NavigationButtons.noNextActivity')}
         </span>
@@ -107,7 +107,7 @@ const CourseInfo = ({
   t: (key: string, values?: Record<string, any>) => string;
 }) => (
   <div className="flex min-w-0 shrink items-center space-x-2 sm:space-x-4">
-    <div className="relative h-[20px] w-[35px] shrink-0 rounded-md sm:h-[26px] sm:w-[45px] overflow-hidden">
+    <div className="relative h-[20px] w-[35px] shrink-0 overflow-hidden rounded-md sm:h-[26px] sm:w-[45px]">
       <NextImage
         src={
           course.thumbnail_image
@@ -121,8 +121,8 @@ const CourseInfo = ({
       />
     </div>
     <div className="hidden min-w-0 flex-col -space-y-0.5 sm:block">
-      <p className="text-sm font-medium text-muted-foreground">{t('CourseInfo.course')}</p>
-      <h1 className="truncate text-base font-semibold text-foreground">{course.name}</h1>
+      <p className="text-muted-foreground text-sm font-medium">{t('CourseInfo.course')}</p>
+      <h1 className="text-foreground truncate text-base font-semibold">{course.name}</h1>
     </div>
   </div>
 );

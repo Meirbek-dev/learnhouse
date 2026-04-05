@@ -44,17 +44,17 @@ const CoursePreview = ({ course, onLink, isLinked }: CoursePreviewProps) => {
     : '../empty_thumbnail.webp';
 
   return (
-    <div className="flex gap-4 rounded-lg border border-border bg-card p-4 transition-colors hover:border-border/80">
+    <div className="border-border bg-card hover:border-border/80 flex gap-4 rounded-lg border p-4 transition-colors">
       {/* Thumbnail */}
       <div
-        className="h-[68px] w-[120px] shrink-0 rounded-md bg-cover bg-center ring-1 ring-border/40 ring-inset"
+        className="ring-border/40 h-[68px] w-[120px] shrink-0 rounded-md bg-cover bg-center ring-1 ring-inset"
         style={{ backgroundImage: `url(${thumbnailImage})` }}
       />
 
       {/* Content */}
       <div className="grow space-y-1">
-        <h3 className="line-clamp-1 font-medium text-foreground">{course.name}</h3>
-        <p className="line-clamp-2 text-sm text-muted-foreground">{course.description ?? ''}</p>
+        <h3 className="text-foreground line-clamp-1 font-medium">{course.name}</h3>
+        <p className="text-muted-foreground line-clamp-2 text-sm">{course.description ?? ''}</p>
       </div>
 
       {/* Action Button */}
@@ -147,7 +147,7 @@ export default function LinkCourseModal({ productId, onSuccess }: LinkCourseModa
           className="w-full pl-10"
         />
         <Search
-          className="absolute top-1/2 left-6 -translate-y-1/2 text-muted-foreground"
+          className="text-muted-foreground absolute top-1/2 left-6 -translate-y-1/2"
           size={20}
         />
       </div>
@@ -169,7 +169,7 @@ export default function LinkCourseModal({ productId, onSuccess }: LinkCourseModa
         ))}
 
         {filteredCourses.length === 0 && (
-          <div className="py-6 text-center text-muted-foreground">{t('noCoursesFound')}</div>
+          <div className="text-muted-foreground py-6 text-center">{t('noCoursesFound')}</div>
         )}
       </div>
     </div>

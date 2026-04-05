@@ -169,7 +169,7 @@ const ThumbnailUpdate = ({ thumbnailType, disabled = false, disabledReason }: Th
 
     if (!thumbnailToShow.url) {
       return (
-        <div className="mx-auto flex h-[270px] max-w-[480px] items-center justify-center rounded-lg border-2 border-dashed border-border bg-muted/50">
+        <div className="border-border bg-muted/50 mx-auto flex h-[270px] max-w-[480px] items-center justify-center rounded-lg border-2 border-dashed">
           <div className="text-center">
             <ImageIcon className="text-muted-foreground mx-auto h-12 w-12" />
             <p className="text-muted-foreground mt-2 text-sm">
@@ -185,7 +185,7 @@ const ThumbnailUpdate = ({ thumbnailType, disabled = false, disabledReason }: Th
         <div className="mx-auto max-w-[480px]">
           <video
             src={thumbnailToShow.url}
-            className={`aspect-video w-full rounded-lg border border-border object-cover shadow-sm ${
+            className={`border-border aspect-video w-full rounded-lg border object-cover shadow-sm ${
               isLoading ? 'animate-pulse' : ''
             }`}
             controls
@@ -206,7 +206,7 @@ const ThumbnailUpdate = ({ thumbnailType, disabled = false, disabledReason }: Th
         <Image
           src={thumbnailToShow.url}
           alt={localThumbnail ? t('thumbnailPreviewAlt') : t('currentThumbnailAlt')}
-          className={`aspect-video w-full rounded-lg border border-border object-cover shadow-sm ${
+          className={`border-border aspect-video w-full rounded-lg border object-cover shadow-sm ${
             isLoading ? 'animate-pulse' : ''
           }`}
           width={480}
@@ -300,7 +300,7 @@ const ThumbnailUpdate = ({ thumbnailType, disabled = false, disabledReason }: Th
 
               {isLoading ? (
                 <div className="flex items-center justify-center">
-                  <div className="text-muted-foreground flex items-center gap-2 rounded-full border bg-muted px-4 py-2 text-sm font-medium">
+                  <div className="text-muted-foreground bg-muted flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium">
                     <ArrowBigUpDash className="h-4 w-4 animate-bounce" />
                     {t('uploading')}
                   </div>
@@ -326,7 +326,7 @@ const ThumbnailUpdate = ({ thumbnailType, disabled = false, disabledReason }: Th
 
               {isLoading ? (
                 <div className="flex items-center justify-center">
-                  <div className="text-muted-foreground flex items-center gap-2 rounded-full border bg-muted px-4 py-2 text-sm font-medium">
+                  <div className="text-muted-foreground bg-muted flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium">
                     <ArrowBigUpDash className="h-4 w-4 animate-bounce" />
                     {t('uploading')}
                   </div>
@@ -357,7 +357,7 @@ const ThumbnailUpdate = ({ thumbnailType, disabled = false, disabledReason }: Th
 
         {isLoading ? (
           <div className="flex items-center justify-center">
-            <div className="text-muted-foreground flex items-center gap-2 rounded-full border bg-muted px-4 py-2 text-sm font-medium">
+            <div className="text-muted-foreground bg-muted flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium">
               <ArrowBigUpDash className="h-4 w-4 animate-bounce" />
               {t('uploading')}
             </div>

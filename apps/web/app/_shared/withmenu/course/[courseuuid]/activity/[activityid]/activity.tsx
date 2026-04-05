@@ -636,7 +636,7 @@ const ActivityClient = (props: ActivityClientProps) => {
                             prefetch={false}
                             href={`${getAbsoluteUrl('')}/course/${courseuuid}`}
                           >
-                            <div className="relative h-[34px] w-[60px] rounded-md drop-shadow-md overflow-hidden">
+                            <div className="relative h-[34px] w-[60px] overflow-hidden rounded-md drop-shadow-md">
                               <NextImage
                                 src={
                                   course.thumbnail_image
@@ -823,7 +823,7 @@ const ActivityClient = (props: ActivityClientProps) => {
                               prefetch={false}
                               href={`${getAbsoluteUrl('')}/course/${courseuuid}`}
                             >
-                              <div className="relative h-[57px] w-[100px] rounded-md drop-shadow-md overflow-hidden">
+                              <div className="relative h-[57px] w-[100px] overflow-hidden rounded-md drop-shadow-md">
                                 <NextImage
                                   src={
                                     course.thumbnail_image
@@ -873,7 +873,7 @@ const ActivityClient = (props: ActivityClientProps) => {
                                     .map((author: any, _idx: number) => (
                                       <div
                                         key={author.user.user_uuid}
-                                        className="relative z-[${10-idx}]"
+                                        className="z-[${10-idx}] relative"
                                       >
                                         <UserAvatar
                                           size="sm"

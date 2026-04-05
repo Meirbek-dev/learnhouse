@@ -1,8 +1,8 @@
 'use client';
 
+import { ActivityAIChatProvider } from '@components/Contexts/AI/ActivityAIChatContext';
 import MathEquationBlock from './Extensions/MathEquation/MathEquationBlock';
 import WarningCallout from './Extensions/Callout/Warning/WarningCallout';
-import { ActivityAIChatProvider } from '@components/Contexts/AI/ActivityAIChatContext';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
 import DividerVerticalIcon from '@components/svg/DividerVerticalIcon';
@@ -64,14 +64,14 @@ const EDITOR_EXTENSIONS = [
   }),
   // other extensions can be added here if needed
 ];
-import { useState } from 'react';
-import type { ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
 import styles from './Editor.module.css';
 import UserAvatar from '../UserAvatar';
+import type { ReactNode } from 'react';
 import { motion } from 'motion/react';
 import { cn } from '@/lib/utils';
+import { useState } from 'react';
 import Image from 'next/image';
 
 interface EditorProps {
@@ -155,7 +155,7 @@ const Editor = (props: EditorProps) => {
   if (isMobile) {
     // TODO: Work on a better editor mobile experience
     return (
-      <div className="flex h-screen w-full items-center justify-center bg-muted p-4">
+      <div className="bg-muted flex h-screen w-full items-center justify-center p-4">
         <div className="rounded-lg bg-white p-6 text-center shadow-md">
           <h2 className="mb-4 text-xl font-bold">{t('mobileTitle')}</h2>
           <Monitor
@@ -189,7 +189,7 @@ const Editor = (props: EditorProps) => {
               className={cn(styles.editorTop, 'bg-opacity-95 fixed bg-white backdrop-blur-sm backdrop-brightness-125')}
             >
               <div className="flex flex-col">
-                <div className="flex flex-row mb-[5px]">
+                <div className="mb-[5px] flex flex-row">
                   <Link href="/">
                     <Image
                       className="rounded-[6px]"
@@ -204,7 +204,7 @@ const Editor = (props: EditorProps) => {
                     href={`/course/${courseUuid}`}
                   >
                     <Image
-                      className="rounded-[7px] ml-[5px] hover:cursor-pointer object-cover object-top"
+                      className="ml-[5px] rounded-[7px] object-cover object-top hover:cursor-pointer"
                       width={56}
                       height={25}
                       src={
@@ -223,7 +223,7 @@ const Editor = (props: EditorProps) => {
                   <ToolbarButtons editor={editor} />
                 </div>
               </div>
-              <div className="flex justify-center items-center space-x-2">
+              <div className="flex items-center justify-center space-x-2">
                 <div>
                   <div className="rounded-md text-teal-100 transition-all ease-linear hover:cursor-pointer">
                     <div
@@ -254,8 +254,8 @@ const Editor = (props: EditorProps) => {
                     opacity: '0.5',
                   }}
                 />
-                <div className="flex justify-center items-center space-x-2">
-                  <div className="rounded-lg border border-border bg-muted px-3 py-2 text-xs font-semibold text-muted-foreground">
+                <div className="flex items-center justify-center space-x-2">
+                  <div className="border-border bg-muted text-muted-foreground rounded-lg border px-3 py-2 text-xs font-semibold">
                     {props.saveState === 'saving'
                       ? tWrapper('saving')
                       : props.saveState === 'saved'

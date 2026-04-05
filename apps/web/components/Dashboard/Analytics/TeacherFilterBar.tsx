@@ -100,14 +100,14 @@ export default function TeacherFilterBar({
   return (
     <section
       aria-label={t('filters.sectionAriaLabel')}
-      className="mb-6 flex flex-col gap-4 rounded-xl border border-slate-200 bg-card p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800 md:flex-row md:items-center md:justify-between"
+      className="bg-card mb-6 flex flex-col gap-4 rounded-xl border border-slate-200 p-4 shadow-sm md:flex-row md:items-center md:justify-between dark:border-slate-700 dark:bg-slate-800"
     >
       <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+        <div className="text-muted-foreground flex items-center gap-2 text-xs font-semibold tracking-wider uppercase">
           <Filter className="h-3.5 w-3.5" />
           {t('filters.label')}
         </div>
-        <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+        <div className="text-muted-foreground mt-2 flex flex-wrap items-center gap-2 text-sm">
           <Badge variant="outline">{t('filters.scopedCourses', { count: courseCount })}</Badge>
           <Badge variant="outline">
             {t('filters.buckets', { bucket: getAnalyticsBucketLabel(t, query.bucket || 'day') })}

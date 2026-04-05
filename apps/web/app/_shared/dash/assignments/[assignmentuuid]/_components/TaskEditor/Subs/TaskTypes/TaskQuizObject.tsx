@@ -379,7 +379,10 @@ const TaskQuizObject = ({ assignmentTaskUUID }: TaskQuizObjectProps) => {
   );
 
   const initialSettings = useMemo(
-    () => ({ ...DEFAULT_QUIZ_SETTINGS, ...(assignmentTask.contents?.settings as Record<string, unknown> | undefined) }),
+    () => ({
+      ...DEFAULT_QUIZ_SETTINGS,
+      ...(assignmentTask.contents?.settings as Record<string, unknown> | undefined),
+    }),
     [assignmentTask.contents?.settings],
   );
 
@@ -594,7 +597,7 @@ const TaskQuizObject = ({ assignmentTaskUUID }: TaskQuizObjectProps) => {
                     key={option.optionUUID || oIndex}
                     className="flex gap-2"
                   >
-                    <div className="group flex flex-1 items-center overflow-hidden rounded-lg border bg-card transition-all">
+                    <div className="group bg-card flex flex-1 items-center overflow-hidden rounded-lg border transition-all">
                       <OptionLetterBadge index={oIndex} />
                       <div className="flex flex-1 items-center gap-2 px-3 py-2">
                         <Input

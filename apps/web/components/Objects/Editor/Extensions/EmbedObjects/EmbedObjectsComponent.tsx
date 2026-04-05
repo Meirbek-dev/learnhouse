@@ -68,7 +68,12 @@ const SCRIPT_BASED_EMBEDS: Record<string, ScriptEmbedConfig> = {
 };
 
 const SUPPORTED_PRODUCTS: SupportedProduct[] = [
-  { name: 'G Docs', icon: SiGoogledocs, color: '#4285F4', guide: 'https://support.google.com/docs/answer/183965' },
+  {
+    name: 'G Docs',
+    icon: SiGoogledocs,
+    color: '#4285F4',
+    guide: 'https://support.google.com/docs/answer/183965',
+  },
   {
     name: 'YouTube',
     icon: SiYoutube,
@@ -77,15 +82,30 @@ const SUPPORTED_PRODUCTS: SupportedProduct[] = [
   },
   { name: 'GitHub', icon: SiGithub, color: '#181717', guide: 'https://emgithub.com/' },
 
-  { name: 'CodePen', icon: BoxIcon, color: '#000000', guide: 'https://blog.codepen.io/documentation/embedded-pens/' },
-  { name: 'Figma', icon: SiFigma, color: '#F24E1E', guide: 'https://help.figma.com/hc/en-us/articles/360041057214' },
+  {
+    name: 'CodePen',
+    icon: BoxIcon,
+    color: '#000000',
+    guide: 'https://blog.codepen.io/documentation/embedded-pens/',
+  },
+  {
+    name: 'Figma',
+    icon: SiFigma,
+    color: '#F24E1E',
+    guide: 'https://help.figma.com/hc/en-us/articles/360041057214',
+  },
   {
     name: 'GMaps',
     icon: SiGooglemaps,
     color: '#4285F4',
     guide: 'https://developers.google.com/maps/documentation/embed/get-started',
   },
-  { name: 'Canva', icon: SiCrewai, color: '#00C4CC', guide: 'https://www.canva.com/help/article/embed-designs' },
+  {
+    name: 'Canva',
+    icon: SiCrewai,
+    color: '#00C4CC',
+    guide: 'https://www.canva.com/help/article/embed-designs',
+  },
   {
     name: 'Notion',
     icon: SiNotion,

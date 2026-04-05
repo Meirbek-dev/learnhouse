@@ -74,7 +74,7 @@ const CoursePaidOptions = ({ course }: CoursePaidOptionsProps) => {
   if (!linkedProducts)
     return (
       <div className="flex items-center justify-center p-8">
-        <div className="flex animate-pulse items-center rounded-md bg-muted px-4 py-2 text-sm font-medium text-muted-foreground">
+        <div className="bg-muted text-muted-foreground flex animate-pulse items-center rounded-md px-4 py-2 text-sm font-medium">
           <Loader2
             size={16}
             className="mr-2 animate-spin"
@@ -91,7 +91,7 @@ const CoursePaidOptions = ({ course }: CoursePaidOptionsProps) => {
       {productItems.map((product: PaymentsProductRead) => (
         <div
           key={product.id}
-          className="flex flex-col rounded-lg bg-card p-4 shadow-sm ring-1 ring-border"
+          className="bg-card ring-border flex flex-col rounded-lg p-4 shadow-sm ring-1"
         >
           <div className="mb-2 flex items-start justify-between">
             <div className="flex flex-col items-start space-y-1">
@@ -100,12 +100,12 @@ const CoursePaidOptions = ({ course }: CoursePaidOptionsProps) => {
                 variant="outline"
               >
                 {product.product_type === 'subscription' ? <RefreshCcw size={12} /> : <SquareCheck size={12} />}
-                <span className="text-sm text-muted-foreground">
+                <span className="text-muted-foreground text-sm">
                   {product.product_type === 'subscription' ? t('subscription') : t('oneTimePayment')}
                   {product.product_type === 'subscription' && ` ${t('perMonth')}`}
                 </span>
               </Badge>
-              <h3 className="text-lg font-bold text-foreground">{product.name}</h3>
+              <h3 className="text-foreground text-lg font-bold">{product.name}</h3>
             </div>
           </div>
 
@@ -118,8 +118,8 @@ const CoursePaidOptions = ({ course }: CoursePaidOptionsProps) => {
               <p className="text-muted-foreground">{product.description}</p>
               {product.benefits ? (
                 <div className="mt-2">
-                  <h4 className="text-sm font-semibold text-foreground">{t('benefits')}</h4>
-                  <p className="text-sm text-muted-foreground">{product.benefits}</p>
+                  <h4 className="text-foreground text-sm font-semibold">{t('benefits')}</h4>
+                  <p className="text-muted-foreground text-sm">{product.benefits}</p>
                 </div>
               ) : null}
             </div>
@@ -130,7 +130,7 @@ const CoursePaidOptions = ({ course }: CoursePaidOptionsProps) => {
               onClick={() => {
                 toggleProductExpansion(product.id);
               }}
-              className="flex items-center text-sm text-muted-foreground hover:text-foreground"
+              className="text-muted-foreground hover:text-foreground flex items-center text-sm"
             >
               {expandedProducts[product.id] ? (
                 <>
@@ -146,22 +146,22 @@ const CoursePaidOptions = ({ course }: CoursePaidOptionsProps) => {
             </button>
           </div>
 
-          <div className="mt-2 flex items-center justify-between rounded-md bg-secondary/10 p-2">
-            <span className="text-sm text-muted-foreground">
+          <div className="bg-secondary/10 mt-2 flex items-center justify-between rounded-md p-2">
+            <span className="text-muted-foreground text-sm">
               {product.price_type === 'customer_choice' ? t('minimumPrice') : t('price')}
             </span>
             <div className="flex flex-col items-end">
-              <span className="text-lg font-semibold text-foreground">
+              <span className="text-foreground text-lg font-semibold">
                 {new Intl.NumberFormat('en-US', {
                   style: 'currency',
                   currency: product.currency,
                 }).format(product.amount)}
                 {product.product_type === 'subscription' && (
-                  <span className="ml-1 text-sm text-muted-foreground">{t('perMonthSuffix')}</span>
+                  <span className="text-muted-foreground ml-1 text-sm">{t('perMonthSuffix')}</span>
                 )}
               </span>
               {product.price_type === 'customer_choice' && (
-                <span className="text-sm text-muted-foreground">{t('choosePrice')}</span>
+                <span className="text-muted-foreground text-sm">{t('choosePrice')}</span>
               )}
             </div>
           </div>

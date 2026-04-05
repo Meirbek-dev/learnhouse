@@ -263,7 +263,7 @@ const ScenariosModal: React.FC<ScenariosModalProps> = ({
               {/* Scenario Text */}
               <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
                 {previewScenario.imageUrl && (
-                  <div className="mb-4 relative h-48 w-full overflow-hidden rounded-lg border border-slate-200">
+                  <div className="relative mb-4 h-48 w-full overflow-hidden rounded-lg border border-slate-200">
                     <NextImage
                       src={previewScenario.imageUrl}
                       alt={t('scenarioIllustrationAlt')}

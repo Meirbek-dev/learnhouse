@@ -620,7 +620,7 @@ const CourseThumbnail: FC<CourseThumbnailProps> = ({
           >
             <h3
               id={titleId}
-              className="line-clamp-2 leading-tight font-semibold tracking-tight text-foreground"
+              className="text-foreground line-clamp-2 leading-tight font-semibold tracking-tight"
             >
               {course.name}
             </h3>

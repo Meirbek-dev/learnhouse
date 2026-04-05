@@ -10,9 +10,30 @@ import type { LevelInfo } from '@/types/gamification/profile';
 
 // Level configuration with RPG-style progression (translation keys)
 export const LEVEL_CONFIG: Record<number, LevelInfo> = {
-  1: { level: 1, title: 'novice', color: 'text-gray-500', icon: Target, minXP: 0, unlocks: ['basicProfile'] },
-  5: { level: 5, title: 'apprentice', color: 'text-blue-500', icon: Star, minXP: 1000, unlocks: ['avatarFrames'] },
-  10: { level: 10, title: 'scholar', color: 'text-purple-500', icon: Zap, minXP: 3000, unlocks: ['customAvatarHat'] },
+  1: {
+    level: 1,
+    title: 'novice',
+    color: 'text-gray-500',
+    icon: Target,
+    minXP: 0,
+    unlocks: ['basicProfile'],
+  },
+  5: {
+    level: 5,
+    title: 'apprentice',
+    color: 'text-blue-500',
+    icon: Star,
+    minXP: 1000,
+    unlocks: ['avatarFrames'],
+  },
+  10: {
+    level: 10,
+    title: 'scholar',
+    color: 'text-purple-500',
+    icon: Zap,
+    minXP: 3000,
+    unlocks: ['customAvatarHat'],
+  },
   15: {
     level: 15,
     title: 'expert',

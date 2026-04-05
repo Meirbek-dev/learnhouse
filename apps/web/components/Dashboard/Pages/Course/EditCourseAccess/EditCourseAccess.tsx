@@ -165,9 +165,9 @@ const UserGroupsSection = ({ usergroups, isLoading }: { usergroups: any[]; isLoa
         </Alert>
       </CardHeader>
       <CardContent className="space-y-4">
-        <p className="text-sm text-muted-foreground">{t('description')}</p>
+        <p className="text-muted-foreground text-sm">{t('description')}</p>
 
-        <ScrollArea className="max-h-72 rounded-lg border bg-background">
+        <ScrollArea className="bg-background max-h-72 rounded-lg border">
           <Table>
             <TableHeader className="uppercase">
               <TableRow>

@@ -107,7 +107,7 @@ export const HeaderProfileBox = () => {
   return (
     <div className="flex items-center">
       {session.status === 'unauthenticated' && (
-        <div className="flex grow rounded-lg p-1.5 px-2 text-sm font-bold text-foreground">
+        <div className="text-foreground flex grow rounded-lg p-1.5 px-2 text-sm font-bold">
           <ul className="flex items-center space-x-3">
             <li>
               <Link
@@ -149,7 +149,7 @@ export const HeaderProfileBox = () => {
                 <UserAvatar size="sm" />
                 <div className="flex flex-col space-y-0 text-start">
                   <div className="flex items-center space-x-2">
-                    <p className="text-sm font-semibold text-foreground capitalize">{session.data.user.username}</p>
+                    <p className="text-foreground text-sm font-semibold capitalize">{session.data.user.username}</p>
                     {/* Updated condition here */}
                     {shouldShowBadge && userRoleInfo && (
                       <Tooltip>
@@ -157,7 +157,7 @@ export const HeaderProfileBox = () => {
                           render={
                             <Badge
                               variant="secondary"
-                              className={`text-[10px] ${userRoleInfo.bgColor} ${userRoleInfo.textColor} flex w-fit items-center gap-1 px-1.5 py-0 rounded-sm font-bold uppercase tracking-wider`}
+                              className={`text-[10px] ${userRoleInfo.bgColor} ${userRoleInfo.textColor} flex w-fit items-center gap-1 rounded-sm px-1.5 py-0 font-bold tracking-wider uppercase`}
                             >
                               {userRoleInfo.icon}
                               {userRoleInfo.name}

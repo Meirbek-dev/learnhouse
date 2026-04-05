@@ -97,13 +97,13 @@ export default function TeacherKpiCards({ cards }: TeacherKpiCardsProps) {
           >
             <CardHeader className="flex-row items-start justify-between gap-4">
               <div className="min-w-0 flex-1">
-                <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                <div className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
                   {metric.label}
                 </div>
-                <CardTitle className="mt-3 text-3xl font-semibold text-foreground">{displayValue}</CardTitle>
+                <CardTitle className="text-foreground mt-3 text-3xl font-semibold">{displayValue}</CardTitle>
                 {/* Benchmark baseline (issue 15) */}
                 {metric.benchmark !== null && metric.benchmark !== undefined && (
-                  <div className="mt-1 text-xs text-muted-foreground">
+                  <div className="text-muted-foreground mt-1 text-xs">
                     {metric.benchmark_label}: {metric.unit === '%' ? `${metric.benchmark}%` : metric.benchmark}
                   </div>
                 )}
@@ -120,7 +120,7 @@ export default function TeacherKpiCards({ cards }: TeacherKpiCardsProps) {
               )}
             </CardHeader>
             <CardContent className="space-y-1">
-              <div className="text-sm text-muted-foreground">
+              <div className="text-muted-foreground text-sm">
                 {metric.delta_value === null
                   ? t('kpi.noComparison')
                   : t('kpi.changePeriod', {
@@ -128,7 +128,7 @@ export default function TeacherKpiCards({ cards }: TeacherKpiCardsProps) {
                     })}
               </div>
               {/* Metric definition for returning learners, at-risk, content health, difficulty (issue 3) */}
-              {definition && <div className="text-xs leading-4 text-muted-foreground">{definition}</div>}
+              {definition && <div className="text-muted-foreground text-xs leading-4">{definition}</div>}
             </CardContent>
           </Card>
         );
