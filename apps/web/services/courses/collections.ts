@@ -78,7 +78,7 @@ async function fetchCollections(access_token?: string) {
     headers.Authorization = `Bearer ${access_token}`;
   }
 
-  const result = await fetch(`${getAPIUrl()}collections/page/1/limit/10`, {
+  const result = await fetch(`${getAPIUrl()}collections/page/1/limit/20`, {
     method: 'GET',
     headers,
   });

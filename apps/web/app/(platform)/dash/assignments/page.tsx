@@ -10,6 +10,8 @@ import { getTranslations } from 'next-intl/server';
 import { Spinner } from '@components/ui/spinner';
 import { auth } from '@/auth';
 
+const EDITABLE_COURSES_PAGE_SIZE = 100;
+
 interface Course {
   course_uuid: string;
   name: string;
@@ -20,6 +22,25 @@ interface Assignment {
   assignment_uuid: string;
   title: string;
   description: string;
+}
+
+async function getAllEditableCourses(access_token: string) {
+  const firstPage = await getEditableCourses(access_token, 1, EDITABLE_COURSES_PAGE_SIZE);
+
+  if (firstPage.total <= firstPage.courses.length) {
+    return firstPage;
+  }
+
+  const totalPages = Math.ceil(firstPage.total / EDITABLE_COURSES_PAGE_SIZE);
+  const remainingPages = Array.from({ length: totalPages - 1 }, (_, index) =>
+    getEditableCourses(access_token, index + 2, EDITABLE_COURSES_PAGE_SIZE),
+  );
+  const remainingResults = await Promise.all(remainingPages);
+
+  return {
+    ...firstPage,
+    courses: [...firstPage.courses, ...remainingResults.flatMap((result) => result.courses)],
+  };
 }
 
 export default async function PlatformAssignmentsPage() {
@@ -33,7 +54,7 @@ export default async function PlatformAssignmentsPage() {
   }
 
   const platform = await getPlatform(access_token);
-  const coursesData = await getEditableCourses(access_token);
+  const coursesData = await getAllEditableCourses(access_token);
   const courses = coursesData?.courses || [];
 
   let courseAssignments: Assignment[][] = [];
