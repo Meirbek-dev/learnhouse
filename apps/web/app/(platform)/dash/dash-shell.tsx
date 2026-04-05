@@ -5,7 +5,7 @@ import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import DashSidebar from '@components/Dashboard/Menus/DashSidebar';
 import type { ReactNode } from 'react';
 
-const ClientAdminLayout = ({ children }: { children: ReactNode }) => {
+const DashShell = ({ children }: { children: ReactNode }) => {
   return (
     <>
       <div className="flex flex-col md:hidden">
@@ -23,4 +23,4 @@ const ClientAdminLayout = ({ children }: { children: ReactNode }) => {
   );
 };
 
-export default ClientAdminLayout;
+export default DashShell;

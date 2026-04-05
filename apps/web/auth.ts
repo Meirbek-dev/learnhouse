@@ -440,6 +440,30 @@ const createAuthConfig = (): NextAuthConfig => {
 
 let nextAuthResultCache: NextAuthResult | null = null;
 
+const createFallbackAuthResponse = (request: Request, method: 'GET' | 'POST') => {
+  const pathname = new URL(request.url).pathname;
+
+  if (method === 'GET') {
+    if (pathname.endsWith('/session')) {
+      return Response.json(null, { status: 200 });
+    }
+
+    if (pathname.endsWith('/providers')) {
+      return Response.json({}, { status: 200 });
+    }
+
+    if (pathname.endsWith('/csrf')) {
+      return Response.json({ csrfToken: '' }, { status: 200 });
+    }
+
+    if (pathname.endsWith('/error')) {
+      return Response.json({ error: 'Auth is not configured' }, { status: 200 });
+    }
+  }
+
+  return Response.json({ error: 'Auth is not configured' }, { status: 503 });
+};
+
 const getNextAuthResult = (): NextAuthResult | null => {
   if (nextAuthResultCache) return nextAuthResultCache;
   try {
@@ -455,10 +479,20 @@ const getNextAuthResult = (): NextAuthResult | null => {
 
 export const handlers: AuthHandlers = {
   async GET(...args) {
-    return (await getNextAuthResult()?.handlers.GET(...args)) ?? new Response(null, { status: 503 });
+    const handler = getNextAuthResult()?.handlers.GET;
+    if (handler) {
+      return handler(...args);
+    }
+
+    return createFallbackAuthResponse(args[0], 'GET');
   },
   async POST(...args) {
-    return (await getNextAuthResult()?.handlers.POST(...args)) ?? new Response(null, { status: 503 });
+    const handler = getNextAuthResult()?.handlers.POST;
+    if (handler) {
+      return handler(...args);
+    }
+
+    return createFallbackAuthResponse(args[0], 'POST');
   },
 };
 

@@ -1,13 +1,23 @@
 'use client';
 
 import type { AbstractIntlMessages } from 'next-intl';
-import { NextIntlClientProvider } from 'next-intl';
-import { useState } from 'react';
+import { NextIntlClientProvider, useLocale } from 'next-intl';
+import { useEffect, useState } from 'react';
 
 interface IntlProviderProps {
   children: React.ReactNode;
   messages: AbstractIntlMessages;
   locale: string;
+}
+
+function HtmlLangSync() {
+  const locale = useLocale();
+
+  useEffect(() => {
+    document.documentElement.lang = locale;
+  }, [locale]);
+
+  return null;
 }
 
 export function IntlProvider({ children, messages, locale }: IntlProviderProps) {
@@ -20,6 +30,7 @@ export function IntlProvider({ children, messages, locale }: IntlProviderProps) 
       locale={locale}
       now={now}
     >
+      <HtmlLangSync />
       {children}
     </NextIntlClientProvider>
   );

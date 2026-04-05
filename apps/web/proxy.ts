@@ -1,6 +1,66 @@
-import { getAbsoluteUrl } from './services/config/config';
 import type { NextRequest } from 'next/server';
+import { getToken } from 'next-auth/jwt';
 import { NextResponse } from 'next/server';
+
+const AUTH_REWRITE: Record<string, string> = {
+  '/forgot': '/auth/forgot',
+  '/login': '/auth/login',
+  '/reset': '/auth/reset',
+  '/signup': '/auth/signup',
+};
+
+const EDITOR_PATH_RE = /^\/course\/[\w-]+\/activity\/[\w-]+\/edit$/;
+
+function getSessionCookieName() {
+  const nextAuthUrl = process.env.NEXTAUTH_URL?.trim();
+  const isSecureCookie =
+    process.env.NODE_ENV === 'production' && typeof nextAuthUrl === 'string' && nextAuthUrl.length > 0
+      ? new URL(nextAuthUrl).protocol === 'https:'
+      : false;
+
+  return `${isSecureCookie ? '__Secure-' : ''}next-auth.session-token`;
+}
+
+function buildRequestHeaders(req: NextRequest, requestId: string) {
+  const headers = new Headers(req.headers);
+
+  headers.set('x-forwarded-host', req.headers.get('host') ?? req.nextUrl.host);
+  headers.set('x-forwarded-proto', req.nextUrl.protocol.replace(':', ''));
+  headers.set('x-request-id', requestId);
+
+  if (req.nextUrl.port) {
+    headers.set('x-forwarded-port', req.nextUrl.port);
+  }
+
+  return headers;
+}
+
+function withRequestId(response: NextResponse, requestId: string) {
+  response.headers.set('x-request-id', requestId);
+  return response;
+}
+
+function nextWithHeaders(req: NextRequest, requestId: string) {
+  return withRequestId(
+    NextResponse.next({
+      request: {
+        headers: buildRequestHeaders(req, requestId),
+      },
+    }),
+    requestId,
+  );
+}
+
+function rewriteWithHeaders(req: NextRequest, requestId: string, pathname: string) {
+  return withRequestId(
+    NextResponse.rewrite(new URL(pathname, req.url), {
+      request: {
+        headers: buildRequestHeaders(req, requestId),
+      },
+    }),
+    requestId,
+  );
+}
 
 export const config = {
   matcher: [
@@ -14,50 +74,64 @@ export const config = {
      * 6. all root files inside /public (e.g. /favicon.ico)
      */
     '/((?!api|_next|fonts|umami|examples|[\\w-]+\\.\\w+).*)',
+    // Keep sitemap explicit so it still hits the proxy even though the regex skips extension paths.
     '/sitemap.xml',
   ],
 };
 
 export default async function proxy(req: NextRequest) {
   const { pathname, search } = req.nextUrl;
+  const requestId = crypto.randomUUID();
 
-  // Standard path rewrites
-  const standard_paths = ['/home'];
-  const auth_paths = ['/login', '/signup', '/reset', '/forgot'];
-  if (standard_paths.includes(pathname)) {
-    // Redirect to the same pathname with the original search params
-    return NextResponse.rewrite(new URL(`${pathname}${search}`, req.url));
+  if (pathname === '/home') {
+    return rewriteWithHeaders(req, requestId, `${pathname}${search}`);
   }
 
-  if (auth_paths.includes(pathname)) {
-    return NextResponse.rewrite(new URL(`/auth${pathname}${search}`, req.url));
+  const authRewrite = AUTH_REWRITE[pathname];
+  if (authRewrite) {
+    return rewriteWithHeaders(req, requestId, `${authRewrite}${search}`);
+  }
+
+  if (pathname.startsWith('/dash')) {
+    const sessionCookieName = getSessionCookieName();
+    const session = await getToken({
+      cookieName: sessionCookieName,
+      req,
+      salt: sessionCookieName,
+      secret: process.env.NEXTAUTH_SECRET,
+      secureCookie: req.nextUrl.protocol === 'https:',
+    });
+
+    if (!session) {
+      return withRequestId(NextResponse.redirect(new URL('/login', req.url)), requestId);
+    }
   }
 
   // Dynamic Pages Editor
-  if (/^\/course\/[^/]+\/activity\/[^/]+\/edit$/.exec(pathname)) {
-    return NextResponse.rewrite(new URL(`/editor${pathname}`, req.url));
+  if (EDITOR_PATH_RE.test(pathname)) {
+    return rewriteWithHeaders(req, requestId, `/editor${pathname}`);
   }
 
   // Health Check
   if (pathname.startsWith('/health')) {
-    return NextResponse.rewrite(new URL('/api/health', req.url));
+    return rewriteWithHeaders(req, requestId, '/api/health');
   }
 
   // Auth Redirects
   if (pathname === '/redirect_from_auth') {
     const { searchParams } = req.nextUrl;
     const queryString = searchParams.toString();
-    const redirectUrl = new URL(getAbsoluteUrl('/'), req.url);
+    const redirectUrl = new URL('/', req.nextUrl.origin);
 
     if (queryString) {
       redirectUrl.search = queryString;
     }
-    return NextResponse.redirect(redirectUrl);
+    return withRequestId(NextResponse.redirect(redirectUrl), requestId);
   }
 
   if (pathname.startsWith('/sitemap.xml')) {
-    return NextResponse.rewrite(new URL('/api/sitemap', req.url));
+    return rewriteWithHeaders(req, requestId, '/api/sitemap');
   }
 
-  return NextResponse.next();
+  return nextWithHeaders(req, requestId);
 }

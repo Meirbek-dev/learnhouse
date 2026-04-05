@@ -19,6 +19,26 @@ export default function GlobalError({ error, reset }: { error: Error & { digest?
       stack: error.stack,
       timestamp: new Date().toISOString(),
     });
+
+    void fetch('/api/log-error', {
+      body: JSON.stringify({
+        digest: error.digest,
+        error: {
+          message: error.message,
+          name: error.name,
+          stack: error.stack,
+        },
+        page: typeof globalThis.window !== 'undefined' ? globalThis.location.pathname : 'unknown',
+        url: typeof globalThis.window !== 'undefined' ? globalThis.location.href : 'unknown',
+      }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      keepalive: true,
+      method: 'POST',
+    }).catch((loggingError: unknown) => {
+      console.error('Failed to report global error boundary event:', loggingError);
+    });
   }, [error]);
 
   const isChunkError = error?.name === 'ChunkLoadError' || /Failed to load chunk/i.test(error?.message || '');

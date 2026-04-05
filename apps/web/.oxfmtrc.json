@@ -34,7 +34,8 @@
     ".logfire",
     ".ruff_cache",
     ".venv",
-    "next-env.d.ts"
+    "next-env.d.ts",
+    "lib/api/generated/schema.ts"
   ],
   "insertPragma": false,
   "jsxSingleQuote": false,

@@ -1,15 +1,16 @@
 import { getLocale, getMessages, setRequestLocale } from 'next-intl/server';
 import { IntlProvider } from '@/components/providers/IntlProvider';
 import DevScriptLoader from '@/components/DevScriptLoader';
+import { defaultLocale } from '@/i18n/config';
 import { inter, jetBrainsMono } from '@/lib/fonts';
-import ClientLayout from './client-layout';
 import { Suspense } from 'react';
+import RootProviders from './root-providers';
 
 import '@styles/globals.css';
 
 const isDevEnv = process.env.NODE_ENV !== 'production';
 
-async function LocalizedLayout({ children }: { children: React.ReactNode }) {
+async function LocalizedApp({ children }: { children: React.ReactNode }) {
   const locale = await getLocale();
   setRequestLocale(locale);
   const messages = await getMessages();
@@ -19,7 +20,9 @@ async function LocalizedLayout({ children }: { children: React.ReactNode }) {
       messages={messages}
       locale={locale}
     >
-      <ClientLayout>{children}</ClientLayout>
+      <RootProviders>
+        <main>{children}</main>
+      </RootProviders>
     </IntlProvider>
   );
 }
@@ -28,8 +31,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       className={`${inter.variable} ${jetBrainsMono.variable}`}
-      lang="ru"
-      suppressHydrationWarning
+      lang={defaultLocale}
     >
       <head>
         <meta
@@ -38,11 +40,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
 
-      {/* Dev-only non-blocking script loader (client-side) */}
-      {isDevEnv && <DevScriptLoader />}
-      <body>
+      <body suppressHydrationWarning>
+        {isDevEnv && <DevScriptLoader />}
         <Suspense fallback={null}>
-          <LocalizedLayout>{children}</LocalizedLayout>
+          <LocalizedApp>{children}</LocalizedApp>
         </Suspense>
       </body>
     </html>

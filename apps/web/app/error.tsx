@@ -7,7 +7,6 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
   const t = useTranslations('Errors');
 
   useEffect(() => {
-    // Log the error to console with full details
     console.error('Root Error Boundary Caught:', {
       message: error.message,
       name: error.name,
@@ -18,8 +17,26 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
       userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'unknown',
     });
 
-    // Send to external logging service if needed
-    // fetch('/api/log-error', { ... })
+    void fetch('/api/log-error', {
+      body: JSON.stringify({
+        digest: error.digest,
+        error: {
+          cause: error.cause,
+          message: error.message,
+          name: error.name,
+          stack: error.stack,
+        },
+        page: typeof globalThis.window !== 'undefined' ? globalThis.location.pathname : 'unknown',
+        url: typeof globalThis.window !== 'undefined' ? globalThis.location.href : 'unknown',
+      }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      keepalive: true,
+      method: 'POST',
+    }).catch((loggingError: unknown) => {
+      console.error('Failed to report root error boundary event:', loggingError);
+    });
   }, [error]);
 
   return (

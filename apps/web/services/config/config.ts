@@ -1,4 +1,4 @@
-import { getPublicConfig, getServerConfig } from './env';
+import { getPublicConfig, getServerConfigResult } from './env';
 
 const toAbsoluteUrl = (path: string, baseUrl: string) => new URL(path, baseUrl).toString();
 
@@ -31,12 +31,12 @@ const isUnsupportedCookieDomain = (host?: string | null) => {
 export const getPublicAPIUrl = () => getPublicConfig().apiUrl;
 
 export const getServerAPIUrl = () => {
-  const { internalApiUrl } = getServerConfig();
-  if (!internalApiUrl) {
-    throw new Error('INTERNAL_API_URL is required for server-side API requests');
+  const serverConfigResult = getServerConfigResult();
+  if (serverConfigResult.success && serverConfigResult.config.internalApiUrl) {
+    return serverConfigResult.config.internalApiUrl;
   }
 
-  return internalApiUrl;
+  return getPublicAPIUrl();
 };
 
 export const getAPIUrl = () => {

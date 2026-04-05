@@ -12,7 +12,7 @@ interface UseCourseStructureOptions<TCourseStructure> {
  * Fetches the course structure (meta + chapters + activities).
  *
  * The auth token is NOT included in the SWR key.  It is injected automatically
- * by the global SWRTokenProvider fetcher in client-layout.tsx.  This keeps
+ * by the global SWR provider fetcher in root-providers.tsx.  This keeps
  * cache entries stable across token refreshes.
  */
 export function useCourseStructure<TCourseStructure = any>(

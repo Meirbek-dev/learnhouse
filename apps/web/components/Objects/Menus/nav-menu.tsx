@@ -7,6 +7,7 @@ import { BookCopy, Menu, Signpost, SquareLibrary, X } from 'lucide-react';
 import { LocaleSwitcher } from '@/components/Utils/LocaleSwitcher';
 import { SearchBar } from '@/components/Objects/Search/SearchBar';
 import platformLogoFull from '@public/platform_logo_full.svg';
+import { NAVBAR_HEIGHT } from '@/lib/constants';
 import { getAbsoluteUrl } from '@/services/config/config';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -179,13 +180,17 @@ export default function NavBar() {
   return (
     <>
       {/* Backdrop blur */}
-      <div className="bg-background/85 fixed top-0 right-0 left-0 -z-10 h-[52px] backdrop-blur-sm" />
+      <div
+        className="bg-background/85 fixed top-0 right-0 left-0 -z-10 backdrop-blur-sm"
+        style={{ height: NAVBAR_HEIGHT }}
+      />
 
       {/* Main header */}
       <header
-        className={`border-border/60 fixed top-0 right-0 left-0 z-50 h-[52px] border-b shadow-sm transition-colors ${
+        className={`border-border/60 fixed top-0 right-0 left-0 z-50 border-b shadow-sm transition-colors ${
           isScrolled ? 'bg-background/97' : 'bg-background/92'
         } backdrop-blur-sm`}
+        style={{ height: NAVBAR_HEIGHT }}
       >
         <div className="mx-auto flex h-full w-full items-center justify-between px-4 sm:px-6 lg:px-12">
           {/* Left section */}
@@ -297,7 +302,7 @@ export default function NavBar() {
               e.stopPropagation();
             }}
             style={{
-              maxHeight: 'calc(100vh - 52px)',
+              maxHeight: `calc(100vh - ${NAVBAR_HEIGHT}px)`,
               overflowY: 'auto',
               overflowX: 'visible',
             }}

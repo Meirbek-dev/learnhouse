@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useEffect, useRef, useState } from 'react';
+import { createContext, useContext, useState } from 'react';
 import { applyTheme, getStoredTheme, getTheme } from '@/lib/themes';
 import { loadTheme } from '@/lib/theme-lazy-loader';
 import type { Theme } from '@/lib/themes';
@@ -8,6 +8,7 @@ import type { ReactNode } from 'react';
 
 interface ThemeContextValue {
   theme: Theme;
+  themeName: string;
   setTheme: (themeName: string, syncToServer?: boolean) => Promise<void>;
   isLoading: boolean;
 }
@@ -33,54 +34,9 @@ export function ThemeProvider({ children, defaultThemeName = 'default', userThem
   });
 
   const [isLoading, setIsLoading] = useState(false);
-  const serverSyncTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
   // Theme object
   const theme = getTheme(themeName);
-
-  // Track pending theme sync
-  const pendingThemeSyncRef = useRef<string | null>(null);
-
-  // Debounced server sync function
-  const debouncedServerSync = (theme: string) => {
-    pendingThemeSyncRef.current = theme;
-
-    // Clear existing timeout
-    if (serverSyncTimeoutRef.current) {
-      clearTimeout(serverSyncTimeoutRef.current);
-    }
-
-    // Set new timeout for server sync (1000ms debounce)
-    serverSyncTimeoutRef.current = setTimeout(() => {
-      if (typeof globalThis.window !== 'undefined') {
-        globalThis.dispatchEvent(
-          new CustomEvent('themeChange', {
-            detail: { theme },
-          }),
-        );
-        pendingThemeSyncRef.current = null;
-      }
-    }, 1000);
-  };
-
-  // Sync pending theme on page unload
-  useEffect(() => {
-    const handleBeforeUnload = () => {
-      if (pendingThemeSyncRef.current) {
-        // Sync immediately before leaving using beacon API (non-blocking)
-        const data = JSON.stringify({ theme: pendingThemeSyncRef.current });
-        navigator.sendBeacon('/api/user/theme', data);
-      }
-    };
-
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-      if (serverSyncTimeoutRef.current) {
-        clearTimeout(serverSyncTimeoutRef.current);
-      }
-    };
-  }, []);
 
   const setTheme = async (newThemeName: string, syncToServer = true) => {
     setIsLoading(true);
@@ -91,11 +47,6 @@ export function ThemeProvider({ children, defaultThemeName = 'default', userThem
     if (newTheme) {
       setThemeName(newThemeName);
       applyTheme(newTheme);
-
-      // Debounced sync to server
-      if (syncToServer) {
-        debouncedServerSync(newThemeName);
-      }
     } else {
       // Fallback to default theme if load fails
       console.warn(`Failed to load theme: ${newThemeName}, falling back to default`);
@@ -108,6 +59,7 @@ export function ThemeProvider({ children, defaultThemeName = 'default', userThem
   // Context value (no memo)
   const contextValue = {
     theme,
+    themeName,
     setTheme,
     isLoading,
   };
