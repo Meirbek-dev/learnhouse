@@ -422,7 +422,7 @@ class BootstrapConfig(PlatformSectionSettings):
 
 class Judge0Config(PlatformSectionSettings):
     base_url: str = Field(
-        default="http://judge0_server:2358",
+        default="http://judge0-server:2358",
         validation_alias="JUDGE0_URL",
     )
 

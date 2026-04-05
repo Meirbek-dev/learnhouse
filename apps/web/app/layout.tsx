@@ -1,7 +1,6 @@
 import { getLocale, getMessages, setRequestLocale } from 'next-intl/server';
 import { IntlProvider } from '@/components/providers/IntlProvider';
 import DevScriptLoader from '@/components/DevScriptLoader';
-import { defaultLocale } from '@/i18n/config';
 import { inter, jetBrainsMono } from '@/lib/fonts';
 import { Suspense } from 'react';
 import RootProviders from './root-providers';
@@ -31,13 +30,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       className={`${inter.variable} ${jetBrainsMono.variable}`}
-      lang={defaultLocale}
+      lang="ru-RU"
     >
       <head>
-        <meta
-          name="viewport"
-          content="width=device-width, initial-scale=1"
-        />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
       </head>
 
       <body suppressHydrationWarning>

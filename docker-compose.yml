@@ -1,5 +1,28 @@
+# Profiles:
+#   core        - nginx + web + api + db + redis + migrate (default working set)
+#   code-runner - judge0 server and workers
+#   ops         - backup service
+#
+# Usage:
+#   docker compose --profile core up -d
+#   docker compose --profile core --profile code-runner up -d
+
+networks:
+  # Reachable by nginx and application containers
+  app-net: {}
+  # Internal only: database and cache; not routable from outside
+  data-net:
+    internal: true
+  # Internal only: code execution tier
+  exec-net:
+    internal: true
+
 services:
-  proxy:
+
+  # ---------------------------------------------------------------------------
+  # Edge
+  # ---------------------------------------------------------------------------
+  nginx:
     image: nginx:1.29.5-alpine
     restart: unless-stopped
     ports:
@@ -8,69 +31,101 @@ services:
     volumes:
       - ./extra/nginx.conf:/etc/nginx/conf.d/default.conf:ro
       - nginx_cache:/var/cache/nginx/app
+    networks:
+      - app-net
     depends_on:
-      app:
+      web:
         condition: service_healthy
-    deploy:
-      resources:
-        limits:
-          cpus: "1.0"
-          memory: 256M
-        reservations:
-          cpus: "0.1"
-          memory: 64M
+      api:
+        condition: service_healthy
+    profiles:
+      - core
 
-  app:
+  # ---------------------------------------------------------------------------
+  # Frontend — Next.js standalone server
+  # ---------------------------------------------------------------------------
+  web:
     build:
       context: .
+      dockerfile: apps/web/Dockerfile
       args:
-        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL}
-        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
-        NEXT_PUBLIC_MEDIA_URL: ${NEXT_PUBLIC_MEDIA_URL}
-        INTERNAL_API_URL: ${INTERNAL_API_URL}
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost:3000/}
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:1338/api/v1/}
+        NEXT_PUBLIC_MEDIA_URL: ${NEXT_PUBLIC_MEDIA_URL:-http://localhost:1338/}
+    restart: unless-stopped
+    expose:
+      - "3000"
+    env_file:
+      - ./extra/.env
+    networks:
+      - app-net
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 60s
+      retries: 3
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    profiles:
+      - core
+
+  # ---------------------------------------------------------------------------
+  # Backend — FastAPI
+  # ---------------------------------------------------------------------------
+  api:
+    build:
+      context: ./apps/api
     restart: unless-stopped
     expose:
       - "8000"
-      - "9000"
     volumes:
-      # Mount only the content directory to persist user uploads and org data
-      - app_content:/app/api/content
-      # Mount logs directory to persist application logs
-      - app_logs:/app/api/logs
+      - api_content:/app/content
     env_file:
       - ./extra/.env
+    networks:
+      - app-net
+      - data-net
+      - exec-net
     depends_on:
       db:
         condition: service_healthy
       redis:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-fsS", "http://localhost:8000/health"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health', timeout=5)"]
       interval: 30s
       timeout: 10s
-      start_period: 90s
+      start_period: 30s
       retries: 3
-    deploy:
-      resources:
-        limits:
-          cpus: "2.0"
-          memory: 2G
-        reservations:
-          cpus: "0.5"
-          memory: 512M
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    profiles:
+      - core
+
+  # ---------------------------------------------------------------------------
+  # Database
+  # ---------------------------------------------------------------------------
   db:
     build:
       context: .
       dockerfile: docker/Dockerfile.db
     restart: unless-stopped
-    ports:
-      - "5432:5432"
+    # No host port exposure — internal only via data-net
+    expose:
+      - "5432"
     environment:
       - POSTGRES_USER=openu
       - POSTGRES_PASSWORD=openu
       - POSTGRES_DB=openu
     volumes:
       - postgres_data:/var/lib/postgresql
+    networks:
+      - data-net
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U openu"]
       interval: 10s
@@ -78,21 +133,24 @@ services:
       retries: 5
     labels:
       - docker-volume-backup.stop-during-backup=true
-    deploy:
-      resources:
-        limits:
-          cpus: "2.0"
-          memory: 1G
-        reservations:
-          cpus: "0.25"
-          memory: 256M
+    security_opt:
+      - no-new-privileges:true
+    profiles:
+      - core
+
+  # ---------------------------------------------------------------------------
+  # Cache
+  # ---------------------------------------------------------------------------
   redis:
     image: redis:8.6.2-alpine
     restart: unless-stopped
-    ports:
-      - "6379:6379"
+    # No host port exposure — internal only via data-net
+    expose:
+      - "6379"
     volumes:
       - redis_data:/data
+    networks:
+      - data-net
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -100,38 +158,41 @@ services:
       retries: 5
     labels:
       - docker-volume-backup.stop-during-backup=true
-    deploy:
-      resources:
-        limits:
-          cpus: "1.0"
-          memory: 256M
-        reservations:
-          cpus: "0.1"
-          memory: 64M
-  # Judge0 - code runner for coding activities
-  judge0_server:
+    profiles:
+      - core
+
+  # ---------------------------------------------------------------------------
+  # Code execution tier (optional — enable with --profile code-runner)
+  # ---------------------------------------------------------------------------
+  judge0-server:
     image: judge0/judge0:1.13.1
     command: ["bash", "-c", "sudo mkdir -p /box && sudo chmod 1777 /box && exec ./scripts/server"]
     volumes:
       - ./judge0.conf:/judge0.conf:ro
       - judge0_box:/box
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
-    ports:
-      - "2358:2358"
+    # No host port exposure — reachable by api via exec-net only
+    expose:
+      - "2358"
     privileged: true
     restart: unless-stopped
+    networks:
+      - exec-net
+      - data-net
     depends_on:
       db:
         condition: service_healthy
       redis:
         condition: service_healthy
-    labels:
-      - docker-volume-backup.stop-during-backup=true
     environment:
       - REDIS_HOST=redis
       - POSTGRES_HOST=db
+    labels:
+      - docker-volume-backup.stop-during-backup=true
+    profiles:
+      - code-runner
 
-  judge0_workers:
+  judge0-workers:
     image: judge0/judge0:1.13.1
     command: ["bash", "-c", "sudo mkdir -p /box && sudo chmod 1777 /box && exec ./scripts/workers"]
     volumes:
@@ -140,39 +201,43 @@ services:
       - /sys/fs/cgroup:/sys/fs/cgroup:ro
     privileged: true
     restart: unless-stopped
+    networks:
+      - exec-net
+      - data-net
     depends_on:
       db:
         condition: service_healthy
       redis:
         condition: service_healthy
-    labels:
-      - docker-volume-backup.stop-during-backup=true
     environment:
       - REDIS_HOST=redis
       - POSTGRES_HOST=db
+    labels:
+      - docker-volume-backup.stop-during-backup=true
+    profiles:
+      - code-runner
 
+  # ---------------------------------------------------------------------------
+  # Backup (optional — enable with --profile ops)
+  # ---------------------------------------------------------------------------
   backup:
     image: offen/docker-volume-backup:v2.47.0
     restart: unless-stopped
     env_file:
       - ./extra/backup.env
     volumes:
-      # Database volumes
       - postgres_data:/backup/postgres:ro
       - redis_data:/backup/redis:ro
-      # Application data volumes
-      - app_content:/backup/app_content:ro
-      - app_logs:/backup/app_logs:ro
+      - api_content:/backup/api_content:ro
       - judge0_box:/backup/judge0_box:ro
-      # Docker socket for container management
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      # Local backup storage
       - ./backups:/archive
+    profiles:
+      - ops
 
 volumes:
   postgres_data:
   redis_data:
-  app_content:
-  app_logs:
+  api_content:
   judge0_box:
   nginx_cache:
