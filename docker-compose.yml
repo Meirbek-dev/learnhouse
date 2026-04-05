@@ -116,7 +116,8 @@ services:
   # Database migration — run manually, never auto-started
   # ---------------------------------------------------------------------------
   migrate:
-    image: ashyq-bilim-api
+    build:
+      context: ./apps/api
     command: ["uv", "run", "--no-sync", "alembic", "upgrade", "head"]
     env_file: .env
     networks:
@@ -184,7 +185,7 @@ services:
           cpus: "1.0"
 
   # ---------------------------------------------------------------------------
-  # Code execution tier (optional — enable with --profile code-runner)
+  # Code execution tier
   # ---------------------------------------------------------------------------
   judge0-server:
     image: judge0/judge0:1.13.1
@@ -235,7 +236,7 @@ services:
       - docker-volume-backup.stop-during-backup=true
 
   # ---------------------------------------------------------------------------
-  # Backup (optional — enable with --profile ops)
+  # Backup
   # ---------------------------------------------------------------------------
   backup:
     image: offen/docker-volume-backup:v2.47.0
