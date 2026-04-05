@@ -101,12 +101,6 @@ docker compose run --rm migrate
 docker compose up -d
 ```
 
-### 7. (Optional) Start the backup service
-
-```bash
-docker compose --profile ops up -d backup
-```
-
 ### 8. Verify
 
 ```bash
@@ -198,7 +192,7 @@ docker compose up -d --no-deps web api
 Backups run daily at 02:00 via `offen/docker-volume-backup`. Start the service:
 
 ```bash
-docker compose --profile ops up -d backup
+docker compose up -d backup
 ```
 
 **Trigger a manual backup:**
@@ -286,19 +280,6 @@ rm -rf temp-restore
 
 > The backup-latest symlink has a `.tar.gz` extension but is zstd-compressed.
 > Always use `tar --zstd`, never `tar -z`.
-
----
-
-## Code Runner (Judge0)
-
-Disabled by default. Requires `privileged: true` and host cgroup access —
-only enable on a dedicated host.
-
-```bash
-docker compose --profile code-runner up -d
-```
-
-Judge0 is only reachable from the `api` container via `exec-net` (no public port).
 
 ---
 

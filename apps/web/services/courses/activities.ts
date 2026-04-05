@@ -368,6 +368,7 @@ async function fetchActivity(activity_uuid: string, access_token: string): Promi
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${access_token}`,
     },
+    signal: AbortSignal.timeout(10_000),
   });
   return (await result.json()) as ActivityReadWithPermissions;
 }
@@ -410,6 +411,7 @@ async function fetchActivityWithAuth(
   const result = await fetch(`${getAPIUrl()}activities/${canonicalActivityUuid}`, {
     method: 'GET',
     headers,
+    signal: AbortSignal.timeout(10_000),
   });
   return (await result.json()) as ActivityReadWithPermissions;
 }

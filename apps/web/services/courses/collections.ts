@@ -57,6 +57,7 @@ async function fetchCollectionById(collection_uuid: string, access_token?: strin
   const result = await fetch(`${getAPIUrl()}collections/collection_${collection_uuid}`, {
     method: 'GET',
     headers,
+    signal: AbortSignal.timeout(10_000),
   });
   return await errorHandling(result);
 }
@@ -81,6 +82,7 @@ async function fetchCollections(access_token?: string) {
   const result = await fetch(`${getAPIUrl()}collections/page/1/limit/20`, {
     method: 'GET',
     headers,
+    signal: AbortSignal.timeout(10_000),
   });
   return await errorHandling(result);
 }

@@ -139,6 +139,7 @@ async function fetchGamificationData(accessToken: string): Promise<ApiDashboardR
     const res = await fetch(`${getServerAPIUrl()}gamification/`, {
       method: 'GET',
       headers: { Authorization: `Bearer ${accessToken}` },
+      signal: AbortSignal.timeout(8_000),
     });
 
     if (!res.ok) {
@@ -167,6 +168,7 @@ async function fetchLeaderboardData(limit: number, accessToken: string): Promise
     const res = await fetch(`${getServerAPIUrl()}gamification/leaderboard?limit=${encodeURIComponent(String(limit))}`, {
       method: 'GET',
       headers: { Authorization: `Bearer ${accessToken}` },
+      signal: AbortSignal.timeout(8_000),
     });
 
     if (!res.ok) {

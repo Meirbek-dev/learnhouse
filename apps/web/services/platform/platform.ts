@@ -40,14 +40,21 @@ async function fetchPlatform(access_token?: string): Promise<PlatformRead | null
   }
 
   try {
+    // AbortSignal.timeout ensures the fetch fails well within the 50-second
+    // PPR prerender deadline when the backend is unreachable (e.g. during a
+    // Docker build where the API container hasn't started yet).  Without an
+    // explicit timeout the fetch hangs indefinitely and Next.js ejects with
+    // USE_CACHE_TIMEOUT before the try/catch ever gets a chance to run.
     const result = await fetch(`${getServerAPIUrl()}platform`, {
       method: 'GET',
       headers,
+      signal: AbortSignal.timeout(8_000),
     });
     return await errorHandling(result);
   } catch {
-    // Backend is unavailable (e.g. during build time) – return null so
-    // the layout renders a shell that hydrates with real data at runtime.
+    // Backend unavailable – return null so the layout renders a graceful
+    // shell.  The cache entry is stored as null here; it will be refreshed
+    // on the next revalidation cycle once the API is healthy.
     return null;
   }
 }

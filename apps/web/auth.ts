@@ -236,9 +236,9 @@ const createAuthConfig = (): NextAuthConfig => {
     ],
 
     pages: {
-      signIn: getAbsoluteUrl('/'),
-      verifyRequest: getAbsoluteUrl('/'),
-      error: getAbsoluteUrl('/'),
+      signIn: '/auth/login',
+      verifyRequest: '/auth/login',
+      error: '/auth/login',
     },
 
     cookies: {

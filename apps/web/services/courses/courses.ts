@@ -214,6 +214,7 @@ async function fetchCourses(
   const result = await fetch(`${getAPIUrl()}courses/page/${page}/limit/${limit}`, {
     method: 'GET',
     headers,
+    signal: AbortSignal.timeout(10_000),
   });
 
   if (!result.ok) {
@@ -281,6 +282,7 @@ async function fetchEditableCourses(
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${access_token}`,
       },
+      signal: AbortSignal.timeout(10_000),
     },
   );
 
@@ -363,6 +365,7 @@ async function fetchCourseMetadata(
     {
       method: 'GET',
       headers,
+      signal: AbortSignal.timeout(10_000),
     },
   );
   return normalizeFullCourse((await errorHandling(result)) as FullCourseRead);
@@ -442,6 +445,7 @@ async function fetchCourse(course_uuid: string, access_token: string): Promise<N
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${access_token}`,
     },
+    signal: AbortSignal.timeout(10_000),
   });
   return normalizeCourse((await errorHandling(result)) as CourseRead);
 }
