@@ -1,6 +1,5 @@
 import { FileUploadBlock, FileUploadBlockButton, FileUploadBlockInput } from '../../FileUploadBlock';
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { AlertTriangle, Download, Expand, FileText } from 'lucide-react';
 import { getActivityBlockMediaDirectory } from '@services/media/media';
 import { useCourse } from '@components/Contexts/CourseContext';
@@ -16,8 +15,6 @@ const SUPPORTED_FILES = constructAcceptValue(['pdf']);
 const PDFBlockComponent = (props: any) => {
   const t = useTranslations('DashPage.Editor.PDFBlock');
   const course = useCourse();
-  const session = usePlatformSession() as any;
-  const access_token = session?.data?.tokens?.access_token;
   const [pdf, setPDF] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [blockObject, setblockObject] = useState(props.node.attrs.blockObject);
@@ -34,7 +31,7 @@ const PDFBlockComponent = (props: any) => {
     e.preventDefault();
     if (!pdf) return; // Guard: only proceed if pdf is not null
     setIsLoading(true);
-    const object = await uploadNewPDFFile(pdf, props.extension.options.activity.activity_uuid, access_token);
+    const object = await uploadNewPDFFile(pdf, props.extension.options.activity.activity_uuid);
     setIsLoading(false);
     setblockObject(object);
     props.updateAttributes({

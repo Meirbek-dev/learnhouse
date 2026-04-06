@@ -17,7 +17,6 @@ import { cn } from '@/lib/utils';
 
 import { canSelectForBatchGrading, canTeacherEditGrade, needsTeacherAction } from '@/types/grading';
 import type { Submission, SubmissionStatus, TeacherGradeInput } from '@/types/grading';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { exportGradesCSV, saveGrade } from '@services/grading/grading';
 import { useSubmissionStats } from '@/hooks/useSubmissionStats';
 import SubmissionStatusBadge from './SubmissionStatusBadge';
@@ -36,8 +35,6 @@ type StatusFilter = SubmissionStatus | 'ALL' | 'NEEDS_GRADING';
 
 export default function SubmissionsTable({ activityId, title }: SubmissionsTableProps) {
   const t = useTranslations('Grading.Table');
-  const session = usePlatformSession();
-  const accessToken = session?.data?.tokens?.access_token ?? '';
 
   const [activeFilter, setActiveFilter] = useState<StatusFilter>('ALL');
   const [search, setSearch] = useState('');
@@ -125,10 +122,9 @@ export default function SubmissionsTable({ activityId, title }: SubmissionsTable
   );
 
   const handleExportCSV = useCallback(async () => {
-    if (!accessToken) return;
     setIsExporting(true);
     try {
-      const csv = await exportGradesCSV(activityId, accessToken);
+      const csv = await exportGradesCSV(activityId);
       if (!csv) return;
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
@@ -140,7 +136,7 @@ export default function SubmissionsTable({ activityId, title }: SubmissionsTable
     } finally {
       setIsExporting(false);
     }
-  }, [activityId, accessToken]);
+  }, [activityId]);
 
   const toggleSubmissionSelection = useCallback((submissionUuid: string, checked: boolean | 'indeterminate') => {
     setSelectedSubmissionUuids((current) => {
@@ -323,7 +319,6 @@ export default function SubmissionsTable({ activityId, title }: SubmissionsTable
                 <SubmissionRow
                   key={submission.submission_uuid}
                   submission={submission}
-                  accessToken={accessToken}
                   isSelected={selectedSubmissionUuids.has(submission.submission_uuid)}
                   onSelectedChange={(checked) => toggleSubmissionSelection(submission.submission_uuid, checked)}
                   onInlineGradeSaved={refreshTableData}
@@ -383,14 +378,12 @@ export default function SubmissionsTable({ activityId, title }: SubmissionsTable
 
 function SubmissionRow({
   submission,
-  accessToken,
   isSelected,
   onSelectedChange,
   onInlineGradeSaved,
   onGrade,
 }: {
   submission: Submission;
-  accessToken: string;
   isSelected: boolean;
   onSelectedChange: (checked: boolean | 'indeterminate') => void;
   onInlineGradeSaved: () => Promise<void>;
@@ -423,22 +416,18 @@ function SubmissionRow({
   }, []);
 
   const handleInlineSave = useCallback(async () => {
-    if (!accessToken || !canInlineEdit || !scoreDirty || scoreInvalid || parsedScore === null) {
+    if (!canInlineEdit || !scoreDirty || scoreInvalid || parsedScore === null) {
       return;
     }
 
     setIsSavingScore(true);
     try {
-      await saveGrade(
-        submission.submission_uuid,
-        {
-          final_score: parsedScore,
-          status: getInlineSaveStatus(submission.status),
-          feedback: submission.grading_json?.feedback ?? '',
-          item_feedback: [],
-        },
-        accessToken,
-      );
+      await saveGrade(submission.submission_uuid, {
+        final_score: parsedScore,
+        status: getInlineSaveStatus(submission.status),
+        feedback: submission.grading_json?.feedback ?? '',
+        item_feedback: [],
+      });
       toast.success(panelT('gradeSaved'));
       await onInlineGradeSaved();
     } catch {
@@ -448,7 +437,6 @@ function SubmissionRow({
       setIsSavingScore(false);
     }
   }, [
-    accessToken,
     canInlineEdit,
     getInlineSaveStatus,
     onInlineGradeSaved,

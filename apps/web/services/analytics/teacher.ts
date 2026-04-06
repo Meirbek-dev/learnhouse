@@ -1,5 +1,6 @@
 import type { AnalyticsQuery, AssessmentType } from '@/types/analytics';
 import type { components } from '@/lib/api/generated';
+import { apiFetch } from '@/lib/api-client';
 import { getAPIUrl } from '@services/config/config';
 
 type TeacherOverviewResponse = components['schemas']['TeacherOverviewResponse'];
@@ -23,16 +24,8 @@ const buildQueryString = (query: AnalyticsQuery = {}) => {
 const getFirstQueryValue = (value: string | string[] | undefined): string | undefined =>
   Array.isArray(value) ? value[0] : value;
 
-async function analyticsRequest<T>(path: string, accessToken: string, query?: AnalyticsQuery): Promise<T> {
-  const response = await fetch(`${getAPIUrl()}analytics/${path}${buildQueryString(query)}`, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${accessToken}`,
-      'Content-Type': 'application/json',
-    },
-    credentials: 'include',
-    cache: 'no-store',
-  });
+async function analyticsRequest<T>(path: string, query?: AnalyticsQuery): Promise<T> {
+  const response = await apiFetch(`analytics/${path}${buildQueryString(query)}`);
 
   if (!response.ok) {
     const payload = await response.json().catch(() => ({}));
@@ -63,48 +56,41 @@ export function normalizeAnalyticsQuery(searchParams: Record<string, string | st
   };
 }
 
-export function getTeacherOverview(accessToken: string, query?: AnalyticsQuery) {
-  return analyticsRequest<TeacherOverviewResponse>('teacher/overview', accessToken, query);
+export function getTeacherOverview(query?: AnalyticsQuery) {
+  return analyticsRequest<TeacherOverviewResponse>('teacher/overview', query);
 }
 
-export function getTeacherCourseList(accessToken: string, query?: AnalyticsQuery) {
-  return analyticsRequest<TeacherCourseListResponse>('teacher/courses', accessToken, query);
+export function getTeacherCourseList(query?: AnalyticsQuery) {
+  return analyticsRequest<TeacherCourseListResponse>('teacher/courses', query);
 }
 
-export function getTeacherCourseDetailByUuid(courseUuid: string, accessToken: string, query?: AnalyticsQuery) {
-  return analyticsRequest<TeacherCourseDetailResponse>(`teacher/courses/by-uuid/${courseUuid}`, accessToken, query);
+export function getTeacherCourseDetailByUuid(courseUuid: string, query?: AnalyticsQuery) {
+  return analyticsRequest<TeacherCourseDetailResponse>(`teacher/courses/by-uuid/${courseUuid}`, query);
 }
 
-export function getTeacherCourseDetail(courseId: number, accessToken: string, query?: AnalyticsQuery) {
-  return analyticsRequest<TeacherCourseDetailResponse>(`teacher/courses/${courseId}`, accessToken, query);
+export function getTeacherCourseDetail(courseId: number, query?: AnalyticsQuery) {
+  return analyticsRequest<TeacherCourseDetailResponse>(`teacher/courses/${courseId}`, query);
 }
 
-export function getTeacherAssessmentList(accessToken: string, query?: AnalyticsQuery) {
-  return analyticsRequest<TeacherAssessmentListResponse>('teacher/assessments', accessToken, query);
+export function getTeacherAssessmentList(query?: AnalyticsQuery) {
+  return analyticsRequest<TeacherAssessmentListResponse>('teacher/assessments', query);
 }
 
 export interface GetTeacherAssessmentDetailParams {
   assessmentType: AssessmentType;
   assessmentId: number;
-  accessToken: string;
   query?: AnalyticsQuery;
 }
 
-export function getTeacherAssessmentDetail({
-  assessmentType,
-  assessmentId,
-  accessToken,
-  query,
-}: GetTeacherAssessmentDetailParams) {
+export function getTeacherAssessmentDetail({ assessmentType, assessmentId, query }: GetTeacherAssessmentDetailParams) {
   return analyticsRequest<TeacherAssessmentDetailResponse>(
     `teacher/assessments/${assessmentType}/${assessmentId}`,
-    accessToken,
     query,
   );
 }
 
-export function getAtRiskLearners(accessToken: string, query?: AnalyticsQuery) {
-  return analyticsRequest<AtRiskLearnersResponse>('teacher/learners/at-risk', accessToken, query);
+export function getAtRiskLearners(query?: AnalyticsQuery) {
+  return analyticsRequest<AtRiskLearnersResponse>('teacher/learners/at-risk', query);
 }
 
 export function getAnalyticsExportUrl(

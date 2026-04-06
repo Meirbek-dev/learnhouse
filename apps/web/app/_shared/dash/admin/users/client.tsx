@@ -57,8 +57,6 @@ export default function UserRolesClient() {
     roleName?: string;
   } | null>(null);
 
-  const accessToken = session?.data?.tokens?.access_token;
-
   const refreshSession = useCallback(async () => {
     const timeoutMs = 5000;
     try {
@@ -73,37 +71,34 @@ export default function UserRolesClient() {
 
   // Fetch user roles
   const fetchUserRolesData = useCallback(async () => {
-    if (!accessToken) return;
     try {
-      const data = await listUserRoles(accessToken);
+      const data = await listUserRoles();
       setUserRoles(data);
     } catch (error) {
       console.error('Failed to fetch user roles:', error);
       toast.error(t('loadFailed'));
     }
-  }, [accessToken, t]);
+  }, [t]);
 
   // Fetch available roles
   const fetchRoles = useCallback(async () => {
-    if (!accessToken) return;
     try {
-      const data = await listRoles(accessToken);
+      const data = await listRoles();
       setAvailableRoles(data);
     } catch (error) {
       console.error('Failed to fetch roles:', error);
     }
-  }, [accessToken]);
+  }, []);
 
   // Fetch users for search
   const fetchUsers = useCallback(async () => {
-    if (!accessToken) return;
     try {
-      const data = await listUsers(accessToken);
+      const data = await listUsers();
       setUsers(data);
     } catch (error) {
       console.error('Failed to fetch users:', error);
     }
-  }, [accessToken]);
+  }, []);
   useEffect(() => {
     const fetchAll = async () => {
       setLoading(true);
@@ -115,10 +110,10 @@ export default function UserRolesClient() {
 
   // Add role to user
   const handleAddUserRole = async () => {
-    if (!accessToken || !selectedUserId || !selectedRoleId) return;
+    if (!selectedUserId || !selectedRoleId) return;
 
     try {
-      await assignRoleToUser(accessToken, selectedUserId, selectedRoleId);
+      await assignRoleToUser(selectedUserId, selectedRoleId);
       toast.success(t('assignedRoleSuccess'));
       setIsAddDialogOpen(false);
       setSelectedUserId(null);
@@ -139,13 +134,13 @@ export default function UserRolesClient() {
 
   // Confirm remove role from user
   const confirmRemoveUserRole = async () => {
-    if (!accessToken || !assignmentToRemove) return;
+    if (!assignmentToRemove) return;
 
     const { userId, roleId } = assignmentToRemove;
     setAssignmentToRemove(null);
 
     try {
-      await removeRoleFromUser(accessToken, userId, roleId);
+      await removeRoleFromUser(userId, roleId);
       toast.success(t('removedRoleSuccess'));
       await fetchUserRolesData();
       // Refresh session so permission changes take effect immediately

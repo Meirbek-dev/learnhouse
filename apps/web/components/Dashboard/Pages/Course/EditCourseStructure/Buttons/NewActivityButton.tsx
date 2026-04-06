@@ -11,7 +11,6 @@ import {
 import NewActivityModal from '@components/Objects/Modals/Activities/Create/NewActivity';
 import { useActivityMutations } from '@/hooks/mutations/useActivityMutations';
 import { cleanActivityUuid, cleanCourseUuid } from '@/lib/course-management';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
@@ -28,8 +27,6 @@ const NewActivityButton = (props: NewActivityButtonProps) => {
   const [newActivityModal, setNewActivityModal] = useState(false);
   const course = useCourse();
   const router = useRouter();
-  const session = usePlatformSession() as any;
-  const access_token = session?.data?.tokens?.access_token;
   const activityMutations = useActivityMutations(course.courseStructure.course_uuid, true);
   const t = useTranslations('CourseEdit.NewActivityModal');
   const tNotify = useTranslations('DashPage.Notifications');
@@ -41,7 +38,7 @@ const NewActivityButton = (props: NewActivityButtonProps) => {
   const submitActivity = async (activity: any) => {
     const toast_loading = toast.loading(tNotify('creatingActivity'));
     try {
-      const response = await activityMutations.createActivity(activity, props.chapterId, access_token);
+      const response = await activityMutations.createActivity(activity, props.chapterId);
       toast.success(tNotify('activityCreatedSuccess'));
       setNewActivityModal(false);
       return response;
@@ -67,7 +64,7 @@ const NewActivityButton = (props: NewActivityButtonProps) => {
     const toast_loading = toast.loading(tNotify('uploadingAndCreating'));
 
     try {
-      await activityMutations.createFileActivity(file, type, activity, chapterId, access_token, (progress) => {
+      await activityMutations.createFileActivity(file, type, activity, chapterId, (progress) => {
         toast.loading(`${tNotify('uploadingAndCreating')} ${progress.percentage}%`, {
           id: toast_loading,
         });
@@ -86,7 +83,7 @@ const NewActivityButton = (props: NewActivityButtonProps) => {
   const submitExternalVideo = async (external_video_data: any, activity: any) => {
     const toast_loading = toast.loading(tNotify('creatingActivity'));
     try {
-      await activityMutations.createExternalVideo(external_video_data, activity, props.chapterId, access_token);
+      await activityMutations.createExternalVideo(external_video_data, activity, props.chapterId);
       setNewActivityModal(false);
       toast.success(tNotify('activityCreatedSuccess'));
     } catch (error: any) {
@@ -97,11 +94,6 @@ const NewActivityButton = (props: NewActivityButtonProps) => {
   };
 
   const createAndOpenActivity = async (kind: 'dynamic' | 'codechallenge') => {
-    if (!access_token) {
-      toast.error(tNotify('uploadFailed'));
-      return;
-    }
-
     const activityPayload =
       kind === 'dynamic'
         ? {

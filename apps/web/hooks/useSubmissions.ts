@@ -1,6 +1,5 @@
 'use client';
 
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import type { SubmissionStatus, SubmissionsPage } from '@/types/grading';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
@@ -24,8 +23,6 @@ export function useSubmissions({
   sortDir = 'desc',
   pageSize = 25,
 }: UseSubmissionsOptions) {
-  const session = usePlatformSession();
-  const accessToken = session?.data?.tokens?.access_token;
   const [page, setPage] = useState(1);
 
   useEffect(() => {
@@ -42,8 +39,8 @@ export function useSubmissions({
   params.set('page_size', String(pageSize));
 
   const { data, error, isLoading, mutate } = useSWR<SubmissionsPage>(
-    activityId && accessToken ? `${getAPIUrl()}grading/submissions?${params}` : null,
-    (url: string) => swrFetcher(url, accessToken),
+    activityId ? `${getAPIUrl()}grading/submissions?${params}` : null,
+    (url: string) => swrFetcher(url),
   );
 
   return {

@@ -18,7 +18,6 @@ export function useContributorStatus(courseUuid: string) {
   const [isLoading, setIsLoading] = useState(true);
   const [refetchTrigger, setRefetchTrigger] = useState(0);
   const t = useTranslations('Hooks.useContributorStatus');
-  const accessToken = session?.data?.tokens?.access_token;
   const userId = session?.data?.user?.id;
 
   // Use Effect Event for the fetch logic that should read latest values
@@ -33,7 +32,6 @@ export function useContributorStatus(courseUuid: string) {
     try {
       const response = await getCourseContributors(
         courseUuid.startsWith('course_') ? courseUuid : `course_${courseUuid}`,
-        accessToken,
       );
 
       if (response?.data && Array.isArray(response.data)) {

@@ -11,7 +11,7 @@ export function useChapterMutations(courseUuid: string, withUnpublishedActivitie
 
   const captureSnapshot = (key: string): unknown | undefined => (cache.get(key) as any)?.data as unknown | undefined;
 
-  const createChapterMutation = async (payload: ChapterCreateValues, accessToken: string) => {
+  const createChapterMutation = async (payload: ChapterCreateValues) => {
     const tempId = `temp_chapter_${Date.now()}`;
     const optimisticChapter = { ...payload, id: tempId, chapter_uuid: tempId, activities: [] };
 
@@ -23,7 +23,7 @@ export function useChapterMutations(courseUuid: string, withUnpublishedActivitie
     );
 
     try {
-      const createdChapter = await createChapter(payload, accessToken);
+      const createdChapter = await createChapter(payload);
 
       await mutate(
         structureKey,
@@ -57,7 +57,7 @@ export function useChapterMutations(courseUuid: string, withUnpublishedActivitie
     }
   };
 
-  const updateChapterMutation = async (chapterUuid: string, payload: ChapterUpdateValues, accessToken: string) => {
+  const updateChapterMutation = async (chapterUuid: string, payload: ChapterUpdateValues) => {
     const previous = captureSnapshot(structureKey);
 
     await mutate(
@@ -75,7 +75,7 @@ export function useChapterMutations(courseUuid: string, withUnpublishedActivitie
     );
 
     try {
-      const response = await updateChapter(chapterUuid, payload, accessToken);
+      const response = await updateChapter(chapterUuid, payload);
       await mutate(structureKey);
       return response;
     } catch (error) {
@@ -84,7 +84,7 @@ export function useChapterMutations(courseUuid: string, withUnpublishedActivitie
     }
   };
 
-  const deleteChapterMutation = async (chapterUuid: string, accessToken: string) => {
+  const deleteChapterMutation = async (chapterUuid: string) => {
     const previous = captureSnapshot(structureKey);
 
     await mutate(
@@ -100,7 +100,7 @@ export function useChapterMutations(courseUuid: string, withUnpublishedActivitie
     );
 
     try {
-      const response = await deleteChapter(chapterUuid, accessToken);
+      const response = await deleteChapter(chapterUuid);
       await mutate(structureKey);
       return response;
     } catch (error) {
@@ -109,13 +109,13 @@ export function useChapterMutations(courseUuid: string, withUnpublishedActivitie
     }
   };
 
-  const reorderStructure = async (nextStructure: any, payload: CourseOrderPayload, accessToken: string) => {
+  const reorderStructure = async (nextStructure: any, payload: CourseOrderPayload) => {
     const previousStructure = captureSnapshot(structureKey);
 
     await mutate(structureKey, nextStructure, { revalidate: false });
 
     try {
-      await updateCourseOrderStructure(courseUuid, payload, accessToken);
+      await updateCourseOrderStructure(courseUuid, payload);
       await mutate(structureKey);
     } catch (error) {
       await mutate(structureKey, previousStructure, { revalidate: false });

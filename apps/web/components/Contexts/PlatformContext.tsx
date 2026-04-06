@@ -19,12 +19,11 @@ export const PlatformContextProvider = ({
   initialPlatform?: any;
 }) => {
   const session = usePlatformSession();
-  const accessToken = session?.data?.tokens?.access_token;
   const platformContextKey = `${getAPIUrl()}platform`;
 
   const { data: platform, isLoading: isPlatformLoading } = useSWR(
     platformContextKey,
-    (url: string) => swrFetcher(url, accessToken),
+    (url: string) => swrFetcher(url),
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,

@@ -3,7 +3,6 @@
 import { AlertTriangle, BookOpen, CheckCircle2, Hexagon, Loader2 } from 'lucide-react';
 import { useChapterMutations } from '@/hooks/mutations/useChapterMutations';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { DragDropContext, Droppable } from '@hello-pangea/dnd';
 import { useEffect, useRef, useState } from 'react';
@@ -17,8 +16,6 @@ import type { CourseOrderPayload } from '@/schemas/chapterSchemas';
 import ChapterElement from './DraggableElements/ChapterElement';
 
 const CurriculumEditor = () => {
-  const session = usePlatformSession() as any;
-  const access_token = session?.data?.tokens?.access_token;
   const tStructure = useTranslations('CourseEdit.Structure');
   const tNotify = useTranslations('DashPage.Notifications');
 
@@ -67,7 +64,7 @@ const CurriculumEditor = () => {
 
     setIsCreatingChapter(true);
     try {
-      await createChapter({ name, course_uuid: course.courseStructure.course_uuid }, access_token);
+      await createChapter({ name, course_uuid: course.courseStructure.course_uuid });
       toast.success(tStructure('chapterCreatedSuccess'));
       setShowChapterInput(false);
       setNewChapterName('');
@@ -128,7 +125,7 @@ const CurriculumEditor = () => {
 
     try {
       setStructureStatus('saving');
-      await reorderStructure(newCourseStructure, payload, access_token);
+      await reorderStructure(newCourseStructure, payload);
       setStructureStatus('saved');
     } catch (error: any) {
       setStructureStatus('error');

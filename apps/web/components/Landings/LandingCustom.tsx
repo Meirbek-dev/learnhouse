@@ -4,7 +4,6 @@ import type { LandingSection } from '@/components/Dashboard/Pages/Platform/EditL
 import { LoginBonusHandler } from '@/app/_shared/withmenu/_components/LoginBonusHandler';
 import { GamificationProvider } from '@/components/Contexts/GamificationContext';
 import CourseThumbnail from '@components/Objects/Thumbnails/CourseThumbnail';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import type { DashboardData } from '@/types/gamification';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { getCourses } from '@services/courses/courses';
@@ -21,14 +20,10 @@ interface LandingCustomProps {
 }
 
 const LandingCustom = ({ landing, gamificationData }: LandingCustomProps) => {
-  const session = usePlatformSession();
-  const access_token = session?.data?.tokens?.access_token;
   const t = useTranslations('LandingCustom');
 
   // Fetch all courses for the platform
-  const { data: coursesData } = useSWR(access_token ? ['platform-courses', access_token] : null, ([, token]) =>
-    getCourses(null, token),
-  );
+  const { data: coursesData } = useSWR('platform-courses', () => getCourses(null));
   const allCourses = coursesData?.courses;
 
   const renderSection = (section: LandingSection) => {

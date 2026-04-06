@@ -16,7 +16,6 @@ import {
   Users,
 } from 'lucide-react';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { useCallback, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { getUser } from '@services/users/users';
@@ -71,7 +70,6 @@ const IconComponent = ({ iconName }: { iconName: string }) => {
 
 const UserProfilePopup = ({ children, userId }: UserProfilePopupProps) => {
   const t = useTranslations('Components.UserProfilePopup');
-  const session = usePlatformSession();
   const router = useRouter();
   const [userData, setUserData] = useState<UserData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -83,12 +81,12 @@ const UserProfilePopup = ({ children, userId }: UserProfilePopupProps) => {
       if (!open || hasFetchedRef.current || !userId) return;
       hasFetchedRef.current = true;
 
-      const token = session?.data?.tokens?.access_token;
+      const token = undefined;
       setIsLoading(true);
       setError(null);
 
       try {
-        const data = await getUser(userId, token);
+        const data = await getUser(userId);
         setUserData(data);
       } catch (error) {
         setError(t('loadingError'));
@@ -97,7 +95,7 @@ const UserProfilePopup = ({ children, userId }: UserProfilePopupProps) => {
         setIsLoading(false);
       }
     },
-    [userId, session?.data?.tokens?.access_token, t],
+    [userId, t],
   );
 
   return (

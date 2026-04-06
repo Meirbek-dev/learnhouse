@@ -1,7 +1,7 @@
 'use server';
 
-import { RequestBodyWithAuthHeader, errorHandling } from '@services/utils/ts/requests';
-import { getAPIUrl } from '@services/config/config';
+import { errorHandling } from '@services/utils/ts/requests';
+import { apiFetch } from '@/lib/api-client';
 import { tags } from '@/lib/cacheTags';
 
 /*
@@ -51,21 +51,14 @@ export interface Discussion {
   is_disliked: boolean;
 }
 
-/**
- * Create a new discussion post or reply
- */
-export async function createDiscussion(
-  course_uuid: string,
-  discussion: DiscussionCreate,
-  access_token: string,
-): Promise<Discussion> {
-  const result = await fetch(
-    `${getAPIUrl()}courses/${course_uuid}/discussions`,
-    RequestBodyWithAuthHeader('POST', discussion, null, access_token),
-  );
+export async function createDiscussion(course_uuid: string, discussion: DiscussionCreate): Promise<Discussion> {
+  const result = await apiFetch(`courses/${course_uuid}/discussions`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(discussion),
+  });
   const data = await errorHandling(result);
 
-  // Revalidate courses cache after creating discussion
   if (result.ok) {
     const { revalidateTag } = await import('next/cache');
     revalidateTag(tags.courses, 'max');
@@ -74,22 +67,18 @@ export async function createDiscussion(
   return data;
 }
 
-/**
- * Update a discussion
- */
 export async function updateDiscussion(
   course_uuid: string,
   discussion_uuid: string,
   discussion: DiscussionUpdate,
-  access_token: string,
 ): Promise<Discussion> {
-  const result = await fetch(
-    `${getAPIUrl()}courses/${course_uuid}/discussions/${discussion_uuid}`,
-    RequestBodyWithAuthHeader('PUT', discussion, null, access_token),
-  );
+  const result = await apiFetch(`courses/${course_uuid}/discussions/${discussion_uuid}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(discussion),
+  });
   const data = await errorHandling(result);
 
-  // Revalidate courses cache after updating discussion
   if (result.ok) {
     const { revalidateTag } = await import('next/cache');
     revalidateTag(tags.courses, 'max');
@@ -98,21 +87,12 @@ export async function updateDiscussion(
   return data;
 }
 
-/**
- * Delete a discussion
- */
-export async function deleteDiscussion(
-  course_uuid: string,
-  discussion_uuid: string,
-  access_token: string,
-): Promise<{ message: string }> {
-  const result = await fetch(
-    `${getAPIUrl()}courses/${course_uuid}/discussions/${discussion_uuid}`,
-    RequestBodyWithAuthHeader('DELETE', null, null, access_token),
-  );
+export async function deleteDiscussion(course_uuid: string, discussion_uuid: string): Promise<{ message: string }> {
+  const result = await apiFetch(`courses/${course_uuid}/discussions/${discussion_uuid}`, {
+    method: 'DELETE',
+  });
   const data = await errorHandling(result);
 
-  // Revalidate courses cache after deleting discussion
   if (result.ok) {
     const { revalidateTag } = await import('next/cache');
     revalidateTag(tags.courses, 'max');
@@ -121,17 +101,13 @@ export async function deleteDiscussion(
   return data;
 }
 
-/**
- * Like a discussion
- */
-export async function likeDiscussion(course_uuid: string, discussion_uuid: string, access_token: string): Promise<any> {
-  const result = await fetch(
-    `${getAPIUrl()}courses/${course_uuid}/discussions/${discussion_uuid}/like`,
-    RequestBodyWithAuthHeader('POST', null, null, access_token),
-  );
+export async function likeDiscussion(course_uuid: string, discussion_uuid: string): Promise<any> {
+  const result = await apiFetch(`courses/${course_uuid}/discussions/${discussion_uuid}/like`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+  });
   const data = await errorHandling(result);
 
-  // Revalidate courses cache after liking discussion
   if (result.ok) {
     const { revalidateTag } = await import('next/cache');
     revalidateTag(tags.courses, 'max');
@@ -140,13 +116,9 @@ export async function likeDiscussion(course_uuid: string, discussion_uuid: strin
   return data;
 }
 
-/**
- * Toggle like status for a discussion (like if not liked, unlike if liked)
- */
 export async function toggleDiscussionLike(
   course_uuid: string,
   discussion_uuid: string,
-  access_token: string,
 ): Promise<{
   message: string;
   is_liked: boolean;
@@ -154,13 +126,12 @@ export async function toggleDiscussionLike(
   likes_count: number;
   dislikes_count: number;
 }> {
-  const result = await fetch(
-    `${getAPIUrl()}courses/${course_uuid}/discussions/${discussion_uuid}/like`,
-    RequestBodyWithAuthHeader('PUT', null, null, access_token),
-  );
+  const result = await apiFetch(`courses/${course_uuid}/discussions/${discussion_uuid}/like`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+  });
   const data = await errorHandling(result);
 
-  // Revalidate courses cache after toggling like
   if (result.ok) {
     const { revalidateTag } = await import('next/cache');
     revalidateTag(tags.courses, 'max');
@@ -169,13 +140,9 @@ export async function toggleDiscussionLike(
   return data;
 }
 
-/**
- * Toggle dislike status for a discussion (dislike if not disliked, undislike if disliked)
- */
 export async function toggleDiscussionDislike(
   course_uuid: string,
   discussion_uuid: string,
-  access_token: string,
 ): Promise<{
   message: string;
   is_liked: boolean;
@@ -183,13 +150,12 @@ export async function toggleDiscussionDislike(
   likes_count: number;
   dislikes_count: number;
 }> {
-  const result = await fetch(
-    `${getAPIUrl()}courses/${course_uuid}/discussions/${discussion_uuid}/dislike`,
-    RequestBodyWithAuthHeader('PUT', null, null, access_token),
-  );
+  const result = await apiFetch(`courses/${course_uuid}/discussions/${discussion_uuid}/dislike`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+  });
   const data = await errorHandling(result);
 
-  // Revalidate courses cache after toggling dislike
   if (result.ok) {
     const { revalidateTag } = await import('next/cache');
     revalidateTag(tags.courses, 'max');

@@ -1,3 +1,6 @@
+import hashlib
+import base64
+import secrets
 from functools import lru_cache
 from typing import Any
 
@@ -6,14 +9,11 @@ from authlib.integrations.httpx_client import AsyncOAuth2Client
 from authlib.jose import JoseError, jwt
 from fastapi import HTTPException
 
-from src.security.security import ALGORITHM, get_secret_key
+from src.security.keys import get_private_key, get_public_key
+from src.services.cache.redis_client import get_redis_client
 
 GOOGLE_DISCOVERY_URL = "https://accounts.google.com/.well-known/openid-configuration"
-
-
-@lru_cache(maxsize=1)
-def _state_signing_key() -> str:
-    return get_secret_key()
+PKCE_TTL = 600  # 10 minutes
 
 
 async def _get_google_metadata() -> dict[str, Any]:
@@ -23,31 +23,71 @@ async def _get_google_metadata() -> dict[str, Any]:
         return response.json()
 
 
+# ── State JWT (carries frontend callback URL through OAuth round-trip) ────────
+
+
 def _encode_state(callback: str) -> str:
-    token = jwt.encode(
-        {"alg": ALGORITHM, "typ": "JWT"},
-        {"callback": callback, "type": "google_state"},
-        _state_signing_key(),
-    )
+    import uuid
+
+    payload = {
+        "callback": callback,
+        "type": "google_state",
+        "jti": str(uuid.uuid4()),
+        "exp": int(__import__("time").time()) + 600,
+    }
+    token = jwt.encode({"alg": "EdDSA"}, payload, get_private_key())
     return token.decode("utf-8") if isinstance(token, bytes) else token
 
 
-def _decode_state(state: str) -> str:
+def _decode_state(state: str) -> tuple[str, str]:
+    """Return (callback_url, state_jti)."""
     try:
-        claims = jwt.decode(state, _state_signing_key())
+        claims = jwt.decode(state, get_public_key())
         claims.validate()
-        callback = claims.get("callback")
-        token_type = claims.get("type")
+        payload = dict(claims)
+        callback = payload.get("callback")
+        jti = payload.get("jti")
+        if (
+            payload.get("type") != "google_state"
+            or not isinstance(callback, str)
+            or not callback
+        ):
+            raise HTTPException(status_code=400, detail="Invalid OAuth state")
+        return callback, jti or ""
     except JoseError as exc:
         raise HTTPException(status_code=400, detail="Invalid OAuth state") from exc
 
-    if token_type != "google_state" or not isinstance(callback, str) or not callback:
-        raise HTTPException(status_code=400, detail="Invalid OAuth state")
 
-    return callback
+# ── PKCE helpers ──────────────────────────────────────────────────────────────
 
 
-# ── Google OAuth helpers ──────────────────────────────────────────────────────
+def _generate_pkce() -> tuple[str, str]:
+    """Return (code_verifier, code_challenge)."""
+    code_verifier = secrets.token_urlsafe(64)
+    digest = hashlib.sha256(code_verifier.encode()).digest()
+    code_challenge = base64.urlsafe_b64encode(digest).rstrip(b"=").decode()
+    return code_verifier, code_challenge
+
+
+def _store_pkce_verifier(state_jti: str, code_verifier: str) -> None:
+    r = get_redis_client()
+    if r:
+        r.set(f"pkce:{state_jti}", code_verifier, ex=PKCE_TTL)
+
+
+def _consume_pkce_verifier(state_jti: str) -> str | None:
+    r = get_redis_client()
+    if not r:
+        return None
+    key = f"pkce:{state_jti}"
+    verifier = r.get(key)
+    r.delete(key)
+    if isinstance(verifier, bytes):
+        return verifier.decode()
+    return verifier
+
+
+# ── Public API ────────────────────────────────────────────────────────────────
 
 
 def get_google_authorize_url(
@@ -55,8 +95,11 @@ def get_google_authorize_url(
     redirect_uri: str,
     callback: str,
 ) -> str:
-    """Build the Google OAuth 2.0 authorization URL with Authlib."""
     state = _encode_state(callback)
+    _, state_jti = _decode_state(state)  # extract jti to store pkce
+    code_verifier, code_challenge = _generate_pkce()
+    _store_pkce_verifier(state_jti, code_verifier)
+
     metadata = httpx.get(GOOGLE_DISCOVERY_URL, timeout=10.0).json()
     client = AsyncOAuth2Client(
         client_id=client_id,
@@ -66,6 +109,8 @@ def get_google_authorize_url(
     url, _ = client.create_authorization_url(
         metadata["authorization_endpoint"],
         state=state,
+        code_challenge=code_challenge,
+        code_challenge_method="S256",
         access_type="online",
         prompt="select_account",
     )
@@ -79,8 +124,14 @@ async def exchange_google_code(
     redirect_uri: str,
     state: str | None = None,
 ) -> dict[str, Any]:
-    """Exchange a Google authorization code for user info with Authlib."""
     metadata = await _get_google_metadata()
+    code_verifier: str | None = None
+    frontend_callback = "/"
+
+    if state:
+        frontend_callback, state_jti = _decode_state(state)
+        code_verifier = _consume_pkce_verifier(state_jti)
+
     async with AsyncOAuth2Client(
         client_id=client_id,
         client_secret=client_secret,
@@ -88,12 +139,15 @@ async def exchange_google_code(
         scope="openid email profile",
     ) as client:
         try:
-            token = await client.fetch_token(
-                metadata["token_endpoint"],
-                code=code,
-                grant_type="authorization_code",
-            )
-        except Exception as exc:  # noqa: BLE001
+            fetch_kwargs: dict[str, Any] = {
+                "url": metadata["token_endpoint"],
+                "code": code,
+                "grant_type": "authorization_code",
+            }
+            if code_verifier:
+                fetch_kwargs["code_verifier"] = code_verifier
+            token = await client.fetch_token(**fetch_kwargs)
+        except Exception as exc:
             raise HTTPException(
                 status_code=400,
                 detail="Failed to exchange Google authorization code",
@@ -114,6 +168,5 @@ async def exchange_google_code(
             )
 
         userinfo = userinfo_resp.json()
-        if state is not None:
-            userinfo["frontend_callback"] = _decode_state(state)
+        userinfo["frontend_callback"] = frontend_callback
         return userinfo

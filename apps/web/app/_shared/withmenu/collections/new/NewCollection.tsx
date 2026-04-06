@@ -3,7 +3,6 @@
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { CheckCircle2, Globe, Image as ImageIcon, Loader2, Lock, Search } from 'lucide-react';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { createCollection } from '@services/courses/collections';
 import { revalidateTags } from '@services/utils/ts/requests';
@@ -33,7 +32,6 @@ interface CourseListItem {
 
 const NewCollection = () => {
   const t = useTranslations('NewCollectionPage');
-  const session = usePlatformSession() as any;
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [selectedCourses, setSelectedCourses] = useState<number[]>([]);
@@ -91,7 +89,7 @@ const NewCollection = () => {
         courses: selectedCourses,
         public: isPublic,
       };
-      await createCollection(collection, session.data?.tokens?.access_token);
+      await createCollection(collection);
       await revalidateTags(['collections']);
       toast.success(t('toast.success'));
       startTransition(() => router.push(getAbsoluteUrl('/collections')));

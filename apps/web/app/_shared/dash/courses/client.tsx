@@ -32,7 +32,6 @@ import { deleteCourseFromBackend, updateCourseAccess } from '@services/courses/c
 import { Actions, Resources, Scopes, usePermissions } from '@/components/Security';
 import { useCallback, useEffect, useMemo, useState, useTransition } from 'react';
 import type { Course } from '@components/Objects/Thumbnails/CourseThumbnail';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
 import type { ColumnDef } from '@tanstack/react-table';
@@ -84,8 +83,6 @@ const CoursesHome = ({
   const [searchInput, setSearchInput] = useState(searchQuery);
   const viewMode = searchParams.get('view') === 'table' ? 'table' : 'cards';
   const { can } = usePermissions();
-  const session = usePlatformSession();
-  const accessToken = session?.data?.tokens?.access_token;
   const canCreateCourse = can(Actions.CREATE, Resources.COURSE, Scopes.PLATFORM);
   const [selectedCourseUuids, setSelectedCourseUuids] = useState<string[]>([]);
   const [isBulkPending, startBulkTransition] = useTransition();
@@ -207,7 +204,7 @@ const CoursesHome = ({
   );
 
   const runBulkVisibility = (nextPublic: boolean) => {
-    if (!(accessToken && selectedCourses.length > 0)) {
+    if (!(selectedCourses.length > 0)) {
       return;
     }
 
@@ -221,9 +218,13 @@ const CoursesHome = ({
       void (async () => {
         const results = await Promise.allSettled(
           targetCourses.map((course) =>
-            updateCourseAccess(course.course_uuid, { public: nextPublic }, accessToken, {
-              lastKnownUpdateDate: course.update_date,
-            }),
+            updateCourseAccess(
+              course.course_uuid,
+              { public: nextPublic },
+              {
+                lastKnownUpdateDate: course.update_date,
+              },
+            ),
           ),
         );
 
@@ -250,7 +251,7 @@ const CoursesHome = ({
   };
 
   const runBulkDelete = () => {
-    if (!(accessToken && selectedCourses.length > 0)) {
+    if (!(selectedCourses.length > 0)) {
       return;
     }
 
@@ -263,7 +264,7 @@ const CoursesHome = ({
     startBulkTransition(() => {
       void (async () => {
         const results = await Promise.allSettled(
-          targetCourses.map((course) => deleteCourseFromBackend(course.course_uuid, accessToken)),
+          targetCourses.map((course) => deleteCourseFromBackend(course.course_uuid)),
         );
 
         const successCount = results.filter((result) => result.status === 'fulfilled').length;
@@ -724,9 +725,7 @@ const CoursesHome = ({
 function CourseRowActions({ course }: { course: ManageableCourse }) {
   const t = useTranslations('DashPage.CourseManagement.Dashboard');
   const router = useRouter();
-  const session = usePlatformSession();
   const { can } = usePermissions();
-  const accessToken = session?.data?.tokens?.access_token;
   const [isPending, startTransition] = useTransition();
 
   const canManageCourse =
@@ -737,12 +736,12 @@ function CourseRowActions({ course }: { course: ManageableCourse }) {
     Boolean(course.is_owner && can(Actions.DELETE, Resources.COURSE, Scopes.OWN));
 
   const handleDelete = () => {
-    if (!(canDeleteCourse && accessToken)) return;
+    if (!canDeleteCourse) return;
 
     startTransition(() => {
       void (async () => {
         try {
-          await deleteCourseFromBackend(course.course_uuid, accessToken);
+          await deleteCourseFromBackend(course.course_uuid);
           toast.success(t('rowActions.deleteSuccess'));
           router.refresh();
         } catch {
@@ -753,14 +752,18 @@ function CourseRowActions({ course }: { course: ManageableCourse }) {
   };
 
   const handleToggleVisibility = () => {
-    if (!(canManageCourse && accessToken)) return;
+    if (!canManageCourse) return;
 
     startTransition(() => {
       void (async () => {
         try {
-          await updateCourseAccess(course.course_uuid, { public: !course.public }, accessToken, {
-            lastKnownUpdateDate: course.update_date,
-          });
+          await updateCourseAccess(
+            course.course_uuid,
+            { public: !course.public },
+            {
+              lastKnownUpdateDate: course.update_date,
+            },
+          );
           toast.success(course.public ? t('rowActions.visibilityMovedPrivate') : t('rowActions.visibilityPublished'));
           router.refresh();
         } catch {

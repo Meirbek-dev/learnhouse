@@ -5,7 +5,6 @@ import TeacherFilterBar from '@components/Dashboard/Analytics/TeacherFilterBar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { getTranslations } from 'next-intl/server';
 import { Button } from '@/components/ui/button';
-import { auth } from '@/auth';
 import Link from 'next/link';
 
 export default function PlatformAnalyticsCoursesPage(props: {
@@ -17,22 +16,11 @@ export default function PlatformAnalyticsCoursesPage(props: {
 async function PlatformAnalyticsCoursesPageInner(props: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const session = await auth();
-  const accessToken = session?.tokens?.access_token;
   const query = normalizeAnalyticsQuery(await props.searchParams);
   const t = await getTranslations('TeacherAnalytics');
 
-  if (!accessToken) {
-    return (
-      <AnalyticsEmptyState
-        title={t('pages.coursesUnavailableTitle')}
-        description={t('pages.coursesUnavailableDesc')}
-      />
-    );
-  }
-
   try {
-    const courseList = await getTeacherCourseList(accessToken, query);
+    const courseList = await getTeacherCourseList(query);
     const totalPages = Math.max(1, Math.ceil(courseList.total / courseList.page_size));
     const params = new URLSearchParams();
     if (query.window) params.set('window', query.window);

@@ -9,7 +9,6 @@ import {
 import { buildCourseWorkspacePath, getCourseContentStats } from '@/lib/course-management';
 import type { CourseWorkspaceCapabilities } from '@/lib/course-management-server';
 import { useCoursesMutations } from '@/hooks/mutations/useCoursesMutations';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { ExternalLink, FileStack, Loader2, Users } from 'lucide-react';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { getAbsoluteUrl } from '@services/config/config';
@@ -30,8 +29,6 @@ export default function CourseReviewPublish({
   const t = useTranslations('DashPage.CourseManagement.Review');
   const tReadiness = useTranslations('DashPage.CourseManagement.Readiness');
   const tOverview = useTranslations('DashPage.CourseManagement.Overview');
-  const session = usePlatformSession();
-  const accessToken = session?.data?.tokens?.access_token;
   const course = useCourse();
   const { updateAccess } = useCoursesMutations(course.courseStructure.course_uuid, true);
   const setConflict = useCourseEditorStore((state) => state.setConflict);
@@ -53,7 +50,7 @@ export default function CourseReviewPublish({
     .every((item) => item.complete);
 
   const toggleVisibility = () => {
-    if (!(capabilities.canManageAccess && accessToken)) {
+    if (!capabilities.canManageAccess) {
       return;
     }
 
@@ -66,7 +63,6 @@ export default function CourseReviewPublish({
           await updateAccess(
             { public: !wasPublic },
             {
-              accessToken,
               lastKnownUpdateDate: course.courseStructure.update_date,
             },
           );
@@ -80,7 +76,6 @@ export default function CourseReviewPublish({
                 await updateAccess(
                   { public: !wasPublic },
                   {
-                    accessToken,
                     lastKnownUpdateDate: course.courseStructure.update_date,
                   },
                 );

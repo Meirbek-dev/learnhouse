@@ -1,6 +1,5 @@
 'use client';
 
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { Field, FieldError, FieldLabel } from '@components/ui/field';
 import { updateUserGroup } from '@services/usergroups/usergroups';
 import { valibotResolver } from '@hookform/resolvers/valibot';
@@ -32,8 +31,6 @@ type UserGroupFormValues = v.InferOutput<ReturnType<typeof createValidationSchem
 
 const EditUserGroup = (props: EditUserGroupProps) => {
   const t = useTranslations('Components.EditUserGroup');
-  const session = usePlatformSession() as any;
-  const access_token = session?.data?.tokens?.access_token;
   const validationSchema = createValidationSchema(t);
 
   const form = useForm<UserGroupFormValues>({
@@ -54,7 +51,7 @@ const EditUserGroup = (props: EditUserGroupProps) => {
   const handleSubmit = (values: UserGroupFormValues) => {
     startTransition(() => {
       void (async () => {
-        const res = await updateUserGroup(props.usergroup.id, access_token, values);
+        const res = await updateUserGroup(props.usergroup.id, values);
 
         if (res.status === 200) {
           toast.success(t('toastSuccess'));

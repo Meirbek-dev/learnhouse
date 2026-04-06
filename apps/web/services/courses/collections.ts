@@ -1,6 +1,7 @@
 'use server';
 
-import { RequestBodyWithAuthHeader, errorHandling } from '@services/utils/ts/requests';
+import { errorHandling } from '@services/utils/ts/requests';
+import { apiFetch } from '@/lib/api-client';
 import { CacheProfiles, cacheLife, cacheTag } from '@/lib/cache';
 import { tags } from '@/lib/cacheTags';
 
@@ -11,14 +12,10 @@ import { getAPIUrl } from '../config/config';
  Client-side GET requests are called from the frontend using SWR
 */
 
-export async function deleteCollection(collection_uuid: string, access_token: string) {
-  const result: any = await fetch(
-    `${getAPIUrl()}collections/${collection_uuid}`,
-    RequestBodyWithAuthHeader('DELETE', null, null, access_token),
-  );
+export async function deleteCollection(collection_uuid: string) {
+  const result = await apiFetch(`collections/${collection_uuid}`, { method: 'DELETE' });
   const data_result = await errorHandling(result);
 
-  // Revalidate collections cache after deletion
   if (result.ok) {
     const { revalidateTag } = await import('next/cache');
     revalidateTag(tags.collections, 'max');
@@ -27,15 +24,14 @@ export async function deleteCollection(collection_uuid: string, access_token: st
   return data_result;
 }
 
-// Create a new collection
-export async function createCollection(collection: any, access_token: string) {
-  const result: any = await fetch(
-    `${getAPIUrl()}collections/`,
-    RequestBodyWithAuthHeader('POST', collection, null, access_token),
-  );
+export async function createCollection(collection: any) {
+  const result = await apiFetch('collections/', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(collection),
+  });
   const data_result = await errorHandling(result);
 
-  // Revalidate collections cache after creation
   if (result.ok) {
     const { revalidateTag } = await import('next/cache');
     revalidateTag(tags.collections, 'max');

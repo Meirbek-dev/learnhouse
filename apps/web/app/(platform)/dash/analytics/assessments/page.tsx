@@ -5,7 +5,6 @@ import TeacherFilterBar from '@components/Dashboard/Analytics/TeacherFilterBar';
 import { Card, CardContent } from '@/components/ui/card';
 import { getTranslations } from 'next-intl/server';
 import { Button } from '@/components/ui/button';
-import { auth } from '@/auth';
 import Link from 'next/link';
 
 export default function PlatformAnalyticsAssessmentsPage(props: {
@@ -17,22 +16,11 @@ export default function PlatformAnalyticsAssessmentsPage(props: {
 async function PlatformAnalyticsAssessmentsPageInner(props: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const session = await auth();
-  const accessToken = session?.tokens?.access_token;
   const query = normalizeAnalyticsQuery(await props.searchParams);
   const t = await getTranslations('TeacherAnalytics');
 
-  if (!accessToken) {
-    return (
-      <AnalyticsEmptyState
-        title={t('pages.assessmentsUnavailableTitle')}
-        description={t('pages.assessmentsUnavailableDesc')}
-      />
-    );
-  }
-
   try {
-    const assessments = await getTeacherAssessmentList(accessToken, query);
+    const assessments = await getTeacherAssessmentList(query);
     const totalPages = Math.max(1, Math.ceil(assessments.total / assessments.page_size));
     const params = new URLSearchParams();
     if (query.window) params.set('window', query.window);

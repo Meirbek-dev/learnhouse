@@ -44,7 +44,6 @@ import { Badge } from '@/components/ui/badge';
 import { useAssignmentsTaskStore } from '@components/Contexts/Assignments/AssignmentsTaskContext';
 import AssignmentBoxUI from '@components/Objects/Activities/Assignment/AssignmentBoxUI';
 import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { updateAssignmentTask } from '@services/courses/assignments';
 
 // ============================================================================
@@ -366,8 +365,6 @@ const QuizSettingsPanel = ({ settings, onSettingsChange, isOpen, onOpenChange, t
 
 const TaskQuizObject = ({ assignmentTaskUUID }: TaskQuizObjectProps) => {
   const t = useTranslations('DashPage.Assignments.TaskQuizObject');
-  const session = usePlatformSession() as any;
-  const access_token = session?.data?.tokens?.access_token;
   const assignmentTask = useAssignmentsTaskStore((s) => s.assignmentTask);
   const reload = useAssignmentsTaskStore((s) => s.reload);
   const setSelectedTaskUUID = useAssignmentsTaskStore((s) => s.setSelectedTaskUUID);
@@ -486,7 +483,6 @@ const TaskQuizObject = ({ assignmentTaskUUID }: TaskQuizObjectProps) => {
         body: { contents: { questions, settings: quizSettings } },
         assignmentTaskUUID: taskUUID,
         assignmentUUID,
-        access_token,
       });
 
       if (res) {
@@ -503,7 +499,6 @@ const TaskQuizObject = ({ assignmentTaskUUID }: TaskQuizObjectProps) => {
     quizSettings,
     assignmentTask.assignment_task_uuid,
     assignment.assignment_object.assignment_uuid,
-    access_token,
     reload,
     t,
   ]);

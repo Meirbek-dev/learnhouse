@@ -1,6 +1,6 @@
 'use client';
 
-import type { ClientAppSession } from '@/lib/auth/session';
+import type { ClientSession } from '@/lib/auth/types';
 import PlatformSessionProvider, { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { PermissionProvider } from '@/components/Security/PermissionProvider';
 import { ThemeProvider, useTheme } from '@/components/providers/theme-provider';
@@ -13,7 +13,7 @@ import type { ReactNode } from 'react';
 
 interface RootProvidersProps {
   children: ReactNode;
-  initialSession?: ClientAppSession | null;
+  initialSession?: ClientSession | null;
 }
 
 function AppSWRProvider({ children }: { children: ReactNode }) {
@@ -56,13 +56,12 @@ function UserThemeSync() {
   const session = usePlatformSession() as {
     status?: 'loading' | 'authenticated' | 'unauthenticated';
     data?: {
-      tokens?: { access_token?: string };
       user?: { id?: number; theme?: string | null };
     };
   };
   const { themeName } = useTheme();
   const pendingThemeRef = useRef<string | null>(null);
-  const syncedThemeRef = useRef<string | null>(session?.data?.user?.theme ?? null);
+  const syncedThemeRef = useRef(session?.data?.user?.theme ?? null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const userId = session?.data?.user?.id;
   const isAuthenticated = session?.status === 'authenticated';
@@ -114,7 +113,7 @@ function UserThemeSync() {
         .catch((error: unknown) => {
           console.error('Failed to sync theme to server:', error);
         });
-    }, 1_000);
+    }, 1000);
 
     return () => {
       if (timeoutRef.current) {

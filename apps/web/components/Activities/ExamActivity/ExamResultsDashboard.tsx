@@ -1,4 +1,6 @@
 'use client';
+
+import { apiFetch } from '@/lib/api-client';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,7 +15,6 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Clock, Download, Eye, TrendingDown, TrendingUp, Users } from 'lucide-react';
-import { getAPIUrl } from '@/services/config/config';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -52,8 +53,7 @@ interface AttemptData {
 interface ExamResultsDashboardProps {
   examUuid: string;
   attempts: AttemptData[];
-  accessToken: string;
-  // optional callback for parent-level navigation; dashboard also provides internal modal
+  // optional callback for parent-level navigation; dashboard also provides internal modal,
   onViewAttempt?: (attemptUuid: string) => void;
   onReviewAttempt?: (attempt: any) => void;
 }
@@ -61,7 +61,6 @@ interface ExamResultsDashboardProps {
 export default function ExamResultsDashboard({
   examUuid,
   attempts,
-  accessToken,
   onViewAttempt,
   onReviewAttempt,
 }: ExamResultsDashboardProps) {
@@ -85,7 +84,7 @@ export default function ExamResultsDashboard({
     { value: 'duration_minutes', label: t('duration') },
   ];
 
-  // Calculate statistics
+  // Calculate statistics,
   const stats = useMemo(() => {
     const submitted = attempts.filter((a) => a.status === 'SUBMITTED' || a.status === 'AUTO_SUBMITTED');
     const scores = submitted.map((a) => a.percentage);
@@ -107,11 +106,11 @@ export default function ExamResultsDashboard({
     };
   }, [attempts]);
 
-  // Filter and sort attempts
+  // Filter and sort attempts,
   const filteredAttempts = useMemo(() => {
     let filtered = [...attempts];
 
-    // Search filter
+    // Search filter,
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(
@@ -119,14 +118,14 @@ export default function ExamResultsDashboard({
       );
     }
 
-    // Status filter
+    // Status filter,
     if (statusFilter !== 'all') {
       filtered = filtered.filter((a) => a.status === statusFilter);
     }
 
-    // Sort
+    // Sort,
     filtered.sort((a, b) => {
-      // dynamic key lookups can be undefined; coalesce to null and handle accordingly
+      // dynamic key lookups can be undefined; coalesce to null and handle accordingly,
       let aVal: any = a[sortBy as keyof AttemptData] ?? null;
       let bVal: any = b[sortBy as keyof AttemptData] ?? null;
 
@@ -134,7 +133,7 @@ export default function ExamResultsDashboard({
       if (bVal === null) bVal = sortOrder === 'asc' ? Infinity : -Infinity;
 
       if (typeof aVal === 'string') {
-        // ensure we have string operands
+        // ensure we have string operands,
         return sortOrder === 'asc' ? aVal.localeCompare(bVal ?? '') : (bVal ?? '').localeCompare(aVal);
       }
 
@@ -217,7 +216,7 @@ export default function ExamResultsDashboard({
     }
   };
 
-  // Attempt detail modal state
+  // Attempt detail modal state,
   const [selectedAttemptUuid, setSelectedAttemptUuid] = useState<string | null>(null);
   const [selectedAttempt, setSelectedAttempt] = useState<any | null>(null);
   const [isAttemptLoading, setIsAttemptLoading] = useState(false);
@@ -228,9 +227,7 @@ export default function ExamResultsDashboard({
     setIsAttemptLoading(true);
 
     try {
-      const res = await fetch(`${getAPIUrl()}exams/${examUuid}/attempts/${attemptUuid}`, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
+      const res = await apiFetch(`exams/${examUuid}/attempts/${attemptUuid}`);
       if (!res.ok) throw new Error('Failed to fetch attempt');
       const data = await res.json();
       setSelectedAttempt(data);

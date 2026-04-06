@@ -1,9 +1,8 @@
 'use server';
-import { RequestBodyWithAuthHeader, getResponseMetadata } from '@services/utils/ts/requests';
-import { resolveServerAccessToken } from '@/lib/auth/server-access-token';
+import { getResponseMetadata } from '@services/utils/ts/requests';
+import { apiFetch } from '@/lib/api-client';
 import type { CustomResponseTyping } from '@services/utils/ts/requests';
 import type { components } from '@/lib/api/generated';
-import { getAPIUrl } from '@services/config/config';
 import { tags } from '@/lib/cacheTags';
 
 type CourseRead = components['schemas']['CourseRead'];
@@ -21,36 +20,19 @@ async function getTypedResponseMetadata<T>(response: Response): Promise<Response
   return (await getResponseMetadata(response)) as ResponseMetadata<T>;
 }
 
-async function requireAccessToken(access_token?: string): Promise<string> {
-  const token = await resolveServerAccessToken(access_token);
-  if (!token) {
-    throw new Error('Authentication required');
-  }
-
-  return token;
-}
-
-export async function getProducts(access_token: string): Promise<ResponseMetadata<PaymentsProductRead[]>> {
-  const token = await requireAccessToken(access_token);
-  const result = await fetch(
-    `${getAPIUrl()}payments/products`,
-    RequestBodyWithAuthHeader('GET', null, null, token),
-  );
+export async function getProducts(): Promise<ResponseMetadata<PaymentsProductRead[]>> {
+  const result = await apiFetch('payments/products');
   return await getTypedResponseMetadata<PaymentsProductRead[]>(result);
 }
 
-export async function createProduct(
-  data: PaymentsProductCreate,
-  access_token: string,
-): Promise<ResponseMetadata<PaymentsProductRead>> {
-  const token = await requireAccessToken(access_token);
-  const result = await fetch(
-    `${getAPIUrl()}payments/products`,
-    RequestBodyWithAuthHeader('POST', data, null, token),
-  );
+export async function createProduct(data: PaymentsProductCreate): Promise<ResponseMetadata<PaymentsProductRead>> {
+  const result = await apiFetch('payments/products', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
   const metadata = await getTypedResponseMetadata<PaymentsProductRead>(result);
 
-  // Revalidate courses cache after creating product
   if (metadata.success) {
     const { revalidateTag } = await import('next/cache');
     revalidateTag(tags.courses, 'max');
@@ -62,16 +44,14 @@ export async function createProduct(
 export async function updateProduct(
   productId: number | string,
   data: PaymentsProductUpdate,
-  access_token: string,
 ): Promise<ResponseMetadata<PaymentsProductRead>> {
-  const token = await requireAccessToken(access_token);
-  const result = await fetch(
-    `${getAPIUrl()}payments/products/${productId}`,
-    RequestBodyWithAuthHeader('PUT', data, null, token),
-  );
+  const result = await apiFetch(`payments/products/${productId}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
   const metadata = await getTypedResponseMetadata<PaymentsProductRead>(result);
 
-  // Revalidate courses cache after updating product
   if (metadata.success) {
     const { revalidateTag } = await import('next/cache');
     revalidateTag(tags.courses, 'max');
@@ -80,18 +60,10 @@ export async function updateProduct(
   return metadata;
 }
 
-export async function archiveProduct(
-  productId: number | string,
-  access_token: string,
-): Promise<ResponseMetadata<PaymentsMessageResponse>> {
-  const token = await requireAccessToken(access_token);
-  const result = await fetch(
-    `${getAPIUrl()}payments/products/${productId}`,
-    RequestBodyWithAuthHeader('DELETE', null, null, token),
-  );
+export async function archiveProduct(productId: number | string): Promise<ResponseMetadata<PaymentsMessageResponse>> {
+  const result = await apiFetch(`payments/products/${productId}`, { method: 'DELETE' });
   const metadata = await getTypedResponseMetadata<PaymentsMessageResponse>(result);
 
-  // Revalidate courses cache after archiving product
   if (metadata.success) {
     const { revalidateTag } = await import('next/cache');
     revalidateTag(tags.courses, 'max');
@@ -100,31 +72,18 @@ export async function archiveProduct(
   return metadata;
 }
 
-export async function getProductDetails(
-  productId: number | string,
-  access_token: string,
-): Promise<ResponseMetadata<PaymentsProductRead>> {
-  const token = await requireAccessToken(access_token);
-  const result = await fetch(
-    `${getAPIUrl()}payments/products/${productId}`,
-    RequestBodyWithAuthHeader('GET', null, null, token),
-  );
+export async function getProductDetails(productId: number | string): Promise<ResponseMetadata<PaymentsProductRead>> {
+  const result = await apiFetch(`payments/products/${productId}`);
   return await getTypedResponseMetadata<PaymentsProductRead>(result);
 }
 
 export async function linkCourseToProduct(
   productId: number | string,
   courseId: number,
-  access_token: string,
 ): Promise<ResponseMetadata<PaymentsMessageResponse>> {
-  const token = await requireAccessToken(access_token);
-  const result = await fetch(
-    `${getAPIUrl()}payments/products/${productId}/courses/${courseId}`,
-    RequestBodyWithAuthHeader('POST', null, null, token),
-  );
+  const result = await apiFetch(`payments/products/${productId}/courses/${courseId}`, { method: 'POST' });
   const metadata = await getTypedResponseMetadata<PaymentsMessageResponse>(result);
 
-  // Revalidate courses cache after linking course to product
   if (metadata.success) {
     const { revalidateTag } = await import('next/cache');
     revalidateTag(tags.courses, 'max');
@@ -136,16 +95,10 @@ export async function linkCourseToProduct(
 export async function unlinkCourseFromProduct(
   productId: number | string,
   courseId: number | string,
-  access_token: string,
 ): Promise<ResponseMetadata<PaymentsMessageResponse>> {
-  const token = await requireAccessToken(access_token);
-  const result = await fetch(
-    `${getAPIUrl()}payments/products/${productId}/courses/${courseId}`,
-    RequestBodyWithAuthHeader('DELETE', null, null, token),
-  );
+  const result = await apiFetch(`payments/products/${productId}/courses/${courseId}`, { method: 'DELETE' });
   const metadata = await getTypedResponseMetadata<PaymentsMessageResponse>(result);
 
-  // Revalidate courses cache after unlinking course from product
   if (metadata.success) {
     const { revalidateTag } = await import('next/cache');
     revalidateTag(tags.courses, 'max');
@@ -154,39 +107,22 @@ export async function unlinkCourseFromProduct(
   return metadata;
 }
 
-export async function getCoursesLinkedToProduct(
-  productId: number | string,
-  access_token: string,
-): Promise<ResponseMetadata<CourseRead[]>> {
-  const token = await requireAccessToken(access_token);
-  const result = await fetch(
-    `${getAPIUrl()}payments/products/${productId}/courses`,
-    RequestBodyWithAuthHeader('GET', null, null, token),
-  );
+export async function getCoursesLinkedToProduct(productId: number | string): Promise<ResponseMetadata<CourseRead[]>> {
+  const result = await apiFetch(`payments/products/${productId}/courses`);
   return await getTypedResponseMetadata<CourseRead[]>(result);
 }
 
-export async function getProductsByCourse(
-  courseId: number,
-  access_token: string,
-): Promise<ResponseMetadata<PaymentsProductRead[]>> {
-  const token = await requireAccessToken(access_token);
-  const result = await fetch(
-    `${getAPIUrl()}payments/courses/${courseId}/products`,
-    RequestBodyWithAuthHeader('GET', null, null, token),
-  );
+export async function getProductsByCourse(courseId: number): Promise<ResponseMetadata<PaymentsProductRead[]>> {
+  const result = await apiFetch(`payments/courses/${courseId}/products`);
   return await getTypedResponseMetadata<PaymentsProductRead[]>(result);
 }
 
 export async function getStripeProductCheckoutSession(
   productId: number,
   redirect_uri: string,
-  access_token: string,
 ): Promise<ResponseMetadata<PaymentsCheckoutSessionResponse>> {
-  const token = await requireAccessToken(access_token);
-  const result = await fetch(
-    `${getAPIUrl()}payments/stripe/checkout/product/${productId}?redirect_uri=${redirect_uri}`,
-    RequestBodyWithAuthHeader('POST', null, null, token),
-  );
+  const result = await apiFetch(`payments/stripe/checkout/product/${productId}?redirect_uri=${redirect_uri}`, {
+    method: 'POST',
+  });
   return await getTypedResponseMetadata<PaymentsCheckoutSessionResponse>(result);
 }

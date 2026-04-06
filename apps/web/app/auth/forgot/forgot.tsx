@@ -43,10 +43,15 @@ const ForgotPasswordClient = () => {
     setMessage('');
     startTransition(async () => {
       const res = await sendResetLink(values.email);
-      if (res.status === 200) {
+      if (res.ok) {
         setMessage(t('checkEmail'));
       } else {
-        setError(res.data.detail);
+        try {
+          const body = await res.json();
+          setError(body?.detail ?? t('unknownError'));
+        } catch {
+          setError(t('unknownError'));
+        }
       }
     });
   };

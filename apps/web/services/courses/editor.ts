@@ -1,5 +1,5 @@
-import { fetchResponseMetadata } from '@services/utils/ts/requests';
-import { getAPIUrl } from '@services/config/config';
+import { getResponseMetadata } from '@services/utils/ts/requests';
+import { apiFetch } from '@/lib/api-client';
 
 export interface CourseEditorResource<T> {
   data: T | null;
@@ -51,11 +51,11 @@ const toArrayResource = (response: {
   return createResource(Array.isArray(response.data) ? response.data : [], response.status, null, true);
 };
 
-export async function getCourseEditorBundle(courseUuid: string, accessToken: string): Promise<CourseEditorBundle> {
+export async function getCourseEditorBundle(courseUuid: string): Promise<CourseEditorBundle> {
   const [contributors, linkedUserGroups, certifications] = await Promise.all([
-    fetchResponseMetadata(`${getAPIUrl()}courses/${courseUuid}/contributors`, accessToken),
-    fetchResponseMetadata(`${getAPIUrl()}usergroups/resource/${courseUuid}`, accessToken),
-    fetchResponseMetadata(`${getAPIUrl()}certifications/course/${courseUuid}`, accessToken),
+    apiFetch(`courses/${courseUuid}/contributors`).then(getResponseMetadata),
+    apiFetch(`usergroups/resource/${courseUuid}`).then(getResponseMetadata),
+    apiFetch(`certifications/course/${courseUuid}`).then(getResponseMetadata),
   ]);
 
   return {

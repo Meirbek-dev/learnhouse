@@ -1,6 +1,7 @@
 'use server';
 
-import { RequestBodyWithAuthHeader, getResponseMetadata } from '@services/utils/ts/requests';
+import { getResponseMetadata } from '@services/utils/ts/requests';
+import { apiFetch } from '@/lib/api-client';
 import { shouldUseChunkedUpload, uploadFileChunked } from '@services/utils/chunked-upload';
 import type { CustomResponseTyping } from '@services/utils/ts/requests';
 import { CacheProfiles, cacheLife, cacheTag } from '@/lib/cache';
@@ -30,20 +31,17 @@ interface ActivityInvalidationOptions {
   courseUuid?: string;
 }
 
-export async function createActivity(
-  data: any,
-  chapter_id: number,
-  access_token: string,
-  options?: ActivityInvalidationOptions,
-) {
-  // Only set empty content if not already provided
+export async function createActivity(data: any, chapter_id: number, options?: ActivityInvalidationOptions) {
   if (!data.content) {
     data.content = {};
   }
-  // ensure the server receives the target chapter so the activity is created under that chapter
   data.chapter_id = chapter_id;
 
-  const result = await fetch(`${getAPIUrl()}activities/`, RequestBodyWithAuthHeader('POST', data, null, access_token));
+  const result = await apiFetch('activities/', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
   return getTypedResponseMetadata<ActivityRead>(result);
 }
 
@@ -84,89 +82,37 @@ function appendSubtitleFiles(formData: FormData, subtitles: any[]): void {
  * Upload FormData with progress tracking - uses XHR in browser, fetch on server
  */
 async function uploadFormData(
-  endpoint: string,
+  path: string,
   formData: FormData,
-  accessToken: string,
   onProgress?: (progress: UploadProgress) => void,
 ): Promise<ActivityRead> {
-  // Server or non-browser environment - use fetch without progress tracking
-  if (typeof XMLHttpRequest === 'undefined') {
-    const result = await fetch(endpoint, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${accessToken}` },
-      body: formData,
-    });
+  const result = await apiFetch(path, { method: 'POST', body: formData });
 
-    if (!result.ok) {
-      let detail = `Upload failed with status ${result.status}`;
-      try {
-        const errorData = await result.json();
-        if (typeof errorData?.detail === 'string') {
-          ({ detail } = errorData);
-        }
-      } catch {
-        // Ignore JSON parse failures and preserve the generic message.
+  if (!result.ok) {
+    let detail = `Upload failed with status ${result.status}`;
+    try {
+      const errorData = await result.json();
+      if (typeof errorData?.detail === 'string') {
+        ({ detail } = errorData);
       }
-      const error: any = new Error(detail);
-      error.status = result.status;
-      error.detail = detail;
-      throw error;
+    } catch {
+      // Ignore JSON parse failures and preserve the generic message.
     }
-
-    const json = (await result.json()) as ActivityRead;
-    if (onProgress) {
-      try {
-        onProgress({ percentage: 100 });
-      } catch {
-        // If onProgress isn't callable in this context, ignore
-      }
-    }
-    return json;
+    const error: any = new Error(detail);
+    error.status = result.status;
+    error.detail = detail;
+    throw error;
   }
 
-  // Browser environment - use XHR for progress tracking
-  return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-
-    if (onProgress) {
-      xhr.upload.addEventListener('progress', (e) => {
-        if (e.lengthComputable) {
-          onProgress({ percentage: Math.round((e.loaded / e.total) * 100) });
-        }
-      });
+  const json = (await result.json()) as ActivityRead;
+  if (onProgress) {
+    try {
+      onProgress({ percentage: 100 });
+    } catch {
+      // ignore
     }
-
-    xhr.addEventListener('load', () => {
-      if (xhr.status >= 200 && xhr.status < 300) {
-        try {
-          resolve(JSON.parse(xhr.responseText));
-        } catch {
-          reject(new Error('Invalid JSON response'));
-        }
-      } else {
-        let detail = `Upload failed with status ${xhr.status}`;
-        try {
-          const errorData = JSON.parse(xhr.responseText || '{}');
-          if (typeof errorData?.detail === 'string') {
-            ({ detail } = errorData);
-          }
-        } catch {
-          // Ignore parse failures and preserve the generic message.
-        }
-        const error: any = new Error(detail);
-        error.status = xhr.status;
-        error.detail = detail;
-        reject(error);
-      }
-    });
-
-    xhr.addEventListener('error', () => reject(new Error('Network error during upload')));
-    xhr.addEventListener('abort', () => reject(new Error('Upload cancelled')));
-
-    xhr.open('POST', endpoint);
-    xhr.setRequestHeader('Authorization', `Bearer ${accessToken}`);
-    xhr.send(formData);
-  });
+  }
+  return json;
 }
 
 /**
@@ -176,7 +122,6 @@ async function createVideoActivityChunked(
   file: File,
   data: any,
   chapterId: number,
-  accessToken: string,
   options?: ActivityInvalidationOptions,
   onProgress?: (progress: UploadProgress) => void,
 ): Promise<ActivityRead> {
@@ -189,13 +134,11 @@ async function createVideoActivityChunked(
   const tempActivityUuid = `activity_temp_${Date.now()}`;
   const videoFormat = file.name.split('.').pop() || 'mp4';
 
-  // Upload video file in chunks first
   await uploadFileChunked({
     file,
     directory: `courses/${courseUuid}/activities/${tempActivityUuid}/video`,
     typeOfDir: 'platform',
     filename: `video.${videoFormat}`,
-    accessToken,
     onProgress: (progress) => {
       onProgress?.({
         percentage: progress.percentage,
@@ -205,7 +148,6 @@ async function createVideoActivityChunked(
     },
   });
 
-  // Create activity with uploaded video reference
   const formData = new FormData();
   formData.append('chapter_id', chapterId.toString());
   formData.append('name', data.name);
@@ -222,11 +164,7 @@ async function createVideoActivityChunked(
     formData.append('details', buildVideoDetails(data.details));
   }
 
-  const result = await fetch(`${getAPIUrl()}activities/video`, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${accessToken}` },
-    body: formData,
-  });
+  const result = await apiFetch('activities/video', { method: 'POST', body: formData });
 
   if (!result.ok) {
     let detail = `Failed to create activity: ${result.status}`;
@@ -254,7 +192,6 @@ async function createVideoActivityStandard(
   file: File,
   data: any,
   chapterId: number,
-  accessToken: string,
   options?: ActivityInvalidationOptions,
   onProgress?: (progress: UploadProgress) => void,
 ): Promise<ActivityRead> {
@@ -271,7 +208,7 @@ async function createVideoActivityStandard(
     formData.append('details', buildVideoDetails(data.details));
   }
 
-  return uploadFormData(`${getAPIUrl()}activities/video`, formData, accessToken, onProgress);
+  return uploadFormData('activities/video', formData, onProgress);
 }
 
 /**
@@ -281,7 +218,6 @@ async function createPdfActivity(
   file: File,
   data: any,
   chapterId: number,
-  accessToken: string,
   options?: ActivityInvalidationOptions,
   onProgress?: (progress: UploadProgress) => void,
 ): Promise<ActivityRead> {
@@ -290,7 +226,7 @@ async function createPdfActivity(
   formData.append('pdf_file', file);
   formData.append('name', data.name);
 
-  return uploadFormData(`${getAPIUrl()}activities/documentpdf`, formData, accessToken, onProgress);
+  return uploadFormData('activities/documentpdf', formData, onProgress);
 }
 
 /**
@@ -301,20 +237,19 @@ export async function createFileActivity(
   type: string,
   data: any,
   chapterId: number,
-  accessToken: string,
   options?: ActivityInvalidationOptions,
   onProgress?: (progress: UploadProgress) => void,
 ): Promise<ActivityRead> {
   if (type === 'video') {
     if (shouldUseChunkedUpload(file.size)) {
       console.log('Using chunked upload for video activity');
-      return createVideoActivityChunked(file, data, chapterId, accessToken, options, onProgress);
+      return createVideoActivityChunked(file, data, chapterId, options, onProgress);
     }
-    return createVideoActivityStandard(file, data, chapterId, accessToken, options, onProgress);
+    return createVideoActivityStandard(file, data, chapterId, options, onProgress);
   }
 
   if (type === 'documentpdf') {
-    return createPdfActivity(file, data, chapterId, accessToken, options, onProgress);
+    return createPdfActivity(file, data, chapterId, options, onProgress);
   }
 
   throw new Error(`Unsupported file activity type: ${type}`);
@@ -324,14 +259,11 @@ export async function createExternalVideoActivity(
   data: any,
   activity: any,
   chapter_id: number,
-  access_token: string,
   options?: ActivityInvalidationOptions,
 ) {
-  // add coursechapter_id to data
   data.chapter_id = chapter_id;
   data.activity_id = activity.id;
 
-  // Add video details with null checking
   const defaultDetails = {
     startTime: 0,
     endTime: null,
@@ -347,17 +279,18 @@ export async function createExternalVideoActivity(
       }
     : defaultDetails;
   data.details = JSON.stringify(videoDetails);
-  const result = await fetch(
-    `${getAPIUrl()}activities/external_video`,
-    RequestBodyWithAuthHeader('POST', data, null, access_token),
-  );
+  const result = await apiFetch('activities/external_video', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
   return getTypedResponseMetadata<ActivityRead>(result);
 }
 
 /**
  * Cached fetch for activity by UUID
  */
-async function fetchActivity(activity_uuid: string, access_token: string): Promise<ActivityReadWithPermissions> {
+async function fetchActivity(activity_uuid: string, access_token?: string): Promise<ActivityReadWithPermissions> {
   'use cache';
   cacheTag(tags.activities);
   cacheLife(CacheProfiles.activities);
@@ -374,17 +307,11 @@ async function fetchActivity(activity_uuid: string, access_token: string): Promi
 }
 
 export async function getActivity(activity_uuid: string, _next?: any, access_token?: string) {
-  if (!access_token) {
-    throw new Error('Access token required');
-  }
   return fetchActivity(activity_uuid, access_token);
 }
 
-export async function deleteActivity(activity_uuid: string, access_token: string) {
-  const result = await fetch(
-    `${getAPIUrl()}activities/${activity_uuid}`,
-    RequestBodyWithAuthHeader('DELETE', null, null, access_token),
-  );
+export async function deleteActivity(activity_uuid: string) {
+  const result = await apiFetch(`activities/${activity_uuid}`, { method: 'DELETE' });
   return getTypedResponseMetadata<ActivityDetailResponse>(result);
 }
 
@@ -420,18 +347,16 @@ export async function getActivityWithAuthHeader(activity_uuid: string, _next?: a
   return fetchActivityWithAuth(activity_uuid, access_token || undefined);
 }
 
-export async function updateActivity(data: any, activity_uuid: string, access_token: string) {
-  const result = await fetch(
-    `${getAPIUrl()}activities/${activity_uuid}`,
-    RequestBodyWithAuthHeader('PATCH', data, null, access_token),
-  );
+export async function updateActivity(data: any, activity_uuid: string) {
+  const result = await apiFetch(`activities/${activity_uuid}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
   return getTypedResponseMetadata<ActivityRead>(result);
 }
 
 export async function getUrlPreview(url: string) {
-  const result = await fetch(
-    `${getAPIUrl()}utils/link-preview?url=${url}`,
-    RequestBodyWithAuthHeader('GET', null, null),
-  );
+  const result = await apiFetch(`utils/link-preview?url=${url}`);
   return await result.json();
 }

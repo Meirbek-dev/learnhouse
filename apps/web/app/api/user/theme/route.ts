@@ -1,10 +1,10 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { updateUserTheme } from '@/services/users/users';
-import { auth } from '@/auth';
+import { getSession } from '@/lib/auth/session';
 
 export async function POST(request: NextRequest) {
-  const session = await auth();
+  const session = await getSession();
   const userId = session?.user?.id;
 
   if (!session?.user || typeof userId !== 'number') {
@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Theme is required' }, { status: 400 });
     }
 
-    await updateUserTheme(userId, theme, session.tokens?.access_token ?? '');
+    await updateUserTheme(userId, theme);
 
     return NextResponse.json({ updated: true }, { status: 200 });
   } catch (error) {

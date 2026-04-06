@@ -3,7 +3,6 @@ import { useAssignmentsTaskStore } from '@components/Contexts/Assignments/Assign
 import { AlertCircle, Cloud, Download, File, Info, Loader2, UploadCloud } from 'lucide-react';
 import { updateAssignmentTask, updateReferenceFile } from '@services/courses/assignments';
 import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { Field, FieldError, FieldLabel } from '@components/ui/field';
 import { useEffect, useRef, useState, useTransition } from 'react';
 import { Alert, AlertDescription } from '@components/ui/alert';
@@ -40,8 +39,6 @@ type TaskFormData = v.InferOutput<ReturnType<typeof createValidationSchema>>;
 
 export const AssignmentTaskGeneralEdit = () => {
   const t = useTranslations('DashPage.Assignments.TaskGeneralEdit');
-  const session = usePlatformSession() as any;
-  const access_token = session?.data?.tokens?.access_token;
   const assignmentTask = useAssignmentsTaskStore((s) => s.assignmentTask);
   const selectedAssignmentTaskUUID = useAssignmentsTaskStore((s) => s.selectedAssignmentTaskUUID);
   const reload = useAssignmentsTaskStore((s) => s.reload);
@@ -89,7 +86,6 @@ export const AssignmentTaskGeneralEdit = () => {
             body: values,
             assignmentTaskUUID,
             assignmentUUID,
-            access_token,
           });
           if (res.success) {
             reload();
@@ -228,8 +224,6 @@ export const AssignmentTaskGeneralEdit = () => {
 };
 const UpdateTaskRef = () => {
   const t = useTranslations('DashPage.Assignments.TaskGeneralEdit');
-  const session = usePlatformSession();
-  const access_token = session?.data?.tokens?.access_token;
   const assignmentTask = useAssignmentsTaskStore((s) => s.assignmentTask);
   const reload = useAssignmentsTaskStore((s) => s.reload);
   const assignment = useAssignments();
@@ -274,10 +268,6 @@ const UpdateTaskRef = () => {
     return null;
   };
   const handleFileUpload = async (file: File) => {
-    if (!access_token) {
-      setError(t('authRequiredUpload'));
-      return;
-    }
     if (!assignmentTask || !assignment) {
       setError(t('missingAssignmentInfo'));
       return;
@@ -305,7 +295,6 @@ const UpdateTaskRef = () => {
         file,
         assignmentTaskUUID,
         assignmentUUID,
-        access_token,
       });
 
       if (!res.success) {

@@ -1,16 +1,13 @@
 'use client';
 
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { courseKeys } from './courseKeys';
 import useSWR from 'swr';
 
 export function useCourse<TCourse = any>(courseUuid: string) {
-  const session = usePlatformSession();
-  const accessToken = session?.data?.tokens?.access_token;
-  const key = accessToken ? ([courseKeys.detail(courseUuid), accessToken] as const) : null;
+  const key = courseKeys.detail(courseUuid);
 
-  const swr = useSWR<TCourse>(key, ([url, token]: readonly [string, string]) => swrFetcher(url, token), {
+  const swr = useSWR<TCourse>(key, (url: string) => swrFetcher(url), {
     revalidateOnFocus: false,
   });
 

@@ -12,7 +12,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { PermissionTooltip } from '@/components/Utils/PermissionTooltip';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { deleteCollection } from '@services/courses/collections';
@@ -99,7 +98,6 @@ const CollectionThumbnail = (props: PropsType) => {
 const CollectionAdminEditsArea = (props: any) => {
   const t = useTranslations('Components.CollectionThumbnail');
   const router = useRouter();
-  const session = usePlatformSession() as any;
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
@@ -108,7 +106,7 @@ const CollectionAdminEditsArea = (props: any) => {
 
   async function deleteCollectionUI() {
     startTransition(async () => {
-      await deleteCollection(props.collection_uuid, session.data?.tokens?.access_token);
+      await deleteCollection(props.collection_uuid);
       await revalidateTags(['collections']);
       setIsOpen(false);
       router.refresh();

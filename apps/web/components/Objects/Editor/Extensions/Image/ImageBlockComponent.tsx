@@ -16,7 +16,6 @@ import { NodeViewWrapper } from '@tiptap/react';
 import { useTranslations } from 'next-intl';
 
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { getActivityBlockMediaDirectory } from '@services/media/media';
 import { usePlatform } from '@/components/Contexts/PlatformContext';
 import { uploadNewImageFile } from '@services/blocks/Image/images';
@@ -76,11 +75,10 @@ const ALIGNMENT_CONFIG = {
 
 interface UseImageUploadOptions {
   activityUuid: string;
-  accessToken: string;
   onSuccess: (blockObject: BlockObject) => void;
 }
 
-function useImageUpload({ activityUuid, accessToken, onSuccess }: UseImageUploadOptions) {
+function useImageUpload({ activityUuid, onSuccess }: UseImageUploadOptions) {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -112,7 +110,7 @@ function useImageUpload({ activityUuid, accessToken, onSuccess }: UseImageUpload
     setError(null);
 
     try {
-      const result = await uploadNewImageFile(file, activityUuid, accessToken);
+      const result = await uploadNewImageFile(file, activityUuid);
       onSuccess(result);
       setFile(null);
       setPreview(null);
@@ -121,7 +119,7 @@ function useImageUpload({ activityUuid, accessToken, onSuccess }: UseImageUpload
     } finally {
       setIsUploading(false);
     }
-  }, [file, activityUuid, accessToken, onSuccess]);
+  }, [file, activityUuid, onSuccess]);
 
   const reset = useCallback(() => {
     setFile(null);
@@ -419,16 +417,11 @@ export default function ImageBlockComponent({ node, updateAttributes, extension 
   usePlatform();
   const course = useCourse();
   const { isEditable } = useEditorProvider();
-  const session = usePlatformSession() as {
-    data?: { tokens?: { access_token: string } };
-  } | null;
-
   const [blockObject, setBlockObject] = useState(node.attrs.blockObject);
   const [alignment, setAlignment] = useState<Alignment>(node.attrs.alignment || 'center');
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const activityUuid = extension.options.activity.activity_uuid;
-  const accessToken = session?.data?.tokens?.access_token || '';
   const initialWidth = node.attrs.size?.width && node.attrs.size.width > 0 ? node.attrs.size.width : DEFAULT_WIDTH;
 
   // Image URL computation
@@ -448,7 +441,6 @@ export default function ImageBlockComponent({ node, updateAttributes, extension 
   // Upload handling
   const { file, preview, isUploading, error, handleFileSelect, handleUpload, reset } = useImageUpload({
     activityUuid,
-    accessToken,
     onSuccess: (newBlockObject) => {
       setBlockObject(newBlockObject);
       updateAttributes({ blockObject: newBlockObject });

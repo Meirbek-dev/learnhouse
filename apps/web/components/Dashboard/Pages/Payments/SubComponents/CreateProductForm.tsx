@@ -1,7 +1,6 @@
 'use client';
 
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { Field, FieldError, FieldLabel } from '@components/ui/field';
 import { getPaymentsProductsSwrKey } from '@services/payments/keys';
 import { valibotResolver } from '@hookform/resolvers/valibot';
@@ -38,8 +37,6 @@ const createValidationSchema = (t: (key: string, values?: any) => string) =>
 type ProductFormValues = v.InferOutput<ReturnType<typeof createValidationSchema>>;
 
 const CreateProductForm: FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
-  const session = usePlatformSession() as any;
-  const accessToken = session?.data?.tokens?.access_token;
   const [currencies, setCurrencies] = useState<{ code: string; name: string }[]>([]);
   const tNotify = useTranslations('DashPage.Notifications');
   const t = useTranslations('Payments.ProductForm');
@@ -91,16 +88,13 @@ const CreateProductForm: FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
   const handleSubmit = async (values: ProductFormValues) => {
     const loadingToast = toast.loading(tNotify('creatingProduct'));
     try {
-      const res = await createProduct(
-        {
-          ...values,
-          benefits: values.benefits ?? '',
-        },
-        accessToken,
-      );
+      const res = await createProduct({
+        ...values,
+        benefits: values.benefits ?? '',
+      });
       if (res.success) {
         toast.success(tNotify('productCreatedSuccess'), { id: loadingToast });
-        mutate([getPaymentsProductsSwrKey(), accessToken]);
+        mutate(getPaymentsProductsSwrKey());
         form.reset();
         onSuccess();
       } else {

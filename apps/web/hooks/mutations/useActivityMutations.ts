@@ -18,11 +18,7 @@ export function useActivityMutations(courseUuid: string, withUnpublishedActiviti
 
   const captureSnapshot = (key: string) => (cache.get(key as any) as any)?.data ?? undefined;
 
-  const updateActivityMutation = async (
-    activityUuid: string,
-    payload: Partial<ActivityUpdateValues>,
-    accessToken: string,
-  ) => {
+  const updateActivityMutation = async (activityUuid: string, payload: Partial<ActivityUpdateValues>) => {
     const previousStructure = captureSnapshot(structureKey);
     const activityKey = courseKeys.activity(activityUuid);
     const previousActivity = captureSnapshot(activityKey);
@@ -50,7 +46,7 @@ export function useActivityMutations(courseUuid: string, withUnpublishedActiviti
     });
 
     try {
-      const response = assertSuccess(await updateActivity(payload, activityUuid, accessToken));
+      const response = assertSuccess(await updateActivity(payload, activityUuid));
       await Promise.all([mutate(structureKey), mutate(activityKey)]);
       return response;
     } catch (error) {
@@ -62,7 +58,7 @@ export function useActivityMutations(courseUuid: string, withUnpublishedActiviti
     }
   };
 
-  const deleteActivityMutation = async (activityUuid: string, accessToken: string) => {
+  const deleteActivityMutation = async (activityUuid: string) => {
     const previousStructure = captureSnapshot(structureKey);
 
     await mutate(
@@ -84,7 +80,7 @@ export function useActivityMutations(courseUuid: string, withUnpublishedActiviti
     );
 
     try {
-      const response = assertSuccess(await deleteActivity(activityUuid, accessToken));
+      const response = assertSuccess(await deleteActivity(activityUuid));
       await mutate(structureKey);
       return response;
     } catch (error) {
@@ -93,8 +89,8 @@ export function useActivityMutations(courseUuid: string, withUnpublishedActiviti
     }
   };
 
-  const createActivityMutation = async (payload: ActivityCreateValues, chapterId: number, accessToken: string) => {
-    const response = assertSuccess(await createActivity(payload, chapterId, accessToken));
+  const createActivityMutation = async (payload: ActivityCreateValues, chapterId: number) => {
+    const response = assertSuccess(await createActivity(payload, chapterId));
     await mutate(structureKey);
     return response;
   };
@@ -104,10 +100,9 @@ export function useActivityMutations(courseUuid: string, withUnpublishedActiviti
     type: string,
     payload: Partial<ActivityCreateValues>,
     chapterId: number,
-    accessToken: string,
     onProgress?: (progress: { percentage: number }) => void,
   ) => {
-    const response = await createFileActivity(file, type, payload, chapterId, accessToken, undefined, onProgress);
+    const response = await createFileActivity(file, type, payload, chapterId, undefined, onProgress);
     await mutate(structureKey);
     return response;
   };
@@ -116,11 +111,8 @@ export function useActivityMutations(courseUuid: string, withUnpublishedActiviti
     externalVideoData: Record<string, unknown>,
     activityPayload: Partial<ActivityCreateValues>,
     chapterId: number,
-    accessToken: string,
   ) => {
-    const response = assertSuccess(
-      await createExternalVideoActivity(externalVideoData, activityPayload, chapterId, accessToken),
-    );
+    const response = assertSuccess(await createExternalVideoActivity(externalVideoData, activityPayload, chapterId));
     await mutate(structureKey);
     return response;
   };

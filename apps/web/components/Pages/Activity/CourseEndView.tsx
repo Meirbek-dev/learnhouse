@@ -1,7 +1,6 @@
 import CertificatePreview from '@components/Dashboard/Pages/Course/EditCourseCertification/CertificatePreview';
 import { Document, Font, Image, Page, StyleSheet, Text, View, pdf } from '@react-pdf/renderer';
 import { ArrowLeft, BookOpen, Download, Loader2, Shield, Target, Trophy } from 'lucide-react';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { getUserCertificates } from '@services/courses/certifications';
 import SimpleAlertDialog from '@/components/ui/alert-dialog-simple';
@@ -26,7 +25,6 @@ interface CourseEndViewProps {
 }
 
 const CourseEndView: FC<CourseEndViewProps> = ({ courseName, courseUuid, thumbnailImage, course, trailData }) => {
-  const session = usePlatformSession();
   const [userCertificate, setUserCertificate] = useState<any>(null);
   const [isLoadingCertificate, setIsLoadingCertificate] = useState(false);
   const [certificateError, setCertificateError] = useState<string | null>(null);
@@ -85,16 +83,11 @@ const CourseEndView: FC<CourseEndViewProps> = ({ courseName, courseUuid, thumbna
       // Mark as attempted to avoid loops; we can reset this manually if needed
       fetchedCertificateRef.current = true;
 
-      if (!session?.data?.tokens?.access_token) {
-        setCertificateError(t('authRequired'));
-        return;
-      }
-
       setIsLoadingCertificate(true);
       setCertificateError(null);
       try {
         const cleanCourseUuid = courseUuid.replace('course_', '');
-        const result = await getUserCertificates(`course_${cleanCourseUuid}`, session.data.tokens.access_token);
+        const result = await getUserCertificates(`course_${cleanCourseUuid}`);
 
         if (result.success && result.data && result.data.length > 0) {
           setUserCertificate(result.data[0]);
@@ -120,7 +113,7 @@ const CourseEndView: FC<CourseEndViewProps> = ({ courseName, courseUuid, thumbna
     fetchUserCertificate();
     // Only depend on stable primitives and the refetch function to avoid
     // triggering this effect when the whole context object identity changes.
-  }, [isCourseCompleted, courseUuid, session?.data?.tokens?.access_token, t, gamificationRefetch]);
+  }, [isCourseCompleted, courseUuid, t, gamificationRefetch]);
 
   // Refetch gamification data on mount if course is completed
   // This ensures recent activity feed shows course completion XP

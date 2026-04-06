@@ -83,8 +83,6 @@ const CoursesActions = ({ courseuuid, course, trailData }: CourseActionsProps) =
   const [isProgressOpen, setIsProgressOpen] = useState(false);
   const t = useTranslations('Courses.CoursesActions');
 
-  // stable primitives to avoid effects depending on whole session object
-  const accessToken = session.data?.tokens?.access_token;
   const userId = session.data?.user?.id;
 
   // one-shot guards to avoid repeated requests when context identity changes
@@ -103,7 +101,7 @@ const CoursesActions = ({ courseuuid, course, trailData }: CourseActionsProps) =
   useEffect(() => {
     const fetchLinkedProducts = async () => {
       try {
-        const response = await getProductsByCourse(course.id, accessToken);
+        const response = await getProductsByCourse(course.id);
         setLinkedProducts(response.data || []);
       } catch {
         console.error('Failed to fetch linked products');
@@ -116,13 +114,13 @@ const CoursesActions = ({ courseuuid, course, trailData }: CourseActionsProps) =
     if (fetchedLinkedProductsRef.current[course.id]) return;
     fetchedLinkedProductsRef.current[course.id] = true;
     fetchLinkedProducts();
-  }, [course.id, accessToken]);
+  }, [course.id]);
 
   useEffect(() => {
     const checkAccess = async () => {
       if (!userId) return;
       try {
-        const response = await checkPaidAccess(course.id, accessToken);
+        const response = await checkPaidAccess(course.id);
         setHasAccess(response.has_access);
       } catch {
         console.error('Failed to check course access');
@@ -133,11 +131,11 @@ const CoursesActions = ({ courseuuid, course, trailData }: CourseActionsProps) =
 
     // Only run when there are linked products and avoid rerunning repeatedly
     if (linkedProducts.length === 0) return;
-    const checkKey = `${course.id}:${accessToken || 'no-token'}`;
+    const checkKey = `${course.id}`;
     if (checkedAccessRef.current[checkKey]) return;
     checkedAccessRef.current[checkKey] = true;
     checkAccess();
-  }, [course.id, accessToken, userId, linkedProducts, t]);
+  }, [course.id, userId, linkedProducts, t]);
 
   const handleCourseAction = async () => {
     if (!session.data?.user) {
@@ -183,8 +181,8 @@ const CoursesActions = ({ courseuuid, course, trailData }: CourseActionsProps) =
     const loadingToast = toast.loading(t('startingCourse'));
 
     try {
-      await startCourse(`course_${courseuuid}`, session.data?.tokens?.access_token);
-      mutate([getTrailSwrKey(), session.data?.tokens?.access_token]);
+      await startCourse(`course_${courseuuid}`);
+      mutate(getTrailSwrKey());
       toast.success(t('startedCourseSuccess'), { id: loadingToast });
 
       // Get the first activity from the first chapter
@@ -197,7 +195,7 @@ const CoursesActions = ({ courseuuid, course, trailData }: CourseActionsProps) =
           `${getAbsoluteUrl('')}/course/${courseuuid}/activity/${firstActivity.activity_uuid.replace('activity_', '')}`,
         );
       } else {
-        mutate([getTrailSwrKey(), session.data?.tokens?.access_token]);
+        mutate(getTrailSwrKey());
         router.refresh();
       }
     } catch (error) {
@@ -224,7 +222,7 @@ const CoursesActions = ({ courseuuid, course, trailData }: CourseActionsProps) =
         message: t('contributorApplicationMessage'),
       };
 
-      await applyForContributor(`course_${courseuuid}`, data, session.data?.tokens?.access_token);
+      await applyForContributor(`course_${courseuuid}`, data);
       await revalidateTags(['courses']);
       refetch();
       toast.success(t('contributorApplicationSuccess'), { id: loadingToast });

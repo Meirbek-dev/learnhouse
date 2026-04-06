@@ -16,7 +16,6 @@ import { AlertTriangle, Loader2, Pencil, SquareUserRound, Users, X } from 'lucid
 import EditUserGroup from '@/components/Objects/Modals/Dash/UserGroups/EditUserGroup';
 import AddUserGroup from '@/components/Objects/Modals/Dash/UserGroups/AddUserGroup';
 import ManageUsers from '@/components/Objects/Modals/Dash/UserGroups/ManageUsers';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { deleteUserGroup } from '@services/usergroups/usergroups';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
 import { swrFetcher } from '@services/utils/ts/requests';
@@ -89,8 +88,6 @@ function DeleteUserGroupButton({ usergroupId, onDelete, t }: DeleteUserGroupButt
 }
 
 const UserGroups = () => {
-  const session = usePlatformSession() as any;
-  const access_token = session?.data?.tokens?.access_token;
   const t = useTranslations('DashPage.UserSettings.usergroupsSection');
   const [userGroupManagementModal, setUserGroupManagementModal] = useState(false);
   const [createUserGroupModal, setCreateUserGroupModal] = useState(false);
@@ -99,16 +96,12 @@ const UserGroups = () => {
   const [selectedUserGroupIdForEdit, setSelectedUserGroupIdForEdit] = useState<number | null>(null);
   const [selectedUserGroupIdForManage, setSelectedUserGroupIdForManage] = useState<number | null>(null);
 
-  const {
-    data: usergroups,
-    error,
-    isLoading,
-  } = useSWR(`${getAPIUrl()}usergroups`, (url) => swrFetcher(url, access_token));
+  const { data: usergroups, error, isLoading } = useSWR(`${getAPIUrl()}usergroups`, (url) => swrFetcher(url));
 
   const deleteUserGroupUI = async (usergroup_id: number) => {
     const toastId = toast.loading(t('deletingUserGroup'));
     try {
-      const res = await deleteUserGroup(usergroup_id, access_token);
+      const res = await deleteUserGroup(usergroup_id);
       if (res.status === 200) {
         mutate(`${getAPIUrl()}usergroups`);
         toast.success(t('userGroupDeletedSuccess'), { id: toastId });

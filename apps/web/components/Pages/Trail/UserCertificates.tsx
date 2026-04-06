@@ -1,7 +1,6 @@
 'use client';
 
 import { Award, Building, Calendar, ExternalLink, Hash } from 'lucide-react';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { getAPIUrl, getAbsoluteUrl } from '@services/config/config';
 import { useFormatter, useTranslations } from 'next-intl';
 import { swrFetcher } from '@services/utils/ts/requests';
@@ -10,8 +9,6 @@ import type React from 'react';
 import useSWR from 'swr';
 
 const UserCertificates: React.FC = () => {
-  const session = usePlatformSession();
-  const access_token = session?.data?.tokens?.access_token;
   const format = useFormatter();
   const t = useTranslations('Certificates.UserCertificates');
 
@@ -19,7 +16,7 @@ const UserCertificates: React.FC = () => {
     data: certificates,
     error,
     isLoading,
-  } = useSWR(access_token ? `${getAPIUrl()}certifications/user/all` : null, (url) => swrFetcher(url, access_token));
+  } = useSWR(`${getAPIUrl()}certifications/user/all`, (url) => swrFetcher(url));
 
   if (isLoading) {
     return (

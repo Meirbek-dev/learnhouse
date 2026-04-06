@@ -26,7 +26,6 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 import type { GradedItem, ItemFeedback, Submission, TeacherGradeInput } from '@/types/grading';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import SubmissionStatusBadge from './SubmissionStatusBadge';
 import { useGradingPanel } from '@/hooks/useGradingPanel';
 import { saveGrade } from '@services/grading/grading';
@@ -272,9 +271,6 @@ export default function GradingPanel({
   onNavigate,
 }: GradingPanelProps) {
   const t = useTranslations('Grading.Panel');
-  const session = usePlatformSession();
-  const accessToken = session?.data?.tokens?.access_token ?? '';
-
   const { submission, isLoading, mutate } = useGradingPanel(submissionUuid);
 
   const [draft, setDraft] = useState<GradingDraftState>({
@@ -283,7 +279,11 @@ export default function GradingPanel({
     itemFeedbacks: {},
   });
   const [isSaving, setIsSaving] = useState(false);
-  const initialRef = useRef<GradingDraftState>({ score: '', feedback: '', itemFeedbacks: {} });
+  const initialRef = useRef<GradingDraftState>({
+    score: '',
+    feedback: '',
+    itemFeedbacks: {},
+  });
 
   const [pendingNavigate, setPendingNavigate] = useState<string | null>(null);
   const [pendingClose, setPendingClose] = useState(false);
@@ -352,7 +352,7 @@ export default function GradingPanel({
 
   const handleSaveGrade = useCallback(
     async (status: TeacherGradeInput['status']) => {
-      if (!submissionUuid || !accessToken) return;
+      if (!submissionUuid) return;
 
       const score = parseDraftScore(draft.score);
       if (scoreInvalid || score === null) {
@@ -369,7 +369,7 @@ export default function GradingPanel({
 
       setIsSaving(true);
       try {
-        const updated = await saveGrade(submissionUuid, input, accessToken);
+        const updated = await saveGrade(submissionUuid, input);
         const msgKey = status === 'PUBLISHED' ? 'gradePublished' : status === 'RETURNED' ? 'returned' : 'gradeSaved';
         toast.success(t(msgKey));
 
@@ -390,7 +390,7 @@ export default function GradingPanel({
         setIsSaving(false);
       }
     },
-    [accessToken, draft, mutate, onGradeSaved, scoreInvalid, submissionUuid, t],
+    [draft, mutate, onGradeSaved, scoreInvalid, submissionUuid, t],
   );
 
   const studentName = getSubmissionDisplayName(submission);

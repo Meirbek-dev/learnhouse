@@ -91,8 +91,8 @@ export async function GET() {
 
     // Check auth
     try {
-      const { auth } = await import('@/auth');
-      const session = await auth();
+      const { getSession } = await import('@/lib/auth/session');
+      const session = await getSession();
       diagnostics.checks.auth = {
         status: 'working',
         hasSession: Boolean(session),

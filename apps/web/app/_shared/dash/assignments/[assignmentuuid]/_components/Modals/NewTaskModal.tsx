@@ -1,5 +1,4 @@
 import { useAssignmentsTaskStore } from '@components/Contexts/Assignments/AssignmentsTaskContext';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { createAssignmentTask } from '@services/courses/assignments';
 import { AArrowUp, FileUp, ListTodo } from 'lucide-react';
 import { getAPIUrl } from '@services/config/config';
@@ -9,8 +8,6 @@ import { mutate } from 'swr';
 
 const NewTaskModal = ({ closeModal, assignment_uuid }: any) => {
   const t = useTranslations('DashPage.Assignments.NewTaskModal');
-  const session = usePlatformSession() as any;
-  const access_token = session?.data?.tokens?.access_token;
   const setSelectedTaskUUID = useAssignmentsTaskStore((s) => s.setSelectedTaskUUID);
 
   function showReminderToast() {
@@ -38,7 +35,7 @@ const NewTaskModal = ({ closeModal, assignment_uuid }: any) => {
       contents: {},
       max_grade_value: 100,
     };
-    const res = await createAssignmentTask(task_object, assignment_uuid, access_token);
+    const res = await createAssignmentTask(task_object, assignment_uuid);
     toast.success(t('createSuccess'));
     showReminderToast();
     mutate(`${getAPIUrl()}assignments/${assignment_uuid}/tasks`);

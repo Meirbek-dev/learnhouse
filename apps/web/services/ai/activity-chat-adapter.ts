@@ -11,7 +11,6 @@
  * that TanStack AI's ChatClient expects.
  */
 
-import { RequestBodyWithAuthHeader } from '@services/utils/ts/requests';
 import { normalizeToUIMessage, stream } from '@tanstack/ai-client';
 import { getAPIUrl } from '@services/config/config';
 import type { TextPart } from '@tanstack/ai-client';
@@ -49,7 +48,6 @@ export function reconcileFinalMessageDelta(streamedText: string, finalContent: s
 
 interface ActivityChatAdapterOptions {
   activityUuid: string;
-  getAccessToken: () => string | undefined;
   getStatusMessage: (status: string) => string | null;
   /**
    * Provides the current session UUID from an external store (e.g. a React
@@ -79,7 +77,6 @@ export interface ActivityChatAdapter {
  */
 export function createActivityChatAdapter({
   activityUuid,
-  getAccessToken,
   getStatusMessage,
   getSessionUuid,
   setSessionUuid,
@@ -103,9 +100,6 @@ export function createActivityChatAdapter({
   const abort = () => currentController?.abort();
 
   const connection = stream(async function* connection(messages, _data) {
-    const accessToken = getAccessToken();
-    if (!accessToken) throw new Error('Not authenticated');
-
     // Extract the last user message text from the UIMessage parts array.
     const lastUser = [...messages].toReversed().find((m) => m.role === 'user');
     const normalizedLastUser = lastUser ? normalizeToUIMessage(lastUser, () => crypto.randomUUID()) : null;
@@ -126,14 +120,18 @@ export function createActivityChatAdapter({
       ? { aichat_uuid: sessionUuid, message: text, activity_uuid: activityUuid }
       : { message: text, activity_uuid: activityUuid };
 
-    const req = RequestBodyWithAuthHeader('POST', body, null, accessToken);
-
     // Compose user-abort + 30 s timeout into a single signal.
     currentController = new AbortController();
     const timeoutSignal = AbortSignal.timeout(REQUEST_TIMEOUT_MS);
     const signal = AbortSignal.any([currentController.signal, timeoutSignal]);
 
-    const response = await fetch(url, { ...req, signal });
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+      credentials: 'include',
+      signal,
+    });
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }

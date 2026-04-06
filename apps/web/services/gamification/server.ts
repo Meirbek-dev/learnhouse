@@ -16,7 +16,8 @@ import { CacheProfiles, cacheLife, cacheTag } from '@/lib/cache';
 import { getServerAPIUrl } from '@/services/config/config';
 import type { components } from '@/lib/api/generated';
 import { revalidateTag } from 'next/cache';
-import { auth } from '@/auth';
+import { getSession } from '@/lib/auth/session';
+import { apiFetch } from '@/lib/api-client';
 
 type ApiDashboardResponse = components['schemas']['DashboardRead'];
 type ApiLeaderboardResponse = components['schemas']['LeaderboardRead'];
@@ -111,8 +112,8 @@ function normalizeLeaderboard(payload?: ApiLeaderboardResponse | null): Platform
  */
 async function getAccessToken(): Promise<string | null> {
   try {
-    const session = await auth();
-    const token = session?.tokens?.access_token;
+    const session = await getSession();
+    const token = session?.accessToken;
     return token || null;
   } catch {
     // Silently fail for unauthorized users - this is expected behavior
@@ -120,17 +121,11 @@ async function getAccessToken(): Promise<string | null> {
   }
 }
 
-async function requireAccessToken(): Promise<string> {
-  const token = await getAccessToken();
-  if (!token) throw new Error('Authentication required');
-  return token;
-}
-
 /**
  * Cached fetch for unified gamification data
  * Uses `use cache` directive for cacheComponents
  */
-async function fetchGamificationData(accessToken: string): Promise<ApiDashboardResponse | null> {
+async function fetchGamificationData(accessToken?: string): Promise<ApiDashboardResponse | null> {
   'use cache';
   cacheTag(gamificationTag.dashboard());
   cacheLife(CacheProfiles.realtime);
@@ -139,7 +134,7 @@ async function fetchGamificationData(accessToken: string): Promise<ApiDashboardR
     const res = await fetch(`${getServerAPIUrl()}gamification/`, {
       method: 'GET',
       headers: { Authorization: `Bearer ${accessToken}` },
-      signal: AbortSignal.timeout(8_000),
+      signal: AbortSignal.timeout(8000),
     });
 
     if (!res.ok) {
@@ -159,7 +154,7 @@ async function fetchGamificationData(accessToken: string): Promise<ApiDashboardR
 /**
  * Cached fetch for leaderboard data
  */
-async function fetchLeaderboardData(limit: number, accessToken: string): Promise<ApiLeaderboardResponse | null> {
+async function fetchLeaderboardData(limit: number, accessToken?: string): Promise<ApiLeaderboardResponse | null> {
   'use cache';
   cacheTag(gamificationTag.leaderboard());
   cacheLife(CacheProfiles.realtime);
@@ -168,7 +163,7 @@ async function fetchLeaderboardData(limit: number, accessToken: string): Promise
     const res = await fetch(`${getServerAPIUrl()}gamification/leaderboard?limit=${encodeURIComponent(String(limit))}`, {
       method: 'GET',
       headers: { Authorization: `Bearer ${accessToken}` },
-      signal: AbortSignal.timeout(8_000),
+      signal: AbortSignal.timeout(8000),
     });
 
     if (!res.ok) {
@@ -297,19 +292,15 @@ export async function revalidateGamificationTags() {
 
 // Server-side mutation helpers
 export async function awardXPOnServer(payload: XPAwardRequest): Promise<XPAwardResponse> {
-  const accessToken = await requireAccessToken();
   const body: ApiXPAwardRequest = {
     source: payload.source,
     source_id: payload.source_id,
     custom_amount: payload.amount,
     idempotency_key: payload.idempotency_key,
   };
-  const res = await fetch(`${getServerAPIUrl()}gamification/xp`, {
+  const res = await apiFetch('gamification/xp', {
     method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${accessToken}`,
-      'Content-Type': 'application/json',
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   });
   if (!res.ok) throw new Error(`Failed to award XP: ${res.status}`);
@@ -319,13 +310,7 @@ export async function awardXPOnServer(payload: XPAwardRequest): Promise<XPAwardR
 }
 
 export async function updateStreakOnServer(type: 'login' | 'learning'): Promise<StreakUpdate> {
-  const accessToken = await requireAccessToken();
-  const res = await fetch(`${getServerAPIUrl()}gamification/streaks/${encodeURIComponent(type)}`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-  });
+  const res = await apiFetch(`gamification/streaks/${encodeURIComponent(type)}`, { method: 'POST' });
   if (!res.ok) throw new Error(`Failed to update streak: ${res.status}`);
   const json = (await res.json()) as ApiStreakUpdateResponse;
   await revalidateGamificationTags();
@@ -333,13 +318,9 @@ export async function updateStreakOnServer(type: 'login' | 'learning'): Promise<
 }
 
 export async function updatePreferencesOnServer(preferences: Record<string, any>) {
-  const accessToken = await requireAccessToken();
-  const res = await fetch(`${getServerAPIUrl()}gamification/preferences`, {
+  const res = await apiFetch('gamification/preferences', {
     method: 'PATCH',
-    headers: {
-      'Authorization': `Bearer ${accessToken}`,
-      'Content-Type': 'application/json',
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(preferences),
   });
   if (!res.ok) throw new Error(`Failed to update preferences: ${res.status}`);

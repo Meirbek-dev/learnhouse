@@ -8,7 +8,7 @@ import { getPlatform } from '@/services/platform/platform';
 import { Card, CardContent } from '@/components/ui/card';
 import { getTranslations } from 'next-intl/server';
 import { Spinner } from '@components/ui/spinner';
-import { auth } from '@/auth';
+import { getSession } from '@/lib/auth/session';
 
 const EDITABLE_COURSES_PAGE_SIZE = 100;
 
@@ -46,8 +46,8 @@ async function getAllEditableCourses(access_token: string) {
 export default async function PlatformAssignmentsPage() {
   const t = await getTranslations('DashPage.Assignments.HomePage');
 
-  const session = await auth();
-  const access_token = session?.tokens?.access_token;
+  const session = await getSession();
+  const access_token = session?.accessToken;
 
   if (!access_token) {
     return <LoadingState />;
@@ -59,10 +59,7 @@ export default async function PlatformAssignmentsPage() {
 
   let courseAssignments: Assignment[][] = [];
   if (courses.length > 0) {
-    const res = await getAssignmentsFromCourses(
-      courses.map((course: Course) => course.course_uuid),
-      access_token,
-    );
+    const res = await getAssignmentsFromCourses(courses.map((course: Course) => course.course_uuid));
 
     const assignmentsMap = res.data as Record<string, Assignment[]>;
     courseAssignments = courses.map((course: Course) => assignmentsMap[course.course_uuid] || []);

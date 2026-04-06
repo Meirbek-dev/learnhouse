@@ -16,7 +16,6 @@ import { useCourseEditorStore } from '@/stores/courses';
 import { useSWRConfig } from 'swr';
 
 interface MutationOptions {
-  accessToken: string;
   lastKnownUpdateDate?: string | null;
 }
 
@@ -85,7 +84,7 @@ export function useCoursesMutations(courseUuid: string, withUnpublishedActivitie
 
     try {
       const response = assertSuccess(
-        await updateCourseMetadata(courseUuid, payload, options.accessToken, {
+        await updateCourseMetadata(courseUuid, payload, {
           lastKnownUpdateDate: options.lastKnownUpdateDate,
         }),
       );
@@ -110,7 +109,7 @@ export function useCoursesMutations(courseUuid: string, withUnpublishedActivitie
 
     try {
       const response = assertSuccess(
-        await updateCourseAccess(courseUuid, payload, options.accessToken, {
+        await updateCourseAccess(courseUuid, payload, {
           lastKnownUpdateDate: options.lastKnownUpdateDate,
         }),
       );
@@ -125,7 +124,7 @@ export function useCoursesMutations(courseUuid: string, withUnpublishedActivitie
 
   const updateThumbnail = async (formData: FormData, options: MutationOptions) => {
     const response = assertSuccess(
-      await updateCourseThumbnail(courseUuid, formData, options.accessToken, {
+      await updateCourseThumbnail(courseUuid, formData, {
         lastKnownUpdateDate: options.lastKnownUpdateDate,
       }),
     );
@@ -163,7 +162,7 @@ export function useCoursesMutations(courseUuid: string, withUnpublishedActivitie
     }
 
     try {
-      const response = assertSuccess(await bulkAddContributors(courseUuid, usernames, options.accessToken));
+      const response = assertSuccess(await bulkAddContributors(courseUuid, usernames));
       await Promise.all([refreshCourse(), refreshEditorBundle()]);
       return response;
     } catch (error) {
@@ -201,13 +200,7 @@ export function useCoursesMutations(courseUuid: string, withUnpublishedActivitie
 
     try {
       const response = assertSuccess(
-        await editContributor(
-          courseUuid,
-          contributorUserId,
-          payload.authorship,
-          payload.authorship_status,
-          options.accessToken,
-        ),
+        await editContributor(courseUuid, contributorUserId, payload.authorship, payload.authorship_status),
       );
       await Promise.all([refreshCourse(), refreshEditorBundle()]);
       return response;
@@ -244,7 +237,7 @@ export function useCoursesMutations(courseUuid: string, withUnpublishedActivitie
     }
 
     try {
-      const response = assertSuccess(await bulkRemoveContributors(courseUuid, usernames, options.accessToken));
+      const response = assertSuccess(await bulkRemoveContributors(courseUuid, usernames));
       await Promise.all([refreshCourse(), refreshEditorBundle()]);
       return response;
     } catch (error) {

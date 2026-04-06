@@ -17,7 +17,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { SectionHeader } from '@components/Dashboard/Courses/SectionHeader';
 import { useCoursesMutations } from '@/hooks/mutations/useCoursesMutations';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
+
 import { Check, ChevronDown, Search, UserPen, Users } from 'lucide-react';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
 import { useSyncDirtySection } from '@/hooks/useSyncDirtySection';
@@ -173,8 +173,6 @@ const sortContributors = (list: Contributor[]) => {
 const EditCourseContributors = () => {
   const t = useTranslations('DashPage.EditCourseContributors');
   const locale = useLocale() as Locale;
-  const session = usePlatformSession();
-  const access_token = session?.data?.tokens?.access_token;
   const course = useCourse();
   const { courseStructure, editorData } = course;
   const contributors = (editorData.contributors.data ?? []) as Contributor[];
@@ -236,7 +234,6 @@ const EditCourseContributors = () => {
           page: 1,
           limit: 5,
           next: null,
-          access_token,
         });
         if (response.success && response.data?.users) {
           const users = response.data.users.map((user: SearchUser) =>
@@ -255,10 +252,8 @@ const EditCourseContributors = () => {
       setIsSearching(false);
     };
 
-    if (access_token) {
-      searchUsers();
-    }
-  }, [debouncedSearch, access_token, t]);
+    searchUsers();
+  }, [debouncedSearch, t]);
 
   const masterCheckboxChecked = (() => {
     const nonCreatorContributors = contributors.filter((c) => c.authorship !== 'CREATOR');
@@ -278,16 +273,11 @@ const EditCourseContributors = () => {
 
   const handleAddContributors = async () => {
     if (selectedUsers.length === 0 || isAdding) return;
-    if (!access_token) {
-      toast.error(t('failedToAddContributorsGeneral'));
-      return;
-    }
 
     const selectedUserObjects = searchResults.filter((user) => selectedUsers.includes(user.username));
     setIsAdding(true);
     try {
       const response = await addContributors(selectedUsers, selectedUserObjects, {
-        accessToken: access_token,
         lastKnownUpdateDate: courseStructure.update_date,
       });
       const result = response.data as BulkAddResponse;
@@ -309,7 +299,6 @@ const EditCourseContributors = () => {
       if (error?.status === 409) {
         raiseContributorConflict(error?.detail || error?.message, async () => {
           await addContributors(selectedUsers, selectedUserObjects, {
-            accessToken: access_token,
             lastKnownUpdateDate: courseStructure.update_date,
           });
         });
@@ -327,11 +316,6 @@ const EditCourseContributors = () => {
     data: { authorship?: ContributorRole; authorship_status?: ContributorStatus },
   ) => {
     try {
-      if (!access_token) {
-        toast.error(t('errorUpdatingContributor'));
-        return;
-      }
-
       const currentContributor = contributors.find((c) => c.user_id === contributorId);
       if (!currentContributor) return;
       if (currentContributor.authorship === 'CREATOR') {
@@ -342,13 +326,7 @@ const EditCourseContributors = () => {
         authorship: data.authorship || currentContributor.authorship,
         authorship_status: data.authorship_status || currentContributor.authorship_status,
       };
-      if (!access_token) {
-        toast.error(t('noAccessToken'));
-        return;
-      }
-
       const res = await updateContributorMutation(contributorId, updatedData, {
-        accessToken: access_token,
         lastKnownUpdateDate: courseStructure.update_date,
       });
 
@@ -371,7 +349,6 @@ const EditCourseContributors = () => {
                 contributors.find((contributor) => contributor.user_id === contributorId)?.authorship_status,
             },
             {
-              accessToken: access_token ?? '',
               lastKnownUpdateDate: courseStructure.update_date,
             },
           );
@@ -405,10 +382,6 @@ const EditCourseContributors = () => {
 
   const handleBulkRemove = async () => {
     if (selectedContributors.length === 0) return;
-    if (!access_token) {
-      toast.error(t('failedToRemoveContributorsGeneral'));
-      return;
-    }
 
     try {
       const selectedContributorRows = contributors.filter((c) => selectedContributors.includes(c.user_id));
@@ -417,7 +390,6 @@ const EditCourseContributors = () => {
         .filter((c) => selectedContributors.includes(c.user_id))
         .map((c) => c.user_id);
       const response = await removeContributors(selectedUsernames, selectedUserIds, {
-        accessToken: access_token,
         lastKnownUpdateDate: courseStructure.update_date,
       });
       const result = response.data as BulkAddResponse;
@@ -444,7 +416,6 @@ const EditCourseContributors = () => {
             retryRows.map((contributor) => contributor.user.username),
             retryRows.map((contributor) => contributor.user_id),
             {
-              accessToken: access_token,
               lastKnownUpdateDate: courseStructure.update_date,
             },
           );
@@ -457,12 +428,11 @@ const EditCourseContributors = () => {
   };
 
   const handleContributorAccessSave = async () => {
-    if (!(access_token && isOpenToContributors !== undefined) || !isDirty) return;
+    if (isOpenToContributors === undefined || !isDirty) return;
     await save(async () =>
       updateAccess(
         { open_to_contributors: isOpenToContributors },
         {
-          accessToken: access_token,
           lastKnownUpdateDate: courseStructure.update_date,
         },
       ),

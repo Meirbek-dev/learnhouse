@@ -2,7 +2,7 @@ import { PLATFORM_BRAND_NAME, PLATFORM_DESCRIPTION } from '@/lib/constants';
 import { getEditableCourses } from '@services/courses/courses';
 import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
-import { auth } from '@/auth';
+import { getSession } from '@/lib/auth/session';
 
 import CoursesHome from '@/app/_shared/dash/courses/client';
 
@@ -77,8 +77,8 @@ async function PlatformDashCoursesPageInner(props: {
   const sortBy = parseSort(searchParams.sort);
   const preset = parsePreset(searchParams.preset);
 
-  const session = await auth();
-  const access_token = session?.tokens?.access_token;
+  const session = await getSession();
+  const access_token = session?.accessToken;
   const { courses, total, summary } = await getEditableCourses(
     access_token || undefined,
     currentPage,

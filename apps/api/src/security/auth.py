@@ -1,40 +1,43 @@
 import logging
+import uuid
 from datetime import UTC, datetime, timedelta
 
 from authlib.jose import JoseError, jwt
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlmodel import Session, select
-from sqlmodel import Session
 
 from src.core.events.database import get_db_session
-from src.db.auth_sessions import AuthSession
 from src.db.strict_base_model import PydanticStrictBaseModel
 from src.db.users import AnonymousUser, PublicUser, User, UserRead
+from src.security.keys import get_private_key, get_public_key
 from src.security.rbac import AuthenticationRequired
 from src.security.auth_cookies import ACCESS_COOKIE_KEY
-from src.security.security import ALGORITHM, get_secret_key
-from src.services.users.users import security_get_user, security_verify_password
+from src.services.cache.redis_client import get_redis_client
 
 logger = logging.getLogger(__name__)
 
 ACCESS_TOKEN_EXPIRE = timedelta(hours=8)
-REFRESH_TOKEN_EXPIRE = timedelta(days=30)
+REFRESH_TOKEN_EXPIRE = timedelta(days=7)  # sliding; hard cap 30 days
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 oauth2_scheme_optional = OAuth2PasswordBearer(
     tokenUrl="/api/auth/login", auto_error=False
 )
 
+JTI_BLOCKLIST_PREFIX = "jti:"
 
-class Token(PydanticStrictBaseModel):
-    access_token: str
-    token_type: str
+
+# ── Token models ─────────────────────────────────────────────────────────────
 
 
 class TokenData(PydanticStrictBaseModel):
-    username: str | None = None
+    user_uuid: str
     session_id: str | None = None
+    jti: str | None = None
+
+
+# ── Internal helpers ─────────────────────────────────────────────────────────
 
 
 def _credentials_exception() -> HTTPException:
@@ -45,86 +48,120 @@ def _credentials_exception() -> HTTPException:
     )
 
 
-def _decode_token(token: str, expected_type: str) -> TokenData:
-    try:
-        claims = jwt.decode(token, get_secret_key())
-        claims.validate()
-        payload = dict(claims)
-    except JoseError as exc:
-        raise _credentials_exception() from exc
-
-    token_type = payload.get("type")
-    username = payload.get("sub")
-    session_id = payload.get("sid")
-
-    if token_type != expected_type or not isinstance(username, str) or not username:
-        raise _credentials_exception()
-
-    if session_id is not None and not isinstance(session_id, str):
-        raise _credentials_exception()
-
-    return TokenData(username=username, session_id=session_id)
+def _generate_jti() -> str:
+    return str(uuid.uuid4())
 
 
-async def authenticate_user(
-    request: Request,
-    email: str,
-    password: str,
-    db_session: Session,
-) -> User | bool:
-    user = await security_get_user(request, db_session, email)
-    if not user:
-        return False
-    if not security_verify_password(password, user.password):
-        return False
-    return user
+# ── Token creation ────────────────────────────────────────────────────────────
 
 
-def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
-    to_encode = data.copy()
-    issued_at = datetime.now(UTC)
-    expire = issued_at + (expires_delta or ACCESS_TOKEN_EXPIRE)
-    to_encode.update(
-        {
-            "exp": int(expire.timestamp()),
-            "iat": int(issued_at.timestamp()),
-            "iss": "ashyq-bilim-api",
-            "aud": "ashyq-bilim-web",
-            "type": "access",
-        }
-    )
-    token = jwt.encode({"alg": ALGORITHM, "typ": "JWT"}, to_encode, get_secret_key())
+def create_access_token(
+    *,
+    user_uuid: str,
+    session_id: str,
+    roles: list[str] | None = None,
+    expires_delta: timedelta | None = None,
+) -> str:
+    now = datetime.now(UTC)
+    expire = now + (expires_delta or ACCESS_TOKEN_EXPIRE)
+    payload = {
+        "sub": user_uuid,
+        "jti": _generate_jti(),
+        "sid": session_id,
+        "iss": "ashyq-bilim-auth",
+        "aud": "ashyq-bilim-api",
+        "iat": int(now.timestamp()),
+        "exp": int(expire.timestamp()),
+        "roles": roles or [],
+        "type": "access",
+    }
+    token = jwt.encode({"alg": "EdDSA", "kid": "v1"}, payload, get_private_key())
     return token.decode("utf-8") if isinstance(token, bytes) else token
 
 
-def get_access_token_expiry_timestamp(expires_delta: timedelta | None = None) -> int:
+def get_access_token_expiry_ms(expires_delta: timedelta | None = None) -> int:
     expire = datetime.now(UTC) + (expires_delta or ACCESS_TOKEN_EXPIRE)
     return int(expire.timestamp() * 1000)
 
 
+# ── Token decoding ────────────────────────────────────────────────────────────
+
+
+def _decode_token_claims(token: str) -> dict:
+    """Decode and validate a JWT, returning its claims dict."""
+    try:
+        claims = jwt.decode(token, get_public_key())
+        claims.validate()
+        return dict(claims)
+    except JoseError as exc:
+        raise _credentials_exception() from exc
+
+
 def decode_access_token(token: str) -> TokenData:
-    return _decode_token(token, expected_type="access")
+    payload = _decode_token_claims(token)
+    if payload.get("type") != "access":
+        raise _credentials_exception()
+    user_uuid = payload.get("sub")
+    if not isinstance(user_uuid, str) or not user_uuid:
+        raise _credentials_exception()
+    return TokenData(
+        user_uuid=user_uuid,
+        session_id=payload.get("sid"),
+        jti=payload.get("jti"),
+    )
 
 
-def decode_refresh_token(token: str) -> TokenData:
-    return _decode_token(token, expected_type="refresh")
+def decode_token_unverified(token: str) -> dict:
+    """Decode JWT payload without signature verification (for JTI extraction on logout)."""
+    import base64, json
+
+    try:
+        parts = token.split(".")
+        if len(parts) != 3:
+            return {}
+        padding = 4 - len(parts[1]) % 4
+        decoded = base64.urlsafe_b64decode(parts[1] + "=" * padding)
+        return json.loads(decoded)
+    except Exception:
+        return {}
+
+
+# ── JTI blocklist ─────────────────────────────────────────────────────────────
+
+
+def blocklist_jti(jti: str, remaining_seconds: int) -> None:
+    """Add a JTI to the Redis revocation blocklist."""
+    r = get_redis_client()
+    if r and remaining_seconds > 0:
+        r.set(f"{JTI_BLOCKLIST_PREFIX}{jti}", "1", ex=remaining_seconds)
+
+
+def is_jti_blocklisted(jti: str) -> bool:
+    r = get_redis_client()
+    if not r:
+        return False
+    return bool(r.exists(f"{JTI_BLOCKLIST_PREFIX}{jti}"))
+
+
+# ── User lookup ───────────────────────────────────────────────────────────────
+
+
+def _get_user_by_uuid(db_session: Session, user_uuid: str) -> User | None:
+    return db_session.exec(select(User).where(User.user_uuid == user_uuid)).first()
+
+
+# ── FastAPI dependencies ──────────────────────────────────────────────────────
 
 
 def get_access_token_from_request(
     request: Request,
     header_token: str | None = None,
 ) -> str | None:
-    request_state_token = getattr(request.state, "resolved_access_token", None)
-    if isinstance(request_state_token, str) and request_state_token.strip():
-        return request_state_token
-
     if isinstance(header_token, str) and header_token.strip():
         return header_token
-
     cookie_token = request.cookies.get(ACCESS_COOKIE_KEY)
     if isinstance(cookie_token, str) and cookie_token.strip():
         return cookie_token
-
     return None
 
 
@@ -134,16 +171,12 @@ async def get_current_user_from_token(
     db_session: Session,
 ) -> PublicUser:
     token_data = decode_access_token(token)
-    if token_data.session_id:
-        auth_session = db_session.exec(
-            select(AuthSession).where(AuthSession.session_id == token_data.session_id)
-        ).first()
-        if auth_session is None or auth_session.revoked_at is not None:
-            raise _credentials_exception()
-        if auth_session.expires_at <= datetime.now(UTC):
-            raise _credentials_exception()
 
-    user = await security_get_user(request, db_session, email=token_data.username)
+    # JTI blocklist check (covers explicitly revoked / logged-out tokens)
+    if token_data.jti and is_jti_blocklisted(token_data.jti):
+        raise _credentials_exception()
+
+    user = _get_user_by_uuid(db_session, token_data.user_uuid)
     if user is None:
         raise _credentials_exception()
     return PublicUser(**user.model_dump())
@@ -176,7 +209,29 @@ async def get_current_user_optional(
     resolved_token = get_access_token_from_request(request, token)
     if resolved_token is None:
         return AnonymousUser()
-    return await get_current_user_from_token(request, resolved_token, db_session)
+    try:
+        return await get_current_user_from_token(request, resolved_token, db_session)
+    except HTTPException:
+        return AnonymousUser()
+
+
+async def authenticate_user(
+    request: Request,
+    email: str,
+    password: str,
+    db_session: Session,
+) -> User | None:
+    from src.services.users.users import (
+        security_get_user,
+        security_verify_password as verify,
+    )
+
+    user = await security_get_user(request, db_session, email)
+    if not user:
+        return None
+    if not verify(password, user.password):
+        return None
+    return user
 
 
 async def non_public_endpoint(current_user: UserRead | AnonymousUser) -> None:

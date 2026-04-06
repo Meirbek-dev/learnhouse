@@ -1,5 +1,7 @@
 'use client';
 
+import { apiFetch } from '@/lib/api-client';
+
 import { AlertCircle, CheckCircle, CircleAlertIcon, Clock, FileText, InfinityIcon, Users } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
@@ -7,14 +9,12 @@ import { toast } from 'sonner';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@components/ui/alert';
-import { getAPIUrl } from '@/services/config/config';
 import { Button } from '@components/ui/button';
 
 interface ExamPreScreenProps {
   exam: any;
   questionCount: number;
   userAttempts: any[];
-  accessToken: string;
   onStartExam: (attempt: any) => void;
   onReviewAttempt?: (attempt: any) => void;
   isTeacher?: boolean;
@@ -25,7 +25,6 @@ export default function ExamPreScreen({
   exam,
   questionCount,
   userAttempts,
-  accessToken,
   onStartExam,
   onReviewAttempt,
   isTeacher = false,
@@ -55,12 +54,9 @@ export default function ExamPreScreen({
     setIsStarting(true);
 
     try {
-      const response = await fetch(`${getAPIUrl()}exams/${exam.exam_uuid}/attempts/start`, {
+      const response = await apiFetch(`exams/${exam.exam_uuid}/attempts/start`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`,
-        },
+        headers: { 'Content-Type': 'application/json' },
       });
 
       if (!response.ok) {

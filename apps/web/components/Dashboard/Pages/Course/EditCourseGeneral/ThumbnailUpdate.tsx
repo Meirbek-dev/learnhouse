@@ -2,7 +2,7 @@ import { ArrowBigUpDash, Image as ImageIcon, UploadCloud, Video } from 'lucide-r
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs';
 import { useCoursesMutations } from '@/hooks/mutations/useCoursesMutations';
 import { Alert, AlertDescription, AlertTitle } from '@components/ui/alert';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
+
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useCourse } from '@components/Contexts/CourseContext';
@@ -41,7 +41,6 @@ const ThumbnailUpdate = ({ thumbnailType, disabled = false, disabledReason }: Th
 
   const course = useCourse();
   const { updateThumbnail: updateThumbnailMutation } = useCoursesMutations(course.courseStructure.course_uuid, true);
-  const session = usePlatformSession() as any;
   const t = useTranslations('CourseEdit.General.Thumbnail');
 
   const [localThumbnail, setLocalThumbnail] = useState<LocalThumbnail | null>(null);
@@ -109,7 +108,6 @@ const ThumbnailUpdate = ({ thumbnailType, disabled = false, disabledReason }: Th
         formData.append('thumbnail_type', type);
 
         await updateThumbnailMutation(formData, {
-          accessToken: session.data?.tokens?.access_token,
           lastKnownUpdateDate: course.courseStructure.update_date,
         });
         setLocalThumbnail(null);
@@ -123,7 +121,7 @@ const ThumbnailUpdate = ({ thumbnailType, disabled = false, disabledReason }: Th
         setIsLoading(false);
       }
     },
-    [course, session, showError, t, updateThumbnailMutation],
+    [course, showError, t, updateThumbnailMutation],
   );
 
   const handleFileChange = useCallback(

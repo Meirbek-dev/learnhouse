@@ -24,7 +24,6 @@ import {
 } from './GradingPanel';
 import type { BatchGradeItem, Submission, TeacherGradeInput } from '@/types/grading';
 import { Drawer, DrawerContent, DrawerTitle } from '@/components/ui/drawer';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { batchGradeSubmissions } from '@services/grading/grading';
 import SubmissionStatusBadge from './SubmissionStatusBadge';
 import type { GradingDraftState } from './GradingPanel';
@@ -62,8 +61,6 @@ function createLocalGrade(submission: Submission): LocalGrade {
 export default function BatchGradingPanel({ open, submissions, onClose, onSubmitted }: BatchGradingPanelProps) {
   const t = useTranslations('Grading.Batch');
   const panelT = useTranslations('Grading.Panel');
-  const session = usePlatformSession();
-  const accessToken = session?.data?.tokens?.access_token ?? '';
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [drafts, setDrafts] = useState(new Map());
@@ -113,8 +110,6 @@ export default function BatchGradingPanel({ open, submissions, onClose, onSubmit
   }, [dirtyCount, isSubmitting, onClose]);
 
   const handleSubmitAll = useCallback(async () => {
-    if (!accessToken) return;
-
     const dirtyPayloads = submissions
       .map((submission) => {
         const draft = drafts.get(submission.submission_uuid);
@@ -154,7 +149,7 @@ export default function BatchGradingPanel({ open, submissions, onClose, onSubmit
     setIsSubmitting(true);
     try {
       const payloads = dirtyPayloads.filter((entry): entry is BatchGradeItem => !('error' in entry));
-      const result = await batchGradeSubmissions(payloads, accessToken);
+      const result = await batchGradeSubmissions(payloads);
 
       if (result.failed > 0) {
         const failures = result.results
@@ -179,7 +174,7 @@ export default function BatchGradingPanel({ open, submissions, onClose, onSubmit
     } finally {
       setIsSubmitting(false);
     }
-  }, [accessToken, drafts, onClose, onSubmitted, submissions, t]);
+  }, [drafts, onClose, onSubmitted, submissions, t]);
 
   if (!currentSubmission || !currentDraft) {
     return null;

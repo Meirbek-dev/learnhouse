@@ -2,7 +2,6 @@
 
 import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media';
 import { removeCoursePrefix } from '@components/Objects/Thumbnails/CourseThumbnail';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { Book, GraduationCap, Search, Users } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { getAbsoluteUrl } from '@services/config/config';
@@ -166,7 +165,6 @@ const EmptyState = ({ query, t }: { query: string; t: (key: string, params?: any
 const SearchPage = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const session = usePlatformSession();
   const t = useTranslations('SearchPage');
 
   // Search state
@@ -235,7 +233,6 @@ const SearchPage = () => {
           page,
           limit: perPage,
           next: selectedType === 'all' ? null : selectedType,
-          access_token: session?.data?.tokens?.access_token,
         });
 
         // The response data is directly what we need
@@ -264,7 +261,7 @@ const SearchPage = () => {
     };
 
     fetchResults();
-  }, [query, page, selectedType, session?.data?.tokens?.access_token]);
+  }, [query, page, selectedType]);
 
   const totalResults = searchResults.total_courses + searchResults.total_collections + searchResults.total_users;
   const totalPages = Math.ceil(totalResults / perPage);

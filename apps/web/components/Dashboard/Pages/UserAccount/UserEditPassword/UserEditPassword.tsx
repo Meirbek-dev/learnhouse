@@ -42,7 +42,6 @@ type PasswordFormData = v.InferOutput<ReturnType<typeof createValidationSchema>>
 
 const UserEditPassword = () => {
   const session = usePlatformSession();
-  const access_token = session?.data?.tokens?.access_token;
   const t = useTranslations('DashPage.Notifications');
   const tPassword = useTranslations('DashPage.UserAccountSettings.UserAccount.EditPassword');
   const validationSchema = createValidationSchema(t);
@@ -66,12 +65,12 @@ const UserEditPassword = () => {
     startTransition(() => setIsProcessing(true));
     try {
       const user_id = session?.data?.user?.id;
-      if (!(user_id && access_token)) {
+      if (!user_id) {
         toast.error(t('passwordUpdateError'), { id: loadingToast });
         return;
       }
 
-      const response = await updatePassword(user_id, values, access_token);
+      const response = await updatePassword(user_id, values);
 
       if (response.success) {
         toast.dismiss(loadingToast);

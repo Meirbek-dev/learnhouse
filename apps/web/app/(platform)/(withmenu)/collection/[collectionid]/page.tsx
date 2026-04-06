@@ -1,7 +1,7 @@
 import GeneralWrapper from '@/components/Objects/Elements/Wrappers/GeneralWrapper';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { getCollectionById } from '@services/courses/collections';
-import { getOptionalSession } from '@/lib/get-optional-session';
+import { getSession } from '@/lib/auth/session';
 import { getAbsoluteUrl } from '@services/config/config';
 import { PLATFORM_BRAND_NAME } from '@/lib/constants';
 import { getTranslations } from 'next-intl/server';
@@ -14,8 +14,8 @@ interface MetadataProps {
 
 export async function generateMetadata(props: MetadataProps): Promise<Metadata> {
   const params = await props.params;
-  const session = await getOptionalSession();
-  const access_token = session?.tokens?.access_token || null;
+  const session = await getSession();
+  const access_token = session?.accessToken || null;
   const t = await getTranslations('General');
   const col = await getCollectionById(params.collectionid, access_token || '');
 
@@ -42,8 +42,8 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
 
 export default async function PlatformCollectionPage(props: { params: Promise<{ collectionid: string }> }) {
   const t = await getTranslations('General');
-  const session = await getOptionalSession();
-  const access_token = session?.tokens?.access_token;
+  const session = await getSession();
+  const access_token = session?.accessToken;
   const { collectionid } = await props.params;
   const col = await getCollectionById(collectionid, access_token || '');
 

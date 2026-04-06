@@ -577,7 +577,7 @@ const CourseThumbnail: FC<CourseThumbnailProps> = ({
   const handleDelete = async () => {
     const toastId = toast.loading(t('deleting'));
     try {
-      await deleteCourseFromBackend(course.course_uuid, session.data?.tokens?.access_token);
+      await deleteCourseFromBackend(course.course_uuid);
       toast.success(t('toastDeleteSuccess'));
       router.refresh();
     } catch {

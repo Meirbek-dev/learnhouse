@@ -1,9 +1,8 @@
 'use server';
-import { RequestBodyWithAuthHeader, errorHandling, getResponseMetadata } from '@services/utils/ts/requests';
-import { resolveServerAccessToken } from '@/lib/auth/server-access-token';
+import { errorHandling, getResponseMetadata } from '@services/utils/ts/requests';
+import { apiFetch } from '@/lib/api-client';
 import type { CustomResponseTyping } from '@services/utils/ts/requests';
 import type { components } from '@/lib/api/generated';
-import { getAPIUrl } from '@services/config/config';
 import { tags } from '@/lib/cacheTags';
 
 type CourseRead = components['schemas']['CourseRead'];
@@ -37,45 +36,39 @@ async function getTypedResponseMetadata<T>(response: Response): Promise<Response
   return (await getResponseMetadata(response)) as ResponseMetadata<T>;
 }
 
-async function requireAccessToken(access_token?: string): Promise<string> {
-  const token = await resolveServerAccessToken(access_token);
-  if (!token) {
-    throw new Error('Authentication required');
-  }
-  return token;
-}
-
-export async function getPaymentConfigs(access_token: string): Promise<PaymentsConfigRead[]> {
-  const token = await requireAccessToken(access_token);
-  const result = await fetch(
-    `${getAPIUrl()}payments/config`,
-    RequestBodyWithAuthHeader('GET', null, null, token),
-  );
+export async function getPaymentConfigs(): Promise<PaymentsConfigRead[]> {
+  const result = await apiFetch('payments/config');
   return (await errorHandling(result)) as PaymentsConfigRead[];
 }
 
-export async function checkPaidAccess(courseId: number, access_token: string): Promise<PaymentsCourseAccessResponse> {
-  const token = await requireAccessToken(access_token);
-  const result = await fetch(
-    `${getAPIUrl()}payments/courses/${courseId}/access`,
-    RequestBodyWithAuthHeader('GET', null, null, token),
-  );
+export async function checkPaidAccess(courseId: number): Promise<PaymentsCourseAccessResponse> {
+  const result = await apiFetch(`payments/courses/${courseId}/access`);
   return (await errorHandling(result)) as PaymentsCourseAccessResponse;
 }
 
 export async function initializePaymentConfig(
   _data: PaymentsConfigCreateInput,
   provider: Extract<PaymentProviderEnum, 'stripe'>,
-  access_token: string,
 ): Promise<PaymentsConfig> {
-  const token = await requireAccessToken(access_token);
-  const result = await fetch(
-    `${getAPIUrl()}payments/config?provider=${provider}`,
-    RequestBodyWithAuthHeader('POST', null, null, token),
-  );
+  const result = await apiFetch(`payments/config?provider=${provider}`, { method: 'POST' });
+  const data = (await errorHandling(result)) as PaymentsConfig;
+
+  if (result.ok) {
+    const { revalidateTag } = await import('next/cache');
+    revalidateTag(tags.platform, 'max');
+  }
+
+  return data;
+}
+
+export async function updatePaymentConfig(id: number | string, data: PaymentsConfigUpdate): Promise<PaymentsConfig> {
+  const result = await apiFetch(`payments/config?id=${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
   const responseData = (await errorHandling(result)) as PaymentsConfig;
 
-  // Revalidate platform cache after initializing payment config
   if (result.ok) {
     const { revalidateTag } = await import('next/cache');
     revalidateTag(tags.platform, 'max');
@@ -84,39 +77,12 @@ export async function initializePaymentConfig(
   return responseData;
 }
 
-export async function updatePaymentConfig(
-  id: number | string,
-  data: PaymentsConfigUpdate,
-  access_token: string,
-): Promise<PaymentsConfig> {
-  const token = await requireAccessToken(access_token);
-  const result = await fetch(
-    `${getAPIUrl()}payments/config?id=${id}`,
-    RequestBodyWithAuthHeader('PUT', data, null, token),
-  );
-  const responseData = (await errorHandling(result)) as PaymentsConfig;
-
-  // Revalidate platform cache after updating payment config
-  if (result.ok) {
-    const { revalidateTag } = await import('next/cache');
-    revalidateTag(tags.platform, 'max');
-  }
-
-  return responseData;
-}
-
-export async function updateStripeAccountID(
-  data: StripeAccountInput,
-  access_token: string,
-): Promise<PaymentsMessageResponse> {
-  const token = await requireAccessToken(access_token);
-  const result = await fetch(
-    `${getAPIUrl()}payments/stripe/account?stripe_account_id=${data.stripe_account_id}`,
-    RequestBodyWithAuthHeader('PUT', data, null, token),
-  );
+export async function updateStripeAccountID(data: StripeAccountInput): Promise<PaymentsMessageResponse> {
+  const result = await apiFetch(`payments/stripe/account?stripe_account_id=${data.stripe_account_id}`, {
+    method: 'PUT',
+  });
   const responseData = (await errorHandling(result)) as PaymentsMessageResponse;
 
-  // Revalidate platform cache after updating Stripe account
   if (result.ok) {
     const { revalidateTag } = await import('next/cache');
     revalidateTag(tags.platform, 'max');
@@ -125,39 +91,20 @@ export async function updateStripeAccountID(
   return responseData;
 }
 
-export async function getStripeOnboardingLink(
-  access_token: string,
-  redirect_uri: string,
-): Promise<PaymentsConnectLinkResponse> {
-  const token = await requireAccessToken(access_token);
-  const result = await fetch(
-    `${getAPIUrl()}payments/stripe/connect/link?redirect_uri=${redirect_uri}`,
-    RequestBodyWithAuthHeader('POST', null, null, token),
-  );
+export async function getStripeOnboardingLink(redirect_uri: string): Promise<PaymentsConnectLinkResponse> {
+  const result = await apiFetch(`payments/stripe/connect/link?redirect_uri=${redirect_uri}`, { method: 'POST' });
   return (await errorHandling(result)) as PaymentsConnectLinkResponse;
 }
 
-export async function verifyStripeConnection(
-  code: string,
-  access_token: string,
-): Promise<PaymentsStripeOAuthCallbackResponse> {
-  const token = await requireAccessToken(access_token);
-  const result = await fetch(
-    `${getAPIUrl()}payments/stripe/oauth/callback?code=${code}`,
-    RequestBodyWithAuthHeader('GET', null, null, token),
-  );
+export async function verifyStripeConnection(code: string): Promise<PaymentsStripeOAuthCallbackResponse> {
+  const result = await apiFetch(`payments/stripe/oauth/callback?code=${code}`);
   return (await errorHandling(result)) as PaymentsStripeOAuthCallbackResponse;
 }
 
-export async function deletePaymentConfig(id: number | string, access_token: string): Promise<PaymentsMessageResponse> {
-  const token = await requireAccessToken(access_token);
-  const result = await fetch(
-    `${getAPIUrl()}payments/config?id=${id}`,
-    RequestBodyWithAuthHeader('DELETE', null, null, token),
-  );
+export async function deletePaymentConfig(id: number | string): Promise<PaymentsMessageResponse> {
+  const result = await apiFetch(`payments/config?id=${id}`, { method: 'DELETE' });
   const responseData = (await errorHandling(result)) as PaymentsMessageResponse;
 
-  // Revalidate platform cache after deleting payment config
   if (result.ok) {
     const { revalidateTag } = await import('next/cache');
     revalidateTag(tags.platform, 'max');
@@ -166,20 +113,12 @@ export async function deletePaymentConfig(id: number | string, access_token: str
   return responseData;
 }
 
-export async function getCustomers(access_token: string): Promise<PaymentsCustomerRead[]> {
-  const token = await requireAccessToken(access_token);
-  const result = await fetch(
-    `${getAPIUrl()}payments/customers`,
-    RequestBodyWithAuthHeader('GET', null, null, token),
-  );
+export async function getCustomers(): Promise<PaymentsCustomerRead[]> {
+  const result = await apiFetch('payments/customers');
   return (await errorHandling(result)) as PaymentsCustomerRead[];
 }
 
-export async function getOwnedCourses(access_token: string): Promise<CourseRead[]> {
-  const token = await requireAccessToken(access_token);
-  const result = await fetch(
-    `${getAPIUrl()}payments/courses/owned`,
-    RequestBodyWithAuthHeader('GET', null, null, token),
-  );
+export async function getOwnedCourses(): Promise<CourseRead[]> {
+  const result = await apiFetch('payments/courses/owned');
   return (await errorHandling(result)) as CourseRead[];
 }

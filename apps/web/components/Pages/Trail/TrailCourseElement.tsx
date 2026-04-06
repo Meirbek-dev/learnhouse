@@ -1,5 +1,4 @@
 'use client';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { getUserCertificates } from '@services/courses/certifications';
 import { revalidateTags } from '@services/utils/ts/requests';
@@ -20,8 +19,6 @@ interface TrailCourseElementProps {
 }
 
 const TrailCourseElement = ({ course, run }: TrailCourseElementProps) => {
-  const session = usePlatformSession() as any;
-  const access_token = session?.data?.tokens?.access_token;
   const courseid = course.course_uuid.replace('course_', '');
   const router = useRouter();
   const t = useTranslations('Trail');
@@ -34,26 +31,26 @@ const TrailCourseElement = ({ course, run }: TrailCourseElementProps) => {
 
   async function quitCourse(course_uuid: string) {
     // Close activity
-    await removeCourse(course_uuid, access_token);
+    await removeCourse(course_uuid);
     // Mutate course
     await revalidateTags(['courses']);
     router.refresh();
 
     // Mutate
-    mutate([getTrailSwrKey(), access_token]);
+    mutate(getTrailSwrKey());
   }
 
   // Fetch certificate for this course
   useEffect(() => {
     // Avoid repeated fetches for the same course if we've already tried
-    if (!access_token || course_progress < 100) return;
+    if (course_progress < 100) return;
     if (fetchedCourseCertificateRef.current[course.course_uuid]) return;
 
     const fetchCourseCertificate = async () => {
       fetchedCourseCertificateRef.current[course.course_uuid] = true;
       setIsLoadingCertificate(true);
       try {
-        const result = await getUserCertificates(course.course_uuid, access_token);
+        const result = await getUserCertificates(course.course_uuid);
 
         if (result.success && result.data && result.data.length > 0) {
           setCourseCertificate(result.data[0]);
@@ -66,7 +63,7 @@ const TrailCourseElement = ({ course, run }: TrailCourseElementProps) => {
     };
 
     fetchCourseCertificate();
-  }, [access_token, course_progress, course.course_uuid]);
+  }, [course_progress, course.course_uuid]);
 
   return (
     <Card className="trailcoursebox border-border bg-card text-card-foreground flex rounded-xl border p-3 shadow-sm">

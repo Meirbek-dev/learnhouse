@@ -2,7 +2,6 @@
 import { BookOpen, BookX, EllipsisVertical, Eye, Layers2, Monitor, Pencil, UserRoundPen } from 'lucide-react';
 import EditAssignmentModal from '@components/Objects/Modals/Activities/Assignments/EditAssignmentModal';
 import { AssignmentProvider, useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import ToolTip from '@/components/Objects/Elements/Tooltip/Tooltip';
 import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
 import { updateAssignment } from '@services/courses/assignments';
@@ -121,20 +120,13 @@ const BrdCmpx = () => {
 const PublishingState = () => {
   const t = useTranslations('DashPage.Assignments.AssignmentPage');
   const assignment = useAssignments();
-  const session = usePlatformSession() as any;
-  const access_token = session?.data?.tokens?.access_token;
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   async function updateAssignmentPublishState(assignmentUUID: string) {
-    const res = await updateAssignment(
-      { published: !assignment?.assignment_object?.published },
-      assignmentUUID,
-      access_token,
-    );
+    const res = await updateAssignment({ published: !assignment?.assignment_object?.published }, assignmentUUID);
     const res2 = await updateActivity(
       { published: !assignment?.assignment_object?.published },
       assignment?.activity_object?.activity_uuid,
-      access_token,
     );
     const toast_loading = toast.loading(t('updateLoading'));
     if (res.success && res2) {
@@ -236,7 +228,6 @@ const PublishingState = () => {
             setIsEditModalOpen(false);
           }}
           assignment={assignment?.assignment_object}
-          accessToken={access_token}
         />
       ) : null}
     </>

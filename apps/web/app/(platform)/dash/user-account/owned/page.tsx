@@ -1,7 +1,6 @@
 'use client';
 
 import CourseThumbnail from '@components/Objects/Thumbnails/CourseThumbnail';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { getOwnedCourses } from '@services/payments/payments';
 import { Package2, ShoppingCart } from 'lucide-react';
@@ -10,18 +9,15 @@ import useSWR from 'swr';
 
 export default function PlatformOwnedCoursesPage() {
   const t = useTranslations('DashPage.Courses');
-  const session = usePlatformSession();
-  const access_token = session?.data?.tokens?.access_token;
 
   const {
     data: ownedCourses,
     error,
     isLoading,
-  } = useSWR(
-    access_token ? ['/payments/courses/owned', access_token] : null,
-    ([_url, token]) => getOwnedCourses(token),
-    { revalidateOnFocus: false, dedupingInterval: 60_000 },
-  );
+  } = useSWR('/payments/courses/owned', () => getOwnedCourses(), {
+    revalidateOnFocus: false,
+    dedupingInterval: 60_000,
+  });
 
   if (isLoading) return <PageLoading />;
   if (error) {

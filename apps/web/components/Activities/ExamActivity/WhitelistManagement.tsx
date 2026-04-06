@@ -1,12 +1,13 @@
 'use client';
 
+import { apiFetch } from '@/lib/api-client';
+
 import { useEffect, useEffectEvent, useState } from 'react';
 import { Search, UserCheck, UserX } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@components/ui/card';
-import { getAPIUrl } from '@/services/config/config';
 import { Checkbox } from '@components/ui/checkbox';
 import { Button } from '@components/ui/button';
 import { Label } from '@components/ui/label';
@@ -22,7 +23,6 @@ interface Student {
 interface WhitelistManagementProps {
   examUuid: string;
   courseUuid: string;
-  accessToken: string;
   currentWhitelist: number[];
   onWhitelistUpdated: () => void;
 }
@@ -30,7 +30,6 @@ interface WhitelistManagementProps {
 export default function WhitelistManagement({
   examUuid,
   courseUuid,
-  accessToken,
   currentWhitelist,
   onWhitelistUpdated,
 }: WhitelistManagementProps) {
@@ -45,17 +44,13 @@ export default function WhitelistManagement({
     try {
       setIsLoading(true);
 
-      const response = await fetch(`${getAPIUrl()}courses/${courseUuid}/contributors`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      });
+      const response = await apiFetch(`courses/${courseUuid}/contributors`);
 
       if (!response.ok) throw new Error('Failed to fetch contributors');
 
       const data = await response.json();
 
-      // Transform contributor data to student format
+      // Transform contributor data to student format,
       const studentsData = data.map((contributor: any) => ({
         id: contributor.user_id,
         user_id: contributor.user_id,
@@ -107,36 +102,29 @@ export default function WhitelistManagement({
     try {
       setIsSaving(true);
 
-      // Fetch current exam settings so we merge user-provided whitelist into existing settings
-      const examResp = await fetch(`${getAPIUrl()}exams/${examUuid}`, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
+      // Fetch current exam settings so we merge user-provided whitelist into existing settings,
+      const examResp = await apiFetch(`exams/${examUuid}`);
 
       if (!examResp.ok) throw new Error('Failed to fetch exam settings');
       const examData = await examResp.json();
       const existingSettings = examData.settings || {};
 
-      // Merge and ensure access mode is WHITELIST so changes persist and the whitelist is effective
+      // Merge and ensure access mode is WHITELIST so changes persist and the whitelist is effective,
       const mergedSettings = {
         ...existingSettings,
         whitelist_user_ids: [...selectedUserIds],
         access_mode: existingSettings.access_mode === 'WHITELIST' ? 'WHITELIST' : 'WHITELIST',
       };
 
-      const response = await fetch(`${getAPIUrl()}exams/${examUuid}`, {
+      const response = await apiFetch(`exams/${examUuid}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify({
-          settings: mergedSettings,
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ settings: mergedSettings }),
       });
 
       if (!response.ok) throw new Error('Failed to update whitelist');
 
-      // If access_mode was not WHITELIST before, inform the user that it has been set
+      // If access_mode was not WHITELIST before, inform the user that it has been set,
       if (existingSettings.access_mode !== 'WHITELIST') {
         toast.success(t('whitelistUpdated') + '. ' + t('accessModeSetToWhitelist'));
       } else {

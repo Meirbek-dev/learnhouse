@@ -114,7 +114,6 @@ function RemoveUserButton({ userId, username, onRemove, t }: RemoveUserButtonPro
 
 const Users = () => {
   const session = usePlatformSession() as any;
-  const access_token = session?.data?.tokens?.access_token;
   const t = useTranslations('DashPage.UserSettings.usersSection');
   const userRoles = session?.data?.roles ?? [];
   const { can } = usePermissions();
@@ -145,9 +144,7 @@ const Users = () => {
     data: usersData,
     error,
     isLoading,
-  } = useSWR(`${getAPIUrl()}members?page=${currentPage}&per_page=${USERS_PER_PAGE}`, (url) =>
-    swrFetcher(url, access_token),
-  );
+  } = useSWR(`${getAPIUrl()}members?page=${currentPage}&per_page=${USERS_PER_PAGE}`, (url) => swrFetcher(url));
 
   const totalUsers = usersData?.total ?? 0;
   const totalPages = usersData?.total_pages ?? 1;
@@ -168,7 +165,7 @@ const Users = () => {
   const handleRemoveUser = async (user_id: number) => {
     const toastId = toast.loading(t('removingUser'));
     try {
-      const res = await removeUser(user_id, access_token);
+      const res = await removeUser(user_id);
       if (res.status === 200) {
         // Revalidate the current page data
         await mutate(`${getAPIUrl()}members?page=${currentPage}&per_page=${USERS_PER_PAGE}`);

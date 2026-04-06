@@ -10,7 +10,6 @@
  * inside a modal trigger render prop — all for a single grading form.
  */
 
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
 import type { Submission } from '@/types/grading';
@@ -24,12 +23,9 @@ export interface UseGradingPanelResult {
 }
 
 export function useGradingPanel(submissionUuid: string | null): UseGradingPanelResult {
-  const session = usePlatformSession();
-  const accessToken = session?.data?.tokens?.access_token;
-
   const { data, error, isLoading, mutate } = useSWR<Submission>(
-    submissionUuid && accessToken ? `${getAPIUrl()}grading/submissions/${submissionUuid}` : null,
-    (url: string) => swrFetcher(url, accessToken),
+    submissionUuid ? `${getAPIUrl()}grading/submissions/${submissionUuid}` : null,
+    (url: string) => swrFetcher(url),
     { revalidateOnFocus: false, dedupingInterval: 2000 },
   );
 

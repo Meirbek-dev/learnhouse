@@ -31,8 +31,8 @@ const CoursePaidOptions = ({ course }: CoursePaidOptionsProps) => {
   const router = useRouter();
 
   const { data: linkedProducts, error } = useSWR(
-    () => (session ? [`/payments/courses/${course.id}/products`, session.data?.tokens?.access_token] : null),
-    ([_url, token]) => getProductsByCourse(course.id, token),
+    () => (session ? [`/payments/courses/${course.id}/products`, undefined] : null),
+    () => getProductsByCourse(course.id),
   );
 
   const handleCheckout = async (productId: number) => {
@@ -45,11 +45,7 @@ const CoursePaidOptions = ({ course }: CoursePaidOptionsProps) => {
     try {
       startTransition(() => setIsProcessing((prev) => ({ ...prev, [productId]: true })));
       const redirect_uri = getAbsoluteUrl('/courses');
-      const response = await getStripeProductCheckoutSession(
-        productId,
-        redirect_uri,
-        session.data?.tokens?.access_token,
-      );
+      const response = await getStripeProductCheckoutSession(productId, redirect_uri);
 
       if (response.success && response.data?.checkout_url) {
         router.push(response.data.checkout_url);

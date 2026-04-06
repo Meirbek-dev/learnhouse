@@ -2,7 +2,6 @@ import { getTeacherOverview, normalizeAnalyticsQuery } from '@services/analytics
 import AnalyticsEmptyState from '@components/Dashboard/Analytics/AnalyticsEmptyState';
 import TeacherOverview from '@components/Dashboard/Analytics/TeacherOverview';
 import { getTranslations } from 'next-intl/server';
-import { auth } from '@/auth';
 
 export default function PlatformAnalyticsPage(props: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -13,22 +12,11 @@ export default function PlatformAnalyticsPage(props: {
 async function PlatformAnalyticsPageInner(props: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const session = await auth();
-  const accessToken = session?.tokens?.access_token;
   const query = normalizeAnalyticsQuery(await props.searchParams);
   const t = await getTranslations('TeacherAnalytics');
 
-  if (!accessToken) {
-    return (
-      <AnalyticsEmptyState
-        title={t('pages.overviewDisabledTitle')}
-        description={t('pages.overviewDisabledDesc')}
-      />
-    );
-  }
-
   try {
-    const overview = await getTeacherOverview(accessToken, query);
+    const overview = await getTeacherOverview(query);
 
     return (
       <TeacherOverview

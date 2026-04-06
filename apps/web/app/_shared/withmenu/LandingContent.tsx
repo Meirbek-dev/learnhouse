@@ -1,6 +1,6 @@
 import { getServerGamificationDashboard } from '@/services/gamification/server';
 import LandingClassic from '@components/Landings/LandingClassic';
-import { getOptionalSession } from '@/lib/get-optional-session';
+import { getSession } from '@/lib/auth/session';
 import LandingCustom from '@components/Landings/LandingCustom';
 import { getCollections } from '@services/courses/collections';
 import { getPlatform } from '@/services/platform/platform';
@@ -39,8 +39,8 @@ export async function LandingContent() {
   await connection();
 
   try {
-    const session = await getOptionalSession();
-    const access_token = session?.tokens?.access_token;
+    const session = await getSession();
+    const access_token = session?.accessToken;
 
     // Fetch platform info with detailed error handling
     let platform;

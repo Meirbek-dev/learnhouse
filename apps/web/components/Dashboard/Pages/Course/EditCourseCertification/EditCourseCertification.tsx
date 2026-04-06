@@ -5,7 +5,6 @@ import { createCertification, deleteCertification, updateCertification } from '@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Controller, FormProvider, useForm, useWatch } from 'react-hook-form';
 import { SectionHeader } from '@components/Dashboard/Courses/SectionHeader';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { AlertTriangle, Award, FileText, Sparkles } from 'lucide-react';
 import { Field, FieldError, FieldLabel } from '@/components/ui/field';
@@ -78,8 +77,7 @@ const EditCourseCertification = () => {
 
   const course = useCourse();
   const { isLoading, courseStructure, editorData } = course;
-  const session = usePlatformSession();
-  const access_token = session?.data?.tokens?.access_token;
+
   const t = useTranslations('Certificates.EditCourseCertification');
   const tCommon = useTranslations('Common');
 
@@ -217,7 +215,7 @@ const EditCourseCertification = () => {
   const certificateInstructor = useWatch({ control: form.control, name: 'certificate_instructor' });
 
   const handleSaveCertification = form.handleSubmit(async (values) => {
-    if (!(access_token && courseStructure) || !isDirty) return;
+    if (!courseStructure || !isDirty) return;
 
     const config = {
       certification_name: values.certification_name,
@@ -236,7 +234,7 @@ const EditCourseCertification = () => {
             return updateCertification({
               certification_uuid: existingCertification.certification_uuid,
               config,
-              access_token,
+
               options: {
                 courseUuid: courseStructure.course_uuid,
                 lastKnownUpdateDate: courseStructure.update_date,
@@ -247,7 +245,6 @@ const EditCourseCertification = () => {
           return createCertification({
             course_id: courseStructure.id,
             config,
-            access_token,
             options: {
               courseUuid: courseStructure.course_uuid,
               lastKnownUpdateDate: courseStructure.update_date,
@@ -256,7 +253,7 @@ const EditCourseCertification = () => {
         }
 
         if (existingCertification) {
-          return deleteCertification(existingCertification.certification_uuid, access_token, {
+          return deleteCertification(existingCertification.certification_uuid, {
             courseUuid: courseStructure.course_uuid,
             lastKnownUpdateDate: courseStructure.update_date,
           });

@@ -1,6 +1,5 @@
 'use client';
 
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { Download, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
@@ -11,18 +10,12 @@ interface AnalyticsExportButtonProps {
 }
 
 export default function AnalyticsExportButton({ href, label }: AnalyticsExportButtonProps) {
-  const session = usePlatformSession();
   const [loading, setLoading] = useState(false);
 
   const handleDownload = async () => {
     setLoading(true);
     try {
-      const accessToken = session.data?.tokens?.access_token;
-      const headers: HeadersInit = {};
-      if (accessToken) {
-        headers.Authorization = `Bearer ${accessToken}`;
-      }
-      const response = await fetch(href, { headers });
+      const response = await fetch(href, { credentials: 'include' });
       if (!response.ok) {
         console.error(`Export failed: ${response.status} ${response.statusText}`);
         return;

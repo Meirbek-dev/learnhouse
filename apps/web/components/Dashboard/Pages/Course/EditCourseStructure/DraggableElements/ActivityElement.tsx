@@ -32,7 +32,7 @@ import { deleteAssignmentUsingActivityUUID, getAssignmentFromActivityUUID } from
 import { CourseWorkflowBadge } from '@components/Dashboard/Courses/courseWorkflowUi';
 import { useActivityMutations } from '@/hooks/mutations/useActivityMutations';
 import { cleanActivityUuid, cleanCourseUuid } from '@/lib/course-management';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
+
 import ToolTip from '@/components/Objects/Elements/Tooltip/Tooltip';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { getAbsoluteUrl } from '@services/config/config';
@@ -72,14 +72,6 @@ interface ActivityElementProps {
   course_uuid: string;
 }
 
-interface PlatformSession {
-  data?: { tokens?: { access_token?: string } };
-}
-
-interface Course {
-  courseStructure?: { course_uuid?: string };
-}
-
 const ACTIVITY_CONFIG = {
   TYPE_VIDEO: {
     Icon: Video,
@@ -117,8 +109,6 @@ const ACTIVITY_CONFIG = {
 } as const;
 
 const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityElementProps) => {
-  const session = usePlatformSession() as PlatformSession;
-  const access_token = session?.data?.tokens?.access_token;
   const { deleteActivity, updateActivity } = useActivityMutations(course_uuid, true);
   const t = useTranslations('CourseEdit.ActivityElement');
 
@@ -131,14 +121,9 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
   const [fetchAssignment, setFetchAssignment] = useState(false);
 
   const { data: assignmentUUID, isLoading: isAssignmentLoading } = useSWR(
-    activity.activity_type === 'TYPE_ASSIGNMENT' && access_token && fetchAssignment
-      ? [`assignment-${activity.activity_uuid}`, access_token]
-      : null,
+    activity.activity_type === 'TYPE_ASSIGNMENT' && fetchAssignment ? `assignment-${activity.activity_uuid}` : null,
     async () => {
-      if (!access_token) {
-        return null;
-      }
-      const result = await getAssignmentFromActivityUUID(activity.activity_uuid, access_token);
+      const result = await getAssignmentFromActivityUUID(activity.activity_uuid);
       return result?.data?.assignment_uuid?.replace('assignment_', '') ?? null;
     },
   );
@@ -158,10 +143,6 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
   };
 
   const handleSaveEdit = async () => {
-    if (!access_token) {
-      toast.error(t('noAccessToken'));
-      return;
-    }
     const trimmedName = editedName.trim();
     if (!trimmedName || trimmedName === activity.name) {
       handleCancelEdit();
@@ -169,7 +150,7 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
     }
     setIsSavingEdit(true);
     try {
-      await updateActivity(activity.activity_uuid, { name: trimmedName }, access_token);
+      await updateActivity(activity.activity_uuid, { name: trimmedName });
       toast.success(t('activityNameUpdatedSuccess'));
       setIsEditing(false);
     } catch (error: any) {
@@ -181,14 +162,10 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
   };
 
   const handleTogglePublish = async () => {
-    if (!access_token) {
-      toast.error(t('noAccessToken'));
-      return;
-    }
     setIsUpdatingPublish(true);
     const toastId = toast.loading(t('updating'));
     try {
-      await updateActivity(activity.activity_uuid, { published: !activity.published }, access_token);
+      await updateActivity(activity.activity_uuid, { published: !activity.published });
       toast.success(t('activityUpdateSuccess'));
     } catch (error: any) {
       toast.error(error?.message || t('updateFailed'));
@@ -199,21 +176,17 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
   };
 
   const handleDeleteActivity = async () => {
-    if (!access_token) {
-      toast.error(t('noAccessToken'));
-      return;
-    }
     setIsDeletingActivity(true);
     const toastId = toast.loading(t('deletingActivity'));
     try {
       if (activity.activity_type === 'TYPE_ASSIGNMENT') {
         try {
-          await deleteAssignmentUsingActivityUUID(activity.activity_uuid, access_token);
+          await deleteAssignmentUsingActivityUUID(activity.activity_uuid);
         } catch {
           /* continue */
         }
       }
-      await deleteActivity(activity.activity_uuid, access_token);
+      await deleteActivity(activity.activity_uuid);
       toast.success(t('activityDeletedSuccess'));
       setIsDeleteDialogOpen(false);
     } catch (error: any) {
@@ -479,7 +452,7 @@ const ActivityEditButton = ({
   onRequestAssignment: () => void;
 }) => {
   const t = useTranslations('CourseEdit.ActivityElement');
-  const course = useCourse() as Course;
+  const course = useCourse() as any;
 
   if (activity.activity_type === 'TYPE_DYNAMIC') {
     const editUrl = `${getAbsoluteUrl('')}/course/${cleanCourseUuid(course?.courseStructure?.course_uuid ?? course_uuid)}/activity/${cleanActivityUuid(activity.activity_uuid)}/edit`;

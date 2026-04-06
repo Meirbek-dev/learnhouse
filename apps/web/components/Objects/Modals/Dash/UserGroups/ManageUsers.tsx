@@ -1,7 +1,6 @@
 'use client';
 
 import { linkUserToUserGroup, unLinkUserToUserGroup } from '@services/usergroups/usergroups';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { swrFetcher } from '@services/utils/ts/requests';
 import type { ColumnDef } from '@tanstack/react-table';
 import { getAPIUrl } from '@services/config/config';
@@ -27,12 +26,8 @@ interface UserRow {
 
 const ManageUsers = (props: ManageUsersProps) => {
   const t = useTranslations('Components.ManageUsers');
-  const session = usePlatformSession() as any;
-  const access_token = session?.data?.tokens?.access_token;
-  const { data: Users } = useSWR(`${getAPIUrl()}members`, (url) => swrFetcher(url, access_token));
-  const { data: UGusers } = useSWR(`${getAPIUrl()}usergroups/${props.usergroup_id}/users`, (url) =>
-    swrFetcher(url, access_token),
-  );
+  const { data: Users } = useSWR(`${getAPIUrl()}members`, (url) => swrFetcher(url));
+  const { data: UGusers } = useSWR(`${getAPIUrl()}usergroups/${props.usergroup_id}/users`, (url) => swrFetcher(url));
 
   // Normalize Users response which may be either an array or a paginated object { users: [], total, ... }
   const platformUsersList = (data: any) => {
@@ -50,7 +45,7 @@ const ManageUsers = (props: ManageUsersProps) => {
   };
 
   const handleLinkUser = async (user_id: number) => {
-    const res = await linkUserToUserGroup(props.usergroup_id, user_id, access_token);
+    const res = await linkUserToUserGroup(props.usergroup_id, user_id);
     if (res.status === 200) {
       toast.success(t('linkSuccess'));
       mutate(`${getAPIUrl()}usergroups/${props.usergroup_id}/users`);
@@ -60,7 +55,7 @@ const ManageUsers = (props: ManageUsersProps) => {
   };
 
   const handleUnlinkUser = async (user_id: number) => {
-    const res = await unLinkUserToUserGroup(props.usergroup_id, user_id, access_token);
+    const res = await unLinkUserToUserGroup(props.usergroup_id, user_id);
     if (res.status === 200) {
       toast.success(t('unlinkSuccess'));
       mutate(`${getAPIUrl()}usergroups/${props.usergroup_id}/users`);

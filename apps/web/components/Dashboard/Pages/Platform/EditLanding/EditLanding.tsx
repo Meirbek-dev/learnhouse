@@ -291,7 +291,6 @@ const makeGradientDirectionItems = (t: Function) =>
 const EditLanding = () => {
   const platform = usePlatform() as any;
   const session = usePlatformSession() as any;
-  const access_token = session?.data?.tokens?.access_token;
   const [isLandingEnabled, setIsLandingEnabled] = useState(false);
   const tNotify = useTranslations('DashPage.Notifications');
   const t = useTranslations('DashPage.PlatformSettings.Landing');
@@ -432,13 +431,10 @@ const EditLanding = () => {
     startTransition(() => setIsSaving(true));
     const loadingToast = toast.loading(tNotify('savingLandingPage'));
     try {
-      const res = await updateLanding(
-        {
-          sections: landingData.sections,
-          enabled: isLandingEnabled,
-        },
-        access_token,
-      );
+      const res = await updateLanding({
+        sections: landingData.sections,
+        enabled: isLandingEnabled,
+      });
 
       if (res.status === 200) {
         toast.success(tNotify('landingPageSavedSuccess'), { id: loadingToast });
@@ -1520,7 +1516,6 @@ interface ImageUploaderProps {
 
 const ImageUploader: FC<ImageUploaderProps> = ({ t, onImageUploaded, className, buttonText, id }) => {
   const session = usePlatformSession() as any;
-  const access_token = session?.data?.tokens?.access_token;
   const [isUploading, setIsUploading] = useState(false);
   const tNotify = useTranslations('DashPage.Notifications');
   const inputId = `imageUpload-${id}`;
@@ -1542,7 +1537,7 @@ const ImageUploader: FC<ImageUploaderProps> = ({ t, onImageUploaded, className, 
     setIsUploading(true);
     const loadingToast = toast.loading(tNotify('uploadingImage'));
     try {
-      const response = await uploadLandingContent(file, access_token);
+      const response = await uploadLandingContent(file);
       if (response.status === 200 && response.data?.filename) {
         const imageUrl = getLandingMediaDirectory(response.data.filename);
         onImageUploaded(imageUrl);
@@ -2003,11 +1998,8 @@ const FeaturedCoursesEditor: FC<{
   onChange: (section: LandingFeaturedCourses) => void;
 }> = ({ t, section, onChange }) => {
   const session = usePlatformSession() as any;
-  const access_token = session?.data?.tokens?.access_token;
 
-  const { data: coursesData } = useSWR(access_token ? ['platform-courses', access_token] : null, ([, token]) =>
-    getCourses(null, token),
-  );
+  const { data: coursesData } = useSWR('platform-courses', () => getCourses());
   const courses = coursesData?.courses;
 
   return (

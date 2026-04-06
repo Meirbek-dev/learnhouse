@@ -1,6 +1,5 @@
 'use client';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { assignRoleToUser, removeRoleFromUser } from '@/services/rbac';
 import { Field, FieldError, FieldLabel } from '@components/ui/field';
 import { BarLoader } from '@components/Objects/Loaders/BarLoader';
@@ -34,8 +33,6 @@ interface FormData {
 const RolesUpdate: FC<Props> = (props) => {
   const validationT = useTranslations('Validation');
   const t = useTranslations('Components.RolesUpdate');
-  const session = usePlatformSession() as any;
-  const access_token = session?.data?.tokens?.access_token;
   const validationSchema = createValidationSchema(validationT);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<any>(null);
@@ -48,7 +45,7 @@ const RolesUpdate: FC<Props> = (props) => {
   });
 
   // Fetch available platform roles and sort them by system flag + priority
-  const { data: roles, error: rolesError } = useSWR(`${getAPIUrl()}roles`, (url) => swrFetcher(url, access_token));
+  const { data: roles, error: rolesError } = useSWR(`${getAPIUrl()}roles`, swrFetcher);
 
   const sortedRoles = (roles ?? []).toSorted((a: any, b: any) => {
     // System roles first, then by descending priority, then by name
@@ -72,9 +69,9 @@ const RolesUpdate: FC<Props> = (props) => {
 
         // Revoke old role, then assign new one
         if (!Number.isNaN(oldRoleId)) {
-          await removeRoleFromUser(access_token, userId, oldRoleId);
+          await removeRoleFromUser(userId, oldRoleId);
         }
-        await assignRoleToUser(access_token, userId, newRoleId);
+        await assignRoleToUser(userId, newRoleId);
 
         await mutate(`${getAPIUrl()}members`);
         props.setRolesModal(false);

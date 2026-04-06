@@ -11,7 +11,6 @@ import * as v from 'valibot';
 import useSWR from 'swr';
 
 import { Field, FieldDescription, FieldError, FieldLabel } from '@components/ui/field';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { getAPIUrl } from '@/services/config/config';
 import { Textarea } from '@components/ui/textarea';
 import { Switch } from '@components/ui/switch';
@@ -44,7 +43,6 @@ interface FormValues {
 const NewExam = ({ submitActivity, chapterId, course, closeModal }: any) => {
   const validationT = useTranslations('Validation');
   const t = useTranslations('Components.NewExamModal');
-  const session = usePlatformSession();
 
   const { data: limits } = useSWR(`${getAPIUrl()}exams/config`, swrFetcher);
   const validationSchema = createValidationSchema(validationT, limits);

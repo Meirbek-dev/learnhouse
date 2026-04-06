@@ -7,54 +7,54 @@ from config.config import get_settings
 ACCESS_COOKIE_KEY = "access_token_cookie"
 REFRESH_COOKIE_KEY = "refresh_token_cookie"
 ACCESS_COOKIE_TTL_SECONDS = int(timedelta(hours=8).total_seconds())
-REFRESH_COOKIE_TTL_SECONDS = int(timedelta(days=30).total_seconds())
+REFRESH_COOKIE_TTL_SECONDS = int(timedelta(days=7).total_seconds())
 
 
 def set_access_cookie(response: Response, value: str) -> None:
     settings = get_settings()
     cookie_domain = settings.hosting_config.cookie_config.domain
-    is_ssl_enabled = settings.hosting_config.ssl
+    is_ssl = settings.hosting_config.ssl
 
-    cookie_kwargs: dict[str, object] = {
+    kwargs: dict[str, object] = {
         "httponly": True,
-        "secure": bool(is_ssl_enabled),
-        "samesite": "lax",
+        "secure": bool(is_ssl),
+        "samesite": "strict",
         "max_age": ACCESS_COOKIE_TTL_SECONDS,
-        "path": "/",
+        "path": "/api",
     }
-
     if cookie_domain:
-        cookie_kwargs["domain"] = cookie_domain
+        kwargs["domain"] = cookie_domain
 
-    response.set_cookie(key=ACCESS_COOKIE_KEY, value=value, **cookie_kwargs)
+    response.set_cookie(key=ACCESS_COOKIE_KEY, value=value, **kwargs)
 
 
 def set_refresh_cookie(response: Response, value: str) -> None:
     settings = get_settings()
     cookie_domain = settings.hosting_config.cookie_config.domain
-    is_ssl_enabled = settings.hosting_config.ssl
+    is_ssl = settings.hosting_config.ssl
 
-    cookie_kwargs: dict[str, object] = {
+    kwargs: dict[str, object] = {
         "httponly": True,
-        "secure": bool(is_ssl_enabled),
-        "samesite": "lax",
+        "secure": bool(is_ssl),
+        "samesite": "strict",
         "max_age": REFRESH_COOKIE_TTL_SECONDS,
-        "path": "/",
+        "path": "/api/auth/refresh",
     }
-
     if cookie_domain:
-        cookie_kwargs["domain"] = cookie_domain
+        kwargs["domain"] = cookie_domain
 
-    response.set_cookie(key=REFRESH_COOKIE_KEY, value=value, **cookie_kwargs)
+    response.set_cookie(key=REFRESH_COOKIE_KEY, value=value, **kwargs)
 
 
 def clear_auth_cookies(response: Response) -> None:
     settings = get_settings()
     cookie_domain = settings.hosting_config.cookie_config.domain
 
-    delete_kwargs: dict[str, object] = {"path": "/"}
+    access_kwargs: dict[str, object] = {"path": "/api"}
+    refresh_kwargs: dict[str, object] = {"path": "/api/auth/refresh"}
     if cookie_domain:
-        delete_kwargs["domain"] = cookie_domain
+        access_kwargs["domain"] = cookie_domain
+        refresh_kwargs["domain"] = cookie_domain
 
-    response.delete_cookie(ACCESS_COOKIE_KEY, **delete_kwargs)
-    response.delete_cookie(REFRESH_COOKIE_KEY, **delete_kwargs)
+    response.delete_cookie(ACCESS_COOKIE_KEY, **access_kwargs)
+    response.delete_cookie(REFRESH_COOKIE_KEY, **refresh_kwargs)

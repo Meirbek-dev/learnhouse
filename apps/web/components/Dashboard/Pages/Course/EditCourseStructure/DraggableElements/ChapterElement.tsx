@@ -11,7 +11,6 @@ import {
 } from '@/components/ui/alert-dialog';
 import { AlertTriangle, Check, GripVertical, Hexagon, Loader2, Pencil, Trash2, X as XIcon } from 'lucide-react';
 import { useChapterMutations } from '@/hooks/mutations/useChapterMutations';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import ToolTip from '@/components/Objects/Elements/Tooltip/Tooltip';
 import { Draggable, Droppable } from '@hello-pangea/dnd';
 import { Button } from '@/components/ui/button';
@@ -59,17 +58,7 @@ interface ChapterElementProps {
   course_uuid: string;
 }
 
-interface PlatformSession {
-  data?: {
-    tokens?: {
-      access_token?: string;
-    };
-  };
-}
-
 const ChapterElement = ({ chapter, chapterIndex, course_uuid }: ChapterElementProps) => {
-  const session = usePlatformSession() as PlatformSession;
-  const access_token = session?.data?.tokens?.access_token;
   const { deleteChapter, updateChapter } = useChapterMutations(course_uuid, true);
   const t = useTranslations('CourseEdit');
 
@@ -94,10 +83,6 @@ const ChapterElement = ({ chapter, chapterIndex, course_uuid }: ChapterElementPr
   };
 
   const handleSaveEdit = async () => {
-    if (!access_token) {
-      toast.error(t('authRequired'));
-      return;
-    }
     const trimmedName = editedName.trim();
     if (!trimmedName || trimmedName === chapter.name) {
       handleCancelEdit();
@@ -105,7 +90,7 @@ const ChapterElement = ({ chapter, chapterIndex, course_uuid }: ChapterElementPr
     }
     setIsSavingEdit(true);
     try {
-      await updateChapter(chapter.chapter_uuid, { name: trimmedName }, access_token);
+      await updateChapter(chapter.chapter_uuid, { name: trimmedName });
       setIsEditing(false);
     } catch (error: any) {
       toast.error(error?.message || t('chapterUpdateFailed'));
@@ -116,13 +101,9 @@ const ChapterElement = ({ chapter, chapterIndex, course_uuid }: ChapterElementPr
   };
 
   const handleDeleteChapter = async () => {
-    if (!access_token) {
-      toast.error(t('authRequired'));
-      return;
-    }
     setIsDeletingChapter(true);
     try {
-      await deleteChapter(chapter.chapter_uuid, access_token);
+      await deleteChapter(chapter.chapter_uuid);
       setIsDeleteDialogOpen(false);
     } catch (error: any) {
       toast.error(error?.message || t('chapterDeleteFailed'));

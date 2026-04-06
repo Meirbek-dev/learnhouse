@@ -147,8 +147,6 @@ const CourseActionsMobile = ({ courseuuid, course, trailData }: CourseActionsMob
   const t = useTranslations('Courses.CourseActionsMobile');
   const router = useRouter();
   const session = usePlatformSession() as any;
-  // stable primitives to avoid effects depending on the whole session object
-  const accessToken = session.data?.tokens?.access_token;
   const userId = session.data?.user?.id;
 
   // one-shot guards to avoid repeated requests when context identity changes
@@ -173,7 +171,7 @@ const CourseActionsMobile = ({ courseuuid, course, trailData }: CourseActionsMob
   useEffect(() => {
     const fetchLinkedProducts = async () => {
       try {
-        const response = await getProductsByCourse(course.id, accessToken);
+        const response = await getProductsByCourse(course.id);
         setLinkedProducts(response.data || []);
       } catch {
         console.error('Failed to fetch linked products');
@@ -186,13 +184,13 @@ const CourseActionsMobile = ({ courseuuid, course, trailData }: CourseActionsMob
     if (fetchedLinkedProductsRef.current[course.id]) return;
     fetchedLinkedProductsRef.current[course.id] = true;
     fetchLinkedProducts();
-  }, [course.id, accessToken]);
+  }, [course.id]);
 
   useEffect(() => {
     const checkAccess = async () => {
       if (!userId) return;
       try {
-        const response = await checkPaidAccess(course.id, accessToken);
+        const response = await checkPaidAccess(course.id);
         setHasAccess(response.has_access);
       } catch {
         console.error('Failed to check course access');
@@ -201,11 +199,11 @@ const CourseActionsMobile = ({ courseuuid, course, trailData }: CourseActionsMob
     };
 
     if (linkedProducts.length === 0) return;
-    const checkKey = `${course.id}:${accessToken || 'no-token'}`;
+    const checkKey = `${course.id}`;
     if (checkedAccessRef.current[checkKey]) return;
     checkedAccessRef.current[checkKey] = true;
     checkAccess();
-  }, [course.id, accessToken, userId, linkedProducts]);
+  }, [course.id, userId, linkedProducts]);
 
   const handleCourseAction = async () => {
     if (!session.data?.user) {
@@ -249,7 +247,7 @@ const CourseActionsMobile = ({ courseuuid, course, trailData }: CourseActionsMob
 
     startTransition(() => setIsActionLoading(true));
     try {
-      await startCourse(`course_${courseuuid}`, session.data?.tokens?.access_token);
+      await startCourse(`course_${courseuuid}`);
       await revalidateTags(['courses']);
 
       // Get the first activity from the first chapter

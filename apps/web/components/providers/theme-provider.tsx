@@ -23,7 +23,7 @@ interface ThemeProviderProps {
 
 export function ThemeProvider({ children, defaultThemeName = 'default', userTheme }: ThemeProviderProps) {
   const initialThemeName = userTheme || defaultThemeName;
-  const [themeName, setThemeName] = useState<string>(initialThemeName);
+  const [themeName, setThemeName] = useState(initialThemeName);
 
   const [isLoading, setIsLoading] = useState(false);
 

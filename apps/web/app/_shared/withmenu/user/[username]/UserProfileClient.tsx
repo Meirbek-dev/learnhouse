@@ -17,7 +17,6 @@ import {
   X,
 } from 'lucide-react';
 import CourseThumbnail from '@components/Objects/Thumbnails/CourseThumbnail';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
 import { getCoursesByUser } from '@services/users/users';
 import UserAvatar from '@components/Objects/UserAvatar';
@@ -79,8 +78,6 @@ const ImageModal: FC<{
 };
 
 const UserProfileClient = ({ userData, profile }: UserProfileClientProps) => {
-  const session = usePlatformSession();
-  const access_token = session?.data?.tokens?.access_token;
   const t = useTranslations('UserProfilePage');
   const [selectedImage, setSelectedImage] = useState<{
     url: string;
@@ -92,10 +89,10 @@ const UserProfileClient = ({ userData, profile }: UserProfileClientProps) => {
 
   useEffect(() => {
     const fetchUserCourses = async () => {
-      if (userData.id && access_token) {
+      if (userData.id) {
         try {
           setIsLoadingCourses(true);
-          const coursesData = await getCoursesByUser(userData.id, access_token);
+          const coursesData = await getCoursesByUser(userData.id);
           if (coursesData.data) {
             setUserCourses(coursesData.data);
           }
@@ -109,7 +106,7 @@ const UserProfileClient = ({ userData, profile }: UserProfileClientProps) => {
     };
 
     fetchUserCourses();
-  }, [userData.id, access_token, t]);
+  }, [userData.id, t]);
 
   return (
     <div className="text-foreground container mx-auto py-8">

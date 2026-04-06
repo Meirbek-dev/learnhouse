@@ -1,21 +1,13 @@
-import { RequestBodyWithAuthHeader, getResponseMetadata } from '@services/utils/ts/requests';
-import { resolveServerAccessToken } from '@/lib/auth/server-access-token';
-import { getAPIUrl } from '@services/config/config';
+'use server';
 
-/*
- This file includes only POST, PUT, DELETE requests
- GET requests are called from the frontend using SWR (https://swr.vercel.app/)
-*/
+import { getResponseMetadata } from '@services/utils/ts/requests';
+import { apiFetch } from '@/lib/api-client';
 
-export async function updatePassword(user_id: number, data: any, access_token: string) {
-  const token = await resolveServerAccessToken(access_token);
-  if (!token) {
-    throw new Error('Authentication required');
-  }
-
-  const result: any = await fetch(
-    `${getAPIUrl()}users/change_password/${user_id}`,
-    RequestBodyWithAuthHeader('PUT', data, null, token),
-  );
+export async function updatePassword(user_id: number, data: any) {
+  const result = await apiFetch(`users/change_password/${user_id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
   return await getResponseMetadata(result);
 }

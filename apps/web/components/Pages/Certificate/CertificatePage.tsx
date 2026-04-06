@@ -39,15 +39,9 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ courseid, qrCodeLink 
     const fetchCertificate = async () => {
       fetchedCertificateRef.current[courseid] = true;
 
-      if (!session?.data?.tokens?.access_token) {
-        setError(t('errorAuth'));
-        setIsLoading(false);
-        return;
-      }
-
       try {
         const cleanCourseId = courseid.replace('course_', '');
-        const result = await getUserCertificates(`course_${cleanCourseId}`, session.data.tokens.access_token);
+        const result = await getUserCertificates(`course_${cleanCourseId}`);
 
         if (result.success && result.data && result.data.length > 0) {
           setUserCertificate(result.data[0]);
@@ -63,7 +57,7 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ courseid, qrCodeLink 
     };
 
     fetchCertificate();
-  }, [courseid, session?.data?.tokens?.access_token, t]);
+  }, [courseid, t]);
 
   // Certificate type translation helper
   const getCertificationTypeLabel = (type: string): string => {

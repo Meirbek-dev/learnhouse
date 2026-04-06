@@ -99,22 +99,30 @@ class GeneralConfig(PlatformSectionSettings):
 
 
 class SecurityConfig(PlatformSectionSettings):
-    auth_jwt_secret_key: str = Field(
-        min_length=1,
-        validation_alias="PLATFORM_AUTH_JWT_SECRET_KEY",
+    auth_ed25519_private_key: str | None = Field(
+        default=None,
+        validation_alias="PLATFORM_AUTH_ED25519_PRIVATE_KEY",
+    )
+    auth_ed25519_public_key: str | None = Field(
+        default=None,
+        validation_alias="PLATFORM_AUTH_ED25519_PUBLIC_KEY",
     )
 
-    @field_validator("auth_jwt_secret_key", mode="before")
+    @field_validator(
+        "auth_ed25519_private_key", "auth_ed25519_public_key", mode="before"
+    )
     @classmethod
-    def validate_auth_jwt_secret_key(cls, value: str) -> str:
-        if not isinstance(value, str):
-            return value
+    def normalize_key_fields(cls, value: str | None) -> str | None:
+        return _strip_optional_string(value)
 
-        stripped = value.strip()
-        if not stripped:
-            raise ValueError("PLATFORM_AUTH_JWT_SECRET_KEY must not be empty")
-
-        return stripped
+    @model_validator(mode="after")
+    def validate_key_presence(self) -> "SecurityConfig":
+        if not self.auth_ed25519_private_key and not self.auth_ed25519_public_key:
+            raise ValueError(
+                "At least one of PLATFORM_AUTH_ED25519_PRIVATE_KEY or "
+                "PLATFORM_AUTH_ED25519_PUBLIC_KEY must be set."
+            )
+        return self
 
 
 class AIConfig(PlatformSectionSettings):
@@ -451,16 +459,6 @@ class PlatformConfig(PydanticStrictBaseModel):
 
     @model_validator(mode="after")
     def validate_security_posture(self) -> "PlatformConfig":
-        secret = self.security_config.auth_jwt_secret_key.strip().lower()
-        if (
-            not self.general_config.development_mode
-            and secret in _INSECURE_DEFAULT_SECRETS
-        ):
-            raise ValueError(
-                "PLATFORM_AUTH_JWT_SECRET_KEY uses an insecure default. "
-                "Set a strong secret before running in non-development mode."
-            )
-
         return self
 
 

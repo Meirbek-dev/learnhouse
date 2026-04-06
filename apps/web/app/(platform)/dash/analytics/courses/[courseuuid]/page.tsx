@@ -8,7 +8,6 @@ import AnalyticsEmptyState from '@components/Dashboard/Analytics/AnalyticsEmptyS
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { getTranslations } from 'next-intl/server';
 import { Badge } from '@/components/ui/badge';
-import { auth } from '@/auth';
 
 export default function PlatformAnalyticsCourseDetailPage(props: {
   params: Promise<{ courseuuid: string }>;
@@ -27,22 +26,11 @@ async function PlatformAnalyticsCourseDetailPageInner(props: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { courseuuid } = await props.params;
-  const session = await auth();
-  const accessToken = session?.tokens?.access_token;
   const query = normalizeAnalyticsQuery(await props.searchParams);
   const t = await getTranslations('TeacherAnalytics');
 
-  if (!accessToken) {
-    return (
-      <AnalyticsEmptyState
-        title={t('pages.courseDetailTitle')}
-        description={t('pages.courseDetailDesc')}
-      />
-    );
-  }
-
   try {
-    const detail = await getTeacherCourseDetailByUuid(courseuuid, accessToken, query);
+    const detail = await getTeacherCourseDetailByUuid(courseuuid, query);
     return (
       <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-6 px-4 py-6 md:px-6 xl:px-8">
         <Card className="border-slate-200 bg-white/90 shadow-sm">

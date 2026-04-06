@@ -2,7 +2,6 @@
 
 import { useAssignmentsTaskStore } from '@components/Contexts/Assignments/AssignmentsTaskContext';
 import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { GalleryVerticalEnd, Info, TentTree, Trash } from 'lucide-react';
 import { deleteAssignmentTask } from '@services/courses/assignments';
 import { getAPIUrl } from '@services/config/config';
@@ -22,8 +21,6 @@ const AssignmentTaskEditor = ({ page }: any) => {
   const assignmentTask = useAssignmentsTaskStore((s) => s.assignmentTask);
   const setSelectedTaskUUID = useAssignmentsTaskStore((s) => s.setSelectedTaskUUID);
   const setAssignmentTask = useAssignmentsTaskStore((s) => s.setAssignmentTask);
-  const session = usePlatformSession() as any;
-  const access_token = session?.data?.tokens?.access_token;
   const { mutate } = useSWRConfig();
 
   const [taskUUIDKey, setTaskUUIDKey] = useState(assignmentTask.assignment_task_uuid);
@@ -49,11 +46,7 @@ const AssignmentTaskEditor = ({ page }: any) => {
 
     const toastId = toast.loading(t('deletingTask'));
     try {
-      await deleteAssignmentTask(
-        assignmentTask.assignment_task_uuid,
-        assignment.assignment_object.assignment_uuid,
-        access_token,
-      );
+      await deleteAssignmentTask(assignmentTask.assignment_task_uuid, assignment.assignment_object.assignment_uuid);
       setAssignmentTask({});
       setSelectedTaskUUID('');
 

@@ -98,8 +98,6 @@ export default function RBACAdminClient() {
     page_size: number;
   } | null>(null);
   const [isAuditLoading, setIsAuditLoading] = useState(false);
-
-  const accessToken = session?.data?.tokens?.access_token;
   const isSuperAdmin = can(Resources.ROLE, Actions.MANAGE, Scopes.ALL);
   const currentUserMaxPriority = useMemo(() => {
     const sessionRoles = session?.data?.roles ?? [];
@@ -110,17 +108,15 @@ export default function RBACAdminClient() {
     data: permissions = [],
     isLoading: permissionsLoading,
     error: permissionsError,
-  } = useSWR(accessToken ? ['rbac-permissions', accessToken] : null, ([, token]) => listAllPermissions(token), {
+  } = useSWR('rbac-permissions', () => listAllPermissions(), {
     dedupingInterval: 3_600_000,
     revalidateOnFocus: false,
   });
 
   const fetchRoles = useCallback(async () => {
-    if (!accessToken) return;
-
     setLoadingRoles(true);
     try {
-      const rolesData = await listRoles(accessToken);
+      const rolesData = await listRoles();
       const sortedRoles = rolesData
         .toSorted((a, b) => {
           const aSystem = a.is_system ? 0 : 1;
@@ -136,7 +132,7 @@ export default function RBACAdminClient() {
     } finally {
       setLoadingRoles(false);
     }
-  }, [accessToken, t]);
+  }, [t]);
 
   const refreshSession = async () => {
     const timeoutMs = 5000;
@@ -151,14 +147,7 @@ export default function RBACAdminClient() {
   };
 
   const loadRoleWithPermissions = async (roleId: number): Promise<RoleWithPermissions> => {
-    if (!accessToken) {
-      throw new Error('Missing credentials');
-    }
-
-    const [role, rolePermissions] = await Promise.all([
-      apiGetRole(accessToken, roleId),
-      getRolePermissions(accessToken, roleId),
-    ]);
+    const [role, rolePermissions] = await Promise.all([apiGetRole(roleId), getRolePermissions(roleId)]);
 
     return {
       ...role,
@@ -194,10 +183,10 @@ export default function RBACAdminClient() {
 
   useEffect(() => {
     const fetchAudit = async () => {
-      if (!accessToken || activeTab !== 'audit') return;
+      if (activeTab !== 'audit') return;
       setIsAuditLoading(true);
       try {
-        const data = await listRoleAuditLog(accessToken, auditPage, 20);
+        const data = await listRoleAuditLog(auditPage, 20);
         setAuditData({
           items: Array.isArray(data.items) ? data.items : [],
           total: typeof data.total === 'number' ? data.total : 0,
@@ -212,7 +201,7 @@ export default function RBACAdminClient() {
     };
 
     fetchAudit();
-  }, [accessToken, activeTab, auditPage, t]);
+  }, [activeTab, auditPage, t]);
 
   const permissionsByResource = permissions.reduce<Record<string, Permission[]>>((acc, permission) => {
     if (!acc[permission.resource_type]) {
@@ -282,16 +271,14 @@ export default function RBACAdminClient() {
     description: string;
     priority: number;
   }) => {
-    if (!accessToken) return;
-
     const sourceRole = roleDialogMode === 'clone' ? roleDialogRole : null;
 
     try {
-      const newRole = await apiCreateRole(accessToken, data);
+      const newRole = await apiCreateRole(data);
 
       if (sourceRole?.permissions?.length) {
         for (const permission of sourceRole.permissions) {
-          await addPermissionToRole(accessToken, newRole.id, permission.id);
+          await addPermissionToRole(newRole.id, permission.id);
         }
       }
 
@@ -310,10 +297,8 @@ export default function RBACAdminClient() {
     roleId: number,
     data: { name: string; slug: string; description: string; priority: number },
   ) => {
-    if (!accessToken) return;
-
     try {
-      await apiUpdateRole(accessToken, roleId, {
+      await apiUpdateRole(roleId, {
         name: data.name,
         description: data.description,
         priority: data.priority,
@@ -334,12 +319,12 @@ export default function RBACAdminClient() {
   };
 
   const confirmDeleteRole = async () => {
-    if (!accessToken || !roleToDelete) return;
+    if (!roleToDelete) return;
 
     setDeletingRoleId(roleToDelete.id);
     setRoleToDelete(null);
     try {
-      await apiDeleteRole(accessToken, roleToDelete.id);
+      await apiDeleteRole(roleToDelete.id);
       await fetchRoles();
       await refreshSession();
       toast.success(t('deletedRoleSuccess'));
@@ -378,16 +363,16 @@ export default function RBACAdminClient() {
   };
 
   const handleTogglePermission = async (permission: Permission, hasPermission: boolean) => {
-    if (!accessToken || !permissionsRole) return;
+    if (!permissionsRole) return;
 
     setPendingPermissionIds((prev) => [...prev, permission.id]);
     optimisticTogglePermission(permission, !hasPermission);
 
     try {
       if (hasPermission) {
-        await removePermissionFromRole(accessToken, permissionsRole.id, permission.id);
+        await removePermissionFromRole(permissionsRole.id, permission.id);
       } else {
-        await addPermissionToRole(accessToken, permissionsRole.id, permission.id);
+        await addPermissionToRole(permissionsRole.id, permission.id);
       }
 
       await refreshPermissionsRole(permissionsRole.id);
@@ -403,7 +388,7 @@ export default function RBACAdminClient() {
   };
 
   const handleToggleResourcePermissions = async (resourceType: string, resourcePermissions: Permission[]) => {
-    if (!accessToken || !permissionsRole) return;
+    if (!permissionsRole) return;
 
     setPendingResourceToggles((prev) => [...prev, resourceType]);
 
@@ -431,10 +416,10 @@ export default function RBACAdminClient() {
       for (const permission of resourcePermissions) {
         const hasPermission = currentPermissionIds.has(permission.id);
         if (shouldGrantAll && !hasPermission) {
-          await addPermissionToRole(accessToken, permissionsRole.id, permission.id);
+          await addPermissionToRole(permissionsRole.id, permission.id);
         }
         if (!shouldGrantAll && hasPermission) {
-          await removePermissionFromRole(accessToken, permissionsRole.id, permission.id);
+          await removePermissionFromRole(permissionsRole.id, permission.id);
         }
       }
 

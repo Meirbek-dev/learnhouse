@@ -3,7 +3,6 @@
 import type { components } from '@/lib/api/generated';
 
 import UnconfiguredPaymentsDisclaimer from '@components/Pages/Payments/UnconfiguredPaymentsDisclaimer';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { usePaymentsEnabled } from '@hooks/usePaymentsEnabled';
@@ -126,16 +125,10 @@ const PaymentsUsersTable = ({ data }: { data: PaymentUserData[] }) => {
 };
 
 const PaymentsCustomersPage = () => {
-  const session = usePlatformSession();
-  const access_token = session?.data?.tokens?.access_token;
   const { isEnabled, isLoading } = usePaymentsEnabled();
   const t = useTranslations('Payments.CustomersPage');
 
-  const {
-    data: customers,
-    error,
-    isLoading: customersLoading,
-  } = useSWR(access_token ? ['/payments/customers', access_token] : null, ([_url, token]) => getCustomers(token));
+  const { data: customers, error, isLoading: customersLoading } = useSWR('/payments/customers', () => getCustomers());
 
   if (!(isEnabled || isLoading)) {
     return <UnconfiguredPaymentsDisclaimer />;

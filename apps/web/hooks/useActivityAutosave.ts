@@ -8,7 +8,6 @@ import { useCallback } from 'react';
 interface ActivityAutosaveOptions {
   activityUuid: string;
   courseUuid: string;
-  accessToken: string;
   delay?: number;
 }
 
@@ -22,14 +21,14 @@ export function useActivityAutosave(options: ActivityAutosaveOptions) {
     async (payload: any) => {
       setActivitySaveStatus('saving');
       try {
-        await updateActivity(options.activityUuid, payload, options.accessToken);
+        await updateActivity(options.activityUuid, payload);
         setActivitySaveStatus('saved');
       } catch (error: any) {
         setActivitySaveStatus('error');
         throw error;
       }
     },
-    [options.accessToken, options.activityUuid, setActivitySaveStatus, updateActivity],
+    [options.activityUuid, setActivitySaveStatus, updateActivity],
   );
 
   const debouncedSave = useDebouncedCallback((payload: any) => {

@@ -1,5 +1,7 @@
 'use client';
 
+import { apiFetch } from '@/lib/api-client';
+
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Field, FieldDescription, FieldLabel } from '@/components/ui/field';
@@ -56,11 +58,10 @@ const createValidationSchema = (
 interface ExamSettingsProps {
   exam: any;
   courseUuid: string;
-  accessToken: string;
   onSettingsUpdated: () => void;
 }
 
-export default function ExamSettings({ exam, courseUuid, accessToken, onSettingsUpdated }: ExamSettingsProps) {
+export default function ExamSettings({ exam, courseUuid, onSettingsUpdated }: ExamSettingsProps) {
   const t = useTranslations('Components.ExamSettings');
   const [isPending, startTransition] = useTransition();
 
@@ -128,15 +129,10 @@ export default function ExamSettings({ exam, courseUuid, accessToken, onSettings
         try {
           // Always enforce shuffle_answers=true
           const payload = { ...values, shuffle_answers: true };
-          const response = await fetch(`${getAPIUrl()}exams/${exam.exam_uuid}`, {
+          const response = await apiFetch(`exams/${exam.exam_uuid}`, {
             method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${accessToken}`,
-            },
-            body: JSON.stringify({
-              settings: payload,
-            }),
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ settings: payload }),
           });
 
           if (!response.ok) {
@@ -418,7 +414,6 @@ export default function ExamSettings({ exam, courseUuid, accessToken, onSettings
                 <WhitelistManagement
                   examUuid={exam.exam_uuid}
                   courseUuid={courseUuid}
-                  accessToken={accessToken}
                   currentWhitelist={settings.whitelist_user_ids || []}
                   onWhitelistUpdated={onSettingsUpdated}
                 />

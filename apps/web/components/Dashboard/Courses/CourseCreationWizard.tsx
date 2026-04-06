@@ -6,7 +6,6 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { CourseChoiceCard, courseWorkflowSummaryCardClass } from './courseWorkflowUi';
 import { CheckCircle2, ChevronDown, Loader2, Search, Sparkles } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState, useTransition } from 'react';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import type { CourseWizardValues } from '@/schemas/courseSchemas';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { courseWizardSchema } from '@/schemas/courseSchemas';
@@ -26,8 +25,6 @@ export default function CourseCreationWizard() {
   const tCommon = useTranslations('Common');
   const router = useRouter();
   const searchParams = useSearchParams();
-  const session = usePlatformSession() as any;
-  const accessToken = session?.data?.tokens?.access_token;
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
 
   const form = useForm<CourseWizardValues>({
@@ -52,39 +49,35 @@ export default function CourseCreationWizard() {
   const [selectedSourceName, setSelectedSourceName] = useState('');
   const searchDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const handleSourceSearch = useCallback(
-    (query: string) => {
-      setSourceQuery(query);
-      if (!accessToken) return;
+  const handleSourceSearch = useCallback((query: string) => {
+    setSourceQuery(query);
 
-      if (searchDebounce.current) clearTimeout(searchDebounce.current);
-      searchDebounce.current = setTimeout(async () => {
-        setIsSearching(true);
-        try {
-          const results = await searchEditableCourses(query, accessToken, 20);
-          setSourceOptions(
-            results.map((c: any) => ({
-              course_uuid: c.course_uuid,
-              name: c.name,
-              cleanUuid: cleanCourseUuid(c.course_uuid) ?? c.course_uuid,
-            })),
-          );
-        } catch {
-          // ignore search errors
-        } finally {
-          setIsSearching(false);
-        }
-      }, 300);
-    },
-    [accessToken],
-  );
+    if (searchDebounce.current) clearTimeout(searchDebounce.current);
+    searchDebounce.current = setTimeout(async () => {
+      setIsSearching(true);
+      try {
+        const results = await searchEditableCourses(query, 20);
+        setSourceOptions(
+          results.map((c: any) => ({
+            course_uuid: c.course_uuid,
+            name: c.name,
+            cleanUuid: cleanCourseUuid(c.course_uuid) ?? c.course_uuid,
+          })),
+        );
+      } catch {
+        // ignore search errors
+      } finally {
+        setIsSearching(false);
+      }
+    }, 300);
+  }, []);
 
   // Trigger initial load when outline panel opens
   useEffect(() => {
-    if (template === 'outline' && sourceOptions.length === 0 && accessToken) {
+    if (template === 'outline' && sourceOptions.length === 0) {
       handleSourceSearch('');
     }
-  }, [template, sourceOptions.length, accessToken, handleSourceSearch]);
+  }, [template, sourceOptions.length, handleSourceSearch]);
 
   useEffect(() => {
     const templateParam = searchParams.get('tpl');
@@ -109,27 +102,19 @@ export default function CourseCreationWizard() {
 
   const createOutlineFromSource = async (createdCourse: any) => {
     if (!sourceCourseUuid) return;
-    const sourceMetadata = await getCourseMetadata(prefixedCourseUuid(sourceCourseUuid), null, accessToken, true);
+    const sourceMetadata = await getCourseMetadata(prefixedCourseUuid(sourceCourseUuid), null, undefined, true);
     const chapters = Array.isArray(sourceMetadata?.chapters) ? sourceMetadata.chapters : [];
     for (const chapter of chapters) {
-      await createChapter(
-        {
-          name: chapter.name || t('importedChapterName'),
-          description: chapter.description || t('importedChapterDescription'),
-          thumbnail_image: '',
-          course_id: createdCourse.id,
-        },
-        accessToken,
-      );
+      await createChapter({
+        name: chapter.name || t('importedChapterName'),
+        description: chapter.description || t('importedChapterDescription'),
+        thumbnail_image: '',
+        course_id: createdCourse.id,
+      });
     }
   };
 
   const handleCreate = form.handleSubmit((values) => {
-    if (!accessToken) {
-      toast.error(t('errors.authRequired'));
-      return;
-    }
-
     startTransition(() => {
       void (async () => {
         try {
@@ -146,7 +131,6 @@ export default function CourseCreationWizard() {
               template: values.template !== 'outline' ? values.template : undefined,
             },
             null,
-            accessToken,
           );
 
           const createdCourse = result.data;
@@ -159,7 +143,6 @@ export default function CourseCreationWizard() {
             throw new Error((typeof detail === 'string' ? detail : undefined) || t('errors.creationFailed'));
           }
 
-          // 'outline' copies chapters from the source course client-side
           // (backend doesn't know which source to copy from)
           if (values.template === 'outline') {
             await createOutlineFromSource(createdCourse);

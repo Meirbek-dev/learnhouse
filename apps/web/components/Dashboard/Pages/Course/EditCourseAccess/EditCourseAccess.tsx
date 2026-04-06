@@ -28,7 +28,6 @@ import { unLinkResourcesToUserGroup } from '@services/usergroups/usergroups';
 import { SectionHeader } from '@components/Dashboard/Courses/SectionHeader';
 import { useCoursesMutations } from '@/hooks/mutations/useCoursesMutations';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { useEffect, useRef, useState, useTransition } from 'react';
 import { useSyncDirtySection } from '@/hooks/useSyncDirtySection';
 import { useCourse } from '@components/Contexts/CourseContext';
@@ -40,8 +39,6 @@ import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
 const EditCourseAccess = () => {
-  const session = usePlatformSession() as any;
-  const access_token = session?.data?.tokens?.access_token;
   const course = useCourse();
   const { courseStructure, editorData } = course;
   const t = useTranslations('DashPage.Courses.Access');
@@ -70,12 +67,11 @@ const EditCourseAccess = () => {
   }, [courseStructure?.public]);
 
   const handleAccessSave = async () => {
-    if (!(access_token && draftPublic !== undefined) || !isDirty) return;
+    if (!(draftPublic !== undefined) || !isDirty) return;
     await save(async () =>
       updateAccess(
         { public: draftPublic },
         {
-          accessToken: access_token,
           lastKnownUpdateDate: courseStructure.update_date,
         },
       ),
@@ -150,8 +146,6 @@ const EditCourseAccess = () => {
 const UserGroupsSection = ({ usergroups, isLoading }: { usergroups: any[]; isLoading: boolean }) => {
   const course = useCourse();
   const [userGroupModal, setUserGroupModal] = useState(false);
-  const session = usePlatformSession() as any;
-  const access_token = session?.data?.tokens?.access_token;
   const t = useTranslations('DashPage.Courses.Access');
 
   return (
@@ -186,7 +180,6 @@ const UserGroupsSection = ({ usergroups, isLoading }: { usergroups: any[]; isLoa
                   key={usergroup.id}
                   usergroup={usergroup}
                   courseUuid={course.courseStructure.course_uuid}
-                  accessToken={access_token}
                 />
               ))}
             </TableBody>
@@ -225,15 +218,7 @@ const UserGroupsSection = ({ usergroups, isLoading }: { usergroups: any[]; isLoa
 };
 
 // Separate component for unlink row with its own dialog state
-const UnlinkUserGroupRow = ({
-  usergroup,
-  courseUuid,
-  accessToken,
-}: {
-  usergroup: any;
-  courseUuid: string;
-  accessToken: string;
-}) => {
+const UnlinkUserGroupRow = ({ usergroup, courseUuid }: { usergroup: any; courseUuid: string }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const course = useCourse();
@@ -242,7 +227,7 @@ const UnlinkUserGroupRow = ({
   const removeUserGroupLink = () => {
     startTransition(async () => {
       try {
-        const res = await unLinkResourcesToUserGroup(usergroup.id, courseUuid, accessToken, {
+        const res = await unLinkResourcesToUserGroup(usergroup.id, courseUuid, {
           courseUuid,
         });
         if (res.status === 200) {

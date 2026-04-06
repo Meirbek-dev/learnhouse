@@ -8,7 +8,6 @@ import { getAnalyticsAssessmentTypeLabel } from '@/lib/analytics/labels';
 import { getLocale, getTranslations } from 'next-intl/server';
 import type { AssessmentType } from '@/types/analytics';
 import { Badge } from '@/components/ui/badge';
-import { auth } from '@/auth';
 
 export default function PlatformAnalyticsAssessmentDetailPage(props: {
   params: Promise<{ assessmentType: AssessmentType; assessmentId: string }>;
@@ -27,26 +26,14 @@ async function PlatformAnalyticsAssessmentDetailPageInner(props: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { assessmentType, assessmentId } = await props.params;
-  const session = await auth();
-  const accessToken = session?.tokens?.access_token;
   const query = normalizeAnalyticsQuery(await props.searchParams);
   const locale = await getLocale();
   const t = await getTranslations('TeacherAnalytics');
-
-  if (!accessToken) {
-    return (
-      <AnalyticsEmptyState
-        title={t('pages.assessmentDetailTitle')}
-        description={t('pages.assessmentDetailDesc')}
-      />
-    );
-  }
 
   try {
     const detail = await getTeacherAssessmentDetail({
       assessmentType,
       assessmentId: Number(assessmentId),
-      accessToken,
       query,
     });
     return (

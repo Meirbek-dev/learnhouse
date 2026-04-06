@@ -58,27 +58,32 @@ export function ActivityAIChatProvider({ activityUuid, children }: PropsWithChil
 
   // Store the adapter's abort function so we can cancel in-flight requests.
   const abortRef = useRef<(() => void) | null>(null);
-  const resolverQueueRef = useRef<Array<(value: string) => void>>([]);
+  const resolverQueueRef = useRef<((value: string) => void)[]>([]);
 
   const adapter = useMemo(
     () =>
       createActivityChatAdapter({
         activityUuid,
-        getAccessToken: () => session?.data?.tokens?.access_token,
         getStatusMessage: (status) => {
           switch (status) {
-            case 'processing':
+            case 'processing': {
               return tStatus('processing');
-            case 'retrieving':
+            }
+            case 'retrieving': {
               return tStatus('retrieving');
-            case 'analyzing':
+            }
+            case 'analyzing': {
               return tStatus('analyzing');
-            case 'generating':
+            }
+            case 'generating': {
               return tStatus('generating');
-            case 'aborted':
+            }
+            case 'aborted': {
               return tStatus('aborted');
-            default:
+            }
+            default: {
               return tStatus('working');
+            }
           }
         },
         getSessionUuid: () => sessionUuidRef.current,
@@ -173,9 +178,11 @@ export function ActivityAIChatProvider({ activityUuid, children }: PropsWithChil
   }, [activityUuid, resetConversation]);
 
   useEffect(() => {
+    const pendingResolvers = resolverQueueRef.current;
+
     return () => {
-      while (resolverQueueRef.current.length) {
-        resolverQueueRef.current.shift()?.('');
+      while (pendingResolvers.length) {
+        pendingResolvers.shift()?.('');
       }
     };
   }, []);

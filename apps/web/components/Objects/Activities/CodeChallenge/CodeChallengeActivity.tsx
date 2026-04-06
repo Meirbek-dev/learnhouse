@@ -4,7 +4,6 @@ import { useTranslations } from 'next-intl';
 import useSWR from 'swr';
 
 import { CodeChallengeEditor } from '@/components/features/courses/code-challenges';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getAPIUrl } from '@services/config/config';
 import { Badge } from '@/components/ui/badge';
@@ -14,12 +13,8 @@ interface CodeChallengeActivityProps {
   course: any;
 }
 
-const fetcher = async ([url, token]: [string, string]) => {
-  const res = await fetch(url, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+const fetcher = async (url: string) => {
+  const res = await fetch(url, { credentials: 'include' });
   if (!res.ok) {
     if (res.status === 404) return null;
     throw new Error('Failed to fetch');
@@ -29,14 +24,11 @@ const fetcher = async ([url, token]: [string, string]) => {
 
 export default function CodeChallengeActivity({ activity, course }: CodeChallengeActivityProps) {
   const t = useTranslations('Activities.CodeChallenges');
-  const session = usePlatformSession();
-  const accessToken = session?.data?.tokens?.access_token;
-
   const activityUuid = activity?.activity_uuid?.replace('activity_', '') || '';
 
   // Fetch challenge settings
   const { data: settings, isLoading } = useSWR(
-    accessToken ? [`${getAPIUrl()}code-challenges/${activityUuid}/settings`, accessToken] : null,
+    activityUuid ? `${getAPIUrl()}code-challenges/${activityUuid}/settings` : null,
     fetcher,
     { revalidateOnFocus: false },
   );

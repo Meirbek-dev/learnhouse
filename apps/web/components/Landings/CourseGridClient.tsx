@@ -10,7 +10,6 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination';
 import CourseThumbnail from '@components/Objects/Thumbnails/CourseThumbnail';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { getCoursesSwrKey, getTrailSwrKey } from '@services/courses/keys';
 import { swrFetcherWithHeaders } from '@services/utils/ts/requests';
 import { swrFetcher } from '@services/utils/ts/requests';
@@ -25,15 +24,13 @@ interface CourseGridClientProps {
 }
 
 export default function CourseGridClient({ initialCourses, initialTotal }: CourseGridClientProps) {
-  const session = usePlatformSession();
-  const accessToken = session?.data?.tokens?.access_token;
   const [page, setPage] = useState(1);
 
   // Fetch courses with pagination
   const COURSES_KEY = getCoursesSwrKey(page, COURSES_PER_PAGE);
   const { data: coursesResponse, isLoading: coursesLoading } = useSWR(
-    COURSES_KEY ? [COURSES_KEY, accessToken] : null,
-    ([url, token]) => swrFetcherWithHeaders(url, token),
+    COURSES_KEY,
+    (url) => swrFetcherWithHeaders(url),
     {
       revalidateOnFocus: false,
       revalidateOnReconnect: false,
@@ -50,17 +47,13 @@ export default function CourseGridClient({ initialCourses, initialTotal }: Cours
 
   // Fetch trail data to show progress on course thumbnails
   const TRAIL_KEY = getTrailSwrKey();
-  const { data: trailData } = useSWR(
-    accessToken && TRAIL_KEY ? [TRAIL_KEY, accessToken] : null,
-    ([url, token]) => swrFetcher(url, token),
-    {
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
-      dedupingInterval: 60_000,
-    },
-  );
+  const { data: trailData } = useSWR(TRAIL_KEY, (url) => swrFetcher(url), {
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+    dedupingInterval: 60_000,
+  });
 
-  const isTrailLoading = Boolean(accessToken && !trailData);
+  const isTrailLoading = !trailData;
 
   // Generate pagination range
   const paginationRange = useMemo(() => {

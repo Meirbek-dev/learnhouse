@@ -1,5 +1,4 @@
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
-import { getOptionalSession } from '@/lib/get-optional-session';
 import { getCourseMetadata } from '@services/courses/courses';
 import type { Metadata } from 'next';
 
@@ -12,9 +11,7 @@ interface MetadataProps {
 
 export async function generateMetadata(props: MetadataProps): Promise<Metadata> {
   const params = await props.params;
-  const session = await getOptionalSession();
-  const access_token = session?.tokens?.access_token;
-  const course_meta = await getCourseMetadata(params.courseuuid, undefined, access_token || null);
+  const course_meta = await getCourseMetadata(params.courseuuid);
 
   return {
     title: `${course_meta.name} - Ashyq Bilim`,
@@ -49,16 +46,13 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
 }
 
 export default async function PlatformCoursePage(props: { params: Promise<{ courseuuid: string }> }) {
-  const session = await getOptionalSession();
-  const access_token = session?.tokens?.access_token;
   const { courseuuid } = await props.params;
-  const course_meta = await getCourseMetadata(courseuuid, undefined, access_token || null);
+  const course_meta = await getCourseMetadata(courseuuid);
 
   return (
     <CourseClient
       courseuuid={courseuuid}
       course={course_meta}
-      access_token={access_token}
     />
   );
 }

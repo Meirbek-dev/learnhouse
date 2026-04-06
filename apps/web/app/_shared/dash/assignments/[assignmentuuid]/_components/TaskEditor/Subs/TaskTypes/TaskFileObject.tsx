@@ -97,8 +97,6 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
   usePlatform();
   const assignment = useAssignments() as Assignment | null;
   const reload = useAssignmentsTaskStore((s) => s.reload);
-
-  const accessToken = session?.data?.tokens?.access_token;
   const username = session?.data?.user?.username;
 
   const [isLoading, setIsLoading] = useState(false);
@@ -119,10 +117,6 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
 
   // ================= Handlers =================
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (!accessToken) {
-      setError(t('authRequiredUpload'));
-      return;
-    }
     if (!assignmentTaskUUID || !assignmentUUID) {
       setError(t('missingAssignmentInfo'));
       return;
@@ -140,7 +134,6 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
         file,
         assignmentTaskUUID,
         assignmentUUID,
-        access_token: accessToken,
       });
 
       if (!res.success) {
@@ -162,10 +155,6 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
   };
 
   const submitFile = async (): Promise<void> => {
-    if (!accessToken) {
-      toast.error(t('authRequiredSubmit'));
-      return;
-    }
     if (!assignmentTaskUUID || !assignmentUUID) {
       toast.error(t('missingAssignmentInfo'));
       return;
@@ -183,7 +172,6 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
         body: values,
         assignmentTaskUUID,
         assignmentUUID,
-        access_token: accessToken,
       });
       if (!res) {
         toast.error(t('errorSaving'));
@@ -207,7 +195,7 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
   };
 
   const gradeSubmission = async (grade: number): Promise<void> => {
-    if (!assignmentTaskUUID || !assignmentUUID || !accessToken || !assignmentTask || !username) {
+    if (!assignmentTaskUUID || !assignmentUUID || !assignmentTask || !username) {
       toast.error(t('missingGradingInfo'));
       return;
     }
@@ -228,7 +216,6 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
         body: values,
         assignmentTaskUUID,
         assignmentUUID,
-        access_token: accessToken,
       });
       if (!res) {
         toast.error(t('gradeError'));
@@ -244,12 +231,11 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
 
   // ================= Fetching =================
   async function fetchUserSubmission() {
-    if (!accessToken || !assignmentTaskUUID || !assignmentUUID || !user_id) return;
+    if (!assignmentTaskUUID || !assignmentUUID || !user_id) return;
     const res = await getAssignmentTaskSubmissionsUser({
       assignmentTaskUUID,
       user_id,
       assignmentUUID,
-      access_token: accessToken,
     });
     if (res.success && res.data?.task_submission) {
       const sub = {
@@ -267,13 +253,13 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
   }
 
   const fetchStudentView = useCallback(async () => {
-    if (accessToken && assignmentTaskUUID) {
-      const res = await getAssignmentTask(assignmentTaskUUID, accessToken);
+    if (assignmentTaskUUID) {
+      const res = await getAssignmentTask(assignmentTaskUUID);
       if (res.success && res.data) setAssignmentTask(res.data);
     }
 
-    if (accessToken && assignmentTaskUUID && assignmentUUID) {
-      const res = await getAssignmentTaskSubmissionsMe(assignmentTaskUUID, assignmentUUID, accessToken);
+    if (assignmentTaskUUID && assignmentUUID) {
+      const res = await getAssignmentTaskSubmissionsMe(assignmentTaskUUID, assignmentUUID);
       if (res.success && res.data?.task_submission) {
         const sub = {
           ...res.data.task_submission,
@@ -286,20 +272,19 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
         setInitialUserSubmissions({ fileUUID: '' });
       }
     }
-  }, [accessToken, assignmentTaskUUID, assignmentUUID]);
+  }, [assignmentTaskUUID, assignmentUUID]);
 
   const fetchCustomGradingView = useCallback(async () => {
-    if (accessToken && assignmentTaskUUID) {
-      const res = await getAssignmentTask(assignmentTaskUUID, accessToken);
+    if (assignmentTaskUUID) {
+      const res = await getAssignmentTask(assignmentTaskUUID);
       if (res.success && res.data) setAssignmentTask(res.data);
     }
 
-    if (accessToken && assignmentTaskUUID && assignmentUUID && user_id) {
+    if (assignmentTaskUUID && assignmentUUID && user_id) {
       const res = await getAssignmentTaskSubmissionsUser({
         assignmentTaskUUID,
         user_id,
         assignmentUUID,
-        access_token: accessToken,
       });
       if (res.success && res.data?.task_submission) {
         const sub = {
@@ -315,7 +300,7 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
         setUserSubmissionObject(null);
       }
     }
-  }, [accessToken, assignmentTaskUUID, assignmentUUID, user_id]);
+  }, [assignmentTaskUUID, assignmentUUID, user_id]);
 
   useEffect(() => {
     const loadIfNeeded = async () => {
@@ -332,7 +317,7 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
     };
 
     void loadIfNeeded();
-  }, [view, accessToken, assignmentTaskUUID, assignmentUUID, user_id, fetchStudentView, fetchCustomGradingView]);
+  }, [view, assignmentTaskUUID, assignmentUUID, user_id, fetchStudentView, fetchCustomGradingView]);
 
   // ================= Render helpers =================
   const renderTeacherView = () => (
@@ -400,12 +385,7 @@ export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: Ta
           <AlertDescription>{t('allowedFormats')}</AlertDescription>
         </Alert>
 
-        {!accessToken ? (
-          <Alert className="w-full sm:w-auto">
-            <Info className="h-4 w-4" />
-            <AlertDescription>{t('signInToUpload')}</AlertDescription>
-          </Alert>
-        ) : isLoading ? (
+        {isLoading ? (
           <Button
             disabled
             variant="secondary"

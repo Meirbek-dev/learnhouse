@@ -1,6 +1,5 @@
 'use client';
 
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import ErrorUI from '@/components/Objects/Elements/Error/Error';
 import { swrFetcher } from '@services/utils/ts/requests';
@@ -65,32 +64,30 @@ export const AssignmentProvider = ({
   children: ReactNode;
   assignment_uuid: string | undefined;
 }) => {
-  const session = usePlatformSession();
-  const accessToken = session?.data?.tokens?.access_token;
   const t = useTranslations('Contexts.Assignment');
 
   const { data: assignment, error: assignmentError } = useSWR(
     assignment_uuid && assignment_uuid !== 'undefined' ? `${getAPIUrl()}assignments/${assignment_uuid}` : null,
-    (url) => swrFetcher(url, accessToken),
+    (url) => swrFetcher(url),
   );
 
   const { data: assignment_tasks, error: assignmentTasksError } = useSWR(
     assignment_uuid && assignment_uuid !== 'undefined' ? `${getAPIUrl()}assignments/${assignment_uuid}/tasks` : null,
-    (url) => swrFetcher(url, accessToken),
+    (url) => swrFetcher(url),
   );
 
   const course_uuid = assignment?.course_uuid;
 
   const { data: course_object, error: courseObjectError } = useSWR(
     course_uuid ? `${getAPIUrl()}courses/${course_uuid}` : null,
-    (url) => swrFetcher(url, accessToken),
+    (url) => swrFetcher(url),
   );
 
   const activity_uuid = assignment?.activity_uuid;
 
   const { data: activity_object, error: activityObjectError } = useSWR(
     activity_uuid ? `${getAPIUrl()}activities/${activity_uuid}` : null,
-    (url) => swrFetcher(url, accessToken),
+    (url) => swrFetcher(url),
   );
 
   // Derive assignmentsFull (memoized to avoid unnecessary context value changes)

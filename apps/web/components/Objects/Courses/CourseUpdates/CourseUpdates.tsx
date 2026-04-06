@@ -37,14 +37,10 @@ import * as v from 'valibot';
 
 const CourseUpdates = () => {
   const course = useCourse();
-  const session = usePlatformSession() as any;
-  const access_token = session?.data?.tokens?.access_token;
   const UPDATES_KEY = course?.courseStructure?.course_uuid
     ? getCourseUpdatesSwrKey(course?.courseStructure?.course_uuid)
     : null;
-  const { data: updates } = useSWR(UPDATES_KEY && access_token ? [UPDATES_KEY, access_token] : null, ([url, token]) =>
-    swrFetcher(url, token),
-  );
+  const { data: updates } = useSWR(UPDATES_KEY || null, (url) => swrFetcher(url));
   const [isModelOpen, setIsModelOpen] = useState(false);
   const t = useTranslations('Courses.CourseUpdates');
 
@@ -174,22 +170,18 @@ const NewUpdateForm = ({ setSelectedView }: any) => {
     };
 
     // Optimistically add the update to the list
-    await mutate(
-      [UPDATES_KEY, session.data?.tokens?.access_token] as any,
-      (prev: any) => [optimistic, ...(prev || [])],
-      false,
-    );
+    await mutate([UPDATES_KEY, undefined] as any, (prev: any) => [optimistic, ...(prev || [])], false);
 
-    const res = await createCourseUpdate(body, session.data?.tokens?.access_token);
+    const res = await createCourseUpdate(body);
     if (res.status === 200) {
       toast.success(t('updateAddedSuccess'));
       setSelectedView('list');
       form.reset();
       // Revalidate to get the actual server-side object and remove optimistic placeholder
-      mutate([UPDATES_KEY, session.data?.tokens?.access_token] as any);
+      mutate(UPDATES_KEY);
     } else {
       // Rollback by revalidating
-      mutate([UPDATES_KEY, session.data?.tokens?.access_token] as any);
+      mutate(UPDATES_KEY);
       toast.error(t('updateAddFailed'));
     }
   };
@@ -270,17 +262,13 @@ const NewUpdateForm = ({ setSelectedView }: any) => {
 
 const UpdatesListView = () => {
   const course = useCourse();
-  const session = usePlatformSession() as any;
   const { can } = usePermissions();
   const canUpdateCourse =
     can(Actions.UPDATE, Resources.COURSE, Scopes.OWN) || can(Actions.UPDATE, Resources.COURSE, Scopes.PLATFORM);
-  const access_token = session?.data?.tokens?.access_token;
   const UPDATES_KEY = course?.courseStructure?.course_uuid
     ? getCourseUpdatesSwrKey(course?.courseStructure?.course_uuid)
     : null;
-  const { data: updates } = useSWR(UPDATES_KEY && access_token ? [UPDATES_KEY, access_token] : null, ([url, token]) =>
-    swrFetcher(url, token),
-  );
+  const { data: updates } = useSWR(UPDATES_KEY || null, (url) => swrFetcher(url));
   const t = useTranslations('Courses.CourseUpdates');
   const locale = useDateFnsLocale();
 
@@ -335,16 +323,12 @@ const DeleteUpdateButton = ({ update }: any) => {
 
   function handleDelete() {
     startTransition(async () => {
-      const res = await deleteCourseUpdate(
-        course.courseStructure.course_uuid,
-        update.courseupdate_uuid,
-        session.data?.tokens?.access_token,
-      );
+      const res = await deleteCourseUpdate(course.courseStructure.course_uuid, update.courseupdate_uuid);
       const toast_loading = toast.loading(t('deletingUpdate'));
       if (res.status === 200) {
         toast.dismiss(toast_loading);
         toast.success(t('successfullDelete'));
-        mutate([getCourseUpdatesSwrKey(course?.courseStructure.course_uuid), session.data?.tokens?.access_token]);
+        mutate(getCourseUpdatesSwrKey(course?.courseStructure.course_uuid));
         setIsOpen(false);
       } else {
         toast.dismiss(toast_loading);

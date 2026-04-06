@@ -6,7 +6,6 @@ import { PermissionGuard } from '@components/Security/PermissionGuard';
 import ProtectedText from '@components/Objects/ContentPlaceHolder';
 import { getPlatformThumbnailImage } from '@services/media/media';
 import { Actions, Resources, Scopes } from '@/types/permissions';
-import { getOptionalSession } from '@/lib/get-optional-session';
 import { getCollections } from '@services/courses/collections';
 import { getAbsoluteUrl } from '@services/config/config';
 import { PLATFORM_BRAND_NAME } from '@/lib/constants';
@@ -52,9 +51,7 @@ export async function generateMetadata(_props: MetadataProps): Promise<Metadata>
 
 export default async function PlatformCollectionsPage() {
   const t = await getTranslations('HomePage.Collections');
-  const session = await getOptionalSession();
-  const access_token = session?.tokens?.access_token;
-  const collections = await getCollections(access_token);
+  const collections = await getCollections();
 
   return (
     <GeneralWrapper>

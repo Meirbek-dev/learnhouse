@@ -1,7 +1,6 @@
 'use client';
 
 import { SiFacebook, SiInstagram, SiTiktok, SiX, SiYoutube } from '@icons-pack/react-simple-icons';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { usePlatform } from '@/components/Contexts/PlatformContext';
 import { updatePlatform } from '@/services/settings/platform';
 import { revalidateTags } from '@services/utils/ts/requests';
@@ -29,8 +28,6 @@ interface SocialMediaData {
 }
 
 export default function EditSocials() {
-  const session = usePlatformSession() as any;
-  const access_token = session?.data?.tokens?.access_token;
   const platform = usePlatform() as any;
   const t = useTranslations('DashPage.PlatformSettings.Socials');
 
@@ -61,7 +58,7 @@ export default function EditSocials() {
   const updatePlatformSettings = async (values: SocialMediaData) => {
     const loadingToast = toast.loading(t('updatingPlatform'));
     try {
-      await updatePlatform(values, access_token);
+      await updatePlatform(values);
       await revalidateTags(['platform']);
       mutate(`${getAPIUrl()}platform`);
       toast.success(t('platformUpdatedSuccess'), { id: loadingToast });

@@ -251,15 +251,12 @@ const ActivityActions = ({ activity, activityid, course, assignment, showNavigat
   const t = useTranslations('ActivityPage');
   const { contributorStatus } = useContributorStatus(course.course_uuid);
   const session = usePlatformSession() as any;
-  const access_token = session?.data?.tokens?.access_token;
   const isAuthenticated = session.status === 'authenticated';
   const isPaidAccessAllowed = activity?.content?.paid_access !== false || contributorStatus === 'ACTIVE';
 
   // Add SWR for trail data
   const TRAIL_KEY = getTrailSwrKey();
-  const { data: trailData } = useSWR(TRAIL_KEY && access_token ? [TRAIL_KEY, access_token] : null, ([url, token]) =>
-    swrFetcher(url, token),
-  );
+  const { data: trailData } = useSWR(TRAIL_KEY || null, (url) => swrFetcher(url));
 
   return (
     <div className="flex items-center space-x-2">
@@ -319,7 +316,6 @@ const ActivityClient = (props: ActivityClientProps) => {
   const { activity } = props;
   const { course } = props;
   const session = usePlatformSession() as any;
-  const access_token = session?.data?.tokens?.access_token;
   const isAuthenticated = session.status === 'authenticated';
   const [assignment, setAssignment] = useState(null) as any;
   const [isFocusMode, setIsFocusMode] = useState(() => {
@@ -363,9 +359,7 @@ const ActivityClient = (props: ActivityClientProps) => {
 
   // Add SWR for trail data
   const TRAIL_KEY = getTrailSwrKey();
-  const { data: trailData } = useSWR(TRAIL_KEY && access_token ? [TRAIL_KEY, access_token] : null, ([url, token]) =>
-    swrFetcher(url, token),
-  );
+  const { data: trailData } = useSWR(TRAIL_KEY || null, (url) => swrFetcher(url));
 
   const { allActivities, currentIndex } = useActivityPosition(course, activityid);
 
@@ -524,15 +518,15 @@ const ActivityClient = (props: ActivityClientProps) => {
   // Load assignment data when activity changes
   useEffect(() => {
     const loadAssignment = async () => {
-      if (!activity?.activity_uuid || !access_token) return;
-      const res = await getAssignmentFromActivityUUID(activity.activity_uuid, access_token);
+      if (!activity?.activity_uuid) return;
+      const res = await getAssignmentFromActivityUUID(activity.activity_uuid);
       setAssignment(res.data);
     };
 
     if (activity?.activity_type === 'TYPE_ASSIGNMENT') {
       loadAssignment();
     }
-  }, [activity?.activity_uuid, activity?.activity_type, access_token, setAssignment]);
+  }, [activity?.activity_uuid, activity?.activity_type, setAssignment]);
 
   return (
     <CourseProvider courseuuid={course?.course_uuid}>
@@ -1140,9 +1134,9 @@ export const MarkStatus = (props: {
       const willCompleteAll = areAllActivitiesCompleted();
       setIsLoading(true);
 
-      await markActivityAsComplete(props.activity.activity_uuid, session.data?.tokens?.access_token);
+      await markActivityAsComplete(props.activity.activity_uuid);
 
-      await mutate([getTrailSwrKey(), session.data?.tokens?.access_token]);
+      await mutate([getTrailSwrKey(), undefined]);
 
       // Show XP feedback and update profile
       if (useGamificationStore.getState().profile) {
@@ -1174,9 +1168,9 @@ export const MarkStatus = (props: {
   const unmarkActivityAsCompleteFront = async () => {
     try {
       setIsLoading(true);
-      await unmarkActivityAsComplete(props.activity.activity_uuid, session.data?.tokens?.access_token);
+      await unmarkActivityAsComplete(props.activity.activity_uuid);
 
-      await mutate([getTrailSwrKey(), session.data?.tokens?.access_token]);
+      await mutate([getTrailSwrKey(), undefined]);
     } catch {
       toast.error(t('unmarkCompleteError'));
     } finally {
@@ -1392,9 +1386,9 @@ const AssignmentTools = (props: {
   const { submission, mutate: mutateSubmission } = useMySubmission(props.activity?.id ?? null);
 
   async function submitForGradingUI() {
-    if (!props.activity?.id || !session.data?.tokens?.access_token) return;
+    if (!props.activity?.id) return;
     try {
-      await submitAssessment(props.activity.id, 'ASSIGNMENT', {}, session.data.tokens.access_token, 0);
+      await submitAssessment(props.activity.id, 'ASSIGNMENT', {}, 0);
       toast.success(t('submitSuccessToast'));
       await mutateSubmission();
     } catch {

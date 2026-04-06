@@ -2,10 +2,10 @@ import { BookCopy, Signpost, SquareLibrary } from 'lucide-react';
 import { getAbsoluteUrl } from '@services/config/config';
 import { getTranslations } from 'next-intl/server';
 import Link from '@components/ui/AppLink';
-import { auth } from '@/auth';
+import { getSession } from '@/lib/auth/session';
 
 const MenuLinks = async () => {
-  const session = await auth();
+  const session = await getSession();
   const isAuthenticated = Boolean(session?.user);
 
   return (

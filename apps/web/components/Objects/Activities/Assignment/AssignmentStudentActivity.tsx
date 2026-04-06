@@ -5,7 +5,6 @@ import { getAssignmentTaskSubmissionsMe, handleAssignmentTaskSubmission } from '
 import { AlertCircle, Backpack, Calendar, CheckCircle2, Download, Info, Loader2 } from 'lucide-react';
 import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
 import { Popover, PopoverContent, PopoverTrigger } from '@components/ui/popover';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { Alert, AlertDescription } from '@components/ui/alert';
 import { getTaskRefFileDir } from '@services/media/media';
 import { Card, CardContent } from '@components/ui/card';
@@ -127,13 +126,11 @@ function normalizeFormSubmission(value: unknown): FormSubmissionState {
 async function loadTaskSubmission({
   assignmentTaskUUID,
   assignmentUUID,
-  accessToken,
 }: {
   assignmentTaskUUID: string;
   assignmentUUID: string;
-  accessToken: string;
 }): Promise<TaskSubmissionRead | null> {
-  const res = await getAssignmentTaskSubmissionsMe(assignmentTaskUUID, assignmentUUID, accessToken);
+  const res = await getAssignmentTaskSubmissionsMe(assignmentTaskUUID, assignmentUUID);
   if (!res.success || !res.data) {
     return null;
   }
@@ -144,13 +141,11 @@ async function loadTaskSubmission({
 async function saveTaskSubmission({
   assignmentTaskUUID,
   assignmentUUID,
-  accessToken,
   submissionUUID,
   taskSubmission,
 }: {
   assignmentTaskUUID: string;
   assignmentUUID: string;
-  accessToken: string;
   submissionUUID?: string;
   taskSubmission: Record<string, unknown>;
 }): Promise<TaskSubmissionRead | null> {
@@ -163,7 +158,6 @@ async function saveTaskSubmission({
     body,
     assignmentTaskUUID,
     assignmentUUID,
-    access_token: accessToken,
   });
 
   if (!res.success || !res.data) {
@@ -453,8 +447,6 @@ interface InteractiveQuizTaskProps {
 
 const InteractiveQuizTask = ({ task, questions, t }: InteractiveQuizTaskProps) => {
   const assignments = useAssignments();
-  const session = usePlatformSession() as { data?: { tokens?: { access_token?: string } } };
-  const accessToken = session?.data?.tokens?.access_token;
   const normalizedQuestions = Array.isArray(questions) ? questions : [];
   const [submissionUUID, setSubmissionUUID] = useState<string | undefined>();
   const [answers, setAnswers] = useState<Record<string, string[]>>({});
@@ -467,7 +459,7 @@ const InteractiveQuizTask = ({ task, questions, t }: InteractiveQuizTaskProps) =
     let cancelled = false;
 
     const assignmentUUID = assignments.assignment_object?.assignment_uuid;
-    if (!accessToken || !assignmentUUID || !task.assignment_task_uuid) {
+    if (!assignmentUUID || !task.assignment_task_uuid) {
       setSubmissionUUID(undefined);
       setAnswers({});
       setInitialAnswers({});
@@ -481,7 +473,6 @@ const InteractiveQuizTask = ({ task, questions, t }: InteractiveQuizTaskProps) =
         const submission = await loadTaskSubmission({
           assignmentTaskUUID: task.assignment_task_uuid,
           assignmentUUID,
-          accessToken,
         });
         if (cancelled) return;
         const normalized = normalizeQuizSubmission(submission?.task_submission);
@@ -503,7 +494,7 @@ const InteractiveQuizTask = ({ task, questions, t }: InteractiveQuizTaskProps) =
     return () => {
       cancelled = true;
     };
-  }, [accessToken, assignments.assignment_object?.assignment_uuid, task.assignment_task_uuid, t]);
+  }, [assignments.assignment_object?.assignment_uuid, task.assignment_task_uuid, t]);
 
   if (normalizedQuestions.length === 0) {
     return <TaskPlaceholder message={t('taskContentUnavailable')} />;
@@ -527,8 +518,7 @@ const InteractiveQuizTask = ({ task, questions, t }: InteractiveQuizTaskProps) =
 
   const handleSave = async () => {
     const assignmentUUID = assignments.assignment_object?.assignment_uuid;
-    if (!accessToken || !assignmentUUID) {
-      toast.error(t('signInToSave'));
+    if (!assignmentUUID) {
       return;
     }
 
@@ -538,7 +528,6 @@ const InteractiveQuizTask = ({ task, questions, t }: InteractiveQuizTaskProps) =
       const saved = await saveTaskSubmission({
         assignmentTaskUUID: task.assignment_task_uuid,
         assignmentUUID,
-        accessToken,
         submissionUUID,
         taskSubmission: { answers },
       });
@@ -557,13 +546,6 @@ const InteractiveQuizTask = ({ task, questions, t }: InteractiveQuizTaskProps) =
 
   return (
     <div className="space-y-4">
-      {!accessToken ? (
-        <Alert>
-          <Info className="h-4 w-4" />
-          <AlertDescription>{t('signInToSave')}</AlertDescription>
-        </Alert>
-      ) : null}
-
       {error ? (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
@@ -620,7 +602,7 @@ const InteractiveQuizTask = ({ task, questions, t }: InteractiveQuizTaskProps) =
         <Button
           type="button"
           onClick={handleSave}
-          disabled={!accessToken || isLoading || isSaving || !isDirty}
+          disabled={isLoading || isSaving || !isDirty}
         >
           {isSaving || isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
           {t('saveProgress')}
@@ -638,8 +620,6 @@ interface InteractiveFormTaskProps {
 
 const InteractiveFormTask = ({ task, questions, t }: InteractiveFormTaskProps) => {
   const assignments = useAssignments();
-  const session = usePlatformSession() as { data?: { tokens?: { access_token?: string } } };
-  const accessToken = session?.data?.tokens?.access_token;
   const normalizedQuestions = Array.isArray(questions) ? questions : [];
   const [submissionUUID, setSubmissionUUID] = useState<string | undefined>();
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -652,7 +632,7 @@ const InteractiveFormTask = ({ task, questions, t }: InteractiveFormTaskProps) =
     let cancelled = false;
 
     const assignmentUUID = assignments.assignment_object?.assignment_uuid;
-    if (!accessToken || !assignmentUUID || !task.assignment_task_uuid) {
+    if (!assignmentUUID || !task.assignment_task_uuid) {
       setSubmissionUUID(undefined);
       setAnswers({});
       setInitialAnswers({});
@@ -666,7 +646,6 @@ const InteractiveFormTask = ({ task, questions, t }: InteractiveFormTaskProps) =
         const submission = await loadTaskSubmission({
           assignmentTaskUUID: task.assignment_task_uuid,
           assignmentUUID,
-          accessToken,
         });
         if (cancelled) return;
         const normalized = normalizeFormSubmission(submission?.task_submission);
@@ -688,7 +667,7 @@ const InteractiveFormTask = ({ task, questions, t }: InteractiveFormTaskProps) =
     return () => {
       cancelled = true;
     };
-  }, [accessToken, assignments.assignment_object?.assignment_uuid, task.assignment_task_uuid, t]);
+  }, [assignments.assignment_object?.assignment_uuid, task.assignment_task_uuid, t]);
 
   if (normalizedQuestions.length === 0) {
     return <TaskPlaceholder message={t('taskContentUnavailable')} />;
@@ -705,8 +684,7 @@ const InteractiveFormTask = ({ task, questions, t }: InteractiveFormTaskProps) =
 
   const handleSave = async () => {
     const assignmentUUID = assignments.assignment_object?.assignment_uuid;
-    if (!accessToken || !assignmentUUID) {
-      toast.error(t('signInToSave'));
+    if (!assignmentUUID) {
       return;
     }
 
@@ -716,7 +694,6 @@ const InteractiveFormTask = ({ task, questions, t }: InteractiveFormTaskProps) =
       const saved = await saveTaskSubmission({
         assignmentTaskUUID: task.assignment_task_uuid,
         assignmentUUID,
-        accessToken,
         submissionUUID,
         taskSubmission: { answers },
       });
@@ -735,13 +712,6 @@ const InteractiveFormTask = ({ task, questions, t }: InteractiveFormTaskProps) =
 
   return (
     <div className="space-y-4">
-      {!accessToken ? (
-        <Alert>
-          <Info className="h-4 w-4" />
-          <AlertDescription>{t('signInToSave')}</AlertDescription>
-        </Alert>
-      ) : null}
-
       {error ? (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
@@ -794,7 +764,7 @@ const InteractiveFormTask = ({ task, questions, t }: InteractiveFormTaskProps) =
         <Button
           type="button"
           onClick={handleSave}
-          disabled={!accessToken || isLoading || isSaving || !isDirty}
+          disabled={isLoading || isSaving || !isDirty}
         >
           {isSaving || isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
           {t('saveProgress')}

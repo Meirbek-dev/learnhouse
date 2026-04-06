@@ -3,7 +3,6 @@
 import type { components } from '@/lib/api/generated';
 
 import { getCoursesLinkedToProduct, linkCourseToProduct } from '@services/payments/products';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { getPaymentsProductsSwrKey } from '@services/payments/keys';
 import { getCourses } from '@services/courses/courses';
@@ -85,30 +84,24 @@ const CoursePreview = ({ course, onLink, isLinked }: CoursePreviewProps) => {
 
 export default function LinkCourseModal({ productId, onSuccess }: LinkCourseModalProps) {
   const [searchTerm, setSearchTerm] = useState('');
-  const session = usePlatformSession() as any;
-  const accessToken = session?.data?.tokens?.access_token;
   const tNotify = useTranslations('DashPage.Notifications');
   const t = useTranslations('DashPage.Payments.LinkCourseModal');
 
   const PRODUCTS_KEY = getPaymentsProductsSwrKey();
 
-  const { data: coursesData, error: coursesError } = useSWR(
-    () => (accessToken ? ['platform-courses', accessToken] : null),
-    ([, token]) => getCourses(null, token),
-  );
+  const { data: coursesData, error: coursesError } = useSWR('platform-courses', () => getCourses(null));
 
   const courses = coursesData?.courses;
 
-  const { data: linkedCoursesData, error: linkedCoursesError } = useSWR(
-    () => (accessToken ? [`/payments/products/${productId}/courses`, accessToken] : null),
-    ([_, token]) => getCoursesLinkedToProduct(productId, token),
+  const { data: linkedCoursesData, error: linkedCoursesError } = useSWR(`/payments/products/${productId}/courses`, () =>
+    getCoursesLinkedToProduct(productId),
   );
 
   const handleLinkCourse = async (courseId: number) => {
     try {
-      const response = await linkCourseToProduct(productId, courseId, accessToken);
+      const response = await linkCourseToProduct(productId, courseId);
       if (response.success) {
-        mutate([getPaymentsProductsSwrKey(), accessToken]);
+        mutate(getPaymentsProductsSwrKey());
         toast.success(tNotify('courseLinkedSuccess'));
         onSuccess();
       } else {

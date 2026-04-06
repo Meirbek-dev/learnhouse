@@ -31,9 +31,9 @@ export const LocaleSwitcher = ({ className, isMobile }: LocaleSwitcherProps) => 
       await setUserLocale(newLocale);
 
       // Sync to database if user is logged in
-      if (session?.data?.user?.id && session?.data?.tokens?.access_token) {
+      if (session?.data?.user?.id && undefined) {
         try {
-          await updateUserLocale(session.data.user.id, newLocale, session.data.tokens.access_token);
+          await updateUserLocale(session.data.user.id, newLocale);
         } catch (error) {
           console.error('Failed to sync locale to server:', error);
         }

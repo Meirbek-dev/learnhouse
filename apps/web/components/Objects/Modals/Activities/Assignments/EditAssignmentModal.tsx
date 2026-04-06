@@ -34,14 +34,12 @@ interface Assignment {
 interface EditAssignmentFormProps {
   onClose: () => void;
   assignment: Assignment;
-  accessToken: string;
 }
 
 interface EditAssignmentModalProps {
   isOpen: boolean;
   onClose: () => void;
   assignment: Assignment;
-  accessToken: string;
 }
 
 interface FormValues {
@@ -59,7 +57,7 @@ const createValidationSchema = (t: (key: string) => string) =>
     grading_type: v.picklist(['NUMERIC', 'PERCENTAGE']),
   });
 
-const EditAssignmentForm: FC<EditAssignmentFormProps> = ({ onClose, assignment, accessToken }) => {
+const EditAssignmentForm: FC<EditAssignmentFormProps> = ({ onClose, assignment }) => {
   const validationT = useTranslations('Validation');
   const t = useTranslations('Components.EditAssignmentModal');
   const fullLocale = useLocale();
@@ -105,7 +103,7 @@ const EditAssignmentForm: FC<EditAssignmentFormProps> = ({ onClose, assignment, 
     startTransition(() => {
       void (async () => {
         try {
-          const res = await updateAssignment(values, assignment.assignment_uuid, accessToken);
+          const res = await updateAssignment(values, assignment.assignment_uuid);
           if (res.success) {
             mutate(`${getAPIUrl()}assignments/${assignment.assignment_uuid}`);
             toast.success(t('updateSuccess'));
@@ -278,7 +276,7 @@ const EditAssignmentForm: FC<EditAssignmentFormProps> = ({ onClose, assignment, 
   );
 };
 
-const EditAssignmentModal: FC<EditAssignmentModalProps> = ({ isOpen, onClose, assignment, accessToken }) => {
+const EditAssignmentModal: FC<EditAssignmentModalProps> = ({ isOpen, onClose, assignment }) => {
   const t = useTranslations('Components.EditAssignmentModal');
   return (
     <Modal
@@ -290,7 +288,6 @@ const EditAssignmentModal: FC<EditAssignmentModalProps> = ({ isOpen, onClose, as
         <EditAssignmentForm
           onClose={onClose}
           assignment={assignment}
-          accessToken={accessToken}
         />
       }
       dialogTitle={t('editAssignment')}

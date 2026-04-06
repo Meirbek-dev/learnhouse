@@ -5,7 +5,6 @@ import TeacherFilterBar from '@components/Dashboard/Analytics/TeacherFilterBar';
 import { Card, CardContent } from '@/components/ui/card';
 import { getTranslations } from 'next-intl/server';
 import { Button } from '@/components/ui/button';
-import { auth } from '@/auth';
 import Link from 'next/link';
 
 export default function PlatformAnalyticsAtRiskPage(props: {
@@ -17,22 +16,11 @@ export default function PlatformAnalyticsAtRiskPage(props: {
 async function PlatformAnalyticsAtRiskPageInner(props: {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const session = await auth();
-  const accessToken = session?.tokens?.access_token;
   const query = normalizeAnalyticsQuery(await props.searchParams);
   const t = await getTranslations('TeacherAnalytics');
 
-  if (!accessToken) {
-    return (
-      <AnalyticsEmptyState
-        title={t('pages.atRiskUnavailableTitle')}
-        description={t('pages.atRiskUnavailableDesc')}
-      />
-    );
-  }
-
   try {
-    const risk = await getAtRiskLearners(accessToken, query);
+    const risk = await getAtRiskLearners(query);
     const totalPages = Math.max(1, Math.ceil(risk.total / risk.page_size));
     const params = new URLSearchParams();
     if (query.window) params.set('window', query.window);

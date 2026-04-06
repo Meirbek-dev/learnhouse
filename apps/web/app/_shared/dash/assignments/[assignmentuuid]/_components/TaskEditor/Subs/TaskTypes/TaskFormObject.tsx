@@ -8,7 +8,6 @@ import { toast } from 'sonner';
 import { useAssignmentsTaskStore } from '@components/Contexts/Assignments/AssignmentsTaskContext';
 import AssignmentBoxUI from '@components/Objects/Activities/Assignment/AssignmentBoxUI';
 import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { updateAssignmentTask } from '@services/courses/assignments';
 import { cn, generateUUID } from '@/lib/utils';
 
@@ -317,10 +316,6 @@ function LoadingSkeleton() {
 
 function TaskFormObject({ assignmentTaskUUID }: TaskFormObjectProps) {
   const t = useTranslations('Components.TaskFormObject');
-  const session = usePlatformSession() as {
-    data?: { tokens?: { access_token?: string } };
-  };
-  const access_token = session?.data?.tokens?.access_token;
   const assignmentTask = useAssignmentsTaskStore((s) => s.assignmentTask);
   const reload = useAssignmentsTaskStore((s) => s.reload);
   const setSelectedTaskUUID = useAssignmentsTaskStore((s) => s.setSelectedTaskUUID);
@@ -392,10 +387,6 @@ function TaskFormObject({ assignmentTaskUUID }: TaskFormObjectProps) {
   };
 
   const saveFC = async () => {
-    if (!access_token) {
-      toast.error(t('authRequired') || 'Authentication required');
-      return;
-    }
     if (!assignmentTask.assignment_task_uuid || !assignment.assignment_object.assignment_uuid) {
       toast.error(t('saveError'));
       return;
@@ -406,7 +397,6 @@ function TaskFormObject({ assignmentTaskUUID }: TaskFormObjectProps) {
         body: { contents: { questions } },
         assignmentTaskUUID: assignmentTask.assignment_task_uuid,
         assignmentUUID: assignment.assignment_object.assignment_uuid,
-        access_token,
       });
       if (res) {
         reload();

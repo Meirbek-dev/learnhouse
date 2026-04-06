@@ -158,14 +158,10 @@ const UpdatesSection = () => {
   const canManageCourse =
     can(Actions.MANAGE, Resources.COURSE, Scopes.OWN) || can(Actions.MANAGE, Resources.COURSE, Scopes.PLATFORM);
   const course = useCourse();
-  const session = usePlatformSession() as any;
-  const access_token = session?.data?.tokens?.access_token;
   const UPDATES_KEY = course?.courseStructure?.course_uuid
     ? getCourseUpdatesSwrKey(course?.courseStructure?.course_uuid)
     : null;
-  const { data: updates } = useSWR(UPDATES_KEY && access_token ? [UPDATES_KEY, access_token] : null, ([url, token]) =>
-    swrFetcher(url, token),
-  );
+  const { data: updates } = useSWR(UPDATES_KEY || null, (url) => swrFetcher(url));
   const t = useTranslations('Courses.CourseAuthors');
 
   return (
@@ -244,12 +240,12 @@ const NewUpdateForm = ({ setSelectedView }: { setSelectedView: (view: string) =>
       content: values.content,
       course_uuid: course.courseStructure.course_uuid,
     };
-    const res = await createCourseUpdate(body, session.data?.tokens?.access_token);
+    const res = await createCourseUpdate(body);
     if (res.status === 200) {
       toast.success(t('updateAddedSuccess'));
       setSelectedView('list');
       form.reset();
-      mutate([getCourseUpdatesSwrKey(course?.courseStructure.course_uuid), session.data?.tokens?.access_token] as any);
+      mutate(getCourseUpdatesSwrKey(course?.courseStructure.course_uuid));
     } else {
       toast.error(t('updateAddFailed'));
     }
@@ -313,11 +309,9 @@ const UpdatesListView = () => {
   const { can } = usePermissions();
   const canManageCourse =
     can(Actions.MANAGE, Resources.COURSE, Scopes.OWN) || can(Actions.MANAGE, Resources.COURSE, Scopes.PLATFORM);
-  const session = usePlatformSession() as any;
-  const access_token = session?.data?.tokens?.access_token;
   const { data: updates } = useSWR(
     `${getAPIUrl()}courses/${course?.courseStructure?.course_uuid}/updates`,
-    (url: string) => swrFetcher(url, access_token),
+    (url: string) => swrFetcher(url),
   );
   const t = useTranslations('Courses.CourseAuthors');
   const locale = useDateFnsLocale();
@@ -380,19 +374,12 @@ const DeleteUpdateButton = ({ update }: any) => {
   function handleDelete() {
     startTransition(async () => {
       const toast_loading = toast.loading(t('deletingUpdate'));
-      const res = await deleteCourseUpdate(
-        course.courseStructure.course_uuid,
-        update.courseupdate_uuid,
-        session.data?.tokens?.access_token,
-      );
+      const res = await deleteCourseUpdate(course.courseStructure.course_uuid, update.courseupdate_uuid);
 
       if (res.status === 200) {
         toast.dismiss(toast_loading);
         toast.success(t('updateDeletedSuccess'));
-        mutate([
-          getCourseUpdatesSwrKey(course?.courseStructure.course_uuid),
-          session.data?.tokens?.access_token,
-        ] as any);
+        mutate(getCourseUpdatesSwrKey(course?.courseStructure.course_uuid));
         setIsOpen(false);
       } else {
         toast.dismiss(toast_loading);

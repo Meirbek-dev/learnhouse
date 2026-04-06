@@ -1,11 +1,7 @@
 'use server';
 
-import {
-  RequestBodyFormWithAuthHeader,
-  RequestBodyWithAuthHeader,
-  errorHandling,
-  getResponseMetadata,
-} from '@services/utils/ts/requests';
+import { errorHandling, getResponseMetadata } from '@services/utils/ts/requests';
+import { apiFetch } from '@/lib/api-client';
 import type { CustomResponseTyping } from '@services/utils/ts/requests';
 import { CacheProfiles, cacheLife, cacheTag } from '@/lib/cache';
 import type { components } from '@/lib/api/generated';
@@ -317,27 +313,13 @@ export async function getEditableCourses(
   return fetchEditableCourses(page, limit, access_token, query, sortBy, preset);
 }
 
-export async function getCourseUserRights(course_uuid: string, access_token?: string | null) {
-  if (!access_token) {
-    throw new Error('Access token required');
-  }
-
-  const result = await fetch(`${getAPIUrl()}courses/${course_uuid}/rights`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${access_token}`,
-    },
-  });
-
+export async function getCourseUserRights(course_uuid: string) {
+  const result = await apiFetch(`courses/${course_uuid}/rights`);
   return (await errorHandling(result)) as CourseUserRightsResponse;
 }
 
-export async function searchCourses(query: string, page = 1, limit = 20, next: any, access_token?: any) {
-  const result: any = await fetch(
-    `${getAPIUrl()}courses/search?query=${encodeURIComponent(query)}&page=${page}&limit=${limit}`,
-    RequestBodyWithAuthHeader('GET', null, next, access_token),
-  );
+export async function searchCourses(query: string, page = 1, limit = 20, next: any) {
+  const result = await apiFetch(`courses/search?query=${encodeURIComponent(query)}&page=${page}&limit=${limit}`);
   return ((await errorHandling(result)) as CourseRead[]).map((course) => normalizeCourse(course));
 }
 
@@ -396,44 +378,31 @@ const toCourseMetadataPayload = (data: any, options?: CourseWriteOptions) => ({
   last_known_update_date: options?.lastKnownUpdateDate ?? data.update_date ?? undefined,
 });
 
-export async function updateCourseMetadata(
-  course_uuid: string,
-  data: any,
-  access_token: string,
-  options?: CourseWriteOptions,
-) {
-  const result = await fetch(
-    `${getAPIUrl()}courses/${course_uuid}/metadata`,
-    RequestBodyWithAuthHeader('PUT', toCourseMetadataPayload(data, options), null, access_token),
-  );
+export async function updateCourseMetadata(course_uuid: string, data: any, options?: CourseWriteOptions) {
+  const result = await apiFetch(`courses/${course_uuid}/metadata`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(toCourseMetadataPayload(data, options)),
+  });
   return getTypedResponseMetadata<NormalizedCourse>(result);
 }
 
-export async function updateCourseAccess(
-  course_uuid: string,
-  data: any,
-  access_token: string,
-  options?: CourseWriteOptions,
-) {
-  const result = await fetch(
-    `${getAPIUrl()}courses/${course_uuid}/access`,
-    RequestBodyWithAuthHeader(
-      'PUT',
-      {
-        ...data,
-        last_known_update_date: options?.lastKnownUpdateDate ?? data.update_date ?? undefined,
-      },
-      null,
-      access_token,
-    ),
-  );
+export async function updateCourseAccess(course_uuid: string, data: any, options?: CourseWriteOptions) {
+  const result = await apiFetch(`courses/${course_uuid}/access`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      ...data,
+      last_known_update_date: options?.lastKnownUpdateDate ?? data.update_date ?? undefined,
+    }),
+  });
   return getTypedResponseMetadata<NormalizedCourse>(result);
 }
 
 /**
  * Cached fetch for full course data
  */
-async function fetchCourse(course_uuid: string, access_token: string): Promise<NormalizedCourse> {
+async function fetchCourse(course_uuid: string, access_token?: string): Promise<NormalizedCourse> {
   'use cache';
   cacheTag(tags.courses);
   cacheTag(courseTag.detail(course_uuid));
@@ -451,33 +420,24 @@ async function fetchCourse(course_uuid: string, access_token: string): Promise<N
 }
 
 export async function getCourse(course_uuid: string, _next?: any, access_token?: string) {
-  if (!access_token) {
-    throw new Error('Access token required');
-  }
   return fetchCourse(course_uuid, access_token);
 }
 
-export async function updateCourseThumbnail(
-  course_uuid: string,
-  formData: FormData,
-  access_token: string,
-  options?: CourseWriteOptions,
-) {
+export async function updateCourseThumbnail(course_uuid: string, formData: FormData, options?: CourseWriteOptions) {
   if (options?.lastKnownUpdateDate) {
     formData.set('last_known_update_date', options.lastKnownUpdateDate);
   }
 
-  const result: any = await fetch(
-    `${getAPIUrl()}courses/${course_uuid}/thumbnail`,
-    RequestBodyFormWithAuthHeader('PUT', formData, null, access_token),
-  );
+  const result = await apiFetch(`courses/${course_uuid}/thumbnail`, {
+    method: 'PUT',
+    body: formData,
+  });
   return getTypedResponseMetadata<NormalizedCourse>(result);
 }
 
 export async function createNewCourse(
   course_body: any,
   thumbnail: any,
-  access_token: string,
   options?: Pick<CourseWriteOptions, 'includeEditableList' | 'includePublicList'>,
 ) {
   // Send file thumbnail as form data
@@ -498,10 +458,7 @@ export async function createNewCourse(
     formData.append('thumbnail', thumbnail);
   }
 
-  const result = await fetch(
-    `${getAPIUrl()}courses`,
-    RequestBodyFormWithAuthHeader('POST', formData, null, access_token),
-  );
+  const result = await apiFetch(`courses`, { method: 'POST', body: formData });
   return getTypedResponseMetadata<NormalizedCourse>(result);
 }
 
@@ -509,15 +466,10 @@ export async function createNewCourse(
  * Search editable courses for the outline template combobox.
  * Not cached — used for interactive search.
  */
-export async function searchEditableCourses(query: string, access_token: string, limit = 20) {
-  const url = `${getAPIUrl()}courses/editable/page/1/limit/${limit}?query=${encodeURIComponent(query)}&sort_by=updated`;
-  const result = await fetch(url, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${access_token}`,
-    },
-  });
+export async function searchEditableCourses(query: string, limit = 20) {
+  const result = await apiFetch(
+    `courses/editable/page/1/limit/${limit}?query=${encodeURIComponent(query)}&sort_by=updated`,
+  );
   if (!result.ok) return [];
   const courses = ((await result.json()) as CourseReadWithPermissions[]).map((course) =>
     normalizeCourseWithPermissions(course),
@@ -527,21 +479,14 @@ export async function searchEditableCourses(query: string, access_token: string,
 
 export async function deleteCourseFromBackend(
   course_uuid: string,
-  access_token: string,
   options?: Pick<CourseWriteOptions, 'includeEditableList' | 'includePublicList'>,
 ) {
-  const result: any = await fetch(
-    `${getAPIUrl()}courses/${course_uuid}`,
-    RequestBodyWithAuthHeader('DELETE', null, null, access_token),
-  );
+  const result = await apiFetch(`courses/${course_uuid}`, { method: 'DELETE' });
   return (await errorHandling(result)) as CourseDetailResponse;
 }
 
-export async function getCourseContributors(course_uuid: string, access_token: string | null | undefined) {
-  const result: any = await fetch(
-    `${getAPIUrl()}courses/${course_uuid}/contributors`,
-    RequestBodyWithAuthHeader('GET', null, null, access_token || undefined),
-  );
+export async function getCourseContributors(course_uuid: string) {
+  const result = await apiFetch(`courses/${course_uuid}/contributors`);
   return await getResponseMetadata(result);
 }
 
@@ -550,54 +495,51 @@ export async function editContributor(
   contributor_id: number,
   authorship: any,
   authorship_status: any,
-  access_token: string | null | undefined,
   options?: Pick<CourseWriteOptions, 'includeEditableList' | 'includePublicList'>,
 ) {
-  const result: any = await fetch(
-    `${getAPIUrl()}courses/${course_uuid}/contributors/${contributor_id}?authorship=${authorship}&authorship_status=${authorship_status}`,
-    RequestBodyWithAuthHeader('PUT', null, null, access_token || undefined),
+  const result = await apiFetch(
+    `courses/${course_uuid}/contributors/${contributor_id}?authorship=${authorship}&authorship_status=${authorship_status}`,
+    { method: 'PUT' },
   );
   return getResponseMetadata(result);
 }
 
-export async function applyForContributor(course_uuid: string, data: any, access_token: string | null | undefined) {
-  const result: any = await fetch(
-    `${getAPIUrl()}courses/${course_uuid}/apply-contributor`,
-    RequestBodyWithAuthHeader('POST', data, null, access_token || undefined),
-  );
+export async function applyForContributor(course_uuid: string, data: any) {
+  const result = await apiFetch(`courses/${course_uuid}/apply-contributor`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
   return getResponseMetadata(result);
 }
 
 export async function bulkAddContributors(
   course_uuid: string,
   data: any,
-  access_token: string | null | undefined,
   options?: Pick<CourseWriteOptions, 'includeEditableList' | 'includePublicList'>,
 ) {
-  const result: any = await fetch(
-    `${getAPIUrl()}courses/${course_uuid}/bulk-add-contributors`,
-    RequestBodyWithAuthHeader('POST', data, null, access_token || undefined),
-  );
+  const result = await apiFetch(`courses/${course_uuid}/bulk-add-contributors`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
   return getResponseMetadata(result);
 }
 
 export async function bulkRemoveContributors(
   course_uuid: string,
   data: any,
-  access_token: string | null | undefined,
   options?: Pick<CourseWriteOptions, 'includeEditableList' | 'includePublicList'>,
 ) {
-  const result: any = await fetch(
-    `${getAPIUrl()}courses/${course_uuid}/bulk-remove-contributors`,
-    RequestBodyWithAuthHeader('PUT', data, null, access_token || undefined),
-  );
+  const result = await apiFetch(`courses/${course_uuid}/bulk-remove-contributors`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
   return getResponseMetadata(result);
 }
 
-export async function getCourseRights(course_uuid: string, access_token: string | null | undefined) {
-  const result: any = await fetch(
-    `${getAPIUrl()}courses/${course_uuid}/rights`,
-    RequestBodyWithAuthHeader('GET', null, null, access_token || undefined),
-  );
+export async function getCourseRights(course_uuid: string) {
+  const result = await apiFetch(`courses/${course_uuid}/rights`);
   return (await errorHandling(result)) as CourseUserRightsResponse;
 }

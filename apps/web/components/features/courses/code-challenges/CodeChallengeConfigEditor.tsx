@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Field, FieldDescription, FieldError, FieldLabel } from '@/components/ui/field';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
+import { apiFetch } from '@/lib/api-client';
 import ComboboxMultiple from '@/components/ui/custom/multiple-combobox';
 import { JUDGE0_LANGUAGES } from './LanguageSelector';
 import { Textarea } from '@/components/ui/textarea';
@@ -93,10 +93,8 @@ export function createConfigFormSchema(t: (key: string, params?: any) => string)
 
 type FormValues = v.InferOutput<typeof formSchema>;
 
-const fetcher = async ([url, token]: [string, string]) => {
-  const res = await fetch(url, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+const fetcher = async (url: string) => {
+  const res = await fetch(url, { credentials: 'include' });
   if (!res.ok) {
     if (res.status === 404) return null;
     throw new Error('Failed to fetch');
@@ -107,13 +105,11 @@ const fetcher = async ([url, token]: [string, string]) => {
 export default function CodeChallengeConfigEditor({ activityUuid, courseId }: CodeChallengeConfigEditorProps) {
   const t = useTranslations('Activities.CodeChallenges');
   const router = useRouter();
-  const session = usePlatformSession();
-  const accessToken = session?.data?.tokens?.access_token;
   const [isSaving, setIsSaving] = useState(false);
 
   // Fetch existing settings
   const { data: existingSettings, isLoading } = useSWR(
-    accessToken ? [`${getAPIUrl()}code-challenges/${activityUuid}/settings`, accessToken] : null,
+    activityUuid ? `${getAPIUrl()}code-challenges/${activityUuid}/settings` : null,
     fetcher,
     { revalidateOnFocus: false },
   );
@@ -205,21 +201,13 @@ export default function CodeChallengeConfigEditor({ activityUuid, courseId }: Co
   }, [existingSettings, form]);
 
   const onSubmit = async (values: FormValues) => {
-    if (!accessToken) {
-      toast.error(t('authRequired'));
-      return;
-    }
-
     setIsSaving(true);
     const loadingToast = toast.loading(t('savingConfig'));
 
     try {
-      const response = await fetch(`${getAPIUrl()}code-challenges/${activityUuid}/settings`, {
+      const response = await apiFetch(`code-challenges/${activityUuid}/settings`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`,
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           allowed_languages: values.allowed_languages,
           time_limit: values.time_limit,

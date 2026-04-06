@@ -32,7 +32,6 @@ import { Button } from '@/components/ui/button';
 
 import type { AssessmentType, Submission, SubmissionStatus } from '@/types/grading';
 import { startSubmission, submitAssessment } from '@services/grading/grading';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
 
 interface SubmitButtonProps {
   activityId: number;
@@ -61,32 +60,25 @@ export default function SubmitButton({
   className,
 }: SubmitButtonProps) {
   const t = useTranslations('Grading.SubmitButton');
-  const session = usePlatformSession();
-  const accessToken = session?.data?.tokens?.access_token ?? '';
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const alreadySubmitted = currentStatus ? NON_SUBMITTABLE_STATUSES.has(currentStatus) : false;
 
   const handleConfirm = useCallback(async () => {
-    if (!accessToken) {
-      toast.error(t('notAuthenticated'));
-      return;
-    }
-
     setIsSubmitting(true);
     try {
       // For timed assessments, ensure a DRAFT exists with a server-stamped start time.
       // startSubmission is idempotent — it returns the existing DRAFT if one already exists.
       if (TIMED_ASSESSMENT_TYPES.has(assessmentType)) {
-        await startSubmission(activityId, assessmentType, accessToken);
+        await startSubmission(activityId, assessmentType);
       }
 
       const submission = await submitAssessment(
         activityId,
         assessmentType,
         answersPayload,
-        accessToken,
+
         violationCount,
       );
       toast.success(t('submitted'));
@@ -96,7 +88,7 @@ export default function SubmitButton({
     } finally {
       setIsSubmitting(false);
     }
-  }, [accessToken, activityId, assessmentType, answersPayload, violationCount, onSubmitted, t]);
+  }, [activityId, assessmentType, answersPayload, violationCount, onSubmitted, t]);
 
   if (alreadySubmitted) {
     return (

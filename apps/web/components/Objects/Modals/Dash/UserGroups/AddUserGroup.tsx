@@ -1,6 +1,5 @@
 'use client';
 
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { Field, FieldError, FieldLabel } from '@components/ui/field';
 import { createUserGroup } from '@services/usergroups/usergroups';
 import { valibotResolver } from '@hookform/resolvers/valibot';
@@ -28,8 +27,6 @@ type UserGroupFormValues = v.InferOutput<ReturnType<typeof createValidationSchem
 
 const AddUserGroup = (props: AddUserGroupProps) => {
   const t = useTranslations('Components.AddUserGroup');
-  const session = usePlatformSession() as any;
-  const access_token = session?.data?.tokens?.access_token;
   const validationSchema = createValidationSchema(t);
 
   const form = useForm<UserGroupFormValues>({
@@ -51,7 +48,7 @@ const AddUserGroup = (props: AddUserGroupProps) => {
     const toastID = toast.loading(t('toastLoading'));
     startTransition(() => {
       void (async () => {
-        const res = await createUserGroup(values, access_token);
+        const res = await createUserGroup(values);
         if (res.status === 200) {
           mutate(`${getAPIUrl()}usergroups`);
           props.setCreateUserGroupModal(false);

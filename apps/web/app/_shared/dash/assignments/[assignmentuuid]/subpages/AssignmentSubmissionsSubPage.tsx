@@ -23,7 +23,6 @@ import { useTranslations } from 'next-intl';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import SubmissionsTable from '@/components/Grading/SubmissionsTable';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { AlertCircle, ClipboardList } from 'lucide-react';
@@ -92,8 +91,6 @@ function normalizeAssignmentUuid(assignmentUuid: string | null | undefined): str
 export default function AssignmentSubmissionsSubPage({ assignment_uuid }: AssignmentSubmissionsSubPageProps) {
   const t = useTranslations('DashPage.Assignments');
   const assignments = useAssignments();
-  const session = usePlatformSession();
-  const accessToken = session?.data?.tokens?.access_token;
   const canonicalAssignmentUuid =
     assignments?.assignment_object?.assignment_uuid ?? normalizeAssignmentUuid(assignment_uuid);
 
@@ -101,8 +98,8 @@ export default function AssignmentSubmissionsSubPage({ assignment_uuid }: Assign
   const activityId: number | null = assignments?.activity_object?.id ?? null;
 
   const { data: assignmentSubmissionRows, error: assignmentSubmissionRowsError } = useSWR<AssignmentSubmissionRow[]>(
-    canonicalAssignmentUuid && accessToken ? `${getAPIUrl()}assignments/${canonicalAssignmentUuid}/submissions` : null,
-    (url: string) => swrFetcher(url, accessToken),
+    canonicalAssignmentUuid ? `${getAPIUrl()}assignments/${canonicalAssignmentUuid}/submissions` : null,
+    (url: string) => swrFetcher(url),
   );
 
   if (!activityId) {

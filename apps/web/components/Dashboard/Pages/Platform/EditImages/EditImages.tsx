@@ -14,7 +14,6 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@components/ui/dialog';
 import { GripVertical, ImageIcon, Images, Info, Plus, StarIcon, UploadCloud, X } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 import { usePlatform } from '@/components/Contexts/PlatformContext';
 import { SiLoom, SiYoutube } from '@icons-pack/react-simple-icons';
@@ -83,8 +82,6 @@ const getAddPreviewOptions = (t: Function, isPreviewUploading: boolean, setSelec
 
 export default function EditImages() {
   const router = useRouter();
-  const session = usePlatformSession() as any;
-  const access_token = session?.data?.tokens?.access_token;
   const platform = usePlatform() as any;
   const tNotify = useTranslations('DashPage.Notifications');
   const t = useTranslations('DashPage.PlatformSettings.Images');
@@ -133,7 +130,7 @@ export default function EditImages() {
         startTransition(() => setIsLogoUploading(true));
         const loadingToast = toast.loading(tNotify('uploadingLogo'));
         try {
-          await uploadPlatformLogo(file, access_token);
+          await uploadPlatformLogo(file);
           await new Promise((r) => setTimeout(r, 1500));
           toast.success(tNotify('logoUpdatedSuccess'), { id: loadingToast });
           router.refresh();
@@ -154,7 +151,7 @@ export default function EditImages() {
         startTransition(() => setIsThumbnailUploading(true));
         const loadingToast = toast.loading(tNotify('uploadingThumbnail'));
         try {
-          await uploadPlatformThumbnail(file, access_token);
+          await uploadPlatformThumbnail(file);
           await new Promise((r) => setTimeout(r, 1500));
           toast.success(tNotify('thumbnailUpdatedSuccess'), { id: loadingToast });
           router.refresh();
@@ -187,7 +184,7 @@ export default function EditImages() {
 
       try {
         const uploadPromises = files.map(async (file) => {
-          const response = await uploadPlatformPreview(file, access_token);
+          const response = await uploadPlatformPreview(file);
           return {
             id: response.name_in_disk,
             url: URL.createObjectURL(file),
@@ -200,27 +197,24 @@ export default function EditImages() {
         const newPreviews = await Promise.all(uploadPromises);
         const updatedPreviews = [...previews, ...newPreviews];
 
-        await updatePlatform(
-          {
-            previews: {
-              images: updatedPreviews
-                .filter((p) => p.type === 'image')
-                .map((p) => ({
-                  filename: p.filename,
-                  order: p.order,
-                })),
-              videos: updatedPreviews
-                .filter((p) => p.type === 'youtube' || p.type === 'loom')
-                .map((p) => ({
-                  type: p.type,
-                  url: p.url,
-                  id: p.id,
-                  order: p.order,
-                })),
-            },
+        await updatePlatform({
+          previews: {
+            images: updatedPreviews
+              .filter((p) => p.type === 'image')
+              .map((p) => ({
+                filename: p.filename,
+                order: p.order,
+              })),
+            videos: updatedPreviews
+              .filter((p) => p.type === 'youtube' || p.type === 'loom')
+              .map((p) => ({
+                type: p.type,
+                url: p.url,
+                id: p.id,
+                order: p.order,
+              })),
           },
-          access_token,
-        );
+        });
 
         setPreviews(updatedPreviews);
         toast.success(tNotify('previewsAddedSuccess', { count: files.length }), {
@@ -241,14 +235,11 @@ export default function EditImages() {
       const updatedPreviews = previews.filter((p) => p.id !== id);
       const updatedPreviewFilenames = updatedPreviews.map((p) => p.filename);
 
-      await updatePlatform(
-        {
-          previews: {
-            images: updatedPreviewFilenames,
-          },
+      await updatePlatform({
+        previews: {
+          images: updatedPreviewFilenames,
         },
-        access_token,
-      );
+      });
 
       startTransition(() => setPreviews(updatedPreviews));
       toast.success(tNotify('previewRemovedSuccess'), { id: loadingToast });
@@ -305,27 +296,24 @@ export default function EditImages() {
 
       const updatedPreviews = [...previews, newPreview];
 
-      await updatePlatform(
-        {
-          previews: {
-            images: updatedPreviews
-              .filter((p) => p.type === 'image')
-              .map((p) => ({
-                filename: p.filename,
-                order: p.order,
-              })),
-            videos: updatedPreviews
-              .filter((p) => p.type === 'youtube' || p.type === 'loom')
-              .map((p) => ({
-                type: p.type,
-                url: p.url,
-                id: p.id,
-                order: p.order,
-              })),
-          },
+      await updatePlatform({
+        previews: {
+          images: updatedPreviews
+            .filter((p) => p.type === 'image')
+            .map((p) => ({
+              filename: p.filename,
+              order: p.order,
+            })),
+          videos: updatedPreviews
+            .filter((p) => p.type === 'youtube' || p.type === 'loom')
+            .map((p) => ({
+              type: p.type,
+              url: p.url,
+              id: p.id,
+              order: p.order,
+            })),
         },
-        access_token,
-      );
+      });
 
       setPreviews(updatedPreviews);
       setVideoUrl('');
@@ -354,27 +342,24 @@ export default function EditImages() {
     // Update the order in the backend
     const loadingToast = toast.loading(tNotify('updatingPreviewOrder'));
     try {
-      await updatePlatform(
-        {
-          previews: {
-            images: reorderedItems
-              .filter((p) => p.type === 'image')
-              .map((p) => ({
-                filename: p.filename,
-                order: p.order,
-              })),
-            videos: reorderedItems
-              .filter((p) => p.type === 'youtube' || p.type === 'loom')
-              .map((p) => ({
-                type: p.type,
-                url: p.url,
-                id: p.id,
-                order: p.order,
-              })),
-          },
+      await updatePlatform({
+        previews: {
+          images: reorderedItems
+            .filter((p) => p.type === 'image')
+            .map((p) => ({
+              filename: p.filename,
+              order: p.order,
+            })),
+          videos: reorderedItems
+            .filter((p) => p.type === 'youtube' || p.type === 'loom')
+            .map((p) => ({
+              type: p.type,
+              url: p.url,
+              id: p.id,
+              order: p.order,
+            })),
         },
-        access_token,
-      );
+      });
 
       toast.success(tNotify('previewOrderUpdatedSuccess'), {
         id: loadingToast,

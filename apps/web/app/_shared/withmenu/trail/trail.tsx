@@ -18,15 +18,10 @@ const EMPTY_RECENT_TRANSACTIONS: any[] = [];
 
 const Trail = () => {
   const session = usePlatformSession() as any;
-  const access_token = session?.data?.tokens?.access_token;
   const t = useTranslations('TrailPage');
 
   const TRAIL_KEY = getTrailSwrKey();
-  const {
-    data: trail,
-    error,
-    mutate,
-  } = useSWR(TRAIL_KEY && access_token ? [TRAIL_KEY, access_token] : null, ([url, token]) => swrFetcher(url, token));
+  const { data: trail, error, mutate } = useSWR(TRAIL_KEY, (url) => swrFetcher(url));
 
   const gamificationProfile = useGamificationStore((s) => s.profile);
   const recentTransactions = useGamificationStore((s) => s.dashboard?.recent_transactions ?? EMPTY_RECENT_TRANSACTIONS);
@@ -39,8 +34,8 @@ const Trail = () => {
   };
 
   const { data: leaderboardData, isLoading: isLeaderboardLoading } = useSWR(
-    access_token ? `${getAPIUrl()}gamification/leaderboard?limit=10` : null,
-    (url) => swrFetcher(url, access_token),
+    `${getAPIUrl()}gamification/leaderboard?limit=10`,
+    (url) => swrFetcher(url),
   );
 
   const userRankData = { rank: gamificationData.user_rank };

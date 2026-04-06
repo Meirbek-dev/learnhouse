@@ -23,11 +23,11 @@ const StripeConnectCallback = () => {
     try {
       const code = searchParams.get('code');
 
-      if (!(code && session?.data?.tokens?.access_token)) {
+      if (!(code && undefined)) {
         throw new Error(t('missingParameters'));
       }
 
-      const _response = await verifyStripeConnection(code, session.data.tokens.access_token);
+      const _response = await verifyStripeConnection(code);
 
       // small delay for UX
       await new Promise((resolve) => setTimeout(resolve, 1000));

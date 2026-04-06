@@ -45,7 +45,7 @@ const ResetPasswordClient = () => {
   const validationT = useTranslations('Validation');
   const t = useTranslations('Auth.Reset');
   const searchParams = useSearchParams();
-  const reset_code = searchParams.get('resetCode') || '';
+  const token = searchParams.get('token') || searchParams.get('resetCode') || '';
   const email = searchParams.get('email') || '';
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
@@ -58,18 +58,23 @@ const ResetPasswordClient = () => {
     formState: { errors },
   } = useForm<ResetPasswordFormData>({
     resolver: valibotResolver(validationSchema),
-    defaultValues: { email, new_password: '', confirm_password: '', reset_code },
+    defaultValues: { email, new_password: '', confirm_password: '', reset_code: token },
   });
 
   const onSubmit = (values: ResetPasswordFormData) => {
     setError('');
     setMessage('');
     startTransition(async () => {
-      const res = await resetPassword(values.email, values.new_password, values.reset_code);
-      if (res.status === 200) {
+      const res = await resetPassword(values.reset_code, values.new_password);
+      if (res.ok) {
         setMessage(t('success'));
       } else {
-        setError(res.data.detail);
+        try {
+          const body = await res.json();
+          setError(body?.detail ?? t('unknownError'));
+        } catch {
+          setError(t('unknownError'));
+        }
       }
     });
   };

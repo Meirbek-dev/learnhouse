@@ -13,7 +13,7 @@ import {
   canSeePlatform,
   canSeeUsers,
 } from '@/lib/rbac/navigation-policy';
-import { requireAuth, sessionCan } from '@/lib/server-auth';
+import { requireSession, sessionCan } from '@/lib/auth/permissions';
 
 import platformLogoFull from '../../../public/platform_logo_full.svg';
 import type { Action, Resource, Scope } from '@/types/permissions';
@@ -23,8 +23,8 @@ import { Badge } from '@/components/ui/badge';
 
 export default async function PlatformDashHomePage() {
   const t = await getTranslations('DashPage.Card');
-  const session = await requireAuth();
-  const permsSet = new Set(session.permissions);
+  const session = await requireSession();
+  const permsSet = new Set<string>(session.permissions);
   const can = (action: Action, resource: Resource, scope: Scope): boolean =>
     sessionCan(session, resource, action, scope, permsSet);
 

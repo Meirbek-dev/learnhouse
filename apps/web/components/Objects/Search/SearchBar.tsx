@@ -11,7 +11,6 @@ import {
   Users,
 } from 'lucide-react';
 import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import { removeCoursePrefix } from '../Thumbnails/CourseThumbnail';
 import type { ChangeEvent, FC, KeyboardEvent } from 'react';
@@ -117,8 +116,6 @@ export const SearchBar: FC<SearchBarProps> = ({ className = '', isMobile = false
   const [isLoading, setIsLoading] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
-  const session = usePlatformSession();
-  const accessToken = session?.data?.tokens?.access_token;
   const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   // Debounce the search query value
@@ -156,8 +153,6 @@ export const SearchBar: FC<SearchBarProps> = ({ className = '', isMobile = false
           query: currentQuery,
           page: 1,
           limit: 3,
-          next: null,
-          access_token: accessToken,
         });
         if (controller.signal.aborted) return;
 
@@ -188,7 +183,7 @@ export const SearchBar: FC<SearchBarProps> = ({ className = '', isMobile = false
     return () => {
       controller.abort();
     };
-  }, [debouncedSearch, accessToken]);
+  }, [debouncedSearch]);
 
   const MemoizedEmptyState = !searchQuery.trim() ? (
     <div className="px-4 py-8">

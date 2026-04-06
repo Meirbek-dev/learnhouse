@@ -1,7 +1,7 @@
 'use client';
 
 import PageLoading from '@components/Objects/Loaders/PageLoading';
-import type { ClientAppSession } from '@/lib/auth/session';
+import type { ClientSession } from '@/lib/auth/types';
 import { createContext, use, useEffect, useMemo, useState } from 'react';
 import type { Role } from '@/types/permissions';
 import type { ReactNode } from 'react';
@@ -10,26 +10,7 @@ interface UserRoleWithPlatform {
   role: Role;
 }
 
-interface ExtendedSessionData {
-  user: {
-    id: number;
-    email: string;
-    username: string;
-    first_name: string | undefined;
-    middle_name: string | undefined;
-    last_name: string | undefined;
-    avatar_image: string | undefined;
-    user_uuid: string | undefined;
-  };
-  roles: UserRoleWithPlatform[] | undefined;
-  tokens:
-    | {
-        access_token?: string;
-      }
-    | undefined;
-  permissions: string[] | undefined;
-  expires?: string;
-}
+type ExtendedSessionData = ClientSession;
 
 interface ExtendedSession {
   data: ExtendedSessionData | null;
@@ -55,8 +36,8 @@ async function fetchSession(): Promise<ExtendedSessionData | null> {
     return null;
   }
 
-  const session = (await response.json()) as ClientAppSession | null;
-  return session as ExtendedSessionData | null;
+  const session = (await response.json()) as ClientSession | null;
+  return session;
 }
 
 const PlatformSessionProvider = ({
@@ -64,11 +45,9 @@ const PlatformSessionProvider = ({
   initialSession,
 }: {
   children: ReactNode;
-  initialSession?: ClientAppSession | null;
+  initialSession?: ClientSession | null;
 }) => {
-  const [data, setData] = useState<ExtendedSessionData | null>(
-    (initialSession as ExtendedSessionData | null | undefined) ?? null,
-  );
+  const [data, setData] = useState(initialSession ?? null);
   const [status, setStatus] = useState<'loading' | 'authenticated' | 'unauthenticated'>(
     initialSession === undefined ? 'loading' : initialSession?.user ? 'authenticated' : 'unauthenticated',
   );

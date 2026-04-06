@@ -20,12 +20,10 @@ interface EditorWrapperProps {
 const EditorWrapper = (props: EditorWrapperProps): JSX.Element => {
   const t = useTranslations('DashPage.Editor.EditorWrapper');
   const session = usePlatformSession() as any;
-  const access_token = session?.data?.tokens?.access_token;
   const isReady = !session.isLoading;
   const activityAutosave = useActivityAutosave({
     activityUuid: props.activity.activity_uuid,
     courseUuid: props.course.course_uuid,
-    accessToken: access_token,
   });
 
   async function setContent(content: any) {

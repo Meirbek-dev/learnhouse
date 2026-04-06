@@ -5,7 +5,6 @@ import { AlertTriangle, Image as ImageIcon, Loader2, Tag, Video } from 'lucide-r
 import { SectionHeader } from '@components/Dashboard/Courses/SectionHeader';
 import { useCoursesMutations } from '@/hooks/mutations/useCoursesMutations';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { Field, FieldError, FieldLabel } from '@components/ui/field';
 import { Card, CardContent, CardHeader } from '@components/ui/card';
 import type { CourseGeneralValues } from '@/schemas/courseSchemas';
@@ -121,8 +120,6 @@ function EditCourseGeneral() {
   const course = useCourse();
   const { isLoading, courseStructure } = course;
   const formId = useId();
-  const session = usePlatformSession();
-  const accessToken = session?.data?.tokens?.access_token;
   const { updateMetadata } = useCoursesMutations(courseStructure?.course_uuid ?? '');
 
   const serverValues = useMemo(() => buildFormValues(courseStructure), [courseStructure]);
@@ -154,16 +151,11 @@ function EditCourseGeneral() {
   }, [courseStructure, isLoading, serverValues, form]);
 
   const handleSubmit = async (values: CourseGeneralValues) => {
-    if (!accessToken) {
-      setError(t('errors.saveFailed'));
-      return;
-    }
     setError('');
 
     await saveWithoutRefresh(
       async () =>
         updateMetadata(values, {
-          accessToken,
           lastKnownUpdateDate: course.courseStructure.update_date,
         }),
       {

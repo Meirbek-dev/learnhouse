@@ -2,7 +2,6 @@
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { createAssignmentWithActivity } from '@services/courses/assignments';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { Field, FieldError, FieldLabel } from '@/components/ui/field';
 import { Controller, FormProvider, useForm } from 'react-hook-form';
 import { BarLoader } from '@components/Objects/Loaders/BarLoader';
@@ -43,7 +42,6 @@ const NewAssignment = ({ submitActivity, chapterId, course, closeModal }: any) =
   const t = useTranslations('Components.NewAssignmentModal');
   const fullLocale = useLocale();
   const locale = fullLocale.split('-')[0] ?? 'ru';
-  const session = usePlatformSession() as any;
   const validationSchema = createValidationSchema(validationT);
   const withUnpublishedActivities = course ? course.withUnpublishedActivities : false;
 
@@ -103,7 +101,6 @@ const NewAssignment = ({ submitActivity, chapterId, course, closeModal }: any) =
             },
             chapterId,
             activityName: values.name,
-            access_token: session.data?.tokens?.access_token,
           });
 
           if (res.success) {

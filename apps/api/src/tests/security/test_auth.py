@@ -183,7 +183,11 @@ class TestAuth:
             },
             secret_key,
         )
-        token = token_value.decode("utf-8") if isinstance(token_value, bytes) else token_value
+        token = (
+            token_value.decode("utf-8")
+            if isinstance(token_value, bytes)
+            else token_value
+        )
         with pytest.raises(HTTPException) as exc_info:
             decode_access_token(token)
         assert exc_info.value.status_code == 401

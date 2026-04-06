@@ -6,7 +6,7 @@ import useSWR, { mutate } from 'swr';
 import { toast } from 'sonner';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
+import { apiFetch } from '@/lib/api-client';
 import { getAPIUrl, getAbsoluteUrl } from '@/services/config/config';
 import { useContributorStatus } from '@/hooks/useContributorStatus';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
@@ -51,8 +51,6 @@ interface ExamActivityProps {
 
 export default function ExamActivity({ activity, course }: ExamActivityProps) {
   const t = useTranslations('Activities.ExamActivity');
-  const session = usePlatformSession();
-  const accessToken = session?.data?.tokens?.access_token;
   const { contributorStatus } = useContributorStatus(course.course_uuid);
 
   // Centralized state management with reducer
@@ -67,9 +65,7 @@ export default function ExamActivity({ activity, course }: ExamActivityProps) {
     data: exam,
     error: examError,
     mutate: mutateExam,
-  } = useSWR(accessToken ? `${getAPIUrl()}exams/activity/${activity.activity_uuid}` : null, (url) =>
-    swrFetcher(url, accessToken),
-  );
+  } = useSWR(`${getAPIUrl()}exams/activity/${activity.activity_uuid}`, swrFetcher);
 
   // Safe exam uuid reference to avoid accessing property on undefined
   const examUuid = exam?.exam_uuid ?? null;
@@ -79,23 +75,19 @@ export default function ExamActivity({ activity, course }: ExamActivityProps) {
     data: questions,
     error: questionsError,
     mutate: mutateQuestions,
-  } = useSWR(examUuid && accessToken ? `${getAPIUrl()}exams/${examUuid}/questions` : null, (url) =>
-    swrFetcher(url, accessToken),
-  );
+  } = useSWR(examUuid ? `${getAPIUrl()}exams/${examUuid}/questions` : null, swrFetcher);
 
   // Fetch user's attempts (fetch for both students and teachers now)
   const {
     data: userAttempts,
     error: attemptsError,
     mutate: mutateAttempts,
-  } = useSWR(examUuid && accessToken ? `${getAPIUrl()}exams/${examUuid}/attempts/me` : null, (url) =>
-    swrFetcher(url, accessToken),
-  );
+  } = useSWR(examUuid ? `${getAPIUrl()}exams/${examUuid}/attempts/me` : null, swrFetcher);
 
   // Fetch all attempts for teachers
   const { data: allAttempts } = useSWR(
-    examUuid && accessToken && isTeacher ? `${getAPIUrl()}exams/${examUuid}/attempts/all` : null,
-    (url) => swrFetcher(url, accessToken),
+    examUuid && isTeacher ? `${getAPIUrl()}exams/${examUuid}/attempts/all` : null,
+    swrFetcher,
   );
 
   // Update state based on loaded data
@@ -153,7 +145,7 @@ export default function ExamActivity({ activity, course }: ExamActivityProps) {
 
     // Revalidate trail data
     try {
-      await mutate([getTrailSwrKey(), accessToken]);
+      await mutate(getTrailSwrKey());
     } catch (error) {
       console.warn('Failed to revalidate trail after exam completion', error);
     }
@@ -169,14 +161,12 @@ export default function ExamActivity({ activity, course }: ExamActivityProps) {
     }
 
     // Fetch the completed attempt
-    const completedAttempt = await fetch(`${getAPIUrl()}exams/${examUuid}/attempts/me`, {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    }).then((res) => res.json());
+    const completedAttempt = await apiFetch(`exams/${examUuid}/attempts/me`).then((res) => res.json());
 
     const lastAttempt = completedAttempt[0];
     dispatch(examActions.submitExam(lastAttempt));
     isCompletingRef.current = false;
-  }, [mutateAttempts, course, examUuid, accessToken]);
+  }, [mutateAttempts, course, examUuid]);
 
   const router = useRouter();
 
@@ -233,10 +223,6 @@ export default function ExamActivity({ activity, course }: ExamActivityProps) {
     // Refresh attempts data
     mutateAttempts();
   }, [mutateAttempts]);
-
-  if (!accessToken) {
-    return <div className="p-4 text-red-600">{t('noAccessToken')}</div>;
-  }
 
   if (state.phase === 'loading' || !exam || !questions) {
     return <PageLoading />;
@@ -303,7 +289,6 @@ export default function ExamActivity({ activity, course }: ExamActivityProps) {
               <QuestionManagement
                 examUuid={examUuid}
                 questions={questions}
-                accessToken={accessToken}
                 onQuestionsChange={() => mutateQuestions()}
               />
             </TabsContent>
@@ -315,7 +300,6 @@ export default function ExamActivity({ activity, course }: ExamActivityProps) {
               <ExamSettings
                 exam={exam}
                 courseUuid={course.course_uuid}
-                accessToken={accessToken}
                 onSettingsUpdated={() => mutateExam()}
               />
             </TabsContent>
@@ -328,7 +312,6 @@ export default function ExamActivity({ activity, course }: ExamActivityProps) {
                 <ExamResultsDashboard
                   examUuid={examUuid}
                   attempts={allAttempts}
-                  accessToken={accessToken}
                   onViewAttempt={(attemptUuid) => {
                     toast.info(t('viewAttempt', { attempt: attemptUuid }));
                   }}
@@ -350,7 +333,6 @@ export default function ExamActivity({ activity, course }: ExamActivityProps) {
           exam={state.exam}
           questionCount={state.questions.length}
           userAttempts={state.userAttempts}
-          accessToken={accessToken}
           onStartExam={handleStartExam}
           onReviewAttempt={handleReviewAttempt}
           isTeacher={isTeacher}
@@ -367,7 +349,6 @@ export default function ExamActivity({ activity, course }: ExamActivityProps) {
           exam={state.exam}
           questions={state.questions}
           attempt={state.attempt}
-          accessToken={accessToken}
           onComplete={handleCompleteExam}
         />
       </ExamLayout>
@@ -377,12 +358,9 @@ export default function ExamActivity({ activity, course }: ExamActivityProps) {
   const handleRetry = async () => {
     // Start a new attempt if allowed
     try {
-      const response = await fetch(`${getAPIUrl()}exams/${exam.exam_uuid}/attempts/start`, {
+      const response = await apiFetch(`exams/${exam.exam_uuid}/attempts/start`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`,
-        },
+        headers: { 'Content-Type': 'application/json' },
       });
 
       if (!response.ok) {

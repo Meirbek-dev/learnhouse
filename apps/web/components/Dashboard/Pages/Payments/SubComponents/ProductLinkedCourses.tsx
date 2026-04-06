@@ -3,7 +3,6 @@
 import type { components } from '@/lib/api/generated';
 
 import { getCoursesLinkedToProduct, unlinkCourseFromProduct } from '@services/payments/products';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
 import { BookOpen, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@components/ui/button';
@@ -23,8 +22,6 @@ interface ProductLinkedCoursesProps {
 
 export default function ProductLinkedCourses({ productId }: ProductLinkedCoursesProps) {
   const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
-  const session = usePlatformSession() as any;
-  const accessToken = session?.data?.tokens?.access_token;
   const tNotify = useTranslations('DashPage.Notifications');
   const t = useTranslations('DashPage.Payments.LinkedCourses');
 
@@ -36,8 +33,8 @@ export default function ProductLinkedCourses({ productId }: ProductLinkedCourses
     data: linkedCourses,
     mutate: mutateLinkedCourses,
     error,
-  } = useSWR(LINKED_COURSES_KEY && accessToken ? [LINKED_COURSES_KEY, accessToken] : null, async ([, token]) => {
-    const response = await getCoursesLinkedToProduct(productId, token);
+  } = useSWR(LINKED_COURSES_KEY || null, async () => {
+    const response = await getCoursesLinkedToProduct(productId);
     return response.data || [];
   });
 
@@ -59,10 +56,10 @@ export default function ProductLinkedCourses({ productId }: ProductLinkedCourses
     );
 
     try {
-      const response = await unlinkCourseFromProduct(productId, courseId, accessToken);
+      const response = await unlinkCourseFromProduct(productId, courseId);
       if (response.success) {
         // Revalidate products list and linked courses list from server
-        mutate([PRODUCTS_KEY, accessToken]);
+        mutate(PRODUCTS_KEY);
         mutateLinkedCourses();
         toast.success(tNotify('courseUnlinkedSuccess'));
       } else {

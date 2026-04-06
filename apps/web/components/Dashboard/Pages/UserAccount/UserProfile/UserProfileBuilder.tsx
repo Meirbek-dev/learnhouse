@@ -231,7 +231,6 @@ interface ProfileData {
 
 const UserProfileBuilder = () => {
   const session = usePlatformSession() as any;
-  const access_token = session?.data?.tokens?.access_token;
   const tNotify = useTranslations('DashPage.Notifications');
   const t = useTranslations('DashPage.UserProfileBuilder');
   const [profileData, setProfileData] = useState<ProfileData>({
@@ -243,36 +242,38 @@ const UserProfileBuilder = () => {
 
   // Initialize profile data from user data
   const fetchUserDataEvent = useEffectEvent(async () => {
-    if (session?.data?.user?.id && access_token) {
-      try {
-        setIsLoading(true);
-        const userData = await getUser(session.data.user.id);
+    if (!session?.data?.user?.id) {
+      return;
+    }
 
-        if (userData.profile) {
-          try {
-            const profileSections =
-              typeof userData.profile === 'string' ? JSON.parse(userData.profile).sections : userData.profile.sections;
+    try {
+      setIsLoading(true);
+      const userData = await getUser(session.data.user.id);
 
-            setProfileData({
-              sections: profileSections || [],
-            });
-          } catch (error) {
-            console.error('Error parsing profile data:', error);
-            setProfileData({ sections: [] });
-          }
+      if (userData.profile) {
+        try {
+          const profileSections =
+            typeof userData.profile === 'string' ? JSON.parse(userData.profile).sections : userData.profile.sections;
+
+          setProfileData({
+            sections: profileSections || [],
+          });
+        } catch (error) {
+          console.error('Error parsing profile data:', error);
+          setProfileData({ sections: [] });
         }
-      } catch (error) {
-        console.error('Error fetching user data:', error);
-        toast.error(t('Errors.profileLoadFailed'));
-      } finally {
-        setIsLoading(false);
       }
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+      toast.error(t('Errors.profileLoadFailed'));
+    } finally {
+      setIsLoading(false);
     }
   });
 
   useEffect(() => {
     fetchUserDataEvent();
-  }, [session?.data?.user?.id, access_token]);
+  }, [session?.data?.user?.id]);
 
   const createEmptySection = (t: Function, type: keyof typeof SECTION_TYPE_KEYS): ProfileSection => {
     const sectionTypesConfig = getSectionTypesConfig(t);
@@ -411,7 +412,7 @@ const UserProfileBuilder = () => {
       // Update only the profile field
       userData.profile = profileData;
 
-      const res = await updateProfile(userData, userData.id, access_token);
+      const res = await updateProfile(userData, userData.id);
 
       if (res.status === 200) {
         toast.success(tNotify('profileUpdateSuccess'), { id: loadingToast });

@@ -1,5 +1,7 @@
 'use client';
 
+import { apiFetch } from '@/lib/api-client';
+
 import { createInitialTakingState, examTakingReducer } from './state/examTakingReducer';
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { useExamPersistence } from '@/hooks/useExamPersistence';
@@ -24,7 +26,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@comp
 import type { AttemptData, ExamData, QuestionData } from './state/examFlowReducer';
 import { RadioGroup, RadioGroupItem } from '@components/ui/radio-group';
 import { Alert, AlertDescription } from '@components/ui/alert';
-import { getAPIUrl } from '@/services/config/config';
 import { useTestGuard } from '@/hooks/useTestGuard';
 import { Progress } from '@components/ui/progress';
 import { Checkbox } from '@components/ui/checkbox';
@@ -35,20 +36,13 @@ interface ExamTakingInterfaceProps {
   exam: ExamData;
   questions: QuestionData[];
   attempt: AttemptData;
-  accessToken: string;
   onComplete: () => void;
 }
 
-export default function ExamTakingInterface({
-  exam,
-  questions,
-  attempt,
-  accessToken,
-  onComplete,
-}: ExamTakingInterfaceProps) {
+export default function ExamTakingInterface({ exam, questions, attempt, onComplete }: ExamTakingInterfaceProps) {
   const t = useTranslations('Activities.ExamActivity');
 
-  // Centralized state management with reducer
+  // Centralized state management with reducer,
   const [state, dispatch] = useReducer(
     examTakingReducer,
     createInitialTakingState(0, {}, attempt.violations?.length || 0),
@@ -58,13 +52,13 @@ export default function ExamTakingInterface({
   const [isFullscreen, setIsFullscreen] = useState(false);
   const examContainerRef = useRef<HTMLDivElement>(null);
 
-  // Answer persistence with auto-save and recovery
+  // Answer persistence with auto-save and recovery,
   const persistence = useExamPersistence({
     attemptUuid: attempt.attempt_uuid,
-    autoSaveInterval: 5000, // Auto-save every 5 seconds
+    autoSaveInterval: 5000, // Auto-save every 5 seconds,
     expirationHours: 24,
     onRestore: (recoveredAnswers) => {
-      // Offer recovery on mount if no current answers and we have recovered data
+      // Offer recovery on mount if no current answers and we have recovered data,
       const currentAnswers =
         state.mode === 'answering' ||
         state.mode === 'confirming-submit' ||
@@ -83,7 +77,7 @@ export default function ExamTakingInterface({
     .map((id) => questions.find((q) => q.id === id))
     .filter(Boolean) as QuestionData[];
 
-  // Extract current state
+  // Extract current state,
   const currentIndex = state.mode === 'submitting' ? 0 : state.currentIndex;
   const answers = state.mode === 'submitting' ? state.answers : state.mode === 'recovery-prompt' ? {} : state.answers;
   const isSubmitting = state.mode === 'submitting';
@@ -104,12 +98,9 @@ export default function ExamTakingInterface({
 
       try {
         const submitAnswers = state.mode === 'confirming-submit' ? state.answers : {};
-        const response = await fetch(`${getAPIUrl()}exams/${exam.exam_uuid}/attempts/${attempt.attempt_uuid}/submit`, {
+        const response = await apiFetch(`exams/${exam.exam_uuid}/attempts/${attempt.attempt_uuid}/submit`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${accessToken}`,
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(submitAnswers),
         });
 
@@ -117,7 +108,7 @@ export default function ExamTakingInterface({
           throw new Error('Failed to submit exam');
         }
 
-        // Clear saved answers on successful submission
+        // Clear saved answers on successful submission,
         persistence.clearSavedAnswers();
 
         toast.success(t('examSubmittedSuccessfully'));
@@ -128,29 +119,26 @@ export default function ExamTakingInterface({
         dispatch({ type: 'RESET_TO_ANSWERING' });
       }
     },
-    [state, accessToken, exam.exam_uuid, attempt.attempt_uuid, onComplete, t, persistence],
+    [state, exam.exam_uuid, attempt.attempt_uuid, onComplete, t, persistence],
   );
 
-  // Anti-cheating with useTestGuard
+  // Anti-cheating with useTestGuard,
   const handleViolation = useCallback(
     async (type: string, count: number) => {
       dispatch({ type: 'RECORD_VIOLATION', violation: { type, count } });
 
-      // Record violation on server
+      // Record violation on server,
       try {
-        await fetch(`${getAPIUrl()}exams/${exam.exam_uuid}/attempts/${attempt.attempt_uuid}/violations`, {
+        await apiFetch(`exams/${exam.exam_uuid}/attempts/${attempt.attempt_uuid}/violations`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${accessToken}`,
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ type }),
         });
 
-        // Check if threshold reached
+        // Check if threshold reached,
         const threshold = settings.violation_threshold;
         if (threshold && count >= threshold) {
-          // Auto-submit on threshold
+          // Auto-submit on threshold,
           toast.error(t('autoSubmitting', { reason: t('autoSubmittingReason.violationThresholdExceeded') }));
           void handleSubmit(true);
         }
@@ -158,7 +146,7 @@ export default function ExamTakingInterface({
         console.error('Failed to record violation:', error);
       }
     },
-    [accessToken, exam.exam_uuid, attempt.attempt_uuid, settings.violation_threshold, handleSubmit, t],
+    [exam.exam_uuid, attempt.attempt_uuid, settings.violation_threshold, handleSubmit, t],
   );
 
   useTestGuard({
@@ -168,17 +156,17 @@ export default function ExamTakingInterface({
     trackBlur: settings.tab_switch_detection,
     trackDevTools: settings.devtools_detection,
     maxViolations: settings.violation_threshold || 999,
-    // Wrap the async handler to avoid passing a Promise-returning function to the hook
+    // Wrap the async handler to avoid passing a Promise-returning function to the hook,
     onViolation: (type, count) => {
       void handleViolation(type, count);
     },
-    // Debounce options to reduce false positives
+    // Debounce options to reduce false positives,
     blurDebounceMs: 500, // Wait 500ms before reporting blur (user might switch back quickly)
-    devToolsThreshold: 180, // More conservative threshold for DevTools detection
+    devToolsThreshold: 180, // More conservative threshold for DevTools detection,
     devToolsCheckIntervalMs: 2000, // Check less frequently to avoid performance impact
   });
 
-  // Fullscreen enforcement with grace period and better UX
+  // Fullscreen enforcement with grace period and better UX,
   useEffect(() => {
     if (!settings.fullscreen_enforcement) return;
 
@@ -197,11 +185,11 @@ export default function ExamTakingInterface({
         console.warn('Fullscreen request failed:', error);
         fullscreenSupported = false;
 
-        // Show warning but don't penalize if browser doesn't support fullscreen
+        // Show warning but don't penalize if browser doesn't support fullscreen,
         if (error.name === 'TypeError' || error.message?.includes('not supported')) {
           toast.warning(t('fullscreenNotSupported'));
         } else {
-          // User denied or other error - show message but allow exam to continue
+          // User denied or other error - show message but allow exam to continue,
           toast.info(t('fullscreenRecommended'));
         }
       }
@@ -212,32 +200,32 @@ export default function ExamTakingInterface({
       setIsFullscreen(inFullscreen);
 
       if (!inFullscreen && settings.fullscreen_enforcement && fullscreenSupported) {
-        // Clear any existing timeout
+        // Clear any existing timeout,
         if (fullscreenExitTimeout) {
           clearTimeout(fullscreenExitTimeout);
         }
 
-        // Grace period: give user 3 seconds to return to fullscreen before reporting violation
+        // Grace period: give user 3 seconds to return to fullscreen before reporting violation,
         fullscreenExitTimeout = setTimeout(() => {
-          // Only report if still not in fullscreen after grace period
+          // Only report if still not in fullscreen after grace period,
           if (!document.fullscreenElement && !userInitiatedExit) {
             toast.warning(t('fullscreenExited'));
             void handleViolation('FULLSCREEN_EXIT', state.violationCount + 1);
 
-            // Optionally try to re-enter fullscreen
+            // Optionally try to re-enter fullscreen,
             if (settings.fullscreen_enforcement) {
               void requestFullscreen();
             }
           }
         }, 3000); // 3 second grace period
       } else if (inFullscreen && fullscreenExitTimeout) {
-        // User returned to fullscreen within grace period - cancel violation
+        // User returned to fullscreen within grace period - cancel violation,
         clearTimeout(fullscreenExitTimeout);
         fullscreenExitTimeout = null;
       }
     };
 
-    // Request fullscreen on mount
+    // Request fullscreen on mount,
     void requestFullscreen();
     document.addEventListener('fullscreenchange', handleFullscreenChange);
 
@@ -258,7 +246,7 @@ export default function ExamTakingInterface({
 
   const handleAnswerChange = (questionId: number, answer: any) => {
     dispatch({ type: 'ANSWER_QUESTION', questionId, answer });
-    // Persist answers to localStorage
+    // Persist answers to localStorage,
     const currentAnswers =
       state.mode === 'answering' || state.mode === 'violation-warning' || state.mode === 'fullscreen-warning'
         ? state.answers

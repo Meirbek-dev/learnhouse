@@ -1,22 +1,23 @@
 import logging
-from datetime import timedelta
+import time
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
-from fastapi.responses import RedirectResponse
-from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.responses import JSONResponse, RedirectResponse
 from sqlmodel import Session
 
 from config.config import get_settings
 from src.core.events.database import get_db_session
 from src.db.strict_base_model import PydanticStrictBaseModel
-from src.db.users import AnonymousUser, PublicUser, UserRead, UserSession
+from src.db.users import AnonymousUser, PublicUser, UserSession
 from src.security.auth import (
-    authenticate_user,
+    ACCESS_TOKEN_EXPIRE,
+    blocklist_jti,
     create_access_token,
-    decode_access_token,
-    get_access_token_expiry_timestamp,
+    decode_token_unverified,
+    get_access_token_expiry_ms,
     get_access_token_from_request,
+    get_current_user,
     get_current_user_optional,
     oauth2_scheme_optional,
 )
@@ -27,40 +28,168 @@ from src.security.auth_cookies import (
     set_access_cookie,
     set_refresh_cookie,
 )
-from src.services.auth.google_oauth import exchange_google_code, get_google_authorize_url
+from src.security.keys import get_jwks
+from src.services.auth.audit import write_audit_event
+from src.services.auth.google_oauth import (
+    exchange_google_code,
+    get_google_authorize_url,
+)
+from src.services.auth.rate_limiter import (
+    RateLimitExceeded,
+    check_account_locked,
+    check_rate_limit,
+    clear_login_failures,
+    record_login_failure,
+)
 from src.services.auth.sessions import (
-    get_session_by_id,
-    get_user_for_session,
+    SessionData,
+    create_auth_session,
+    get_user_active_sessions,
     resolve_refresh_session,
+    revoke_all_user_sessions,
     revoke_session,
     revoke_token_family,
     rotate_session,
-    create_auth_session,
 )
 from src.services.auth.utils import find_or_create_google_user
-from src.services.users.users import get_user_session
+from src.services.users.password_reset import (
+    change_password_with_reset_code,
+    send_reset_password_code,
+)
+from src.services.users.users import (
+    get_user_session,
+    security_get_user,
+    security_verify_password,
+)
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
 
+# ── Schemas ───────────────────────────────────────────────────────────────────
+
+
+class LoginRequest(PydanticStrictBaseModel):
+    email: str
+    password: str
+
+
 class TokensResponse(PydanticStrictBaseModel):
-    expiry: int
+    expires_at: int  # unix ms
 
 
 class LogoutResponse(PydanticStrictBaseModel):
     msg: str
 
 
-async def _build_user_session(
+class ForgotPasswordRequest(PydanticStrictBaseModel):
+    email: str
+
+
+class ResetPasswordRequest(PydanticStrictBaseModel):
+    token: str
+    new_password: str
+
+
+# ── Helpers ───────────────────────────────────────────────────────────────────
+
+
+def _client_ip(request: Request) -> str:
+    return request.client.host if request.client else "unknown"
+
+
+def _user_agent(request: Request) -> str:
+    return request.headers.get("user-agent", "unknown")
+
+
+def _make_access_token(session: SessionData) -> str:
+    return create_access_token(
+        user_uuid=session.user_uuid,
+        session_id=session.session_id,
+    )
+
+
+# ── Endpoints ─────────────────────────────────────────────────────────────────
+
+
+@router.post("/login", response_model=UserSession)
+async def login(
     request: Request,
-    db_session: Session,
-    user: PublicUser,
-) -> UserSession:
-    return await get_user_session(request, db_session, user)
+    response: Response,
+    body: LoginRequest,
+    db_session: Annotated[Session, Depends(get_db_session)],
+):
+    ip = _client_ip(request)
+    ua = _user_agent(request)
+
+    try:
+        check_rate_limit(key=f"login:ip:{ip}", max_requests=5, window_seconds=60)
+        check_rate_limit(
+            key=f"login:email:{body.email.lower()}", max_requests=10, window_seconds=60
+        )
+    except RateLimitExceeded as exc:
+        raise HTTPException(
+            status_code=429,
+            detail="Too many login attempts",
+            headers={"Retry-After": str(exc.retry_after)},
+        )
+
+    if check_account_locked(body.email):
+        write_audit_event(
+            db_session,
+            event_type="login_blocked",
+            ip_address=ip,
+            user_agent=ua,
+            metadata={"email": body.email},
+            severity="warning",
+        )
+        raise HTTPException(
+            status_code=423, detail="Account temporarily locked. Try again later."
+        )
+
+    user = await security_get_user(request, db_session, body.email)
+    if not user or not security_verify_password(body.password, user.password):
+        record_login_failure(body.email)
+        write_audit_event(
+            db_session,
+            event_type="login_failure",
+            ip_address=ip,
+            user_agent=ua,
+            metadata={"email": body.email},
+            severity="warning",
+        )
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect email or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    clear_login_failures(body.email)
+    session_data, refresh_token = create_auth_session(
+        db_session,
+        user=user,
+        ip_address=ip,
+        user_agent=ua,
+    )
+    access_token = _make_access_token(session_data)
+    set_access_cookie(response, access_token)
+    set_refresh_cookie(response, refresh_token)
+
+    write_audit_event(
+        db_session,
+        event_type="login_success",
+        user_id=str(user.user_uuid),
+        session_id=session_data.session_id,
+        ip_address=ip,
+        user_agent=ua,
+    )
+    logger.info("Login success user=%s ip=%s", user.email, ip)
+
+    user_pub = PublicUser.model_validate(user)
+    return await get_user_session(request, db_session, user_pub)
 
 
-@router.get("/refresh", response_model=TokensResponse)
+@router.post("/refresh", response_model=TokensResponse)
 def refresh(
     request: Request,
     response: Response,
@@ -70,185 +199,226 @@ def refresh(
     if not refresh_token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Could not validate credentials",
+            detail="Missing refresh token",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    auth_session = resolve_refresh_session(db_session, refresh_token)
-    if auth_session is None:
+    session_id_part = refresh_token.split(".", 1)[0]
+    try:
+        check_rate_limit(
+            key=f"refresh:{session_id_part}", max_requests=30, window_seconds=60
+        )
+    except RateLimitExceeded as exc:
+        raise HTTPException(
+            status_code=429,
+            detail="Too many refresh requests",
+            headers={"Retry-After": str(exc.retry_after)},
+        )
+
+    old_session = resolve_refresh_session(db_session, refresh_token)
+    if old_session is None:
+        # Token not in Redis: check if it ever existed (theft detection)
+        # Revocation already handled inside resolve_refresh_session
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Could not validate credentials",
+            detail="Invalid or expired refresh token",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    user = get_user_for_session(db_session, auth_session)
+    from sqlmodel import select
+    from src.db.users import User
+
+    user = db_session.exec(select(User).where(User.id == old_session.user_id)).first()
     if user is None:
-        revoke_token_family(db_session, auth_session.token_family_id)
+        revoke_token_family(
+            db_session, old_session.token_family_id, old_session.user_id
+        )
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Could not validate credentials",
+            detail="User not found",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    rotated_session, new_refresh_token = rotate_session(
+    # Blocklist old access token JTI if present
+    old_access_token = request.cookies.get(ACCESS_COOKIE_KEY)
+    if old_access_token:
+        old_payload = decode_token_unverified(old_access_token)
+        old_jti = old_payload.get("jti")
+        old_exp = old_payload.get("exp")
+        if old_jti and old_exp:
+            remaining = max(0, int(old_exp) - int(time.time()))
+            blocklist_jti(old_jti, remaining)
+
+    new_session, new_refresh_token = rotate_session(
         db_session,
-        auth_session=auth_session,
-        ip_address=request.client.host if request.client else None,
-        user_agent=request.headers.get("user-agent"),
+        old_session=old_session,
+        user=user,
+        ip_address=_client_ip(request),
+        user_agent=_user_agent(request),
     )
-    new_access_token = create_access_token(
-        {"sub": user.email, "sid": rotated_session.session_id}
-    )
-    expiry_timestamp = get_access_token_expiry_timestamp()
-
-    client_ip = request.client.host if request.client else "unknown"
-    logger.info(
-        "Token refresh succeeded",
-        extra={
-            "email": user.email,
-            "ip_address": client_ip,
-            "session_id": rotated_session.session_id,
-        },
-    )
-
+    new_access_token = _make_access_token(new_session)
     set_access_cookie(response, new_access_token)
     set_refresh_cookie(response, new_refresh_token)
 
-    return {"expiry": expiry_timestamp}
-
-
-@router.post("/login", response_model=UserSession)
-async def login(
-    request: Request,
-    response: Response,
-    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
-    db_session: Annotated[Session, Depends(get_db_session)],
-):
-    # Extract client info for security logging
-    client_ip = request.client.host if request.client else "unknown"
-    user_agent = request.headers.get("user-agent", "unknown")
-
-    user = await authenticate_user(
-        request, form_data.username, form_data.password, db_session
-    )
-
-    if not user:
-        # Log failed authentication attempt
-        logger.warning(
-            "Failed login attempt",
-            extra={
-                "email": form_data.username,
-                "ip_address": client_ip,
-                "user_agent": user_agent,
-                "reason": "invalid_credentials",
-            },
-        )
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect Email or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    auth_session, refresh_token = create_auth_session(
+    write_audit_event(
         db_session,
-        user_id=user.id,
-        ip_address=client_ip,
-        user_agent=user_agent,
-    )
-    access_token = create_access_token({"sub": user.email, "sid": auth_session.session_id})
-    set_refresh_cookie(response, refresh_token)
-    set_access_cookie(response, access_token)
-    user_read = PublicUser.model_validate(user)
-
-    logger.info(
-        "Successful login",
-        extra={
-            "user_id": user.id,
-            "email": user.email,
-            "ip_address": client_ip,
-            "user_agent": user_agent,
-            "session_id": auth_session.session_id,
-        },
+        event_type="token_refresh",
+        user_id=str(user.user_uuid),
+        session_id=new_session.session_id,
+        ip_address=_client_ip(request),
     )
 
-    return await _build_user_session(request, db_session, user_read)
+    return TokensResponse(expires_at=get_access_token_expiry_ms())
 
 
-@router.delete("/logout", response_model=LogoutResponse)
+@router.post("/logout", response_model=LogoutResponse)
 def logout(
     request: Request,
     response: Response,
     token: Annotated[str | None, Depends(oauth2_scheme_optional)],
     db_session: Annotated[Session, Depends(get_db_session)],
 ) -> LogoutResponse:
-    """
-    Because the JWT are stored in an httponly cookie now, we cannot
-    log the user out by simply deleting the cookies in the frontend.
-    We need the backend to send us a response to delete the cookies.
-    """
     resolved_token = get_access_token_from_request(request, token)
-    refresh_token = request.cookies.get(REFRESH_COOKIE_KEY)
-    token_data = decode_access_token(resolved_token) if resolved_token else None
-    client_ip = request.client.host if request.client else "unknown"
 
-    if token_data and token_data.session_id:
-        auth_session = get_session_by_id(db_session, token_data.session_id)
-        if auth_session is not None:
-            revoke_session(db_session, auth_session)
-    elif refresh_token:
-        auth_session = resolve_refresh_session(db_session, refresh_token)
-        if auth_session is not None:
-            revoke_session(db_session, auth_session)
-            token_data = token_data or PydanticStrictBaseModel.model_validate({})
+    if resolved_token:
+        payload = decode_token_unverified(resolved_token)
+        jti = payload.get("jti")
+        exp = payload.get("exp")
+        session_id = payload.get("sid")
+        user_uuid = payload.get("sub")
 
-    current_user = token_data.username if token_data else "unknown"
+        if jti and exp:
+            remaining = max(0, int(exp) - int(time.time()))
+            blocklist_jti(jti, remaining)
 
-    logger.info(
-        "User logout",
-        extra={
-            "email": current_user,
-            "ip_address": client_ip,
-        },
-    )
+        if session_id:
+            # Find user_id from the refresh token if available
+            refresh_token = request.cookies.get(REFRESH_COOKIE_KEY)
+            user_id_hint = None
+            if refresh_token:
+                old_session = resolve_refresh_session(db_session, refresh_token)
+                if old_session:
+                    user_id_hint = old_session.user_id
+            if user_id_hint is None and session_id:
+                # Try to get user_id from session prefix
+                parts = session_id.split("_", 1)
+                # Best effort — won't fail if we can't find it
+                pass
+            if user_id_hint:
+                revoke_session(db_session, session_id, user_id_hint)
+
+        write_audit_event(
+            db_session,
+            event_type="logout",
+            user_id=user_uuid,
+            session_id=session_id,
+            ip_address=_client_ip(request),
+        )
 
     clear_auth_cookies(response)
-    return LogoutResponse(msg="Successfully logout")
+    return LogoutResponse(msg="Successfully logged out")
 
 
-# ── Backend-driven Google OAuth (Authorization Code flow) ─────────────────────
-#
-# Flow:
-#   1. Frontend  →  GET /auth/google/authorize?callback=<frontend-url>
-#      Backend builds a Google OAuth URL (includes the callback in state) and
-#      redirects the browser to Google's consent screen.
-#
-#   2. Google    →  GET /auth/google/callback?code=...&state=...
-#      Backend exchanges the code for a Google access token, fetches user info,
-#      finds or creates the local user, issues our JWT pair, stores them under a
-#      short-lived exchange code, and redirects the browser back to the frontend.
-#
-#   3. Frontend  →  POST /auth/google/exchange  { "code": "<exchange-code>" }
-#      NextAuth's credentials provider calls this to trade the exchange code for
-#      the user + token payload, which NextAuth then stores in its session JWT.
-#
-# The Google client ID and secret live exclusively in the backend
-# (PLATFORM_GOOGLE_CLIENT_ID / PLATFORM_GOOGLE_CLIENT_SECRET).  The Next.js
-# layer no longer needs GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET.
+@router.post("/logout-all", response_model=LogoutResponse)
+async def logout_all(
+    request: Request,
+    response: Response,
+    db_session: Annotated[Session, Depends(get_db_session)],
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
+) -> LogoutResponse:
+    token = get_access_token_from_request(request, None)
+    if token:
+        payload = decode_token_unverified(token)
+        jti = payload.get("jti")
+        exp = payload.get("exp")
+        if jti and exp:
+            blocklist_jti(jti, max(0, int(exp) - int(time.time())))
+
+    from sqlmodel import select
+    from src.db.users import User
+
+    user = db_session.exec(
+        select(User).where(User.user_uuid == current_user.user_uuid)
+    ).first()
+    if user:
+        revoked = revoke_all_user_sessions(db_session, user.id)
+        write_audit_event(
+            db_session,
+            event_type="logout_all",
+            user_id=str(current_user.user_uuid),
+            ip_address=_client_ip(request),
+            metadata={"sessions_revoked": revoked},
+        )
+
+    clear_auth_cookies(response)
+    return LogoutResponse(msg="All sessions terminated")
 
 
-def _get_backend_callback_url() -> str:
-    """Return the redirect_uri that must be registered in Google Cloud Console.
+@router.get("/.well-known/jwks.json", include_in_schema=False)
+def jwks() -> JSONResponse:
+    return JSONResponse(
+        content=get_jwks(), headers={"Cache-Control": "public, max-age=3600"}
+    )
 
-    Prefers the explicit PLATFORM_GOOGLE_REDIRECT_URI env var, which must match
-    the URI registered in Google Cloud Console exactly.  Falls back to
-    constructing the URL from PLATFORM_DOMAIN / PLATFORM_PORT / PLATFORM_SSL
-    for simpler deployments.
-    """
+
+@router.get("/sessions")
+async def list_sessions(
+    current_user: Annotated[PublicUser, Depends(get_current_user)],
+    db_session: Annotated[Session, Depends(get_db_session)],
+):
+    from sqlmodel import select
+    from src.db.users import User
+
+    user = db_session.exec(
+        select(User).where(User.user_uuid == current_user.user_uuid)
+    ).first()
+    if not user:
+        return []
+    return get_user_active_sessions(user.id)
+
+
+# ── Password reset ────────────────────────────────────────────────────────────
+
+
+@router.post("/forgot-password")
+async def forgot_password(
+    request: Request,
+    body: ForgotPasswordRequest,
+    db_session: Annotated[Session, Depends(get_db_session)],
+):
+    ip = _client_ip(request)
+    try:
+        check_rate_limit(key=f"forgot:ip:{ip}", max_requests=3, window_seconds=3600)
+        check_rate_limit(
+            key=f"forgot:email:{body.email.lower()}", max_requests=1, window_seconds=300
+        )
+    except RateLimitExceeded:
+        # Always return 200 — no info leak
+        return {"msg": "If that email exists, a reset link has been sent"}
+
+    msg = await send_reset_password_code(db_session, body.email)
+    return {"msg": msg}
+
+
+@router.post("/reset-password")
+async def reset_password(
+    request: Request,
+    body: ResetPasswordRequest,
+    db_session: Annotated[Session, Depends(get_db_session)],
+):
+    msg = await change_password_with_reset_code(
+        db_session, body.token, body.new_password
+    )
+    return {"msg": msg}
+
+
+# ── Google OAuth ──────────────────────────────────────────────────────────────
+
+
+def _backend_callback_url() -> str:
     settings = get_settings()
     if settings.google_oauth.redirect_uri:
         return settings.google_oauth.redirect_uri
-
     hosting = settings.hosting_config
     protocol = "https" if hosting.ssl else "http"
     port = hosting.port
@@ -262,25 +432,13 @@ def _get_backend_callback_url() -> str:
 
 @router.get("/google/authorize")
 async def google_authorize(callback: str) -> RedirectResponse:
-    """
-    Redirect the browser to Google's OAuth consent screen.
-
-    `callback` is the frontend URL that the backend will redirect to after a
-    successful OAuth exchange (e.g. https://app.example.com/auth/google).
-    It is carried through the OAuth `state` parameter.
-    """
     settings = get_settings()
-    google_cfg = settings.google_oauth
-
-    if not google_cfg.client_id or not google_cfg.client_secret:
-        raise HTTPException(
-            status_code=503,
-            detail="Google OAuth is not configured on this server",
-        )
-
+    cfg = settings.google_oauth
+    if not cfg.client_id or not cfg.client_secret:
+        raise HTTPException(status_code=503, detail="Google OAuth is not configured")
     url = get_google_authorize_url(
-        client_id=google_cfg.client_id,
-        redirect_uri=_get_backend_callback_url(),
+        client_id=cfg.client_id,
+        redirect_uri=_backend_callback_url(),
         callback=callback,
     )
     return RedirectResponse(url)
@@ -297,70 +455,57 @@ async def google_callback(
     ] = None,
     db_session: Session = Depends(get_db_session),
 ) -> RedirectResponse:
-    """
-    Handle Google's redirect after the user consents.
-
-    Exchanges the authorization code for user info, finds/creates the local
-    user, creates a persistent auth session, sets cookies, and redirects the
-    browser back to the frontend already authenticated.
-    """
     frontend_callback = "/"
     if state:
-        frontend_callback = state
+        frontend_callback = state  # decoded inside exchange_google_code
 
     if error or not code:
-        logger.warning("Google OAuth error or missing code", extra={"error": error})
+        logger.warning("Google OAuth error: %s", error)
         return RedirectResponse(f"{frontend_callback}?error=oauth_failed")
 
     settings = get_settings()
-    google_cfg = settings.google_oauth
-
-    if not google_cfg.client_id or not google_cfg.client_secret:
+    cfg = settings.google_oauth
+    if not cfg.client_id or not cfg.client_secret:
         return RedirectResponse(f"{frontend_callback}?error=not_configured")
 
     try:
         google_user = await exchange_google_code(
-            client_id=google_cfg.client_id,
-            client_secret=google_cfg.client_secret,
+            client_id=cfg.client_id,
+            client_secret=cfg.client_secret,
             code=code,
-            redirect_uri=_get_backend_callback_url(),
+            redirect_uri=_backend_callback_url(),
+            state=state,
         )
     except HTTPException:
         return RedirectResponse(f"{frontend_callback}?error=oauth_failed")
 
-    client_ip = request.client.host if request.client else "unknown"
+    frontend_callback = google_user.get("frontend_callback", "/")
+    ip = _client_ip(request)
 
     try:
         user = await find_or_create_google_user(
             request, google_user, current_user, db_session
         )
     except HTTPException:
-        logger.warning(
-            "Google OAuth user lookup/creation failed",
-            extra={"ip_address": client_ip},
-        )
         return RedirectResponse(f"{frontend_callback}?error=user_error")
 
-    auth_session, refresh_token = create_auth_session(
+    session_data, refresh_token = create_auth_session(
         db_session,
-        user_id=user.id,
-        ip_address=client_ip,
-        user_agent=request.headers.get("user-agent"),
+        user=user,
+        ip_address=ip,
+        user_agent=_user_agent(request),
     )
-    access_token = create_access_token({"sub": user.email, "sid": auth_session.session_id})
+    access_token = _make_access_token(session_data)
 
     redirect_response = RedirectResponse(frontend_callback)
     set_access_cookie(redirect_response, access_token)
     set_refresh_cookie(redirect_response, refresh_token)
 
-    logger.info(
-        "Google OAuth login successful",
-        extra={
-            "user_id": user.id,
-            "email": user.email,
-            "ip_address": client_ip,
-            "session_id": auth_session.session_id,
-        },
+    write_audit_event(
+        db_session,
+        event_type="oauth_linked",
+        user_id=str(user.user_uuid),
+        session_id=session_data.session_id,
+        ip_address=ip,
     )
-
     return redirect_response

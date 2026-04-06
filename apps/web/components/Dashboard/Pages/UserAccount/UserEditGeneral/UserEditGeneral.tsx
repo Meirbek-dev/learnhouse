@@ -621,7 +621,6 @@ const UserEditForm = ({ form, profilePicture }: UserEditFormProps) => {
 
 const UserEditGeneral = () => {
   const session = usePlatformSession();
-  const access_token = session?.data?.tokens?.access_token;
   const [localAvatar, setLocalAvatar] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | undefined>();
@@ -648,10 +647,10 @@ const UserEditGeneral = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (session?.data?.user?.id && access_token) {
+      if (session?.data?.user?.id) {
         try {
           const [userDataResponse, localeResponse] = await Promise.all([
-            getUser(session.data.user.id, access_token),
+            getUser(session.data.user.id),
             getUserLocale(),
           ]);
           setUserData(userDataResponse);
@@ -680,7 +679,7 @@ const UserEditGeneral = () => {
     };
 
     fetchData();
-  }, [session?.data?.user?.id, access_token, form]);
+  }, [session?.data?.user?.id, form]);
 
   const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -691,14 +690,14 @@ const UserEditGeneral = () => {
     setError(undefined);
     setSuccess('');
 
-    if (!(session?.data?.user?.id && access_token)) {
+    if (!session?.data?.user?.id) {
       setError(t('avatarError'));
       setIsLoading(false);
       return;
     }
 
     try {
-      const res = await updateUserAvatar(session.data.user.id, file, access_token);
+      const res = await updateUserAvatar(session.data.user.id, file);
       if (!res.success) {
         setError(res.HTTPmessage || t('avatarError'));
       } else {
@@ -729,7 +728,7 @@ const UserEditGeneral = () => {
   };
 
   const onSubmit = async (values: FormValues) => {
-    if (!(userData?.id && access_token)) {
+    if (!userData?.id) {
       toast.error(t('profileUpdateError'));
       return;
     }
@@ -738,8 +737,8 @@ const UserEditGeneral = () => {
     const loadingToast = toast.loading(t('updating'));
 
     try {
-      await updateProfile(values, userData.id, access_token);
-      const updatedUserData = await getUser(userData.id, access_token);
+      await updateProfile(values, userData.id);
+      const updatedUserData = await getUser(userData.id);
       setUserData(updatedUserData);
 
       toast.dismiss(loadingToast);

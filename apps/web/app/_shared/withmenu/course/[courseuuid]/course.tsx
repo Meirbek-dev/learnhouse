@@ -22,10 +22,10 @@ import CourseAuthors from '@components/Objects/Courses/CourseAuthors/CourseAutho
 import GeneralWrapper from '@/components/Objects/Elements/Wrappers/GeneralWrapper';
 import ActivityIndicators from '@components/Pages/Courses/ActivityIndicators';
 import CourseBreadcrumbs from '@components/Pages/Courses/CourseBreadcrumbs';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { getDiscussionsSwrKey } from '@services/courses/discussions-keys';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { CourseProvider } from '@components/Contexts/CourseContext';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { swrFetcher } from '@services/utils/ts/requests';
 // Import the new discussions component
@@ -55,23 +55,19 @@ const CourseClient = (props: any) => {
   const { courseuuid } = props;
   const { course } = props;
   const isMobile = useIsMobile();
-  const session = usePlatformSession();
-  const access_token = session?.data?.tokens?.access_token;
+  const session = usePlatformSession() as any;
 
   const {
     data: discussionPosts = [],
     error: discussionsError,
     mutate: mutateDiscussions,
-  } = useSWR(
-    course?.course_uuid && access_token ? getDiscussionsSwrKey(course.course_uuid, true, 50, 0) : null,
-    (url) => swrFetcher(url, access_token),
+  } = useSWR(course?.course_uuid ? getDiscussionsSwrKey(course.course_uuid, true, 50, 0) : null, (url) =>
+    swrFetcher(url),
   );
 
   // Add SWR for trail data
   const TRAIL_KEY = getTrailSwrKey();
-  const { data: trailData } = useSWR(TRAIL_KEY && access_token ? [TRAIL_KEY, access_token] : null, ([url, token]) =>
-    swrFetcher(url, token),
-  );
+  const { data: trailData } = useSWR(TRAIL_KEY || null, (url) => swrFetcher(url));
 
   // Normalizes various formats of `course.learnings` into an array that the UI can render
   const normalizedLearnings = useMemo(() => {

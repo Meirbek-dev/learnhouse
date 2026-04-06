@@ -4,7 +4,7 @@ import { RecentActivityFeed } from './Gamification/recent-activity-feed';
 import { HeroSection } from './Gamification/hero-section';
 import { Leaderboard } from './Gamification/leaderboard';
 import { Skeleton } from '@/components/ui/skeleton';
-import { auth } from '@/auth';
+import { getSession } from '@/lib/auth/session';
 
 /**
  * Unified Gamification Dashboard (Server Component)
@@ -14,7 +14,7 @@ import { auth } from '@/auth';
  */
 export default async function GamificationDashboard() {
   try {
-    const session = await auth();
+    const session = await getSession();
     const userId = session?.user?.id;
 
     // Return null early if no session (not authenticated)
