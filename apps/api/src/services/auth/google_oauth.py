@@ -1,58 +1,50 @@
-import time
-import urllib.parse
-import uuid
+from functools import lru_cache
 from typing import Any
 
 import httpx
+from authlib.integrations.httpx_client import AsyncOAuth2Client
+from authlib.jose import JoseError, jwt
 from fastapi import HTTPException
 
-# ── In-memory one-time exchange code store ────────────────────────────────────
-#
-# After the Google OAuth callback, we create a short-lived exchange code (UUID)
-# that holds the user + token data. The Next.js callback page calls
-# POST /auth/google/exchange to consume it and establish a NextAuth session.
-#
-# .pop() makes each code single-use; _cleanup_exchange_store() evicts expired
-# entries to bound memory. TTL is 5 minutes — enough for the browser redirect
-# round-trip but short enough to limit exposure.
+from src.security.security import ALGORITHM, get_secret_key
 
-_EXCHANGE_STORE: dict[str, dict[str, Any]] = {}
-_EXCHANGE_TTL = 300  # seconds
+GOOGLE_DISCOVERY_URL = "https://accounts.google.com/.well-known/openid-configuration"
 
 
-def _cleanup_exchange_store() -> None:
-    now = time.time()
-    expired = [k for k, v in list(_EXCHANGE_STORE.items()) if v["expires_at"] < now]
-    for k in expired:
-        del _EXCHANGE_STORE[k]
+@lru_cache(maxsize=1)
+def _state_signing_key() -> str:
+    return get_secret_key()
 
 
-def create_exchange_code(
-    user_data: Any,
-    access_token: str,
-    refresh_token: str,
-    expiry: int,
-) -> str:
-    """Store user+token data and return a one-time exchange code."""
-    _cleanup_exchange_store()
-    code = str(uuid.uuid4())
-    _EXCHANGE_STORE[code] = {
-        "user": user_data,
-        "access_token": access_token,
-        "refresh_token": refresh_token,
-        "expiry": expiry,
-        "expires_at": time.time() + _EXCHANGE_TTL,
-    }
-    return code
+async def _get_google_metadata() -> dict[str, Any]:
+    async with httpx.AsyncClient(timeout=10.0) as client:
+        response = await client.get(GOOGLE_DISCOVERY_URL)
+        response.raise_for_status()
+        return response.json()
 
 
-def consume_exchange_code(code: str) -> dict[str, Any] | None:
-    """Retrieve and delete exchange code data. Returns None if missing/expired."""
-    _cleanup_exchange_store()
-    entry = _EXCHANGE_STORE.pop(code, None)
-    if not entry or time.time() > entry["expires_at"]:
-        return None
-    return entry
+def _encode_state(callback: str) -> str:
+    token = jwt.encode(
+        {"alg": ALGORITHM, "typ": "JWT"},
+        {"callback": callback, "type": "google_state"},
+        _state_signing_key(),
+    )
+    return token.decode("utf-8") if isinstance(token, bytes) else token
+
+
+def _decode_state(state: str) -> str:
+    try:
+        claims = jwt.decode(state, _state_signing_key())
+        claims.validate()
+        callback = claims.get("callback")
+        token_type = claims.get("type")
+    except JoseError as exc:
+        raise HTTPException(status_code=400, detail="Invalid OAuth state") from exc
+
+    if token_type != "google_state" or not isinstance(callback, str) or not callback:
+        raise HTTPException(status_code=400, detail="Invalid OAuth state")
+
+    return callback
 
 
 # ── Google OAuth helpers ──────────────────────────────────────────────────────
@@ -61,21 +53,23 @@ def consume_exchange_code(code: str) -> dict[str, Any] | None:
 def get_google_authorize_url(
     client_id: str,
     redirect_uri: str,
-    state: str | None = None,
+    callback: str,
 ) -> str:
-    """Build the Google OAuth 2.0 authorization URL."""
-    params: dict[str, str] = {
-        "client_id": client_id,
-        "redirect_uri": redirect_uri,
-        "response_type": "code",
-        "scope": "openid email profile",
-        "access_type": "online",
-    }
-    if state:
-        params["state"] = state
-    return "https://accounts.google.com/o/oauth2/v2/auth?" + urllib.parse.urlencode(
-        params
+    """Build the Google OAuth 2.0 authorization URL with Authlib."""
+    state = _encode_state(callback)
+    metadata = httpx.get(GOOGLE_DISCOVERY_URL, timeout=10.0).json()
+    client = AsyncOAuth2Client(
+        client_id=client_id,
+        redirect_uri=redirect_uri,
+        scope="openid email profile",
     )
+    url, _ = client.create_authorization_url(
+        metadata["authorization_endpoint"],
+        state=state,
+        access_type="online",
+        prompt="select_account",
+    )
+    return url
 
 
 async def exchange_google_code(
@@ -83,38 +77,43 @@ async def exchange_google_code(
     client_secret: str,
     code: str,
     redirect_uri: str,
+    state: str | None = None,
 ) -> dict[str, Any]:
-    """Exchange a Google authorization code for user info."""
-    async with httpx.AsyncClient() as client:
-        token_resp = await client.post(
-            "https://oauth2.googleapis.com/token",
-            data={
-                "client_id": client_id,
-                "client_secret": client_secret,
-                "code": code,
-                "grant_type": "authorization_code",
-                "redirect_uri": redirect_uri,
-            },
-        )
-        if token_resp.status_code != 200:
+    """Exchange a Google authorization code for user info with Authlib."""
+    metadata = await _get_google_metadata()
+    async with AsyncOAuth2Client(
+        client_id=client_id,
+        client_secret=client_secret,
+        redirect_uri=redirect_uri,
+        scope="openid email profile",
+    ) as client:
+        try:
+            token = await client.fetch_token(
+                metadata["token_endpoint"],
+                code=code,
+                grant_type="authorization_code",
+            )
+        except Exception as exc:  # noqa: BLE001
             raise HTTPException(
                 status_code=400,
                 detail="Failed to exchange Google authorization code",
-            )
-        access_token = token_resp.json().get("access_token")
-        if not access_token:
+            ) from exc
+
+        access_token = token.get("access_token")
+        if not isinstance(access_token, str) or not access_token:
             raise HTTPException(
                 status_code=400,
                 detail="Google token response missing access_token",
             )
 
-        userinfo_resp = await client.get(
-            "https://www.googleapis.com/oauth2/v3/userinfo",
-            headers={"Authorization": f"Bearer {access_token}"},
-        )
+        userinfo_resp = await client.get(metadata["userinfo_endpoint"])
         if userinfo_resp.status_code != 200:
             raise HTTPException(
                 status_code=400,
                 detail="Failed to fetch Google user info",
             )
-        return userinfo_resp.json()
+
+        userinfo = userinfo_resp.json()
+        if state is not None:
+            userinfo["frontend_callback"] = _decode_state(state)
+        return userinfo

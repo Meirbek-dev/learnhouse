@@ -1,5 +1,4 @@
 import type { NextRequest } from 'next/server';
-import { getToken } from 'next-auth/jwt';
 import { NextResponse } from 'next/server';
 
 const AUTH_REWRITE: Record<string, string> = {
@@ -10,16 +9,6 @@ const AUTH_REWRITE: Record<string, string> = {
 };
 
 const EDITOR_PATH_RE = /^\/course\/[\w-]+\/activity\/[\w-]+\/edit$/;
-
-function getSessionCookieName() {
-  const nextAuthUrl = process.env.NEXTAUTH_URL?.trim();
-  const isSecureCookie =
-    process.env.NODE_ENV === 'production' && typeof nextAuthUrl === 'string' && nextAuthUrl.length > 0
-      ? new URL(nextAuthUrl).protocol === 'https:'
-      : false;
-
-  return `${isSecureCookie ? '__Secure-' : ''}next-auth.session-token`;
-}
 
 function buildRequestHeaders(req: NextRequest, requestId: string) {
   const headers = new Headers(req.headers);
@@ -93,16 +82,9 @@ export default async function proxy(req: NextRequest) {
   }
 
   if (pathname.startsWith('/dash')) {
-    const sessionCookieName = getSessionCookieName();
-    const session = await getToken({
-      cookieName: sessionCookieName,
-      req,
-      salt: sessionCookieName,
-      secret: process.env.NEXTAUTH_SECRET,
-      secureCookie: req.nextUrl.protocol === 'https:',
-    });
+    const hasAuthCookie = req.cookies.has('access_token_cookie') || req.cookies.has('refresh_token_cookie');
 
-    if (!session) {
+    if (!hasAuthCookie) {
       return withRequestId(NextResponse.redirect(new URL('/login', req.url)), requestId);
     }
   }

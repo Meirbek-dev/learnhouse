@@ -1,5 +1,6 @@
 'use server';
 import { RequestBodyWithAuthHeader, errorHandling, getResponseMetadata } from '@services/utils/ts/requests';
+import { resolveServerAccessToken } from '@/lib/auth/server-access-token';
 import type { CustomResponseTyping } from '@services/utils/ts/requests';
 import type { components } from '@/lib/api/generated';
 import { getAPIUrl } from '@services/config/config';
@@ -36,18 +37,28 @@ async function getTypedResponseMetadata<T>(response: Response): Promise<Response
   return (await getResponseMetadata(response)) as ResponseMetadata<T>;
 }
 
+async function requireAccessToken(access_token?: string): Promise<string> {
+  const token = await resolveServerAccessToken(access_token);
+  if (!token) {
+    throw new Error('Authentication required');
+  }
+  return token;
+}
+
 export async function getPaymentConfigs(access_token: string): Promise<PaymentsConfigRead[]> {
+  const token = await requireAccessToken(access_token);
   const result = await fetch(
     `${getAPIUrl()}payments/config`,
-    RequestBodyWithAuthHeader('GET', null, null, access_token),
+    RequestBodyWithAuthHeader('GET', null, null, token),
   );
   return (await errorHandling(result)) as PaymentsConfigRead[];
 }
 
 export async function checkPaidAccess(courseId: number, access_token: string): Promise<PaymentsCourseAccessResponse> {
+  const token = await requireAccessToken(access_token);
   const result = await fetch(
     `${getAPIUrl()}payments/courses/${courseId}/access`,
-    RequestBodyWithAuthHeader('GET', null, null, access_token),
+    RequestBodyWithAuthHeader('GET', null, null, token),
   );
   return (await errorHandling(result)) as PaymentsCourseAccessResponse;
 }
@@ -57,9 +68,10 @@ export async function initializePaymentConfig(
   provider: Extract<PaymentProviderEnum, 'stripe'>,
   access_token: string,
 ): Promise<PaymentsConfig> {
+  const token = await requireAccessToken(access_token);
   const result = await fetch(
     `${getAPIUrl()}payments/config?provider=${provider}`,
-    RequestBodyWithAuthHeader('POST', null, null, access_token),
+    RequestBodyWithAuthHeader('POST', null, null, token),
   );
   const responseData = (await errorHandling(result)) as PaymentsConfig;
 
@@ -77,9 +89,10 @@ export async function updatePaymentConfig(
   data: PaymentsConfigUpdate,
   access_token: string,
 ): Promise<PaymentsConfig> {
+  const token = await requireAccessToken(access_token);
   const result = await fetch(
     `${getAPIUrl()}payments/config?id=${id}`,
-    RequestBodyWithAuthHeader('PUT', data, null, access_token),
+    RequestBodyWithAuthHeader('PUT', data, null, token),
   );
   const responseData = (await errorHandling(result)) as PaymentsConfig;
 
@@ -96,9 +109,10 @@ export async function updateStripeAccountID(
   data: StripeAccountInput,
   access_token: string,
 ): Promise<PaymentsMessageResponse> {
+  const token = await requireAccessToken(access_token);
   const result = await fetch(
     `${getAPIUrl()}payments/stripe/account?stripe_account_id=${data.stripe_account_id}`,
-    RequestBodyWithAuthHeader('PUT', data, null, access_token),
+    RequestBodyWithAuthHeader('PUT', data, null, token),
   );
   const responseData = (await errorHandling(result)) as PaymentsMessageResponse;
 
@@ -115,9 +129,10 @@ export async function getStripeOnboardingLink(
   access_token: string,
   redirect_uri: string,
 ): Promise<PaymentsConnectLinkResponse> {
+  const token = await requireAccessToken(access_token);
   const result = await fetch(
     `${getAPIUrl()}payments/stripe/connect/link?redirect_uri=${redirect_uri}`,
-    RequestBodyWithAuthHeader('POST', null, null, access_token),
+    RequestBodyWithAuthHeader('POST', null, null, token),
   );
   return (await errorHandling(result)) as PaymentsConnectLinkResponse;
 }
@@ -126,17 +141,19 @@ export async function verifyStripeConnection(
   code: string,
   access_token: string,
 ): Promise<PaymentsStripeOAuthCallbackResponse> {
+  const token = await requireAccessToken(access_token);
   const result = await fetch(
     `${getAPIUrl()}payments/stripe/oauth/callback?code=${code}`,
-    RequestBodyWithAuthHeader('GET', null, null, access_token),
+    RequestBodyWithAuthHeader('GET', null, null, token),
   );
   return (await errorHandling(result)) as PaymentsStripeOAuthCallbackResponse;
 }
 
 export async function deletePaymentConfig(id: number | string, access_token: string): Promise<PaymentsMessageResponse> {
+  const token = await requireAccessToken(access_token);
   const result = await fetch(
     `${getAPIUrl()}payments/config?id=${id}`,
-    RequestBodyWithAuthHeader('DELETE', null, null, access_token),
+    RequestBodyWithAuthHeader('DELETE', null, null, token),
   );
   const responseData = (await errorHandling(result)) as PaymentsMessageResponse;
 
@@ -150,17 +167,19 @@ export async function deletePaymentConfig(id: number | string, access_token: str
 }
 
 export async function getCustomers(access_token: string): Promise<PaymentsCustomerRead[]> {
+  const token = await requireAccessToken(access_token);
   const result = await fetch(
     `${getAPIUrl()}payments/customers`,
-    RequestBodyWithAuthHeader('GET', null, null, access_token),
+    RequestBodyWithAuthHeader('GET', null, null, token),
   );
   return (await errorHandling(result)) as PaymentsCustomerRead[];
 }
 
 export async function getOwnedCourses(access_token: string): Promise<CourseRead[]> {
+  const token = await requireAccessToken(access_token);
   const result = await fetch(
     `${getAPIUrl()}payments/courses/owned`,
-    RequestBodyWithAuthHeader('GET', null, null, access_token),
+    RequestBodyWithAuthHeader('GET', null, null, token),
   );
   return (await errorHandling(result)) as CourseRead[];
 }

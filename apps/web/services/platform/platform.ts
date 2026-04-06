@@ -6,6 +6,7 @@ import {
   errorHandling,
   getResponseMetadata,
 } from '@services/utils/ts/requests';
+import { resolveServerAccessToken } from '@/lib/auth/server-access-token';
 import type { CustomResponseTyping } from '@services/utils/ts/requests';
 import { CacheProfiles, cacheLife, cacheTag } from '@/lib/cache';
 import { getServerAPIUrl } from '@services/config/config';
@@ -35,8 +36,9 @@ async function fetchPlatform(access_token?: string): Promise<PlatformRead | null
   cacheLife(CacheProfiles.platform);
 
   const headers: HeadersInit = { 'Content-Type': 'application/json' };
-  if (access_token) {
-    headers.Authorization = `Bearer ${access_token}`;
+  const token = await resolveServerAccessToken(access_token);
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
   }
 
   try {
@@ -67,9 +69,14 @@ export async function updateLanding(
   landing_object: Record<string, unknown>,
   access_token: string,
 ): Promise<ResponseMetadata<PlatformDetailResponse>> {
+  const token = await resolveServerAccessToken(access_token);
+  if (!token) {
+    throw new Error('Authentication required');
+  }
+
   const result = await fetch(
     `${getServerAPIUrl()}landing`,
-    RequestBodyWithAuthHeader('PUT', landing_object, null, access_token),
+    RequestBodyWithAuthHeader('PUT', landing_object, null, token),
   );
   const metadata = await getTypedResponseMetadata<PlatformDetailResponse>(result);
 
@@ -83,12 +90,17 @@ export async function updateLanding(
 }
 
 export async function uploadLandingContent(content_file: File, access_token: string) {
+  const token = await resolveServerAccessToken(access_token);
+  if (!token) {
+    throw new Error('Authentication required');
+  }
+
   const formData = new FormData();
   formData.append('content_file', content_file);
 
   const result = await fetch(
     `${getServerAPIUrl()}landing/content`,
-    RequestBodyFormWithAuthHeader('POST', formData, null, access_token),
+    RequestBodyFormWithAuthHeader('POST', formData, null, token),
   );
   return await getTypedResponseMetadata<PlatformLandingUploadResponse>(result);
 }
@@ -97,9 +109,14 @@ export async function removeUser(
   user_id: number,
   access_token: string,
 ): Promise<ResponseMetadata<PlatformDetailResponse>> {
+  const token = await resolveServerAccessToken(access_token);
+  if (!token) {
+    throw new Error('Authentication required');
+  }
+
   const result = await fetch(
     `${getServerAPIUrl()}members/${user_id}`,
-    RequestBodyWithAuthHeader('DELETE', null, null, access_token),
+    RequestBodyWithAuthHeader('DELETE', null, null, token),
   );
   const metadata = await getTypedResponseMetadata<PlatformDetailResponse>(result);
 

@@ -93,7 +93,6 @@ const NewExam = ({ submitActivity, chapterId, course, closeModal }: any) => {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'Authorization': `Bearer ${session?.data?.tokens?.access_token}`,
             },
             body: JSON.stringify({
               activity_name: values.activity_name,

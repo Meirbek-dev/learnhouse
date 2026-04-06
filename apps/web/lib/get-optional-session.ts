@@ -1,9 +1,3 @@
-const hasAuthRuntimeConfig = () => {
-  const requiredKeys = [process.env.NEXTAUTH_SECRET, process.env.NEXTAUTH_URL];
-
-  return requiredKeys.every((value) => typeof value === 'string' && value.trim().length > 0);
-};
-
 const isDeferredRequestApiError = (error: unknown) => {
   if (!(error instanceof Error)) {
     return false;
@@ -13,10 +7,6 @@ const isDeferredRequestApiError = (error: unknown) => {
 };
 
 export async function getOptionalSession() {
-  if (!hasAuthRuntimeConfig()) {
-    return null;
-  }
-
   const { auth } = await import('@/auth');
 
   try {

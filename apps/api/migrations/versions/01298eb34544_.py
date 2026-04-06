@@ -9,6 +9,7 @@ from typing import Sequence, Union
 
 from alembic import op
 import sqlalchemy as sa
+import sqlmodel
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
@@ -84,10 +85,12 @@ def upgrade() -> None:
     op.alter_column('assignmentusersubmission', 'submitted_at',
                existing_type=sa.TEXT(),
                type_=sa.DateTime(timezone=True),
+               postgresql_using='submitted_at::timestamp with time zone',
                existing_nullable=True)
     op.alter_column('assignmentusersubmission', 'graded_at',
                existing_type=sa.TEXT(),
                type_=sa.DateTime(timezone=True),
+               postgresql_using='graded_at::timestamp with time zone',
                existing_nullable=True)
     op.drop_index(op.f('idx_assignmentusersubmission_assignmentusersubmission_uuid'), table_name='assignmentusersubmission')
     op.drop_constraint(op.f('uq_assignmentusersubmission_assignmentusersubmission_uuid'), 'assignmentusersubmission', type_='unique')
@@ -494,10 +497,12 @@ def downgrade() -> None:
     op.alter_column('assignmentusersubmission', 'graded_at',
                existing_type=sa.DateTime(timezone=True),
                type_=sa.TEXT(),
+               postgresql_using='graded_at::text',
                existing_nullable=True)
     op.alter_column('assignmentusersubmission', 'submitted_at',
                existing_type=sa.DateTime(timezone=True),
                type_=sa.TEXT(),
+               postgresql_using='submitted_at::text',
                existing_nullable=True)
     op.alter_column('assignmentusersubmission', 'update_date',
                existing_type=sqlmodel.sql.sqltypes.AutoString(),

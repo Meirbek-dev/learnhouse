@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import { applyTheme, getStoredTheme, getTheme } from '@/lib/themes';
 import { loadTheme } from '@/lib/theme-lazy-loader';
 import type { Theme } from '@/lib/themes';
@@ -22,21 +22,23 @@ interface ThemeProviderProps {
 }
 
 export function ThemeProvider({ children, defaultThemeName = 'default', userTheme }: ThemeProviderProps) {
-  // Initialize theme name and apply theme immediately during initialization
-  const [themeName, setThemeName] = useState<string>(() => {
-    if (typeof globalThis.window !== 'undefined') {
-      const effectiveTheme = getStoredTheme() || userTheme || defaultThemeName;
-      const initialTheme = getTheme(effectiveTheme);
-      applyTheme(initialTheme);
-      return effectiveTheme;
-    }
-    return userTheme || defaultThemeName;
-  });
+  const initialThemeName = userTheme || defaultThemeName;
+  const [themeName, setThemeName] = useState<string>(initialThemeName);
 
   const [isLoading, setIsLoading] = useState(false);
 
   // Theme object
   const theme = getTheme(themeName);
+
+  useEffect(() => {
+    const effectiveTheme = getStoredTheme() || userTheme || defaultThemeName;
+
+    if (effectiveTheme !== themeName) {
+      setThemeName(effectiveTheme);
+    }
+
+    applyTheme(getTheme(effectiveTheme));
+  }, [defaultThemeName, themeName, userTheme]);
 
   const setTheme = async (newThemeName: string, syncToServer = true) => {
     setIsLoading(true);

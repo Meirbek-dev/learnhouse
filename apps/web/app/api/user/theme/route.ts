@@ -5,10 +5,9 @@ import { auth } from '@/auth';
 
 export async function POST(request: NextRequest) {
   const session = await auth();
-  const accessToken = session?.tokens?.access_token;
   const userId = session?.user?.id;
 
-  if (!session?.user || !accessToken || typeof userId !== 'number') {
+  if (!session?.user || typeof userId !== 'number') {
     return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
   }
 
@@ -20,7 +19,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Theme is required' }, { status: 400 });
     }
 
-    await updateUserTheme(userId, theme, accessToken);
+    await updateUserTheme(userId, theme, session.tokens?.access_token ?? '');
 
     return NextResponse.json({ updated: true }, { status: 200 });
   } catch (error) {

@@ -1,5 +1,7 @@
 import { getLocale, getMessages, setRequestLocale } from 'next-intl/server';
 import { IntlProvider } from '@/components/providers/IntlProvider';
+import { toClientSession } from '@/lib/auth/session';
+import { auth } from '@/auth';
 import DevScriptLoader from '@/components/DevScriptLoader';
 import { inter, jetBrainsMono } from '@/lib/fonts';
 import { Suspense } from 'react';
@@ -13,13 +15,14 @@ async function LocalizedApp({ children }: { children: React.ReactNode }) {
   const locale = await getLocale();
   setRequestLocale(locale);
   const messages = await getMessages();
+  const session = toClientSession(await auth());
 
   return (
     <IntlProvider
       messages={messages}
       locale={locale}
     >
-      <RootProviders>
+      <RootProviders initialSession={session}>
         <main>{children}</main>
       </RootProviders>
     </IntlProvider>

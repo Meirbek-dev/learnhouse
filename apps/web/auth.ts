@@ -1,502 +1,66 @@
-import {
-  exchangeGoogleCode,
-  getNewAccessTokenUsingRefreshTokenServer,
-  getUserSession,
-  loginAndGetToken,
-} from '@/services/auth/auth';
-import { SESSION_CACHE_TTL_MS, TOKEN_REFRESH_BUFFER_MS } from '@/lib/constants';
-import type { NextAuthConfig, NextAuthResult, Session } from 'next-auth';
-import { getResponseMetadata } from '@/services/utils/ts/requests';
-import Credentials from 'next-auth/providers/credentials';
-import { getAbsoluteUrl } from '@/services/config/config';
-import { getServerConfig } from '@/services/config/env';
-import type { JWT } from 'next-auth/jwt';
-import { createHash } from 'node:crypto';
-import NextAuth from 'next-auth';
-import { cache } from 'react';
+import { getAPIUrl } from '@/services/config/config';
+import { fetchWithRetry } from '@/lib/fetchWithRetry';
+import type { AppSession } from '@/lib/auth/session';
+import { cookies } from 'next/headers';
 
-// ─── Constants ────────────────────────────────────────────────────────────────
+const ACCESS_COOKIE_KEY = 'access_token_cookie';
+const REFRESH_COOKIE_KEY = 'refresh_token_cookie';
 
-const SESSION_MAX_AGE = 30 * 24 * 60 * 60; // 30 days
-const SESSION_UPDATE_AGE = 24 * 60 * 60; // 24 hours
-
-export const isDevEnv = process.env.NODE_ENV !== 'production';
-
-// ─── Cross-Request Session Store ──────────────────────────────────────────────
-//
-// React 19's cache() memoizes per request/render cycle, which handles
-// deduplication within a single request. For cross-request persistence we
-// maintain a plain Map with manual TTL eviction — same semantics as the
-// former LRU TTL, without the size-bound eviction policy.
-//
-// If bounded memory is a concern in production, swap the Map for a size-aware
-// structure (e.g., a simple FIFO ring-buffer map) without bringing back
-// lru-cache.
-
-interface TimestampedSessionData {
-  data: SessionData;
-  expiresAt: number;
+function serializeCookieHeader(entries: { name: string; value: string }[]) {
+  return entries.map(({ name, value }) => `${name}=${value}`).join('; ');
 }
 
-const sessionStore = new Map<string, TimestampedSessionData>();
-
-const setSession = (key: string, data: SessionData): void => {
-  sessionStore.set(key, { data, expiresAt: Date.now() + SESSION_CACHE_TTL_MS });
-};
-
-const getSession = (key: string): SessionData | null => {
-  const entry = sessionStore.get(key);
-  if (!entry) return null;
-  if (Date.now() > entry.expiresAt) {
-    sessionStore.delete(key);
-    return null;
+function extractCookieValue(setCookieHeader: string | null, cookieName: string): string | undefined {
+  if (!setCookieHeader) {
+    return undefined;
   }
-  return entry.data;
-};
 
-const deleteSession = (key: string): void => {
-  sessionStore.delete(key);
-};
+  const match = setCookieHeader.match(new RegExp(`${cookieName}=([^;]+)`));
+  return match?.[1];
+}
 
-const toOptionalString = (value: string | null | undefined): string | undefined => value ?? undefined;
+export async function auth(): Promise<AppSession | null> {
+  const cookieStore = await cookies();
+  const requestCookies = cookieStore.getAll();
 
-const normalizeSessionUser = (user: Awaited<ReturnType<typeof getUserSession>>['user']): AuthUser => ({
-  id: user.id,
-  email: user.email,
-  username: user.username,
-  user_uuid: user.user_uuid,
-  first_name: toOptionalString(user.first_name),
-  middle_name: toOptionalString(user.middle_name),
-  last_name: toOptionalString(user.last_name),
-  avatar_image: toOptionalString(user.avatar_image),
-  bio: toOptionalString(user.bio),
-});
-
-const normalizeSessionRoles = (roles: Awaited<ReturnType<typeof getUserSession>>['roles']): SessionData['roles'] =>
-  roles.map(({ role }) => ({
-    role: {
-      ...role,
-      description: toOptionalString(role.description),
-    },
-  }));
-
-// ─── Cache Key ────────────────────────────────────────────────────────────────
-
-const createCacheKey = (accessToken: string): string | null => {
-  if (!accessToken) return null;
-  return `user_session_${createHash('sha256').update(accessToken).digest('hex')}`;
-};
-
-// ─── React 19 cache() — per-request deduplication ────────────────────────────
-//
-// cache() memoizes the wrapped function for the lifetime of a single server
-// request. Repeated calls to fetchUserSession() with the same access token
-// within one render tree are collapsed into one network round-trip.
-// The result is NOT shared across requests — that is the job of sessionStore.
-
-const fetchUserSession = cache(async (accessToken: string): Promise<Awaited<ReturnType<typeof getUserSession>>> => {
-  return getUserSession(accessToken);
-});
-
-// ─── Token Helpers ────────────────────────────────────────────────────────────
-
-const getTokenExpiry = (expiry: unknown): number | null => {
-  if (typeof expiry !== 'number' || !Number.isFinite(expiry) || expiry <= 0) {
+  if (requestCookies.length === 0) {
     return null;
   }
 
-  return expiry;
-};
+  const cookieHeader = serializeCookieHeader(requestCookies);
+  const accessCookie = cookieStore.get(ACCESS_COOKIE_KEY)?.value;
+  const refreshCookie = cookieStore.get(REFRESH_COOKIE_KEY)?.value;
 
-const isTokenExpiringSoon = (expiry: number, bufferMs = TOKEN_REFRESH_BUFFER_MS): boolean => {
-  const expiring = Date.now() + bufferMs >= expiry;
-  if (expiring) {
-    console.log('Token expiring soon, will refresh', {
-      expiresAt: new Date(expiry).toISOString(),
-      bufferMs,
-    });
+  if (!accessCookie && !refreshCookie) {
+    return null;
   }
-  return expiring;
-};
 
-// ─── NextAuth Types ───────────────────────────────────────────────────────────
+  const headers = new Headers({
+    Cookie: cookieHeader,
+  });
 
-type AuthFunction = NextAuthResult['auth'];
-type SignInFunction = NextAuthResult['signIn'];
-type SignOutFunction = NextAuthResult['signOut'];
-type AuthHandlers = NextAuthResult['handlers'];
+  if (accessCookie) {
+    headers.set('Authorization', `Bearer ${accessCookie}`);
+  }
 
-// ─── Auth Config ──────────────────────────────────────────────────────────────
+  const response = await fetchWithRetry(`${getAPIUrl()}users/session`, {
+    method: 'GET',
+    headers,
+    redirect: 'follow',
+    cache: 'no-cache',
+  });
 
-const createAuthConfig = (): NextAuthConfig => {
-  const serverConfig = getServerConfig();
-  const rawCookieDomain = !isDevEnv ? serverConfig.cookieDomain : undefined;
-  const normalizedCookieDomain = rawCookieDomain ? rawCookieDomain.replace(/^\.+/, '') : undefined;
-  const cookieDomain = normalizedCookieDomain ? `.${normalizedCookieDomain}` : undefined;
-  const cookieSecure = !isDevEnv && serverConfig.cookieSecure;
-  const cookieNamePrefix = cookieSecure ? '__Secure-' : '';
+  if (!response.ok) {
+    return null;
+  }
+
+  const session = (await response.json()) as AppSession;
+  const refreshedAccessToken = extractCookieValue(response.headers.get('set-cookie'), ACCESS_COOKIE_KEY);
 
   return {
-    debug: isDevEnv,
-
-    providers: [
-      // ── Credentials (email + password) ────────────────────────────────────
-      Credentials({
-        id: 'credentials',
-        name: 'Credentials',
-        credentials: {
-          email: { label: 'Email', type: 'text', placeholder: 'user@example.com' },
-          password: { label: 'Password', type: 'password' },
-        },
-        async authorize(credentials): Promise<any> {
-          if (!credentials || typeof credentials !== 'object') {
-            console.warn('Missing credentials object');
-            return null;
-          }
-
-          const { email: rawEmail, password: rawPassword } = credentials as Record<string, unknown>;
-
-          if (typeof rawEmail !== 'string' || typeof rawPassword !== 'string') {
-            console.warn('Credentials must be strings');
-            return null;
-          }
-
-          if (!rawEmail.trim() || !rawPassword.trim()) {
-            console.warn('Empty email or password');
-            return null;
-          }
-
-          if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(rawEmail)) {
-            console.warn('Invalid email format');
-            return null;
-          }
-
-          try {
-            const res = await getResponseMetadata(await loginAndGetToken(rawEmail.toLowerCase().trim(), rawPassword));
-
-            if (!res.success || !res.data) {
-              console.warn('Authorization failed: invalid credentials or server error');
-              return null;
-            }
-
-            const userData = res.data as UserWithTokens;
-            if (!userData.tokens?.access_token || !userData.tokens?.refresh_token) {
-              console.error('Missing required tokens in authorization response');
-              return null;
-            }
-
-            return userData as any;
-          } catch (error) {
-            console.error('Authorization error:', error);
-            return null;
-          }
-        },
-      }),
-
-      // ── Google OAuth (backend Authorization Code flow) ─────────────────────
-      //
-      // Google credentials live only in the backend.  After the backend
-      // completes the OAuth dance it redirects to /auth/google with a
-      // short-lived exchange code.  That page calls signIn('google-exchange')
-      // which triggers this provider, which exchanges the code for user+tokens.
-      Credentials({
-        id: 'google-exchange',
-        name: 'Google (backend OAuth)',
-        credentials: {
-          exchange_code: { label: 'Exchange Code', type: 'text' },
-        },
-        async authorize(credentials): Promise<any> {
-          const code = (credentials as Record<string, unknown>)?.exchange_code;
-          if (typeof code !== 'string' || !code.trim()) {
-            console.warn('Missing Google OAuth exchange code');
-            return null;
-          }
-
-          try {
-            const res = await getResponseMetadata(await exchangeGoogleCode(code.trim()));
-
-            if (!res.success || !res.data) {
-              console.error('Google exchange failed:', res);
-              return null;
-            }
-
-            const userData = res.data as UserWithTokens;
-            if (!userData.tokens?.access_token || !userData.tokens?.refresh_token) {
-              console.error('Missing tokens in Google exchange response');
-              return null;
-            }
-
-            return userData as any;
-          } catch (error) {
-            console.error('Google exchange error:', error);
-            return null;
-          }
-        },
-      }),
-    ],
-
-    pages: {
-      signIn: '/auth/login',
-      verifyRequest: '/auth/login',
-      error: '/auth/login',
-    },
-
-    cookies: {
-      sessionToken: {
-        name: `${cookieNamePrefix}next-auth.session-token`,
-        options: {
-          httpOnly: true,
-          sameSite: 'lax' as const,
-          path: '/',
-          domain: cookieDomain || undefined,
-          secure: cookieSecure,
-        },
-      },
-    },
-
-    session: {
-      strategy: 'jwt',
-      maxAge: SESSION_MAX_AGE,
-      updateAge: SESSION_UPDATE_AGE,
-    },
-
-    trustHost: true,
-
-    callbacks: {
-      // ── jwt ──────────────────────────────────────────────────────────────
-      async jwt({ token, user, account }): Promise<JWT | null> {
-        try {
-          // Sign-in via credentials or google-exchange provider
-          if (account?.provider === 'credentials' || account?.provider === 'google-exchange') {
-            const u = user as unknown as UserWithTokens;
-            if (!u.tokens?.access_token || !u.tokens?.refresh_token) {
-              console.error('Invalid token data from provider');
-              return null;
-            }
-            const tokenExpiry = getTokenExpiry(u.tokens.expiry);
-            if (!tokenExpiry) {
-              console.error('Token expiry claim is missing or invalid');
-              return null;
-            }
-            if (tokenExpiry <= Date.now()) {
-              console.error('Token from provider is already expired');
-              return null;
-            }
-            token.user = u;
-            return token;
-          }
-
-          // Subsequent requests — refresh access token when nearing expiry
-          const userWithTokens = token.user;
-          if (!userWithTokens?.tokens) {
-            console.warn('No user tokens found in JWT callback');
-            return token;
-          }
-
-          const { tokens } = userWithTokens;
-          const tokenExpiry = getTokenExpiry(tokens.expiry);
-
-          if (!tokenExpiry) {
-            console.warn('Token expiry claim is missing or invalid');
-            return null;
-          }
-
-          if (!isTokenExpiringSoon(tokenExpiry)) return token;
-
-          console.log('Token expiring soon, attempting refresh...');
-
-          if (!tokens.refresh_token) {
-            console.error('No refresh token available');
-            return null;
-          }
-
-          try {
-            const refreshed = await getNewAccessTokenUsingRefreshTokenServer(tokens.refresh_token);
-
-            if (!refreshed?.access_token || !refreshed?.refresh_token) {
-              console.error('Token refresh failed: missing rotated token pair in response');
-              return null;
-            }
-
-            const refreshedExpiry = getTokenExpiry(refreshed.expiry);
-            if (!refreshedExpiry) {
-              console.error('Refresh response did not include a valid expiry');
-              return null;
-            }
-
-            token.user = {
-              ...userWithTokens,
-              tokens: {
-                ...tokens,
-                access_token: refreshed.access_token,
-                refresh_token: refreshed.refresh_token,
-                expiry: refreshedExpiry,
-              },
-            } as UserWithTokens;
-
-            console.log('Token refreshed successfully');
-            return token;
-          } catch (error) {
-            console.error('Token refresh error:', error);
-            const cacheKey = createCacheKey(tokens.access_token);
-            if (cacheKey) deleteSession(cacheKey);
-            return null;
-          }
-        } catch (error) {
-          console.error('JWT callback error:', error);
-          return null;
-        }
-      },
-
-      // ── session ──────────────────────────────────────────────────────────
-      async session({ session, token }): Promise<Session> {
-        const userWithTokens = token.user;
-
-        if (!userWithTokens?.tokens?.access_token) {
-          console.warn('No valid token data for session callback');
-          return session;
-        }
-
-        const { tokens } = userWithTokens;
-        const cacheKey = createCacheKey(tokens.access_token);
-
-        // 1. Cross-request cache hit
-        const cached = cacheKey ? getSession(cacheKey) : null;
-        if (cached) {
-          return { ...session, ...cached };
-        }
-
-        // 2. fetchUserSession is wrapped with React 19 cache(), so concurrent
-        //    calls within the same request are automatically deduplicated.
-        try {
-          const apiSession = await fetchUserSession(tokens.access_token);
-
-          if (!apiSession?.user) {
-            console.error('Invalid session data from getUserSession');
-            return session;
-          }
-
-          const sessionData: SessionData = {
-            user: normalizeSessionUser(apiSession.user),
-            roles: normalizeSessionRoles(apiSession.roles ?? []),
-            tokens,
-            permissions: apiSession.permissions ?? [],
-          };
-
-          if (cacheKey) setSession(cacheKey, sessionData);
-
-          return { ...session, ...sessionData };
-        } catch (error) {
-          console.error('Failed to fetch user session:', error);
-          if (cacheKey) deleteSession(cacheKey);
-
-          return {
-            ...session,
-            user: {
-              id: userWithTokens.id,
-              email: userWithTokens.email,
-              username: userWithTokens.username,
-              first_name: userWithTokens.first_name,
-              last_name: userWithTokens.last_name,
-            },
-            roles: [],
-            tokens,
-            permissions: [],
-          };
-        }
-      },
-
-      // ── authorized ────────────────────────────────────────────────────────
-      async authorized({ auth, request: { nextUrl } }) {
-        const isLoggedIn = Boolean(auth?.user);
-        const isAuthPage = nextUrl.pathname.startsWith('/auth');
-
-        if (isAuthPage) {
-          return isLoggedIn ? Response.redirect(new URL('/redirect_from_auth', nextUrl)) : true;
-        }
-
-        return isLoggedIn;
-      },
-    },
-
-    events: {
-      async signOut(message) {
-        const token = (message as any)?.token;
-        const userWithTokens = token?.user as UserWithTokens | undefined;
-        if (userWithTokens?.tokens?.access_token) {
-          const cacheKey = createCacheKey(userWithTokens.tokens.access_token);
-          if (cacheKey) deleteSession(cacheKey);
-        }
-      },
-      async signIn({ user, account }) {
-        const u = user as unknown as UserWithTokens;
-        console.log(`User signed in: ${u.email} via ${account?.provider}`);
-      },
+    ...session,
+    tokens: {
+      access_token: refreshedAccessToken ?? accessCookie,
     },
   };
-};
-
-// ─── Singleton NextAuth Result ────────────────────────────────────────────────
-
-let nextAuthResultCache: NextAuthResult | null = null;
-
-const createFallbackAuthResponse = (request: Request, method: 'GET' | 'POST') => {
-  const pathname = new URL(request.url).pathname;
-
-  if (method === 'GET') {
-    if (pathname.endsWith('/session')) {
-      return Response.json(null, { status: 200 });
-    }
-
-    if (pathname.endsWith('/providers')) {
-      return Response.json({}, { status: 200 });
-    }
-
-    if (pathname.endsWith('/csrf')) {
-      return Response.json({ csrfToken: '' }, { status: 200 });
-    }
-
-    if (pathname.endsWith('/error')) {
-      return Response.json({ error: 'Auth is not configured' }, { status: 200 });
-    }
-  }
-
-  return Response.json({ error: 'Auth is not configured' }, { status: 503 });
-};
-
-const getNextAuthResult = (): NextAuthResult | null => {
-  if (nextAuthResultCache) return nextAuthResultCache;
-  try {
-    nextAuthResultCache = NextAuth(createAuthConfig());
-    return nextAuthResultCache;
-  } catch {
-    // Server env vars are absent (e.g. during `next build` without an .env
-    // file). Return null so auth() callers get a null session rather than
-    // crashing the build.
-    return null;
-  }
-};
-
-export const handlers: AuthHandlers = {
-  async GET(...args) {
-    const handler = getNextAuthResult()?.handlers.GET;
-    if (handler) {
-      return handler(...args);
-    }
-
-    return createFallbackAuthResponse(args[0], 'GET');
-  },
-  async POST(...args) {
-    const handler = getNextAuthResult()?.handlers.POST;
-    if (handler) {
-      return handler(...args);
-    }
-
-    return createFallbackAuthResponse(args[0], 'POST');
-  },
-};
-
-export const signIn = ((...args: Parameters<SignInFunction>) => getNextAuthResult()?.signIn(...args)) as SignInFunction;
-export const signOut = ((...args: Parameters<SignOutFunction>) =>
-  getNextAuthResult()?.signOut(...args)) as SignOutFunction;
-export const auth = ((...args: Parameters<AuthFunction>) => getNextAuthResult()?.auth(...args) ?? null) as AuthFunction;
+}

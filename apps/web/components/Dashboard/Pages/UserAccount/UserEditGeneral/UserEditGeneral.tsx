@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
+import { logout } from '@services/auth/auth';
 import { Field, FieldError, FieldLabel } from '@components/ui/field';
 import { getUser, updateUserAvatar } from '@services/users/users';
 import { valibotResolver } from '@hookform/resolvers/valibot';
@@ -42,7 +43,6 @@ import { Input } from '@components/ui/input';
 import type { Locale } from '@/i18n/config';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
-import { signOut } from 'next-auth/react';
 import { toast } from 'sonner';
 import * as v from 'valibot';
 
@@ -724,7 +724,8 @@ const UserEditGeneral = () => {
 
     // Wait for 4 seconds before signing out
     await new Promise((resolve) => setTimeout(resolve, 4000));
-    signOut({ redirect: true, callbackUrl: getAbsoluteUrl('/') });
+    await logout();
+    globalThis.location.href = getAbsoluteUrl('/');
   };
 
   const onSubmit = async (values: FormValues) => {

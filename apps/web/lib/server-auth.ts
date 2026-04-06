@@ -1,4 +1,5 @@
 import type { Action, Resource, Scope } from '@/types/permissions';
+import type { AppSession } from '@/lib/auth/session';
 import { perm } from '@/types/permissions';
 import { redirect } from 'next/navigation';
 import { auth } from '@/auth';
@@ -9,7 +10,7 @@ import { auth } from '@/auth';
 export async function requireAuth() {
   const session = await auth();
   if (!session?.user) {
-    redirect('/auth');
+    redirect('/login');
   }
   return session;
 }
@@ -18,7 +19,7 @@ export async function requireAuth() {
  * Check if the session has a specific permission.
  */
 export function sessionCan(
-  session: { permissions?: string[] } | undefined,
+  session: Pick<AppSession, 'permissions'> | undefined,
   resource: Resource,
   action: Action,
   scope: Scope,

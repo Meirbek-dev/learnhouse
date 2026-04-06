@@ -1,4 +1,5 @@
 import { RequestBody, getResponseMetadata } from '@services/utils/ts/requests';
+import { CLIENT_SESSION_ACCESS_TOKEN_SENTINEL } from '@/lib/auth/session';
 import { fetchWithRetry } from '@/lib/fetchWithRetry';
 import type { components } from '@/lib/api/generated';
 import { getAPIUrl } from '@services/config/config';
@@ -29,7 +30,6 @@ interface NewAccountBody {
 const AUTH_ENDPOINTS = {
   login: 'auth/login',
   googleAuthorize: 'auth/google/authorize',
-  googleExchange: 'auth/google/exchange',
   logout: 'auth/logout',
   refresh: 'auth/refresh',
   userProfile: 'users/profile',
@@ -127,40 +127,6 @@ export async function loginAndGetToken(username: any, password: any): Promise<Re
       throw createAuthError(`Login request failed: ${error.message}`, undefined, 'NETWORK_ERROR');
     }
     throw createAuthError('Unknown login error', undefined, 'UNKNOWN_ERROR');
-  }
-}
-
-/**
- * Exchange a backend-issued OAuth exchange code for a full login response.
- * Called by the NextAuth google-exchange credentials provider after the backend
- * Authorization Code flow completes.
- *
- * @param exchangeCode - The short-lived UUID code from the backend OAuth callback
- * @returns Promise<Response> - Raw response for compatibility
- */
-export async function exchangeGoogleCode(exchangeCode: string): Promise<Response> {
-  if (!exchangeCode?.trim()) {
-    throw createAuthError('Exchange code is required', 400, 'MISSING_EXCHANGE_CODE');
-  }
-
-  try {
-    const headers = createHeaders('application/json');
-    const body = { code: exchangeCode.trim() };
-
-    const requestOptions: RequestInit = {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(body),
-      redirect: 'follow',
-      credentials: 'include',
-    };
-
-    return await fetchWithRetry(`${getAPIUrl()}${AUTH_ENDPOINTS.googleExchange}`, requestOptions);
-  } catch (error) {
-    if (error instanceof Error) {
-      throw createAuthError(`Google code exchange failed: ${error.message}`, undefined, 'GOOGLE_EXCHANGE_ERROR');
-    }
-    throw createAuthError('Unknown Google exchange error', undefined, 'UNKNOWN_ERROR');
   }
 }
 
@@ -277,7 +243,7 @@ export async function getUserInfo(token: string): Promise<AuthUser> {
     throw createAuthError('getUserInfo can only be called on the client side', 400, 'CLIENT_SIDE_ONLY');
   }
 
-  if (!token?.trim()) {
+  if (!token?.trim() || token === CLIENT_SESSION_ACCESS_TOKEN_SENTINEL) {
     throw createAuthError('Access token is required', 400, 'MISSING_TOKEN');
   }
 
@@ -312,15 +278,12 @@ export async function getUserInfo(token: string): Promise<AuthUser> {
  * @param token - JWT access token
  * @returns Promise<UserSessionResponse> - User session information
  */
-export async function getUserSession(token: string): Promise<UserSessionResponse> {
-  if (!token?.trim()) {
-    throw createAuthError('Access token is required', 400, 'MISSING_TOKEN');
-  }
-
+export async function getUserSession(token?: string): Promise<UserSessionResponse> {
   try {
-    const headers = createHeaders('application/json', {
-      Authorization: `Bearer ${token.trim()}`,
-    });
+    const headers = createHeaders('application/json');
+    if (token?.trim() && token !== CLIENT_SESSION_ACCESS_TOKEN_SENTINEL) {
+      headers.set('Authorization', `Bearer ${token.trim()}`);
+    }
 
     const requestOptions: RequestInit = {
       method: 'GET',
@@ -355,7 +318,8 @@ export async function getNewAccessTokenUsingRefreshToken(): Promise<AuthTokens> 
     };
 
     const response = await fetchWithRetry(`${getAPIUrl()}${AUTH_ENDPOINTS.refresh}`, requestOptions);
-    return await handleAuthResponse<AuthTokens>(response, 'refresh token');
+    const tokenResponse = await handleAuthResponse<{ expiry: number }>(response, 'refresh token');
+    return { access_token: CLIENT_SESSION_ACCESS_TOKEN_SENTINEL, expiry: tokenResponse.expiry } as AuthTokens;
   } catch (error) {
     if (error instanceof Error) {
       // Re-throw AuthError instances
@@ -399,7 +363,8 @@ export async function getNewAccessTokenUsingRefreshTokenServer(refreshToken: str
       console.error('[Auth] Token refresh failed:', response.status, response.statusText);
     }
 
-    return await handleAuthResponse<AuthTokens>(response, 'refresh token server');
+    const tokenResponse = await handleAuthResponse<{ expiry: number }>(response, 'refresh token server');
+    return { access_token: CLIENT_SESSION_ACCESS_TOKEN_SENTINEL, expiry: tokenResponse.expiry } as AuthTokens;
   } catch (error) {
     console.error('[Auth] Token refresh error:', {
       message: error instanceof Error ? error.message : 'Unknown error',
@@ -439,7 +404,7 @@ export async function getAccessTokenFromRefreshTokenCookie(cookieStore: any): Pr
     }
 
     const tokenResponse = await getNewAccessTokenUsingRefreshTokenServer(refreshTokenCookie.value);
-    return tokenResponse?.access_token || null;
+    return tokenResponse?.access_token || CLIENT_SESSION_ACCESS_TOKEN_SENTINEL;
   } catch (error) {
     console.error('Failed to get access token from refresh token cookie:', error);
     return null; // Fail silently for cookie-based operations

@@ -1,77 +1,35 @@
 'use client';
 
+import type { ClientAppSession } from '@/lib/auth/session';
 import PlatformSessionProvider, { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { PermissionProvider } from '@/components/Security/PermissionProvider';
 import { ThemeProvider, useTheme } from '@/components/providers/theme-provider';
 import { swrFetcher } from '@services/utils/ts/requests';
 import NextTopLoader from 'nextjs-toploader';
-import { SessionProvider } from 'next-auth/react';
 import { Toaster } from '@/components/ui/sonner';
-import { SWRConfig, useSWRConfig } from 'swr';
+import { SWRConfig } from 'swr';
 import { useEffect, useRef } from 'react';
-import type { MutableRefObject, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 interface RootProvidersProps {
   children: ReactNode;
-}
-
-function AppSessionProvider({ children }: { children: ReactNode }) {
-  return (
-    <SessionProvider
-      refetchInterval={5 * 60_000}
-      refetchOnWindowFocus={false}
-      refetchWhenOffline={false}
-    >
-      <PlatformSessionProvider>{children}</PlatformSessionProvider>
-    </SessionProvider>
-  );
-}
-
-function SWRTokenSync({
-  children,
-  token,
-  tokenRef,
-}: {
-  children: ReactNode;
-  token?: string;
-  tokenRef: MutableRefObject<string | undefined>;
-}) {
-  const { mutate } = useSWRConfig();
-
-  useEffect(() => {
-    if (token === tokenRef.current) {
-      return;
-    }
-
-    tokenRef.current = token;
-    void mutate((key: unknown) => typeof key === 'string', undefined, { revalidate: true });
-  }, [mutate, token, tokenRef]);
-
-  return children;
+  initialSession?: ClientAppSession | null;
 }
 
 function AppSWRProvider({ children }: { children: ReactNode }) {
-  const session = usePlatformSession();
-  const tokenRef = useRef(session?.data?.tokens?.access_token);
-
   return (
     <SWRConfig
       value={{
         dedupingInterval: 60_000,
         errorRetryCount: 3,
-        fetcher: (url: string) => swrFetcher(url, tokenRef.current ?? undefined),
+        fetcher: (url: string) => swrFetcher(url),
         focusThrottleInterval: 60_000,
         revalidateOnFocus: false,
         revalidateOnReconnect: false,
         shouldRetryOnError: true,
       }}
     >
-      <SWRTokenSync
-        token={session?.data?.tokens?.access_token}
-        tokenRef={tokenRef}
-      >
-        {children}
-      </SWRTokenSync>
+      {children}
     </SWRConfig>
   );
 }
@@ -96,6 +54,7 @@ function RootProgressBar() {
 
 function UserThemeSync() {
   const session = usePlatformSession() as {
+    status?: 'loading' | 'authenticated' | 'unauthenticated';
     data?: {
       tokens?: { access_token?: string };
       user?: { id?: number; theme?: string | null };
@@ -106,7 +65,7 @@ function UserThemeSync() {
   const syncedThemeRef = useRef<string | null>(session?.data?.user?.theme ?? null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const userId = session?.data?.user?.id;
-  const accessToken = session?.data?.tokens?.access_token;
+  const isAuthenticated = session?.status === 'authenticated';
 
   useEffect(() => {
     syncedThemeRef.current = session?.data?.user?.theme ?? null;
@@ -114,7 +73,7 @@ function UserThemeSync() {
   }, [session?.data?.user?.id, session?.data?.user?.theme]);
 
   useEffect(() => {
-    if (!userId || !accessToken) {
+    if (!userId || !isAuthenticated) {
       pendingThemeRef.current = null;
       return;
     }
@@ -163,10 +122,10 @@ function UserThemeSync() {
         timeoutRef.current = null;
       }
     };
-  }, [accessToken, themeName, userId]);
+  }, [isAuthenticated, themeName, userId]);
 
   useEffect(() => {
-    if (!userId || !accessToken) {
+    if (!userId || !isAuthenticated) {
       return;
     }
 
@@ -185,7 +144,7 @@ function UserThemeSync() {
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-  }, [accessToken, userId]);
+  }, [isAuthenticated, userId]);
 
   return null;
 }
@@ -204,14 +163,14 @@ function ThemeProviderWrapper({ children }: { children: ReactNode }) {
   );
 }
 
-export default function RootProviders({ children }: RootProvidersProps) {
+export default function RootProviders({ children, initialSession }: RootProvidersProps) {
   return (
-    <AppSessionProvider>
+    <PlatformSessionProvider initialSession={initialSession}>
       <PermissionProvider>
         <AppSWRProvider>
           <ThemeProviderWrapper>{children}</ThemeProviderWrapper>
         </AppSWRProvider>
       </PermissionProvider>
-    </AppSessionProvider>
+    </PlatformSessionProvider>
   );
 }

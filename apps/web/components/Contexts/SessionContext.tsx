@@ -1,17 +1,15 @@
 'use client';
 
 import PageLoading from '@components/Objects/Loaders/PageLoading';
-import { createContext, use, useMemo } from 'react';
+import type { ClientAppSession } from '@/lib/auth/session';
+import { createContext, use, useEffect, useMemo, useState } from 'react';
 import type { Role } from '@/types/permissions';
-import { useSession } from 'next-auth/react';
 import type { ReactNode } from 'react';
 
-// Match the global UserRoleWithPlatform interface from next-auth.d.ts
 interface UserRoleWithPlatform {
   role: Role;
 }
 
-// Extended session data interface - matches actual NextAuth session shape
 interface ExtendedSessionData {
   user: {
     id: number;
@@ -26,47 +24,82 @@ interface ExtendedSessionData {
   roles: UserRoleWithPlatform[] | undefined;
   tokens:
     | {
-        access_token: string;
-        refresh_token: string;
-        expiry?: number;
+        access_token?: string;
       }
     | undefined;
   permissions: string[] | undefined;
-  expires: string;
+  expires?: string;
 }
 
-// Extended session interface that ensures data is properly typed when not null
 interface ExtendedSession {
   data: ExtendedSessionData | null;
   status: 'loading' | 'authenticated' | 'unauthenticated';
   update: () => Promise<ExtendedSessionData | null>;
-  // Add isLoading property that some components expect
   isLoading?: boolean;
 }
 
 interface SessionContextType extends ExtendedSession {
-  // Ensure data is never null when status is 'authenticated'
   data: ExtendedSessionData | null;
 }
 
 export const SessionContext = createContext<SessionContextType | null>(null);
 
-const PlatformSessionProvider = ({ children }: { children: ReactNode }) => {
-  const session = useSession();
+async function fetchSession(): Promise<ExtendedSessionData | null> {
+  const response = await fetch('/api/auth/session', {
+    method: 'GET',
+    credentials: 'include',
+    cache: 'no-store',
+  });
 
-  // Type assertion to ensure our extended interface
-  const extendedSession: SessionContextType = useMemo(
-    () => ({
-      ...session,
-      data: session.data as ExtendedSessionData | null,
-      update: session.update as () => Promise<ExtendedSessionData | null>,
-      isLoading: session.status === 'loading',
-    }),
-    [session],
+  if (!response.ok) {
+    return null;
+  }
+
+  const session = (await response.json()) as ClientAppSession | null;
+  return session as ExtendedSessionData | null;
+}
+
+const PlatformSessionProvider = ({
+  children,
+  initialSession,
+}: {
+  children: ReactNode;
+  initialSession?: ClientAppSession | null;
+}) => {
+  const [data, setData] = useState<ExtendedSessionData | null>(
+    (initialSession as ExtendedSessionData | null | undefined) ?? null,
+  );
+  const [status, setStatus] = useState<'loading' | 'authenticated' | 'unauthenticated'>(
+    initialSession === undefined ? 'loading' : initialSession?.user ? 'authenticated' : 'unauthenticated',
   );
 
-  // Only show loading on initial load, not during session updates/revalidation
-  const isInitialLoad = session.status === 'loading' && session.data === undefined;
+  const update = async () => {
+    setStatus((current) => (current === 'authenticated' ? current : 'loading'));
+    const nextSession = await fetchSession();
+    setData(nextSession);
+    setStatus(nextSession?.user ? 'authenticated' : 'unauthenticated');
+    return nextSession;
+  };
+
+  useEffect(() => {
+    if (initialSession !== undefined) {
+      return;
+    }
+
+    void update();
+  }, [initialSession]);
+
+  const extendedSession: SessionContextType = useMemo(
+    () => ({
+      data,
+      status,
+      update,
+      isLoading: status === 'loading',
+    }),
+    [data, status],
+  );
+
+  const isInitialLoad = status === 'loading' && data === null;
 
   if (isInitialLoad) {
     return <PageLoading />;

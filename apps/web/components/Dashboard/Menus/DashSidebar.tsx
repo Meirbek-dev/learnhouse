@@ -28,6 +28,7 @@ import {
 import { useNavigationPermissions } from '@/hooks/useNavigationPermissions';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import platformLogoLight from '@public/platform_logo_light.svg';
+import { logout } from '@services/auth/auth';
 import { getAbsoluteUrl } from '@services/config/config';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -37,7 +38,6 @@ import AppLink from '@/components/ui/AppLink';
 import { Badge } from '@/components/ui/badge';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { signOut } from 'next-auth/react';
 import Image from 'next/image';
 
 interface NavigationItem {
@@ -247,10 +247,8 @@ const DashSidebar = ({ className }: SidebarProps) => {
 
   async function handleLogout() {
     try {
-      await signOut({
-        redirect: true,
-        callbackUrl: getAbsoluteUrl('/login'),
-      });
+      await logout();
+      globalThis.location.href = getAbsoluteUrl('/login');
     } catch (error) {
       console.error('Logout failed:', error);
       // Could add toast notification here

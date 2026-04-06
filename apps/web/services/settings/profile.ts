@@ -1,6 +1,7 @@
 'use server';
 
 import { RequestBodyWithAuthHeader, getResponseMetadata } from '@services/utils/ts/requests';
+import { resolveServerAccessToken } from '@/lib/auth/server-access-token';
 import { getAPIUrl } from '@services/config/config';
 import { tags } from '@/lib/cacheTags';
 
@@ -10,9 +11,14 @@ import { tags } from '@/lib/cacheTags';
 */
 
 export async function updateProfile(data: any, user_id: number, access_token: string) {
+  const token = await resolveServerAccessToken(access_token);
+  if (!token) {
+    throw new Error('Authentication required');
+  }
+
   const result: any = await fetch(
     `${getAPIUrl()}users/${user_id}`,
-    RequestBodyWithAuthHeader('PUT', data, null, access_token),
+    RequestBodyWithAuthHeader('PUT', data, null, token),
   );
   const metadata = await getResponseMetadata(result);
 

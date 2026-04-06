@@ -1,7 +1,5 @@
-import base64
-import json
 import logging
-from datetime import datetime, timedelta
+from datetime import timedelta
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
@@ -12,130 +10,62 @@ from sqlmodel import Session
 from config.config import get_settings
 from src.core.events.database import get_db_session
 from src.db.strict_base_model import PydanticStrictBaseModel
-from src.db.users import AnonymousUser, PublicUser, UserRead
+from src.db.users import AnonymousUser, PublicUser, UserRead, UserSession
 from src.security.auth import (
     authenticate_user,
     create_access_token,
-    create_refresh_token,
     decode_access_token,
-    decode_refresh_token,
+    get_access_token_expiry_timestamp,
     get_access_token_from_request,
     get_current_user_optional,
     oauth2_scheme_optional,
 )
-from src.services.auth.google_oauth import (
-    consume_exchange_code,
-    create_exchange_code,
-    exchange_google_code,
-    get_google_authorize_url,
+from src.security.auth_cookies import (
+    ACCESS_COOKIE_KEY,
+    REFRESH_COOKIE_KEY,
+    clear_auth_cookies,
+    set_access_cookie,
+    set_refresh_cookie,
+)
+from src.services.auth.google_oauth import exchange_google_code, get_google_authorize_url
+from src.services.auth.sessions import (
+    get_session_by_id,
+    get_user_for_session,
+    resolve_refresh_session,
+    revoke_session,
+    revoke_token_family,
+    rotate_session,
+    create_auth_session,
 )
 from src.services.auth.utils import find_or_create_google_user
+from src.services.users.users import get_user_session
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
 
 class TokensResponse(PydanticStrictBaseModel):
-    access_token: str
-    refresh_token: str
     expiry: int
-
-
-class LoginResponse(PydanticStrictBaseModel):
-    user: UserRead
-    tokens: TokensResponse
 
 
 class LogoutResponse(PydanticStrictBaseModel):
     msg: str
 
 
-COOKIE_TTL_SECONDS = int(timedelta(hours=8).total_seconds())
-REFRESH_COOKIE_TTL_SECONDS = int(timedelta(days=30).total_seconds())
-ACCESS_COOKIE_KEY = "access_token_cookie"
-REFRESH_COOKIE_KEY = "refresh_token_cookie"
-
-
-def _set_access_cookie(response: Response, value: str) -> None:
-    """
-    Set access token cookie with secure configuration.
-
-    Security features:
-    - httponly=True: Prevents JavaScript access (XSS protection)
-    - secure=True: HTTPS only (when SSL is enabled)
-    - samesite='lax': CSRF protection while allowing normal navigation
-    """
-    settings = get_settings()
-    cookie_domain = settings.hosting_config.cookie_config.domain
-    is_ssl_enabled = settings.hosting_config.ssl
-
-    cookie_kwargs: dict[str, object] = {
-        "httponly": True,  # ✅ Prevent XSS attacks
-        "secure": bool(is_ssl_enabled),  # ✅ HTTPS only in production
-        "samesite": "lax",  # ✅ CSRF protection
-        "expires": COOKIE_TTL_SECONDS,
-    }
-
-    if cookie_domain:
-        cookie_kwargs["domain"] = cookie_domain
-
-    response.set_cookie(
-        key=ACCESS_COOKIE_KEY,
-        value=value,
-        **cookie_kwargs,
-    )
-
-
-def _set_refresh_cookie(response: Response, value: str) -> None:
-    settings = get_settings()
-    cookie_domain = settings.hosting_config.cookie_config.domain
-    is_ssl_enabled = settings.hosting_config.ssl
-
-    cookie_kwargs: dict[str, object] = {
-        "httponly": True,
-        "secure": is_ssl_enabled,
-        "samesite": "lax",
-        "max_age": REFRESH_COOKIE_TTL_SECONDS,
-    }
-
-    if cookie_domain:
-        cookie_kwargs["domain"] = cookie_domain
-
-    response.set_cookie(
-        key=REFRESH_COOKIE_KEY,
-        value=value,
-        **cookie_kwargs,
-    )
-
-
-def _clear_auth_cookies(response: Response) -> None:
-    settings = get_settings()
-    cookie_domain = settings.hosting_config.cookie_config.domain
-
-    delete_kwargs: dict[str, object] = {}
-    if cookie_domain:
-        delete_kwargs["domain"] = cookie_domain
-
-    response.delete_cookie(ACCESS_COOKIE_KEY, **delete_kwargs)
-    response.delete_cookie(REFRESH_COOKIE_KEY, **delete_kwargs)
+async def _build_user_session(
+    request: Request,
+    db_session: Session,
+    user: PublicUser,
+) -> UserSession:
+    return await get_user_session(request, db_session, user)
 
 
 @router.get("/refresh", response_model=TokensResponse)
 def refresh(
     request: Request,
     response: Response,
+    db_session: Annotated[Session, Depends(get_db_session)],
 ) -> TokensResponse:
-    """
-    Token refresh with rotation.
-
-    Security features:
-    - Issues new refresh token on each use (token rotation)
-    - Invalidates old refresh token
-    - Logs refresh events for monitoring
-    - Returns both new access and refresh tokens
-
-    This prevents stolen refresh tokens from being used indefinitely.
-    """
     refresh_token = request.cookies.get(REFRESH_COOKIE_KEY)
     if not refresh_token:
         raise HTTPException(
@@ -144,42 +74,51 @@ def refresh(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    token_data = decode_refresh_token(refresh_token)
-    current_user = token_data.username
+    auth_session = resolve_refresh_session(db_session, refresh_token)
+    if auth_session is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
-    # Create NEW tokens (both access and refresh)
-    new_access_token = create_access_token({"sub": current_user})
-    new_refresh_token = create_refresh_token({"sub": current_user})
+    user = get_user_for_session(db_session, auth_session)
+    if user is None:
+        revoke_token_family(db_session, auth_session.token_family_id)
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
-    # Set the new refresh token in cookies (this invalidates the old one)
-    _set_refresh_cookie(response, new_refresh_token)
-
-    # Calculate token expiry timestamp (8 hours from now in milliseconds)
-    expiry_timestamp = int(
-        (datetime.now().timestamp() + timedelta(hours=8).total_seconds()) * 1000
+    rotated_session, new_refresh_token = rotate_session(
+        db_session,
+        auth_session=auth_session,
+        ip_address=request.client.host if request.client else None,
+        user_agent=request.headers.get("user-agent"),
     )
+    new_access_token = create_access_token(
+        {"sub": user.email, "sid": rotated_session.session_id}
+    )
+    expiry_timestamp = get_access_token_expiry_timestamp()
 
-    # Log token refresh with rotation
     client_ip = request.client.host if request.client else "unknown"
     logger.info(
-        "Token refresh with rotation",
+        "Token refresh succeeded",
         extra={
-            "email": current_user,
+            "email": user.email,
             "ip_address": client_ip,
-            "rotation": True,
+            "session_id": rotated_session.session_id,
         },
     )
 
-    _set_access_cookie(response, new_access_token)
+    set_access_cookie(response, new_access_token)
+    set_refresh_cookie(response, new_refresh_token)
 
-    return {
-        "access_token": new_access_token,
-        "refresh_token": new_refresh_token,  # Return new refresh token
-        "expiry": expiry_timestamp,
-    }
+    return {"expiry": expiry_timestamp}
 
 
-@router.post("/login", response_model=LoginResponse)
+@router.post("/login", response_model=UserSession)
 async def login(
     request: Request,
     response: Response,
@@ -211,21 +150,17 @@ async def login(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    access_token = create_access_token({"sub": form_data.username})
-    refresh_token = create_refresh_token({"sub": form_data.username})
-    _set_refresh_cookie(response, refresh_token)
-
-    # set cookies using fastapi
-    _set_access_cookie(response, access_token)
-
-    user_read = UserRead.model_validate(user)
-
-    # Calculate token expiry timestamp (8 hours from now in milliseconds)
-    expiry_timestamp = int(
-        (datetime.now().timestamp() + timedelta(hours=8).total_seconds()) * 1000
+    auth_session, refresh_token = create_auth_session(
+        db_session,
+        user_id=user.id,
+        ip_address=client_ip,
+        user_agent=user_agent,
     )
+    access_token = create_access_token({"sub": user.email, "sid": auth_session.session_id})
+    set_refresh_cookie(response, refresh_token)
+    set_access_cookie(response, access_token)
+    user_read = PublicUser.model_validate(user)
 
-    # Log successful authentication
     logger.info(
         "Successful login",
         extra={
@@ -233,17 +168,11 @@ async def login(
             "email": user.email,
             "ip_address": client_ip,
             "user_agent": user_agent,
+            "session_id": auth_session.session_id,
         },
     )
 
-    return {
-        "user": user_read,
-        "tokens": {
-            "access_token": access_token,
-            "refresh_token": refresh_token,
-            "expiry": expiry_timestamp,
-        },
-    }
+    return await _build_user_session(request, db_session, user_read)
 
 
 @router.delete("/logout", response_model=LogoutResponse)
@@ -251,6 +180,7 @@ def logout(
     request: Request,
     response: Response,
     token: Annotated[str | None, Depends(oauth2_scheme_optional)],
+    db_session: Annotated[Session, Depends(get_db_session)],
 ) -> LogoutResponse:
     """
     Because the JWT are stored in an httponly cookie now, we cannot
@@ -258,19 +188,22 @@ def logout(
     We need the backend to send us a response to delete the cookies.
     """
     resolved_token = get_access_token_from_request(request, token)
-    if not resolved_token:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Could not validate credentials",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    # Get user info before logout for logging
-    token_data = decode_access_token(resolved_token)
-    current_user = token_data.username
+    refresh_token = request.cookies.get(REFRESH_COOKIE_KEY)
+    token_data = decode_access_token(resolved_token) if resolved_token else None
     client_ip = request.client.host if request.client else "unknown"
 
-    # Log logout event
+    if token_data and token_data.session_id:
+        auth_session = get_session_by_id(db_session, token_data.session_id)
+        if auth_session is not None:
+            revoke_session(db_session, auth_session)
+    elif refresh_token:
+        auth_session = resolve_refresh_session(db_session, refresh_token)
+        if auth_session is not None:
+            revoke_session(db_session, auth_session)
+            token_data = token_data or PydanticStrictBaseModel.model_validate({})
+
+    current_user = token_data.username if token_data else "unknown"
+
     logger.info(
         "User logout",
         extra={
@@ -279,7 +212,7 @@ def logout(
         },
     )
 
-    _clear_auth_cookies(response)
+    clear_auth_cookies(response)
     return LogoutResponse(msg="Successfully logout")
 
 
@@ -345,13 +278,10 @@ async def google_authorize(callback: str) -> RedirectResponse:
             detail="Google OAuth is not configured on this server",
         )
 
-    state = base64.urlsafe_b64encode(
-        json.dumps({"callback": callback}).encode()
-    ).decode()
     url = get_google_authorize_url(
         client_id=google_cfg.client_id,
         redirect_uri=_get_backend_callback_url(),
-        state=state,
+        callback=callback,
     )
     return RedirectResponse(url)
 
@@ -359,7 +289,6 @@ async def google_authorize(callback: str) -> RedirectResponse:
 @router.get("/google/callback")
 async def google_callback(
     request: Request,
-    response: Response,
     code: str | None = None,
     state: str | None = None,
     error: str | None = None,
@@ -372,17 +301,12 @@ async def google_callback(
     Handle Google's redirect after the user consents.
 
     Exchanges the authorization code for user info, finds/creates the local
-    user, issues our JWT pair, and redirects the browser back to the frontend
-    with a short-lived exchange code.
+    user, creates a persistent auth session, sets cookies, and redirects the
+    browser back to the frontend already authenticated.
     """
-    # Decode state to get the frontend callback URL
     frontend_callback = "/"
     if state:
-        try:
-            state_data = json.loads(base64.urlsafe_b64decode(state + "=="))
-            frontend_callback = state_data.get("callback", "/")
-        except Exception:
-            pass
+        frontend_callback = state
 
     if error or not code:
         logger.warning("Google OAuth error or missing code", extra={"error": error})
@@ -417,58 +341,26 @@ async def google_callback(
         )
         return RedirectResponse(f"{frontend_callback}?error=user_error")
 
-    access_token = create_access_token({"sub": user.email})
-    refresh_token = create_refresh_token({"sub": user.email})
-
-    expiry_timestamp = int(
-        (datetime.now().timestamp() + timedelta(hours=8).total_seconds()) * 1000
+    auth_session, refresh_token = create_auth_session(
+        db_session,
+        user_id=user.id,
+        ip_address=client_ip,
+        user_agent=request.headers.get("user-agent"),
     )
+    access_token = create_access_token({"sub": user.email, "sid": auth_session.session_id})
 
-    exchange_code = create_exchange_code(
-        user_data=user.model_dump(),
-        access_token=access_token,
-        refresh_token=refresh_token,
-        expiry=expiry_timestamp,
-    )
+    redirect_response = RedirectResponse(frontend_callback)
+    set_access_cookie(redirect_response, access_token)
+    set_refresh_cookie(redirect_response, refresh_token)
 
     logger.info(
         "Google OAuth login successful",
-        extra={"user_id": user.id, "email": user.email, "ip_address": client_ip},
+        extra={
+            "user_id": user.id,
+            "email": user.email,
+            "ip_address": client_ip,
+            "session_id": auth_session.session_id,
+        },
     )
 
-    return RedirectResponse(f"{frontend_callback}?code={exchange_code}")
-
-
-class GoogleExchangeRequest(PydanticStrictBaseModel):
-    code: str
-
-
-@router.post("/google/exchange", response_model=LoginResponse)
-async def google_exchange(
-    body: GoogleExchangeRequest,
-    response: Response,
-) -> dict:
-    """
-    Exchange a short-lived OAuth exchange code for a full login response.
-
-    Called by the Next.js callback page (via a NextAuth credentials provider).
-    Each code is single-use and expires after 5 minutes.
-    """
-    entry = consume_exchange_code(body.code)
-    if not entry:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired exchange code",
-        )
-
-    _set_access_cookie(response, entry["access_token"])
-    _set_refresh_cookie(response, entry["refresh_token"])
-
-    return {
-        "user": entry["user"],
-        "tokens": {
-            "access_token": entry["access_token"],
-            "refresh_token": entry["refresh_token"],
-            "expiry": entry["expiry"],
-        },
-    }
+    return redirect_response

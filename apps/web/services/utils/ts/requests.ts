@@ -1,3 +1,5 @@
+import { CLIENT_SESSION_ACCESS_TOKEN_SENTINEL } from '@/lib/auth/session';
+
 type FetchCacheConfig =
   | {
       revalidate?: number | null | undefined;
@@ -53,7 +55,7 @@ const createRequestInit = (
   const { data, token, next, isJson = true, limitBodyToMethods = false } = config;
 
   const headers: Record<string, string> = {};
-  if (token) {
+  if (token && token !== CLIENT_SESSION_ACCESS_TOKEN_SENTINEL) {
     headers.Authorization = `Bearer ${token}`;
   }
 
@@ -113,7 +115,7 @@ export const RequestBodyFormWithAuthHeader = (method: string, data: any, next: a
 
 export const swrFetcher = async (url: string, token?: string) => {
   const headers: Record<string, string> = {};
-  if (token) {
+  if (token && token !== CLIENT_SESSION_ACCESS_TOKEN_SENTINEL) {
     headers.Authorization = `Bearer ${token}`;
   }
   const options: RequestInit = {
@@ -128,7 +130,7 @@ export const swrFetcher = async (url: string, token?: string) => {
 
 export const fetchResponseMetadata = async (url: string, token?: string): Promise<CustomResponseTyping> => {
   const headers: Record<string, string> = {};
-  if (token) {
+  if (token && token !== CLIENT_SESSION_ACCESS_TOKEN_SENTINEL) {
     headers.Authorization = `Bearer ${token}`;
   }
 
@@ -151,7 +153,7 @@ export const swrFetcherWithHeaders = async (
   token?: string,
 ): Promise<{ data: any; headers: Record<string, string> }> => {
   const reqHeaders: Record<string, string> = {};
-  if (token) {
+  if (token && token !== CLIENT_SESSION_ACCESS_TOKEN_SENTINEL) {
     reqHeaders.Authorization = `Bearer ${token}`;
   }
   const options: RequestInit = {

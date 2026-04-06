@@ -1,6 +1,7 @@
 'use client';
 
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
+import { logout } from '@services/auth/auth';
 import PasswordInput from '@components/ui/custom/password-input';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { updatePassword } from '@services/settings/password';
@@ -11,7 +12,6 @@ import { Label } from '@components/ui/label';
 import { AlertTriangle } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
-import { signOut } from 'next-auth/react';
 import { toast } from 'sonner';
 import * as v from 'valibot';
 
@@ -87,7 +87,9 @@ const UserEditPassword = () => {
 
         // Wait for 4 seconds before signing out
         setTimeout(() => {
-          signOut({ redirect: true, callbackUrl: getAbsoluteUrl('/') });
+          void logout().finally(() => {
+            globalThis.location.href = getAbsoluteUrl('/');
+          });
         }, 4000);
       } else {
         toast.error(t('passwordUpdateError'), {

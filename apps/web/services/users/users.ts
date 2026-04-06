@@ -7,14 +7,12 @@ import {
   errorHandling,
   getResponseMetadata,
 } from '@services/utils/ts/requests';
-import { getOptionalSession } from '@/lib/get-optional-session';
+import { resolveServerAccessToken } from '@/lib/auth/server-access-token';
 import { getAPIUrl } from '@services/config/config';
 import { tags } from '@/lib/cacheTags';
 
 async function resolveToken(access_token?: string): Promise<string | undefined> {
-  if (access_token) return access_token;
-  const session = await getOptionalSession();
-  return session?.tokens?.access_token ?? undefined;
+  return resolveServerAccessToken(access_token);
 }
 
 export async function getUser(user_id: number, access_token?: string) {
@@ -36,18 +34,24 @@ export async function getUserByUsername(username: string, access_token?: string)
 }
 
 export async function getCoursesByUser(user_id: number, access_token?: string) {
+  const token = await resolveToken(access_token);
   const result = await fetch(
     `${getAPIUrl()}users/${user_id}/courses`,
-    access_token ? RequestBodyWithAuthHeader('GET', null, null, access_token) : RequestBody('GET', null, null),
+    token ? RequestBodyWithAuthHeader('GET', null, null, token) : RequestBody('GET', null, null),
   );
   return await getResponseMetadata(result);
 }
 export async function updateUserAvatar(user_id: number, avatar_file: any, access_token: string) {
+  const token = await resolveToken(access_token);
+  if (!token) {
+    throw new Error('Authentication required');
+  }
+
   const formData = new FormData();
   formData.append('avatar_file', avatar_file);
   const result: any = await fetch(
     `${getAPIUrl()}users/update_avatar/${user_id}`,
-    RequestBodyFormWithAuthHeader('PUT', formData, null, access_token),
+    RequestBodyFormWithAuthHeader('PUT', formData, null, token),
   );
   const metadata = await getResponseMetadata(result);
 
@@ -61,9 +65,14 @@ export async function updateUserAvatar(user_id: number, avatar_file: any, access
 }
 
 export async function updateUserTheme(user_id: number, theme: string, access_token: string) {
+  const token = await resolveToken(access_token);
+  if (!token) {
+    throw new Error('Authentication required');
+  }
+
   const result = await fetch(
     `${getAPIUrl()}users/preferences/theme/${user_id}?theme=${encodeURIComponent(theme)}`,
-    RequestBodyWithAuthHeader('PUT', null, null, access_token),
+    RequestBodyWithAuthHeader('PUT', null, null, token),
   );
   const data = await errorHandling(result);
 
@@ -77,9 +86,14 @@ export async function updateUserTheme(user_id: number, theme: string, access_tok
 }
 
 export async function updateUserLocale(user_id: number, locale: string, access_token: string) {
+  const token = await resolveToken(access_token);
+  if (!token) {
+    throw new Error('Authentication required');
+  }
+
   const result = await fetch(
     `${getAPIUrl()}users/preferences/locale/${user_id}?locale=${encodeURIComponent(locale)}`,
-    RequestBodyWithAuthHeader('PUT', null, null, access_token),
+    RequestBodyWithAuthHeader('PUT', null, null, token),
   );
   const data = await errorHandling(result);
 

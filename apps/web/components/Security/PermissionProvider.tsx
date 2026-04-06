@@ -10,9 +10,9 @@
  */
 
 import type { Action, Resource, Scope } from '@/types/permissions';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { createContext, useContext, useMemo } from 'react';
 import { Resources } from '@/types/permissions';
-import { useSession } from 'next-auth/react';
 import { perm } from '@/types/permissions';
 import type { ReactNode } from 'react';
 
@@ -49,7 +49,7 @@ const PermissionContext = createContext<PermissionContextValue | null>(null);
 // ============================================================================
 
 export function PermissionProvider({ children }: { children: ReactNode }) {
-  const { data: session, status } = useSession();
+  const { data: session, status } = usePlatformSession();
 
   const permissions = useMemo(() => new Set<string>(session?.permissions), [session?.permissions]);
 

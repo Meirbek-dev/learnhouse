@@ -3,6 +3,7 @@
 import { Field, FieldContent, FieldError, FieldLabel } from '@components/ui/field';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { getAbsoluteUrl, getPublicAPIUrl } from '@services/config/config';
+import { loginAndGetToken } from '@services/auth/auth';
 import PasswordInput from '@components/ui/custom/password-input';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { useEffect, useState, useTransition } from 'react';
@@ -19,7 +20,6 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
 import { useForm } from 'react-hook-form';
-import { signIn } from 'next-auth/react';
 import * as v from 'valibot';
 
 const buildFormSchema = (t: (key: string) => string) =>
@@ -81,12 +81,8 @@ const SignUpClient = () => {
         });
 
         if (res.ok) {
-          const signInRes = await signIn('credentials', {
-            redirect: false,
-            email: data.email,
-            password: data.password,
-          });
-          if (signInRes?.ok) {
+          const loginResponse = await loginAndGetToken(data.email, data.password);
+          if (loginResponse.ok) {
             globalThis.location.href = '/redirect_from_auth';
           } else {
             router.push(getAbsoluteUrl('/login'));
@@ -106,7 +102,7 @@ const SignUpClient = () => {
 
   const handleGoogleSignIn = () => {
     startTransition(() => {
-      const frontendCallback = getAbsoluteUrl('/auth/google');
+      const frontendCallback = getAbsoluteUrl('/redirect_from_auth');
       const authorizeUrl = new URL(`${getPublicAPIUrl()}auth/google/authorize`);
       authorizeUrl.searchParams.set('callback', frontendCallback);
       globalThis.location.href = authorizeUrl.toString();

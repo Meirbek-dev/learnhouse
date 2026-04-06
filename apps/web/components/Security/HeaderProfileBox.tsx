@@ -10,6 +10,7 @@ import { ChevronDown, Crown, LogOut, Shield, User as UserIcon, Users, Star } fro
 import { Tooltip, TooltipContent, TooltipTrigger } from '@components/ui/tooltip';
 import { useNavigationPermissions } from '@/hooks/useNavigationPermissions';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
+import { logout } from '@services/auth/auth';
 import { getAbsoluteUrl } from '@services/config/config';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { RoleSlugs } from '@/types/permissions';
@@ -17,7 +18,6 @@ import { Button } from '@components/ui/button';
 import { Badge } from '@components/ui/badge';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
-import { signOut } from 'next-auth/react';
 import type { ReactNode } from 'react';
 
 interface RoleInfo {
@@ -249,7 +249,11 @@ export const HeaderProfileBox = () => {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   variant="destructive"
-                  onClick={() => signOut({ callbackUrl: '/' })}
+                  onClick={() => {
+                    void logout().finally(() => {
+                      globalThis.location.href = '/';
+                    });
+                  }}
                   className="flex space-x-2"
                 >
                   <LogOut size={16} />

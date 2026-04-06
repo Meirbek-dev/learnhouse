@@ -1,15 +1,18 @@
 import logging
 from datetime import UTC, datetime, timedelta
 
-import jwt
+from authlib.jose import JoseError, jwt
 from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer
+from sqlmodel import Session, select
 from sqlmodel import Session
 
 from src.core.events.database import get_db_session
+from src.db.auth_sessions import AuthSession
 from src.db.strict_base_model import PydanticStrictBaseModel
 from src.db.users import AnonymousUser, PublicUser, User, UserRead
 from src.security.rbac import AuthenticationRequired
+from src.security.auth_cookies import ACCESS_COOKIE_KEY
 from src.security.security import ALGORITHM, get_secret_key
 from src.services.users.users import security_get_user, security_verify_password
 
@@ -31,6 +34,7 @@ class Token(PydanticStrictBaseModel):
 
 class TokenData(PydanticStrictBaseModel):
     username: str | None = None
+    session_id: str | None = None
 
 
 def _credentials_exception() -> HTTPException:
@@ -43,17 +47,23 @@ def _credentials_exception() -> HTTPException:
 
 def _decode_token(token: str, expected_type: str) -> TokenData:
     try:
-        payload = jwt.decode(token, get_secret_key(), algorithms=[ALGORITHM])
-    except jwt.PyJWTError as exc:
+        claims = jwt.decode(token, get_secret_key())
+        claims.validate()
+        payload = dict(claims)
+    except JoseError as exc:
         raise _credentials_exception() from exc
 
     token_type = payload.get("type")
     username = payload.get("sub")
+    session_id = payload.get("sid")
 
     if token_type != expected_type or not isinstance(username, str) or not username:
         raise _credentials_exception()
 
-    return TokenData(username=username)
+    if session_id is not None and not isinstance(session_id, str):
+        raise _credentials_exception()
+
+    return TokenData(username=username, session_id=session_id)
 
 
 async def authenticate_user(
@@ -72,16 +82,24 @@ async def authenticate_user(
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
     to_encode = data.copy()
+    issued_at = datetime.now(UTC)
+    expire = issued_at + (expires_delta or ACCESS_TOKEN_EXPIRE)
+    to_encode.update(
+        {
+            "exp": int(expire.timestamp()),
+            "iat": int(issued_at.timestamp()),
+            "iss": "ashyq-bilim-api",
+            "aud": "ashyq-bilim-web",
+            "type": "access",
+        }
+    )
+    token = jwt.encode({"alg": ALGORITHM, "typ": "JWT"}, to_encode, get_secret_key())
+    return token.decode("utf-8") if isinstance(token, bytes) else token
+
+
+def get_access_token_expiry_timestamp(expires_delta: timedelta | None = None) -> int:
     expire = datetime.now(UTC) + (expires_delta or ACCESS_TOKEN_EXPIRE)
-    to_encode.update({"exp": expire, "type": "access"})
-    return jwt.encode(to_encode, get_secret_key(), algorithm=ALGORITHM)
-
-
-def create_refresh_token(data: dict, expires_delta: timedelta | None = None) -> str:
-    to_encode = data.copy()
-    expire = datetime.now(UTC) + (expires_delta or REFRESH_TOKEN_EXPIRE)
-    to_encode.update({"exp": expire, "type": "refresh"})
-    return jwt.encode(to_encode, get_secret_key(), algorithm=ALGORITHM)
+    return int(expire.timestamp() * 1000)
 
 
 def decode_access_token(token: str) -> TokenData:
@@ -96,10 +114,14 @@ def get_access_token_from_request(
     request: Request,
     header_token: str | None = None,
 ) -> str | None:
+    request_state_token = getattr(request.state, "resolved_access_token", None)
+    if isinstance(request_state_token, str) and request_state_token.strip():
+        return request_state_token
+
     if isinstance(header_token, str) and header_token.strip():
         return header_token
 
-    cookie_token = request.cookies.get("access_token_cookie")
+    cookie_token = request.cookies.get(ACCESS_COOKIE_KEY)
     if isinstance(cookie_token, str) and cookie_token.strip():
         return cookie_token
 
@@ -112,6 +134,15 @@ async def get_current_user_from_token(
     db_session: Session,
 ) -> PublicUser:
     token_data = decode_access_token(token)
+    if token_data.session_id:
+        auth_session = db_session.exec(
+            select(AuthSession).where(AuthSession.session_id == token_data.session_id)
+        ).first()
+        if auth_session is None or auth_session.revoked_at is not None:
+            raise _credentials_exception()
+        if auth_session.expires_at <= datetime.now(UTC):
+            raise _credentials_exception()
+
     user = await security_get_user(request, db_session, email=token_data.username)
     if user is None:
         raise _credentials_exception()

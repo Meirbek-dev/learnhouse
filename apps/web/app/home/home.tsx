@@ -1,11 +1,11 @@
 'use client';
 
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
+import { logout } from '@/services/auth/auth';
 import platformLogoFull from '@public/platform_logo_full.svg';
 import { getAbsoluteUrl } from '@services/config/config';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { useTranslations } from 'next-intl';
-import { signOut } from 'next-auth/react';
 import Image from 'next/image';
 
 const HomeClient = () => {
@@ -34,7 +34,15 @@ const HomeClient = () => {
         </span>
       </div>
       <div className="mx-auto flex cursor-pointer items-center space-x-4 pt-16 text-2xl font-semibold">
-        <span onClick={() => signOut({ redirect: true, callbackUrl: getAbsoluteUrl('/') })}>{t('signOut')}</span>
+        <span
+          onClick={() => {
+            void logout().finally(() => {
+              globalThis.location.href = getAbsoluteUrl('/');
+            });
+          }}
+        >
+          {t('signOut')}
+        </span>
       </div>
     </div>
   );

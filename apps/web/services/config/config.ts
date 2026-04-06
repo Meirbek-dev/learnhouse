@@ -57,7 +57,7 @@ export const getTopLevelCookieDomain = () => {
   const override = process.env.COOKIE_DOMAIN?.trim();
   if (override) return override;
 
-  const cookieSourceUrl = process.env.NEXTAUTH_URL?.trim() || getSiteUrl();
+  const cookieSourceUrl = process.env.APP_URL?.trim() || getSiteUrl();
   const { hostname } = new URL(cookieSourceUrl);
   return isUnsupportedCookieDomain(hostname) ? undefined : hostname;
 };

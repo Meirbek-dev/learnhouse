@@ -2,8 +2,8 @@ from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
+from authlib.jose import JoseError, jwt
 from fastapi import HTTPException, Request
-from jwt import PyJWTError, decode, encode
 from sqlmodel import Session
 
 from src.db.users import AnonymousUser, PublicUser, User
@@ -12,9 +12,7 @@ from src.security.auth import (
     TokenData,
     authenticate_user,
     create_access_token,
-    create_refresh_token,
     decode_access_token,
-    decode_refresh_token,
     get_access_token_from_request,
     get_current_user,
     get_current_user_optional,
@@ -145,7 +143,7 @@ class TestAuth:
         assert len(token) > 0
 
         # Decode and verify token
-        decoded = decode(token, secret_key, algorithms=[ALGORITHM])
+        decoded = dict(jwt.decode(token, secret_key))
         assert decoded["sub"] == "test@example.com"
         assert "exp" in decoded
         assert decoded["type"] == "access"
@@ -158,61 +156,34 @@ class TestAuth:
         secret_key = get_secret_key()
 
         # Decode and verify token
-        decoded = decode(token, secret_key, algorithms=[ALGORITHM])
+        decoded = dict(jwt.decode(token, secret_key))
         assert decoded["sub"] == "test@example.com"
 
         # Check that expiry time exists and is in the future
         assert "exp" in decoded
-        exp_time = datetime.fromtimestamp(decoded["exp"], tz=UTC)
+        exp_time = datetime.fromtimestamp(int(decoded["exp"]), tz=UTC)
         now = datetime.now(UTC)
 
         # Verify the token expires in the future
         assert exp_time > now
-
-    def test_create_refresh_token_default_expiry(self) -> None:
-        """Test refresh token creation with default expiry"""
-        data = {"sub": "test@example.com"}
-        token = create_refresh_token(data)
-        secret_key = get_secret_key()
-
-        decoded = decode(token, secret_key, algorithms=[ALGORITHM])
-        assert decoded["sub"] == "test@example.com"
-        assert decoded["type"] == "refresh"
-        assert "exp" in decoded
 
     def test_decode_access_token_success(self) -> None:
         token = create_access_token({"sub": "test@example.com"})
         token_data = decode_access_token(token)
         assert token_data.username == "test@example.com"
 
-    def test_decode_refresh_token_success(self) -> None:
-        token = create_refresh_token({"sub": "test@example.com"})
-        token_data = decode_refresh_token(token)
-        assert token_data.username == "test@example.com"
-
-    def test_decode_access_token_with_wrong_type(self) -> None:
-        token = create_refresh_token({"sub": "test@example.com"})
-        with pytest.raises(HTTPException) as exc_info:
-            decode_access_token(token)
-        assert exc_info.value.status_code == 401
-
-    def test_decode_refresh_token_with_wrong_type(self) -> None:
-        token = create_access_token({"sub": "test@example.com"})
-        with pytest.raises(HTTPException) as exc_info:
-            decode_refresh_token(token)
-        assert exc_info.value.status_code == 401
-
     def test_decode_access_token_missing_sub(self) -> None:
         secret_key = get_secret_key()
 
-        token = encode(
+        token_value = jwt.encode(
+            {"alg": ALGORITHM, "typ": "JWT"},
             {
                 "type": "access",
-                "exp": datetime.now(UTC) + timedelta(hours=1),
+                "exp": int((datetime.now(UTC) + timedelta(hours=1)).timestamp()),
             },
             secret_key,
-            algorithm=ALGORITHM,
         )
+        token = token_value.decode("utf-8") if isinstance(token_value, bytes) else token_value
         with pytest.raises(HTTPException) as exc_info:
             decode_access_token(token)
         assert exc_info.value.status_code == 401
@@ -311,7 +282,7 @@ class TestAuth:
     ) -> None:
         """Test getting current user when JWT is invalid"""
         with patch("src.security.auth.jwt.decode") as mock_decode:
-            mock_decode.side_effect = PyJWTError("Invalid token")
+            mock_decode.side_effect = JoseError("Invalid token")
 
             with pytest.raises(HTTPException) as exc_info:
                 await get_current_user(

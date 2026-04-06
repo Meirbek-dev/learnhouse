@@ -1,5 +1,6 @@
 'use server';
 import { RequestBodyWithAuthHeader, getResponseMetadata } from '@services/utils/ts/requests';
+import { resolveServerAccessToken } from '@/lib/auth/server-access-token';
 import type { CustomResponseTyping } from '@services/utils/ts/requests';
 import type { components } from '@/lib/api/generated';
 import { getAPIUrl } from '@services/config/config';
@@ -20,10 +21,20 @@ async function getTypedResponseMetadata<T>(response: Response): Promise<Response
   return (await getResponseMetadata(response)) as ResponseMetadata<T>;
 }
 
+async function requireAccessToken(access_token?: string): Promise<string> {
+  const token = await resolveServerAccessToken(access_token);
+  if (!token) {
+    throw new Error('Authentication required');
+  }
+
+  return token;
+}
+
 export async function getProducts(access_token: string): Promise<ResponseMetadata<PaymentsProductRead[]>> {
+  const token = await requireAccessToken(access_token);
   const result = await fetch(
     `${getAPIUrl()}payments/products`,
-    RequestBodyWithAuthHeader('GET', null, null, access_token),
+    RequestBodyWithAuthHeader('GET', null, null, token),
   );
   return await getTypedResponseMetadata<PaymentsProductRead[]>(result);
 }
@@ -32,9 +43,10 @@ export async function createProduct(
   data: PaymentsProductCreate,
   access_token: string,
 ): Promise<ResponseMetadata<PaymentsProductRead>> {
+  const token = await requireAccessToken(access_token);
   const result = await fetch(
     `${getAPIUrl()}payments/products`,
-    RequestBodyWithAuthHeader('POST', data, null, access_token),
+    RequestBodyWithAuthHeader('POST', data, null, token),
   );
   const metadata = await getTypedResponseMetadata<PaymentsProductRead>(result);
 
@@ -52,9 +64,10 @@ export async function updateProduct(
   data: PaymentsProductUpdate,
   access_token: string,
 ): Promise<ResponseMetadata<PaymentsProductRead>> {
+  const token = await requireAccessToken(access_token);
   const result = await fetch(
     `${getAPIUrl()}payments/products/${productId}`,
-    RequestBodyWithAuthHeader('PUT', data, null, access_token),
+    RequestBodyWithAuthHeader('PUT', data, null, token),
   );
   const metadata = await getTypedResponseMetadata<PaymentsProductRead>(result);
 
@@ -71,9 +84,10 @@ export async function archiveProduct(
   productId: number | string,
   access_token: string,
 ): Promise<ResponseMetadata<PaymentsMessageResponse>> {
+  const token = await requireAccessToken(access_token);
   const result = await fetch(
     `${getAPIUrl()}payments/products/${productId}`,
-    RequestBodyWithAuthHeader('DELETE', null, null, access_token),
+    RequestBodyWithAuthHeader('DELETE', null, null, token),
   );
   const metadata = await getTypedResponseMetadata<PaymentsMessageResponse>(result);
 
@@ -90,9 +104,10 @@ export async function getProductDetails(
   productId: number | string,
   access_token: string,
 ): Promise<ResponseMetadata<PaymentsProductRead>> {
+  const token = await requireAccessToken(access_token);
   const result = await fetch(
     `${getAPIUrl()}payments/products/${productId}`,
-    RequestBodyWithAuthHeader('GET', null, null, access_token),
+    RequestBodyWithAuthHeader('GET', null, null, token),
   );
   return await getTypedResponseMetadata<PaymentsProductRead>(result);
 }
@@ -102,9 +117,10 @@ export async function linkCourseToProduct(
   courseId: number,
   access_token: string,
 ): Promise<ResponseMetadata<PaymentsMessageResponse>> {
+  const token = await requireAccessToken(access_token);
   const result = await fetch(
     `${getAPIUrl()}payments/products/${productId}/courses/${courseId}`,
-    RequestBodyWithAuthHeader('POST', null, null, access_token),
+    RequestBodyWithAuthHeader('POST', null, null, token),
   );
   const metadata = await getTypedResponseMetadata<PaymentsMessageResponse>(result);
 
@@ -122,9 +138,10 @@ export async function unlinkCourseFromProduct(
   courseId: number | string,
   access_token: string,
 ): Promise<ResponseMetadata<PaymentsMessageResponse>> {
+  const token = await requireAccessToken(access_token);
   const result = await fetch(
     `${getAPIUrl()}payments/products/${productId}/courses/${courseId}`,
-    RequestBodyWithAuthHeader('DELETE', null, null, access_token),
+    RequestBodyWithAuthHeader('DELETE', null, null, token),
   );
   const metadata = await getTypedResponseMetadata<PaymentsMessageResponse>(result);
 
@@ -141,9 +158,10 @@ export async function getCoursesLinkedToProduct(
   productId: number | string,
   access_token: string,
 ): Promise<ResponseMetadata<CourseRead[]>> {
+  const token = await requireAccessToken(access_token);
   const result = await fetch(
     `${getAPIUrl()}payments/products/${productId}/courses`,
-    RequestBodyWithAuthHeader('GET', null, null, access_token),
+    RequestBodyWithAuthHeader('GET', null, null, token),
   );
   return await getTypedResponseMetadata<CourseRead[]>(result);
 }
@@ -152,9 +170,10 @@ export async function getProductsByCourse(
   courseId: number,
   access_token: string,
 ): Promise<ResponseMetadata<PaymentsProductRead[]>> {
+  const token = await requireAccessToken(access_token);
   const result = await fetch(
     `${getAPIUrl()}payments/courses/${courseId}/products`,
-    RequestBodyWithAuthHeader('GET', null, null, access_token),
+    RequestBodyWithAuthHeader('GET', null, null, token),
   );
   return await getTypedResponseMetadata<PaymentsProductRead[]>(result);
 }
@@ -164,9 +183,10 @@ export async function getStripeProductCheckoutSession(
   redirect_uri: string,
   access_token: string,
 ): Promise<ResponseMetadata<PaymentsCheckoutSessionResponse>> {
+  const token = await requireAccessToken(access_token);
   const result = await fetch(
     `${getAPIUrl()}payments/stripe/checkout/product/${productId}?redirect_uri=${redirect_uri}`,
-    RequestBodyWithAuthHeader('POST', null, null, access_token),
+    RequestBodyWithAuthHeader('POST', null, null, token),
   );
   return await getTypedResponseMetadata<PaymentsCheckoutSessionResponse>(result);
 }

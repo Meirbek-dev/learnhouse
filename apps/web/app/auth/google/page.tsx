@@ -8,15 +8,14 @@ import AuthCard from '@components/auth/card';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import Link from '@components/ui/AppLink';
-import { signIn } from 'next-auth/react';
 
 /**
  * Google OAuth callback page.
  *
  * After the backend completes the Authorization Code flow with Google, it
  * redirects here with either:
- *   - ?code=<exchange_code>  — success; exchange the code for a NextAuth session
- *   - ?error=<reason>        — failure; show an error and offer a retry link
+ *   - ?error=<reason>  — failure; show an error and offer a retry link
+ *   - otherwise        — redirect into the authenticated app flow
  */
 const GoogleCallbackPage = () => {
   const searchParams = useSearchParams();
@@ -24,28 +23,14 @@ const GoogleCallbackPage = () => {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    const code = searchParams.get('code');
     const oauthError = searchParams.get('error');
 
-    if (oauthError || !code) {
+    if (oauthError) {
       setError(t('wrongCredentials'));
       return;
     }
 
-    // Exchange the backend-issued code for a NextAuth session.
-    // The 'google-exchange' credentials provider calls POST /auth/google/exchange.
-    signIn('google-exchange', {
-      exchange_code: code,
-      redirect: false,
-    }).then((result) => {
-      if (result?.error) {
-        setError(t('wrongCredentials'));
-        return;
-      }
-      if (result?.ok) {
-        globalThis.location.href = '/redirect_from_auth';
-      }
-    });
+    globalThis.location.href = '/redirect_from_auth';
   }, [searchParams, t]);
 
   return (

@@ -2,6 +2,7 @@
 
 import { Field, FieldContent, FieldError, FieldLabel } from '@components/ui/field';
 import { getAbsoluteUrl, getPublicAPIUrl } from '@services/config/config';
+import { loginAndGetToken } from '@services/auth/auth';
 import PasswordInput from '@components/ui/custom/password-input';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { SiGoogle } from '@icons-pack/react-simple-icons';
@@ -15,7 +16,6 @@ import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
 import { useForm } from 'react-hook-form';
-import { signIn } from 'next-auth/react';
 import * as v from 'valibot';
 
 const createValidationSchema = (t: (key: string, values?: any) => string) =>
@@ -45,20 +45,14 @@ const LoginClient = () => {
   const onSubmit = (values: LoginFormData) => {
     startTransition(async () => {
       try {
-        const res = await signIn('credentials', {
-          redirect: false,
-          email: values.email,
-          password: values.password,
-        });
+        const response = await loginAndGetToken(values.email, values.password);
 
-        if (res?.error) {
+        if (!response.ok) {
           setError(t('wrongCredentials'));
           return;
         }
 
-        if (res?.ok) {
-          globalThis.location.href = '/redirect_from_auth';
-        }
+        globalThis.location.href = '/redirect_from_auth';
       } catch {
         setError(t('wrongCredentials'));
       }
@@ -67,11 +61,7 @@ const LoginClient = () => {
 
   const handleGoogleSignIn = () => {
     startTransition(() => {
-      // The backend handles the full Google Authorization Code flow.
-      // We redirect the browser to the backend's authorize endpoint, which in
-      // turn redirects to Google. After Google consent, the backend redirects
-      // back to /auth/google on this site to finalize the NextAuth session.
-      const frontendCallback = getAbsoluteUrl('/auth/google');
+      const frontendCallback = getAbsoluteUrl('/redirect_from_auth');
       const authorizeUrl = new URL(`${getPublicAPIUrl()}auth/google/authorize`);
       authorizeUrl.searchParams.set('callback', frontendCallback);
       globalThis.location.href = authorizeUrl.toString();
