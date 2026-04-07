@@ -1,5 +1,6 @@
 'use client';
 
+import { defaultTimeZone } from '@/i18n/config';
 import type { AbstractIntlMessages } from 'next-intl';
 import { NextIntlClientProvider, useLocale } from 'next-intl';
 import { useEffect, useState } from 'react';
@@ -29,6 +30,7 @@ export function IntlProvider({ children, messages, locale }: IntlProviderProps) 
       messages={messages}
       locale={locale}
       now={now}
+      timeZone={defaultTimeZone}
     >
       <HtmlLangSync />
       {children}
