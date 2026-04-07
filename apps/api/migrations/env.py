@@ -1,10 +1,13 @@
 import importlib
 import os
+from pathlib import Path
 from logging.config import fileConfig
 
 from alembic import context
+import sqlalchemy as sa
 from sqlalchemy import engine_from_config, pool
 from sqlmodel import SQLModel
+from sqlmodel.sql.sqltypes import AutoString
 
 from config.config import get_settings
 
@@ -29,8 +32,21 @@ if config.config_file_name is not None:
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
 
+# Tables that share the database but are not managed by SQLModel metadata.
+_AUTOGENERATE_EXCLUDED_TABLES = {
+    "ar_internal_metadata",
+    "chapteractivity",
+    "clients",
+    "coursechapter",
+    "document_chunks",
+    "languages",
+    "schema_migrations",
+    "submissions",
+}
+
 # IMPORTING ALL SCHEMAS
-base_dir = "src/db"
+project_root = Path(__file__).resolve().parents[1]
+base_dir = project_root / "src" / "db"
 base_module_path = "src.db"
 
 # Recursively walk through the base directory
@@ -38,7 +54,7 @@ for root, _dirs, files in os.walk(base_dir):
     # Filter out __init__.py and non-Python files
     module_files = [f for f in files if f.endswith(".py") and f != "__init__.py"]
     # Calculate the module's base path from its directory structure
-    path_diff = os.path.relpath(root, base_dir)
+    path_diff = os.path.relpath(root, str(base_dir))
     if path_diff == ".":
         # Root of the base_dir, no additional path to add
         current_module_base = base_module_path
@@ -55,6 +71,38 @@ for root, _dirs, files in os.walk(base_dir):
 # IMPORTING ALL SCHEMAS
 
 target_metadata = SQLModel.metadata
+
+
+def include_object(object_, name: str | None, type_: str, reflected: bool, compare_to):
+    if not name:
+        return True
+
+    table_name = name
+    if type_ != "table":
+        parent_table = getattr(object_, "table", None)
+        if parent_table is not None and getattr(parent_table, "name", None):
+            table_name = parent_table.name
+
+    if reflected and compare_to is None and table_name in _AUTOGENERATE_EXCLUDED_TABLES:
+        return False
+
+    return True
+
+
+def compare_type(
+    _context,
+    _inspected_column,
+    _metadata_column,
+    inspected_type,
+    metadata_type,
+):
+    stringish_types = (sa.String, sa.Text, AutoString)
+    if isinstance(inspected_type, stringish_types) and isinstance(
+        metadata_type, stringish_types
+    ):
+        return False
+
+    return None
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
@@ -80,6 +128,8 @@ def run_migrations_offline() -> None:
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
+        include_object=include_object,
+        compare_type=compare_type,
     )
 
     with context.begin_transaction():
@@ -105,7 +155,12 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
-        context.configure(connection=connection, target_metadata=target_metadata)
+        context.configure(
+            connection=connection,
+            target_metadata=target_metadata,
+            include_object=include_object,
+            compare_type=compare_type,
+        )
 
         with context.begin_transaction():
             context.run_migrations()

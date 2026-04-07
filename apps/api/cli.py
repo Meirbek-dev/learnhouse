@@ -1,11 +1,14 @@
 import asyncio
 from datetime import date
+from pathlib import Path
 from typing import Annotated
 
 import typer
+from alembic import command
+from alembic.config import Config
 from sqlalchemy import create_engine
 from sqlalchemy.engine.base import Engine
-from sqlmodel import Session, SQLModel, select
+from sqlmodel import Session, select
 
 from config.config import get_settings
 from src.core.platform import (
@@ -26,10 +29,21 @@ from src.services.setup.setup import (
 cli = typer.Typer()
 
 
+def _run_migrations_to_head() -> None:
+    alembic_config = Config(str(Path(__file__).with_name("alembic.ini")))
+    settings = get_settings()
+    alembic_config.set_main_option(
+        "sqlalchemy.url", settings.database_config.sql_connection_string
+    )
+    command.upgrade(alembic_config, "head")
+
+
 @cli.command()
 def install(
     short: Annotated[bool, typer.Option(help="Install with predefined values")] = False,
 ) -> None:
+    _run_migrations_to_head()
+
     # Get the database session
     settings = get_settings()
     engine: Engine = create_engine(
@@ -37,7 +51,6 @@ def install(
         echo=False,
         pool_pre_ping=True,
     )
-    SQLModel.metadata.create_all(engine)
 
     db_session = Session(engine)
 

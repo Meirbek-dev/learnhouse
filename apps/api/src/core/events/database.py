@@ -8,7 +8,7 @@ from sqlalchemy import event
 from sqlalchemy.engine import Engine
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.pool import QueuePool
-from sqlmodel import Session, SQLModel, create_engine
+from sqlmodel import Session, create_engine
 
 from config.config import get_settings
 
@@ -26,7 +26,7 @@ is_testing = os.getenv("TESTING", "false").lower() == "true"
 def import_all_models() -> None:
     """
     Dynamically imports all SQLModel definitions from the 'src/db' directory.
-    This ensures that SQLModel.metadata.create_all() discovers all defined tables.
+    This ensures SQLModel metadata is populated for query construction.
     """
     base_dir = "src/db"
     base_module_path = "src.db"
@@ -198,12 +198,6 @@ async def connect_to_db(app: FastAPI) -> None:
 
         # Assign the engine to the FastAPI app state for easy access in routes
         app.state.db_engine = db_engine
-
-        # Create all tables defined by SQLModel metadata
-        # This is only called once at application startup
-        # Only create tables if not in test mode
-        if not is_testing:
-            SQLModel.metadata.create_all(db_engine)
 
     except (SQLAlchemyError, OSError) as e:
         logger.exception(f"Database initialization failed: {e}")
