@@ -20,7 +20,7 @@ def set_access_cookie(response: Response, value: str) -> None:
         "secure": bool(is_ssl),
         "samesite": "strict",
         "max_age": ACCESS_COOKIE_TTL_SECONDS,
-        "path": "/api",
+        "path": "/",
     }
     if cookie_domain:
         kwargs["domain"] = cookie_domain
@@ -50,7 +50,7 @@ def clear_auth_cookies(response: Response) -> None:
     settings = get_settings()
     cookie_domain = settings.hosting_config.cookie_config.domain
 
-    access_kwargs: dict[str, object] = {"path": "/api"}
+    access_kwargs: dict[str, object] = {"path": "/"}
     refresh_kwargs: dict[str, object] = {"path": "/api/auth/refresh"}
     if cookie_domain:
         access_kwargs["domain"] = cookie_domain

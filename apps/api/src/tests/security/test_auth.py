@@ -6,6 +6,7 @@ from unittest.mock import AsyncMock, Mock, patch
 import pytest
 from authlib.jose import jwt
 from fastapi import HTTPException, Request
+from fastapi import Response
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from sqlmodel import Session
@@ -22,6 +23,7 @@ from src.security.auth import (
     get_current_user_optional,
 )
 from src.security.keys import get_private_key, get_public_key, reload_key_cache
+from src.security.auth_cookies import set_access_cookie, set_refresh_cookie
 from src.services.auth.sessions import SessionData, hash_refresh_token, inspect_refresh_session
 
 
@@ -251,3 +253,23 @@ class TestRefreshSessionInspection:
         assert inspection.session_id == 'sess_old'
         assert inspection.token_family_id == 'fam_123'
         assert inspection.user_id == 10
+
+
+class TestAuthCookies:
+    def test_set_access_cookie_uses_root_path(self) -> None:
+        response = Response()
+
+        set_access_cookie(response, 'access-token')
+
+        cookie_header = response.headers['set-cookie']
+        assert 'access_token_cookie=access-token' in cookie_header
+        assert 'Path=/' in cookie_header
+
+    def test_set_refresh_cookie_keeps_refresh_path(self) -> None:
+        response = Response()
+
+        set_refresh_cookie(response, 'refresh-token')
+
+        cookie_header = response.headers['set-cookie']
+        assert 'refresh_token_cookie=refresh-token' in cookie_header
+        assert 'Path=/api/auth/refresh' in cookie_header

@@ -7,7 +7,7 @@ import { GlowingLevelBadge, getLevelInfo } from '@/lib/gamification';
 import type { UserGamificationProfile } from '@/types/gamification';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { motion } from 'motion/react';
 import { cn } from '@/lib/utils';
 
@@ -28,7 +28,10 @@ interface HeroSectionProps {
  */
 export function HeroSection({ profile, userRank, className }: HeroSectionProps) {
   const t = useTranslations('DashPage.UserAccountSettings.Gamification');
+  const locale = useLocale();
   const session = usePlatformSession();
+  const numberFormatter = new Intl.NumberFormat(locale);
+  const formatNumber = (value: number) => numberFormatter.format(value);
 
   const xpToNext = Math.max(0, profile.xp_to_next_level || 0);
   const currentLevelXp = profile.xp_in_current_level || 0;
@@ -210,11 +213,11 @@ export function HeroSection({ profile, userRank, className }: HeroSectionProps) 
                 {/* XP labels with better styling */}
                 <div className="mt-2 flex justify-between text-xs">
                   <span className="font-medium tabular-nums">
-                    <span className="text-foreground">{profile.xp_in_current_level?.toLocaleString() || 0}</span>
+                    <span className="text-foreground">{formatNumber(profile.xp_in_current_level || 0)}</span>
                     <span className="text-muted-foreground"> {t('progress.xpAbbreviation')}</span>
                   </span>
                   <span className="text-muted-foreground font-medium tabular-nums">
-                    {xpToNext.toLocaleString()} {t('progress.xpToGo')}
+                    {formatNumber(xpToNext)} {t('progress.xpToGo')}
                   </span>
                 </div>
               </div>
@@ -233,7 +236,7 @@ export function HeroSection({ profile, userRank, className }: HeroSectionProps) 
                     dailyXpProgress >= 100 ? 'text-orange-500' : 'text-foreground',
                   )}
                 >
-                  {profile.daily_xp_earned?.toLocaleString() || 0} / 500
+                  {formatNumber(profile.daily_xp_earned || 0)} / 500
                 </span>
               </div>
               <div className="relative">
@@ -268,7 +271,7 @@ export function HeroSection({ profile, userRank, className }: HeroSectionProps) 
               <StatCard
                 icon={Trophy}
                 label={t('stats.totalXP')}
-                value={profile.total_xp?.toLocaleString() || '0'}
+                value={formatNumber(profile.total_xp || 0)}
                 iconColor="text-yellow-500"
               />
               <StatCard
