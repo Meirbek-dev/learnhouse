@@ -4,7 +4,7 @@
  * Centralized Permission Provider
  *
  * Single source of truth for client-side permission checks.
- * Reads permissions from the NextAuth session - no separate API fetch.
+ * Reads permissions from the platform session - no separate API fetch.
  * Does simple Set.has() lookups - the backend expands wildcards and
  * scope-broadening before sending permissions to the frontend.
  */

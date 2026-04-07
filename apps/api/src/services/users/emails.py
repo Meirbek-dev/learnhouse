@@ -1,5 +1,3 @@
-import os
-
 from pydantic import EmailStr
 
 from config.config import get_settings
@@ -9,10 +7,6 @@ from src.services.email.utils import send_email
 
 
 def _get_public_web_origin() -> str:
-    explicit_origin = os.getenv("NEXTAUTH_URL")
-    if explicit_origin:
-        return explicit_origin.rstrip("/")
-
     settings = get_settings()
     scheme = "https" if settings.hosting_config.ssl else "http"
     return f"{scheme}://{settings.hosting_config.domain}".rstrip("/")
