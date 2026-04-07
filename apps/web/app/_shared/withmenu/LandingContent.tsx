@@ -1,4 +1,5 @@
 import { getServerGamificationDashboard } from '@/services/gamification/server';
+import { getSession } from '@/lib/auth/session';
 import LandingClassic from '@components/Landings/LandingClassic';
 import LandingCustom from '@components/Landings/LandingCustom';
 import { getCollections } from '@services/courses/collections';
@@ -55,10 +56,13 @@ export async function LandingContent() {
     const hasCustomLanding = platform?.landing?.enabled;
 
     // Only fetch gamification data if user is authenticated
-    const gamificationPromise = getServerGamificationDashboard().catch((error: unknown) => {
-      logLandingFetchError('Gamification fetch failed', error);
-      return null;
-    });
+    const session = await getSession();
+    const gamificationPromise = session
+      ? getServerGamificationDashboard().catch((error: unknown) => {
+          logLandingFetchError('Gamification fetch failed', error);
+          return null;
+        })
+      : Promise.resolve(null);
 
     if (hasCustomLanding && platform?.landing) {
       const gamificationData = await gamificationPromise;

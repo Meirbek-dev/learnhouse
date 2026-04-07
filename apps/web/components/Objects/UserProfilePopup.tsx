@@ -20,6 +20,7 @@ import { useCallback, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { getUser } from '@services/users/users';
 import { Badge } from '@/components/ui/badge';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
@@ -71,6 +72,7 @@ const IconComponent = ({ iconName }: { iconName: string }) => {
 const UserProfilePopup = ({ children, userId }: UserProfilePopupProps) => {
   const t = useTranslations('Components.UserProfilePopup');
   const router = useRouter();
+  const { status } = usePlatformSession();
   const [userData, setUserData] = useState<UserData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -78,7 +80,7 @@ const UserProfilePopup = ({ children, userId }: UserProfilePopupProps) => {
 
   const fetchOnOpen = useCallback(
     async (open: boolean) => {
-      if (!open || hasFetchedRef.current || !userId) return;
+      if (!open || hasFetchedRef.current || !userId || status !== 'authenticated') return;
       hasFetchedRef.current = true;
 
       const token = undefined;
@@ -95,7 +97,7 @@ const UserProfilePopup = ({ children, userId }: UserProfilePopupProps) => {
         setIsLoading(false);
       }
     },
-    [userId, t],
+    [userId, status, t],
   );
 
   return (
