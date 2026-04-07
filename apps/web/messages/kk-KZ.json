@@ -870,6 +870,7 @@
       "certificationRemoved": "Сертификат сәтті жойылды",
       "certificationSettings": "Сертификат баптаулары",
       "certificationType": "Сертификат түрі",
+      "certificationTypeRequired": "Сертификат түрі қажет",
       "certificationTypes": {
         "achievement": "Жетістік негізінде",
         "assessment": "Бағалау негізінде",
@@ -883,6 +884,7 @@
       },
       "certificationUpdated": "Сертификат сәтті жаңартылды",
       "courseCertification": "Курс сертификаты",
+      "certificatePatternRequired": "Сертификат үлгісі қажет",
       "creatingCertification": "Сертификат жасалуда...",
       "creatingCertificationDescription": "Курс сертификаты бапталуда. Күте тұрыңыз...",
       "enableCertification": "Бұл курсты аяқтаған студенттер үшін сертификатты қосу және баптау",

@@ -854,6 +854,7 @@
       "certificationRemoved": "Certification removed successfully",
       "certificationSettings": "Certification Settings",
       "certificationType": "Certification Type",
+      "certificationTypeRequired": "Certification type is required",
       "certificationTypes": {
         "achievement": "Achievement Based",
         "assessment": "Assessment Based",
@@ -867,6 +868,7 @@
       },
       "certificationUpdated": "Certification updated successfully",
       "courseCertification": "Course Certification",
+      "certificatePatternRequired": "Certificate pattern is required",
       "creatingCertification": "Creating Certification...",
       "creatingCertificationDescription": "Please wait while we set up your course certification.",
       "enableCertification": "Enable and configure certificates for students who complete this course",

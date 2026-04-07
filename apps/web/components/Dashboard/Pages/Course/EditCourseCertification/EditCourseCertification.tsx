@@ -81,36 +81,66 @@ const EditCourseCertification = () => {
   const t = useTranslations('Certificates.EditCourseCertification');
   const tCommon = useTranslations('Common');
 
+  const certificationTypeItems = useMemo(
+    () =>
+      ([
+        'completion',
+        'achievement',
+        'assessment',
+        'participation',
+        'mastery',
+        'professional',
+        'continuing',
+        'workshop',
+        'specialization',
+      ] as const).map((type) => ({ value: type, label: t(`certificationTypes.${type}`) })),
+    [t],
+  );
+
   const formSchema = useMemo(
     () =>
       v.pipe(
         v.object({
           enable_certification: v.boolean(),
-          certification_name: v.pipe(v.string(), v.maxLength(100, t('maxCharacters100'))),
-          certification_description: v.pipe(v.string(), v.maxLength(700, t('maxCharacters500'))),
-          certification_type: v.picklist([
-            'completion',
-            'achievement',
-            'assessment',
-            'participation',
-            'mastery',
-            'professional',
-            'continuing',
-            'workshop',
-            'specialization',
-          ]),
-          certificate_pattern: v.picklist([
-            'royal',
-            'tech',
-            'nature',
-            'geometric',
-            'vintage',
-            'waves',
-            'minimal',
-            'professional',
-            'academic',
-            'modern',
-          ]),
+          certification_name: v.pipe(
+            v.string(t('certificationNameRequired')),
+            v.minLength(1, t('certificationNameRequired')),
+            v.maxLength(100, t('maxCharacters100')),
+          ),
+          certification_description: v.pipe(
+            v.string(t('certificationDescriptionRequired')),
+            v.minLength(1, t('certificationDescriptionRequired')),
+            v.maxLength(700, t('maxCharacters500')),
+          ),
+          certification_type: v.picklist(
+            [
+              'completion',
+              'achievement',
+              'assessment',
+              'participation',
+              'mastery',
+              'professional',
+              'continuing',
+              'workshop',
+              'specialization',
+            ],
+            t('certificationTypeRequired'),
+          ),
+          certificate_pattern: v.picklist(
+            [
+              'royal',
+              'tech',
+              'nature',
+              'geometric',
+              'vintage',
+              'waves',
+              'minimal',
+              'professional',
+              'academic',
+              'modern',
+            ],
+            t('certificatePatternRequired'),
+          ),
           certificate_instructor: v.optional(v.string()),
         }),
         v.check((data) => {
@@ -139,20 +169,6 @@ const EditCourseCertification = () => {
       certificate_instructor: '',
     },
   });
-
-  const certificationTypeItems = (
-    [
-      'completion',
-      'achievement',
-      'assessment',
-      'participation',
-      'mastery',
-      'professional',
-      'continuing',
-      'workshop',
-      'specialization',
-    ] as const
-  ).map((type) => ({ value: type, label: t(`certificationTypes.${type}`) }));
 
   const getInitialValues = useCallback((): FormValues => {
     const getInstructorName = () => {
@@ -218,14 +234,15 @@ const EditCourseCertification = () => {
     name: 'enable_certification',
     defaultValue: false,
   });
-  const certificationName = useWatch({ control: form.control, name: 'certification_name' });
+  const certificationName = useWatch({ control: form.control, name: 'certification_name', defaultValue: '' });
   const certificationDescription = useWatch({
     control: form.control,
     name: 'certification_description',
+    defaultValue: '',
   });
-  const certificationType = useWatch({ control: form.control, name: 'certification_type' });
-  const certificatePattern = useWatch({ control: form.control, name: 'certificate_pattern' });
-  const certificateInstructor = useWatch({ control: form.control, name: 'certificate_instructor' });
+  const certificationType = useWatch({ control: form.control, name: 'certification_type', defaultValue: 'completion' });
+  const certificatePattern = useWatch({ control: form.control, name: 'certificate_pattern', defaultValue: 'professional' });
+  const certificateInstructor = useWatch({ control: form.control, name: 'certificate_instructor', defaultValue: '' });
 
   const handleSaveCertification = form.handleSubmit(async (values) => {
     if (!courseStructure || !isDirty) return;
@@ -398,12 +415,12 @@ const EditCourseCertification = () => {
                               <Field className="sm:col-span-2">
                                 <FieldLabel>{t('certificationType')}</FieldLabel>
                                 <Select
-                                  value={field.value}
+                                  value={field.value || 'completion'}
                                   onValueChange={field.onChange}
                                   items={certificationTypeItems}
                                 >
                                   <SelectTrigger>
-                                    <SelectValue>{t(`certificationTypes.${field.value}`)}</SelectValue>
+                                    <SelectValue>{t(`certificationTypes.${field.value || 'completion'}`)}</SelectValue>
                                   </SelectTrigger>
                                   <SelectContent>
                                     <SelectGroup>
@@ -526,10 +543,10 @@ const EditCourseCertification = () => {
                           </CardHeader>
                           <CardContent>
                             <CertificatePreview
-                              certificationName={certificationName || ''}
-                              certificationDescription={certificationDescription || ''}
-                              certificationType={certificationType || 'completion'}
-                              certificatePattern={certificatePattern || 'professional'}
+                              certificationName={certificationName}
+                              certificationDescription={certificationDescription}
+                              certificationType={certificationType}
+                              certificatePattern={certificatePattern}
                               certificateInstructor={certificateInstructor}
                             />
                           </CardContent>

@@ -870,6 +870,7 @@
       "certificationRemoved": "Сертификация успешно удалена",
       "certificationSettings": "Настройки сертификации",
       "certificationType": "Тип сертификации",
+      "certificationTypeRequired": "Требуется тип сертификации",
       "certificationTypes": {
         "achievement": "За достижение",
         "assessment": "По результатам оценки",
@@ -883,6 +884,7 @@
       },
       "certificationUpdated": "Сертификация успешно обновлена",
       "courseCertification": "Сертификация курса",
+      "certificatePatternRequired": "Требуется шаблон сертификата",
       "creatingCertification": "Создание сертификации...",
       "creatingCertificationDescription": "Пожалуйста, подождите, идёт настройка сертификации курса.",
       "enableCertification": "Включите и настройте сертификаты для студентов, завершивших курс",
