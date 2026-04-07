@@ -4,10 +4,8 @@ import { getResponseMetadata } from '@services/utils/ts/requests';
 import { apiFetch } from '@/lib/api-client';
 import { shouldUseChunkedUpload, uploadFileChunked } from '@services/utils/chunked-upload';
 import type { CustomResponseTyping } from '@services/utils/ts/requests';
-import { CacheProfiles, cacheLife, cacheTag } from '@/lib/cache';
 import type { components } from '@/lib/api/generated';
 import { getAPIUrl } from '@services/config/config';
-import { tags } from '@/lib/cacheTags';
 
 type ActivityRead = components['schemas']['ActivityRead'];
 type ActivityReadWithPermissions = components['schemas']['ActivityReadWithPermissions'];

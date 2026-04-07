@@ -3,7 +3,6 @@
 import { errorHandling, getResponseMetadata } from '@services/utils/ts/requests';
 import { apiFetch } from '@/lib/api-client';
 import type { CustomResponseTyping } from '@services/utils/ts/requests';
-import { CacheProfiles, cacheLife, cacheTag } from '@/lib/cache';
 import { getServerAPIUrl } from '@services/config/config';
 import type { components } from '@/lib/api/generated';
 import { tags } from '@/lib/cacheTags';

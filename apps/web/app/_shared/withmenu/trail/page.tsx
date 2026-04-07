@@ -1,6 +1,7 @@
 import { getServerGamificationDashboard, getServerLeaderboard } from '@/services/gamification/server';
 import { GamificationProvider } from '@/components/Contexts/GamificationContext';
 import { getTranslations } from 'next-intl/server';
+import { connection } from 'next/server';
 import type { Metadata } from 'next';
 
 import Trail from './trail';
@@ -19,6 +20,8 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
 }
 
 const TrailPage = async () => {
+  await connection();
+
   const content = (
     <div>
       <Trail />

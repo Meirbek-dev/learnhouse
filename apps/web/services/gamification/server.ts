@@ -10,9 +10,8 @@ import type {
   XPAwardRequest,
   XPAwardResponse,
 } from '@/types/gamification';
-import { gamificationTag, gamificationTags } from '@/lib/cacheTags';
+import { gamificationTags } from '@/lib/cacheTags';
 import { extractStreakInfo } from '@/types/gamification/profile';
-import { CacheProfiles, cacheLife, cacheTag } from '@/lib/cache';
 import { getServerAPIUrl } from '@/services/config/config';
 import type { components } from '@/lib/api/generated';
 import { revalidateTag } from 'next/cache';

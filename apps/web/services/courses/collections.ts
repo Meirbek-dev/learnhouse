@@ -2,7 +2,6 @@
 
 import { errorHandling } from '@services/utils/ts/requests';
 import { apiFetch } from '@/lib/api-client';
-import { CacheProfiles, cacheLife, cacheTag } from '@/lib/cache';
 import { tags } from '@/lib/cacheTags';
 
 import { getAPIUrl } from '../config/config';

@@ -10,7 +10,6 @@
  */
 
 import { getAPIUrl, getServerAPIUrl } from '@services/config/config';
-import { cookies } from 'next/headers';
 
 type ApiFetchInit = Omit<RequestInit, 'credentials'> & {
   /** Override which base URL to use (defaults to environment-aware selection). */
@@ -20,6 +19,38 @@ type ApiFetchInit = Omit<RequestInit, 'credentials'> & {
 function apiBase(isServer: boolean, baseUrl?: string): string {
   if (baseUrl) return baseUrl;
   return isServer ? getServerAPIUrl() : getAPIUrl();
+}
+
+function isRequestCookieUnavailableError(error: unknown): boolean {
+  if (!(error instanceof Error)) {
+    return false;
+  }
+
+  const message = error.message.toLowerCase();
+  return (
+    message.includes('during prerendering') ||
+    message.includes('prerender is complete') ||
+    message.includes('outside a request scope') ||
+    message.includes('requestasyncstorage')
+  );
+}
+
+async function getServerCookieHeader(): Promise<string> {
+  try {
+    const { cookies } = await import('next/headers');
+    const cookieStore = await cookies();
+
+    return cookieStore
+      .getAll()
+      .map((cookie) => `${cookie.name}=${cookie.value}`)
+      .join('; ');
+  } catch (error) {
+    if (isRequestCookieUnavailableError(error)) {
+      return '';
+    }
+
+    throw error;
+  }
 }
 
 async function refreshTokens(): Promise<boolean> {
@@ -41,12 +72,10 @@ export async function apiFetch(path: string, init: ApiFetchInit = {}): Promise<R
 
   // Server: forward cookies from the incoming request.
   if (isServer) {
-    const cookieStore = await cookies();
-    const cookieHeader = cookieStore
-      .getAll()
-      .map((c) => `${c.name}=${c.value}`)
-      .join('; ');
-    options.headers = { ...Object.fromEntries(new Headers(options.headers ?? {}).entries()), Cookie: cookieHeader };
+    const cookieHeader = await getServerCookieHeader();
+    if (cookieHeader) {
+      options.headers = { ...Object.fromEntries(new Headers(options.headers ?? {}).entries()), Cookie: cookieHeader };
+    }
   }
 
   let response = await fetch(url, options);
