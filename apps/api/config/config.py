@@ -228,6 +228,13 @@ class HostingConfig(PlatformSectionSettings):
     domain: str = Field(validation_alias="PLATFORM_DOMAIN")
     ssl: bool = Field(default=False, validation_alias="PLATFORM_SSL")
     port: int = Field(default=8000, validation_alias="PLATFORM_PORT")
+    # Number of trusted reverse proxies in front of the app.
+    # Set to 1 when running behind a single nginx/load-balancer.
+    # Used to correctly resolve the real client IP from X-Forwarded-For.
+    trusted_proxy_count: int = Field(
+        default=0,
+        validation_alias="PLATFORM_TRUSTED_PROXY_COUNT",
+    )
     allowed_origins: Annotated[list[str], NoDecode] = Field(
         default_factory=list,
         validation_alias="PLATFORM_ALLOWED_ORIGINS",

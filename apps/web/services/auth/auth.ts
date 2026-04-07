@@ -79,5 +79,22 @@ export async function signup(body: NewAccountBody): Promise<Response> {
   });
 }
 
+/**
+ * Attempt to refresh the access token using the refresh token cookie.
+ * Returns true if successful, false if the session has expired and the user
+ * must log in again.
+ */
+export async function refreshToken(): Promise<boolean> {
+  try {
+    const res = await fetch(`${getAPIUrl()}${AUTH_ENDPOINTS.refresh}`, {
+      method: 'POST',
+      credentials: 'include',
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
 export type { AuthUser, NewAccountBody };
 export { AUTH_ENDPOINTS };

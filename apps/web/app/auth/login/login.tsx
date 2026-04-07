@@ -9,6 +9,7 @@ import { SiGoogle } from '@icons-pack/react-simple-icons';
 import { AlertTriangle, Loader2 } from 'lucide-react';
 import { Separator } from '@components/ui/separator';
 import { useState, useTransition } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Button } from '@components/ui/button';
 import AuthLogo from '@components/auth/logo';
 import AuthCard from '@components/auth/card';
@@ -29,8 +30,27 @@ type LoginFormData = v.InferOutput<ReturnType<typeof createValidationSchema>>;
 const LoginClient = () => {
   const validationT = useTranslations('Validation');
   const t = useTranslations('Auth.Login');
+  const searchParams = useSearchParams();
   const [error, setError] = useState('');
   const [isPending, startTransition] = useTransition();
+
+  /** Resolve the post-login destination from ?returnTo or fall back to the
+   *  default auth redirect route. */
+  const getPostLoginUrl = (): string => {
+    const returnTo = searchParams.get('returnTo');
+    if (returnTo) {
+      try {
+        // Ensure returnTo is a path-only URL to prevent open-redirect attacks
+        const parsed = new URL(returnTo, globalThis.location.origin);
+        if (parsed.origin === globalThis.location.origin) {
+          return returnTo;
+        }
+      } catch {
+        // Invalid URL — fall through to default
+      }
+    }
+    return '/redirect_from_auth';
+  };
   const validationSchema = createValidationSchema(validationT);
 
   const {
@@ -52,7 +72,7 @@ const LoginClient = () => {
           return;
         }
 
-        globalThis.location.href = '/redirect_from_auth';
+        globalThis.location.href = getPostLoginUrl();
       } catch {
         setError(t('wrongCredentials'));
       }
@@ -61,7 +81,10 @@ const LoginClient = () => {
 
   const handleGoogleSignIn = () => {
     startTransition(() => {
-      const frontendCallback = getAbsoluteUrl('/redirect_from_auth');
+      // Pass returnTo through to the OAuth callback so Google sign-in also
+      // lands the user back at their intended destination.
+      const postLoginPath = getPostLoginUrl();
+      const frontendCallback = getAbsoluteUrl(postLoginPath.startsWith('/') ? postLoginPath : '/redirect_from_auth');
       const authorizeUrl = new URL(`${getPublicAPIUrl()}auth/google/authorize`);
       authorizeUrl.searchParams.set('callback', frontendCallback);
       globalThis.location.href = authorizeUrl.toString();

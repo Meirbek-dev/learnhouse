@@ -14,7 +14,7 @@ from src.security.keys import get_private_key, get_public_key
 from src.security.rbac import AuthenticationRequired
 from src.security.auth_cookies import ACCESS_COOKIE_KEY
 from src.services.auth.sessions import get_session_by_id
-from src.services.cache.redis_client import get_redis_client
+from src.services.cache.redis_client import get_async_redis_client
 
 logger = logging.getLogger(__name__)
 
@@ -38,6 +38,7 @@ class TokenData(PydanticStrictBaseModel):
     user_uuid: str
     session_id: str | None = None
     jti: str | None = None
+    roles: list[str] = []
 
 
 # ── Internal helpers ─────────────────────────────────────────────────────────
@@ -114,16 +115,34 @@ def decode_access_token(token: str) -> TokenData:
     user_uuid = payload.get("sub")
     if not isinstance(user_uuid, str) or not user_uuid:
         raise _credentials_exception()
+    roles = payload.get("roles", [])
+    if not isinstance(roles, list):
+        roles = []
     return TokenData(
         user_uuid=user_uuid,
         session_id=payload.get("sid"),
         jti=payload.get("jti"),
+        roles=[r for r in roles if isinstance(r, str)],
     )
 
 
 def decode_token_unverified(token: str) -> dict:
-    """Decode JWT payload without signature verification (for JTI extraction on logout)."""
-    import base64, json
+    """Decode JWT payload WITHOUT signature verification.
+
+    SAFE USE ONLY: This is intentionally used during token rotation (refresh
+    endpoint) to extract the JTI of the OLD access token so it can be
+    blocklisted AFTER the new session has been successfully created.
+
+    The security invariant is maintained because:
+    1. The refresh token has already been fully verified against Redis.
+    2. We are only ADDING an entry to the JTI blocklist (deny-only operation).
+    3. Even if an attacker injects a fake JTI here, the worst case is a
+       spurious blocklist entry — no tokens are unblocked.
+
+    DO NOT use this function to make authorization decisions.
+    """
+    import base64
+    import json
 
     try:
         parts = token.split(".")
@@ -136,21 +155,21 @@ def decode_token_unverified(token: str) -> dict:
         return {}
 
 
-# ── JTI blocklist ─────────────────────────────────────────────────────────────
+# ── JTI blocklist (async) ─────────────────────────────────────────────────────
 
 
-def blocklist_jti(jti: str, remaining_seconds: int) -> None:
-    """Add a JTI to the Redis revocation blocklist."""
-    r = get_redis_client()
+async def blocklist_jti(jti: str, remaining_seconds: int) -> None:
+    """Add a JTI to the Redis revocation blocklist (async)."""
+    r = get_async_redis_client()
     if r and remaining_seconds > 0:
-        r.set(f"{JTI_BLOCKLIST_PREFIX}{jti}", "1", ex=remaining_seconds)
+        await r.set(f"{JTI_BLOCKLIST_PREFIX}{jti}", "1", ex=remaining_seconds)
 
 
-def is_jti_blocklisted(jti: str) -> bool:
-    r = get_redis_client()
+async def is_jti_blocklisted(jti: str) -> bool:
+    r = get_async_redis_client()
     if not r:
         return False
-    return bool(r.exists(f"{JTI_BLOCKLIST_PREFIX}{jti}"))
+    return bool(await r.exists(f"{JTI_BLOCKLIST_PREFIX}{jti}"))
 
 
 # ── User lookup ───────────────────────────────────────────────────────────────
@@ -183,13 +202,13 @@ async def get_current_user_from_token(
     token_data = decode_access_token(token)
 
     # JTI blocklist check (covers explicitly revoked / logged-out tokens)
-    if token_data.jti and is_jti_blocklisted(token_data.jti):
+    if token_data.jti and await is_jti_blocklisted(token_data.jti):
         raise _credentials_exception()
 
     if not token_data.session_id:
         raise _credentials_exception()
 
-    session = get_session_by_id(token_data.session_id)
+    session = await get_session_by_id(token_data.session_id)
     if session is None or session.user_uuid != token_data.user_uuid:
         raise _credentials_exception()
 

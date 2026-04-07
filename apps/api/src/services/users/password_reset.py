@@ -14,7 +14,7 @@ from src.db.users import User
 from src.security.keys import get_private_key, get_public_key
 from src.security.security import security_hash_password
 from src.services.auth.sessions import revoke_all_user_sessions
-from src.services.cache.redis_client import get_redis_client
+from src.services.cache.redis_client import get_async_redis_client
 from src.services.users.emails import send_password_reset_email
 
 logger = logging.getLogger(__name__)
@@ -63,7 +63,7 @@ async def send_reset_password_code(
     if not user:
         return "If that email exists, a reset link has been sent"
 
-    r = get_redis_client()
+    r = get_async_redis_client()
     if not r:
         logger.error("Redis unavailable for password reset")
         raise HTTPException(status_code=500, detail="Service temporarily unavailable")
@@ -71,7 +71,7 @@ async def send_reset_password_code(
     token_str, jti = _create_reset_token(str(user.user_uuid))
 
     # Store JTI as "pending" to enforce single-use
-    r.set(f"{RESET_JTI_PREFIX}{jti}", "pending", ex=RESET_TOKEN_TTL)
+    await r.set(f"{RESET_JTI_PREFIX}{jti}", "pending", ex=RESET_TOKEN_TTL)
 
     try:
         from src.db.users import UserRead
@@ -93,7 +93,7 @@ async def change_password_with_reset_code(
     token: str,
     new_password: str,
 ) -> str:
-    r = get_redis_client()
+    r = get_async_redis_client()
     if not r:
         raise HTTPException(status_code=500, detail="Service temporarily unavailable")
 
@@ -103,7 +103,7 @@ async def change_password_with_reset_code(
 
     # Single-use check
     jti_key = f"{RESET_JTI_PREFIX}{jti}"
-    if not r.exists(jti_key):
+    if not await r.exists(jti_key):
         raise HTTPException(
             status_code=400, detail="Reset token has already been used or expired"
         )
@@ -112,14 +112,14 @@ async def change_password_with_reset_code(
     if not user:
         raise HTTPException(status_code=400, detail="User not found")
 
-    # Consume the JTI
-    r.delete(jti_key)
+    # Consume the JTI atomically before changing the password
+    await r.delete(jti_key)
 
     user.password = security_hash_password(new_password)
     db_session.add(user)
     db_session.commit()
 
-    # Revoke all sessions — force re-login on all devices
-    revoke_all_user_sessions(db_session, user.id)
+    # Revoke all sessions — force re-login on all devices after password change
+    await revoke_all_user_sessions(db_session, user.id)
 
     return "Password changed successfully"

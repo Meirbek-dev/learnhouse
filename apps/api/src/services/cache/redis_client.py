@@ -1,16 +1,19 @@
-"""Simple Redis helper utilities (sync) with safe fallback and JSON (or orjson) serialization.
+"""Redis helper utilities — sync and async — with safe fallback and JSON serialization.
 
-API:
+Sync API (legacy, kept for non-request code paths):
 - get_redis_client() -> Optional[redis.Redis]
 - get_json(key) -> Optional[dict]
 - set_json(key, dict, ttl_seconds)
 - delete_keys(*keys)
 
+Async API (used by auth request handlers):
+- get_async_redis_client() -> Optional[redis.asyncio.Redis]
+
 Design:
-- Lazy, cached client instance
+- Separate lazy-cached instances for sync and async clients
 - Uses orjson if available for speed, falls back to json
-- Swallows exceptions and logs, so callers can be simple and robust
-- Easy to patch in tests (patch get_redis_client or this module functions)
+- Swallows exceptions and logs — callers stay simple and robust
+- Easy to patch in tests (patch get_redis_client / get_async_redis_client)
 """
 
 from __future__ import annotations
@@ -20,8 +23,10 @@ from typing import Optional
 
 try:
     import redis
+    import redis.asyncio as aioredis
 except Exception:  # pragma: no cover - environment without redis installed
     redis = None
+    aioredis = None
 
 try:
     import orjson as _orjson  # type: ignore
@@ -43,11 +48,25 @@ except Exception:  # pragma: no cover - orjson optional
 
 
 _logger = logging.getLogger(__name__)
-_client: redis.Redis | None = None
+_client: "redis.Redis | None" = None
+_async_client: "aioredis.Redis | None" = None
 
 
-def get_redis_client() -> redis.Redis | None:
-    """Return a cached redis client or None if not configured/available."""
+def _get_redis_url() -> str | None:
+    """Return the Redis connection URL from config, or None if not configured."""
+    try:
+        from config.config import get_settings
+
+        cfg = get_settings()
+        url = getattr(cfg.redis_config, "redis_connection_string", None)
+        return url or None
+    except Exception:
+        _logger.debug("no platform config available for redis client")
+        return None
+
+
+def get_redis_client() -> "redis.Redis | None":
+    """Return a cached synchronous Redis client, or None if not configured/available."""
     global _client
     if _client is not None:
         return _client
@@ -56,27 +75,46 @@ def get_redis_client() -> redis.Redis | None:
         _logger.debug("redis package not available")
         return None
 
-    # Delay importing platform config so tests can import this module without
-    # triggering heavier application imports (which may require optional deps).
-    try:
-        from config.config import get_settings
-
-        cfg = get_settings()
-        url = getattr(cfg.redis_config, "redis_connection_string", None)
-        if not url:
-            _logger.debug("no redis connection string configured")
-            return None
-    except Exception:
-        _logger.debug("no platform config available for redis client")
+    url = _get_redis_url()
+    if not url:
+        _logger.debug("no redis connection string configured")
         return None
 
     try:
         _client = redis.Redis.from_url(url)
-        # Optionally test connection (PING) lazily when first used; defer to callers
         return _client
     except Exception as exc:
-        _logger.exception("Failed to initialize redis client: %s", exc)
+        _logger.exception("Failed to initialize sync redis client: %s", exc)
         _client = None
+        return None
+
+
+def get_async_redis_client() -> "aioredis.Redis | None":
+    """Return a cached async Redis client, or None if not configured/available.
+
+    This client must be used from async context (auth request handlers).
+    It shares the same connection URL as the sync client but is a separate
+    instance backed by asyncio-compatible connection pools.
+    """
+    global _async_client
+    if _async_client is not None:
+        return _async_client
+
+    if aioredis is None:
+        _logger.debug("redis.asyncio not available")
+        return None
+
+    url = _get_redis_url()
+    if not url:
+        _logger.debug("no redis connection string configured for async client")
+        return None
+
+    try:
+        _async_client = aioredis.Redis.from_url(url, decode_responses=False)
+        return _async_client
+    except Exception as exc:
+        _logger.exception("Failed to initialize async redis client: %s", exc)
+        _async_client = None
         return None
 
 

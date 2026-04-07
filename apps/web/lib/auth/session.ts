@@ -1,9 +1,12 @@
 import 'server-only';
 import { cache } from 'react';
-import { cookies } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import type { AppSession, ClientSession } from './types';
 import { getServerAPIUrl } from '@services/config/config';
+
+/** Cookie names forwarded to the backend for session validation. */
+const AUTH_COOKIE_NAMES = ['access_token_cookie', 'refresh_token_cookie'] as const;
 
 function getAccessTokenExpiry(token: string): number | null {
   try {
@@ -11,9 +14,9 @@ function getAccessTokenExpiry(token: string): number | null {
     if (!payloadSegment) return null;
 
     const padding = '='.repeat((4 - (payloadSegment.length % 4)) % 4);
-    const jsonPayload = JSON.parse(Buffer.from(`${payloadSegment}${padding}`, 'base64url').toString('utf-8')) as {
-      exp?: number;
-    };
+    const jsonPayload = JSON.parse(
+      Buffer.from(`${payloadSegment}${padding}`, 'base64url').toString('utf-8'),
+    ) as { exp?: number };
 
     return typeof jsonPayload.exp === 'number' ? jsonPayload.exp * 1000 : null;
   } catch {
@@ -27,16 +30,16 @@ export const getSession = cache(async (): Promise<AppSession | null> => {
 
   if (!accessToken) return null;
 
+  // Only forward auth cookies — not analytics, preferences, or other cookies.
   const cookieHeader = cookieStore
     .getAll()
-    .map((cookie) => `${cookie.name}=${cookie.value}`)
+    .filter((c) => (AUTH_COOKIE_NAMES as readonly string[]).includes(c.name))
+    .map((c) => `${c.name}=${c.value}`)
     .join('; ');
 
   try {
     const response = await fetch(`${getServerAPIUrl()}users/session`, {
-      headers: {
-        Cookie: cookieHeader,
-      },
+      headers: { Cookie: cookieHeader },
       cache: 'no-store',
     });
 
@@ -45,10 +48,7 @@ export const getSession = cache(async (): Promise<AppSession | null> => {
     const sessionData = await response.json();
     const expiresAt = getAccessTokenExpiry(accessToken) ?? Date.now() + 30 * 60 * 1000;
 
-    return {
-      ...sessionData,
-      expiresAt,
-    } as AppSession;
+    return { ...sessionData, expiresAt } as AppSession;
   } catch {
     return null;
   }
@@ -56,7 +56,18 @@ export const getSession = cache(async (): Promise<AppSession | null> => {
 
 export async function requireSession(): Promise<AppSession> {
   const session = await getSession();
-  if (!session) redirect('/login');
+  if (!session) {
+    // Preserve the current path so the login page can redirect back after auth
+    let returnTo = '/';
+    try {
+      const headersList = await headers();
+      const path = headersList.get('x-invoke-path') ?? headersList.get('x-pathname');
+      if (path) returnTo = path;
+    } catch {
+      // headers() may not be available in all contexts; fall back to '/'
+    }
+    redirect(`/login?returnTo=${encodeURIComponent(returnTo)}`);
+  }
   return session;
 }
 

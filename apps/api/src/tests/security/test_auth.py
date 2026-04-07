@@ -1,7 +1,7 @@
 import base64
 import os
 from datetime import UTC, datetime, timedelta
-from unittest.mock import Mock, patch
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 from authlib.jose import jwt
@@ -133,8 +133,8 @@ class TestAuth:
         token = create_access_token(user_uuid='user_123', session_id='sess_123')
 
         with (
-            patch('src.security.auth.get_session_by_id', return_value=None),
-            patch('src.security.auth.is_jti_blocklisted', return_value=False),
+            patch('src.security.auth.get_session_by_id', new=AsyncMock(return_value=None)),
+            patch('src.security.auth.is_jti_blocklisted', new=AsyncMock(return_value=False)),
         ):
             with pytest.raises(HTTPException) as exc_info:
                 await get_current_user_from_token(Mock(spec=Request), token, Mock(spec=Session))
@@ -160,8 +160,8 @@ class TestAuth:
         user = _mock_user()
 
         with (
-            patch('src.security.auth.get_session_by_id', return_value=active_session),
-            patch('src.security.auth.is_jti_blocklisted', return_value=False),
+            patch('src.security.auth.get_session_by_id', new=AsyncMock(return_value=active_session)),
+            patch('src.security.auth.is_jti_blocklisted', new=AsyncMock(return_value=False)),
             patch('src.security.auth._get_user_by_uuid', return_value=user),
         ):
             result = await get_current_user_from_token(Mock(spec=Request), token, Mock(spec=Session))
@@ -180,7 +180,8 @@ class TestAuth:
 
 
 class TestRefreshSessionInspection:
-    def test_inspect_refresh_session_reports_reused_rotated_token(self) -> None:
+    @pytest.mark.asyncio
+    async def test_inspect_refresh_session_reports_reused_rotated_token(self) -> None:
         refresh_token = 'sess_old.secret'
         record = Mock()
         record.refresh_token_hash = hash_refresh_token(refresh_token)
@@ -193,8 +194,8 @@ class TestRefreshSessionInspection:
         db_session = Mock(spec=Session)
         db_session.exec.return_value.first.return_value = record
 
-        with patch('src.services.auth.sessions._find_session_by_refresh_token', return_value=None):
-            inspection = inspect_refresh_session(db_session, refresh_token)
+        with patch('src.services.auth.sessions._find_session_by_refresh_token', new=AsyncMock(return_value=None)):
+            inspection = await inspect_refresh_session(db_session, refresh_token)
 
         assert inspection.status == 'reused'
         assert inspection.session_id == 'sess_old'

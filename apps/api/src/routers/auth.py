@@ -3,18 +3,20 @@ import time
 from typing import Annotated
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
-from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, Response, status
 from fastapi.responses import JSONResponse, RedirectResponse
-from sqlmodel import Session
+from sqlmodel import Session, select
 
 from config.config import get_settings
 from src.core.events.database import get_db_session
 from src.db.strict_base_model import PydanticStrictBaseModel
-from src.db.users import AnonymousUser, PublicUser, UserSession
+from src.db.users import AnonymousUser, PublicUser, User, UserSession
 from src.security.auth import (
     ACCESS_TOKEN_EXPIRE,
+    TokenData,
     blocklist_jti,
     create_access_token,
+    decode_access_token,
     decode_token_unverified,
     get_access_token_expiry_ms,
     get_access_token_from_request,
@@ -30,7 +32,7 @@ from src.security.auth_cookies import (
     set_refresh_cookie,
 )
 from src.security.keys import get_jwks
-from src.services.auth.audit import write_audit_event
+from src.services.auth.audit import enqueue_audit_event
 from src.services.auth.google_oauth import (
     exchange_google_code,
     get_google_authorize_url,
@@ -48,7 +50,6 @@ from src.services.auth.sessions import (
     get_user_active_sessions,
     get_session_owner_id,
     inspect_refresh_session,
-    resolve_refresh_session,
     revoke_all_user_sessions,
     revoke_session,
     revoke_token_family,
@@ -67,7 +68,6 @@ from src.services.users.users import (
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
-UNSAFE_METHODS = {"POST", "PUT", "PATCH", "DELETE"}
 
 
 # ── Schemas ───────────────────────────────────────────────────────────────────
@@ -99,6 +99,25 @@ class ResetPasswordRequest(PydanticStrictBaseModel):
 
 
 def _client_ip(request: Request) -> str:
+    """Resolve the real client IP, honouring X-Forwarded-For for trusted proxies.
+
+    PLATFORM_TRUSTED_PROXY_COUNT controls how many proxy hops to skip from the
+    right of the XFF list.  Set to 1 when behind a single nginx/load-balancer.
+    Set to 0 (default) to use request.client.host directly (no proxies).
+    """
+    settings = get_settings()
+    proxy_count = getattr(settings.hosting_config, "trusted_proxy_count", 0)
+
+    if proxy_count > 0:
+        xff = request.headers.get("x-forwarded-for") or request.headers.get("x-real-ip")
+        if xff:
+            ips = [ip.strip() for ip in xff.split(",") if ip.strip()]
+            # Walk back <proxy_count> hops; the first remaining entry is the client
+            if len(ips) > proxy_count:
+                return ips[-(proxy_count + 1)]
+            if ips:
+                return ips[0]
+
     return request.client.host if request.client else "unknown"
 
 
@@ -106,10 +125,20 @@ def _user_agent(request: Request) -> str:
     return request.headers.get("user-agent", "unknown")
 
 
-def _make_access_token(session: SessionData) -> str:
+def _get_user_role_slugs(db_session: Session, user_id: int) -> list[str]:
+    """Load role slugs for a user to embed in the JWT."""
+    from src.security.rbac import PermissionChecker
+
+    checker = PermissionChecker(db_session)
+    return [r["slug"] for r in checker.get_user_roles(user_id)]
+
+
+def _make_access_token(session: SessionData, roles: list[str]) -> str:
+    """Create a signed access token embedding the user's current role slugs."""
     return create_access_token(
         user_uuid=session.user_uuid,
         session_id=session.session_id,
+        roles=roles,
     )
 
 
@@ -125,6 +154,12 @@ def _current_origin() -> str:
 
 
 def _sanitize_callback_target(callback: str) -> str:
+    """Validate and normalise an OAuth callback URL.
+
+    If the URL is absolute, its origin must be in PLATFORM_ALLOWED_ORIGINS.
+    The returned value is always a path-only string (scheme and host stripped)
+    so the backend redirect never bounces users to an untrusted external domain.
+    """
     if not isinstance(callback, str) or not callback.strip():
         raise HTTPException(status_code=400, detail="Invalid callback target")
 
@@ -147,31 +182,6 @@ def _sanitize_callback_target(callback: str) -> str:
     return urlunsplit(("", "", parsed.path or "/", query, "")) or "/"
 
 
-def _require_cookie_origin(request: Request) -> None:
-    if request.method.upper() not in UNSAFE_METHODS:
-        return
-
-    if request.headers.get("authorization"):
-        return
-
-    if not (
-        request.cookies.get(ACCESS_COOKIE_KEY)
-        or request.cookies.get(REFRESH_COOKIE_KEY)
-    ):
-        return
-
-    origin = request.headers.get("origin")
-    if not origin:
-        return
-
-    normalized_origin = origin.rstrip("/")
-    settings = get_settings()
-    allowed_origins = {item.rstrip("/") for item in settings.hosting_config.allowed_origins}
-    allowed_origins.add(_current_origin())
-    if normalized_origin not in allowed_origins:
-        raise HTTPException(status_code=403, detail="Untrusted request origin")
-
-
 # ── Endpoints ─────────────────────────────────────────────────────────────────
 
 
@@ -180,15 +190,17 @@ async def login(
     request: Request,
     response: Response,
     body: LoginRequest,
+    background_tasks: BackgroundTasks,
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
-    _require_cookie_origin(request)
+    # CSRF protection is provided by SameSite=strict cookies (set in auth_cookies.py).
+    # An Origin header check would be redundant and fragile for non-browser clients.
     ip = _client_ip(request)
     ua = _user_agent(request)
 
     try:
-        check_rate_limit(key=f"login:ip:{ip}", max_requests=5, window_seconds=60)
-        check_rate_limit(
+        await check_rate_limit(key=f"login:ip:{ip}", max_requests=5, window_seconds=60)
+        await check_rate_limit(
             key=f"login:email:{body.email.lower()}", max_requests=10, window_seconds=60
         )
     except RateLimitExceeded as exc:
@@ -198,9 +210,9 @@ async def login(
             headers={"Retry-After": str(exc.retry_after)},
         )
 
-    if check_account_locked(body.email):
-        write_audit_event(
-            db_session,
+    if await check_account_locked(body.email):
+        enqueue_audit_event(
+            background_tasks,
             event_type="login_blocked",
             ip_address=ip,
             user_agent=ua,
@@ -213,9 +225,9 @@ async def login(
 
     user = await security_get_user(request, db_session, body.email)
     if not user or not security_verify_password(body.password, user.password):
-        record_login_failure(body.email)
-        write_audit_event(
-            db_session,
+        await record_login_failure(body.email)
+        enqueue_audit_event(
+            background_tasks,
             event_type="login_failure",
             ip_address=ip,
             user_agent=ua,
@@ -228,19 +240,23 @@ async def login(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    clear_login_failures(body.email)
-    session_data, refresh_token = create_auth_session(
+    await clear_login_failures(body.email)
+
+    # Load roles before creating the session so they can be embedded in the JWT
+    role_slugs = _get_user_role_slugs(db_session, user.id)
+
+    session_data, refresh_token = await create_auth_session(
         db_session,
         user=user,
         ip_address=ip,
         user_agent=ua,
     )
-    access_token = _make_access_token(session_data)
+    access_token = _make_access_token(session_data, role_slugs)
     set_access_cookie(response, access_token)
     set_refresh_cookie(response, refresh_token)
 
-    write_audit_event(
-        db_session,
+    enqueue_audit_event(
+        background_tasks,
         event_type="login_success",
         user_id=str(user.user_uuid),
         session_id=session_data.session_id,
@@ -254,12 +270,12 @@ async def login(
 
 
 @router.post("/refresh", response_model=TokensResponse)
-def refresh(
+async def refresh(
     request: Request,
     response: Response,
+    background_tasks: BackgroundTasks,
     db_session: Annotated[Session, Depends(get_db_session)],
 ) -> TokensResponse:
-    _require_cookie_origin(request)
     refresh_token = request.cookies.get(REFRESH_COOKIE_KEY)
     if not refresh_token:
         raise HTTPException(
@@ -270,7 +286,7 @@ def refresh(
 
     session_id_part = refresh_token.split(".", 1)[0]
     try:
-        check_rate_limit(
+        await check_rate_limit(
             key=f"refresh:{session_id_part}", max_requests=30, window_seconds=60
         )
     except RateLimitExceeded as exc:
@@ -280,15 +296,15 @@ def refresh(
             headers={"Retry-After": str(exc.retry_after)},
         )
 
-    inspection = inspect_refresh_session(db_session, refresh_token)
+    inspection = await inspect_refresh_session(db_session, refresh_token)
     if inspection.status != "active" or inspection.session is None:
         if inspection.status == "reused":
             if inspection.token_family_id and inspection.user_id is not None:
-                revoke_token_family(
+                await revoke_token_family(
                     db_session, inspection.token_family_id, inspection.user_id
                 )
-            write_audit_event(
-                db_session,
+            enqueue_audit_event(
+                background_tasks,
                 event_type="refresh_reuse_detected",
                 session_id=inspection.session_id,
                 ip_address=_client_ip(request),
@@ -304,12 +320,9 @@ def refresh(
         )
     old_session = inspection.session
 
-    from sqlmodel import select
-    from src.db.users import User
-
     user = db_session.exec(select(User).where(User.id == old_session.user_id)).first()
     if user is None:
-        revoke_token_family(
+        await revoke_token_family(
             db_session, old_session.token_family_id, old_session.user_id
         )
         raise HTTPException(
@@ -318,7 +331,9 @@ def refresh(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    # Blocklist old access token JTI if present
+    # Blocklist old access token JTI before issuing a new one.
+    # We use unverified decode here because the old AT may be expired; see the
+    # docstring on decode_token_unverified() for the security rationale.
     old_access_token = request.cookies.get(ACCESS_COOKIE_KEY)
     if old_access_token:
         old_payload = decode_token_unverified(old_access_token)
@@ -326,21 +341,24 @@ def refresh(
         old_exp = old_payload.get("exp")
         if old_jti and old_exp:
             remaining = max(0, int(old_exp) - int(time.time()))
-            blocklist_jti(old_jti, remaining)
+            await blocklist_jti(old_jti, remaining)
 
-    new_session, new_refresh_token = rotate_session(
+    # Reload roles to keep embedded claims fresh on every rotation
+    role_slugs = _get_user_role_slugs(db_session, user.id)
+
+    new_session, new_refresh_token = await rotate_session(
         db_session,
         old_session=old_session,
         user=user,
         ip_address=_client_ip(request),
         user_agent=_user_agent(request),
     )
-    new_access_token = _make_access_token(new_session)
+    new_access_token = _make_access_token(new_session, role_slugs)
     set_access_cookie(response, new_access_token)
     set_refresh_cookie(response, new_refresh_token)
 
-    write_audit_event(
-        db_session,
+    enqueue_audit_event(
+        background_tasks,
         event_type="token_refresh",
         user_id=str(user.user_uuid),
         session_id=new_session.session_id,
@@ -351,36 +369,42 @@ def refresh(
 
 
 @router.post("/logout", response_model=LogoutResponse)
-def logout(
+async def logout(
     request: Request,
     response: Response,
+    background_tasks: BackgroundTasks,
     token: Annotated[str | None, Depends(oauth2_scheme_optional)],
+    current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user_optional)],
     db_session: Annotated[Session, Depends(get_db_session)],
 ) -> LogoutResponse:
-    _require_cookie_origin(request)
+    # Only blocklist / revoke when the token was fully verified.
+    # If the access token is expired the JTI is already safe (expired tokens
+    # are rejected during verification), so clearing the cookies is sufficient.
     resolved_token = get_access_token_from_request(request, token)
 
-    if resolved_token:
-        payload = decode_token_unverified(resolved_token)
-        jti = payload.get("jti")
-        exp = payload.get("exp")
-        session_id = payload.get("sid")
-        user_uuid = payload.get("sub")
+    if resolved_token and isinstance(current_user, PublicUser):
+        # Token has already been verified by get_current_user_optional —
+        # decode again (cheap, cached public key) to extract JTI and session_id.
+        try:
+            token_data: TokenData = decode_access_token(resolved_token)
+            jti = token_data.jti
+            exp_remaining = int(ACCESS_TOKEN_EXPIRE.total_seconds())
 
-        if jti and exp:
-            remaining = max(0, int(exp) - int(time.time()))
-            blocklist_jti(jti, remaining)
+            if jti:
+                await blocklist_jti(jti, exp_remaining)
 
-        if session_id:
-            user_id_hint = get_session_owner_id(db_session, session_id)
-            if user_id_hint:
-                revoke_session(db_session, session_id, user_id_hint)
+            if token_data.session_id:
+                user_id_hint = await get_session_owner_id(db_session, token_data.session_id)
+                if user_id_hint:
+                    await revoke_session(db_session, token_data.session_id, user_id_hint)
+        except Exception:
+            # Never block logout due to token parsing errors
+            pass
 
-        write_audit_event(
-            db_session,
+        enqueue_audit_event(
+            background_tasks,
             event_type="logout",
-            user_id=user_uuid,
-            session_id=session_id,
+            user_id=str(current_user.user_uuid),
             ip_address=_client_ip(request),
         )
 
@@ -392,28 +416,29 @@ def logout(
 async def logout_all(
     request: Request,
     response: Response,
+    background_tasks: BackgroundTasks,
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
 ) -> LogoutResponse:
-    _require_cookie_origin(request)
-    token = get_access_token_from_request(request, None)
-    if token:
-        payload = decode_token_unverified(token)
-        jti = payload.get("jti")
-        exp = payload.get("exp")
-        if jti and exp:
-            blocklist_jti(jti, max(0, int(exp) - int(time.time())))
-
-    from sqlmodel import select
-    from src.db.users import User
+    # Blocklist the current access token using the verified decode path
+    resolved_token = get_access_token_from_request(request, None)
+    if resolved_token:
+        try:
+            token_data = decode_access_token(resolved_token)
+            if token_data.jti:
+                await blocklist_jti(
+                    token_data.jti, int(ACCESS_TOKEN_EXPIRE.total_seconds())
+                )
+        except Exception:
+            pass
 
     user = db_session.exec(
         select(User).where(User.user_uuid == current_user.user_uuid)
     ).first()
     if user:
-        revoked = revoke_all_user_sessions(db_session, user.id)
-        write_audit_event(
-            db_session,
+        revoked = await revoke_all_user_sessions(db_session, user.id)
+        enqueue_audit_event(
+            background_tasks,
             event_type="logout_all",
             user_id=str(current_user.user_uuid),
             ip_address=_client_ip(request),
@@ -436,15 +461,12 @@ async def list_sessions(
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
-    from sqlmodel import select
-    from src.db.users import User
-
     user = db_session.exec(
         select(User).where(User.user_uuid == current_user.user_uuid)
     ).first()
     if not user:
         return []
-    return get_user_active_sessions(user.id)
+    return await get_user_active_sessions(user.id)
 
 
 # ── Password reset ────────────────────────────────────────────────────────────
@@ -456,11 +478,10 @@ async def forgot_password(
     body: ForgotPasswordRequest,
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
-    _require_cookie_origin(request)
     ip = _client_ip(request)
     try:
-        check_rate_limit(key=f"forgot:ip:{ip}", max_requests=3, window_seconds=3600)
-        check_rate_limit(
+        await check_rate_limit(key=f"forgot:ip:{ip}", max_requests=3, window_seconds=3600)
+        await check_rate_limit(
             key=f"forgot:email:{body.email.lower()}", max_requests=1, window_seconds=300
         )
     except RateLimitExceeded:
@@ -477,7 +498,6 @@ async def reset_password(
     body: ResetPasswordRequest,
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
-    _require_cookie_origin(request)
     msg = await change_password_with_reset_code(
         db_session, body.token, body.new_password
     )
@@ -520,6 +540,7 @@ async def google_authorize(callback: str) -> RedirectResponse:
 @router.get("/google/callback")
 async def google_callback(
     request: Request,
+    background_tasks: BackgroundTasks,
     code: str | None = None,
     state: str | None = None,
     error: str | None = None,
@@ -562,20 +583,21 @@ async def google_callback(
     except HTTPException:
         return RedirectResponse(f"{frontend_callback}?error=user_error")
 
-    session_data, refresh_token = create_auth_session(
+    role_slugs = _get_user_role_slugs(db_session, user.id)
+    session_data, refresh_token = await create_auth_session(
         db_session,
         user=user,
         ip_address=ip,
         user_agent=_user_agent(request),
     )
-    access_token = _make_access_token(session_data)
+    access_token = _make_access_token(session_data, role_slugs)
 
     redirect_response = RedirectResponse(frontend_callback)
     set_access_cookie(redirect_response, access_token)
     set_refresh_cookie(redirect_response, refresh_token)
 
-    write_audit_event(
-        db_session,
+    enqueue_audit_event(
+        background_tasks,
         event_type="oauth_linked",
         user_id=str(user.user_uuid),
         session_id=session_data.session_id,

@@ -82,6 +82,62 @@ const createRequestInit = (
   return options;
 };
 
+// ── Token refresh helpers ─────────────────────────────────────────────────────
+
+/**
+ * Whether a token refresh is currently in-flight.
+ * Prevents multiple concurrent refresh attempts from the same browser tab.
+ */
+let _refreshInFlight: Promise<boolean> | null = null;
+
+/**
+ * Attempt a single token refresh, deduplicating concurrent calls.
+ * Returns true if the refresh succeeded and the caller should retry its request.
+ */
+async function _tryRefreshToken(): Promise<boolean> {
+  if (_refreshInFlight) return _refreshInFlight;
+
+  _refreshInFlight = (async () => {
+    try {
+      const { refreshToken } = await import('@services/auth/auth');
+      const ok = await refreshToken();
+      if (!ok) {
+        // Refresh failed — notify the app so it can show the login screen
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new Event('auth:session-expired'));
+        }
+      }
+      return ok;
+    } finally {
+      _refreshInFlight = null;
+    }
+  })();
+
+  return _refreshInFlight;
+}
+
+/**
+ * Thin fetch wrapper that automatically refreshes the access token on 401
+ * and retries the original request once.  All existing helper functions
+ * (swrFetcher, RequestBody, etc.) are built on this.
+ *
+ * Only runs on the client side — on the server (SSR) we never have a refresh
+ * token cookie available, so we skip the retry logic there.
+ */
+async function fetchWithRefresh(url: string, init: RequestInit): Promise<Response> {
+  const res = await fetch(url, init);
+
+  if (res.status === 401 && typeof window !== 'undefined') {
+    const refreshed = await _tryRefreshToken();
+    if (refreshed) {
+      // Retry the original request with fresh cookies
+      return fetch(url, init);
+    }
+  }
+
+  return res;
+}
+
 // --- EXPORTED FUNCTIONS (UNCHANGED SIGNATURES) ---
 
 export const RequestBody = (method: string, data: any, next: any) => {
@@ -94,12 +150,12 @@ export const swrFetcher = async (url: string) => {
     redirect: 'follow',
     credentials: 'include',
   };
-  const response = await fetch(url, options);
+  const response = await fetchWithRefresh(url, options);
   return errorHandling(response);
 };
 
 export const fetchResponseMetadata = async (url: string): Promise<CustomResponseTyping> => {
-  const response = await fetch(url, {
+  const response = await fetchWithRefresh(url, {
     method: 'GET',
     redirect: 'follow',
     credentials: 'include',
@@ -120,7 +176,7 @@ export const swrFetcherWithHeaders = async (
     redirect: 'follow',
     credentials: 'include',
   };
-  const response = await fetch(url, options);
+  const response = await fetchWithRefresh(url, options);
   if (!response.ok) {
     const error: any = new Error(response.statusText || 'Request failed');
     error.status = response.status;

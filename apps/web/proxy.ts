@@ -10,6 +10,22 @@ const AUTH_REWRITE: Record<string, string> = {
 
 const EDITOR_PATH_RE = /^\/course\/[\w-]+\/activity\/[\w-]+\/edit$/;
 
+/**
+ * Route prefixes that require an authenticated session.
+ * Unauthenticated requests are redirected to /login with a ?returnTo param
+ * so the user lands back at their intended destination after signing in.
+ */
+const PROTECTED_PREFIXES = [
+  '/dash',
+  '/courses',
+  '/profile',
+  '/settings',
+  '/admin',
+  '/analytics',
+  '/editor',
+  '/certificates',
+] as const;
+
 function buildRequestHeaders(req: NextRequest, requestId: string) {
   const headers = new Headers(req.headers);
 
@@ -81,11 +97,14 @@ export default async function proxy(req: NextRequest) {
     return rewriteWithHeaders(req, requestId, `${authRewrite}${search}`);
   }
 
-  if (pathname.startsWith('/dash')) {
+  const isProtected = PROTECTED_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+  if (isProtected) {
     const hasAuthCookie = req.cookies.has('access_token_cookie') || req.cookies.has('refresh_token_cookie');
 
     if (!hasAuthCookie) {
-      return withRequestId(NextResponse.redirect(new URL('/login', req.url)), requestId);
+      const returnTo = encodeURIComponent(pathname + search);
+      const loginUrl = new URL(`/login?returnTo=${returnTo}`, req.url);
+      return withRequestId(NextResponse.redirect(loginUrl), requestId);
     }
   }
 

@@ -68,38 +68,28 @@ def create_app() -> FastAPI:
     app.add_middleware(GZipMiddleware, minimum_size=1000)
 
     @app.middleware("http")
-    async def enforce_cookie_request_origin(request: Request, call_next):
-        unsafe_methods = {"POST", "PUT", "PATCH", "DELETE"}
-        has_cookie_auth = bool(
-            request.cookies.get("access_token_cookie")
-            or request.cookies.get("refresh_token_cookie")
-        )
-        has_authorization = bool(request.headers.get("authorization"))
-
+    async def enforce_sec_fetch_site(request: Request, call_next):
+        # Primary CSRF protection: SameSite=strict cookies prevent cross-site
+        # requests from including auth cookies at all.
+        #
+        # Defence-in-depth: Sec-Fetch-Site is a browser-only header that cannot
+        # be set by JavaScript (forbidden header name), so it cannot be spoofed
+        # by a malicious page. Unlike Origin, it is always present on browser
+        # requests and its absence reliably identifies non-browser clients
+        # (APIs, mobile apps, server-to-server) that are not subject to CSRF.
+        sec_fetch_site = request.headers.get("sec-fetch-site")
         if (
-            request.method.upper() in unsafe_methods
-            and has_cookie_auth
-            and not has_authorization
+            sec_fetch_site == "cross-site"
+            and request.method.upper() in {"POST", "PUT", "PATCH", "DELETE"}
+            and not request.headers.get("authorization")
         ):
-            origin = request.headers.get("origin")
-            if origin:
-                allowed = {item.rstrip("/") for item in settings.hosting_config.allowed_origins}
-                scheme = "https" if settings.hosting_config.ssl else "http"
-                port = settings.hosting_config.port
-                default_port = 443 if settings.hosting_config.ssl else 80
-                if port == default_port:
-                    allowed.add(f"{scheme}://{settings.hosting_config.domain}")
-                else:
-                    allowed.add(f"{scheme}://{settings.hosting_config.domain}:{port}")
-
-                if origin.rstrip("/") not in allowed:
-                    return JSONResponse(
-                        status_code=403,
-                        content={
-                            "error_code": "CSRF_ORIGIN_MISMATCH",
-                            "message": "Untrusted request origin",
-                        },
-                    )
+            return JSONResponse(
+                status_code=403,
+                content={
+                    "error_code": "CSRF_CROSS_SITE_REQUEST",
+                    "message": "Cross-site requests are not allowed",
+                },
+            )
 
         return await call_next(request)
 
