@@ -9,7 +9,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { AlertTriangle, Award, FileText, Sparkles } from 'lucide-react';
 import { Field, FieldError, FieldLabel } from '@/components/ui/field';
 import { useSyncDirtySection } from '@/hooks/useSyncDirtySection';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { valibotResolver } from '@hookform/resolvers/valibot';
@@ -183,6 +183,13 @@ const EditCourseCertification = () => {
     return getInitialValues();
   }, [editorData.certifications.data, getInitialValues, isLoading]);
 
+  const serverValuesSignature = useMemo(() => {
+    if (!serverValues) return '';
+    return JSON.stringify(serverValues);
+  }, [serverValues]);
+
+  const hydratedServerValuesSignatureRef = useRef('');
+
   const { isDirty } = form.formState;
   useSyncDirtySection('certification', isDirty);
 
@@ -200,11 +207,17 @@ const EditCourseCertification = () => {
   // Hydrate form from server data on load / when server data changes.
   useEffect(() => {
     if (!serverValues) return;
+    if (hydratedServerValuesSignatureRef.current === serverValuesSignature) return;
     form.reset(serverValues, { keepDirtyValues: true });
-  }, [serverValues, form]);
+    hydratedServerValuesSignatureRef.current = serverValuesSignature;
+  }, [serverValues, serverValuesSignature, form]);
 
   // Subscribe to individual watched fields to avoid over-rendering
-  const isEnabled = useWatch({ control: form.control, name: 'enable_certification' });
+  const isEnabled = useWatch({
+    control: form.control,
+    name: 'enable_certification',
+    defaultValue: false,
+  });
   const certificationName = useWatch({ control: form.control, name: 'certification_name' });
   const certificationDescription = useWatch({
     control: form.control,
@@ -216,6 +229,8 @@ const EditCourseCertification = () => {
 
   const handleSaveCertification = form.handleSubmit(async (values) => {
     if (!courseStructure || !isDirty) return;
+
+    const isCertificationEnabled = Boolean(values.enable_certification);
 
     const config = {
       certification_name: values.certification_name,
@@ -229,7 +244,7 @@ const EditCourseCertification = () => {
 
     await saveWithEditorRefresh(
       async () => {
-        if (values.enable_certification) {
+        if (isCertificationEnabled) {
           if (existingCertification) {
             return updateCertification({
               certification_uuid: existingCertification.certification_uuid,
@@ -262,7 +277,7 @@ const EditCourseCertification = () => {
         return { success: true };
       },
       {
-        successMessage: values.enable_certification
+        successMessage: isCertificationEnabled
           ? hasExistingCertification
             ? tCommon('saved')
             : t('certificationCreated')
@@ -311,19 +326,25 @@ const EditCourseCertification = () => {
               onSave={handleSaveCertification}
               onDiscard={handleDiscard}
             >
-              <Label
-                htmlFor="cert-toggle"
-                className="cursor-pointer"
-              >
-                <Switch
-                  id="cert-toggle"
-                  checked={isEnabled}
-                  onCheckedChange={(checked) => {
-                    form.setValue('enable_certification', checked, { shouldDirty: true });
-                  }}
-                  disabled={isSaving}
-                />
-              </Label>
+              <Controller
+                control={form.control}
+                name="enable_certification"
+                render={({ field }) => (
+                  <Label
+                    htmlFor="cert-toggle"
+                    className="cursor-pointer"
+                  >
+                    <Switch
+                      id="cert-toggle"
+                      checked={Boolean(field.value)}
+                      onCheckedChange={(checked) => {
+                        field.onChange(Boolean(checked));
+                      }}
+                      disabled={isSaving}
+                    />
+                  </Label>
+                )}
+              />
             </SectionHeader>
           </CardHeader>
 
@@ -530,7 +551,10 @@ const EditCourseCertification = () => {
                 <Button
                   type="button"
                   onClick={() => {
-                    form.setValue('enable_certification', true, { shouldDirty: true });
+                    form.setValue('enable_certification', true, {
+                      shouldDirty: true,
+                      shouldTouch: true,
+                    });
                   }}
                   disabled={isSaving}
                 >

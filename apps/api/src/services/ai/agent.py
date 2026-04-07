@@ -41,7 +41,6 @@ def _build_instructions(ctx: RunContext[AgentDependencies]) -> str:
     context_blocks = [
         f"Course: {deps.course_name}",
         f"Activity: {deps.activity_name}",
-        f"Activity UUID: {deps.activity_uuid}",
         f"Request mode: {deps.request_mode}",
     ]
 

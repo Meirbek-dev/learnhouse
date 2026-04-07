@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import { Send } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useState } from 'react';
+import { hasMeaningfulText } from './text';
 
 const RichTextEditor = dynamic(() => import('./rich-text-editor'), {
   ssr: false,
@@ -20,15 +21,6 @@ interface DiscussionFormProps {
 export default function DiscussionForm({ currentUser, onSubmit }: DiscussionFormProps) {
   const t = useTranslations('CoursePage');
   const [content, setContent] = useState('');
-
-  const hasMeaningfulText = (value: string) => {
-    // Check if content has meaningful text (not just empty HTML tags)
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = value;
-    const textContent = tempDiv.textContent || tempDiv.textContent || '';
-
-    return textContent.trim().length > 0;
-  };
 
   const handleSubmit = (formData: FormData) => {
     const nextContent = String(formData.get('content') ?? '');

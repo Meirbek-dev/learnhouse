@@ -12,7 +12,6 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import {
-  AlertTriangle,
   BookOpenCheck,
   CheckCircle,
   ChevronLeft,
@@ -75,82 +74,6 @@ const LoadingFallback = () => (
     <Loader2 className="h-6 w-6 animate-spin" />
   </div>
 );
-
-// AlertDialog helper for unmark activity
-interface UnmarkActivityDialogProps {
-  onConfirm: () => Promise<void> | void;
-  t: (key: string) => string;
-}
-
-function UnmarkActivityDialog({ onConfirm, t }: UnmarkActivityDialogProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [isPending, startTransition] = useTransition();
-
-  const handleConfirm = () => {
-    startTransition(async () => {
-      await onConfirm();
-      setIsOpen(false);
-    });
-  };
-
-  return (
-    <AlertDialog
-      open={isOpen}
-      onOpenChange={setIsOpen}
-    >
-      <AlertDialogTrigger
-        nativeButton={false}
-        render={
-          <div className="soft-shadow flex flex-col rounded-md bg-teal-600 p-2.5 px-4 text-white transition delay-150 duration-300 ease-in-out hover:cursor-pointer">
-            <span className="mb-1 text-[10px] font-bold uppercase">{t('status')}</span>
-            <div className="flex items-center space-x-2">
-              <svg
-                width="17"
-                height="17"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <rect
-                  x="3"
-                  y="3"
-                  width="18"
-                  height="18"
-                  rx="2"
-                />
-                <path d="M7 12l3 3 7-7" />
-              </svg>
-              <span className="text-xs font-bold">{t('statusComplete')}</span>
-            </div>
-          </div>
-        }
-      />
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogMedia>
-            <AlertTriangle className="text-destructive size-6" />
-          </AlertDialogMedia>
-          <AlertDialogTitle>{t('unmarkDialogTitle')}</AlertDialogTitle>
-          <AlertDialogDescription>{t('unmarkConfirmation')}</AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel disabled={isPending} />
-          <AlertDialogAction
-            variant="destructive"
-            onClick={handleConfirm}
-            disabled={isPending}
-          >
-            {isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
-            {t('unmarkActivity')}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
-  );
-}
 
 // AlertDialog helper for submit assignment
 interface SubmitAssignmentDialogProps {
@@ -1101,6 +1024,7 @@ export const MarkStatus = (props: {
   const router = useRouter();
   const session = usePlatformSession() as any;
   const [isLoading, setIsLoading] = useState(false);
+  const TRAIL_KEY = getTrailSwrKey();
 
   const refetchGamification = useGamificationStore((s) => s.refetch);
 
@@ -1136,7 +1060,7 @@ export const MarkStatus = (props: {
 
       await markActivityAsComplete(props.activity.activity_uuid);
 
-      await mutate([getTrailSwrKey(), undefined]);
+      await mutate(TRAIL_KEY);
 
       // Show XP feedback and update profile
       if (useGamificationStore.getState().profile) {
@@ -1170,7 +1094,7 @@ export const MarkStatus = (props: {
       setIsLoading(true);
       await unmarkActivityAsComplete(props.activity.activity_uuid);
 
-      await mutate([getTrailSwrKey(), undefined]);
+      await mutate(TRAIL_KEY);
     } catch {
       toast.error(t('unmarkCompleteError'));
     } finally {
@@ -1204,10 +1128,53 @@ export const MarkStatus = (props: {
       {isActivityCompleted ? (
         <div className="flex items-center space-x-2">
           <div className="relative">
-            <UnmarkActivityDialog
-              onConfirm={unmarkActivityAsCompleteFront}
-              t={t}
-            />
+            <button
+              type="button"
+              className={`${isLoading ? 'opacity-90' : ''} soft-shadow flex flex-col rounded-md bg-teal-600 p-2.5 px-4 text-white transition delay-150 duration-300 ease-in-out ${isLoading ? 'cursor-not-allowed' : 'hover:cursor-pointer hover:bg-teal-700'}`}
+              onClick={!isLoading ? unmarkActivityAsCompleteFront : undefined}
+              disabled={isLoading}
+            >
+              <span className="mb-1 text-[10px] font-bold uppercase">{t('status')}</span>
+              <div className="flex items-center space-x-2">
+                {isLoading ? (
+                  <div className="animate-spin">
+                    <svg
+                      width="17"
+                      height="17"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M21 12a9 9 0 11-6.219-8.56" />
+                    </svg>
+                  </div>
+                ) : (
+                  <svg
+                    width="17"
+                    height="17"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <rect
+                      x="3"
+                      y="3"
+                      width="18"
+                      height="18"
+                      rx="2"
+                    />
+                    <path d="M7 12l3 3 7-7" />
+                  </svg>
+                )}
+                <span className="text-xs font-bold">{isLoading ? t('marking') : t('statusComplete')}</span>
+              </div>
+            </button>
           </div>
         </div>
       ) : (

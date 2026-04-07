@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import dynamic from 'next/dynamic';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
+import { hasMeaningfulText } from './text';
 
 const RichTextEditor = dynamic(() => import('./rich-text-editor'), {
   ssr: false,
@@ -82,15 +83,6 @@ export default function DiscussionPost({
     const first = firstName || '';
     const last = lastName || '';
     return `${first} ${last}`.trim() || post.username;
-  };
-
-  const hasMeaningfulText = (value: string) => {
-    // Check if content has meaningful text (not just empty HTML tags)
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = value;
-    const textContent = tempDiv.textContent || tempDiv.textContent || '';
-
-    return textContent.trim().length > 0;
   };
 
   const handleSubmitReply = (formData: FormData) => {
