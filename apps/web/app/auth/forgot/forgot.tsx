@@ -1,12 +1,11 @@
 'use client';
 
 import { Field, FieldContent, FieldError, FieldLabel } from '@components/ui/field';
-import { AlertTriangle, ArrowLeft, Info, Loader2 } from 'lucide-react';
+import { AuthErrorBanner, AuthSuccessBanner, AuthSubmitButton, useAuthAction } from '@components/auth/AuthForm';
+import { ArrowLeft } from 'lucide-react';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { getAbsoluteUrl } from '@services/config/config';
 import { sendResetLink } from '@services/auth/auth';
-import { useState, useTransition } from 'react';
-import { Button } from '@components/ui/button';
 import AuthLogo from '@components/auth/logo';
 import AuthCard from '@components/auth/card';
 import { Input } from '@components/ui/input';
@@ -24,10 +23,8 @@ type ForgotPasswordFormData = v.InferOutput<ReturnType<typeof createValidationSc
 
 const ForgotPasswordClient = () => {
   const t = useTranslations('Auth.Forgot');
-  const [error, setError] = useState('');
-  const [message, setMessage] = useState('');
-  const [isPending, startTransition] = useTransition();
-  const validationSchema = createValidationSchema(t);
+  const validationT = useTranslations('Validation');
+  const validationSchema = createValidationSchema(validationT);
 
   const {
     register,
@@ -38,23 +35,14 @@ const ForgotPasswordClient = () => {
     defaultValues: { email: '' },
   });
 
-  const onSubmit = (values: ForgotPasswordFormData) => {
-    setError('');
-    setMessage('');
-    startTransition(async () => {
-      const res = await sendResetLink(values.email);
-      if (res.ok) {
-        setMessage(t('checkEmail'));
-      } else {
-        try {
-          const body = await res.json();
-          setError(body?.detail ?? t('unknownError'));
-        } catch {
-          setError(t('unknownError'));
-        }
-      }
-    });
-  };
+  const { execute, error, message, setMessage, isPending } = useAuthAction<ForgotPasswordFormData>(async (values) => {
+    const res = await sendResetLink(values.email);
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({})) as { detail?: string };
+      throw new Error(body?.detail ?? t('unknownError'));
+    }
+    setMessage(t('checkEmail'));
+  });
 
   return (
     <AuthCard>
@@ -67,23 +55,12 @@ const ForgotPasswordClient = () => {
       <p className="mt-4 text-xl font-semibold tracking-tight">{t('title')}</p>
       <p className="text-muted-foreground mt-2 text-center text-sm">{t('enterEmailMessage')}</p>
 
-      {error ? (
-        <div className="mt-4 flex w-full items-center gap-2 rounded-md bg-red-200 p-3 text-red-950">
-          <AlertTriangle size={18} />
-          <span className="text-sm font-semibold">{error}</span>
-        </div>
-      ) : null}
-
-      {message ? (
-        <div className="mt-4 flex w-full items-center gap-2 rounded-md bg-green-200 p-3 text-green-950">
-          <Info size={18} />
-          <span className="text-sm font-semibold">{t('checkEmail')}</span>
-        </div>
-      ) : null}
+      {error ? <div className="mt-4"><AuthErrorBanner message={error} /></div> : null}
+      {message ? <div className="mt-4"><AuthSuccessBanner message={message} /></div> : null}
 
       <form
         className="mt-6 w-full space-y-4"
-        onSubmit={handleSubmit(onSubmit)}
+        onSubmit={handleSubmit(execute)}
       >
         <Field>
           <FieldLabel>{t('email')}</FieldLabel>
@@ -99,23 +76,11 @@ const ForgotPasswordClient = () => {
           <FieldError>{errors.email?.message}</FieldError>
         </Field>
 
-        <Button
-          type="submit"
-          className="w-full"
-          disabled={isPending}
-        >
-          {isPending ? (
-            <>
-              <Loader2
-                className="mr-2 h-4 w-4 animate-spin"
-                aria-hidden="true"
-              />
-              {t('loading')}
-            </>
-          ) : (
-            t('sendResetLink')
-          )}
-        </Button>
+        <AuthSubmitButton
+          isPending={isPending}
+          label={t('sendResetLink')}
+          pendingLabel={t('loading')}
+        />
       </form>
 
       <Link

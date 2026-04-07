@@ -1,15 +1,20 @@
 /**
  * Unified API fetch client.
  *
- * Server-side: forwards request cookies so the backend receives the access
- * token cookie automatically. Server requests do not attempt hidden refreshes.
+ * Server-side: forwards only auth cookies from the incoming request so the
+ * backend receives the access token cookie automatically. Server requests do
+ * not attempt hidden refreshes.
  *
  * Client-side: uses credentials:"include" so cookies are sent automatically.
- * On 401, posts to /auth/refresh and retries. On second 401 emits a custom
- * `auth:session-expired` event so the SessionProvider can redirect to login.
+ * On 401, posts to /auth/refresh and retries once. On second 401 emits a
+ * custom `auth:session-expired` event so the SessionProvider redirects to login.
  */
 
 import { getAPIUrl, getServerAPIUrl } from '@services/config/config';
+import { refreshToken } from '@services/auth/auth';
+
+/** Only these cookies are forwarded to the backend on server-side requests. */
+const AUTH_COOKIE_NAMES = ['access_token_cookie', 'refresh_token_cookie'] as const;
 
 type ApiFetchInit = Omit<RequestInit, 'credentials'> & {
   /** Override which base URL to use (defaults to environment-aware selection). */
@@ -22,10 +27,7 @@ function apiBase(isServer: boolean, baseUrl?: string): string {
 }
 
 function isRequestCookieUnavailableError(error: unknown): boolean {
-  if (!(error instanceof Error)) {
-    return false;
-  }
-
+  if (!(error instanceof Error)) return false;
   const message = error.message.toLowerCase();
   return (
     message.includes('during prerendering') ||
@@ -42,23 +44,12 @@ async function getServerCookieHeader(): Promise<string> {
 
     return cookieStore
       .getAll()
-      .map((cookie) => `${cookie.name}=${cookie.value}`)
+      .filter((c) => (AUTH_COOKIE_NAMES as readonly string[]).includes(c.name))
+      .map((c) => `${c.name}=${c.value}`)
       .join('; ');
   } catch (error) {
-    if (isRequestCookieUnavailableError(error)) {
-      return '';
-    }
-
+    if (isRequestCookieUnavailableError(error)) return '';
     throw error;
-  }
-}
-
-async function refreshTokens(): Promise<boolean> {
-  try {
-    const res = await fetch(`${getAPIUrl()}auth/refresh`, { method: 'POST', credentials: 'include', cache: 'no-store' });
-    return res.ok;
-  } catch {
-    return false;
   }
 }
 
@@ -81,7 +72,7 @@ export async function apiFetch(path: string, init: ApiFetchInit = {}): Promise<R
   let response = await fetch(url, options);
 
   if (!isServer && response.status === 401) {
-    const refreshed = await refreshTokens();
+    const refreshed = await refreshToken();
     if (refreshed) {
       response = await fetch(url, options);
     }

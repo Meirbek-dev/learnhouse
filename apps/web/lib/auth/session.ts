@@ -57,11 +57,11 @@ export const getSession = cache(async (): Promise<AppSession | null> => {
 export async function requireSession(): Promise<AppSession> {
   const session = await getSession();
   if (!session) {
-    // Preserve the current path so the login page can redirect back after auth
+    // x-pathname is set by middleware.ts on every request.
     let returnTo = '/';
     try {
       const headersList = await headers();
-      const path = headersList.get('x-invoke-path') ?? headersList.get('x-pathname');
+      const path = headersList.get('x-pathname');
       if (path) returnTo = path;
     } catch {
       // headers() may not be available in all contexts; fall back to '/'

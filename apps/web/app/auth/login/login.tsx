@@ -1,14 +1,14 @@
 'use client';
 
 import { Field, FieldContent, FieldError, FieldLabel } from '@components/ui/field';
+import { AuthErrorBanner, AuthSubmitButton, useAuthAction } from '@components/auth/AuthForm';
 import { getAbsoluteUrl, getPublicAPIUrl } from '@services/config/config';
 import { loginAndGetToken } from '@services/auth/auth';
 import PasswordInput from '@components/ui/custom/password-input';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { SiGoogle } from '@icons-pack/react-simple-icons';
-import { AlertTriangle, Loader2 } from 'lucide-react';
 import { Separator } from '@components/ui/separator';
-import { useState, useTransition } from 'react';
+import { useTransition } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Button } from '@components/ui/button';
 import AuthLogo from '@components/auth/logo';
@@ -19,7 +19,7 @@ import Link from '@components/ui/AppLink';
 import { useForm } from 'react-hook-form';
 import * as v from 'valibot';
 
-const createValidationSchema = (t: (key: string, values?: any) => string) =>
+const createValidationSchema = (t: (key: string, values?: Record<string, unknown>) => string) =>
   v.object({
     email: v.pipe(v.string(), v.minLength(1, t('required')), v.email(t('invalidEmail'))),
     password: v.pipe(v.string(), v.minLength(1, t('required')), v.minLength(8, t('passwordMinLength', { length: 8 }))),
@@ -27,30 +27,25 @@ const createValidationSchema = (t: (key: string, values?: any) => string) =>
 
 type LoginFormData = v.InferOutput<ReturnType<typeof createValidationSchema>>;
 
+/** Validate and return the returnTo path, rejecting open-redirect attempts. */
+function getSafeReturnTo(raw: string | null): string {
+  if (raw) {
+    try {
+      const parsed = new URL(raw, globalThis.location.origin);
+      if (parsed.origin === globalThis.location.origin) return raw;
+    } catch {
+      // Invalid URL — fall through.
+    }
+  }
+  return '/redirect_from_auth';
+}
+
 const LoginClient = () => {
   const validationT = useTranslations('Validation');
   const t = useTranslations('Auth.Login');
   const searchParams = useSearchParams();
-  const [error, setError] = useState('');
-  const [isPending, startTransition] = useTransition();
+  const [isPendingGoogle, startGoogleTransition] = useTransition();
 
-  /** Resolve the post-login destination from ?returnTo or fall back to the
-   *  default auth redirect route. */
-  const getPostLoginUrl = (): string => {
-    const returnTo = searchParams.get('returnTo');
-    if (returnTo) {
-      try {
-        // Ensure returnTo is a path-only URL to prevent open-redirect attacks
-        const parsed = new URL(returnTo, globalThis.location.origin);
-        if (parsed.origin === globalThis.location.origin) {
-          return returnTo;
-        }
-      } catch {
-        // Invalid URL — fall through to default
-      }
-    }
-    return '/redirect_from_auth';
-  };
   const validationSchema = createValidationSchema(validationT);
 
   const {
@@ -62,34 +57,23 @@ const LoginClient = () => {
     defaultValues: { email: '', password: '' },
   });
 
-  const onSubmit = (values: LoginFormData) => {
-    startTransition(async () => {
-      try {
-        const response = await loginAndGetToken(values.email, values.password);
-
-        if (!response.ok) {
-          setError(t('wrongCredentials'));
-          return;
-        }
-
-        globalThis.location.href = getPostLoginUrl();
-      } catch {
-        setError(t('wrongCredentials'));
-      }
-    });
-  };
+  const { execute, error, isPending } = useAuthAction<LoginFormData>(async (values) => {
+    const response = await loginAndGetToken(values.email, values.password);
+    if (!response.ok) throw new Error(t('wrongCredentials'));
+    globalThis.location.href = getSafeReturnTo(searchParams.get('returnTo'));
+  });
 
   const handleGoogleSignIn = () => {
-    startTransition(() => {
-      // Pass returnTo through to the OAuth callback so Google sign-in also
-      // lands the user back at their intended destination.
-      const postLoginPath = getPostLoginUrl();
+    startGoogleTransition(() => {
+      const postLoginPath = getSafeReturnTo(searchParams.get('returnTo'));
       const frontendCallback = getAbsoluteUrl(postLoginPath.startsWith('/') ? postLoginPath : '/redirect_from_auth');
       const authorizeUrl = new URL(`${getPublicAPIUrl()}auth/google/authorize`);
       authorizeUrl.searchParams.set('callback', frontendCallback);
       globalThis.location.href = authorizeUrl.toString();
     });
   };
+
+  const anyPending = isPending || isPendingGoogle;
 
   return (
     <AuthCard>
@@ -103,7 +87,7 @@ const LoginClient = () => {
       <Button
         className="mt-8 w-full gap-3"
         onClick={handleGoogleSignIn}
-        disabled={isPending}
+        disabled={anyPending}
       >
         <SiGoogle />
         {t('signInWithGoogle')}
@@ -116,15 +100,14 @@ const LoginClient = () => {
       </div>
 
       {error ? (
-        <div className="mb-4 flex w-full items-center gap-2 rounded-md bg-red-200 p-3 text-red-950">
-          <AlertTriangle size={18} />
-          <span className="text-sm font-semibold">{error}</span>
+        <div className="mb-4">
+          <AuthErrorBanner message={error} />
         </div>
       ) : null}
 
       <form
         className="w-full space-y-4"
-        onSubmit={handleSubmit(onSubmit)}
+        onSubmit={handleSubmit(execute)}
       >
         <Field>
           <FieldLabel>{t('email')}</FieldLabel>
@@ -163,23 +146,11 @@ const LoginClient = () => {
           </Link>
         </div>
 
-        <Button
-          type="submit"
-          className="w-full"
-          disabled={isPending}
-        >
-          {isPending ? (
-            <>
-              <Loader2
-                className="mr-2 h-4 w-4 animate-spin"
-                aria-hidden="true"
-              />
-              {t('loading')}
-            </>
-          ) : (
-            t('login')
-          )}
-        </Button>
+        <AuthSubmitButton
+          isPending={anyPending}
+          label={t('login')}
+          pendingLabel={t('loading')}
+        />
       </form>
 
       <p className="mt-5 text-center text-sm">

@@ -1,22 +1,19 @@
 'use client';
 
 import { Field, FieldContent, FieldError, FieldLabel } from '@components/ui/field';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
+import { AuthErrorBanner, AuthSubmitButton, useAuthAction } from '@components/auth/AuthForm';
 import { getAbsoluteUrl, getPublicAPIUrl } from '@services/config/config';
-import { loginAndGetToken } from '@services/auth/auth';
+import { loginAndGetToken, signup } from '@services/auth/auth';
 import PasswordInput from '@components/ui/custom/password-input';
 import { valibotResolver } from '@hookform/resolvers/valibot';
-import { useEffect, useState, useTransition } from 'react';
+import { useTransition } from 'react';
 import { SiGoogle } from '@icons-pack/react-simple-icons';
-import { AlertTriangle, Loader2 } from 'lucide-react';
 import { Separator } from '@components/ui/separator';
 import { passwordSchema } from '@/lib/schemas/auth';
 import { Button } from '@components/ui/button';
 import AuthLogo from '@components/auth/logo';
 import AuthCard from '@components/auth/card';
 import { Input } from '@components/ui/input';
-import { signup } from '@services/auth/auth';
-import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
 import { useForm } from 'react-hook-form';
@@ -43,13 +40,40 @@ const buildFormSchema = (t: (key: string) => string) =>
 
 type SignUpFormData = v.InferOutput<ReturnType<typeof buildFormSchema>>;
 
+/** Known backend error codes → i18n key mapping. Falls back to generic message. */
+const SIGNUP_ERROR_MAP: Record<string, string> = {
+  email_taken: 'emailTaken',
+  username_taken: 'usernameTaken',
+};
+
+async function signupAndLogin(
+  body: Parameters<typeof signup>[0],
+  email: string,
+  password: string,
+  t: (key: string) => string,
+) {
+  const res = await signup(body);
+
+  if (!res.ok) {
+    const json = await res.json().catch(() => ({})) as { detail?: string | { code?: string; message?: string } };
+    const detail = json?.detail;
+    const code = typeof detail === 'object' ? detail?.code : undefined;
+    const msg = code && SIGNUP_ERROR_MAP[code]
+      ? t(SIGNUP_ERROR_MAP[code])
+      : t('errorSomethingWentWrong');
+    throw new Error(msg);
+  }
+
+  const loginRes = await loginAndGetToken(email, password);
+  if (!loginRes.ok) throw new Error(t('loginAfterSignupFailed'));
+
+  globalThis.location.href = '/redirect_from_auth';
+}
+
 const SignUpClient = () => {
-  const session = usePlatformSession();
-  const router = useRouter();
   const t = useTranslations('Auth.Signup');
   const validationT = useTranslations('Validation');
-  const [isPending, startTransition] = useTransition();
-  const [error, setError] = useState('');
+  const [isPendingGoogle, startGoogleTransition] = useTransition();
   const formSchema = buildFormSchema(validationT);
 
   const {
@@ -61,47 +85,18 @@ const SignUpClient = () => {
     resolver: valibotResolver(formSchema),
   });
 
-  useEffect(() => {
-    if (session?.status === 'authenticated') {
-      router.push(getAbsoluteUrl('/'));
-    }
-  }, [session?.status, router]);
-
-  const onSubmit = (data: SignUpFormData) => {
-    setError('');
-    startTransition(async () => {
-      try {
-        const username = `${data.firstName.toLowerCase()}.${data.lastName.toLowerCase()}`;
-        const res = await signup({
-          username,
-          email: data.email,
-          password: data.password,
-          first_name: data.firstName,
-          last_name: data.lastName,
-        });
-
-        if (res.ok) {
-          const loginResponse = await loginAndGetToken(data.email, data.password);
-          if (loginResponse.ok) {
-            globalThis.location.href = '/redirect_from_auth';
-          } else {
-            router.push(getAbsoluteUrl('/login'));
-          }
-        } else {
-          const body = await res.json().catch(() => ({}));
-          const detail = body?.detail;
-          const msg =
-            typeof detail === 'string' ? detail : detail?.message || body?.message || t('errorSomethingWentWrong');
-          setError(msg);
-        }
-      } catch (error: any) {
-        setError(error.message || t('errorSomethingWentWrong'));
-      }
-    });
-  };
+  const { execute, error, isPending } = useAuthAction<SignUpFormData>(async (data) => {
+    const username = `${data.firstName.toLowerCase()}.${data.lastName.toLowerCase()}`;
+    await signupAndLogin(
+      { username, email: data.email, password: data.password, first_name: data.firstName, last_name: data.lastName },
+      data.email,
+      data.password,
+      t,
+    );
+  });
 
   const handleGoogleSignIn = () => {
-    startTransition(() => {
+    startGoogleTransition(() => {
       const frontendCallback = getAbsoluteUrl('/redirect_from_auth');
       const authorizeUrl = new URL(`${getPublicAPIUrl()}auth/google/authorize`);
       authorizeUrl.searchParams.set('callback', frontendCallback);
@@ -109,14 +104,7 @@ const SignUpClient = () => {
     });
   };
 
-  if (session?.status === 'authenticated') {
-    return (
-      <AuthCard>
-        <AuthLogo />
-        <p className="text-muted-foreground mt-4 text-sm">{t('redirecting')}</p>
-      </AuthCard>
-    );
-  }
+  const anyPending = isPending || isPendingGoogle;
 
   return (
     <AuthCard className="max-w-md">
@@ -131,7 +119,7 @@ const SignUpClient = () => {
       <Button
         className="mt-8 w-full gap-3"
         onClick={handleGoogleSignIn}
-        disabled={isPending}
+        disabled={anyPending}
       >
         <SiGoogle />
         {t('continueWithGoogle')}
@@ -145,14 +133,10 @@ const SignUpClient = () => {
 
       <form
         className="w-full space-y-4"
-        onSubmit={handleSubmit(onSubmit)}
+        onSubmit={handleSubmit(execute)}
       >
-        {error ? (
-          <div className="flex items-center gap-2 rounded-md bg-red-200 p-3 text-red-950">
-            <AlertTriangle size={18} />
-            <span className="text-sm font-semibold">{error}</span>
-          </div>
-        ) : null}
+        {error ? <AuthErrorBanner message={error} /> : null}
+
         <div className="grid grid-cols-2 gap-3">
           <Field>
             <FieldLabel>{t('firstName')}</FieldLabel>
@@ -223,23 +207,12 @@ const SignUpClient = () => {
           <FieldError>{errors.confirmPassword?.message}</FieldError>
         </Field>
 
-        <Button
-          type="submit"
+        <AuthSubmitButton
+          isPending={anyPending}
+          label={t('createAccount')}
+          pendingLabel={t('loading')}
           className="mt-2 w-full"
-          disabled={isPending}
-        >
-          {isPending ? (
-            <>
-              <Loader2
-                className="mr-2 h-4 w-4 animate-spin"
-                aria-hidden="true"
-              />
-              {t('loading')}
-            </>
-          ) : (
-            t('createAccount')
-          )}
-        </Button>
+        />
       </form>
 
       <p className="mt-5 text-center text-sm">

@@ -1,14 +1,12 @@
 'use client';
 
 import { Field, FieldContent, FieldError, FieldLabel } from '@components/ui/field';
+import { AuthErrorBanner, AuthSuccessBanner, AuthSubmitButton, useAuthAction } from '@components/auth/AuthForm';
 import PasswordInput from '@components/ui/custom/password-input';
 import { valibotResolver } from '@hookform/resolvers/valibot';
-import { AlertTriangle, Info, Loader2 } from 'lucide-react';
 import { getAbsoluteUrl } from '@services/config/config';
 import { resetPassword } from '@services/auth/auth';
 import { useSearchParams } from 'next/navigation';
-import { useState, useTransition } from 'react';
-import { Button } from '@components/ui/button';
 import AuthLogo from '@components/auth/logo';
 import AuthCard from '@components/auth/card';
 import { Input } from '@components/ui/input';
@@ -17,7 +15,7 @@ import Link from '@components/ui/AppLink';
 import { useForm } from 'react-hook-form';
 import * as v from 'valibot';
 
-const createValidationSchema = (t: (key: string, values?: any) => string) =>
+const createValidationSchema = (t: (key: string, values?: Record<string, unknown>) => string) =>
   v.pipe(
     v.object({
       email: v.pipe(v.string(), v.minLength(1, t('required')), v.email(t('invalidEmail'))),
@@ -45,11 +43,8 @@ const ResetPasswordClient = () => {
   const validationT = useTranslations('Validation');
   const t = useTranslations('Auth.Reset');
   const searchParams = useSearchParams();
-  const token = searchParams.get('token') || searchParams.get('resetCode') || '';
-  const email = searchParams.get('email') || '';
-  const [error, setError] = useState('');
-  const [message, setMessage] = useState('');
-  const [isPending, startTransition] = useTransition();
+  const token = searchParams.get('token') ?? searchParams.get('resetCode') ?? '';
+  const email = searchParams.get('email') ?? '';
   const validationSchema = createValidationSchema(validationT);
 
   const {
@@ -61,23 +56,14 @@ const ResetPasswordClient = () => {
     defaultValues: { email, new_password: '', confirm_password: '', reset_code: token },
   });
 
-  const onSubmit = (values: ResetPasswordFormData) => {
-    setError('');
-    setMessage('');
-    startTransition(async () => {
-      const res = await resetPassword(values.reset_code, values.new_password);
-      if (res.ok) {
-        setMessage(t('success'));
-      } else {
-        try {
-          const body = await res.json();
-          setError(body?.detail ?? t('unknownError'));
-        } catch {
-          setError(t('unknownError'));
-        }
-      }
-    });
-  };
+  const { execute, error, message, setMessage, isPending } = useAuthAction<ResetPasswordFormData>(async (values) => {
+    const res = await resetPassword(values.reset_code, values.new_password);
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({})) as { detail?: string };
+      throw new Error(body?.detail ?? t('unknownError'));
+    }
+    setMessage(t('success'));
+  });
 
   return (
     <AuthCard className="max-w-md">
@@ -85,19 +71,11 @@ const ResetPasswordClient = () => {
       <p className="mt-4 text-xl font-semibold tracking-tight">{t('title')}</p>
       <p className="text-muted-foreground mt-2 text-center text-sm">{t('enterResetDetails')}</p>
 
-      {error ? (
-        <div className="mt-4 flex w-full items-center gap-2 rounded-md bg-red-200 p-3 text-red-950">
-          <AlertTriangle size={18} />
-          <span className="text-sm font-semibold">{error}</span>
-        </div>
-      ) : null}
+      {error ? <div className="mt-4"><AuthErrorBanner message={error} /></div> : null}
 
       {message ? (
         <div className="mt-4 w-full space-y-2">
-          <div className="flex items-center gap-2 rounded-md bg-green-200 p-3 text-green-950">
-            <Info size={18} />
-            <span className="text-sm font-semibold">{t('success')}</span>
-          </div>
+          <AuthSuccessBanner message={message} />
           <Link
             href={getAbsoluteUrl('/login')}
             className="block text-center text-sm underline"
@@ -109,7 +87,7 @@ const ResetPasswordClient = () => {
 
       <form
         className="mt-6 w-full space-y-4"
-        onSubmit={handleSubmit(onSubmit)}
+        onSubmit={handleSubmit(execute)}
       >
         <Field>
           <FieldLabel>{t('email')}</FieldLabel>
@@ -165,23 +143,11 @@ const ResetPasswordClient = () => {
           <FieldError>{errors.confirm_password?.message}</FieldError>
         </Field>
 
-        <Button
-          type="submit"
-          className="w-full"
-          disabled={isPending}
-        >
-          {isPending ? (
-            <>
-              <Loader2
-                className="mr-2 h-4 w-4 animate-spin"
-                aria-hidden="true"
-              />
-              {t('loading')}
-            </>
-          ) : (
-            t('changePassword')
-          )}
-        </Button>
+        <AuthSubmitButton
+          isPending={isPending}
+          label={t('changePassword')}
+          pendingLabel={t('loading')}
+        />
       </form>
     </AuthCard>
   );

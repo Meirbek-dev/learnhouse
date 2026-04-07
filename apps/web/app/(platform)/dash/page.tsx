@@ -13,7 +13,8 @@ import {
   canSeePlatform,
   canSeeUsers,
 } from '@/lib/rbac/navigation-policy';
-import { requireSession, sessionCan } from '@/lib/auth/permissions';
+import { requireSession } from '@/lib/auth/session';
+import { sessionCan } from '@/lib/auth/permissions';
 
 import platformLogoFull from '../../../public/platform_logo_full.svg';
 import type { Action, Resource, Scope } from '@/types/permissions';

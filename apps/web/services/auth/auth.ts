@@ -22,8 +22,6 @@ const AUTH_ENDPOINTS = {
   signup: 'users',
 } as const;
 
-const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-
 export async function loginAndGetToken(email: string, password: string): Promise<Response> {
   const trimmed = email.trim().toLowerCase();
   return fetch(`${getAPIUrl()}${AUTH_ENDPOINTS.login}`, {
@@ -55,7 +53,6 @@ export async function logoutAll(): Promise<Response> {
 }
 
 export async function sendResetLink(email: string): Promise<Response> {
-  if (!validateEmail(email)) throw new Error('Valid email is required');
   return fetch(`${getAPIUrl()}${AUTH_ENDPOINTS.forgotPassword}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

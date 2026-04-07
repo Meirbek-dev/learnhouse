@@ -1,7 +1,8 @@
 import type { CourseWorkspaceStage } from '@/lib/course-management';
 import { Actions, Resources, Scopes } from '@/types/permissions';
 import { getCourseUserRights } from '@services/courses/courses';
-import { requireSession, sessionCan } from '@/lib/auth/permissions';
+import { requireSession } from '@/lib/auth/session';
+import { sessionCan } from '@/lib/auth/permissions';
 import { cleanCourseUuid } from '@/lib/course-management';
 import { redirect } from 'next/navigation';
 

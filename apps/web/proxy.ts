@@ -32,6 +32,7 @@ function buildRequestHeaders(req: NextRequest, requestId: string) {
   headers.set('x-forwarded-host', req.headers.get('host') ?? req.nextUrl.host);
   headers.set('x-forwarded-proto', req.nextUrl.protocol.replace(':', ''));
   headers.set('x-request-id', requestId);
+  headers.set('x-pathname', req.nextUrl.pathname);
 
   if (req.nextUrl.port) {
     headers.set('x-forwarded-port', req.nextUrl.port);

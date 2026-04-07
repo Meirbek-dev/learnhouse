@@ -4,8 +4,6 @@ import { perm } from '@/types/permissions';
 import { requireSession } from './session';
 import { redirect } from 'next/navigation';
 
-export { requireSession };
-
 export function sessionCan(
   session: Pick<AppSession | ClientSession, 'permissions'> | undefined,
   resource: Resource,

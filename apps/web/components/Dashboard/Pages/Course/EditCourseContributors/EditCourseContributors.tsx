@@ -509,21 +509,27 @@ const EditCourseContributors = () => {
               onOpenChange={setSearchOpen}
             >
               <PopoverTrigger
-                render={<div className="relative w-full" />}
+                render={(triggerProps) => (
+                  <div
+                    {...triggerProps}
+                    className={`relative w-full ${triggerProps.className ?? ''}`}
+                  >
+                    <Search className="text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4" />
+                    <Input
+                      className="pl-8"
+                      placeholder={t('searchUsersPlaceholder')}
+                      value={searchQuery}
+                      onFocus={() => setSearchOpen(true)}
+                      onChange={(e) => {
+                        setSearchQuery(e.target.value);
+                        if (e.target.value.trim()) setSearchOpen(true);
+                        else setSearchOpen(false);
+                      }}
+                    />
+                  </div>
+                )}
                 nativeButton={false}
-              >
-                <Search className="text-muted-foreground absolute top-2.5 left-2.5 h-4 w-4" />
-                <Input
-                  className="pl-8"
-                  placeholder={t('searchUsersPlaceholder')}
-                  value={searchQuery}
-                  onChange={(e) => {
-                    setSearchQuery(e.target.value);
-                    if (e.target.value.trim()) setSearchOpen(true);
-                    else setSearchOpen(false);
-                  }}
-                />
-              </PopoverTrigger>
+              />
               <PopoverContent
                 className="w-(--anchor-width) p-0"
                 align="start"
