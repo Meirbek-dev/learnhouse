@@ -218,7 +218,7 @@ docker compose exec backup backup
 |---|---|
 | `postgres_data` | PostgreSQL (includes pgvector) |
 | `redis_data` | Redis |
-| `api_content` | User uploads and media |
+| `app_content` | User uploads and media |
 | `judge0_box` | Judge0 sandbox (when code-runner is active) |
 
 Files land in `./backups/` as `backup-YYYY-MM-DDTHH-MM-SS.tar.zst`.
@@ -251,7 +251,7 @@ docker compose down
 # 2. Extract the backup
 mkdir -p temp-restore
 tar --zstd -xf ./backups/backup-YYYY-MM-DDTHH-MM-SS.tar.zst -C temp-restore
-# Layout: temp-restore/backup/{postgres,redis,api_content,judge0_box}
+# Layout: temp-restore/backup/{postgres,redis,app_content,judge0_box}
 
 # 3. Restore volumes (prefix is your Compose project name, default: ashyq-bilim)
 BACKUP_PATH="$(pwd)/temp-restore/backup"
@@ -267,8 +267,8 @@ docker run --rm \
   alpine sh -c "cd /data && cp -a /backup/. ."
 
 docker run --rm \
-  -v ashyq-bilim_api_content:/data \
-  -v "${BACKUP_PATH}/api_content:/backup" \
+  -v ashyq-bilim_app_content:/data \
+  -v "${BACKUP_PATH}/app_content:/backup" \
   alpine sh -c "cd /data && cp -a /backup/. ."
 
 # 4. Start
@@ -300,7 +300,7 @@ rm -rf temp-restore
 |---|---|---|
 | `postgres_data` | PostgreSQL database | Yes |
 | `redis_data` | Redis | Yes |
-| `api_content` | User uploads, media | Yes |
+| `app_content` | User uploads, media | Yes |
 | `judge0_box` | Judge0 sandbox | Yes (when used) |
 | `nginx_cache` | Nginx proxy cache | No (ephemeral) |
 

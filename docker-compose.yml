@@ -81,7 +81,7 @@ services:
     expose:
       - "8000"
     volumes:
-      - api_content:/app/content
+      - app_content:/app/content
     env_file: .env
     networks:
       - app-net
@@ -246,7 +246,7 @@ services:
     volumes:
       - postgres_data:/backup/postgres:ro
       - redis_data:/backup/redis:ro
-      - api_content:/backup/api_content:ro
+      - app_content:/backup/app_content:ro
       - judge0_box:/backup/judge0_box:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./backups:/archive
@@ -254,6 +254,6 @@ services:
 volumes:
   postgres_data:
   redis_data:
-  api_content:
+  app_content:
   judge0_box:
   nginx_cache:
