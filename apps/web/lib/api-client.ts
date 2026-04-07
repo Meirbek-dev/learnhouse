@@ -2,7 +2,7 @@
  * Unified API fetch client.
  *
  * Server-side: forwards request cookies so the backend receives the access
- * token cookie automatically. Handles 401 → POST /auth/refresh → retry once.
+ * token cookie automatically. Server requests do not attempt hidden refreshes.
  *
  * Client-side: uses credentials:"include" so cookies are sent automatically.
  * On 401, posts to /auth/refresh and retries. On second 401 emits a custom
@@ -22,21 +22,9 @@ function apiBase(isServer: boolean, baseUrl?: string): string {
   return isServer ? getServerAPIUrl() : getAPIUrl();
 }
 
-async function refreshTokens(isServer: boolean): Promise<boolean> {
+async function refreshTokens(): Promise<boolean> {
   try {
-    const base = apiBase(isServer, undefined);
-    const init: RequestInit = { method: 'POST', credentials: 'include', cache: 'no-store' };
-
-    if (isServer) {
-      const cookieStore = await cookies();
-      const cookieHeader = cookieStore
-        .getAll()
-        .map((c) => `${c.name}=${c.value}`)
-        .join('; ');
-      (init as RequestInit & { headers: Record<string, string> }).headers = { Cookie: cookieHeader };
-    }
-
-    const res = await fetch(`${base}auth/refresh`, init);
+    const res = await fetch(`${getAPIUrl()}auth/refresh`, { method: 'POST', credentials: 'include', cache: 'no-store' });
     return res.ok;
   } catch {
     return false;
@@ -63,23 +51,13 @@ export async function apiFetch(path: string, init: ApiFetchInit = {}): Promise<R
 
   let response = await fetch(url, options);
 
-  if (response.status === 401) {
-    const refreshed = await refreshTokens(isServer);
+  if (!isServer && response.status === 401) {
+    const refreshed = await refreshTokens();
     if (refreshed) {
-      // After refresh cookies are set; re-issue the original request.
-      if (isServer) {
-        // Re-read cookies after refresh (they were set server-side by the backend).
-        const cookieStore = await cookies();
-        const cookieHeader = cookieStore
-          .getAll()
-          .map((c) => `${c.name}=${c.value}`)
-          .join('; ');
-        options.headers = { ...Object.fromEntries(new Headers(options.headers ?? {}).entries()), Cookie: cookieHeader };
-      }
       response = await fetch(url, options);
     }
 
-    if (response.status === 401 && !isServer) {
+    if (response.status === 401) {
       globalThis.window.dispatchEvent(new CustomEvent('auth:session-expired'));
     }
   }

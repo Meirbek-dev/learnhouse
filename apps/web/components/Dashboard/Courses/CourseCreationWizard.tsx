@@ -102,7 +102,7 @@ export default function CourseCreationWizard() {
 
   const createOutlineFromSource = async (createdCourse: any) => {
     if (!sourceCourseUuid) return;
-    const sourceMetadata = await getCourseMetadata(prefixedCourseUuid(sourceCourseUuid), null, undefined, true);
+    const sourceMetadata = await getCourseMetadata(prefixedCourseUuid(sourceCourseUuid), undefined, true);
     const chapters = Array.isArray(sourceMetadata?.chapters) ? sourceMetadata.chapters : [];
     for (const chapter of chapters) {
       await createChapter({

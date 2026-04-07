@@ -2,53 +2,40 @@ import 'server-only';
 import { cache } from 'react';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { jwtVerify, createRemoteJWKSet } from 'jose';
 import type { AppSession, ClientSession } from './types';
 import { getServerAPIUrl } from '@services/config/config';
 
-// ---------------------------------------------------------------------------
-// JWKS – fetched once per process, module-level singleton.
-// ---------------------------------------------------------------------------
-let _jwks: ReturnType<typeof createRemoteJWKSet> | null = null;
-
-function getJWKS() {
-  if (!_jwks) {
-    const uri = new URL(`${getServerAPIUrl()}.well-known/jwks.json`);
-    _jwks = createRemoteJWKSet(uri);
-  }
-  return _jwks;
-}
-
-async function verifyAccessToken(token: string): Promise<{ sub: string; exp: number; sid: string } | null> {
+function getAccessTokenExpiry(token: string): number | null {
   try {
-    const { payload } = await jwtVerify(token, getJWKS(), { algorithms: ['EdDSA'] });
-    return {
-      sub: payload.sub!,
-      exp: payload.exp!,
-      sid: payload.sid as string,
+    const [, payloadSegment] = token.split('.');
+    if (!payloadSegment) return null;
+
+    const padding = '='.repeat((4 - (payloadSegment.length % 4)) % 4);
+    const jsonPayload = JSON.parse(Buffer.from(`${payloadSegment}${padding}`, 'base64url').toString('utf-8')) as {
+      exp?: number;
     };
+
+    return typeof jsonPayload.exp === 'number' ? jsonPayload.exp * 1000 : null;
   } catch {
     return null;
   }
 }
 
-// ---------------------------------------------------------------------------
-// getSession – deduplicated per render via React cache()
-// ---------------------------------------------------------------------------
 export const getSession = cache(async (): Promise<AppSession | null> => {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('access_token_cookie')?.value;
 
   if (!accessToken) return null;
 
-  const claims = await verifyAccessToken(accessToken);
-  if (!claims) return null;
+  const cookieHeader = cookieStore
+    .getAll()
+    .map((cookie) => `${cookie.name}=${cookie.value}`)
+    .join('; ');
 
   try {
     const response = await fetch(`${getServerAPIUrl()}users/session`, {
       headers: {
-        Authorization: `Bearer ${accessToken}`,
-        Cookie: `access_token_cookie=${accessToken}`,
+        Cookie: cookieHeader,
       },
       cache: 'no-store',
     });
@@ -56,10 +43,11 @@ export const getSession = cache(async (): Promise<AppSession | null> => {
     if (!response.ok) return null;
 
     const sessionData = await response.json();
+    const expiresAt = getAccessTokenExpiry(accessToken) ?? Date.now() + 30 * 60 * 1000;
+
     return {
       ...sessionData,
-      accessToken,
-      expiresAt: claims.exp * 1000,
+      expiresAt,
     } as AppSession;
   } catch {
     return null;
@@ -74,7 +62,5 @@ export async function requireSession(): Promise<AppSession> {
 
 export function toClientSession(session: AppSession | null): ClientSession | null {
   if (!session) return null;
-
-  const { accessToken: _t, ...rest } = session;
-  return rest as ClientSession;
+  return { ...session } as ClientSession;
 }

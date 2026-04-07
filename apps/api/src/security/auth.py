@@ -13,11 +13,14 @@ from src.db.users import AnonymousUser, PublicUser, User, UserRead
 from src.security.keys import get_private_key, get_public_key
 from src.security.rbac import AuthenticationRequired
 from src.security.auth_cookies import ACCESS_COOKIE_KEY
+from src.services.auth.sessions import get_session_by_id
 from src.services.cache.redis_client import get_redis_client
 
 logger = logging.getLogger(__name__)
 
-ACCESS_TOKEN_EXPIRE = timedelta(hours=8)
+AUTH_TOKEN_ISSUER = "ashyq-bilim-auth"
+AUTH_TOKEN_AUDIENCE = "ashyq-bilim-api"
+ACCESS_TOKEN_EXPIRE = timedelta(minutes=30)
 REFRESH_TOKEN_EXPIRE = timedelta(days=7)  # sliding; hard cap 30 days
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
@@ -68,8 +71,8 @@ def create_access_token(
         "sub": user_uuid,
         "jti": _generate_jti(),
         "sid": session_id,
-        "iss": "ashyq-bilim-auth",
-        "aud": "ashyq-bilim-api",
+        "iss": AUTH_TOKEN_ISSUER,
+        "aud": AUTH_TOKEN_AUDIENCE,
         "iat": int(now.timestamp()),
         "exp": int(expire.timestamp()),
         "roles": roles or [],
@@ -90,7 +93,14 @@ def get_access_token_expiry_ms(expires_delta: timedelta | None = None) -> int:
 def _decode_token_claims(token: str) -> dict:
     """Decode and validate a JWT, returning its claims dict."""
     try:
-        claims = jwt.decode(token, get_public_key())
+        claims = jwt.decode(
+            token,
+            get_public_key(),
+            claims_options={
+                "iss": {"essential": True, "value": AUTH_TOKEN_ISSUER},
+                "aud": {"essential": True, "value": AUTH_TOKEN_AUDIENCE},
+            },
+        )
         claims.validate()
         return dict(claims)
     except JoseError as exc:
@@ -119,7 +129,7 @@ def decode_token_unverified(token: str) -> dict:
         parts = token.split(".")
         if len(parts) != 3:
             return {}
-        padding = 4 - len(parts[1]) % 4
+        padding = (-len(parts[1])) % 4
         decoded = base64.urlsafe_b64decode(parts[1] + "=" * padding)
         return json.loads(decoded)
     except Exception:
@@ -174,6 +184,13 @@ async def get_current_user_from_token(
 
     # JTI blocklist check (covers explicitly revoked / logged-out tokens)
     if token_data.jti and is_jti_blocklisted(token_data.jti):
+        raise _credentials_exception()
+
+    if not token_data.session_id:
+        raise _credentials_exception()
+
+    session = get_session_by_id(token_data.session_id)
+    if session is None or session.user_uuid != token_data.user_uuid:
         raise _credentials_exception()
 
     user = _get_user_by_uuid(db_session, token_data.user_uuid)

@@ -195,21 +195,11 @@ function normalizeFullCourse(course: FullCourseRead): NormalizedFullCourse {
 async function fetchCourses(
   page = 1,
   limit = 20,
-  access_token?: string,
 ): Promise<{ courses: NormalizedCourseWithPermissions[]; total: number }> {
-  'use cache';
-  cacheTag(tags.courses);
-  cacheTag(courseTag.publicList());
-  cacheLife(CacheProfiles.courses);
-
-  const headers: HeadersInit = { 'Content-Type': 'application/json' };
-  if (access_token) {
-    headers.Authorization = `Bearer ${access_token}`;
-  }
-
-  const result = await fetch(`${getAPIUrl()}courses/page/${page}/limit/${limit}`, {
+  const result = await apiFetch(`courses/page/${page}/limit/${limit}`, {
     method: 'GET',
-    headers,
+    headers: { 'Content-Type': 'application/json' },
+    baseUrl: getAPIUrl(),
     signal: AbortSignal.timeout(10_000),
   });
 
@@ -227,8 +217,8 @@ async function fetchCourses(
   return { courses, total };
 }
 
-export async function getCourses(_next?: any, access_token?: any, page = 1, limit = 20) {
-  return fetchCourses(page, limit, access_token);
+export async function getCourses(_next?: any, page = 1, limit = 20) {
+  return fetchCourses(page, limit);
 }
 
 /**
@@ -237,7 +227,6 @@ export async function getCourses(_next?: any, access_token?: any, page = 1, limi
 async function fetchEditableCourses(
   page = 1,
   limit = 20,
-  access_token?: string,
   query = '',
   sortBy = 'updated',
   preset = '',
@@ -246,19 +235,6 @@ async function fetchEditableCourses(
   total: number;
   summary: EditableCoursesSummary;
 }> {
-  'use cache';
-  cacheTag(tags.editableCourses);
-  cacheTag(courseTag.editableList());
-  cacheLife(CacheProfiles.courses);
-
-  if (!access_token) {
-    return {
-      courses: [],
-      total: 0,
-      summary: { total: 0, ready: 0, private: 0, attention: 0 },
-    };
-  }
-
   const queryParams = new URLSearchParams();
   if (query?.trim()) {
     queryParams.set('query', query.trim());
@@ -270,17 +246,23 @@ async function fetchEditableCourses(
     queryParams.set('preset', preset.trim());
   }
 
-  const result = await fetch(
-    `${getAPIUrl()}courses/editable/page/${page}/limit/${limit}${queryParams.size > 0 ? `?${queryParams.toString()}` : ''}`,
+  const result = await apiFetch(
+    `courses/editable/page/${page}/limit/${limit}${queryParams.size > 0 ? `?${queryParams.toString()}` : ''}`,
     {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${access_token}`,
-      },
+      headers: { 'Content-Type': 'application/json' },
+      baseUrl: getAPIUrl(),
       signal: AbortSignal.timeout(10_000),
     },
   );
+
+  if (result.status === 401 || result.status === 403) {
+    return {
+      courses: [],
+      total: 0,
+      summary: { total: 0, ready: 0, private: 0, attention: 0 },
+    };
+  }
 
   if (!result.ok) {
     const error: any = new Error(result.statusText || 'Request failed');
@@ -303,14 +285,13 @@ async function fetchEditableCourses(
 }
 
 export async function getEditableCourses(
-  access_token?: any,
   page = 1,
   limit = 20,
   query = '',
   sortBy = 'updated',
   preset = '',
 ) {
-  return fetchEditableCourses(page, limit, access_token, query, sortBy, preset);
+  return fetchEditableCourses(page, limit, query, sortBy, preset);
 }
 
 export async function getCourseUserRights(course_uuid: string) {
@@ -328,25 +309,15 @@ export async function searchCourses(query: string, page = 1, limit = 20, next: a
  */
 async function fetchCourseMetadata(
   course_uuid: string,
-  access_token?: string,
   withUnpublishedActivities = false,
 ): Promise<NormalizedFullCourse> {
-  'use cache';
   const normalizedCourseUuid = course_uuid.startsWith('course_') ? course_uuid : `course_${course_uuid}`;
-  cacheTag(tags.courses);
-  cacheTag(courseTag.detail(normalizedCourseUuid));
-  cacheLife(CacheProfiles.courses);
-
-  const headers: HeadersInit = { 'Content-Type': 'application/json' };
-  if (access_token) {
-    headers.Authorization = `Bearer ${access_token}`;
-  }
-
-  const result = await fetch(
-    `${getAPIUrl()}courses/${normalizedCourseUuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`,
+  const result = await apiFetch(
+    `courses/${normalizedCourseUuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`,
     {
       method: 'GET',
-      headers,
+      headers: { 'Content-Type': 'application/json' },
+      baseUrl: getAPIUrl(),
       signal: AbortSignal.timeout(10_000),
     },
   );
@@ -356,10 +327,9 @@ async function fetchCourseMetadata(
 export async function getCourseMetadata(
   course_uuid: string,
   _next?: any,
-  access_token?: string | null,
   withUnpublishedActivities = false,
 ) {
-  return fetchCourseMetadata(course_uuid, access_token || undefined, withUnpublishedActivities);
+  return fetchCourseMetadata(course_uuid, withUnpublishedActivities);
 }
 
 interface CourseWriteOptions {
@@ -402,25 +372,18 @@ export async function updateCourseAccess(course_uuid: string, data: any, options
 /**
  * Cached fetch for full course data
  */
-async function fetchCourse(course_uuid: string, access_token?: string): Promise<NormalizedCourse> {
-  'use cache';
-  cacheTag(tags.courses);
-  cacheTag(courseTag.detail(course_uuid));
-  cacheLife(CacheProfiles.courses);
-
-  const result = await fetch(`${getAPIUrl()}courses/${course_uuid}`, {
+async function fetchCourse(course_uuid: string): Promise<NormalizedCourse> {
+  const result = await apiFetch(`courses/${course_uuid}`, {
     method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${access_token}`,
-    },
+    headers: { 'Content-Type': 'application/json' },
+    baseUrl: getAPIUrl(),
     signal: AbortSignal.timeout(10_000),
   });
   return normalizeCourse((await errorHandling(result)) as CourseRead);
 }
 
-export async function getCourse(course_uuid: string, _next?: any, access_token?: string) {
-  return fetchCourse(course_uuid, access_token);
+export async function getCourse(course_uuid: string, _next?: any) {
+  return fetchCourse(course_uuid);
 }
 
 export async function updateCourseThumbnail(course_uuid: string, formData: FormData, options?: CourseWriteOptions) {

@@ -290,61 +290,27 @@ export async function createExternalVideoActivity(
 /**
  * Cached fetch for activity by UUID
  */
-async function fetchActivity(activity_uuid: string, access_token?: string): Promise<ActivityReadWithPermissions> {
-  'use cache';
-  cacheTag(tags.activities);
-  cacheLife(CacheProfiles.activities);
+async function fetchActivity(activity_uuid: string): Promise<ActivityReadWithPermissions> {
+  // Support both raw and canonical UUID variants.
+  // Some UI routes pass the raw suffix (e.g. "01KE..."), but API uses "activity_...".
+  const canonicalActivityUuid = activity_uuid.startsWith('activity_') ? activity_uuid : `activity_${activity_uuid}`;
 
-  const result = await fetch(`${getAPIUrl()}activities/${activity_uuid}`, {
+  const result = await apiFetch(`activities/${canonicalActivityUuid}`, {
     method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${access_token}`,
-    },
+    headers: { 'Content-Type': 'application/json' },
+    baseUrl: getAPIUrl(),
     signal: AbortSignal.timeout(10_000),
   });
   return (await result.json()) as ActivityReadWithPermissions;
 }
 
-export async function getActivity(activity_uuid: string, _next?: any, access_token?: string) {
-  return fetchActivity(activity_uuid, access_token);
+export async function getActivity(activity_uuid: string, _next?: any) {
+  return fetchActivity(activity_uuid);
 }
 
 export async function deleteActivity(activity_uuid: string) {
   const result = await apiFetch(`activities/${activity_uuid}`, { method: 'DELETE' });
   return getTypedResponseMetadata<ActivityDetailResponse>(result);
-}
-
-/**
- * Cached fetch for activity with auth header
- */
-async function fetchActivityWithAuth(
-  activity_uuid: string,
-  access_token?: string,
-): Promise<ActivityReadWithPermissions> {
-  'use cache';
-  cacheTag(tags.activities);
-  cacheLife(CacheProfiles.activities);
-
-  const headers: HeadersInit = { 'Content-Type': 'application/json' };
-  if (access_token) {
-    headers.Authorization = `Bearer ${access_token}`;
-  }
-
-  // Support both raw and canonical UUID variants.
-  // Some UI routes pass the raw suffix (e.g. "01KE..."), but API uses "activity_...".
-  const canonicalActivityUuid = activity_uuid.startsWith('activity_') ? activity_uuid : `activity_${activity_uuid}`;
-
-  const result = await fetch(`${getAPIUrl()}activities/${canonicalActivityUuid}`, {
-    method: 'GET',
-    headers,
-    signal: AbortSignal.timeout(10_000),
-  });
-  return (await result.json()) as ActivityReadWithPermissions;
-}
-
-export async function getActivityWithAuthHeader(activity_uuid: string, _next?: any, access_token?: string | null) {
-  return fetchActivityWithAuth(activity_uuid, access_token || undefined);
 }
 
 export async function updateActivity(data: any, activity_uuid: string) {

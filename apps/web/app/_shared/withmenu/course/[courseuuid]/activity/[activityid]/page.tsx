@@ -1,4 +1,4 @@
-import { getActivityWithAuthHeader } from '@services/courses/activities';
+import { getActivity } from '@services/courses/activities';
 import { getCourseMetadata } from '@services/courses/courses';
 import { getTranslations } from 'next-intl/server';
 import { jetBrainsMono } from '@/lib/fonts';
@@ -24,7 +24,7 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
 
   // Don't fetch activity if it's the end page
   const isCourseEnd = activityid === 'end';
-  const activity = isCourseEnd ? null : await getActivityWithAuthHeader(activityid);
+  const activity = isCourseEnd ? null : await getActivity(activityid);
 
   // Localized page title
   const pageTitle = isCourseEnd
@@ -63,7 +63,7 @@ const ActivityPage = async (params: any) => {
 
   const [course_meta, activity] = await Promise.all([
     fetchCourseMetadata(courseuuid),
-    isCourseEnd ? Promise.resolve(null) : getActivityWithAuthHeader(activityid),
+    isCourseEnd ? Promise.resolve(null) : getActivity(activityid),
   ]);
 
   return (

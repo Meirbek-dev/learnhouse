@@ -1,4 +1,4 @@
-import { getActivityWithAuthHeader } from '@services/courses/activities';
+import { getActivity } from '@services/courses/activities';
 import { getCourseMetadata } from '@services/courses/courses';
 import { jetBrainsMono } from '@/lib/fonts';
 import type { Metadata } from 'next';
@@ -18,7 +18,7 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
   const { courseuuid, activityid } = await props.params;
   const course_meta = await fetchCourseMetadata(courseuuid);
   const isCourseEnd = activityid === 'end';
-  const activity = isCourseEnd ? null : await getActivityWithAuthHeader(activityid);
+  const activity = isCourseEnd ? null : await getActivity(activityid);
 
   const pageTitle = isCourseEnd ? `Course End - ${course_meta.name}` : `${activity?.name ?? ''} - ${course_meta.name}`;
 
@@ -52,7 +52,7 @@ export default async function PlatformActivityPage(props: {
   const isCourseEnd = activityid === 'end';
   const [course_meta, activity] = await Promise.all([
     fetchCourseMetadata(courseuuid),
-    isCourseEnd ? Promise.resolve(null) : getActivityWithAuthHeader(activityid),
+    isCourseEnd ? Promise.resolve(null) : getActivity(activityid),
   ]);
 
   return (

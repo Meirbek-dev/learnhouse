@@ -7,8 +7,9 @@ import secrets
 import time
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
+from typing import Literal
 
-from sqlmodel import Session
+from sqlmodel import Session, select
 
 from src.db.auth_sessions import AuthSession
 from src.db.users import User
@@ -20,6 +21,8 @@ REFRESH_SESSION_TTL = int(timedelta(days=7).total_seconds())
 REFRESH_SESSION_HARD_CAP = int(timedelta(days=30).total_seconds())
 SESSION_PREFIX = "session:"
 USER_SESSIONS_PREFIX = "user_sessions:"
+
+RefreshSessionStatus = Literal["active", "expired", "revoked", "reused", "invalid"]
 
 
 @dataclass(slots=True)
@@ -37,6 +40,15 @@ class SessionData:
     absolute_expires_at: int
 
 
+@dataclass(slots=True)
+class RefreshSessionInspection:
+    status: RefreshSessionStatus
+    session: SessionData | None = None
+    session_id: str | None = None
+    token_family_id: str | None = None
+    user_id: int | None = None
+
+
 def _now_ts() -> int:
     return int(time.time())
 
@@ -51,6 +63,14 @@ def _generate_family_id() -> str:
 
 def _generate_refresh_token(session_id: str) -> str:
     return session_id + "." + secrets.token_hex(32)
+
+
+def _extract_session_id(refresh_token: str) -> str | None:
+    parts = refresh_token.split(".", 1)
+    if len(parts) != 2:
+        return None
+    session_id = parts[0].strip()
+    return session_id or None
 
 
 def hash_refresh_token(token: str) -> str:
@@ -117,10 +137,9 @@ def _delete_session_from_redis(session_id: str, user_id: int) -> None:
 
 
 def _find_session_by_refresh_token(refresh_token: str) -> SessionData | None:
-    parts = refresh_token.split(".", 1)
-    if len(parts) != 2:
+    session_id = _extract_session_id(refresh_token)
+    if session_id is None:
         return None
-    session_id = parts[0]
     data = _read_session_from_redis(session_id)
     if data is None:
         return None
@@ -195,21 +214,95 @@ def create_auth_session(
     return data, refresh_token
 
 
+def get_session_by_id(session_id: str) -> SessionData | None:
+    return _read_session_from_redis(session_id)
+
+
+def get_session_owner_id(db_session: Session | None, session_id: str) -> int | None:
+    active = _read_session_from_redis(session_id)
+    if active is not None:
+        return active.user_id
+
+    if db_session is None:
+        return None
+
+    try:
+        record = db_session.exec(
+            select(AuthSession).where(AuthSession.session_id == session_id)
+        ).first()
+        return record.user_id if record else None
+    except Exception:
+        logger.warning("Failed to resolve owner for session %s", session_id)
+        return None
+
+
+def inspect_refresh_session(
+    db_session: Session, refresh_token: str
+) -> RefreshSessionInspection:
+    session_id = _extract_session_id(refresh_token)
+    if session_id is None:
+        return RefreshSessionInspection(status="invalid")
+
+    data = _find_session_by_refresh_token(refresh_token)
+    if data is not None:
+        now = _now_ts()
+        if now >= data.absolute_expires_at:
+            _delete_session_from_redis(data.session_id, data.user_id)
+            _audit_revoke(db_session, data.session_id)
+            return RefreshSessionInspection(
+                status="expired",
+                session_id=data.session_id,
+                token_family_id=data.token_family_id,
+                user_id=data.user_id,
+            )
+
+        data.last_seen_at = now
+        remaining = min(REFRESH_SESSION_TTL, data.absolute_expires_at - now)
+        _write_session_to_redis(data, remaining)
+        return RefreshSessionInspection(
+            status="active",
+            session=data,
+            session_id=data.session_id,
+            token_family_id=data.token_family_id,
+            user_id=data.user_id,
+        )
+
+    record = db_session.exec(
+        select(AuthSession).where(AuthSession.session_id == session_id)
+    ).first()
+    if record is None:
+        return RefreshSessionInspection(status="invalid", session_id=session_id)
+
+    if record.refresh_token_hash != hash_refresh_token(refresh_token):
+        return RefreshSessionInspection(
+            status="invalid",
+            session_id=session_id,
+            token_family_id=record.token_family_id,
+            user_id=record.user_id,
+        )
+
+    now_dt = datetime.now(UTC)
+    if record.expires_at <= now_dt:
+        return RefreshSessionInspection(
+            status="expired",
+            session_id=session_id,
+            token_family_id=record.token_family_id,
+            user_id=record.user_id,
+        )
+
+    return RefreshSessionInspection(
+        status="reused" if record.replaced_by_session_id else "revoked",
+        session_id=session_id,
+        token_family_id=record.token_family_id,
+        user_id=record.user_id,
+    )
+
+
 def resolve_refresh_session(
     db_session: Session, refresh_token: str
 ) -> SessionData | None:
-    data = _find_session_by_refresh_token(refresh_token)
-    if data is None:
-        return None
-    now = _now_ts()
-    if now >= data.absolute_expires_at:
-        _delete_session_from_redis(data.session_id, data.user_id)
-        _audit_revoke(db_session, data.session_id)
-        return None
-    data.last_seen_at = now
-    remaining = min(REFRESH_SESSION_TTL, data.absolute_expires_at - now)
-    _write_session_to_redis(data, remaining)
-    return data
+    inspection = inspect_refresh_session(db_session, refresh_token)
+    return inspection.session if inspection.status == "active" else None
 
 
 def rotate_session(
@@ -222,7 +315,6 @@ def rotate_session(
 ) -> tuple[SessionData, str]:
     now = _now_ts()
     _delete_session_from_redis(old_session.session_id, old_session.user_id)
-    _audit_revoke(db_session, old_session.session_id)
     new_session_id = _generate_session_id()
     new_refresh_token = _generate_refresh_token(new_session_id)
     new_data = SessionData(
@@ -240,6 +332,20 @@ def rotate_session(
     )
     remaining = max(1, min(REFRESH_SESSION_TTL, old_session.absolute_expires_at - now))
     _write_session_to_redis(new_data, remaining)
+
+    try:
+        record = db_session.exec(
+            select(AuthSession).where(AuthSession.session_id == old_session.session_id)
+        ).first()
+        if record is not None:
+            record.revoked_at = datetime.now(UTC)
+            record.rotated_at = datetime.now(UTC)
+            record.replaced_by_session_id = new_session_id
+            db_session.add(record)
+            db_session.commit()
+    except Exception:
+        logger.warning("Audit rotate failed for session %s", old_session.session_id)
+
     _audit_create(db_session, new_data)
     return new_data, new_refresh_token
 

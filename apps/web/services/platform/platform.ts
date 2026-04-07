@@ -20,24 +20,12 @@ async function getTypedResponseMetadata<T>(response: Response): Promise<Response
   return (await getResponseMetadata(response)) as ResponseMetadata<T>;
 }
 
-/**
- * `fetchPlatform` lives inside a `use cache` boundary so `cookies()` is
- * unavailable here. Callers must pass the raw access token explicitly.
- */
-async function fetchPlatform(access_token?: string): Promise<PlatformRead | null> {
-  'use cache';
-  cacheTag(tags.platform);
-  cacheLife(CacheProfiles.platform);
-
-  const headers: HeadersInit = { 'Content-Type': 'application/json' };
-  if (access_token) {
-    headers.Authorization = `Bearer ${access_token}`;
-  }
-
+async function fetchPlatform(): Promise<PlatformRead | null> {
   try {
-    const result = await fetch(`${getServerAPIUrl()}platform`, {
+    const result = await apiFetch('platform', {
       method: 'GET',
-      headers,
+      headers: { 'Content-Type': 'application/json' },
+      baseUrl: getServerAPIUrl(),
       signal: AbortSignal.timeout(8000),
     });
     return await errorHandling(result);
@@ -46,8 +34,8 @@ async function fetchPlatform(access_token?: string): Promise<PlatformRead | null
   }
 }
 
-export async function getPlatform(access_token?: string) {
-  return fetchPlatform(access_token);
+export async function getPlatform() {
+  return fetchPlatform();
 }
 
 export async function updateLanding(

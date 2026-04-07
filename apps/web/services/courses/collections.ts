@@ -40,49 +40,33 @@ export async function createCollection(collection: any) {
   return data_result;
 }
 
-async function fetchCollectionById(collection_uuid: string, access_token?: string) {
-  'use cache';
-  cacheTag(tags.collections);
-  cacheLife(CacheProfiles.courses);
-
-  const headers: HeadersInit = { 'Content-Type': 'application/json' };
-  if (access_token) {
-    headers.Authorization = `Bearer ${access_token}`;
-  }
-
-  const result = await fetch(`${getAPIUrl()}collections/collection_${collection_uuid}`, {
+async function fetchCollectionById(collection_uuid: string) {
+  const result = await apiFetch(`collections/collection_${collection_uuid}`, {
     method: 'GET',
-    headers,
+    headers: { 'Content-Type': 'application/json' },
+    baseUrl: getAPIUrl(),
     signal: AbortSignal.timeout(10_000),
   });
   return await errorHandling(result);
 }
 
-export async function getCollectionById(collection_uuid: string, access_token?: string, _next?: any) {
-  return fetchCollectionById(collection_uuid, access_token);
+export async function getCollectionById(collection_uuid: string, _next?: any) {
+  return fetchCollectionById(collection_uuid);
 }
 
 /**
  * Cached fetch for collections
  */
-async function fetchCollections(access_token?: string) {
-  'use cache';
-  cacheTag(tags.collections);
-  cacheLife(CacheProfiles.courses);
-
-  const headers: HeadersInit = { 'Content-Type': 'application/json' };
-  if (access_token) {
-    headers.Authorization = `Bearer ${access_token}`;
-  }
-
-  const result = await fetch(`${getAPIUrl()}collections/page/1/limit/20`, {
+async function fetchCollections() {
+  const result = await apiFetch('collections/page/1/limit/20', {
     method: 'GET',
-    headers,
+    headers: { 'Content-Type': 'application/json' },
+    baseUrl: getAPIUrl(),
     signal: AbortSignal.timeout(10_000),
   });
   return await errorHandling(result);
 }
 
-export async function getCollections(access_token?: string, _next?: any) {
-  return fetchCollections(access_token);
+export async function getCollections(_next?: any) {
+  return fetchCollections();
 }

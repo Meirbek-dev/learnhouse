@@ -1,6 +1,7 @@
 import logging
 import time
 from typing import Annotated
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from fastapi.responses import JSONResponse, RedirectResponse
@@ -45,6 +46,8 @@ from src.services.auth.sessions import (
     SessionData,
     create_auth_session,
     get_user_active_sessions,
+    get_session_owner_id,
+    inspect_refresh_session,
     resolve_refresh_session,
     revoke_all_user_sessions,
     revoke_session,
@@ -64,6 +67,7 @@ from src.services.users.users import (
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
+UNSAFE_METHODS = {"POST", "PUT", "PATCH", "DELETE"}
 
 
 # ── Schemas ───────────────────────────────────────────────────────────────────
@@ -109,6 +113,65 @@ def _make_access_token(session: SessionData) -> str:
     )
 
 
+def _current_origin() -> str:
+    settings = get_settings()
+    hosting = settings.hosting_config
+    protocol = "https" if hosting.ssl else "http"
+    port = hosting.port
+    default_port = 443 if hosting.ssl else 80
+    if port == default_port:
+        return f"{protocol}://{hosting.domain}"
+    return f"{protocol}://{hosting.domain}:{port}"
+
+
+def _sanitize_callback_target(callback: str) -> str:
+    if not isinstance(callback, str) or not callback.strip():
+        raise HTTPException(status_code=400, detail="Invalid callback target")
+
+    raw = callback.strip()
+    parsed = urlsplit(raw)
+    if not parsed.scheme and not parsed.netloc:
+        if not raw.startswith("/"):
+            raise HTTPException(status_code=400, detail="Invalid callback target")
+        query = urlencode(parse_qsl(parsed.query, keep_blank_values=True))
+        return urlunsplit(("", "", parsed.path or "/", query, "")) or "/"
+
+    origin = urlunsplit((parsed.scheme, parsed.netloc, "", "", "")).rstrip("/")
+    settings = get_settings()
+    allowed_origins = {item.rstrip("/") for item in settings.hosting_config.allowed_origins}
+    allowed_origins.add(_current_origin())
+    if origin not in allowed_origins:
+        raise HTTPException(status_code=400, detail="Untrusted callback origin")
+
+    query = urlencode(parse_qsl(parsed.query, keep_blank_values=True))
+    return urlunsplit(("", "", parsed.path or "/", query, "")) or "/"
+
+
+def _require_cookie_origin(request: Request) -> None:
+    if request.method.upper() not in UNSAFE_METHODS:
+        return
+
+    if request.headers.get("authorization"):
+        return
+
+    if not (
+        request.cookies.get(ACCESS_COOKIE_KEY)
+        or request.cookies.get(REFRESH_COOKIE_KEY)
+    ):
+        return
+
+    origin = request.headers.get("origin")
+    if not origin:
+        return
+
+    normalized_origin = origin.rstrip("/")
+    settings = get_settings()
+    allowed_origins = {item.rstrip("/") for item in settings.hosting_config.allowed_origins}
+    allowed_origins.add(_current_origin())
+    if normalized_origin not in allowed_origins:
+        raise HTTPException(status_code=403, detail="Untrusted request origin")
+
+
 # ── Endpoints ─────────────────────────────────────────────────────────────────
 
 
@@ -119,6 +182,7 @@ async def login(
     body: LoginRequest,
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
+    _require_cookie_origin(request)
     ip = _client_ip(request)
     ua = _user_agent(request)
 
@@ -195,6 +259,7 @@ def refresh(
     response: Response,
     db_session: Annotated[Session, Depends(get_db_session)],
 ) -> TokensResponse:
+    _require_cookie_origin(request)
     refresh_token = request.cookies.get(REFRESH_COOKIE_KEY)
     if not refresh_token:
         raise HTTPException(
@@ -215,15 +280,29 @@ def refresh(
             headers={"Retry-After": str(exc.retry_after)},
         )
 
-    old_session = resolve_refresh_session(db_session, refresh_token)
-    if old_session is None:
-        # Token not in Redis: check if it ever existed (theft detection)
-        # Revocation already handled inside resolve_refresh_session
+    inspection = inspect_refresh_session(db_session, refresh_token)
+    if inspection.status != "active" or inspection.session is None:
+        if inspection.status == "reused":
+            if inspection.token_family_id and inspection.user_id is not None:
+                revoke_token_family(
+                    db_session, inspection.token_family_id, inspection.user_id
+                )
+            write_audit_event(
+                db_session,
+                event_type="refresh_reuse_detected",
+                session_id=inspection.session_id,
+                ip_address=_client_ip(request),
+                user_agent=_user_agent(request),
+                metadata={"status": inspection.status},
+                severity="warning",
+            )
+
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or expired refresh token",
             headers={"WWW-Authenticate": "Bearer"},
         )
+    old_session = inspection.session
 
     from sqlmodel import select
     from src.db.users import User
@@ -278,6 +357,7 @@ def logout(
     token: Annotated[str | None, Depends(oauth2_scheme_optional)],
     db_session: Annotated[Session, Depends(get_db_session)],
 ) -> LogoutResponse:
+    _require_cookie_origin(request)
     resolved_token = get_access_token_from_request(request, token)
 
     if resolved_token:
@@ -292,18 +372,7 @@ def logout(
             blocklist_jti(jti, remaining)
 
         if session_id:
-            # Find user_id from the refresh token if available
-            refresh_token = request.cookies.get(REFRESH_COOKIE_KEY)
-            user_id_hint = None
-            if refresh_token:
-                old_session = resolve_refresh_session(db_session, refresh_token)
-                if old_session:
-                    user_id_hint = old_session.user_id
-            if user_id_hint is None and session_id:
-                # Try to get user_id from session prefix
-                parts = session_id.split("_", 1)
-                # Best effort — won't fail if we can't find it
-                pass
+            user_id_hint = get_session_owner_id(db_session, session_id)
             if user_id_hint:
                 revoke_session(db_session, session_id, user_id_hint)
 
@@ -326,6 +395,7 @@ async def logout_all(
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
 ) -> LogoutResponse:
+    _require_cookie_origin(request)
     token = get_access_token_from_request(request, None)
     if token:
         payload = decode_token_unverified(token)
@@ -386,6 +456,7 @@ async def forgot_password(
     body: ForgotPasswordRequest,
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
+    _require_cookie_origin(request)
     ip = _client_ip(request)
     try:
         check_rate_limit(key=f"forgot:ip:{ip}", max_requests=3, window_seconds=3600)
@@ -406,6 +477,7 @@ async def reset_password(
     body: ResetPasswordRequest,
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
+    _require_cookie_origin(request)
     msg = await change_password_with_reset_code(
         db_session, body.token, body.new_password
     )
@@ -432,6 +504,7 @@ def _backend_callback_url() -> str:
 
 @router.get("/google/authorize")
 async def google_authorize(callback: str) -> RedirectResponse:
+    callback = _sanitize_callback_target(callback)
     settings = get_settings()
     cfg = settings.google_oauth
     if not cfg.client_id or not cfg.client_secret:
@@ -456,8 +529,6 @@ async def google_callback(
     db_session: Session = Depends(get_db_session),
 ) -> RedirectResponse:
     frontend_callback = "/"
-    if state:
-        frontend_callback = state  # decoded inside exchange_google_code
 
     if error or not code:
         logger.warning("Google OAuth error: %s", error)
@@ -479,7 +550,9 @@ async def google_callback(
     except HTTPException:
         return RedirectResponse(f"{frontend_callback}?error=oauth_failed")
 
-    frontend_callback = google_user.get("frontend_callback", "/")
+    frontend_callback = _sanitize_callback_target(
+        str(google_user.get("frontend_callback", "/"))
+    )
     ip = _client_ip(request)
 
     try:

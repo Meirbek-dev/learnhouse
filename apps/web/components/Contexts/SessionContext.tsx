@@ -68,6 +68,18 @@ const PlatformSessionProvider = ({
     void update();
   }, [initialSession]);
 
+  useEffect(() => {
+    const handleSessionExpired = () => {
+      setData(null);
+      setStatus('unauthenticated');
+    };
+
+    window.addEventListener('auth:session-expired', handleSessionExpired);
+    return () => {
+      window.removeEventListener('auth:session-expired', handleSessionExpired);
+    };
+  }, []);
+
   const extendedSession: SessionContextType = useMemo(
     () => ({
       data,

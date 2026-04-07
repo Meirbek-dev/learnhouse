@@ -66,6 +66,43 @@ def create_app() -> FastAPI:
         logfire.instrument_sqlalchemy(engine=engine)
 
     app.add_middleware(GZipMiddleware, minimum_size=1000)
+
+    @app.middleware("http")
+    async def enforce_cookie_request_origin(request: Request, call_next):
+        unsafe_methods = {"POST", "PUT", "PATCH", "DELETE"}
+        has_cookie_auth = bool(
+            request.cookies.get("access_token_cookie")
+            or request.cookies.get("refresh_token_cookie")
+        )
+        has_authorization = bool(request.headers.get("authorization"))
+
+        if (
+            request.method.upper() in unsafe_methods
+            and has_cookie_auth
+            and not has_authorization
+        ):
+            origin = request.headers.get("origin")
+            if origin:
+                allowed = {item.rstrip("/") for item in settings.hosting_config.allowed_origins}
+                scheme = "https" if settings.hosting_config.ssl else "http"
+                port = settings.hosting_config.port
+                default_port = 443 if settings.hosting_config.ssl else 80
+                if port == default_port:
+                    allowed.add(f"{scheme}://{settings.hosting_config.domain}")
+                else:
+                    allowed.add(f"{scheme}://{settings.hosting_config.domain}:{port}")
+
+                if origin.rstrip("/") not in allowed:
+                    return JSONResponse(
+                        status_code=403,
+                        content={
+                            "error_code": "CSRF_ORIGIN_MISMATCH",
+                            "message": "Untrusted request origin",
+                        },
+                    )
+
+        return await call_next(request)
+
     app.mount("/content", CachedStaticFiles(directory="content"), name="content")
     app.include_router(v1_router)
     return app

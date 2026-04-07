@@ -18,12 +18,6 @@ uv run pytest src/tests/security/test_security.py -v
 
 # Run only authentication tests
 uv run pytest src/tests/security/test_auth.py -v
-
-# Run only RBAC v2 tests
-uv run pytest src/tests/services/test_rbac_v2.py -v
-
-# Run only feature usage tests
-uv run pytest src/tests/security/test_features_utils.py -v
 ```
 
 ## Run Comprehensive Tests

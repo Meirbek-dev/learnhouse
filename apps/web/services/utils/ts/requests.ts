@@ -43,19 +43,15 @@ const createRequestInit = (
   method: string,
   config: {
     data?: any;
-    token?: string;
     next?: any;
     isJson?: boolean;
     // When true, only adds a body for POST, PUT, PATCH, or DELETE methods.
     limitBodyToMethods?: boolean;
   },
 ): RequestInit & { next?: any } => {
-  const { data, token, next, isJson = true, limitBodyToMethods = false } = config;
+  const { data, next, isJson = true, limitBodyToMethods = false } = config;
 
   const headers: Record<string, string> = {};
-  if (token) {
-    headers.Authorization = `Bearer ${token}`;
-  }
 
   const options: RequestInit & { next?: any } = {
     method,
@@ -92,33 +88,9 @@ export const RequestBody = (method: string, data: any, next: any) => {
   return createRequestInit(method, { data, next });
 };
 
-export const RequestBodyWithAuthHeader = (method: string, data: any, next: any, token?: string) => {
-  return createRequestInit(method, {
-    data,
-    next,
-    token,
-    limitBodyToMethods: true,
-  });
-};
-
-export const RequestBodyFormWithAuthHeader = (method: string, data: any, next: any, access_token?: string) => {
-  // Handles FormData, so isJson is false.
-  return createRequestInit(method, {
-    data,
-    next,
-    token: access_token,
-    isJson: false,
-  });
-};
-
-export const swrFetcher = async (url: string, token?: string) => {
-  const headers: Record<string, string> = {};
-  if (token) {
-    headers.Authorization = `Bearer ${token}`;
-  }
+export const swrFetcher = async (url: string) => {
   const options: RequestInit = {
     method: 'GET',
-    headers,
     redirect: 'follow',
     credentials: 'include',
   };
@@ -126,15 +98,9 @@ export const swrFetcher = async (url: string, token?: string) => {
   return errorHandling(response);
 };
 
-export const fetchResponseMetadata = async (url: string, token?: string): Promise<CustomResponseTyping> => {
-  const headers: Record<string, string> = {};
-  if (token) {
-    headers.Authorization = `Bearer ${token}`;
-  }
-
+export const fetchResponseMetadata = async (url: string): Promise<CustomResponseTyping> => {
   const response = await fetch(url, {
     method: 'GET',
-    headers,
     redirect: 'follow',
     credentials: 'include',
   });
@@ -148,15 +114,9 @@ export const fetchResponseMetadata = async (url: string, token?: string): Promis
  */
 export const swrFetcherWithHeaders = async (
   url: string,
-  token?: string,
 ): Promise<{ data: any; headers: Record<string, string> }> => {
-  const reqHeaders: Record<string, string> = {};
-  if (token) {
-    reqHeaders.Authorization = `Bearer ${token}`;
-  }
   const options: RequestInit = {
     method: 'GET',
-    headers: reqHeaders,
     redirect: 'follow',
     credentials: 'include',
   };

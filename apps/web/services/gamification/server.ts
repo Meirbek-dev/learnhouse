@@ -16,7 +16,6 @@ import { CacheProfiles, cacheLife, cacheTag } from '@/lib/cache';
 import { getServerAPIUrl } from '@/services/config/config';
 import type { components } from '@/lib/api/generated';
 import { revalidateTag } from 'next/cache';
-import { getSession } from '@/lib/auth/session';
 import { apiFetch } from '@/lib/api-client';
 
 type ApiDashboardResponse = components['schemas']['DashboardRead'];
@@ -107,33 +106,14 @@ function normalizeLeaderboard(payload?: ApiLeaderboardResponse | null): Platform
 }
 
 /**
- * Get access token from session without throwing
- * Returns null if no session or error occurs
- */
-async function getAccessToken(): Promise<string | null> {
-  try {
-    const session = await getSession();
-    const token = session?.accessToken;
-    return token || null;
-  } catch {
-    // Silently fail for unauthorized users - this is expected behavior
-    return null;
-  }
-}
-
-/**
  * Cached fetch for unified gamification data
  * Uses `use cache` directive for cacheComponents
  */
-async function fetchGamificationData(accessToken?: string): Promise<ApiDashboardResponse | null> {
-  'use cache';
-  cacheTag(gamificationTag.dashboard());
-  cacheLife(CacheProfiles.realtime);
-
+async function fetchGamificationData(): Promise<ApiDashboardResponse | null> {
   try {
-    const res = await fetch(`${getServerAPIUrl()}gamification/`, {
+    const res = await apiFetch('gamification/', {
       method: 'GET',
-      headers: { Authorization: `Bearer ${accessToken}` },
+      baseUrl: getServerAPIUrl(),
       signal: AbortSignal.timeout(8000),
     });
 
@@ -154,15 +134,11 @@ async function fetchGamificationData(accessToken?: string): Promise<ApiDashboard
 /**
  * Cached fetch for leaderboard data
  */
-async function fetchLeaderboardData(limit: number, accessToken?: string): Promise<ApiLeaderboardResponse | null> {
-  'use cache';
-  cacheTag(gamificationTag.leaderboard());
-  cacheLife(CacheProfiles.realtime);
-
+async function fetchLeaderboardData(limit: number): Promise<ApiLeaderboardResponse | null> {
   try {
-    const res = await fetch(`${getServerAPIUrl()}gamification/leaderboard?limit=${encodeURIComponent(String(limit))}`, {
+    const res = await apiFetch(`gamification/leaderboard?limit=${encodeURIComponent(String(limit))}`, {
       method: 'GET',
-      headers: { Authorization: `Bearer ${accessToken}` },
+      baseUrl: getServerAPIUrl(),
       signal: AbortSignal.timeout(8000),
     });
 
@@ -184,23 +160,7 @@ async function fetchLeaderboardData(limit: number, accessToken?: string): Promis
  * Returns null if user is not authenticated or if fetch fails
  */
 async function getUnifiedServerData(): Promise<ApiDashboardResponse | null> {
-  // Check if user is authenticated first
-  const accessToken = await getAccessToken();
-  if (!accessToken) {
-    return null; // Expected: user not authenticated
-  }
-
-  // Use the cached fetcher
-  return fetchGamificationData(accessToken);
-}
-
-async function getUnifiedServerDataWithToken(accessToken?: string | null): Promise<ApiDashboardResponse | null> {
-  const resolvedAccessToken = accessToken ?? (await getAccessToken());
-  if (!resolvedAccessToken) {
-    return null;
-  }
-
-  return fetchGamificationData(resolvedAccessToken);
+  return fetchGamificationData();
 }
 
 export async function getServerGamificationProfile(): Promise<UserGamificationProfile | null> {
@@ -214,8 +174,8 @@ export async function getServerGamificationProfile(): Promise<UserGamificationPr
   return normalizeProfile(json.profile);
 }
 
-export async function getServerGamificationDashboard(accessToken?: string | null): Promise<DashboardData | null> {
-  const json = await getUnifiedServerDataWithToken(accessToken);
+export async function getServerGamificationDashboard(): Promise<DashboardData | null> {
+  const json = await getUnifiedServerData();
 
   // Return null if no data (unauthorized or error)
   if (!json) {
@@ -246,15 +206,8 @@ export async function getServerGamificationDashboard(accessToken?: string | null
  */
 export async function getServerLeaderboard(
   limit = 20,
-  accessToken?: string | null,
 ): Promise<PlatformLeaderboard | null> {
-  const resolvedAccessToken = accessToken ?? (await getAccessToken());
-  if (!resolvedAccessToken) {
-    return null; // Expected: user not authenticated
-  }
-
-  // Use the cached fetcher
-  const json = await fetchLeaderboardData(limit, resolvedAccessToken);
+  const json = await fetchLeaderboardData(limit);
   return normalizeLeaderboard(json);
 }
 

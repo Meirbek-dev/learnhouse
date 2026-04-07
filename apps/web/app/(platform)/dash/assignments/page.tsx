@@ -8,7 +8,6 @@ import { getPlatform } from '@/services/platform/platform';
 import { Card, CardContent } from '@/components/ui/card';
 import { getTranslations } from 'next-intl/server';
 import { Spinner } from '@components/ui/spinner';
-import { getSession } from '@/lib/auth/session';
 
 const EDITABLE_COURSES_PAGE_SIZE = 100;
 
@@ -24,8 +23,8 @@ interface Assignment {
   description: string;
 }
 
-async function getAllEditableCourses(access_token: string) {
-  const firstPage = await getEditableCourses(access_token, 1, EDITABLE_COURSES_PAGE_SIZE);
+async function getAllEditableCourses() {
+  const firstPage = await getEditableCourses(1, EDITABLE_COURSES_PAGE_SIZE);
 
   if (firstPage.total <= firstPage.courses.length) {
     return firstPage;
@@ -33,7 +32,7 @@ async function getAllEditableCourses(access_token: string) {
 
   const totalPages = Math.ceil(firstPage.total / EDITABLE_COURSES_PAGE_SIZE);
   const remainingPages = Array.from({ length: totalPages - 1 }, (_, index) =>
-    getEditableCourses(access_token, index + 2, EDITABLE_COURSES_PAGE_SIZE),
+    getEditableCourses(index + 2, EDITABLE_COURSES_PAGE_SIZE),
   );
   const remainingResults = await Promise.all(remainingPages);
 
@@ -46,15 +45,8 @@ async function getAllEditableCourses(access_token: string) {
 export default async function PlatformAssignmentsPage() {
   const t = await getTranslations('DashPage.Assignments.HomePage');
 
-  const session = await getSession();
-  const access_token = session?.accessToken;
-
-  if (!access_token) {
-    return <LoadingState />;
-  }
-
-  const platform = await getPlatform(access_token);
-  const coursesData = await getAllEditableCourses(access_token);
+  const platform = await getPlatform();
+  const coursesData = await getAllEditableCourses();
   const courses = coursesData?.courses || [];
 
   let courseAssignments: Assignment[][] = [];

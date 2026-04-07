@@ -1,6 +1,5 @@
 import { getServerGamificationDashboard } from '@/services/gamification/server';
 import LandingClassic from '@components/Landings/LandingClassic';
-import { getSession } from '@/lib/auth/session';
 import LandingCustom from '@components/Landings/LandingCustom';
 import { getCollections } from '@services/courses/collections';
 import { getPlatform } from '@/services/platform/platform';
@@ -39,13 +38,10 @@ export async function LandingContent() {
   await connection();
 
   try {
-    const session = await getSession();
-    const access_token = session?.accessToken;
-
     // Fetch platform info with detailed error handling
     let platform;
     try {
-      platform = await getPlatform(access_token || undefined);
+      platform = await getPlatform();
     } catch (error) {
       console.error('[LandingContent] Failed to fetch platform info:', {
         message: error instanceof Error ? error.message : 'Unknown error',
@@ -59,12 +55,10 @@ export async function LandingContent() {
     const hasCustomLanding = platform?.landing?.enabled;
 
     // Only fetch gamification data if user is authenticated
-    const gamificationPromise = access_token
-      ? getServerGamificationDashboard(access_token).catch((error: unknown) => {
-          logLandingFetchError('Gamification fetch failed', error);
-          return null;
-        })
-      : Promise.resolve(null);
+    const gamificationPromise = getServerGamificationDashboard().catch((error: unknown) => {
+      logLandingFetchError('Gamification fetch failed', error);
+      return null;
+    });
 
     if (hasCustomLanding && platform?.landing) {
       const gamificationData = await gamificationPromise;
@@ -78,11 +72,11 @@ export async function LandingContent() {
     }
 
     const [coursesData, collections, gamificationData] = await Promise.all([
-      getCourses('', access_token || undefined).catch((error: unknown) => {
+      getCourses(undefined, 1, 20).catch((error: unknown) => {
         logLandingFetchError('Courses fetch failed', error);
         return { courses: [], total: 0 };
       }),
-      getCollections(access_token).catch((error: unknown) => {
+      getCollections().catch((error: unknown) => {
         logLandingFetchError('Collections fetch failed', error);
         return [];
       }),
