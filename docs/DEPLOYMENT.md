@@ -312,6 +312,6 @@ rm -rf temp-restore
 
 **`gzip: stdin: not in gzip format` during restore** — the archive is zstd-compressed despite the `.tar.gz` symlink. Use `tar --zstd`.
 
-**PostgreSQL version mismatch after restore** — the image in `docker/Dockerfile.db` must match the major version in the backup. Run `pg_upgrade` or pin the image version.
+**PostgreSQL version mismatch after restore** — the image in `extra/Dockerfile.db` must match the major version in the backup. Run `pg_upgrade` or pin the image version.
 
 **Backup not running** — `docker compose logs backup` to inspect. Check disk space with `df -h`.

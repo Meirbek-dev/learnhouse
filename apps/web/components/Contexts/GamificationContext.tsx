@@ -3,6 +3,7 @@
 import { useXPToast } from '@/lib/gamification/components/xp-toast';
 import type { UserGamificationProfile } from '@/types/gamification';
 import { useGamificationStore } from '@/stores/gamification';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { AnimatePresence } from 'motion/react';
 import React, { lazy, useEffect } from 'react';
 
@@ -29,6 +30,7 @@ interface GamificationProviderProps {
 }
 
 export function GamificationProvider({ children, initialData }: GamificationProviderProps) {
+  const { status } = usePlatformSession();
   const { ToastContainer, showXPToast: showEnhancedXPToast } = useXPToast();
 
   const hydrate = useGamificationStore((s) => s._hydrate);
@@ -50,10 +52,10 @@ export function GamificationProvider({ children, initialData }: GamificationProv
   }, [initialData, hydrate]);
 
   useEffect(() => {
-    if (initialData === undefined) {
+    if (initialData === undefined && status === 'authenticated') {
       void fetchIfNeeded();
     }
-  }, [initialData, fetchIfNeeded]);
+  }, [initialData, fetchIfNeeded, status]);
 
   useEffect(() => {
     if (pendingXPToasts.length === 0) return;

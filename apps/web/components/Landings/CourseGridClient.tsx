@@ -13,6 +13,7 @@ import CourseThumbnail from '@components/Objects/Thumbnails/CourseThumbnail';
 import { getCoursesSwrKey, getTrailSwrKey } from '@services/courses/keys';
 import { swrFetcherWithHeaders } from '@services/utils/ts/requests';
 import { swrFetcher } from '@services/utils/ts/requests';
+import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { useMemo, useState } from 'react';
 import useSWR from 'swr';
 
@@ -24,6 +25,8 @@ interface CourseGridClientProps {
 }
 
 export default function CourseGridClient({ initialCourses, initialTotal }: CourseGridClientProps) {
+  const { status } = usePlatformSession();
+  const isAuthenticated = status === 'authenticated';
   const [page, setPage] = useState(1);
 
   // Fetch courses with pagination
@@ -45,8 +48,8 @@ export default function CourseGridClient({ initialCourses, initialTotal }: Cours
   const totalCount = Number.parseInt(coursesResponse?.headers?.['x-total-count'] ?? String(initialTotal), 10);
   const totalPages = Math.ceil(totalCount / COURSES_PER_PAGE);
 
-  // Fetch trail data to show progress on course thumbnails
-  const TRAIL_KEY = getTrailSwrKey();
+  // Fetch trail data to show progress on course thumbnails (auth-required)
+  const TRAIL_KEY = isAuthenticated ? getTrailSwrKey() : null;
   const { data: trailData } = useSWR(TRAIL_KEY, (url) => swrFetcher(url), {
     revalidateOnFocus: false,
     revalidateOnReconnect: false,

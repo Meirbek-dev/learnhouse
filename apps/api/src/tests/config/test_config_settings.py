@@ -63,7 +63,7 @@ def test_platform_config_accepts_public_key_only_security_config() -> None:
             sql_connection_string="postgresql+psycopg://openu:openu@db:5432/openu"
         ),
         redis_config=RedisConfig.model_construct(
-            redis_connection_string="redis://redis:6379/openu"
+            redis_connection_string="redis://redis:6379/0"
         ),
         security_config=SecurityConfig.model_construct(
             auth_ed25519_private_key=None,

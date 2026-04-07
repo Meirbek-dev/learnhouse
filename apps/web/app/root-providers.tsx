@@ -21,12 +21,15 @@ function AppSWRProvider({ children }: { children: ReactNode }) {
     <SWRConfig
       value={{
         dedupingInterval: 60_000,
-        errorRetryCount: 3,
         fetcher: (url: string) => swrFetcher(url),
         focusThrottleInterval: 60_000,
         revalidateOnFocus: false,
         revalidateOnReconnect: false,
-        shouldRetryOnError: true,
+        onErrorRetry: (error, _key, _config, revalidate, { retryCount }) => {
+          if ((error)?.status === 401) return;
+          if (retryCount >= 3) return;
+          setTimeout(() => revalidate({ retryCount }), 5000);
+        },
       }}
     >
       {children}

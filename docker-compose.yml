@@ -128,7 +128,7 @@ services:
   db:
     build:
       context: .
-      dockerfile: docker/Dockerfile.db
+      dockerfile: extra/Dockerfile.db
     restart: unless-stopped
     ports:
       - "5432:5432"
