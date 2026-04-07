@@ -25,10 +25,27 @@ from functools import lru_cache
 from typing import Any
 
 from authlib.jose import OKPKey
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.serialization import load_pem_private_key
+
+from config.config import get_settings
+
+
+def _raw_key_from_env_or_settings(env_var: str) -> str:
+    raw = __import__("os").environ.get(env_var, "")
+    if raw:
+        return raw
+
+    security_config = get_settings().security_config
+    if env_var == "PLATFORM_AUTH_ED25519_PRIVATE_KEY":
+        return security_config.auth_ed25519_private_key or ""
+    if env_var == "PLATFORM_AUTH_ED25519_PUBLIC_KEY":
+        return security_config.auth_ed25519_public_key or ""
+    return ""
 
 
 def _pem_from_env(env_var: str) -> bytes:
-    raw = __import__("os").environ.get(env_var, "")
+    raw = _raw_key_from_env_or_settings(env_var)
     if not raw:
         raise RuntimeError(f"{env_var} is not set")
     try:
@@ -47,13 +64,18 @@ def get_private_key() -> OKPKey:
 @lru_cache(maxsize=1)
 def get_public_key() -> OKPKey:
     """Return the Ed25519 public key (used to verify tokens, safe to distribute)."""
-    raw = __import__("os").environ.get("PLATFORM_AUTH_ED25519_PUBLIC_KEY", "")
+    raw = _raw_key_from_env_or_settings("PLATFORM_AUTH_ED25519_PUBLIC_KEY")
     if raw:
         pem = base64.b64decode(raw)
         return OKPKey.import_key(pem)
-    # Derive from private key when public key var is not set
-    priv = get_private_key()
-    return priv.public_key
+    # Derive the verify key from the private PEM when only the signer key is configured.
+    private_pem = _pem_from_env("PLATFORM_AUTH_ED25519_PRIVATE_KEY")
+    private_key = load_pem_private_key(private_pem, password=None)
+    public_pem = private_key.public_key().public_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PublicFormat.SubjectPublicKeyInfo,
+    )
+    return OKPKey.import_key(public_pem)
 
 
 def get_jwks() -> dict[str, Any]:

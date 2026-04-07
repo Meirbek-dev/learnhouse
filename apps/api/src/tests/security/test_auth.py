@@ -116,6 +116,56 @@ class TestAuth:
 
         assert exc_info.value.status_code == 401
 
+    def test_get_public_key_derives_from_private_key_when_public_missing(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        monkeypatch.delenv('PLATFORM_AUTH_ED25519_PUBLIC_KEY', raising=False)
+        monkeypatch.setattr(
+            'src.security.keys.get_settings',
+            lambda: Mock(
+                security_config=Mock(
+                    auth_ed25519_private_key=None,
+                    auth_ed25519_public_key=None,
+                )
+            ),
+        )
+        reload_key_cache()
+
+        token = create_access_token(user_uuid='user_123', session_id='sess_123')
+        token_data = decode_access_token(token)
+
+        assert token_data.user_uuid == 'user_123'
+        assert token_data.session_id == 'sess_123'
+
+    def test_get_public_key_uses_settings_fallback(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        private_key = Ed25519PrivateKey.generate()
+        public_key = private_key.public_key()
+
+        private_pem = private_key.private_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PrivateFormat.PKCS8,
+            encryption_algorithm=serialization.NoEncryption(),
+        )
+        public_pem = public_key.public_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PublicFormat.SubjectPublicKeyInfo,
+        )
+
+        monkeypatch.delenv('PLATFORM_AUTH_ED25519_PRIVATE_KEY', raising=False)
+        monkeypatch.delenv('PLATFORM_AUTH_ED25519_PUBLIC_KEY', raising=False)
+        monkeypatch.setattr(
+            'src.security.keys.get_settings',
+            lambda: Mock(
+                security_config=Mock(
+                    auth_ed25519_private_key=base64.b64encode(private_pem).decode('utf-8'),
+                    auth_ed25519_public_key=base64.b64encode(public_pem).decode('utf-8'),
+                )
+            ),
+        )
+        reload_key_cache()
+
+        key = get_public_key()
+
+        assert key is not None
+
     def test_get_access_token_from_request_prefers_header(self) -> None:
         request = Mock(spec=Request)
         request.cookies = {'access_token_cookie': 'cookie-token'}
