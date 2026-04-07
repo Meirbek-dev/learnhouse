@@ -6770,6 +6770,7 @@
       "visibleRows": "{count} видимых строк",
       "showingRows": "{from}–{to} из {total}",
       "page": "Страница {current} из {total}",
+      "pagination": "Пагинация",
       "prev": "Назад",
       "next": "Вперёд",
       "rowsPerPage": "Строк на страницу",

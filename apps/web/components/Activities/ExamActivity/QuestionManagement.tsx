@@ -19,7 +19,7 @@ import {
   AlertDialogTitle,
 } from '@components/ui/alert-dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@components/ui/card';
-import { Dialog, DialogContent } from '@components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription } from '@components/ui/dialog';
 import { Button } from '@components/ui/button';
 import QuestionEditor from './QuestionEditor';
 
@@ -242,6 +242,7 @@ export default function QuestionManagement({ examUuid, questions, onQuestionsCha
             onOpenChange={(open) => !open && dispatch({ type: 'CANCEL_EDIT' })}
           >
             <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-[600px]">
+              <DialogDescription className="sr-only">{t('fillInQuestionDetails')}</DialogDescription>
               <QuestionEditor
                 question={editingQuestion}
                 examUuid={examUuid}

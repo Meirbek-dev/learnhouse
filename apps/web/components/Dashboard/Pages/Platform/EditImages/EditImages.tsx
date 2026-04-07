@@ -677,7 +677,10 @@ export default function EditImages() {
                                 </div>
                                 <span className="text-sm font-medium text-gray-600">{t('Buttons.addPreview')}</span>
                               </DialogTrigger>
-                              <DialogContent className="sm:max-w-[600px]">
+                              <DialogContent
+                                className="sm:max-w-[600px]"
+                                aria-describedby={undefined}
+                              >
                                 <DialogHeader>
                                   <DialogTitle>{t('Dialog.AddPreview.title')}</DialogTitle>
                                 </DialogHeader>

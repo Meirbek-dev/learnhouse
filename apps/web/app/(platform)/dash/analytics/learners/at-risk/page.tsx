@@ -67,6 +67,7 @@ async function PlatformAnalyticsAtRiskPageInner(props: {
               variant="outline"
               size="sm"
               disabled={risk.page <= 1}
+              nativeButton={false}
               render={
                 <Link
                   href={`/dash/analytics/learners/at-risk?${new URLSearchParams({ ...Object.fromEntries(params.entries()), page: String(Math.max(1, risk.page - 1)), page_size: String(risk.page_size) }).toString()}`}
@@ -80,6 +81,7 @@ async function PlatformAnalyticsAtRiskPageInner(props: {
               variant="outline"
               size="sm"
               disabled={risk.page >= totalPages}
+              nativeButton={false}
               render={
                 <Link
                   href={`/dash/analytics/learners/at-risk?${new URLSearchParams({ ...Object.fromEntries(params.entries()), page: String(Math.min(totalPages, risk.page + 1)), page_size: String(risk.page_size) }).toString()}`}

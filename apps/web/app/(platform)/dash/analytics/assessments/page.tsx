@@ -75,6 +75,7 @@ async function PlatformAnalyticsAssessmentsPageInner(props: {
                   size="sm"
                   disabled={assessments.page <= 1}
                   aria-label={t('table.prev')}
+                  nativeButton={false}
                   render={
                     <Link
                       href={`/dash/analytics/assessments?${new URLSearchParams({ ...Object.fromEntries(params.entries()), page: String(Math.max(1, assessments.page - 1)), page_size: String(assessments.page_size) }).toString()}`}
@@ -91,6 +92,7 @@ async function PlatformAnalyticsAssessmentsPageInner(props: {
                   size="sm"
                   disabled={assessments.page >= totalPages}
                   aria-label={t('table.next')}
+                  nativeButton={false}
                   render={
                     <Link
                       href={`/dash/analytics/assessments?${new URLSearchParams({ ...Object.fromEntries(params.entries()), page: String(Math.min(totalPages, assessments.page + 1)), page_size: String(assessments.page_size) }).toString()}`}

@@ -393,6 +393,8 @@ export default function GradingPanel({
     [draft, mutate, onGradeSaved, scoreInvalid, submissionUuid, t],
   );
 
+  const saveDraftStatus: TeacherGradeInput['status'] = submission?.status === 'PUBLISHED' ? 'PUBLISHED' : 'GRADED';
+
   const studentName = getSubmissionDisplayName(submission);
   const canSave = !isSaving && draft.score !== '' && !scoreInvalid;
   const unsavedOpen = (pendingNavigate !== null || pendingClose) && !isSaving && !publishOpen && !returnOpen;
@@ -538,7 +540,7 @@ export default function GradingPanel({
                 <Button
                   variant="outline"
                   disabled={!canSave}
-                  onClick={() => handleSaveGrade('GRADED')}
+                  onClick={() => handleSaveGrade(saveDraftStatus)}
                   className="gap-1.5"
                 >
                   <BookOpenCheck className="h-4 w-4" />

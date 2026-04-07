@@ -6769,6 +6769,7 @@
       "visibleRows": "{count} көрінетін жол",
       "showingRows": "{total} ішіндегі {from}–{to}",
       "page": "{total} беттен {current} бет",
+      "pagination": "Беттеу",
       "prev": "Алдыңғы",
       "next": "Келесі",
       "rowsPerPage": "Бетке жолдар",
