@@ -35,15 +35,15 @@ interface CustomRoleInfo {
 }
 
 export const HeaderProfileBox = () => {
-  const session = usePlatformSession() as any;
+  const { data: session, status } = usePlatformSession();
   const { canAccessDashboard } = useNavigationPermissions();
   const t = useTranslations('Header');
 
-  const userRoles = session?.data?.roles ?? [];
+  const userRoles = session?.roles ?? [];
 
   let userRoleInfo: RoleInfo | null = null;
   if (userRoles && userRoles.length > 0) {
-    const sortedRoles = userRoles.toSorted((a: any, b: any) => {
+    const sortedRoles = [...userRoles].sort((a: any, b: any) => {
       return (b.role?.priority ?? 0) - (a.role?.priority ?? 0);
     });
 
@@ -95,7 +95,7 @@ export const HeaderProfileBox = () => {
   const shouldShowBadge = userRoleInfo !== null && userRoleInfo.slug !== RoleSlugs.USER;
 
   const customRoles: CustomRoleInfo[] =
-    userRoles && userRoles.length > 0
+    userRoles.length > 0
       ? userRoles
           .filter((role: any) => !role.role?.is_system)
           .map((role: any) => ({
@@ -106,7 +106,7 @@ export const HeaderProfileBox = () => {
 
   return (
     <div className="flex items-center">
-      {session.status === 'unauthenticated' && (
+      {status === 'unauthenticated' && (
         <div className="text-foreground flex grow rounded-lg p-1.5 px-2 text-sm font-bold">
           <ul className="flex items-center space-x-3">
             <li>
@@ -133,7 +133,7 @@ export const HeaderProfileBox = () => {
           </ul>
         </div>
       )}
-      {session.status === 'authenticated' && (
+      {status === 'authenticated' && (
         <div className="flex items-center">
           <div className="flex items-center space-x-3">
             <DropdownMenu>
@@ -149,7 +149,7 @@ export const HeaderProfileBox = () => {
                 <UserAvatar size="sm" />
                 <div className="flex flex-col space-y-0 text-start">
                   <div className="flex items-center space-x-2">
-                    <p className="text-foreground text-sm font-semibold capitalize">{session.data.user.username}</p>
+                    <p className="text-foreground text-sm font-semibold capitalize">{session?.user?.username}</p>
                     {/* Updated condition here */}
                     {shouldShowBadge && userRoleInfo && (
                       <Tooltip>
@@ -197,7 +197,7 @@ export const HeaderProfileBox = () => {
                       </Tooltip>
                     ))}
                   </div>
-                  <p className="text-muted-foreground text-xs">{session.data.user.email}</p>
+                  <p className="text-muted-foreground text-xs">{session?.user?.email}</p>
                 </div>
                 <ChevronDown
                   size={16}
@@ -212,8 +212,8 @@ export const HeaderProfileBox = () => {
                   <div className="flex items-center space-x-2">
                     <UserAvatar size="sm" />
                     <div>
-                      <p className="text-sm font-medium capitalize">{session.data.user.username}</p>
-                      <p className="text-muted-foreground text-xs">{session.data.user.email}</p>
+                      <p className="text-sm font-medium capitalize">{session?.user?.username}</p>
+                      <p className="text-muted-foreground text-xs">{session?.user?.email}</p>
                     </div>
                   </div>
                 </div>

@@ -4,6 +4,7 @@ import type { ClientSession } from '@/lib/auth/types';
 import PlatformSessionProvider, { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { PermissionProvider } from '@/components/Security/PermissionProvider';
 import { ThemeProvider, useTheme } from '@/components/providers/theme-provider';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { swrFetcher } from '@services/utils/ts/requests';
 import NextTopLoader from 'nextjs-toploader';
 import { Toaster } from '@/components/ui/sonner';
@@ -56,23 +57,19 @@ function RootProgressBar() {
 }
 
 function UserThemeSync() {
-  const session = usePlatformSession() as {
-    status?: 'loading' | 'authenticated' | 'unauthenticated';
-    data?: {
-      user?: { id?: number; theme?: string | null };
-    };
-  };
+  const { status } = usePlatformSession();
+  const currentUser = useCurrentUser();
   const { themeName } = useTheme();
   const pendingThemeRef = useRef<string | null>(null);
-  const syncedThemeRef = useRef(session?.data?.user?.theme ?? null);
+  const syncedThemeRef = useRef(currentUser?.theme ?? null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const userId = session?.data?.user?.id;
-  const isAuthenticated = session?.status === 'authenticated';
+  const userId = currentUser?.id;
+  const isAuthenticated = status === 'authenticated';
 
   useEffect(() => {
-    syncedThemeRef.current = session?.data?.user?.theme ?? null;
+    syncedThemeRef.current = currentUser?.theme ?? null;
     pendingThemeRef.current = null;
-  }, [session?.data?.user?.id, session?.data?.user?.theme]);
+  }, [currentUser?.id, currentUser?.theme]);
 
   useEffect(() => {
     if (!userId || !isAuthenticated) {
@@ -152,8 +149,8 @@ function UserThemeSync() {
 }
 
 function ThemeProviderWrapper({ children }: { children: ReactNode }) {
-  const session = usePlatformSession() as { data?: { user?: { theme?: string | null } } };
-  const userTheme = session?.data?.user?.theme;
+  const currentUser = useCurrentUser();
+  const userTheme = currentUser?.theme ?? null;
 
   return (
     <ThemeProvider userTheme={userTheme}>

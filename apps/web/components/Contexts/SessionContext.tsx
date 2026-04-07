@@ -1,6 +1,7 @@
 'use client';
 
 import type { ClientSession } from '@/lib/auth/types';
+import { tryRefreshToken } from '@services/utils/ts/requests';
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 
@@ -36,11 +37,10 @@ async function fetchSessionWithRefresh(): Promise<ClientSession | null> {
   if (session) return session;
 
   try {
-    const { refreshToken } = await import('@services/auth/auth');
-    const refreshed = await refreshToken();
+    const refreshed = await tryRefreshToken();
     if (refreshed) return fetchSession();
   } catch {
-    // If the import or refresh call fails, fall through to unauthenticated.
+    // If the refresh call fails, fall through to unauthenticated.
   }
 
   return null;
@@ -73,8 +73,7 @@ const PlatformSessionProvider = ({
 
   async function performRefresh() {
     try {
-      const { refreshToken } = await import('@services/auth/auth');
-      const refreshed = await refreshToken();
+      const refreshed = await tryRefreshToken();
       if (!refreshed) {
         setData(null);
         setStatus('unauthenticated');

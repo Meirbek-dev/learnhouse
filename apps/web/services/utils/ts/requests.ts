@@ -91,21 +91,23 @@ const createRequestInit = (
 let _refreshInFlight: Promise<boolean> | null = null;
 
 /**
- * Attempt a single token refresh, deduplicating concurrent calls.
+ * Attempt a single token refresh, deduplicating ALL concurrent callers.
+ *
+ * Every fetch path that handles 401s (api-client, swrFetcher, SessionContext)
+ * must go through this function. Running two concurrent refreshes against the
+ * backend's token-family tracking triggers session revocation.
+ *
  * Returns true if the refresh succeeded and the caller should retry its request.
  */
-async function _tryRefreshToken(): Promise<boolean> {
+export async function tryRefreshToken(): Promise<boolean> {
   if (_refreshInFlight) return _refreshInFlight;
 
   _refreshInFlight = (async () => {
     try {
       const { refreshToken } = await import('@services/auth/auth');
       const ok = await refreshToken();
-      if (!ok) {
-        // Refresh failed — notify the app so it can show the login screen
-        if (typeof window !== 'undefined') {
-          window.dispatchEvent(new Event('auth:session-expired'));
-        }
+      if (!ok && typeof window !== 'undefined') {
+        window.dispatchEvent(new Event('auth:session-expired'));
       }
       return ok;
     } finally {
@@ -128,7 +130,7 @@ async function fetchWithRefresh(url: string, init: RequestInit): Promise<Respons
   const res = await fetch(url, init);
 
   if (res.status === 401 && typeof window !== 'undefined') {
-    const refreshed = await _tryRefreshToken();
+    const refreshed = await tryRefreshToken();
     if (refreshed) {
       // Retry the original request with fresh cookies
       return fetch(url, init);

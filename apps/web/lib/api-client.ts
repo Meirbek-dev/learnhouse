@@ -11,7 +11,7 @@
  */
 
 import { getAPIUrl, getServerAPIUrl } from '@services/config/config';
-import { refreshToken } from '@services/auth/auth';
+import { tryRefreshToken } from '@services/utils/ts/requests';
 
 /** Only these cookies are forwarded to the backend on server-side requests. */
 const AUTH_COOKIE_NAMES = ['access_token_cookie', 'refresh_token_cookie'] as const;
@@ -72,7 +72,7 @@ export async function apiFetch(path: string, init: ApiFetchInit = {}): Promise<R
   let response = await fetch(url, options);
 
   if (!isServer && response.status === 401) {
-    const refreshed = await refreshToken();
+    const refreshed = await tryRefreshToken();
     if (refreshed) {
       response = await fetch(url, options);
     }

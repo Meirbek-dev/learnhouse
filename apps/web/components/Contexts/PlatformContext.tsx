@@ -1,6 +1,5 @@
 'use client';
 
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
@@ -18,7 +17,6 @@ export const PlatformContextProvider = ({
   children: ReactNode;
   initialPlatform?: any;
 }) => {
-  const session = usePlatformSession();
   const platformContextKey = `${getAPIUrl()}platform`;
 
   const { data: platform, isLoading: isPlatformLoading } = useSWR(
@@ -32,9 +30,8 @@ export const PlatformContextProvider = ({
     },
   );
 
-  const isLoading = session.status === 'loading' || (!platform && isPlatformLoading);
-
-  if (isLoading) return <PageLoading />;
+  // Only block on platform data — session state is independent of platform config.
+  if (!platform && isPlatformLoading) return <PageLoading />;
 
   return <PlatformContext.Provider value={platform}>{children}</PlatformContext.Provider>;
 };

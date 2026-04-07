@@ -15,7 +15,7 @@ import Link from '@components/ui/AppLink';
 import { useForm } from 'react-hook-form';
 import * as v from 'valibot';
 
-const createValidationSchema = (t: (key: string, values?: Record<string, unknown>) => string) =>
+const createValidationSchema = (t: (key: string, values?: Record<string, string | number | Date>) => string) =>
   v.pipe(
     v.object({
       email: v.pipe(v.string(), v.minLength(1, t('required')), v.email(t('invalidEmail'))),
