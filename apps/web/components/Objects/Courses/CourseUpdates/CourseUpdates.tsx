@@ -15,16 +15,16 @@ import {
 import { createCourseUpdate, deleteCourseUpdate } from '@services/courses/updates';
 import { AlertTriangle, Loader2, PencilLine, Rss, TentTree } from 'lucide-react';
 import { useEffectEvent, useLayoutEffect, useState, useTransition } from 'react';
+import { useForm } from '@tanstack/react-form';
 import { Field, FieldError, FieldLabel } from '@components/ui/field';
 import { Actions, Resources, Scopes } from '@/types/permissions';
 import { getCourseUpdatesSwrKey } from '@services/courses/keys';
 import { useCourse } from '@components/Contexts/CourseContext';
-import { valibotResolver } from '@hookform/resolvers/valibot';
+import { toFieldErrors } from '@/lib/tanstack-form';
 import { useDateFnsLocale } from '@/hooks/useDateFnsLocale';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { usePermissions } from '@/components/Security';
 import { format, formatDistanceToNow } from 'date-fns';
-import { Controller, useForm } from 'react-hook-form';
 import { Textarea } from '@components/ui/textarea';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
@@ -144,45 +144,44 @@ const NewUpdateForm = ({ setSelectedView }: any) => {
   const t = useTranslations('Courses.CourseUpdates');
   const validationSchema = createUpdateFormSchema(t);
 
-  const form = useForm<UpdateFormValues>({
-    resolver: valibotResolver(validationSchema),
+  const form = useForm({
     defaultValues: {
       title: '',
       content: '',
     },
+    validators: {
+      onChange: validationSchema,
+      onSubmit: validationSchema,
+    },
+    onSubmit: async ({ value }) => {
+      const body = {
+        title: value.title,
+        content: value.content,
+        course_uuid: course.courseStructure.course_uuid,
+      };
+      const UPDATES_KEY = getCourseUpdatesSwrKey(course.courseStructure.course_uuid);
+
+      const optimistic = {
+        id: `temp-${Date.now()}`,
+        title: value.title,
+        content: value.content,
+        creation_date: new Date().toISOString(),
+      };
+
+      await mutate([UPDATES_KEY, undefined] as any, (prev: any) => [optimistic, ...(prev || [])], false);
+
+      const res = await createCourseUpdate(body);
+      if (res.status === 200) {
+        toast.success(t('updateAddedSuccess'));
+        setSelectedView('list');
+        form.reset();
+        mutate(UPDATES_KEY);
+      } else {
+        mutate(UPDATES_KEY);
+        toast.error(t('updateAddFailed'));
+      }
+    },
   });
-
-  const onSubmit = async (values: UpdateFormValues) => {
-    const body = {
-      title: values.title,
-      content: values.content,
-      course_uuid: course.courseStructure.course_uuid,
-    };
-    const UPDATES_KEY = getCourseUpdatesSwrKey(course.courseStructure.course_uuid);
-
-    const optimistic = {
-      id: `temp-${Date.now()}`,
-      title: values.title,
-      content: values.content,
-      creation_date: new Date().toISOString(),
-    };
-
-    // Optimistically add the update to the list
-    await mutate([UPDATES_KEY, undefined] as any, (prev: any) => [optimistic, ...(prev || [])], false);
-
-    const res = await createCourseUpdate(body);
-    if (res.status === 200) {
-      toast.success(t('updateAddedSuccess'));
-      setSelectedView('list');
-      form.reset();
-      // Revalidate to get the actual server-side object and remove optimistic placeholder
-      mutate(UPDATES_KEY);
-    } else {
-      // Rollback by revalidating
-      mutate(UPDATES_KEY);
-      toast.error(t('updateAddFailed'));
-    }
-  };
 
   return (
     <div className="soft-shadow flex w-[700px] flex-col -space-y-2 overflow-hidden rounded-lg bg-white/95 backdrop-blur-md">
@@ -192,13 +191,15 @@ const NewUpdateForm = ({ setSelectedView }: any) => {
       </div>
       <div className="-py-2 px-5">
         <form
-          onSubmit={form.handleSubmit(onSubmit)}
+          onSubmit={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            void form.handleSubmit();
+          }}
           className="space-y-4"
         >
-          <Controller
-            control={form.control}
-            name="title"
-            render={({ field, fieldState }) => (
+          <form.Field name="title">
+            {(field) => (
               <Field>
                 <FieldLabel
                   className="text-sm font-medium"
@@ -207,19 +208,20 @@ const NewUpdateForm = ({ setSelectedView }: any) => {
                   {t('title')}
                 </FieldLabel>
                 <Input
-                  {...field}
                   id={field.name}
+                  name={field.name}
                   style={{ backgroundColor: 'white' }}
                   type="text"
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(event) => field.handleChange(event.target.value)}
                 />
-                <FieldError errors={[fieldState.error]} />
+                <FieldError errors={toFieldErrors(field.state.meta.errors)} />
               </Field>
             )}
-          />
-          <Controller
-            control={form.control}
-            name="content"
-            render={({ field, fieldState }) => (
+          </form.Field>
+          <form.Field name="content">
+            {(field) => (
               <Field>
                 <FieldLabel
                   className="text-sm font-medium"
@@ -228,14 +230,17 @@ const NewUpdateForm = ({ setSelectedView }: any) => {
                   {t('content')}
                 </FieldLabel>
                 <Textarea
-                  {...field}
                   id={field.name}
+                  name={field.name}
                   style={{ backgroundColor: 'white', height: '100px' }}
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(event) => field.handleChange(event.target.value)}
                 />
-                <FieldError errors={[fieldState.error]} />
+                <FieldError errors={toFieldErrors(field.state.meta.errors)} />
               </Field>
             )}
-          />
+          </form.Field>
           <div className="flex justify-end py-2">
             <button
               type="button"
@@ -244,13 +249,18 @@ const NewUpdateForm = ({ setSelectedView }: any) => {
             >
               {t('cancel')}
             </button>
-            <Button
-              type="submit"
-              className="rounded-md px-4 py-2 text-sm font-semibold antialiased"
-              disabled={form.formState.isSubmitting}
-            >
-              {form.formState.isSubmitting ? t('adding') : t('addUpdate')}
-            </Button>
+            <form.Subscribe
+              selector={(state) => [state.canSubmit, state.isSubmitting]}
+              children={([canSubmit, isSubmitting]) => (
+                <Button
+                  type="submit"
+                  className="rounded-md px-4 py-2 text-sm font-semibold antialiased"
+                  disabled={!canSubmit || isSubmitting}
+                >
+                  {isSubmitting ? t('adding') : t('addUpdate')}
+                </Button>
+              )}
+            />
           </div>
         </form>
       </div>

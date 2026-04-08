@@ -57,9 +57,7 @@ export function HeroSection({ profile, userRank, className }: HeroSectionProps) 
 
   // Get display name from session
   const displayName = viewer?.first_name
-    ? [viewer.first_name, viewer.middle_name, viewer.last_name]
-        .filter(Boolean)
-        .join(' ')
+    ? [viewer.first_name, viewer.middle_name, viewer.last_name].filter(Boolean).join(' ')
     : viewer?.username;
 
   return (

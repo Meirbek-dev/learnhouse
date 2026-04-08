@@ -19,6 +19,7 @@ import {
   initializePaymentConfig,
   updateStripeAccountID,
 } from '@services/payments/payments';
+import { useForm } from '@tanstack/react-form';
 import {
   AlertTriangle,
   BarChart2,
@@ -35,12 +36,11 @@ import { useEffect, useEffectEvent, useRef, useState, useTransition } from 'reac
 import { Alert, AlertDescription, AlertTitle } from '@components/ui/alert';
 import { Field, FieldError, FieldLabel } from '@components/ui/field';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
-import { valibotResolver } from '@hookform/resolvers/valibot';
 import { SiStripe } from '@icons-pack/react-simple-icons';
 import { getAbsoluteUrl } from '@services/config/config';
-import { Controller, useForm } from 'react-hook-form';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
+import { toFieldErrors } from '@/lib/tanstack-form';
 import { useTranslations } from 'next-intl';
 import useSWR, { mutate } from 'swr';
 import type { FC } from 'react';
@@ -335,10 +335,28 @@ const EditStripeConfigModal: FC<EditStripeConfigModalProps> = ({ configId, isOpe
   const t = useTranslations('Payments.Configuration');
   const validationSchema = createStripeConfigSchema(t);
 
-  const form = useForm<StripeConfigFormValues>({
-    resolver: valibotResolver(validationSchema),
+  const form = useForm({
     defaultValues: {
       stripeAccountId: '',
+    },
+    validators: {
+      onChange: validationSchema,
+      onSubmit: validationSchema,
+    },
+    onSubmit: async ({ value }) => {
+      const loadingToast = toast.loading(t('updatingConfig'));
+      try {
+        const stripe_config = {
+          stripe_account_id: value.stripeAccountId,
+        };
+        await updateStripeAccountID(stripe_config);
+        toast.success(t('configUpdatedSuccess'), { id: loadingToast });
+        mutate('/payments/config');
+        onClose();
+      } catch (error) {
+        console.error('Error updating config:', error);
+        toast.error(t('errors.updateConfigFailed'), { id: loadingToast });
+      }
     },
   });
 
@@ -350,7 +368,7 @@ const EditStripeConfigModal: FC<EditStripeConfigModalProps> = ({ configId, isOpe
       if (signal?.aborted) return;
       const stripeConfig = config.find((c: any) => c.id === configId);
       if (stripeConfig?.provider_specific_id) {
-        form.setValue('stripeAccountId', stripeConfig.provider_specific_id || '');
+        form.setFieldValue('stripeAccountId', stripeConfig.provider_specific_id || '');
       }
     } catch (error) {
       if (signal?.aborted) return;
@@ -372,22 +390,6 @@ const EditStripeConfigModal: FC<EditStripeConfigModalProps> = ({ configId, isOpe
     return;
   }, [isOpen, configId, t, form]);
 
-  const handleSubmit = async (values: StripeConfigFormValues) => {
-    const loadingToast = toast.loading(t('updatingConfig'));
-    try {
-      const stripe_config = {
-        stripe_account_id: values.stripeAccountId,
-      };
-      await updateStripeAccountID(stripe_config);
-      toast.success(t('configUpdatedSuccess'), { id: loadingToast });
-      mutate('/payments/config');
-      onClose();
-    } catch (error) {
-      console.error('Error updating config:', error);
-      toast.error(t('errors.updateConfigFailed'), { id: loadingToast });
-    }
-  };
-
   return (
     <Modal
       isDialogOpen={isOpen}
@@ -396,33 +398,43 @@ const EditStripeConfigModal: FC<EditStripeConfigModalProps> = ({ configId, isOpe
       onOpenChange={onClose}
       dialogContent={
         <form
-          onSubmit={form.handleSubmit(handleSubmit)}
+          onSubmit={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            void form.handleSubmit();
+          }}
           className="space-y-4"
         >
-          <Controller
-            control={form.control}
-            name="stripeAccountId"
-            render={({ field, fieldState }) => (
+          <form.Field name="stripeAccountId">
+            {(field) => (
               <Field>
                 <FieldLabel htmlFor={field.name}>{t('stripeAccountIdLabel')}</FieldLabel>
                 <Input
                   id={field.name}
+                  name={field.name}
                   type="text"
                   placeholder="acct_..."
-                  {...field}
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(event) => field.handleChange(event.target.value)}
                 />
-                <FieldError errors={[fieldState.error]} />
+                <FieldError errors={toFieldErrors(field.state.meta.errors)} />
               </Field>
             )}
-          />
+          </form.Field>
           <div className="flex justify-end pt-4">
-            <Button
-              type="submit"
-              className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg px-4 py-2 transition duration-300"
-              disabled={form.formState.isSubmitting}
-            >
-              {form.formState.isSubmitting ? t('saving') : t('saveButton')}
-            </Button>
+            <form.Subscribe
+              selector={(state) => [state.canSubmit, state.isSubmitting]}
+              children={([canSubmit, isSubmitting]) => (
+                <Button
+                  type="submit"
+                  className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg px-4 py-2 transition duration-300"
+                  disabled={!canSubmit || isSubmitting}
+                >
+                  {isSubmitting ? t('saving') : t('saveButton')}
+                </Button>
+              )}
+            />
           </div>
         </form>
       }

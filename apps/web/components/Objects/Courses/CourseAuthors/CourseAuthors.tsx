@@ -12,18 +12,18 @@ import {
 } from '@/components/ui/alert-dialog';
 import { createCourseUpdate, deleteCourseUpdate } from '@services/courses/updates';
 import { AlertTriangle, Loader2, PencilLine, Rss, TentTree } from 'lucide-react';
+import { useForm } from '@tanstack/react-form';
 import { Field, FieldError, FieldLabel } from '@components/ui/field';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
 import { Actions, Resources, Scopes } from '@/types/permissions';
 import { getCourseUpdatesSwrKey } from '@services/courses/keys';
 import { useCourse } from '@components/Contexts/CourseContext';
-import { valibotResolver } from '@hookform/resolvers/valibot';
+import { toFieldErrors } from '@/lib/tanstack-form';
 import { useDateFnsLocale } from '@/hooks/useDateFnsLocale';
 import { swrFetcher } from '@services/utils/ts/requests';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { usePermissions } from '@/components/Security';
 import { format, formatDistanceToNow } from 'date-fns';
-import { Controller, useForm } from 'react-hook-form';
 import { getAPIUrl } from '@services/config/config';
 import { Textarea } from '@components/ui/textarea';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -224,78 +224,91 @@ const NewUpdateForm = ({ setSelectedView }: { setSelectedView: (view: string) =>
   const t = useTranslations('Courses.CourseAuthors');
   const validationSchema = createUpdateFormSchema(t);
 
-  const form = useForm<UpdateFormValues>({
-    resolver: valibotResolver(validationSchema),
+  const form = useForm({
     defaultValues: {
       title: '',
       content: '',
     },
+    validators: {
+      onChange: validationSchema,
+      onSubmit: validationSchema,
+    },
+    onSubmit: async ({ value }) => {
+      const body = {
+        title: value.title,
+        content: value.content,
+        course_uuid: course.courseStructure.course_uuid,
+      };
+      const res = await createCourseUpdate(body);
+      if (res.status === 200) {
+        toast.success(t('updateAddedSuccess'));
+        setSelectedView('list');
+        form.reset();
+        mutate(getCourseUpdatesSwrKey(course?.courseStructure.course_uuid));
+      } else {
+        toast.error(t('updateAddFailed'));
+      }
+    },
   });
-
-  const onSubmit = async (values: UpdateFormValues) => {
-    const body = {
-      title: values.title,
-      content: values.content,
-      course_uuid: course.courseStructure.course_uuid,
-    };
-    const res = await createCourseUpdate(body);
-    if (res.status === 200) {
-      toast.success(t('updateAddedSuccess'));
-      setSelectedView('list');
-      form.reset();
-      mutate(getCourseUpdatesSwrKey(course?.courseStructure.course_uuid));
-    } else {
-      toast.error(t('updateAddFailed'));
-    }
-  };
 
   return (
     <div className="space-y-4">
       <form
-        onSubmit={form.handleSubmit(onSubmit)}
+        onSubmit={(event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          void form.handleSubmit();
+        }}
         className="space-y-4"
       >
-        <Controller
-          control={form.control}
-          name="title"
-          render={({ field, fieldState }) => (
+        <form.Field name="title">
+          {(field) => (
             <Field>
               <FieldLabel htmlFor={field.name}>{t('updateTitle')}</FieldLabel>
               <Input
                 type="text"
                 id={field.name}
+                name={field.name}
                 placeholder={t('updateTitlePlaceholder')}
                 className="border-neutral-200 bg-white focus:border-neutral-300 focus:ring-neutral-200"
-                {...field}
+                value={field.state.value}
+                onBlur={field.handleBlur}
+                onChange={(event) => field.handleChange(event.target.value)}
               />
-              <FieldError errors={[fieldState.error]} />
+              <FieldError errors={toFieldErrors(field.state.meta.errors)} />
             </Field>
           )}
-        />
-        <Controller
-          control={form.control}
-          name="content"
-          render={({ field, fieldState }) => (
+        </form.Field>
+        <form.Field name="content">
+          {(field) => (
             <Field>
               <FieldLabel htmlFor={field.name}>{t('updateContent')}</FieldLabel>
               <Textarea
                 placeholder={t('updateContentPlaceholder')}
                 id={field.name}
+                name={field.name}
                 className="h-[120px] resize-none border-neutral-200 bg-white focus:border-neutral-300 focus:ring-neutral-200"
-                {...field}
+                value={field.state.value}
+                onBlur={field.handleBlur}
+                onChange={(event) => field.handleChange(event.target.value)}
               />
-              <FieldError errors={[fieldState.error]} />
+              <FieldError errors={toFieldErrors(field.state.meta.errors)} />
             </Field>
           )}
-        />
+        </form.Field>
         <div className="flex justify-end space-x-2 pt-2">
-          <Button
-            type="submit"
-            className="rounded-full px-4 py-1.5 text-xs font-medium text-white transition-colors duration-150"
-            disabled={form.formState.isSubmitting}
-          >
-            {form.formState.isSubmitting ? t('publishing') : t('publishUpdate')}
-          </Button>
+          <form.Subscribe
+            selector={(state) => [state.canSubmit, state.isSubmitting]}
+            children={([canSubmit, isSubmitting]) => (
+              <Button
+                type="submit"
+                className="rounded-full px-4 py-1.5 text-xs font-medium text-white transition-colors duration-150"
+                disabled={!canSubmit || isSubmitting}
+              >
+                {isSubmitting ? t('publishing') : t('publishUpdate')}
+              </Button>
+            )}
+          />
         </div>
       </form>
     </div>

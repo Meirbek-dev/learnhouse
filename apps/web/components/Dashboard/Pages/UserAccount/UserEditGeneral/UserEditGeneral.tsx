@@ -1,4 +1,5 @@
 'use client';
+import { useForm, useStore } from '@tanstack/react-form';
 import {
   AlertTriangle,
   ArrowBigUpDash,
@@ -25,14 +26,12 @@ import { updateProfile, updateUserAvatar } from '@/lib/users/client';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { logout } from '@services/auth/auth';
 import { Field, FieldError, FieldLabel } from '@components/ui/field';
-import { valibotResolver } from '@hookform/resolvers/valibot';
 import { useDebouncedCallback } from '@/hooks/useDebounce';
 import { getAbsoluteUrl } from '@services/config/config';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { constructAcceptValue } from '@/lib/constants';
-import { Controller, useForm } from 'react-hook-form';
 import type { ChangeEvent, ElementType } from 'react';
-import type { UseFormReturn } from 'react-hook-form';
+import { toFieldErrors, valibotFormValidator } from '@/lib/tanstack-form';
 import { Textarea } from '@components/ui/textarea';
 import { ThemeSelector } from '@/lib/theme-system';
 import { Button } from '@components/ui/button';
@@ -237,7 +236,9 @@ const DetailCard = ({
 };
 
 interface UserEditFormProps {
-  form: UseFormReturn<FormValues>;
+  form: any;
+  details: FormValues['details'];
+  isSubmitting: boolean;
   profilePicture: {
     error: string | undefined;
     success: string;
@@ -248,7 +249,7 @@ interface UserEditFormProps {
 }
 
 // Form component to handle the details section
-const UserEditForm = ({ form, profilePicture }: UserEditFormProps) => {
+const UserEditForm = ({ form, details, isSubmitting, profilePicture }: UserEditFormProps) => {
   const tIcons = useTranslations('Components.UserProfilePopup.Icons');
   const tTemplates = useTranslations('DashPage.UserAccountSettings.generalSection.detailTemplateLabels');
   const t = useTranslations('DashPage.UserAccountSettings.generalSection');
@@ -290,8 +291,6 @@ const UserEditForm = ({ form, profilePicture }: UserEditFormProps) => {
     ],
   } as const;
 
-  const details = form.watch('details');
-
   return (
     <div>
       <div className="flex flex-col gap-0">
@@ -303,113 +302,119 @@ const UserEditForm = ({ form, profilePicture }: UserEditFormProps) => {
         <div className="mx-5 my-5 mt-0 flex flex-col gap-8 lg:flex-row">
           {/* Profile Information Section */}
           <div className="min-w-0 flex-1 space-y-4">
-            <Controller
-              control={form.control}
-              name="email"
-              render={({ field, fieldState }) => (
+            <form.Field name="email">
+              {(field: any) => (
                 <Field>
                   <FieldLabel htmlFor={field.name}>{t('email')}</FieldLabel>
                   <Input
                     id={field.name}
+                    name={field.name}
                     type="email"
                     placeholder={t('emailPlaceholder')}
-                    {...field}
+                    value={field.state.value}
+                    onBlur={field.handleBlur}
+                    onChange={(event) => field.handleChange(event.target.value)}
                   />
-                  <FieldError errors={[fieldState.error]} />
+                  <FieldError errors={toFieldErrors(field.state.meta.errors)} />
                   <div className="mt-2 flex items-center space-x-2 rounded-md bg-amber-50 p-2 text-amber-600">
                     <AlertTriangle size={16} />
                     <span className="text-sm">{t('emailChangeWarning')}</span>
                   </div>
                 </Field>
               )}
-            />
+            </form.Field>
 
-            <Controller
-              control={form.control}
-              name="username"
-              render={({ field, fieldState }) => (
+            <form.Field name="username">
+              {(field: any) => (
                 <Field>
                   <FieldLabel htmlFor={field.name}>{t('username')}</FieldLabel>
                   <Input
                     id={field.name}
+                    name={field.name}
                     placeholder={t('usernamePlaceholder')}
-                    {...field}
+                    value={field.state.value}
+                    onBlur={field.handleBlur}
+                    onChange={(event) => field.handleChange(event.target.value)}
                   />
-                  <FieldError errors={[fieldState.error]} />
+                  <FieldError errors={toFieldErrors(field.state.meta.errors)} />
                 </Field>
               )}
-            />
+            </form.Field>
 
-            <Controller
-              control={form.control}
-              name="first_name"
-              render={({ field, fieldState }) => (
+            <form.Field name="first_name">
+              {(field: any) => (
                 <Field>
                   <FieldLabel htmlFor={field.name}>{t('firstName')}</FieldLabel>
                   <Input
                     id={field.name}
+                    name={field.name}
                     placeholder={t('firstNamePlaceholder')}
-                    {...field}
+                    value={field.state.value}
+                    onBlur={field.handleBlur}
+                    onChange={(event) => field.handleChange(event.target.value)}
                   />
-                  <FieldError errors={[fieldState.error]} />
+                  <FieldError errors={toFieldErrors(field.state.meta.errors)} />
                 </Field>
               )}
-            />
+            </form.Field>
 
-            <Controller
-              control={form.control}
-              name="middle_name"
-              render={({ field, fieldState }) => (
+            <form.Field name="middle_name">
+              {(field: any) => (
                 <Field>
                   <FieldLabel htmlFor={field.name}>{t('middleName')}</FieldLabel>
                   <Input
                     id={field.name}
+                    name={field.name}
                     placeholder={t('middleNamePlaceholder')}
-                    {...field}
+                    value={field.state.value ?? ''}
+                    onBlur={field.handleBlur}
+                    onChange={(event) => field.handleChange(event.target.value)}
                   />
-                  <FieldError errors={[fieldState.error]} />
+                  <FieldError errors={toFieldErrors(field.state.meta.errors)} />
                 </Field>
               )}
-            />
+            </form.Field>
 
-            <Controller
-              control={form.control}
-              name="last_name"
-              render={({ field, fieldState }) => (
+            <form.Field name="last_name">
+              {(field: any) => (
                 <Field>
                   <FieldLabel htmlFor={field.name}>{t('lastName')}</FieldLabel>
                   <Input
                     id={field.name}
+                    name={field.name}
                     placeholder={t('lastNamePlaceholder')}
-                    {...field}
+                    value={field.state.value}
+                    onBlur={field.handleBlur}
+                    onChange={(event) => field.handleChange(event.target.value)}
                   />
-                  <FieldError errors={[fieldState.error]} />
+                  <FieldError errors={toFieldErrors(field.state.meta.errors)} />
                 </Field>
               )}
-            />
+            </form.Field>
 
-            <Controller
-              control={form.control}
-              name="bio"
-              render={({ field, fieldState }) => (
+            <form.Field name="bio">
+              {(field: any) => (
                 <Field>
                   <FieldLabel htmlFor={field.name}>
                     {t('bio')}
                     <span className="text-sm text-gray-500">
-                      ({400 - (field.value?.length || 0)} {t('charactersLeft')})
+                      ({400 - (field.state.value?.length || 0)} {t('charactersLeft')})
                     </span>
                   </FieldLabel>
                   <Textarea
                     id={field.name}
+                    name={field.name}
                     placeholder={t('bioPlaceholder')}
                     className="min-h-[150px]"
                     maxLength={400}
-                    {...field}
+                    value={field.state.value ?? ''}
+                    onBlur={field.handleBlur}
+                    onChange={(event) => field.handleChange(event.target.value)}
                   />
-                  <FieldError errors={[fieldState.error]} />
+                  <FieldError errors={toFieldErrors(field.state.meta.errors)} />
                 </Field>
               )}
-            />
+            </form.Field>
 
             {/* Theme Selector */}
             <ThemeSelector className="border-t pt-6" />
@@ -425,7 +430,7 @@ const UserEditForm = ({ form, profilePicture }: UserEditFormProps) => {
                       size="sm"
                       className="text-red-500 hover:bg-red-50 hover:text-red-700"
                       onClick={() => {
-                        form.setValue('details', {});
+                        form.setFieldValue('details', {});
                       }}
                     >
                       {t('clearAll')}
@@ -443,7 +448,7 @@ const UserEditForm = ({ form, profilePicture }: UserEditFormProps) => {
                           icon: '',
                           text: '',
                         };
-                        form.setValue('details', newDetails);
+                        form.setFieldValue('details', newDetails);
                       }}
                     >
                       {t('addDetail')}
@@ -469,7 +474,7 @@ const UserEditForm = ({ form, profilePicture }: UserEditFormProps) => {
                           }
                         }
 
-                        form.setValue('details', newDetails);
+                        form.setFieldValue('details', newDetails);
                       }}
                     >
                       {key === 'general' && <Briefcase className="h-4 w-4" />}
@@ -498,12 +503,12 @@ const UserEditForm = ({ form, profilePicture }: UserEditFormProps) => {
                         ...existingDetail,
                         [field]: value,
                       };
-                      form.setValue('details', newDetails);
+                      form.setFieldValue('details', newDetails);
                     }}
                     onRemove={(id) => {
                       const newDetails = { ...details };
                       const { [id]: removed, ...nextDetails } = newDetails;
-                      form.setValue('details', nextDetails);
+                      form.setFieldValue('details', nextDetails);
                     }}
                     onLabelChange={(id, newLabel) => {
                       const newDetails = { ...details };
@@ -515,7 +520,7 @@ const UserEditForm = ({ form, profilePicture }: UserEditFormProps) => {
                         text: existingDetail?.text || '',
                         ...existingDetail,
                       };
-                      form.setValue('details', newDetails);
+                      form.setFieldValue('details', newDetails);
                     }}
                     availableIcons={AVAILABLE_ICONS}
                   />
@@ -608,9 +613,9 @@ const UserEditForm = ({ form, profilePicture }: UserEditFormProps) => {
         <div className="mx-5 mt-0 mb-5 flex flex-row-reverse">
           <Button
             type="submit"
-            disabled={form.formState.isSubmitting}
+            disabled={isSubmitting}
           >
-            {form.formState.isSubmitting ? t('saving') : t('saveChanges')}
+            {isSubmitting ? t('saving') : t('saveChanges')}
           </Button>
         </div>
       </div>
@@ -629,20 +634,52 @@ const UserEditGeneral = () => {
   const [initialLoading, setInitialLoading] = useState(true);
   const t = useTranslations('DashPage.Notifications');
   const validationSchema = createValidationSchema(t);
+  const formValidator = valibotFormValidator(validationSchema);
+  const defaultValues: FormValues = {
+    username: '',
+    first_name: '',
+    middle_name: '',
+    last_name: '',
+    email: '',
+    bio: '',
+    details: {},
+  };
 
-  const form = useForm<FormValues>({
-    resolver: valibotResolver(validationSchema),
-    defaultValues: {
-      username: '',
-      first_name: '',
-      middle_name: '',
-      last_name: '',
-      email: '',
-      bio: '',
-      details: {},
+  const form = useForm({
+    defaultValues,
+    validators: {
+      onChange: formValidator,
+      onSubmit: formValidator,
     },
-    mode: 'onChange',
+    onSubmit: async ({ value }) => {
+      if (!userData?.id) {
+        toast.error(t('profileUpdateError'));
+        return;
+      }
+
+      const isEmailChanged = value.email !== userData.email;
+      const loadingToast = toast.loading(t('updating'));
+
+      try {
+        await updateProfile(value, userData.id);
+        setUserData((current: any) => ({ ...current, ...value }));
+
+        toast.dismiss(loadingToast);
+        if (isEmailChanged) {
+          await handleEmailChange(value.email);
+        } else {
+          toast.success(t('profileUpdateSuccess'));
+        }
+      } catch (error) {
+        console.error('Profile update error:', error);
+        toast.error(t('profileUpdateError'), {
+          id: loadingToast,
+        });
+      }
+    },
   });
+  const details = useStore(form.store, (state) => state.values.details);
+  const isSubmitting = useStore(form.store, (state) => state.isSubmitting);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -723,33 +760,6 @@ const UserEditGeneral = () => {
     await logout({ redirectTo: getAbsoluteUrl('/') });
   };
 
-  const onSubmit = async (values: FormValues) => {
-    if (!userData?.id) {
-      toast.error(t('profileUpdateError'));
-      return;
-    }
-
-    const isEmailChanged = values.email !== userData.email;
-    const loadingToast = toast.loading(t('updating'));
-
-    try {
-      await updateProfile(values, userData.id);
-      setUserData((current: any) => ({ ...current, ...values }));
-
-      toast.dismiss(loadingToast);
-      if (isEmailChanged) {
-        await handleEmailChange(values.email);
-      } else {
-        toast.success(t('profileUpdateSuccess'));
-      }
-    } catch (error) {
-      console.error('Profile update error:', error);
-      toast.error(t('profileUpdateError'), {
-        id: loadingToast,
-      });
-    }
-  };
-
   if (initialLoading || !userData || !currentLocale) {
     return (
       <div className="soft-shadow mx-0 rounded-xl bg-white p-8 sm:mx-10">
@@ -762,9 +772,17 @@ const UserEditGeneral = () => {
 
   return (
     <div className="soft-shadow mx-0 rounded-xl bg-white sm:mx-10">
-      <form onSubmit={form.handleSubmit(onSubmit)}>
+      <form
+        onSubmit={(event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          void form.handleSubmit();
+        }}
+      >
         <UserEditForm
           form={form}
+          details={details}
+          isSubmitting={isSubmitting}
           profilePicture={{
             error,
             success,

@@ -13,11 +13,7 @@ const isDevEnv = process.env.NODE_ENV !== 'production';
 
 async function LocalizedApp({ children }: { children: React.ReactNode }) {
   await connection();
-  const [locale, messages, initialSession] = await Promise.all([
-    getLocale(),
-    getMessages(),
-    getSession(),
-  ]);
+  const [locale, messages, initialSession] = await Promise.all([getLocale(), getMessages(), getSession()]);
   setRequestLocale(locale);
 
   return (

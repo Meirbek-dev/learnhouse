@@ -1,14 +1,14 @@
 'use client';
 
+import { useForm, useStore } from '@tanstack/react-form';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { Field, FieldError, FieldLabel } from '@components/ui/field';
 import { getPaymentsProductsSwrKey } from '@services/payments/keys';
-import { valibotResolver } from '@hookform/resolvers/valibot';
 import { createProduct } from '@services/payments/products';
-import { Controller, useForm } from 'react-hook-form';
 import { Textarea } from '@components/ui/textarea';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
+import { toFieldErrors, valibotFormValidator } from '@/lib/tanstack-form';
 import currencyCodes from '@/lib/currencies';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
@@ -41,6 +41,7 @@ const CreateProductForm: FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
   const tNotify = useTranslations('DashPage.Notifications');
   const t = useTranslations('Payments.ProductForm');
   const validationSchema = createValidationSchema(t);
+  const formValidator = valibotFormValidator(validationSchema);
 
   useEffect(() => {
     const allCurrencies = currencyCodes.data.map((currency) => ({
@@ -50,22 +51,48 @@ const CreateProductForm: FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
     setCurrencies(allCurrencies);
   }, []);
 
-  const form = useForm<ProductFormValues>({
-    resolver: valibotResolver(validationSchema),
-    defaultValues: {
-      name: '',
-      description: '',
-      product_type: 'one_time',
-      price_type: 'fixed_price',
-      benefits: '',
-      amount: 1,
-      currency: 'KZT',
+  const defaultValues: ProductFormValues = {
+    name: '',
+    description: '',
+    product_type: 'one_time',
+    price_type: 'fixed_price',
+    benefits: '',
+    amount: 1,
+    currency: 'KZT',
+  };
+
+  const form = useForm({
+    defaultValues,
+    validators: {
+      onChange: formValidator,
+      onSubmit: formValidator,
     },
-    mode: 'onChange',
+    onSubmit: async ({ value }) => {
+      const loadingToast = toast.loading(tNotify('creatingProduct'));
+      try {
+        const res = await createProduct({
+          ...value,
+          benefits: value.benefits ?? '',
+        });
+        if (res.success) {
+          toast.success(tNotify('productCreatedSuccess'), { id: loadingToast });
+          mutate(getPaymentsProductsSwrKey());
+          form.reset();
+          onSuccess();
+        } else {
+          toast.error(tNotify('errors.createProductFailed'), {
+            id: loadingToast,
+          });
+        }
+      } catch (error) {
+        console.error('Error creating product:', error);
+        toast.error(tNotify('errors.createProductError'), { id: loadingToast });
+      }
+    },
   });
 
-  const productType = form.watch('product_type');
-  const priceType = form.watch('price_type');
+  const productType = useStore(form.store, (state) => state.values.product_type);
+  const priceType = useStore(form.store, (state) => state.values.price_type);
 
   const productTypeItems = [
     { value: 'one_time', label: t('productTypes.one_time') },
@@ -85,64 +112,57 @@ const CreateProductForm: FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
     label: currency.name,
   }));
 
-  const handleSubmit = async (values: ProductFormValues) => {
-    const loadingToast = toast.loading(tNotify('creatingProduct'));
-    try {
-      const res = await createProduct({
-        ...values,
-        benefits: values.benefits ?? '',
-      });
-      if (res.success) {
-        toast.success(tNotify('productCreatedSuccess'), { id: loadingToast });
-        mutate(getPaymentsProductsSwrKey());
-        form.reset();
-        onSuccess();
-      } else {
-        toast.error(tNotify('errors.createProductFailed'), {
-          id: loadingToast,
-        });
-      }
-    } catch (error) {
-      console.error('Error creating product:', error);
-      toast.error(tNotify('errors.createProductError'), { id: loadingToast });
-    }
-  };
-
   return (
     <form
-      onSubmit={form.handleSubmit(handleSubmit)}
+      onSubmit={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        void form.handleSubmit();
+      }}
       className="space-y-4"
     >
       <div className="flex-col space-y-3 px-1.5 py-2">
-        <Field>
-          <FieldLabel htmlFor="name">{t('nameLabel')}</FieldLabel>
-          <Input
-            id="name"
-            placeholder={t('namePlaceholder')}
-            {...form.register('name')}
-          />
-          <FieldError errors={[form.formState.errors.name]} />
-        </Field>
+        <form.Field name="name">
+          {(field) => (
+            <Field>
+              <FieldLabel htmlFor={field.name}>{t('nameLabel')}</FieldLabel>
+              <Input
+                id={field.name}
+                name={field.name}
+                placeholder={t('namePlaceholder')}
+                value={field.state.value}
+                onBlur={field.handleBlur}
+                onChange={(event) => field.handleChange(event.target.value)}
+              />
+              <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+            </Field>
+          )}
+        </form.Field>
 
-        <Field>
-          <FieldLabel htmlFor="description">{t('descriptionLabel')}</FieldLabel>
-          <Textarea
-            id="description"
-            placeholder={t('descriptionPlaceholder')}
-            {...form.register('description')}
-          />
-          <FieldError errors={[form.formState.errors.description]} />
-        </Field>
+        <form.Field name="description">
+          {(field) => (
+            <Field>
+              <FieldLabel htmlFor={field.name}>{t('descriptionLabel')}</FieldLabel>
+              <Textarea
+                id={field.name}
+                name={field.name}
+                placeholder={t('descriptionPlaceholder')}
+                value={field.state.value}
+                onBlur={field.handleBlur}
+                onChange={(event) => field.handleChange(event.target.value)}
+              />
+              <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+            </Field>
+          )}
+        </form.Field>
 
-        <Controller
-          control={form.control}
-          name="product_type"
-          render={({ field, fieldState }) => (
+        <form.Field name="product_type">
+          {(field) => (
             <Field>
               <FieldLabel>{t('productTypeLabel')}</FieldLabel>
               <Select
-                onValueChange={field.onChange}
-                value={field.value}
+                onValueChange={(value) => field.handleChange(value as ProductFormValues['product_type'])}
+                value={field.state.value}
                 items={productTypeItems}
               >
                 <SelectTrigger>
@@ -161,20 +181,18 @@ const CreateProductForm: FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
                   </SelectGroup>
                 </SelectContent>
               </Select>
-              <FieldError errors={[fieldState.error]} />
+              <FieldError errors={toFieldErrors(field.state.meta.errors)} />
             </Field>
           )}
-        />
+        </form.Field>
 
-        <Controller
-          control={form.control}
-          name="price_type"
-          render={({ field, fieldState }) => (
+        <form.Field name="price_type">
+          {(field) => (
             <Field>
               <FieldLabel>{t('priceTypeLabel')}</FieldLabel>
               <Select
-                onValueChange={field.onChange}
-                value={field.value}
+                onValueChange={(value) => field.handleChange(value as ProductFormValues['price_type'])}
+                value={field.state.value}
                 items={priceTypeOptions}
               >
                 <SelectTrigger>
@@ -193,45 +211,45 @@ const CreateProductForm: FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
                   </SelectGroup>
                 </SelectContent>
               </Select>
-              <FieldError errors={[fieldState.error]} />
+              <FieldError errors={toFieldErrors(field.state.meta.errors)} />
             </Field>
           )}
-        />
+        </form.Field>
 
         <div className="flex space-x-2">
           <div className="grow">
-            <Controller
-              control={form.control}
-              name="amount"
-              render={({ field, fieldState }) => (
+            <form.Field name="amount">
+              {(field) => (
                 <Field>
                   <FieldLabel htmlFor={field.name}>
                     {priceType === 'fixed_price' ? t('priceLabel') : t('minAmountLabel')}
                   </FieldLabel>
                   <Input
                     id={field.name}
+                    name={field.name}
                     type="number"
                     placeholder={priceType === 'fixed_price' ? t('priceLabel') : t('minAmountLabel')}
-                    {...field}
-                    onChange={(e) => {
-                      field.onChange(Number(e.target.value));
-                    }}
+                    value={field.state.value}
+                    onBlur={field.handleBlur}
+                    onChange={(event) => field.handleChange(Number(event.target.value))}
                   />
-                  <FieldError errors={[fieldState.error]} />
+                  <FieldError errors={toFieldErrors(field.state.meta.errors)} />
                 </Field>
               )}
-            />
+            </form.Field>
           </div>
           <div className="w-1/3">
-            <Controller
-              control={form.control}
-              name="currency"
-              render={({ field, fieldState }) => (
+            <form.Field name="currency">
+              {(field) => (
                 <Field>
                   <FieldLabel>{t('currencyLabel')}</FieldLabel>
                   <Select
-                    onValueChange={field.onChange}
-                    value={field.value}
+                    onValueChange={(value) => {
+                      if (value) {
+                        field.handleChange(value);
+                      }
+                    }}
+                    value={field.state.value}
                     items={currencyItems}
                   >
                     <SelectTrigger>
@@ -250,31 +268,43 @@ const CreateProductForm: FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
                       </SelectGroup>
                     </SelectContent>
                   </Select>
-                  <FieldError errors={[fieldState.error]} />
+                  <FieldError errors={toFieldErrors(field.state.meta.errors)} />
                 </Field>
               )}
-            />
+            </form.Field>
           </div>
         </div>
 
-        <Field>
-          <FieldLabel htmlFor="benefits">{t('benefitsLabel')}</FieldLabel>
-          <Textarea
-            id="benefits"
-            placeholder={t('benefitsPlaceholder')}
-            {...form.register('benefits')}
-          />
-          <FieldError errors={[form.formState.errors.benefits]} />
-        </Field>
+        <form.Field name="benefits">
+          {(field) => (
+            <Field>
+              <FieldLabel htmlFor={field.name}>{t('benefitsLabel')}</FieldLabel>
+              <Textarea
+                id={field.name}
+                name={field.name}
+                placeholder={t('benefitsPlaceholder')}
+                value={field.state.value ?? ''}
+                onBlur={field.handleBlur}
+                onChange={(event) => field.handleChange(event.target.value)}
+              />
+              <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+            </Field>
+          )}
+        </form.Field>
       </div>
 
       <div className="flex justify-end">
-        <Button
-          type="submit"
-          disabled={form.formState.isSubmitting}
-        >
-          {form.formState.isSubmitting ? t('submittingButton') : t('submitButton')}
-        </Button>
+        <form.Subscribe
+          selector={(state) => [state.canSubmit, state.isSubmitting]}
+          children={([canSubmit, isSubmitting]) => (
+            <Button
+              type="submit"
+              disabled={!canSubmit || isSubmitting}
+            >
+              {isSubmitting ? t('submittingButton') : t('submitButton')}
+            </Button>
+          )}
+        />
       </div>
     </form>
   );

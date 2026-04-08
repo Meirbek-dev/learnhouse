@@ -5,9 +5,5 @@ import '@styles/globals.css';
 export default async function PlatformLayout({ children }: { children: React.ReactNode }) {
   const initialPlatform = await getPlatform();
 
-  return (
-    <PlatformContextProvider initialPlatform={initialPlatform}>
-      {children}
-    </PlatformContextProvider>
-  );
+  return <PlatformContextProvider initialPlatform={initialPlatform}>{children}</PlatformContextProvider>;
 }

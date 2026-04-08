@@ -1,5 +1,6 @@
 'use client';
 
+import { useForm, useStore } from '@tanstack/react-form';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { AlertTriangle, Image as ImageIcon, Loader2, Tag, Video } from 'lucide-react';
 import { SectionHeader } from '@components/Dashboard/Courses/SectionHeader';
@@ -10,14 +11,13 @@ import { Card, CardContent, CardHeader } from '@components/ui/card';
 import type { CourseGeneralValues } from '@/schemas/courseSchemas';
 import { useSyncDirtySection } from '@/hooks/useSyncDirtySection';
 import { useCourse } from '@components/Contexts/CourseContext';
-import { valibotResolver } from '@hookform/resolvers/valibot';
 import { courseGeneralSchema } from '@/schemas/courseSchemas';
 import { TagsInput } from '@components/ui/custom/tags-input';
 import { useEffect, useId, useMemo, useState } from 'react';
 import { useSaveSection } from '@/hooks/useSaveSection';
-import { Controller, useForm } from 'react-hook-form';
 import { Separator } from '@components/ui/separator';
 import LearningItemsList from './LearningItemsList';
+import { toFieldErrors, valibotFormValidator } from '@/lib/tanstack-form';
 import { Textarea } from '@components/ui/textarea';
 import ThumbnailUpdate from './ThumbnailUpdate';
 import { Input } from '@components/ui/input';
@@ -123,14 +123,34 @@ function EditCourseGeneral() {
   const { updateMetadata } = useCoursesMutations(courseStructure?.course_uuid ?? '');
 
   const serverValues = useMemo(() => buildFormValues(courseStructure), [courseStructure]);
+  const formValidator = valibotFormValidator(courseGeneralSchema);
 
-  const form = useForm<CourseGeneralValues>({
-    resolver: valibotResolver(courseGeneralSchema),
+  const form = useForm({
     defaultValues: serverValues,
-    mode: 'onChange',
+    validators: {
+      onChange: formValidator,
+      onSubmit: formValidator,
+    },
+    onSubmit: async ({ value }) => {
+      setError('');
+
+      await saveWithoutRefresh(
+        async () =>
+          updateMetadata(value, {
+            lastKnownUpdateDate: course.courseStructure.update_date,
+          }),
+        {
+          onSuccess: () => {
+            form.reset(value);
+            setError('');
+          },
+        },
+      );
+    },
   });
 
-  const { isDirty } = form.formState;
+  const isDirty = useStore(form.store, (state) => state.isDirty);
+  const values = useStore(form.store, (state) => state.values);
 
   // Keep the global store's dirty map in sync — no separate state needed.
   useSyncDirtySection('general', isDirty);
@@ -143,29 +163,11 @@ function EditCourseGeneral() {
   });
 
   // Hydrate form from server data on mount / when server data changes.
-  // RHF's `reset` only runs when values actually differ, so it's cheap.
   useEffect(() => {
-    if (!isLoading && courseStructure) {
-      form.reset(serverValues, { keepDirtyValues: true });
+    if (!isLoading && courseStructure && !form.state.isDirty) {
+      form.reset(serverValues);
     }
   }, [courseStructure, isLoading, serverValues, form]);
-
-  const handleSubmit = async (values: CourseGeneralValues) => {
-    setError('');
-
-    await saveWithoutRefresh(
-      async () =>
-        updateMetadata(values, {
-          lastKnownUpdateDate: course.courseStructure.update_date,
-        }),
-      {
-        onSuccess: () => {
-          form.reset(values);
-          setError('');
-        },
-      },
-    );
-  };
 
   const handleDiscard = () => {
     form.reset(serverValues);
@@ -194,7 +196,11 @@ function EditCourseGeneral() {
     >
       <form
         id={formId}
-        onSubmit={form.handleSubmit(handleSubmit)}
+        onSubmit={(event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          void form.handleSubmit();
+        }}
         className="space-y-6"
         noValidate
       >
@@ -225,68 +231,89 @@ function EditCourseGeneral() {
               description={t('subtitle')}
               isDirty={isDirty}
               isSaving={isSaving}
-              onSave={() => form.handleSubmit(handleSubmit)()}
+              onSave={() => {
+                void form.handleSubmit();
+              }}
               onDiscard={handleDiscard}
             />
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="space-y-6">
-              <Field>
-                <FieldLabel
-                  className="text-base font-semibold"
-                  htmlFor="name"
-                >
-                  {t('name.label')}
-                </FieldLabel>
-                <Input
-                  {...form.register('name')}
-                  id="name"
-                  placeholder={t('name.placeholder')}
-                  className="text-lg"
-                  maxLength={100}
-                />
-                <FieldError errors={[form.formState.errors.name]} />
-              </Field>
+              <form.Field name="name">
+                {(field) => (
+                  <Field>
+                    <FieldLabel
+                      className="text-base font-semibold"
+                      htmlFor={field.name}
+                    >
+                      {t('name.label')}
+                    </FieldLabel>
+                    <Input
+                      id={field.name}
+                      name={field.name}
+                      placeholder={t('name.placeholder')}
+                      className="text-lg"
+                      maxLength={100}
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(event) => field.handleChange(event.target.value)}
+                    />
+                    <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+                  </Field>
+                )}
+              </form.Field>
 
-              <Field>
-                <FieldLabel
-                  className="text-base font-semibold"
-                  htmlFor="description"
-                >
-                  {t('description.label')}
-                </FieldLabel>
-                <Textarea
-                  {...form.register('description')}
-                  id="description"
-                  placeholder={t('description.placeholder')}
-                  className="min-h-[100px] resize-y"
-                  maxLength={1000}
-                />
-                <FieldError errors={[form.formState.errors.description]} />
-              </Field>
+              <form.Field name="description">
+                {(field) => (
+                  <Field>
+                    <FieldLabel
+                      className="text-base font-semibold"
+                      htmlFor={field.name}
+                    >
+                      {t('description.label')}
+                    </FieldLabel>
+                    <Textarea
+                      id={field.name}
+                      name={field.name}
+                      placeholder={t('description.placeholder')}
+                      className="min-h-[100px] resize-y"
+                      maxLength={1000}
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(event) => field.handleChange(event.target.value)}
+                    />
+                    <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+                  </Field>
+                )}
+              </form.Field>
 
-              <Field>
-                <FieldLabel
-                  className="text-base font-semibold"
-                  htmlFor="about"
-                >
-                  {t('about.label')}
-                </FieldLabel>
-                <Textarea
-                  {...form.register('about')}
-                  id="about"
-                  placeholder={t('about.placeholder')}
-                  className="min-h-[120px]"
-                />
-                <FieldError errors={[form.formState.errors.about]} />
-              </Field>
+              <form.Field name="about">
+                {(field) => (
+                  <Field>
+                    <FieldLabel
+                      className="text-base font-semibold"
+                      htmlFor={field.name}
+                    >
+                      {t('about.label')}
+                    </FieldLabel>
+                    <Textarea
+                      id={field.name}
+                      name={field.name}
+                      placeholder={t('about.placeholder')}
+                      className="min-h-[120px]"
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(event) => field.handleChange(event.target.value)}
+                    />
+                    <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+                  </Field>
+                )}
+              </form.Field>
 
               <Separator />
 
-              <Controller
-                control={form.control}
-                name="learnings"
-                render={({ field, fieldState }) => (
+              <form.Field name="learnings">
+                {(field) => (
                   <Field>
                     <FieldLabel className="text-base font-semibold">{t('learnings.label')}</FieldLabel>
                     <div
@@ -294,20 +321,18 @@ function EditCourseGeneral() {
                       aria-labelledby="learnings-label"
                     >
                       <LearningItemsList
-                        value={field.value}
-                        onChange={field.onChange}
-                        error={fieldState.error?.message}
+                        value={field.state.value}
+                        onChange={field.handleChange}
+                        error={toFieldErrors(field.state.meta.errors)?.[0]?.message}
                       />
                     </div>
-                    <FieldError errors={[fieldState.error]} />
+                    <FieldError errors={toFieldErrors(field.state.meta.errors)} />
                   </Field>
                 )}
-              />
+              </form.Field>
 
-              <Controller
-                control={form.control}
-                name="tags"
-                render={({ field, fieldState }) => (
+              <form.Field name="tags">
+                {(field) => (
                   <Field>
                     <FieldLabel className="flex items-center gap-2 text-base font-semibold">
                       <Tag
@@ -318,13 +343,13 @@ function EditCourseGeneral() {
                     </FieldLabel>
                     <TagsInput
                       placeholder={t('tags.placeholder')}
-                      value={field.value || []}
-                      onValueChange={field.onChange}
+                      value={field.state.value || []}
+                      onValueChange={field.handleChange}
                     />
-                    <FieldError errors={[fieldState.error]} />
+                    <FieldError errors={toFieldErrors(field.state.meta.errors)} />
                   </Field>
                 )}
-              />
+              </form.Field>
             </div>
           </CardContent>
         </Card>
@@ -343,15 +368,17 @@ function EditCourseGeneral() {
               <AlertDescription>{t('thumbnail.mediaActionsDescription')}</AlertDescription>
             </Alert>
 
-            <Controller
-              control={form.control}
-              name="thumbnail_type"
-              render={({ field, fieldState }) => (
+            <form.Field name="thumbnail_type">
+              {(field) => (
                 <Field>
                   <FieldLabel className="text-base font-semibold">{t('thumbnailType')}</FieldLabel>
                   <Select
-                    value={field.value}
-                    onValueChange={field.onChange}
+                    value={field.state.value}
+                    onValueChange={(value) => {
+                      if (value) {
+                        field.handleChange(value);
+                      }
+                    }}
                     items={thumbnailTypeItems}
                   >
                     <SelectTrigger>
@@ -370,12 +397,12 @@ function EditCourseGeneral() {
                       </SelectGroup>
                     </SelectContent>
                   </Select>
-                  <FieldError errors={[fieldState.error]} />
+                  <FieldError errors={toFieldErrors(field.state.meta.errors)} />
                 </Field>
               )}
-            />
+            </form.Field>
 
-            <ThumbnailUpdate thumbnailType={form.watch('thumbnail_type')} />
+            <ThumbnailUpdate thumbnailType={values.thumbnail_type} />
           </CardContent>
         </Card>
       </form>

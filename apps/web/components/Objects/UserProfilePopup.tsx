@@ -76,11 +76,7 @@ const UserProfilePopup = ({ children, userId }: UserProfilePopupProps) => {
   const router = useRouter();
   const status = useAuthStatus();
   const [open, setOpen] = useState(false);
-  const {
-    data: userData,
-    error,
-    isLoading,
-  } = useUserById(userId, { enabled: open && status === 'authenticated' });
+  const { data: userData, error, isLoading } = useUserById(userId, { enabled: open && status === 'authenticated' });
   const details = userData?.details ? (Object.values(userData.details) as UserDetail[]) : [];
 
   return (

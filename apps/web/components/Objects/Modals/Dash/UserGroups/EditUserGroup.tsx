@@ -1,14 +1,13 @@
 'use client';
 
 import { Field, FieldError, FieldLabel } from '@components/ui/field';
+import { useForm } from '@tanstack/react-form';
 import { updateUserGroup } from '@services/usergroups/usergroups';
-import { valibotResolver } from '@hookform/resolvers/valibot';
 import { getAPIUrl } from '@services/config/config';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
+import { toFieldErrors, valibotFormValidator } from '@/lib/tanstack-form';
 import { useTranslations } from 'next-intl';
-import { useForm } from 'react-hook-form';
-import { useTransition } from 'react';
 import { toast } from 'sonner';
 import * as v from 'valibot';
 import { mutate } from 'swr';
@@ -32,70 +31,85 @@ type UserGroupFormValues = v.InferOutput<ReturnType<typeof createValidationSchem
 const EditUserGroup = (props: EditUserGroupProps) => {
   const t = useTranslations('Components.EditUserGroup');
   const validationSchema = createValidationSchema(t);
+  const formValidator = valibotFormValidator(validationSchema);
 
-  const form = useForm<UserGroupFormValues>({
-    resolver: valibotResolver(validationSchema),
+  const form = useForm({
     defaultValues: {
       name: props.usergroup.name,
       description: props.usergroup.description,
     },
+    validators: {
+      onChange: formValidator,
+      onSubmit: formValidator,
+    },
+    onSubmit: async ({ value }) => {
+      const res = await updateUserGroup(props.usergroup.id, value);
+
+      if (res.status === 200) {
+        toast.success(t('toastSuccess'));
+        mutate(`${getAPIUrl()}usergroups`);
+      } else {
+        toast.error(t('toastError'));
+      }
+    },
   });
-  const {
-    register,
-    handleSubmit: submitWithValidation,
-    formState: { errors, isSubmitting },
-  } = form;
-
-  const [isPending, startTransition] = useTransition();
-
-  const handleSubmit = (values: UserGroupFormValues) => {
-    startTransition(() => {
-      void (async () => {
-        const res = await updateUserGroup(props.usergroup.id, values);
-
-        if (res.status === 200) {
-          toast.success(t('toastSuccess'));
-          mutate(`${getAPIUrl()}usergroups`);
-        } else {
-          toast.error(t('toastError'));
-        }
-      })();
-    });
-  };
 
   return (
     <form
-      onSubmit={submitWithValidation(handleSubmit)}
+      onSubmit={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        void form.handleSubmit();
+      }}
       className="space-y-4"
     >
-      <Field>
-        <FieldLabel htmlFor="name">{t('nameLabel')}</FieldLabel>
-        <Input
-          id="name"
-          type="text"
-          {...register('name')}
-        />
-        <FieldError errors={[errors.name]} />
-      </Field>
+      <form.Field name="name">
+        {(field) => (
+          <Field>
+            <FieldLabel htmlFor={field.name}>{t('nameLabel')}</FieldLabel>
+            <Input
+              id={field.name}
+              name={field.name}
+              type="text"
+              value={field.state.value}
+              onBlur={field.handleBlur}
+              onChange={(event) => field.handleChange(event.target.value)}
+            />
+            <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+          </Field>
+        )}
+      </form.Field>
 
-      <Field>
-        <FieldLabel htmlFor="description">{t('descriptionLabel')}</FieldLabel>
-        <Input
-          id="description"
-          type="text"
-          {...register('description')}
-        />
-        <FieldError errors={[errors.description]} />
-      </Field>
+      <form.Field name="description">
+        {(field) => (
+          <Field>
+            <FieldLabel htmlFor={field.name}>{t('descriptionLabel')}</FieldLabel>
+            <Input
+              id={field.name}
+              name={field.name}
+              type="text"
+              value={field.state.value ?? ''}
+              onBlur={field.handleBlur}
+              onChange={(event) => field.handleChange(event.target.value)}
+            />
+            <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+          </Field>
+        )}
+      </form.Field>
 
       <div className="flex py-4">
-        <Button
-          type="submit"
-          className="w-full rounded-md p-2 text-center font-bold shadow-md hover:cursor-pointer"
-          disabled={isPending || isSubmitting}
-        >
-          {isPending || isSubmitting ? t('loadingButton') : t('saveButton')}
-        </Button>
+        <form.Subscribe
+          selector={(state) => [state.canSubmit, state.isSubmitting]}
+          children={([canSubmit, isSubmitting]) => (
+            <Button
+              type="submit"
+              className="w-full rounded-md p-2 text-center font-bold shadow-md hover:cursor-pointer"
+              disabled={!canSubmit || isSubmitting}
+            >
+              {isSubmitting ? t('loadingButton') : t('saveButton')}
+            </Button>
+          )}
+        />
       </div>
     </form>
   );

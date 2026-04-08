@@ -2,6 +2,7 @@
 
 import type { components } from '@/lib/api/generated';
 
+import { useForm } from '@tanstack/react-form';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -36,9 +37,7 @@ import CreateProductForm from './SubComponents/CreateProductForm';
 import { getPaymentConfigs } from '@services/payments/payments';
 import { usePaymentsEnabled } from '@hooks/usePaymentsEnabled';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
-import { valibotResolver } from '@hookform/resolvers/valibot';
-import { Controller, useForm } from 'react-hook-form';
-import type { SubmitHandler } from 'react-hook-form';
+import { toFieldErrors, valibotFormValidator } from '@/lib/tanstack-form';
 import { Textarea } from '@components/ui/textarea';
 import { useState, useTransition } from 'react';
 import { Button } from '@components/ui/button';
@@ -365,9 +364,9 @@ const EditProductForm = ({
   }));
   const t = useTranslations('DashPage.Payments.ProductPage.editForm');
   const validationSchema = createValidationSchema(t);
+  const formValidator = valibotFormValidator(validationSchema);
 
-  const form = useForm<EditProductFormData>({
-    resolver: valibotResolver(validationSchema),
+  const form = useForm({
     defaultValues: {
       name: product.name,
       description: product.description ?? '',
@@ -375,78 +374,98 @@ const EditProductForm = ({
       benefits: product.benefits || '',
       currency: product.currency || '',
     },
-    mode: 'onChange',
+    validators: {
+      onChange: formValidator,
+      onSubmit: formValidator,
+    },
+    onSubmit: async ({ value }) => {
+      try {
+        await updateProduct(product.id, value);
+        mutate(getPaymentsProductsSwrKey());
+        onSuccess();
+        toast.success(t('productUpdatedSuccess'));
+      } catch {
+        toast.error(t('updateProductFailed'));
+      }
+    },
   });
-
-  const handleSubmit: SubmitHandler<EditProductFormData> = async (values) => {
-    try {
-      await updateProduct(product.id, values);
-      mutate(getPaymentsProductsSwrKey());
-      onSuccess();
-      toast.success(t('productUpdatedSuccess'));
-    } catch {
-      toast.error(t('updateProductFailed'));
-    }
-  };
 
   return (
     <form
-      onSubmit={form.handleSubmit(handleSubmit)}
+      onSubmit={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        void form.handleSubmit();
+      }}
       className="space-y-4"
     >
       <div className="flex-col space-y-3 px-1.5 py-2">
-        <Field>
-          <FieldLabel htmlFor="name">{t('nameLabel')}</FieldLabel>
-          <Input
-            id="name"
-            placeholder={t('namePlaceholder')}
-            {...form.register('name')}
-          />
-          <FieldError errors={[form.formState.errors.name]} />
-        </Field>
+        <form.Field name="name">
+          {(field) => (
+            <Field>
+              <FieldLabel htmlFor={field.name}>{t('nameLabel')}</FieldLabel>
+              <Input
+                id={field.name}
+                name={field.name}
+                placeholder={t('namePlaceholder')}
+                value={field.state.value}
+                onBlur={field.handleBlur}
+                onChange={(event) => field.handleChange(event.target.value)}
+              />
+              <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+            </Field>
+          )}
+        </form.Field>
 
-        <Field>
-          <FieldLabel htmlFor="description">{t('descriptionLabel')}</FieldLabel>
-          <Textarea
-            id="description"
-            placeholder={t('descriptionPlaceholder')}
-            {...form.register('description')}
-          />
-          <FieldError errors={[form.formState.errors.description]} />
-        </Field>
+        <form.Field name="description">
+          {(field) => (
+            <Field>
+              <FieldLabel htmlFor={field.name}>{t('descriptionLabel')}</FieldLabel>
+              <Textarea
+                id={field.name}
+                name={field.name}
+                placeholder={t('descriptionPlaceholder')}
+                value={field.state.value}
+                onBlur={field.handleBlur}
+                onChange={(event) => field.handleChange(event.target.value)}
+              />
+              <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+            </Field>
+          )}
+        </form.Field>
 
         <div className="flex space-x-2">
           <div className="grow">
-            <Controller
-              control={form.control}
-              name="amount"
-              render={({ field, fieldState }) => (
+            <form.Field name="amount">
+              {(field) => (
                 <Field>
                   <FieldLabel htmlFor={field.name}>{t('priceLabel')}</FieldLabel>
                   <Input
                     id={field.name}
+                    name={field.name}
                     type="number"
                     placeholder={t('pricePlaceholder')}
-                    {...field}
-                    onChange={(e) => {
-                      field.onChange(Number(e.target.value));
-                    }}
+                    value={field.state.value}
+                    onBlur={field.handleBlur}
+                    onChange={(event) => field.handleChange(Number(event.target.value))}
                   />
-                  <FieldError errors={[fieldState.error]} />
+                  <FieldError errors={toFieldErrors(field.state.meta.errors)} />
                 </Field>
               )}
-            />
+            </form.Field>
           </div>
           <div className="w-1/3">
-            <Controller
-              control={form.control}
-              name="currency"
-              render={({ field, fieldState }) => (
+            <form.Field name="currency">
+              {(field) => (
                 <Field>
                   <FieldLabel>{t('currencyLabel')}</FieldLabel>
                   <Select
-                    onValueChange={field.onChange}
-                    value={field.value}
+                    onValueChange={(value) => {
+                      if (value) {
+                        field.handleChange(value);
+                      }
+                    }}
+                    value={field.state.value}
                     items={currencyItems}
                   >
                     <SelectTrigger>
@@ -465,22 +484,29 @@ const EditProductForm = ({
                       </SelectGroup>
                     </SelectContent>
                   </Select>
-                  <FieldError errors={[fieldState.error]} />
+                  <FieldError errors={toFieldErrors(field.state.meta.errors)} />
                 </Field>
               )}
-            />
+            </form.Field>
           </div>
         </div>
 
-        <Field>
-          <FieldLabel htmlFor="benefits">{t('benefitsLabel')}</FieldLabel>
-          <Textarea
-            id="benefits"
-            placeholder={t('benefitsPlaceholder')}
-            {...form.register('benefits')}
-          />
-          <FieldError errors={[form.formState.errors.benefits]} />
-        </Field>
+        <form.Field name="benefits">
+          {(field) => (
+            <Field>
+              <FieldLabel htmlFor={field.name}>{t('benefitsLabel')}</FieldLabel>
+              <Textarea
+                id={field.name}
+                name={field.name}
+                placeholder={t('benefitsPlaceholder')}
+                value={field.state.value ?? ''}
+                onBlur={field.handleBlur}
+                onChange={(event) => field.handleChange(event.target.value)}
+              />
+              <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+            </Field>
+          )}
+        </form.Field>
       </div>
 
       <div className="flex justify-end space-x-2">
@@ -491,12 +517,16 @@ const EditProductForm = ({
         >
           {t('cancelButton')}
         </Button>
-        <Button
-          type="submit"
-          disabled={form.formState.isSubmitting}
-        >
-          {form.formState.isSubmitting ? t('savingButton') : t('saveButton')}
-        </Button>
+        <form.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting]}>
+          {([canSubmit, isSubmitting]) => (
+            <Button
+              type="submit"
+              disabled={!canSubmit || isSubmitting}
+            >
+              {isSubmitting ? t('savingButton') : t('saveButton')}
+            </Button>
+          )}
+        </form.Subscribe>
       </div>
     </form>
   );

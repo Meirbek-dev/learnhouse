@@ -73,9 +73,7 @@ export function emitAuthInvalidation(
   getChannel()?.postMessage(message);
 
   if (options.local && typeof window !== 'undefined') {
-    window.dispatchEvent(
-      new CustomEvent<AuthInvalidationMessage>(AUTH_INVALIDATED_EVENT, { detail: message }),
-    );
+    window.dispatchEvent(new CustomEvent<AuthInvalidationMessage>(AUTH_INVALIDATED_EVENT, { detail: message }));
   }
 
   return message;
@@ -86,9 +84,7 @@ export function emitAuthInvalidation(
  * when `local: true` was used). Returns an unsubscribe function for useEffect
  * cleanup.
  */
-export function subscribeToAuthInvalidation(
-  listener: (detail: AuthInvalidationMessage) => void,
-): () => void {
+export function subscribeToAuthInvalidation(listener: (detail: AuthInvalidationMessage) => void): () => void {
   if (typeof window === 'undefined') return () => {};
 
   const handleLocal = (e: Event) => {
