@@ -26,7 +26,7 @@ import { Actions, PermissionGuard, Resources, Scopes } from '@/components/Securi
 import { AlertTriangle, Calendar, Plus, Shield, Trash2, User } from 'lucide-react';
 import type { UserBasic, Role, UserRoleAssignment } from '@/types/permissions';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useSession, useAuthActions } from '@/components/Contexts/SessionProvider';
+import { useSession } from '@/components/Contexts/SessionProvider';
 import { getUserAvatarMediaDirectory } from '@/services/media/media';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ColumnDef } from '@tanstack/react-table';
@@ -41,7 +41,6 @@ import { toast } from 'sonner';
 
 export default function UserRolesClient() {
   const session = useSession();
-  const { syncSession } = useAuthActions();
   const t = useTranslations('Components.Roles');
   const locale = useLocale();
 
@@ -59,9 +58,9 @@ export default function UserRolesClient() {
   } | null>(null);
 
   const refreshSession = useCallback(async () => {
-    const next = await syncSession();
-    if (!next) toast.warning(t('sessionRefreshWarning'));
-  }, [syncSession, t]);
+    const next = await session.mutate();
+    if (!next?.user) toast.warning(t('sessionRefreshWarning'));
+  }, [session, t]);
 
   // Fetch user roles
   const fetchUserRolesData = useCallback(async () => {

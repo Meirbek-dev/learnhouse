@@ -1,11 +1,11 @@
 import type { Action, Resource, Scope } from '@/types/permissions';
-import type { ClientSession, AppSession } from './types';
+import type { Session } from './types';
 import { perm } from '@/types/permissions';
 import { requireSession } from './session';
 import { redirect } from 'next/navigation';
 
 export function sessionCan(
-  session: Pick<AppSession | ClientSession, 'permissions'> | undefined,
+  session: Pick<Session, 'permissions'> | undefined,
   resource: Resource,
   action: Action,
   scope: Scope,

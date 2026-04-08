@@ -7,11 +7,12 @@
  *
  * Client-side: uses credentials:"include" so cookies are sent automatically.
  * On 401, posts to /auth/refresh and retries once. On second 401 emits a
- * centralized auth invalidation event so the SessionProvider can clear state
+ * centralized auth invalidation event so auth listeners can clear state
  * and redirect consistently.
  */
 
 import { getAPIUrl, getServerAPIUrl } from '@services/config/config';
+import { AUTH_SESSION_SWR_KEY } from '@/lib/auth/constants';
 import { emitAuthInvalidation, tryRefreshToken } from '@/lib/auth/client';
 
 /** Only these cookies are forwarded to the backend on server-side requests. */
@@ -32,7 +33,15 @@ function resolveRequestUrl(pathOrUrl: string, base: string): string {
     return pathOrUrl;
   }
 
-  return `${base}${pathOrUrl}`;
+  return `${base.replace(/\/+$/, '')}/${pathOrUrl.replace(/^\/+/, '')}`;
+}
+
+function isSessionRequest(url: string): boolean {
+  try {
+    return new URL(url).pathname.endsWith('/users/session');
+  } catch {
+    return url.endsWith('/users/session');
+  }
 }
 
 function isRequestCookieUnavailableError(error: unknown): boolean {
@@ -62,6 +71,11 @@ async function getServerCookieHeader(): Promise<string> {
   }
 }
 
+async function revalidateAuthSession(): Promise<void> {
+  const { mutate } = await import('swr');
+  await mutate(AUTH_SESSION_SWR_KEY);
+}
+
 export async function apiFetch(path: string, init: ApiFetchInit = {}): Promise<Response> {
   const isServer = typeof globalThis.window === 'undefined';
   const { baseUrl, ...fetchInit } = init;
@@ -84,6 +98,9 @@ export async function apiFetch(path: string, init: ApiFetchInit = {}): Promise<R
     const refreshed = await tryRefreshToken();
     if (refreshed) {
       response = await fetch(url, options);
+      if (!isSessionRequest(url)) {
+        void revalidateAuthSession();
+      }
     }
 
     if (response.status === 401) {

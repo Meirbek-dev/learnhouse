@@ -51,7 +51,7 @@ import { Actions, PermissionGuard, Resources, Scopes, usePermissions } from '@/c
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import type { Permission, RoleAuditEvent, RoleWithPermissions } from '@/types/permissions';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useSession, useAuthActions } from '@/components/Contexts/SessionProvider';
+import { useSession } from '@/components/Contexts/SessionProvider';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ColumnDef } from '@tanstack/react-table';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -69,7 +69,6 @@ type RoleDialogMode = 'create' | 'edit' | 'clone';
 
 export default function RBACAdminClient() {
   const session = useSession();
-  const { syncSession } = useAuthActions();
   const { can } = usePermissions();
   const t = useTranslations('Components.Roles');
 
@@ -136,9 +135,9 @@ export default function RBACAdminClient() {
   }, [t]);
 
   const refreshSession = useCallback(async () => {
-    const next = await syncSession();
-    if (!next) toast.warning(t('sessionRefreshWarning'));
-  }, [syncSession, t]);
+    const next = await session.mutate();
+    if (!next?.user) toast.warning(t('sessionRefreshWarning'));
+  }, [session, t]);
 
   const loadRoleWithPermissions = async (roleId: number): Promise<RoleWithPermissions> => {
     const [role, rolePermissions] = await Promise.all([apiGetRole(roleId), getRolePermissions(roleId)]);

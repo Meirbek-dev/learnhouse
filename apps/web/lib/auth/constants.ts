@@ -1,0 +1,1 @@
+export const AUTH_SESSION_SWR_KEY = 'auth/session';

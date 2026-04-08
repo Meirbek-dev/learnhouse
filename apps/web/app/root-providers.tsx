@@ -1,10 +1,12 @@
 'use client';
 
-import type { ClientSession } from '@/lib/auth/types';
-import { SessionProvider, useSession } from '@/components/Contexts/SessionProvider';
+import { AuthBroadcastListener } from '@/components/auth/AuthBroadcastListener';
 import { PermissionProvider } from '@/components/Security/PermissionProvider';
 import { ThemeProvider, useTheme } from '@/components/providers/theme-provider';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { useSession } from '@/hooks/useSession';
+import { AUTH_SESSION_SWR_KEY } from '@/lib/auth/constants';
+import type { Session } from '@/lib/auth/types';
 import { swrFetcher } from '@services/utils/ts/requests';
 import NextTopLoader from 'nextjs-toploader';
 import { Toaster } from '@/components/ui/sonner';
@@ -14,13 +16,16 @@ import type { ReactNode } from 'react';
 
 interface RootProvidersProps {
   children: ReactNode;
-  initialSession?: ClientSession | null;
+  initialSession?: Session | null;
 }
 
-function AppSWRProvider({ children }: { children: ReactNode }) {
+function AppSWRProvider({ children, initialSession }: { children: ReactNode; initialSession?: Session | null }) {
+  const fallback = initialSession === undefined ? undefined : { [AUTH_SESSION_SWR_KEY]: initialSession };
+
   return (
     <SWRConfig
       value={{
+        fallback,
         dedupingInterval: 60_000,
         fetcher: (url: string) => swrFetcher(url),
         focusThrottleInterval: 60_000,
@@ -164,12 +169,11 @@ function ThemeProviderWrapper({ children }: { children: ReactNode }) {
 
 export default function RootProviders({ children, initialSession }: RootProvidersProps) {
   return (
-    <SessionProvider initialSession={initialSession}>
+    <AppSWRProvider initialSession={initialSession}>
+      <AuthBroadcastListener />
       <PermissionProvider>
-        <AppSWRProvider>
-          <ThemeProviderWrapper>{children}</ThemeProviderWrapper>
-        </AppSWRProvider>
+        <ThemeProviderWrapper>{children}</ThemeProviderWrapper>
       </PermissionProvider>
-    </SessionProvider>
+    </AppSWRProvider>
   );
 }
