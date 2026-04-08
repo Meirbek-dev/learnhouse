@@ -1,7 +1,7 @@
 'use client';
 
 import type { ClientSession } from '@/lib/auth/types';
-import PlatformSessionProvider, { usePlatformSession } from '@/components/Contexts/SessionContext';
+import { SessionProvider, useSession } from '@/components/Contexts/SessionProvider';
 import { PermissionProvider } from '@/components/Security/PermissionProvider';
 import { ThemeProvider, useTheme } from '@/components/providers/theme-provider';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
@@ -57,7 +57,7 @@ function RootProgressBar() {
 }
 
 function UserThemeSync() {
-  const { status } = usePlatformSession();
+  const { status } = useSession();
   const currentUser = useCurrentUser();
   const { themeName } = useTheme();
   const pendingThemeRef = useRef<string | null>(null);
@@ -164,12 +164,12 @@ function ThemeProviderWrapper({ children }: { children: ReactNode }) {
 
 export default function RootProviders({ children, initialSession }: RootProvidersProps) {
   return (
-    <PlatformSessionProvider initialSession={initialSession}>
+    <SessionProvider initialSession={initialSession}>
       <PermissionProvider>
         <AppSWRProvider>
           <ThemeProviderWrapper>{children}</ThemeProviderWrapper>
         </AppSWRProvider>
       </PermissionProvider>
-    </PlatformSessionProvider>
+    </SessionProvider>
   );
 }

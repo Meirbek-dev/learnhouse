@@ -1,4 +1,4 @@
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
+import { useSession } from '@/components/Contexts/SessionProvider';
 import { getCourseContributors } from '@services/courses/courses';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
@@ -13,7 +13,7 @@ interface Contributor {
 }
 
 export function useContributorStatus(courseUuid: string) {
-  const session = usePlatformSession();
+  const session = useSession();
   const [contributorStatus, setContributorStatus] = useState<ContributorStatus>('NONE');
   const [isLoading, setIsLoading] = useState(true);
   const [refetchTrigger, setRefetchTrigger] = useState(0);

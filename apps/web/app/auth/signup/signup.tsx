@@ -1,97 +1,112 @@
 'use client';
 
 import { Field, FieldContent, FieldError, FieldLabel } from '@components/ui/field';
-import { AuthErrorBanner, AuthSubmitButton, useAuthAction } from '@components/auth/AuthForm';
+import { AuthErrorBanner, AuthSubmitButton } from '@components/auth/AuthForm';
 import { getAbsoluteUrl, getPublicAPIUrl } from '@services/config/config';
 import { loginAndGetToken, signup } from '@services/auth/auth';
 import PasswordInput from '@components/ui/custom/password-input';
-import { valibotResolver } from '@hookform/resolvers/valibot';
-import { useTransition } from 'react';
 import { SiGoogle } from '@icons-pack/react-simple-icons';
 import { Separator } from '@components/ui/separator';
 import { passwordSchema } from '@/lib/schemas/auth';
+import { useActionState, useTransition } from 'react';
 import { Button } from '@components/ui/button';
 import AuthLogo from '@components/auth/logo';
 import AuthCard from '@components/auth/card';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
-import { useForm } from 'react-hook-form';
 import * as v from 'valibot';
 
-const buildFormSchema = (t: (key: string) => string) =>
-  v.pipe(
+const SIGNUP_ERROR_MAP: Record<string, string> = {
+  email_taken: 'emailTaken',
+  username_taken: 'usernameTaken',
+};
+
+type SignupState = {
+  error: string | null;
+  fieldErrors: {
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+    password?: string;
+    confirmPassword?: string;
+  };
+};
+
+const SignUpClient = () => {
+  const t = useTranslations('Auth.Signup');
+  const validationT = useTranslations('Validation');
+  const [isPendingGoogle, startGoogleTransition] = useTransition();
+
+  const schema = v.pipe(
     v.object({
-      firstName: v.pipe(v.string(), v.minLength(1, t('required'))),
-      lastName: v.pipe(v.string(), v.minLength(1, t('required'))),
-      email: v.pipe(v.string(), v.email(t('invalidEmail'))),
-      password: passwordSchema(t),
+      firstName: v.pipe(v.string(), v.minLength(1, validationT('required'))),
+      lastName: v.pipe(v.string(), v.minLength(1, validationT('required'))),
+      email: v.pipe(v.string(), v.email(validationT('invalidEmail'))),
+      password: passwordSchema(validationT),
       confirmPassword: v.string(),
     }),
     v.forward(
       v.partialCheck(
         [['password'], ['confirmPassword']],
         (data) => data.password === data.confirmPassword,
-        t('passwordsDontMatch'),
+        validationT('passwordsDontMatch'),
       ),
       ['confirmPassword'],
     ),
   );
 
-type SignUpFormData = v.InferOutput<ReturnType<typeof buildFormSchema>>;
+  const [state, action, isPending] = useActionState(
+    async (_prev: SignupState, formData: FormData): Promise<SignupState> => {
+      const result = v.safeParse(schema, {
+        firstName: formData.get('firstName'),
+        lastName: formData.get('lastName'),
+        email: formData.get('email'),
+        password: formData.get('password'),
+        confirmPassword: formData.get('confirmPassword'),
+      });
 
-/** Known backend error codes → i18n key mapping. Falls back to generic message. */
-const SIGNUP_ERROR_MAP: Record<string, string> = {
-  email_taken: 'emailTaken',
-  username_taken: 'usernameTaken',
-};
+      if (!result.success) {
+        const flat = v.flatten(result.issues);
+        return {
+          error: null,
+          fieldErrors: {
+            firstName: flat.nested?.firstName?.[0],
+            lastName: flat.nested?.lastName?.[0],
+            email: flat.nested?.email?.[0],
+            password: flat.nested?.password?.[0],
+            confirmPassword: flat.nested?.confirmPassword?.[0],
+          },
+        };
+      }
 
-async function signupAndLogin(
-  body: Parameters<typeof signup>[0],
-  email: string,
-  password: string,
-  t: (key: string) => string,
-) {
-  const res = await signup(body);
+      const { firstName, lastName, email, password } = result.output;
+      const username = `${firstName.toLowerCase()}.${lastName.toLowerCase()}`;
 
-  if (!res.ok) {
-    const json = (await res.json().catch(() => ({}))) as { detail?: string | { code?: string; message?: string } };
-    const detail = json?.detail;
-    const code = typeof detail === 'object' ? detail?.code : undefined;
-    const msg = code && SIGNUP_ERROR_MAP[code] ? t(SIGNUP_ERROR_MAP[code]) : t('errorSomethingWentWrong');
-    throw new Error(msg);
-  }
+      const res = await signup({ username, email, password, first_name: firstName, last_name: lastName });
+      if (!res.ok) {
+        const json = (await res.json().catch(() => ({}))) as {
+          detail?: string | { code?: string };
+        };
+        const detail = json?.detail;
+        const code = typeof detail === 'object' ? detail?.code : undefined;
+        const msgKey = code && SIGNUP_ERROR_MAP[code] ? SIGNUP_ERROR_MAP[code] : null;
+        return {
+          error: msgKey ? t(msgKey) : t('errorSomethingWentWrong'),
+          fieldErrors: {},
+        };
+      }
 
-  const loginRes = await loginAndGetToken(email, password);
-  if (!loginRes.ok) throw new Error(t('loginAfterSignupFailed'));
+      const loginRes = await loginAndGetToken(email, password);
+      if (!loginRes.ok) {
+        return { error: t('loginAfterSignupFailed'), fieldErrors: {} };
+      }
 
-  globalThis.location.href = '/redirect_from_auth';
-}
-
-const SignUpClient = () => {
-  const t = useTranslations('Auth.Signup');
-  const validationT = useTranslations('Validation');
-  const [isPendingGoogle, startGoogleTransition] = useTransition();
-  const formSchema = buildFormSchema(validationT);
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<SignUpFormData>({
-    defaultValues: { firstName: '', lastName: '', email: '', password: '', confirmPassword: '' },
-    resolver: valibotResolver(formSchema),
-  });
-
-  const { execute, error, isPending } = useAuthAction<SignUpFormData>(async (data) => {
-    const username = `${data.firstName.toLowerCase()}.${data.lastName.toLowerCase()}`;
-    await signupAndLogin(
-      { username, email: data.email, password: data.password, first_name: data.firstName, last_name: data.lastName },
-      data.email,
-      data.password,
-      t,
-    );
-  });
+      globalThis.location.href = '/redirect_from_auth';
+      return { error: null, fieldErrors: {} };
+    },
+    { error: null, fieldErrors: {} },
+  );
 
   const handleGoogleSignIn = () => {
     startGoogleTransition(() => {
@@ -131,37 +146,37 @@ const SignUpClient = () => {
 
       <form
         className="w-full space-y-4"
-        onSubmit={handleSubmit(execute)}
+        action={action}
       >
-        {error ? <AuthErrorBanner message={error} /> : null}
+        {state.error ? <AuthErrorBanner message={state.error} /> : null}
 
         <div className="grid grid-cols-2 gap-3">
           <Field>
             <FieldLabel>{t('firstName')}</FieldLabel>
             <FieldContent>
               <Input
+                name="firstName"
                 type="text"
                 placeholder={t('firstNamePlaceholder')}
                 autoComplete="given-name"
                 className="w-full"
-                {...register('firstName')}
               />
             </FieldContent>
-            <FieldError>{errors.firstName?.message}</FieldError>
+            <FieldError>{state.fieldErrors.firstName}</FieldError>
           </Field>
 
           <Field>
             <FieldLabel>{t('lastName')}</FieldLabel>
             <FieldContent>
               <Input
+                name="lastName"
                 type="text"
                 placeholder={t('lastNamePlaceholder')}
                 autoComplete="family-name"
                 className="w-full"
-                {...register('lastName')}
               />
             </FieldContent>
-            <FieldError>{errors.lastName?.message}</FieldError>
+            <FieldError>{state.fieldErrors.lastName}</FieldError>
           </Field>
         </div>
 
@@ -169,40 +184,40 @@ const SignUpClient = () => {
           <FieldLabel>{t('email')}</FieldLabel>
           <FieldContent>
             <Input
+              name="email"
               type="email"
               placeholder={t('emailPlaceholder')}
               autoComplete="email"
               className="w-full"
-              {...register('email')}
             />
           </FieldContent>
-          <FieldError>{errors.email?.message}</FieldError>
+          <FieldError>{state.fieldErrors.email}</FieldError>
         </Field>
 
         <Field>
           <FieldLabel>{t('password')}</FieldLabel>
           <FieldContent>
             <PasswordInput
+              name="password"
               placeholder={t('passwordPlaceholder')}
               autoComplete="new-password"
               className="w-full"
-              {...register('password')}
             />
           </FieldContent>
-          <FieldError>{errors.password?.message}</FieldError>
+          <FieldError>{state.fieldErrors.password}</FieldError>
         </Field>
 
         <Field>
           <FieldLabel>{t('confirmPassword')}</FieldLabel>
           <FieldContent>
             <PasswordInput
+              name="confirmPassword"
               placeholder={t('confirmPasswordPlaceholder')}
               autoComplete="new-password"
               className="w-full"
-              {...register('confirmPassword')}
             />
           </FieldContent>
-          <FieldError>{errors.confirmPassword?.message}</FieldError>
+          <FieldError>{state.fieldErrors.confirmPassword}</FieldError>
         </Field>
 
         <AuthSubmitButton

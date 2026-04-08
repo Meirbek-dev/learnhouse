@@ -1,6 +1,6 @@
 'use client';
 
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
+import { useSession } from '@/components/Contexts/SessionProvider';
 import { logout } from '@services/auth/auth';
 import PasswordInput from '@components/ui/custom/password-input';
 import { valibotResolver } from '@hookform/resolvers/valibot';
@@ -41,7 +41,7 @@ const createValidationSchema = (t: (key: string, values?: any) => string) =>
 type PasswordFormData = v.InferOutput<ReturnType<typeof createValidationSchema>>;
 
 const UserEditPassword = () => {
-  const session = usePlatformSession();
+  const session = useSession();
   const t = useTranslations('DashPage.Notifications');
   const tPassword = useTranslations('DashPage.UserAccountSettings.UserAccount.EditPassword');
   const validationSchema = createValidationSchema(t);

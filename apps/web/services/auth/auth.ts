@@ -1,5 +1,5 @@
 import { getAPIUrl } from '@services/config/config';
-import { notifyAuthInvalidation } from '@/lib/auth/client';
+import { emitAuthInvalidation } from '@/lib/auth/client';
 import type { components } from '@/lib/api/generated';
 
 type AuthUser = components['schemas']['UserRead'];
@@ -49,10 +49,7 @@ export async function logout(options?: LogoutOptions): Promise<Response> {
   });
 
   if (response.ok) {
-    notifyAuthInvalidation({
-      reason: 'logged_out',
-      redirectTo: options?.redirectTo ?? null,
-    });
+    emitAuthInvalidation({ reason: 'logged_out', redirectTo: options?.redirectTo ?? null }, { local: true });
   }
 
   return response;
@@ -65,10 +62,7 @@ export async function logoutAll(options?: LogoutOptions): Promise<Response> {
   });
 
   if (response.ok) {
-    notifyAuthInvalidation({
-      reason: 'logged_out',
-      redirectTo: options?.redirectTo ?? null,
-    });
+    emitAuthInvalidation({ reason: 'logged_out', redirectTo: options?.redirectTo ?? null }, { local: true });
   }
 
   return response;

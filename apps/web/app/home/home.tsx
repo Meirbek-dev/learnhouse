@@ -1,6 +1,6 @@
 'use client';
 
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
+import { useSession } from '@/components/Contexts/SessionProvider';
 import { logout } from '@/services/auth/auth';
 import platformLogoFull from '@public/platform_logo_full.svg';
 import { getAbsoluteUrl } from '@services/config/config';
@@ -10,7 +10,7 @@ import Image from 'next/image';
 
 const HomeClient = () => {
   const t = useTranslations('HomeClient');
-  const session = usePlatformSession();
+  const session = useSession();
 
   return (
     <div className="flex flex-col">

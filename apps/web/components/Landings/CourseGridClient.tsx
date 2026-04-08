@@ -13,7 +13,7 @@ import CourseThumbnail from '@components/Objects/Thumbnails/CourseThumbnail';
 import { getCoursesSwrKey, getTrailSwrKey } from '@services/courses/keys';
 import { swrFetcherWithHeaders } from '@services/utils/ts/requests';
 import { swrFetcher } from '@services/utils/ts/requests';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
+import { useSession } from '@/components/Contexts/SessionProvider';
 import { useMemo, useState } from 'react';
 import useSWR from 'swr';
 
@@ -25,7 +25,7 @@ interface CourseGridClientProps {
 }
 
 export default function CourseGridClient({ initialCourses, initialTotal }: CourseGridClientProps) {
-  const { status } = usePlatformSession();
+  const { status } = useSession();
   const isAuthenticated = status === 'authenticated';
   const [page, setPage] = useState(1);
 

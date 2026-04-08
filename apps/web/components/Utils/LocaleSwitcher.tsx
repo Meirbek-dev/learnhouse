@@ -1,7 +1,7 @@
 'use client';
 
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
+import { useSession } from '@/components/Contexts/SessionProvider';
 import { updateUserLocale } from '@services/users/users';
 import { useLocale, useTranslations } from 'next-intl';
 import { setUserLocale } from '@/i18n/locale';
@@ -22,7 +22,7 @@ export const LocaleSwitcher = ({ className, isMobile }: LocaleSwitcherProps) => 
   const currentLocale = useLocale();
   const [isPending, startTransition] = useTransition();
   const t = useTranslations('Components.LocaleSwitcher');
-  const session = usePlatformSession();
+  const session = useSession();
 
   const localeItems = locales.map((locale) => ({ value: locale, label: t(locale) }));
 

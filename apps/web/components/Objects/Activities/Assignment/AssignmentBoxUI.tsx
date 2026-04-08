@@ -1,7 +1,7 @@
 'use client';
 
 import { BookPlus, BookUser, FileUp, Forward, InfoIcon, ListTodo, Save, Type } from 'lucide-react';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
+import { useSession } from '@/components/Contexts/SessionProvider';
 import { Alert, AlertDescription } from '@components/ui/alert';
 import { CardContent, CardHeader } from '@components/ui/card';
 import { Separator } from '@components/ui/separator';
@@ -47,7 +47,7 @@ const AssignmentBoxUI = ({
 }: AssignmentBoxProps) => {
   const t = useTranslations('Activities.AssignmentBoxUI');
   const [customGrade, setCustomGrade] = useState('');
-  const session = usePlatformSession();
+  const session = useSession();
 
   const isAuthenticated = session?.status === 'authenticated';
   const showStudentSubmitButton = view === 'student' && isAuthenticated && !hasExistingSubmission;

@@ -1,6 +1,6 @@
 // hooks/usePaymentsEnabled.ts
 
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
+import { useSession } from '@/components/Contexts/SessionProvider';
 import { getPaymentConfigs } from '@services/payments/payments';
 import type { components } from '@/lib/api/generated';
 import useSWR from 'swr';
@@ -8,7 +8,7 @@ import useSWR from 'swr';
 type PaymentsConfigRead = components['schemas']['PaymentsConfigRead'];
 
 export function usePaymentsEnabled() {
-  const session = usePlatformSession();
+  const session = useSession();
   const isAuthenticated = session.status === 'authenticated' && Boolean(session.data?.user);
   const {
     data: paymentConfigs,

@@ -37,7 +37,7 @@ import { Suspense, lazy, useEffect, useRef, useState, useTransition } from 'reac
 import ActivityBreadcrumbs from '@components/Pages/Activity/ActivityBreadcrumbs';
 import ActivityIndicators from '@components/Pages/Courses/ActivityIndicators';
 import { getAssignmentFromActivityUUID } from '@services/courses/assignments';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
+import { useSession } from '@/components/Contexts/SessionProvider';
 import CourseEndView from '@components/Pages/Activity/CourseEndView';
 import { useFormatter, useLocale, useTranslations } from 'next-intl';
 import ToolTip from '@/components/Objects/Elements/Tooltip/Tooltip';
@@ -173,7 +173,7 @@ function useActivityPosition(course: CourseStructure, activityId: string) {
 const ActivityActions = ({ activity, activityid, course, assignment, showNavigation = true }: ActivityActionsProps) => {
   const t = useTranslations('ActivityPage');
   const { contributorStatus } = useContributorStatus(course.course_uuid);
-  const { status } = usePlatformSession();
+  const { status } = useSession();
   const isAuthenticated = status === 'authenticated';
   const isPaidAccessAllowed = activity?.content?.paid_access !== false || contributorStatus === 'ACTIVE';
 
@@ -238,7 +238,7 @@ const ActivityClient = (props: ActivityClientProps) => {
   const { courseuuid } = props;
   const { activity } = props;
   const { course } = props;
-  const { status } = usePlatformSession();
+  const { status } = useSession();
   const isAuthenticated = status === 'authenticated';
   const [assignment, setAssignment] = useState(null) as any;
   const [isFocusMode, setIsFocusMode] = useState(() => {

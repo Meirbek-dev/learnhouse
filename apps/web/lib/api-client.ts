@@ -12,7 +12,7 @@
  */
 
 import { getAPIUrl, getServerAPIUrl } from '@services/config/config';
-import { notifyAuthInvalidation, tryRefreshToken } from '@/lib/auth/client';
+import { emitAuthInvalidation, tryRefreshToken } from '@/lib/auth/client';
 
 /** Only these cookies are forwarded to the backend on server-side requests. */
 const AUTH_COOKIE_NAMES = ['access_token_cookie', 'refresh_token_cookie'] as const;
@@ -87,7 +87,7 @@ export async function apiFetch(path: string, init: ApiFetchInit = {}): Promise<R
     }
 
     if (response.status === 401) {
-      notifyAuthInvalidation({ reason: 'expired' });
+      emitAuthInvalidation({ reason: 'expired' }, { local: true });
     }
   }
 

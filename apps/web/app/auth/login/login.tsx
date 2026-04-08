@@ -1,14 +1,13 @@
 'use client';
 
 import { Field, FieldContent, FieldError, FieldLabel } from '@components/ui/field';
-import { AuthErrorBanner, AuthSubmitButton, useAuthAction } from '@components/auth/AuthForm';
+import { AuthErrorBanner, AuthSubmitButton } from '@components/auth/AuthForm';
 import { getAbsoluteUrl, getPublicAPIUrl } from '@services/config/config';
 import { loginAndGetToken } from '@services/auth/auth';
 import PasswordInput from '@components/ui/custom/password-input';
-import { valibotResolver } from '@hookform/resolvers/valibot';
 import { SiGoogle } from '@icons-pack/react-simple-icons';
 import { Separator } from '@components/ui/separator';
-import { useTransition } from 'react';
+import { useActionState, useTransition } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Button } from '@components/ui/button';
 import AuthLogo from '@components/auth/logo';
@@ -16,18 +15,9 @@ import AuthCard from '@components/auth/card';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
-import { useForm } from 'react-hook-form';
 import * as v from 'valibot';
 
-const createValidationSchema = (t: (key: string, values?: Record<string, string | number | Date>) => string) =>
-  v.object({
-    email: v.pipe(v.string(), v.minLength(1, t('required')), v.email(t('invalidEmail'))),
-    password: v.pipe(v.string(), v.minLength(1, t('required')), v.minLength(8, t('passwordMinLength', { length: 8 }))),
-  });
-
-type LoginFormData = v.InferOutput<ReturnType<typeof createValidationSchema>>;
-
-/** Validate and return the returnTo path, rejecting open-redirect attempts. */
+/** Validates returnTo, rejecting open-redirect attempts. */
 function getSafeReturnTo(raw: string | null): string {
   if (raw) {
     try {
@@ -40,28 +30,55 @@ function getSafeReturnTo(raw: string | null): string {
   return '/redirect_from_auth';
 }
 
+type LoginState = {
+  error: string | null;
+  fieldErrors: { email?: string; password?: string };
+};
+
 const LoginClient = () => {
   const validationT = useTranslations('Validation');
   const t = useTranslations('Auth.Login');
   const searchParams = useSearchParams();
   const [isPendingGoogle, startGoogleTransition] = useTransition();
 
-  const validationSchema = createValidationSchema(validationT);
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<LoginFormData>({
-    resolver: valibotResolver(validationSchema),
-    defaultValues: { email: '', password: '' },
+  const schema = v.object({
+    email: v.pipe(v.string(), v.minLength(1, validationT('required')), v.email(validationT('invalidEmail'))),
+    password: v.pipe(
+      v.string(),
+      v.minLength(1, validationT('required')),
+      v.minLength(8, validationT('passwordMinLength', { length: 8 })),
+    ),
   });
 
-  const { execute, error, isPending } = useAuthAction<LoginFormData>(async (values) => {
-    const response = await loginAndGetToken(values.email, values.password);
-    if (!response.ok) throw new Error(t('wrongCredentials'));
-    globalThis.location.href = getSafeReturnTo(searchParams.get('returnTo'));
-  });
+  const [state, action, isPending] = useActionState(
+    async (_prev: LoginState, formData: FormData): Promise<LoginState> => {
+      const result = v.safeParse(schema, {
+        email: formData.get('email'),
+        password: formData.get('password'),
+      });
+
+      if (!result.success) {
+        const flat = v.flatten(result.issues);
+        return {
+          error: null,
+          fieldErrors: {
+            email: flat.nested?.email?.[0],
+            password: flat.nested?.password?.[0],
+          },
+        };
+      }
+
+      const response = await loginAndGetToken(result.output.email, result.output.password);
+      if (!response.ok) {
+        return { error: t('wrongCredentials'), fieldErrors: {} };
+      }
+
+      // Hard navigate to clear React state and trigger server-side session check.
+      globalThis.location.href = getSafeReturnTo(searchParams.get('returnTo'));
+      return { error: null, fieldErrors: {} };
+    },
+    { error: null, fieldErrors: {} },
+  );
 
   const handleGoogleSignIn = () => {
     startGoogleTransition(() => {
@@ -99,41 +116,41 @@ const LoginClient = () => {
         <Separator />
       </div>
 
-      {error ? (
+      {state.error ? (
         <div className="mb-4">
-          <AuthErrorBanner message={error} />
+          <AuthErrorBanner message={state.error} />
         </div>
       ) : null}
 
       <form
         className="w-full space-y-4"
-        onSubmit={handleSubmit(execute)}
+        action={action}
       >
         <Field>
           <FieldLabel>{t('email')}</FieldLabel>
           <FieldContent>
             <Input
+              name="email"
               type="email"
               placeholder={t('emailPlaceholder')}
               autoComplete="email"
               className="w-full"
-              {...register('email')}
             />
           </FieldContent>
-          <FieldError>{errors.email?.message}</FieldError>
+          <FieldError>{state.fieldErrors.email}</FieldError>
         </Field>
 
         <Field>
           <FieldLabel>{t('password')}</FieldLabel>
           <FieldContent>
             <PasswordInput
+              name="password"
               placeholder={t('passwordPlaceholder')}
               autoComplete="current-password"
               className="w-full"
-              {...register('password')}
             />
           </FieldContent>
-          <FieldError>{errors.password?.message}</FieldError>
+          <FieldError>{state.fieldErrors.password}</FieldError>
         </Field>
 
         <div className="flex justify-end">

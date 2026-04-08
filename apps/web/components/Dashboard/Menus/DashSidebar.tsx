@@ -26,7 +26,7 @@ import {
   Users,
 } from 'lucide-react';
 import { useNavigationPermissions } from '@/hooks/useNavigationPermissions';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
+import { useSession } from '@/components/Contexts/SessionProvider';
 import platformLogoLight from '@public/platform_logo_light.svg';
 import { logout } from '@services/auth/auth';
 import { getAbsoluteUrl } from '@services/config/config';
@@ -237,7 +237,7 @@ const NavItem = ({ item, isCollapsed }: { item: NavigationItem; isCollapsed: boo
 );
 
 const DashSidebar = ({ className }: SidebarProps) => {
-  const session = usePlatformSession();
+  const session = useSession();
   const { state, toggleSidebar } = useSidebar();
   const t = useTranslations('SidebarMenu');
   const navigationItems = useNavigationItems();

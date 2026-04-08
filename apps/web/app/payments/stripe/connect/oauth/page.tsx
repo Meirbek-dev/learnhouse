@@ -1,6 +1,6 @@
 'use client';
 
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
+import { useSession } from '@/components/Contexts/SessionProvider';
 import { verifyStripeConnection } from '@services/payments/payments';
 import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import { AlertTriangle, Check, Loader2 } from 'lucide-react';
@@ -14,7 +14,7 @@ import { toast } from 'sonner';
 const StripeConnectCallback = () => {
   const t = useTranslations('Stripe');
   const searchParams = useSearchParams();
-  const session = usePlatformSession();
+  const session = useSession();
   const [status, setStatus] = useState<'processing' | 'success' | 'error'>('processing');
   const [message, setMessage] = useState('');
   const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);

@@ -1,7 +1,7 @@
 'use client';
 
 import CertificatePreview from '@components/Dashboard/Pages/Course/EditCourseCertification/CertificatePreview';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
+import { useSession } from '@/components/Contexts/SessionProvider';
 import { getUserCertificates } from '@services/courses/certifications';
 import SimpleAlertDialog from '@/components/ui/alert-dialog-simple';
 import { ArrowLeft, Download, Loader2 } from 'lucide-react';
@@ -18,7 +18,7 @@ interface CertificatePageProps {
 }
 
 const CertificatePage: React.FC<CertificatePageProps> = ({ courseid, qrCodeLink }) => {
-  const session = usePlatformSession();
+  const session = useSession();
   const [userCertificate, setUserCertificate] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

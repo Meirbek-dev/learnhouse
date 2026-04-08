@@ -1,48 +1,51 @@
 'use client';
 
 import { Field, FieldContent, FieldError, FieldLabel } from '@components/ui/field';
-import { AuthErrorBanner, AuthSuccessBanner, AuthSubmitButton, useAuthAction } from '@components/auth/AuthForm';
+import { AuthErrorBanner, AuthSuccessBanner, AuthSubmitButton } from '@components/auth/AuthForm';
 import { ArrowLeft } from 'lucide-react';
-import { valibotResolver } from '@hookform/resolvers/valibot';
 import { getAbsoluteUrl } from '@services/config/config';
 import { sendResetLink } from '@services/auth/auth';
+import { useActionState } from 'react';
 import AuthLogo from '@components/auth/logo';
 import AuthCard from '@components/auth/card';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
-import { useForm } from 'react-hook-form';
 import * as v from 'valibot';
 
-const createValidationSchema = (t: (key: string) => string) =>
-  v.object({
-    email: v.pipe(v.string(), v.minLength(1, t('required')), v.email(t('invalidEmail'))),
-  });
-
-type ForgotPasswordFormData = v.InferOutput<ReturnType<typeof createValidationSchema>>;
+type ForgotState = {
+  error: string | null;
+  message: string | null;
+  fieldErrors: { email?: string };
+};
 
 const ForgotPasswordClient = () => {
   const t = useTranslations('Auth.Forgot');
   const validationT = useTranslations('Validation');
-  const validationSchema = createValidationSchema(validationT);
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<ForgotPasswordFormData>({
-    resolver: valibotResolver(validationSchema),
-    defaultValues: { email: '' },
+  const schema = v.object({
+    email: v.pipe(v.string(), v.minLength(1, validationT('required')), v.email(validationT('invalidEmail'))),
   });
 
-  const { execute, error, message, setMessage, isPending } = useAuthAction<ForgotPasswordFormData>(async (values) => {
-    const res = await sendResetLink(values.email);
-    if (!res.ok) {
-      const body = (await res.json().catch(() => ({}))) as { detail?: string };
-      throw new Error(body?.detail ?? t('unknownError'));
-    }
-    setMessage(t('checkEmail'));
-  });
+  const [state, action, isPending] = useActionState(
+    async (_prev: ForgotState, formData: FormData): Promise<ForgotState> => {
+      const result = v.safeParse(schema, { email: formData.get('email') });
+
+      if (!result.success) {
+        const flat = v.flatten(result.issues);
+        return { error: null, message: null, fieldErrors: { email: flat.nested?.email?.[0] } };
+      }
+
+      const res = await sendResetLink(result.output.email);
+      if (!res.ok) {
+        const body = (await res.json().catch(() => ({}))) as { detail?: string };
+        return { error: body?.detail ?? t('unknownError'), message: null, fieldErrors: {} };
+      }
+
+      return { error: null, message: t('checkEmail'), fieldErrors: {} };
+    },
+    { error: null, message: null, fieldErrors: {} },
+  );
 
   return (
     <AuthCard>
@@ -55,33 +58,33 @@ const ForgotPasswordClient = () => {
       <p className="mt-4 text-xl font-semibold tracking-tight">{t('title')}</p>
       <p className="text-muted-foreground mt-2 text-center text-sm">{t('enterEmailMessage')}</p>
 
-      {error ? (
+      {state.error ? (
         <div className="mt-4">
-          <AuthErrorBanner message={error} />
+          <AuthErrorBanner message={state.error} />
         </div>
       ) : null}
-      {message ? (
+      {state.message ? (
         <div className="mt-4">
-          <AuthSuccessBanner message={message} />
+          <AuthSuccessBanner message={state.message} />
         </div>
       ) : null}
 
       <form
         className="mt-6 w-full space-y-4"
-        onSubmit={handleSubmit(execute)}
+        action={action}
       >
         <Field>
           <FieldLabel>{t('email')}</FieldLabel>
           <FieldContent>
             <Input
+              name="email"
               type="email"
               placeholder={t('emailPlaceholder')}
               autoComplete="email"
               className="w-full"
-              {...register('email')}
             />
           </FieldContent>
-          <FieldError>{errors.email?.message}</FieldError>
+          <FieldError>{state.fieldErrors.email}</FieldError>
         </Field>
 
         <AuthSubmitButton

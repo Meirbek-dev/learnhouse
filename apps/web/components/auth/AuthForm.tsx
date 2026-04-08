@@ -1,9 +1,7 @@
 'use client';
 
 import { AlertTriangle, Info, Loader2 } from 'lucide-react';
-import { useState, useTransition } from 'react';
 import { Button } from '@components/ui/button';
-import { useTranslations } from 'next-intl';
 
 // ---------------------------------------------------------------------------
 // Banners
@@ -60,40 +58,4 @@ export function AuthSubmitButton({ isPending, label, pendingLabel, className }: 
       )}
     </Button>
   );
-}
-
-// ---------------------------------------------------------------------------
-// useAuthAction hook
-// ---------------------------------------------------------------------------
-
-/**
- * Wraps an async form submission handler with transition, error, and success
- * state. Keeps form pages free of boilerplate.
- *
- * Usage:
- *   const { execute, error, message, isPending } = useAuthAction(async (data) => {
- *     const res = await someApiCall(data);
- *     if (!res.ok) throw new Error(t('someError'));
- *     setMessage(t('success'));
- *   });
- */
-export function useAuthAction<T>(fn: (data: T) => Promise<void>) {
-  const t = useTranslations('Validation');
-  const [error, setError] = useState('');
-  const [message, setMessage] = useState('');
-  const [isPending, startTransition] = useTransition();
-
-  const execute = (data: T) => {
-    setError('');
-    setMessage('');
-    startTransition(async () => {
-      try {
-        await fn(data);
-      } catch (e) {
-        setError(e instanceof Error ? e.message : t('unknownError'));
-      }
-    });
-  };
-
-  return { execute, error, message, setMessage, isPending };
 }

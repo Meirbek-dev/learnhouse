@@ -9,7 +9,7 @@ import {
 import { ChevronDown, Crown, LogOut, Shield, User as UserIcon, Users, Star } from 'lucide-react'; // Added Star
 import { Tooltip, TooltipContent, TooltipTrigger } from '@components/ui/tooltip';
 import { useNavigationPermissions } from '@/hooks/useNavigationPermissions';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
+import { useSession } from '@/components/Contexts/SessionProvider';
 import { logout } from '@services/auth/auth';
 import { getAbsoluteUrl } from '@services/config/config';
 import UserAvatar from '@components/Objects/UserAvatar';
@@ -35,7 +35,7 @@ interface CustomRoleInfo {
 }
 
 export const HeaderProfileBox = () => {
-  const { data: session, status } = usePlatformSession();
+  const { data: session, status } = useSession();
   const { canAccessDashboard } = useNavigationPermissions();
   const t = useTranslations('Header');
 

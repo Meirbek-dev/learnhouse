@@ -21,7 +21,7 @@ import {
   Users,
 } from 'lucide-react';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
+import { useSession } from '@/components/Contexts/SessionProvider';
 import { logout } from '@services/auth/auth';
 import { Field, FieldError, FieldLabel } from '@components/ui/field';
 import { getUser, updateUserAvatar } from '@services/users/users';
@@ -620,7 +620,7 @@ const UserEditForm = ({ form, profilePicture }: UserEditFormProps) => {
 };
 
 const UserEditGeneral = () => {
-  const session = usePlatformSession();
+  const session = useSession();
   const [localAvatar, setLocalAvatar] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | undefined>();

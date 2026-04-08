@@ -1,6 +1,6 @@
 'use client';
 
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
+import { useSession } from '@/components/Contexts/SessionProvider';
 import { useActivityAutosave } from '@/hooks/useActivityAutosave';
 
 import { PlatformContextProvider } from '@/components/Contexts/PlatformContext';
@@ -19,7 +19,7 @@ interface EditorWrapperProps {
 
 const EditorWrapper = (props: EditorWrapperProps): JSX.Element => {
   const t = useTranslations('DashPage.Editor.EditorWrapper');
-  const { status } = usePlatformSession();
+  const { status } = useSession();
   const isReady = status !== 'loading';
   const activityAutosave = useActivityAutosave({
     activityUuid: props.activity.activity_uuid,
