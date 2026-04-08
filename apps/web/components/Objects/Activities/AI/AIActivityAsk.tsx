@@ -2,7 +2,7 @@
 
 import { useActivityAIChat } from '@components/Contexts/AI/ActivityAIChatContext';
 import { Alert, AlertDescription, AlertTitle } from '@components/ui/alert';
-import { useSession } from '@/components/Contexts/SessionProvider';
+import { useViewer } from '@/hooks/useViewer';
 import { AlertTriangle, BadgeInfo, NotebookTabs, X } from 'lucide-react';
 import { AiMessageBubble } from '@components/Shared/AI/AiMessageBubble';
 import { AiChatInput } from '@components/Shared/AI/AiChatInput';
@@ -78,7 +78,7 @@ const AIActivityAsk = ({ activity: _activity }: AIActivityAskProps) => {
 
 const ActivityChatPanel = () => {
   const t = useTranslations('Activities.AIActivityAsk');
-  const session = useSession();
+  const viewer = useViewer();
 
   const {
     messages,
@@ -233,7 +233,7 @@ const ActivityChatPanel = () => {
                     sendMessage={(msg) => {
                       sendMessage(msg);
                     }}
-                    session={session}
+                    viewer={viewer}
                   />
                 )}
               </div>
@@ -298,13 +298,13 @@ const ErrorDisplay = ({ errorMessage, onDismiss, t }: ErrorDisplayProps) => (
 
 interface AIMessagePlaceHolderProps {
   sendMessage: (message: string) => void;
-  session: ReturnType<typeof useSession> | null;
+  viewer: ReturnType<typeof useViewer>;
 }
 
-const AIMessagePlaceHolder = ({ sendMessage, session }: AIMessagePlaceHolderProps) => {
+const AIMessagePlaceHolder = ({ sendMessage, viewer }: AIMessagePlaceHolderProps) => {
   const t = useTranslations('Activities.AIActivityAsk');
 
-  const userName = session?.data?.user?.first_name || session?.data?.user?.username || t('defaultUser');
+  const userName = viewer?.first_name || viewer?.username || t('defaultUser');
 
   return (
     <div className="flex h-full flex-col items-center justify-center gap-5">

@@ -3,7 +3,7 @@
 import { AuthBroadcastListener } from '@/components/auth/AuthBroadcastListener';
 import { ThemeProvider, useTheme } from '@/components/providers/theme-provider';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
-import { useSession } from '@/hooks/useSession';
+import { useAuthStatus } from '@/hooks/useSession';
 import { AUTH_SESSION_SWR_KEY } from '@/lib/auth/constants';
 import type { Session } from '@/lib/auth/types';
 import { swrFetcher } from '@services/utils/ts/requests';
@@ -61,7 +61,7 @@ function RootProgressBar() {
 }
 
 function UserThemeSync() {
-  const { status } = useSession();
+  const status = useAuthStatus();
   const currentUser = useCurrentUser();
   const { themeName } = useTheme();
   const pendingThemeRef = useRef<string | null>(null);

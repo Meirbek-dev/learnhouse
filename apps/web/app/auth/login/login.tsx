@@ -4,6 +4,7 @@ import { Field, FieldContent, FieldError, FieldLabel } from '@components/ui/fiel
 import { AuthErrorBanner, AuthSubmitButton } from '@components/auth/AuthForm';
 import { getAbsoluteUrl, getPublicAPIUrl } from '@services/config/config';
 import { loginAndGetToken } from '@services/auth/auth';
+import { normalizeReturnTo } from '@/lib/auth/client';
 import PasswordInput from '@components/ui/custom/password-input';
 import { SiGoogle } from '@icons-pack/react-simple-icons';
 import { Separator } from '@components/ui/separator';
@@ -19,15 +20,8 @@ import * as v from 'valibot';
 
 /** Validates returnTo, rejecting open-redirect attempts. */
 function getSafeReturnTo(raw: string | null): string {
-  if (raw) {
-    try {
-      const parsed = new URL(raw, globalThis.location.origin);
-      if (parsed.origin === globalThis.location.origin) return raw;
-    } catch {
-      // Invalid URL — fall through.
-    }
-  }
-  return '/redirect_from_auth';
+  const normalized = normalizeReturnTo(raw);
+  return normalized === '/' ? '/redirect_from_auth' : normalized;
 }
 
 type LoginState = {

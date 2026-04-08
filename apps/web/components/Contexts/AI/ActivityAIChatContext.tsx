@@ -11,7 +11,6 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { createActivityChatAdapter } from '@services/ai/activity-chat-adapter';
-import { useSession } from '@/components/Contexts/SessionProvider';
 import type { UseChatReturn } from '@tanstack/ai-react';
 import type { TextPart } from '@tanstack/ai-client';
 import type { PropsWithChildren } from 'react';
@@ -46,7 +45,6 @@ const ActivityAIChatContext = createContext<ActivityAIChatContextValue | null>(n
 // ── Provider ──────────────────────────────────────────────────────────────────
 
 export function ActivityAIChatProvider({ activityUuid, children }: PropsWithChildren<{ activityUuid: string }>) {
-  const session = useSession();
   const tStatus = useTranslations('Activities.AIStatus');
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);

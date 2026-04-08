@@ -26,7 +26,6 @@ import { Actions, PermissionGuard, Resources, Scopes } from '@/components/Securi
 import { AlertTriangle, Calendar, Plus, Shield, Trash2, User } from 'lucide-react';
 import type { UserBasic, Role, UserRoleAssignment } from '@/types/permissions';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useSession } from '@/components/Contexts/SessionProvider';
 import { useAuthSession } from '@/hooks/useSession';
 import { getUserAvatarMediaDirectory } from '@/services/media/media';
 import { useCallback, useEffect, useMemo, useState } from 'react';

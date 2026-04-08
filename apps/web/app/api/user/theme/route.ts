@@ -1,6 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
-import { updateUserTheme } from '@/services/users/users';
+import { updateUserTheme } from '@/lib/users/server';
 import { getSession } from '@/lib/auth/session';
 
 export async function POST(request: NextRequest) {

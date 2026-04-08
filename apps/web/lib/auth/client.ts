@@ -23,6 +23,17 @@ export type AuthInvalidationMessage = AuthInvalidationDetail & {
 
 const AUTH_INVALIDATED_EVENT = 'auth:session-invalidated';
 const AUTH_BROADCAST_CHANNEL = 'auth-session';
+const AUTH_ROUTE_PREFIXES = ['/login', '/signup', '/forgot', '/reset'] as const;
+const PROTECTED_ROUTE_PREFIXES = [
+  '/dash',
+  '/courses',
+  '/profile',
+  '/settings',
+  '/admin',
+  '/analytics',
+  '/editor',
+  '/certificates',
+] as const;
 
 // Module-level singleton — one channel for the entire page lifetime.
 // BroadcastChannel is supported in all modern browsers (Chrome 54+, Firefox 38+, Safari 15.4+).
@@ -100,7 +111,7 @@ export function subscribeToAuthInvalidation(
 }
 
 export function buildLoginRedirect(returnTo?: string | null): string {
-  const resolvedReturnTo = returnTo ?? getCurrentReturnTo();
+  const resolvedReturnTo = normalizeReturnTo(returnTo ?? getCurrentReturnTo());
   return `/login?returnTo=${encodeURIComponent(resolvedReturnTo)}`;
 }
 
@@ -108,6 +119,37 @@ export function getCurrentReturnTo(): string {
   if (typeof window === 'undefined') return '/';
   const { pathname, search } = window.location;
   return `${pathname}${search}` || '/';
+}
+
+export function isAuthRoute(pathname: string): boolean {
+  return AUTH_ROUTE_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
+}
+
+export function isProtectedRoute(pathname: string): boolean {
+  return PROTECTED_ROUTE_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
+}
+
+export function normalizeReturnTo(returnTo: string | null | undefined): string {
+  if (!returnTo) return '/';
+
+  try {
+    const origin = typeof window === 'undefined' ? 'http://localhost' : window.location.origin;
+    const parsed = new URL(returnTo, origin);
+    const normalizedPath = `${parsed.pathname}${parsed.search}` || '/';
+
+    if (parsed.origin !== origin || isAuthRoute(parsed.pathname)) {
+      return '/';
+    }
+
+    return normalizedPath;
+  } catch {
+    if (!returnTo.startsWith('/') || returnTo.startsWith('//')) {
+      return '/';
+    }
+
+    const [pathname] = returnTo.split('?');
+    return isAuthRoute(pathname || '/') ? '/' : returnTo;
+  }
 }
 
 let refreshInFlight: Promise<boolean> | null = null;

@@ -82,15 +82,3 @@ export function useAuthStatus(): SessionStatus {
 export function useIsAuthenticated(): boolean {
   return useAuthSession().isAuthenticated;
 }
-
-export function useSession() {
-  const { session, error, status, isLoading, mutate } = useAuthSession();
-
-  return {
-    data: session,
-    error,
-    status,
-    isLoading,
-    mutate,
-  };
-}

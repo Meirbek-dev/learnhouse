@@ -1,7 +1,7 @@
 'use client';
 
 import { AUTH_SESSION_SWR_KEY } from '@/lib/auth/constants';
-import { buildLoginRedirect, subscribeToAuthInvalidation } from '@/lib/auth/client';
+import { buildLoginRedirect, isAuthRoute, isProtectedRoute, subscribeToAuthInvalidation } from '@/lib/auth/client';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef } from 'react';
@@ -25,6 +25,10 @@ export function AuthBroadcastListener() {
       void mutate(AUTH_SESSION_SWR_KEY, null, { revalidate: false });
       router.refresh();
 
+      const pathname = globalThis.location.pathname;
+      const onAuthRoute = isAuthRoute(pathname);
+      const onProtectedRoute = isProtectedRoute(pathname);
+
       if (detail.reason === 'expired') {
         toast.error(t('sessionExpired'));
       } else if (detail.reason === 'revoked') {
@@ -38,7 +42,14 @@ export function AuthBroadcastListener() {
         return;
       }
 
-      if (detail.reason !== 'logged_out' && detail.reason !== 'unauthenticated') {
+      if (detail.reason === 'unauthenticated') {
+        if (onProtectedRoute && !onAuthRoute) {
+          globalThis.location.href = buildLoginRedirect(detail.returnTo);
+        }
+        return;
+      }
+
+      if (!onAuthRoute && detail.reason !== 'logged_out') {
         globalThis.location.href = buildLoginRedirect(detail.returnTo);
       }
     });

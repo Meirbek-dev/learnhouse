@@ -23,7 +23,6 @@ import {
 } from '@/components/ui/pagination';
 import { Actions, Resources, Scopes, usePermissions } from '@/components/Security';
 import RolesUpdate from '@/components/Objects/Modals/Dash/Users/RolesUpdate';
-import { useSession } from '@/components/Contexts/SessionProvider';
 import { useAuthSession } from '@/hooks/useSession';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import type { ColumnDef } from '@tanstack/react-table';

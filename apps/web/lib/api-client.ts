@@ -95,6 +95,7 @@ export async function apiFetch(path: string, init: ApiFetchInit = {}): Promise<R
   let response = await fetch(url, options);
 
   if (!isServer && response.status === 401) {
+    const sessionRequest = isSessionRequest(url);
     const refreshed = await tryRefreshToken();
     if (refreshed) {
       response = await fetch(url, options);
@@ -104,7 +105,7 @@ export async function apiFetch(path: string, init: ApiFetchInit = {}): Promise<R
     }
 
     if (response.status === 401) {
-      emitAuthInvalidation({ reason: 'expired' }, { local: true });
+      emitAuthInvalidation({ reason: sessionRequest ? 'unauthenticated' : 'expired' }, { local: true });
     }
   }
 

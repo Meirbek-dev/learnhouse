@@ -1,9 +1,9 @@
 'use client';
 
+import { useAuthStatus } from '@/hooks/useSession';
 import { useXPToast } from '@/lib/gamification/components/xp-toast';
 import type { UserGamificationProfile } from '@/types/gamification';
 import { useGamificationStore } from '@/stores/gamification';
-import { useSession } from '@/components/Contexts/SessionProvider';
 import { AnimatePresence } from 'motion/react';
 import React, { lazy, useEffect } from 'react';
 
@@ -30,7 +30,7 @@ interface GamificationProviderProps {
 }
 
 export function GamificationProvider({ children, initialData }: GamificationProviderProps) {
-  const { status } = useSession();
+  const status = useAuthStatus();
   const { ToastContainer, showXPToast: showEnhancedXPToast } = useXPToast();
 
   const hydrate = useGamificationStore((s) => s._hydrate);
