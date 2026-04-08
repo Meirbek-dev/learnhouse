@@ -86,9 +86,7 @@ const UserEditPassword = () => {
 
         // Wait for 4 seconds before signing out
         setTimeout(() => {
-          void logout().finally(() => {
-            globalThis.location.href = getAbsoluteUrl('/');
-          });
+          void logout({ redirectTo: getAbsoluteUrl('/') });
         }, 4000);
       } else {
         toast.error(t('passwordUpdateError'), {

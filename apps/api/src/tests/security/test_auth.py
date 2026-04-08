@@ -23,7 +23,7 @@ from src.security.auth import (
     get_current_user_optional,
 )
 from src.security.keys import get_private_key, get_public_key, reload_key_cache
-from src.security.auth_cookies import set_access_cookie, set_refresh_cookie
+from src.security.auth_cookies import ACCESS_COOKIE_TTL_SECONDS, set_access_cookie, set_refresh_cookie
 from src.services.auth.sessions import SessionData, hash_refresh_token, inspect_refresh_session
 
 
@@ -264,6 +264,7 @@ class TestAuthCookies:
         cookie_header = response.headers['set-cookie']
         assert 'access_token_cookie=access-token' in cookie_header
         assert 'Path=/' in cookie_header
+        assert f'Max-Age={ACCESS_COOKIE_TTL_SECONDS}' in cookie_header
 
     def test_set_refresh_cookie_keeps_refresh_path(self) -> None:
         response = Response()

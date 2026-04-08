@@ -135,7 +135,7 @@ export default function RBACAdminClient() {
   }, [t]);
 
   const refreshSession = useCallback(async () => {
-    const next = await session.update();
+    const next = await session.syncSession();
     if (!next) toast.warning(t('sessionRefreshWarning'));
   }, [session, t]);
 

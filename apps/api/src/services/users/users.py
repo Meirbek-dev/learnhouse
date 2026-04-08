@@ -290,6 +290,8 @@ async def get_user_session(
 ) -> UserSession:
     from datetime import UTC, datetime
 
+    from src.security.auth import decode_access_token, get_access_token_from_request
+
     user = await _get_user_by_field(db_session, "user_uuid", current_user.user_uuid)
     user_read = UserRead.model_validate(user)
 
@@ -303,6 +305,8 @@ async def get_user_session(
     # Resolve permissions
     permissions: list[str] = []
     permissions_timestamp: int | None = None
+    expires_at: int | None = None
+    session_version: int | None = None
     try:
         effective = checker.get_expanded_permissions(current_user.id)
         permissions = sorted(effective)
@@ -310,11 +314,24 @@ async def get_user_session(
     except Exception as e:
         _logger.exception(f"Error loading permissions for user {current_user.id}: {e}")
 
+    try:
+        resolved_token = get_access_token_from_request(request, None)
+        if resolved_token:
+            token_data = decode_access_token(resolved_token)
+            if token_data.expires_at is not None:
+                expires_at = token_data.expires_at * 1000
+            if token_data.issued_at is not None:
+                session_version = token_data.issued_at
+    except Exception as e:
+        _logger.exception(f"Error resolving session expiry for user {current_user.id}: {e}")
+
     return UserSession(
         user=user_read,
         roles=roles,
         permissions=permissions,
         permissions_timestamp=permissions_timestamp,
+        expires_at=expires_at,
+        session_version=session_version,
     )
 
 

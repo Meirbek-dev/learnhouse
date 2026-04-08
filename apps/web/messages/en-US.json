@@ -587,6 +587,9 @@
       "signInWithGoogle": "Sign in with Google",
       "signup": "Sign up",
       "title": "Login - {platformName}",
+      "sessionExpired": "Your session expired. Please sign in again.",
+      "sessionRevoked": "Your session was revoked. Please sign in again.",
+      "sessionRecoveryFailed": "We could not recover your session. Please sign in again.",
       "wrongCredentials": "Wrong email or password",
       "loginTitle": "Login",
       "noAccount": "Don't have an account?"

@@ -247,8 +247,7 @@ const DashSidebar = ({ className }: SidebarProps) => {
 
   async function handleLogout() {
     try {
-      await logout();
-      globalThis.location.href = getAbsoluteUrl('/login');
+      await logout({ redirectTo: getAbsoluteUrl('/login') });
     } catch (error) {
       console.error('Logout failed:', error);
       // Could add toast notification here

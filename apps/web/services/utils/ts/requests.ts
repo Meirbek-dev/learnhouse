@@ -1,3 +1,5 @@
+import { apiFetch } from '@/lib/api-client';
+
 type FetchCacheConfig =
   | {
       revalidate?: number | null | undefined;
@@ -85,40 +87,6 @@ const createRequestInit = (
 // ── Token refresh helpers ─────────────────────────────────────────────────────
 
 /**
- * Whether a token refresh is currently in-flight.
- * Prevents multiple concurrent refresh attempts from the same browser tab.
- */
-let _refreshInFlight: Promise<boolean> | null = null;
-
-/**
- * Attempt a single token refresh, deduplicating ALL concurrent callers.
- *
- * Every fetch path that handles 401s (api-client, swrFetcher, SessionContext)
- * must go through this function. Running two concurrent refreshes against the
- * backend's token-family tracking triggers session revocation.
- *
- * Returns true if the refresh succeeded and the caller should retry its request.
- */
-export async function tryRefreshToken(): Promise<boolean> {
-  if (_refreshInFlight) return _refreshInFlight;
-
-  _refreshInFlight = (async () => {
-    try {
-      const { refreshToken } = await import('@services/auth/auth');
-      const ok = await refreshToken();
-      if (!ok && typeof window !== 'undefined') {
-        window.dispatchEvent(new Event('auth:session-expired'));
-      }
-      return ok;
-    } finally {
-      _refreshInFlight = null;
-    }
-  })();
-
-  return _refreshInFlight;
-}
-
-/**
  * Thin fetch wrapper that automatically refreshes the access token on 401
  * and retries the original request once.  All existing helper functions
  * (swrFetcher, RequestBody, etc.) are built on this.
@@ -127,17 +95,7 @@ export async function tryRefreshToken(): Promise<boolean> {
  * token cookie available, so we skip the retry logic there.
  */
 async function fetchWithRefresh(url: string, init: RequestInit): Promise<Response> {
-  const res = await fetch(url, init);
-
-  if (res.status === 401 && typeof window !== 'undefined') {
-    const refreshed = await tryRefreshToken();
-    if (refreshed) {
-      // Retry the original request with fresh cookies
-      return fetch(url, init);
-    }
-  }
-
-  return res;
+  return apiFetch(url, init);
 }
 
 // --- EXPORTED FUNCTIONS (UNCHANGED SIGNATURES) ---

@@ -1,13 +1,12 @@
-from datetime import timedelta
-
 from fastapi import Response
 
 from config.config import get_settings
+from src.security.auth_lifetimes import ACCESS_TOKEN_EXPIRE, REFRESH_TOKEN_EXPIRE
 
 ACCESS_COOKIE_KEY = "access_token_cookie"
 REFRESH_COOKIE_KEY = "refresh_token_cookie"
-ACCESS_COOKIE_TTL_SECONDS = int(timedelta(hours=8).total_seconds())
-REFRESH_COOKIE_TTL_SECONDS = int(timedelta(days=7).total_seconds())
+ACCESS_COOKIE_TTL_SECONDS = int(ACCESS_TOKEN_EXPIRE.total_seconds())
+REFRESH_COOKIE_TTL_SECONDS = int(REFRESH_TOKEN_EXPIRE.total_seconds())
 
 
 def set_access_cookie(response: Response, value: str) -> None:

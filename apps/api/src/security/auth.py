@@ -11,6 +11,7 @@ from src.core.events.database import get_db_session
 from src.db.strict_base_model import PydanticStrictBaseModel
 from src.db.users import AnonymousUser, PublicUser, User, UserRead
 from src.security.keys import get_private_key, get_public_key
+from src.security.auth_lifetimes import ACCESS_TOKEN_EXPIRE, REFRESH_TOKEN_EXPIRE
 from src.security.rbac import AuthenticationRequired
 from src.security.auth_cookies import ACCESS_COOKIE_KEY
 from src.services.auth.sessions import get_session_by_id
@@ -20,8 +21,6 @@ logger = logging.getLogger(__name__)
 
 AUTH_TOKEN_ISSUER = "ashyq-bilim-auth"
 AUTH_TOKEN_AUDIENCE = "ashyq-bilim-api"
-ACCESS_TOKEN_EXPIRE = timedelta(minutes=30)
-REFRESH_TOKEN_EXPIRE = timedelta(days=7)  # sliding; hard cap 30 days
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 oauth2_scheme_optional = OAuth2PasswordBearer(
@@ -39,6 +38,8 @@ class TokenData(PydanticStrictBaseModel):
     session_id: str | None = None
     jti: str | None = None
     roles: list[str] = []
+    issued_at: int | None = None
+    expires_at: int | None = None
 
 
 # ── Internal helpers ─────────────────────────────────────────────────────────
@@ -123,6 +124,8 @@ def decode_access_token(token: str) -> TokenData:
         session_id=payload.get("sid"),
         jti=payload.get("jti"),
         roles=[r for r in roles if isinstance(r, str)],
+        issued_at=payload.get("iat") if isinstance(payload.get("iat"), int) else None,
+        expires_at=payload.get("exp") if isinstance(payload.get("exp"), int) else None,
     )
 
 

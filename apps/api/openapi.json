@@ -2434,65 +2434,6 @@
         "title": "Body_initiate_chunked_upload_api_v1_uploads_initiate_post",
         "type": "object"
       },
-      "Body_login_api_v1_auth_login_post": {
-        "properties": {
-          "client_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Client Id"
-          },
-          "client_secret": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "format": "password",
-            "title": "Client Secret"
-          },
-          "grant_type": {
-            "anyOf": [
-              {
-                "pattern": "^password$",
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Grant Type"
-          },
-          "password": {
-            "format": "password",
-            "title": "Password",
-            "type": "string"
-          },
-          "scope": {
-            "default": "",
-            "title": "Scope",
-            "type": "string"
-          },
-          "username": {
-            "title": "Username",
-            "type": "string"
-          }
-        },
-        "required": [
-          "username",
-          "password"
-        ],
-        "title": "Body_login_api_v1_auth_login_post",
-        "type": "object"
-      },
       "Body_upload_chunk_api_v1_uploads_chunk_post": {
         "properties": {
           "chunk": {
@@ -5221,6 +5162,19 @@
         "title": "ExternalVideo",
         "type": "object"
       },
+      "ForgotPasswordRequest": {
+        "properties": {
+          "email": {
+            "title": "Email",
+            "type": "string"
+          }
+        },
+        "required": [
+          "email"
+        ],
+        "title": "ForgotPasswordRequest",
+        "type": "object"
+      },
       "FullCourseRead": {
         "properties": {
           "about": {
@@ -5404,19 +5358,6 @@
           "count"
         ],
         "title": "FunnelStep",
-        "type": "object"
-      },
-      "GoogleExchangeRequest": {
-        "properties": {
-          "code": {
-            "title": "Code",
-            "type": "string"
-          }
-        },
-        "required": [
-          "code"
-        ],
-        "title": "GoogleExchangeRequest",
         "type": "object"
       },
       "GradedItem": {
@@ -5832,20 +5773,22 @@
         "title": "LeaderboardRead",
         "type": "object"
       },
-      "LoginResponse": {
+      "LoginRequest": {
         "properties": {
-          "tokens": {
-            "$ref": "#/components/schemas/TokensResponse"
+          "email": {
+            "title": "Email",
+            "type": "string"
           },
-          "user": {
-            "$ref": "#/components/schemas/UserRead"
+          "password": {
+            "title": "Password",
+            "type": "string"
           }
         },
         "required": [
-          "user",
-          "tokens"
+          "email",
+          "password"
         ],
-        "title": "LoginResponse",
+        "title": "LoginRequest",
         "type": "object"
       },
       "LogoutResponse": {
@@ -6049,7 +5992,7 @@
             "type": "boolean"
           },
           "creation_date": {
-            "default": "2026-04-05T14:22:42.369349",
+            "default": "2026-04-08T08:36:30.994957",
             "format": "date-time",
             "title": "Creation Date",
             "type": "string"
@@ -6091,7 +6034,7 @@
             "title": "Provider Specific Id"
           },
           "update_date": {
-            "default": "2026-04-05T14:22:42.369392",
+            "default": "2026-04-08T08:36:30.994998",
             "format": "date-time",
             "title": "Update Date",
             "type": "string"
@@ -7671,6 +7614,24 @@
           "grading_result"
         ],
         "title": "QuizSubmissionResponse",
+        "type": "object"
+      },
+      "ResetPasswordRequest": {
+        "properties": {
+          "new_password": {
+            "title": "New Password",
+            "type": "string"
+          },
+          "token": {
+            "title": "Token",
+            "type": "string"
+          }
+        },
+        "required": [
+          "token",
+          "new_password"
+        ],
+        "title": "ResetPasswordRequest",
         "type": "object"
       },
       "ResourceAuthorshipEnum": {
@@ -9580,23 +9541,13 @@
       },
       "TokensResponse": {
         "properties": {
-          "access_token": {
-            "title": "Access Token",
-            "type": "string"
-          },
-          "expiry": {
-            "title": "Expiry",
+          "expires_at": {
+            "title": "Expires At",
             "type": "integer"
-          },
-          "refresh_token": {
-            "title": "Refresh Token",
-            "type": "string"
           }
         },
         "required": [
-          "access_token",
-          "refresh_token",
-          "expiry"
+          "expires_at"
         ],
         "title": "TokensResponse",
         "type": "object"
@@ -10420,6 +10371,17 @@
       },
       "UserSession": {
         "properties": {
+          "expires_at": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires At"
+          },
           "permissions": {
             "default": [],
             "items": {
@@ -10445,6 +10407,17 @@
             },
             "title": "Roles",
             "type": "array"
+          },
+          "session_version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Session Version"
           },
           "user": {
             "$ref": "#/components/schemas/UserRead"
@@ -15074,9 +15047,47 @@
         ]
       }
     },
+    "/api/v1/auth/forgot-password": {
+      "post": {
+        "operationId": "forgot_password_api_v1_auth_forgot_password_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ForgotPasswordRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Forgot Password",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
     "/api/v1/auth/google/authorize": {
       "get": {
-        "description": "Redirect the browser to Google's OAuth consent screen.\n\n`callback` is the frontend URL that the backend will redirect to after a\nsuccessful OAuth exchange (e.g. https://app.example.com/auth/google).\nIt is carried through the OAuth `state` parameter.",
         "operationId": "google_authorize_api_v1_auth_google_authorize_get",
         "parameters": [
           {
@@ -15117,7 +15128,6 @@
     },
     "/api/v1/auth/google/callback": {
       "get": {
-        "description": "Handle Google's redirect after the user consents.\n\nExchanges the authorization code for user info, finds/creates the local\nuser, issues our JWT pair, and redirects the browser back to the frontend\nwith a short-lived exchange code.",
         "operationId": "google_callback_api_v1_auth_google_callback_get",
         "parameters": [
           {
@@ -15200,56 +15210,14 @@
         ]
       }
     },
-    "/api/v1/auth/google/exchange": {
-      "post": {
-        "description": "Exchange a short-lived OAuth exchange code for a full login response.\n\nCalled by the Next.js callback page (via a NextAuth credentials provider).\nEach code is single-use and expires after 5 minutes.",
-        "operationId": "google_exchange_api_v1_auth_google_exchange_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/GoogleExchangeRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/LoginResponse"
-                }
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Google Exchange",
-        "tags": [
-          "auth"
-        ]
-      }
-    },
     "/api/v1/auth/login": {
       "post": {
         "operationId": "login_api_v1_auth_login_post",
         "requestBody": {
           "content": {
-            "application/x-www-form-urlencoded": {
+            "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Body_login_api_v1_auth_login_post"
+                "$ref": "#/components/schemas/LoginRequest"
               }
             }
           },
@@ -15260,7 +15228,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LoginResponse"
+                  "$ref": "#/components/schemas/UserSession"
                 }
               }
             },
@@ -15284,9 +15252,8 @@
       }
     },
     "/api/v1/auth/logout": {
-      "delete": {
-        "description": "Because the JWT are stored in an httponly cookie now, we cannot\nlog the user out by simply deleting the cookies in the frontend.\nWe need the backend to send us a response to delete the cookies.",
-        "operationId": "logout_api_v1_auth_logout_delete",
+      "post": {
+        "operationId": "logout_api_v1_auth_logout_post",
         "responses": {
           "200": {
             "content": {
@@ -15310,10 +15277,35 @@
         ]
       }
     },
+    "/api/v1/auth/logout-all": {
+      "post": {
+        "operationId": "logout_all_api_v1_auth_logout_all_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LogoutResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Logout All",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
     "/api/v1/auth/refresh": {
-      "get": {
-        "description": "Token refresh with rotation.\n\nSecurity features:\n- Issues new refresh token on each use (token rotation)\n- Invalidates old refresh token\n- Logs refresh events for monitoring\n- Returns both new access and refresh tokens\n\nThis prevents stolen refresh tokens from being used indefinitely.",
-        "operationId": "refresh_api_v1_auth_refresh_get",
+      "post": {
+        "operationId": "refresh_api_v1_auth_refresh_post",
         "responses": {
           "200": {
             "content": {
@@ -15327,6 +15319,69 @@
           }
         },
         "summary": "Refresh",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/auth/reset-password": {
+      "post": {
+        "operationId": "reset_password_api_v1_auth_reset_password_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetPasswordRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Reset Password",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/auth/sessions": {
+      "get": {
+        "operationId": "list_sessions_api_v1_auth_sessions_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "List Sessions",
         "tags": [
           "auth"
         ]

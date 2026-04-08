@@ -723,8 +723,7 @@ const UserEditGeneral = () => {
 
     // Wait for 4 seconds before signing out
     await new Promise((resolve) => setTimeout(resolve, 4000));
-    await logout();
-    globalThis.location.href = getAbsoluteUrl('/');
+    await logout({ redirectTo: getAbsoluteUrl('/') });
   };
 
   const onSubmit = async (values: FormValues) => {

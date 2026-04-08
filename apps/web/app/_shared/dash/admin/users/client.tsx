@@ -58,7 +58,7 @@ export default function UserRolesClient() {
   } | null>(null);
 
   const refreshSession = useCallback(async () => {
-    const next = await session.update();
+    const next = await session.syncSession();
     if (!next) toast.warning(t('sessionRefreshWarning'));
   }, [session, t]);
 

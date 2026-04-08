@@ -2,26 +2,24 @@ import 'server-only';
 import { cache } from 'react';
 import { cookies, headers } from 'next/headers';
 import { redirect } from 'next/navigation';
-import type { AppSession, ClientSession } from './types';
+import type { AppSession, ClientSession, RawUserSessionResponse } from './types';
 import { getServerAPIUrl } from '@services/config/config';
 
 /** Cookie names forwarded to the backend for session validation. */
 const AUTH_COOKIE_NAMES = ['access_token_cookie', 'refresh_token_cookie'] as const;
 
-function getAccessTokenExpiry(token: string): number | null {
-  try {
-    const [, payloadSegment] = token.split('.');
-    if (!payloadSegment) return null;
-
-    const padding = '='.repeat((4 - (payloadSegment.length % 4)) % 4);
-    const jsonPayload = JSON.parse(Buffer.from(`${payloadSegment}${padding}`, 'base64url').toString('utf-8')) as {
-      exp?: number;
-    };
-
-    return typeof jsonPayload.exp === 'number' ? jsonPayload.exp * 1000 : null;
-  } catch {
+function toAppSession(payload: RawUserSessionResponse): AppSession | null {
+  if (!payload || typeof payload !== 'object' || typeof payload.expires_at !== 'number') {
     return null;
   }
+
+  const { expires_at, session_version, ...session } = payload;
+
+  return {
+    ...session,
+    expiresAt: expires_at,
+    sessionVersion: typeof session_version === 'number' ? session_version : null,
+  } as AppSession;
 }
 
 export const getSession = cache(async (): Promise<AppSession | null> => {
@@ -45,10 +43,8 @@ export const getSession = cache(async (): Promise<AppSession | null> => {
 
     if (!response.ok) return null;
 
-    const sessionData = await response.json();
-    const expiresAt = getAccessTokenExpiry(accessToken) ?? Date.now() + 30 * 60 * 1000;
-
-    return { ...sessionData, expiresAt } as AppSession;
+    const sessionData = (await response.json()) as RawUserSessionResponse;
+    return toAppSession(sessionData);
   } catch {
     return null;
   }

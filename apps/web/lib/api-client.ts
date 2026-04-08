@@ -7,11 +7,12 @@
  *
  * Client-side: uses credentials:"include" so cookies are sent automatically.
  * On 401, posts to /auth/refresh and retries once. On second 401 emits a
- * custom `auth:session-expired` event so the SessionProvider redirects to login.
+ * centralized auth invalidation event so the SessionProvider can clear state
+ * and redirect consistently.
  */
 
 import { getAPIUrl, getServerAPIUrl } from '@services/config/config';
-import { tryRefreshToken } from '@services/utils/ts/requests';
+import { notifyAuthInvalidation, tryRefreshToken } from '@/lib/auth/client';
 
 /** Only these cookies are forwarded to the backend on server-side requests. */
 const AUTH_COOKIE_NAMES = ['access_token_cookie', 'refresh_token_cookie'] as const;
@@ -24,6 +25,14 @@ type ApiFetchInit = Omit<RequestInit, 'credentials'> & {
 function apiBase(isServer: boolean, baseUrl?: string): string {
   if (baseUrl) return baseUrl;
   return isServer ? getServerAPIUrl() : getAPIUrl();
+}
+
+function resolveRequestUrl(pathOrUrl: string, base: string): string {
+  if (/^https?:\/\//i.test(pathOrUrl)) {
+    return pathOrUrl;
+  }
+
+  return `${base}${pathOrUrl}`;
 }
 
 function isRequestCookieUnavailableError(error: unknown): boolean {
@@ -57,7 +66,7 @@ export async function apiFetch(path: string, init: ApiFetchInit = {}): Promise<R
   const isServer = typeof globalThis.window === 'undefined';
   const { baseUrl, ...fetchInit } = init;
   const base = apiBase(isServer, baseUrl);
-  const url = `${base}${path}`;
+  const url = resolveRequestUrl(path, base);
 
   const options: RequestInit = { ...fetchInit, credentials: 'include', cache: fetchInit.cache ?? 'no-store' };
 
@@ -78,7 +87,7 @@ export async function apiFetch(path: string, init: ApiFetchInit = {}): Promise<R
     }
 
     if (response.status === 401) {
-      globalThis.window.dispatchEvent(new CustomEvent('auth:session-expired'));
+      notifyAuthInvalidation({ reason: 'expired' });
     }
   }
 

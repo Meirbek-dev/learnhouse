@@ -855,6 +855,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/auth/forgot-password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Forgot Password */
+        post: operations["forgot_password_api_v1_auth_forgot_password_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/auth/google/authorize": {
         parameters: {
             query?: never;
@@ -862,14 +879,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /**
-         * Google Authorize
-         * @description Redirect the browser to Google's OAuth consent screen.
-         *
-         *     `callback` is the frontend URL that the backend will redirect to after a
-         *     successful OAuth exchange (e.g. https://app.example.com/auth/google).
-         *     It is carried through the OAuth `state` parameter.
-         */
+        /** Google Authorize */
         get: operations["google_authorize_api_v1_auth_google_authorize_get"];
         put?: never;
         post?: never;
@@ -886,40 +896,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /**
-         * Google Callback
-         * @description Handle Google's redirect after the user consents.
-         *
-         *     Exchanges the authorization code for user info, finds/creates the local
-         *     user, issues our JWT pair, and redirects the browser back to the frontend
-         *     with a short-lived exchange code.
-         */
+        /** Google Callback */
         get: operations["google_callback_api_v1_auth_google_callback_get"];
         put?: never;
         post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/auth/google/exchange": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Google Exchange
-         * @description Exchange a short-lived OAuth exchange code for a full login response.
-         *
-         *     Called by the Next.js callback page (via a NextAuth credentials provider).
-         *     Each code is single-use and expires after 5 minutes.
-         */
-        post: operations["google_exchange_api_v1_auth_google_exchange_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -952,14 +932,26 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        post?: never;
-        /**
-         * Logout
-         * @description Because the JWT are stored in an httponly cookie now, we cannot
-         *     log the user out by simply deleting the cookies in the frontend.
-         *     We need the backend to send us a response to delete the cookies.
-         */
-        delete: operations["logout_api_v1_auth_logout_delete"];
+        /** Logout */
+        post: operations["logout_api_v1_auth_logout_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/logout-all": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Logout All */
+        post: operations["logout_all_api_v1_auth_logout_all_post"];
+        delete?: never;
         options?: never;
         head?: never;
         patch?: never;
@@ -972,19 +964,42 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /**
-         * Refresh
-         * @description Token refresh with rotation.
-         *
-         *     Security features:
-         *     - Issues new refresh token on each use (token rotation)
-         *     - Invalidates old refresh token
-         *     - Logs refresh events for monitoring
-         *     - Returns both new access and refresh tokens
-         *
-         *     This prevents stolen refresh tokens from being used indefinitely.
-         */
-        get: operations["refresh_api_v1_auth_refresh_get"];
+        get?: never;
+        put?: never;
+        /** Refresh */
+        post: operations["refresh_api_v1_auth_refresh_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/reset-password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reset Password */
+        post: operations["reset_password_api_v1_auth_reset_password_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/sessions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Sessions */
+        get: operations["list_sessions_api_v1_auth_sessions_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -4415,9 +4430,13 @@ export interface components {
             /** Chapter Id */
             chapter_id: number;
             /** Content */
-            content?: Record<string, unknown>;
+            content?: {
+                [key: string]: unknown;
+            };
             /** Details */
-            details?: Record<string, unknown>;
+            details?: {
+                [key: string]: unknown;
+            };
             /** Name */
             name: string;
             /**
@@ -4467,7 +4486,9 @@ export interface components {
             /** Chapter Id */
             chapter_id: number;
             /** Content */
-            content?: Record<string, unknown>;
+            content?: {
+                [key: string]: unknown;
+            };
             /** Course Id */
             course_id?: number | null;
             /**
@@ -4476,7 +4497,9 @@ export interface components {
              */
             creation_date: string;
             /** Details */
-            details?: Record<string, unknown> | null;
+            details?: {
+                [key: string]: unknown;
+            } | null;
             /** Id */
             id: number;
             /** Name */
@@ -4513,7 +4536,9 @@ export interface components {
             /** Chapter Id */
             chapter_id: number;
             /** Content */
-            content?: Record<string, unknown>;
+            content?: {
+                [key: string]: unknown;
+            };
             /** Course Id */
             course_id?: number | null;
             /**
@@ -4522,7 +4547,9 @@ export interface components {
              */
             creation_date: string;
             /** Details */
-            details?: Record<string, unknown> | null;
+            details?: {
+                [key: string]: unknown;
+            } | null;
             /** Id */
             id: number;
             /** Is Creator */
@@ -4562,9 +4589,13 @@ export interface components {
             activity_sub_type?: components["schemas"]["ActivitySubTypeEnum"] | null;
             activity_type?: components["schemas"]["ActivityTypeEnum"] | null;
             /** Content */
-            content?: Record<string, unknown> | null;
+            content?: {
+                [key: string]: unknown;
+            } | null;
             /** Details */
-            details?: Record<string, unknown> | null;
+            details?: {
+                [key: string]: unknown;
+            } | null;
             /** Name */
             name?: string | null;
             /** Published */
@@ -4758,7 +4789,9 @@ export interface components {
         AssignmentTaskCreate: {
             assignment_type: components["schemas"]["AssignmentTaskTypeEnum"];
             /** Contents */
-            contents?: Record<string, unknown>;
+            contents?: {
+                [key: string]: unknown;
+            };
             /** Description */
             description: string;
             /** Hint */
@@ -4799,7 +4832,9 @@ export interface components {
             /** Id */
             id: number;
             /** Task Submission */
-            task_submission?: Record<string, unknown>;
+            task_submission?: {
+                [key: string]: unknown;
+            };
             /** Task Submission Grade Feedback */
             task_submission_grade_feedback: string;
             /** Update Date */
@@ -4820,7 +4855,9 @@ export interface components {
             /** Grade */
             grade?: number | null;
             /** Task Submission */
-            task_submission?: Record<string, unknown> | null;
+            task_submission?: {
+                [key: string]: unknown;
+            } | null;
             /** Task Submission Grade Feedback */
             task_submission_grade_feedback?: string | null;
         };
@@ -4836,7 +4873,9 @@ export interface components {
         AssignmentTaskUpdate: {
             assignment_type?: components["schemas"]["AssignmentTaskTypeEnum"] | null;
             /** Contents */
-            contents?: Record<string, unknown> | null;
+            contents?: {
+                [key: string]: unknown;
+            } | null;
             /** Description */
             description?: string | null;
             /** Hint */
@@ -4957,7 +4996,9 @@ export interface components {
              * Risk Components
              * @default {}
              */
-            risk_components: Record<string, number>;
+            risk_components: {
+                [key: string]: number;
+            };
             /**
              * Risk Level
              * @enum {string}
@@ -5079,7 +5120,9 @@ export interface components {
         /** BatchPermissionCheckResponse */
         BatchPermissionCheckResponse: {
             /** Results */
-            results: Record<string, boolean>;
+            results: {
+                [key: string]: boolean;
+            };
         };
         /**
          * BlockRead
@@ -5095,7 +5138,9 @@ export interface components {
             /** Chapter Id */
             chapter_id: number | null;
             /** Content */
-            content?: Record<string, unknown>;
+            content?: {
+                [key: string]: unknown;
+            };
             /** Course Id */
             course_id: number;
             /** Creation Date */
@@ -5248,30 +5293,6 @@ export interface components {
             /** Uuid */
             uuid: string;
         };
-        /** Body_login_api_v1_auth_login_post */
-        Body_login_api_v1_auth_login_post: {
-            /** Client Id */
-            client_id?: string | null;
-            /**
-             * Client Secret
-             * Format: password
-             */
-            client_secret?: string | null;
-            /** Grant Type */
-            grant_type?: string | null;
-            /**
-             * Password
-             * Format: password
-             */
-            password: string;
-            /**
-             * Scope
-             * @default
-             */
-            scope: string;
-            /** Username */
-            username: string;
-        };
         /** Body_upload_chunk_api_v1_uploads_chunk_post */
         Body_upload_chunk_api_v1_uploads_chunk_post: {
             /** Chunk */
@@ -5284,7 +5305,9 @@ export interface components {
         /** CertificationCreate */
         CertificationCreate: {
             /** Config */
-            config?: Record<string, unknown>;
+            config?: {
+                [key: string]: unknown;
+            };
             /** Course Id */
             course_id: number;
             /** Last Known Update Date */
@@ -5295,7 +5318,9 @@ export interface components {
             /** Certification Uuid */
             certification_uuid: string;
             /** Config */
-            config: Record<string, unknown>;
+            config: {
+                [key: string]: unknown;
+            };
             /** Course Id */
             course_id: number;
             /** Creation Date */
@@ -5308,7 +5333,9 @@ export interface components {
         /** CertificationUpdate */
         CertificationUpdate: {
             /** Config */
-            config?: Record<string, unknown> | null;
+            config?: {
+                [key: string]: unknown;
+            } | null;
             /** Last Known Update Date */
             last_known_update_date?: string | null;
         };
@@ -5562,7 +5589,9 @@ export interface components {
             /** Submission Uuid */
             submission_uuid: string;
             /** Test Results */
-            test_results: Record<string, unknown>;
+            test_results: {
+                [key: string]: unknown;
+            };
             /**
              * Total Tests
              * @default 0
@@ -5614,7 +5643,9 @@ export interface components {
             /** Submission Uuid */
             submission_uuid: string;
             /** Test Results */
-            test_results: Record<string, unknown>;
+            test_results: {
+                [key: string]: unknown;
+            };
             /**
              * Total Tests
              * @default 0
@@ -6164,7 +6195,9 @@ export interface components {
          */
         ExamAttemptRead: {
             /** Answers */
-            answers?: Record<string, unknown>;
+            answers?: {
+                [key: string]: unknown;
+            };
             /** Attempt Uuid */
             attempt_uuid: string;
             /** Creation Date */
@@ -6195,7 +6228,9 @@ export interface components {
             /** User Id */
             user_id: number;
             /** Violations */
-            violations?: Record<string, unknown>[];
+            violations?: {
+                [key: string]: unknown;
+            }[];
         };
         /**
          * ExamCreate
@@ -6216,7 +6251,9 @@ export interface components {
              */
             published: boolean;
             /** Settings */
-            settings?: Record<string, unknown>;
+            settings?: {
+                [key: string]: unknown;
+            };
             /** Title */
             title: string;
         };
@@ -6234,7 +6271,9 @@ export interface components {
             /** Exam Title */
             exam_title: string;
             /** Settings */
-            settings?: Record<string, unknown>;
+            settings?: {
+                [key: string]: unknown;
+            };
         };
         /**
          * ExamRead
@@ -6261,7 +6300,9 @@ export interface components {
              */
             published: boolean;
             /** Settings */
-            settings?: Record<string, unknown>;
+            settings?: {
+                [key: string]: unknown;
+            };
             /** Title */
             title: string;
             /** Update Date */
@@ -6277,7 +6318,9 @@ export interface components {
             /** Published */
             published?: boolean | null;
             /** Settings */
-            settings?: Record<string, unknown> | null;
+            settings?: {
+                [key: string]: unknown;
+            } | null;
             /** Title */
             title?: string | null;
             /** Update Date */
@@ -6307,6 +6350,11 @@ export interface components {
             type: "youtube" | "vimeo";
             /** Uri */
             uri: string;
+        };
+        /** ForgotPasswordRequest */
+        ForgotPasswordRequest: {
+            /** Email */
+            email: string;
         };
         /** FullCourseRead */
         FullCourseRead: {
@@ -6357,11 +6405,6 @@ export interface components {
             label: string;
             /** Pct Of Previous */
             pct_of_previous?: number | null;
-        };
-        /** GoogleExchangeRequest */
-        GoogleExchangeRequest: {
-            /** Code */
-            code: string;
         };
         /**
          * GradedItem
@@ -6456,15 +6499,23 @@ export interface components {
             /** Average Score */
             average_score: number;
             /** Common Errors */
-            common_errors: Record<string, unknown>[];
+            common_errors: {
+                [key: string]: unknown;
+            }[];
             /** Completion Rate */
             completion_rate: number;
             /** Failing Tests */
-            failing_tests: Record<string, number>;
+            failing_tests: {
+                [key: string]: number;
+            };
             /** Language Distribution */
-            language_distribution: Record<string, number>;
+            language_distribution: {
+                [key: string]: number;
+            };
             /** Score Distribution */
-            score_distribution: Record<string, number>;
+            score_distribution: {
+                [key: string]: number;
+            };
             /** Total Submissions */
             total_submissions: number;
             /** Unique Students */
@@ -6553,10 +6604,12 @@ export interface components {
             /** Total Participants */
             total_participants: number;
         };
-        /** LoginResponse */
-        LoginResponse: {
-            tokens: components["schemas"]["TokensResponse"];
-            user: components["schemas"]["UserRead"];
+        /** LoginRequest */
+        LoginRequest: {
+            /** Email */
+            email: string;
+            /** Password */
+            password: string;
         };
         /** LogoutResponse */
         LogoutResponse: {
@@ -6643,7 +6696,7 @@ export interface components {
             /**
              * Creation Date
              * Format: date-time
-             * @default 2026-04-05T14:22:42.369349
+             * @default 2026-04-08T08:36:30.994957
              */
             creation_date: string;
             /**
@@ -6656,13 +6709,15 @@ export interface components {
             /** @default stripe */
             provider: components["schemas"]["PaymentProviderEnum"];
             /** Provider Config */
-            provider_config?: Record<string, unknown>;
+            provider_config?: {
+                [key: string]: unknown;
+            };
             /** Provider Specific Id */
             provider_specific_id?: string | null;
             /**
              * Update Date
              * Format: date-time
-             * @default 2026-04-05T14:22:42.369392
+             * @default 2026-04-08T08:36:30.994998
              */
             update_date: string;
         };
@@ -6688,7 +6743,9 @@ export interface components {
             /** @default stripe */
             provider: components["schemas"]["PaymentProviderEnum"];
             /** Provider Config */
-            provider_config?: Record<string, unknown>;
+            provider_config?: {
+                [key: string]: unknown;
+            };
             /** Provider Specific Id */
             provider_specific_id?: string | null;
             /**
@@ -6712,7 +6769,9 @@ export interface components {
             /** @default stripe */
             provider: components["schemas"]["PaymentProviderEnum"];
             /** Provider Config */
-            provider_config?: Record<string, unknown> | null;
+            provider_config?: {
+                [key: string]: unknown;
+            } | null;
             /** Provider Specific Id */
             provider_specific_id?: string | null;
         };
@@ -6916,17 +6975,25 @@ export interface components {
             /** Label */
             label?: string | null;
             /** Landing */
-            landing?: Record<string, unknown> | null;
+            landing?: {
+                [key: string]: unknown;
+            } | null;
             /** Links */
-            links?: Record<string, unknown> | null;
+            links?: {
+                [key: string]: unknown;
+            } | null;
             /** Logo Image */
             logo_image?: string | null;
             /** Name */
             name: string;
             /** Previews */
-            previews?: Record<string, unknown> | null;
+            previews?: {
+                [key: string]: unknown;
+            } | null;
             /** Socials */
-            socials?: Record<string, unknown> | null;
+            socials?: {
+                [key: string]: unknown;
+            } | null;
             /** Thumbnail Image */
             thumbnail_image?: string | null;
             /** Update Date */
@@ -6942,13 +7009,19 @@ export interface components {
             /** Email */
             email?: string | null;
             /** Links */
-            links?: Record<string, unknown> | null;
+            links?: {
+                [key: string]: unknown;
+            } | null;
             /** Logo Image */
             logo_image?: string | null;
             /** Previews */
-            previews?: Record<string, unknown> | null;
+            previews?: {
+                [key: string]: unknown;
+            } | null;
             /** Socials */
-            socials?: Record<string, unknown> | null;
+            socials?: {
+                [key: string]: unknown;
+            } | null;
             /** Thumbnail Image */
             thumbnail_image?: string | null;
             /** Update Date */
@@ -6993,7 +7066,9 @@ export interface components {
             /** Longest Login Streak */
             longest_login_streak: number;
             /** Preferences */
-            preferences: Record<string, unknown>;
+            preferences: {
+                [key: string]: unknown;
+            };
             /** Total Activities Completed */
             total_activities_completed: number;
             /** Total Courses Completed */
@@ -7018,7 +7093,9 @@ export interface components {
          */
         QuestionCreate: {
             /** Answer Options */
-            answer_options?: Record<string, unknown>[];
+            answer_options?: {
+                [key: string]: unknown;
+            }[];
             /** Exam Id */
             exam_id?: number | null;
             /** Explanation */
@@ -7054,7 +7131,9 @@ export interface components {
          */
         QuestionRead: {
             /** Answer Options */
-            answer_options?: Record<string, unknown>[];
+            answer_options?: {
+                [key: string]: unknown;
+            }[];
             /** Creation Date */
             creation_date?: string | null;
             /** Exam Id */
@@ -7092,7 +7171,9 @@ export interface components {
          */
         QuestionUpdate: {
             /** Answer Options */
-            answer_options?: Record<string, unknown>[] | null;
+            answer_options?: {
+                [key: string]: unknown;
+            }[] | null;
             /** Explanation */
             explanation?: string | null;
             /** Order Index */
@@ -7121,7 +7202,9 @@ export interface components {
             /** End Ts */
             end_ts: string | null;
             /** Grading Result */
-            grading_result: Record<string, unknown>;
+            grading_result: {
+                [key: string]: unknown;
+            };
             /** Id */
             id: number;
             /** Max Attempts */
@@ -7146,7 +7229,9 @@ export interface components {
             /** Violation Count */
             violation_count: number;
             /** Violations */
-            violations: Record<string, unknown>;
+            violations: {
+                [key: string]: unknown;
+            };
         };
         /**
          * QuizGradingResult
@@ -7158,7 +7243,9 @@ export interface components {
             /** Passed */
             passed: boolean;
             /** Per Question */
-            per_question: Record<string, unknown>[];
+            per_question: {
+                [key: string]: unknown;
+            }[];
             /** Percentage */
             percentage: number;
             /** Total Score */
@@ -7202,7 +7289,9 @@ export interface components {
          */
         QuizSubmissionRequest: {
             /** Answers */
-            answers?: Record<string, unknown>[];
+            answers?: {
+                [key: string]: unknown;
+            }[];
             /** End Ts */
             end_ts?: string | null;
             /** Idempotency Key */
@@ -7215,7 +7304,9 @@ export interface components {
              */
             violation_count: number;
             /** Violations */
-            violations?: Record<string, unknown>;
+            violations?: {
+                [key: string]: unknown;
+            };
         };
         /**
          * QuizSubmissionResponse
@@ -7237,6 +7328,13 @@ export interface components {
              * @default false
              */
             violations_exceeded: boolean;
+        };
+        /** ResetPasswordRequest */
+        ResetPasswordRequest: {
+            /** New Password */
+            new_password: string;
+            /** Token */
+            token: string;
         };
         /**
          * ResourceAuthorshipEnum
@@ -7411,17 +7509,23 @@ export interface components {
             execution_mode?: components["schemas"]["ExecutionMode"] | null;
             grading_strategy?: components["schemas"]["GradingStrategy"] | null;
             /** Hidden Tests */
-            hidden_tests?: Record<string, unknown>[] | null;
+            hidden_tests?: {
+                [key: string]: unknown;
+            }[] | null;
             /** Memory Limit */
             memory_limit?: number | null;
             /** Points */
             points?: number | null;
             /** Starter Code */
-            starter_code?: Record<string, string> | null;
+            starter_code?: {
+                [key: string]: string;
+            } | null;
             /** Time Limit */
             time_limit?: number | null;
             /** Visible Tests */
-            visible_tests?: Record<string, unknown>[] | null;
+            visible_tests?: {
+                [key: string]: unknown;
+            }[] | null;
         };
         /** StartActivityAIChatSession */
         StartActivityAIChatSession: {
@@ -7503,7 +7607,9 @@ export interface components {
             /** Activity Id */
             activity_id: number;
             /** Answers Json */
-            answers_json?: Record<string, unknown>;
+            answers_json?: {
+                [key: string]: unknown;
+            };
             assessment_type: components["schemas"]["AssessmentType"];
             /**
              * Attempt Number
@@ -7698,11 +7804,15 @@ export interface components {
             /** Content Health */
             content_health: components["schemas"]["ContentHealthRow"][];
             /** Course */
-            course: Record<string, number | string>;
+            course: {
+                [key: string]: number | string;
+            };
             /** Engagement Trend */
             engagement_trend: components["schemas"]["TimeSeriesPoint"][];
             /** Funnels */
-            funnels: Record<string, components["schemas"]["FunnelStep"][]>;
+            funnels: {
+                [key: string]: components["schemas"]["FunnelStep"][];
+            };
             /** Generated At */
             generated_at: string;
             summary: components["schemas"]["TeacherCourseDetailSummary"];
@@ -7945,12 +8055,8 @@ export interface components {
         };
         /** TokensResponse */
         TokensResponse: {
-            /** Access Token */
-            access_token: string;
-            /** Expiry */
-            expiry: number;
-            /** Refresh Token */
-            refresh_token: string;
+            /** Expires At */
+            expires_at: number;
         };
         /** Trail */
         Trail: {
@@ -7997,7 +8103,9 @@ export interface components {
         /** TrailRunRead */
         TrailRunRead: {
             /** Course */
-            course?: Record<string, unknown> | null;
+            course?: {
+                [key: string]: unknown;
+            } | null;
             /** Course Id */
             course_id?: number;
             /** Course Total Steps */
@@ -8005,7 +8113,9 @@ export interface components {
             /** Creation Date */
             creation_date?: string | null;
             /** Data */
-            data?: Record<string, unknown>;
+            data?: {
+                [key: string]: unknown;
+            };
             /** Id */
             id?: number | null;
             /** @default STATUS_IN_PROGRESS */
@@ -8022,7 +8132,9 @@ export interface components {
         /** TrailStepRead */
         TrailStepRead: {
             /** Activity */
-            activity?: Record<string, unknown> | null;
+            activity?: {
+                [key: string]: unknown;
+            } | null;
             /** Activity Id */
             activity_id: number;
             /** Complete */
@@ -8032,7 +8144,9 @@ export interface components {
             /** Creation Date */
             creation_date?: string | null;
             /** Data */
-            data?: Record<string, unknown>;
+            data?: {
+                [key: string]: unknown;
+            };
             /**
              * Grade
              * @default 0
@@ -8088,7 +8202,9 @@ export interface components {
              */
             bio: string | null;
             /** Details */
-            details?: Record<string, unknown> | null;
+            details?: {
+                [key: string]: unknown;
+            } | null;
             /**
              * Email
              * Format: email
@@ -8117,7 +8233,9 @@ export interface components {
             /** Password */
             password: string;
             /** Profile */
-            profile?: Record<string, unknown> | null;
+            profile?: {
+                [key: string]: unknown;
+            } | null;
             /**
              * Theme
              * @default default
@@ -8160,7 +8278,9 @@ export interface components {
             /** Permissions */
             permissions: string[];
             /** Roles */
-            roles: Record<string, unknown>[];
+            roles: {
+                [key: string]: unknown;
+            }[];
         };
         /** UserRankRead */
         UserRankRead: {
@@ -8182,7 +8302,9 @@ export interface components {
              */
             bio: string | null;
             /** Details */
-            details?: Record<string, unknown> | null;
+            details?: {
+                [key: string]: unknown;
+            } | null;
             /**
              * Email
              * Format: email
@@ -8205,7 +8327,9 @@ export interface components {
              */
             middle_name: string | null;
             /** Profile */
-            profile?: Record<string, unknown> | null;
+            profile?: {
+                [key: string]: unknown;
+            } | null;
             /**
              * Theme
              * @default default
@@ -8246,6 +8370,8 @@ export interface components {
         };
         /** UserSession */
         UserSession: {
+            /** Expires At */
+            expires_at?: number | null;
             /**
              * Permissions
              * @default []
@@ -8255,6 +8381,8 @@ export interface components {
             permissions_timestamp?: number | null;
             /** Roles */
             roles: components["schemas"]["UserSessionRole"][];
+            /** Session Version */
+            session_version?: number | null;
             user: components["schemas"]["UserRead"];
         };
         /** UserSessionRole */
@@ -8285,7 +8413,9 @@ export interface components {
             /** Bio */
             bio?: string | null;
             /** Details */
-            details?: Record<string, unknown> | null;
+            details?: {
+                [key: string]: unknown;
+            } | null;
             /** Email */
             email?: string | null;
             /** First Name */
@@ -8297,7 +8427,9 @@ export interface components {
             /** Middle Name */
             middle_name?: string | null;
             /** Profile */
-            profile?: Record<string, unknown> | null;
+            profile?: {
+                [key: string]: unknown;
+            } | null;
             /** Theme */
             theme?: string | null;
             /** Username */
@@ -8388,7 +8520,9 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": unknown;
                 };
@@ -8410,14 +8544,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["ActivityRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -8439,14 +8577,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["ActivityRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -8468,14 +8610,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["ActivityRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -8497,14 +8643,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["ActivityRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -8524,14 +8674,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["ActivityReadWithPermissions"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -8551,14 +8705,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["ActivityDetailResponse"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -8582,14 +8740,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["ActivityRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -8611,14 +8773,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["ActivityAIChatSessionResponse"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -8640,14 +8806,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": unknown;
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -8669,14 +8839,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["ActivityAIChatSessionResponse"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -8698,14 +8872,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": unknown;
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -8736,14 +8914,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["TeacherAssessmentListResponse"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -8777,14 +8959,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["TeacherAssessmentDetailResponse"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -8815,14 +9001,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["TeacherCourseListResponse"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -8855,14 +9045,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["TeacherCourseDetailResponse"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -8895,14 +9089,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["TeacherCourseDetailResponse"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -8933,14 +9131,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": unknown;
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -8971,14 +9173,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": unknown;
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -9009,14 +9215,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": unknown;
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -9047,14 +9257,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": unknown;
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -9085,14 +9299,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["AtRiskLearnersResponse"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -9123,14 +9341,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["TeacherOverviewResponse"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -9152,14 +9374,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["AssignmentRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -9179,14 +9405,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["AssignmentRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -9206,14 +9436,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": unknown;
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -9233,14 +9467,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": unknown;
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -9256,20 +9494,26 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": Record<string, unknown>;
+                "application/json": {
+                    [key: string]: unknown;
+                };
             };
         };
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": unknown;
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -9285,20 +9529,26 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": Record<string, unknown>;
+                "application/json": {
+                    [key: string]: unknown;
+                };
             };
         };
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": unknown;
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -9322,14 +9572,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["AssignmentTaskSubmissionRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -9349,14 +9603,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": unknown;
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -9381,14 +9639,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": unknown;
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -9408,14 +9670,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["AssignmentRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -9439,14 +9705,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["AssignmentRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -9466,14 +9736,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": unknown;
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -9493,14 +9767,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["AssignmentUserSubmissionWithUserRead"][];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -9520,14 +9798,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["AssignmentUserSubmissionRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -9548,14 +9830,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["AssignmentUserSubmissionRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -9575,14 +9861,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": unknown;
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -9606,14 +9896,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": unknown;
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -9637,14 +9931,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": unknown;
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -9664,14 +9962,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": unknown;
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -9695,14 +9997,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": unknown;
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -9727,14 +10033,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": unknown;
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -9755,14 +10065,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["AssignmentTaskSubmissionRead"][];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -9787,14 +10101,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": unknown;
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -9815,14 +10133,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": unknown;
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -9844,14 +10166,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": unknown;
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -9873,14 +10199,51 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": unknown;
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    forgot_password_api_v1_auth_forgot_password_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ForgotPasswordRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -9900,14 +10263,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": unknown;
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -9929,43 +10296,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": unknown;
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
+                headers: {
+                    [name: string]: unknown;
                 };
-            };
-        };
-    };
-    google_exchange_api_v1_auth_google_exchange_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["GoogleExchangeRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: Record<string, unknown>;
-                content: {
-                    "application/json": components["schemas"]["LoginResponse"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: Record<string, unknown>;
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -9981,27 +10323,31 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/x-www-form-urlencoded": components["schemas"]["Body_login_api_v1_auth_login_post"];
+                "application/json": components["schemas"]["LoginRequest"];
             };
         };
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
-                    "application/json": components["schemas"]["LoginResponse"];
+                    "application/json": components["schemas"]["UserSession"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
     };
-    logout_api_v1_auth_logout_delete: {
+    logout_api_v1_auth_logout_post: {
         parameters: {
             query?: never;
             header?: never;
@@ -10012,14 +10358,16 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["LogoutResponse"];
                 };
             };
         };
     };
-    refresh_api_v1_auth_refresh_get: {
+    logout_all_api_v1_auth_logout_all_post: {
         parameters: {
             query?: never;
             header?: never;
@@ -10030,9 +10378,84 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LogoutResponse"];
+                };
+            };
+        };
+    };
+    refresh_api_v1_auth_refresh_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["TokensResponse"];
+                };
+            };
+        };
+    };
+    reset_password_api_v1_auth_reset_password_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResetPasswordRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_sessions_api_v1_auth_sessions_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
                 };
             };
         };
@@ -10050,14 +10473,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["BlockRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -10079,14 +10506,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["BlockRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -10106,14 +10537,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["BlockRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -10135,14 +10570,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["BlockRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -10166,14 +10605,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["QuizSubmissionResponse"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -10195,14 +10638,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["QuizAttemptRead"][];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -10222,14 +10669,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["QuizQuestionStatRead"][];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -10249,14 +10700,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["BlockRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -10278,14 +10733,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["BlockRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -10307,14 +10766,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["CertificationRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -10334,14 +10797,20 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
-                    "application/json": Record<string, unknown>;
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -10361,14 +10830,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["CertificationRead"][];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -10386,9 +10859,13 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
-                    "application/json": Record<string, unknown>[];
+                    "application/json": {
+                        [key: string]: unknown;
+                    }[];
                 };
             };
         };
@@ -10406,14 +10883,20 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
-                    "application/json": Record<string, unknown>[];
+                    "application/json": {
+                        [key: string]: unknown;
+                    }[];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -10433,14 +10916,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["CertificationRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -10464,14 +10951,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["CertificationRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -10493,14 +10984,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": unknown;
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -10522,14 +11017,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["ChapterRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -10553,14 +11052,20 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
-                    "application/json": Record<string, unknown>;
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -10580,14 +11085,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["ChapterRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -10607,14 +11116,20 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
-                    "application/json": Record<string, unknown>;
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -10638,14 +11153,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["ChapterRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -10670,14 +11189,20 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
-                    "application/json": Record<string, unknown>;
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -10701,14 +11226,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["ChapterRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -10726,7 +11255,9 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": unknown;
                 };
@@ -10744,7 +11275,9 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["Judge0Language"][];
                 };
@@ -10764,14 +11297,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["CodeSubmissionDetail"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -10791,14 +11328,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["ActivityRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -10818,14 +11359,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["InstructorAnalytics"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -10846,14 +11391,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["StudentAnalytics"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -10877,14 +11426,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["CustomTestResponse"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -10907,14 +11460,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["CodeChallengeLeaderboard"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -10934,14 +11491,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": unknown;
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -10965,14 +11526,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": unknown;
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -10995,14 +11560,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["CodeSubmissionRead"][];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -11026,14 +11595,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["SubmissionResponse"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -11057,14 +11630,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["TestRunResponse"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -11086,14 +11663,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["CollectionRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -11114,14 +11695,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["CollectionReadWithPermissions"][];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -11141,14 +11726,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["CollectionReadWithPermissions"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -11172,14 +11761,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["CollectionRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -11199,14 +11792,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": unknown;
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -11228,14 +11825,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["CourseRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -11260,14 +11861,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["CourseReadWithPermissions"][];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -11288,14 +11893,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["CourseReadWithPermissions"][];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -11317,14 +11926,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["CourseRead"][];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -11344,14 +11957,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["CourseRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -11371,14 +11988,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["CourseDetailResponse"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -11402,14 +12023,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["CourseRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -11429,14 +12054,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": unknown;
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -11460,14 +12089,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": unknown;
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -11491,14 +12124,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": unknown;
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -11518,14 +12155,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": unknown;
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -11549,14 +12190,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": unknown;
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -11583,14 +12228,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["CourseDiscussionReadWithPermissions"][];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -11614,14 +12263,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["CourseDiscussionRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -11646,14 +12299,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["CourseDiscussionRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -11674,14 +12331,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": unknown;
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -11702,14 +12363,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": unknown;
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -11730,14 +12395,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": unknown;
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -11758,14 +12427,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["DiscussionLikeRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -11786,14 +12459,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": unknown;
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -11819,14 +12496,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["CourseDiscussionRead"][];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -11848,14 +12529,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["FullCourseRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -11879,14 +12564,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["CourseRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -11906,14 +12595,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["CourseUserRightsResponse"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -11937,14 +12630,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["CourseRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -11969,14 +12666,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["CourseUpdateRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -11997,14 +12698,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": unknown;
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -12024,14 +12729,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["CourseUpdateRead"][];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -12055,14 +12764,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["CourseUpdateRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -12080,7 +12793,9 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": unknown;
                 };
@@ -12102,14 +12817,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["ExamRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -12129,14 +12848,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["ExamRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -12156,14 +12879,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["ExamAttemptRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -12181,7 +12908,9 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": unknown;
                 };
@@ -12205,14 +12934,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["QuestionRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -12232,14 +12965,20 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
-                    "application/json": Record<string, string>;
+                    "application/json": {
+                        [key: string]: string;
+                    };
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -12261,14 +13000,20 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
-                    "application/json": Record<string, unknown>;
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -12288,14 +13033,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["ExamRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -12319,14 +13068,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["ExamRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -12346,14 +13099,20 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
-                    "application/json": Record<string, string>;
+                    "application/json": {
+                        [key: string]: string;
+                    };
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -12373,14 +13132,20 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
-                    "application/json": Record<string, unknown>[];
+                    "application/json": {
+                        [key: string]: unknown;
+                    }[];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -12400,14 +13165,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["ExamAttemptRead"][];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -12427,14 +13196,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["ExamAttemptRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -12455,14 +13228,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["ExamAttemptRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -12481,20 +13258,26 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": Record<string, unknown>;
+                "application/json": {
+                    [key: string]: unknown;
+                };
             };
         };
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["ExamAttemptRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -12514,14 +13297,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["QuestionRead"][];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -12545,14 +13332,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["QuestionRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -12572,14 +13363,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": unknown;
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -12603,14 +13398,20 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
-                    "application/json": Record<string, unknown>;
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -12628,20 +13429,28 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": Record<string, unknown>[];
+                "application/json": {
+                    [key: string]: unknown;
+                }[];
             };
         };
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
-                    "application/json": Record<string, unknown>;
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -12659,7 +13468,9 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["DashboardRead"];
                 };
@@ -12680,14 +13491,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["LeaderboardRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -12703,20 +13518,26 @@ export interface operations {
         };
         requestBody?: {
             content: {
-                "application/json": Record<string, unknown>;
+                "application/json": {
+                    [key: string]: unknown;
+                };
             };
         };
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["ProfileRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -12734,7 +13555,9 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["UserRankRead"];
                 };
@@ -12754,14 +13577,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["StreakUpdateRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -12783,14 +13610,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["XPAwardResponse"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -12812,14 +13643,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["SubmissionRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -12846,14 +13681,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["SubmissionListResponse"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -12875,14 +13714,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["BatchGradeResponse"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -12902,14 +13745,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": unknown;
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -12929,14 +13776,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["SubmissionRead"][];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -12956,14 +13807,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["SubmissionRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -12983,14 +13838,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["SubmissionStats"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -13010,14 +13869,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["SubmissionRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -13041,14 +13904,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["SubmissionRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -13069,20 +13936,26 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": Record<string, unknown>;
+                "application/json": {
+                    [key: string]: unknown;
+                };
             };
         };
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["SubmissionRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -13100,7 +13973,9 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": unknown;
                 };
@@ -13116,20 +13991,26 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": Record<string, unknown>;
+                "application/json": {
+                    [key: string]: unknown;
+                };
             };
         };
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["PlatformDetailResponse"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -13151,14 +14032,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["PlatformLandingUploadResponse"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -13180,14 +14065,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["PlatformDetailResponse"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -13208,14 +14097,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["PaginatedPlatformUsers"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -13235,14 +14128,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["PlatformDetailResponse"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -13263,14 +14160,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["PlatformDetailResponse"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -13288,7 +14189,9 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["PaymentsConfigRead"][];
                 };
@@ -13312,14 +14215,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["PaymentsConfig"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -13339,14 +14246,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["PaymentsConfig"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -13366,14 +14277,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["PaymentsMessageResponse"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -13391,7 +14306,9 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["CourseRead"][];
                 };
@@ -13411,14 +14328,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["PaymentsCourseAccessResponse"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -13438,14 +14359,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["PaymentsProductRead"][];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -13463,7 +14388,9 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["PaymentsCustomerRead"][];
                 };
@@ -13481,7 +14408,9 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["PaymentsProductRead"][];
                 };
@@ -13503,14 +14432,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["PaymentsProductRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -13530,14 +14463,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["PaymentsProductRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -13561,14 +14498,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["PaymentsProductRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -13588,14 +14529,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["PaymentsMessageResponse"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -13615,14 +14560,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["CourseRead"][];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -13643,14 +14592,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["PaymentsMessageResponse"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -13671,14 +14624,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["PaymentsMessageResponse"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -13698,14 +14655,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["PaymentsMessageResponse"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -13727,14 +14688,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["PaymentsCheckoutSessionResponse"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -13754,14 +14719,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["PaymentsConnectLinkResponse"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -13781,14 +14750,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["PaymentsStripeOAuthCallbackResponse"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -13806,7 +14779,9 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["PaymentsWebhookResponse"];
                 };
@@ -13824,7 +14799,9 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["PaymentsWebhookResponse"];
                 };
@@ -13842,7 +14819,9 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["PlatformRead"];
                 };
@@ -13864,14 +14843,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["PlatformRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -13893,14 +14876,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["PlatformPreviewUploadResponse"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -13922,14 +14909,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["PermissionCheckResponse"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -13951,14 +14942,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["BatchPermissionCheckResponse"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -13976,7 +14971,9 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["UserPermissionsResponse"];
                 };
@@ -13998,14 +14995,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": unknown;
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -14027,14 +15028,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": unknown;
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -14052,7 +15057,9 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["UserRoleAssignmentResponse"][];
                 };
@@ -14070,7 +15077,9 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["RoleRead"][];
                 };
@@ -14092,14 +15101,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["RoleRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -14120,14 +15133,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["RoleAuditListResponse"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -14145,7 +15162,9 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["PermissionRead"][];
                 };
@@ -14165,14 +15184,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["RoleRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -14196,14 +15219,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["RoleRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -14223,14 +15250,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": unknown;
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -14250,14 +15281,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["PermissionRead"][];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -14281,14 +15316,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": unknown;
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -14309,14 +15348,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": unknown;
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -14336,14 +15379,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": unknown;
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -14365,14 +15412,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["SearchResult"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -14394,14 +15445,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["PlatformDetailResponse"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -14419,7 +15474,9 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["TrailRead"];
                 };
@@ -14439,14 +15496,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["TrailRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -14466,14 +15527,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["TrailRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -14493,14 +15558,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["TrailRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -14520,14 +15589,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["TrailRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -14549,14 +15622,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["Trail"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -14578,14 +15655,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["ChunkedUploadChunkResponse"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -14607,14 +15688,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["ChunkedUploadCompleteResponse"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -14636,14 +15721,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["ChunkedUploadInitiateResponse"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -14663,14 +15752,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["ChunkedUploadStatusResponse"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -14690,14 +15783,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["ChunkedUploadCancelResponse"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -14715,7 +15812,9 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["UserGroupRead"][];
                 };
@@ -14737,14 +15836,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["UserGroupRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -14764,14 +15867,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["UserGroupRead"][];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -14791,14 +15898,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["UserGroupRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -14822,14 +15933,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["UserGroupRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -14849,14 +15964,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": string;
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -14878,14 +15997,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": string;
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -14907,14 +16030,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": string;
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -14936,14 +16063,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": string;
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -14965,14 +16096,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": string;
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -14992,14 +16127,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["UserRead"][];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -15021,14 +16160,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["UserRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -15052,14 +16195,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["UserRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -15079,14 +16226,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["UserRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -15108,14 +16259,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["UserRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -15137,14 +16292,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["UserRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -15162,7 +16321,9 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["UserRead"];
                 };
@@ -15185,14 +16346,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": unknown;
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -15212,14 +16377,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": unknown;
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -15237,7 +16406,9 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["UserSession"];
                 };
@@ -15261,14 +16432,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["UserRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -15288,14 +16463,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": unknown;
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -15315,14 +16494,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["UserRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -15342,14 +16525,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["UserRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -15373,14 +16560,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["UserRead"];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -15403,14 +16594,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["CourseRead"][];
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
@@ -15431,14 +16626,18 @@ export interface operations {
         responses: {
             /** @description Successful Response */
             200: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": unknown;
                 };
             };
             /** @description Validation Error */
             422: {
-                headers: Record<string, unknown>;
+                headers: {
+                    [name: string]: unknown;
+                };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };

@@ -1,9 +1,20 @@
 'use client';
 
+import {
+  buildLoginRedirect,
+  broadcastAuthInvalidation,
+  getCurrentReturnTo,
+  subscribeToAuthInvalidation,
+  tryRefreshToken,
+} from '@/lib/auth/client';
 import type { ClientSession } from '@/lib/auth/types';
-import { tryRefreshToken } from '@services/utils/ts/requests';
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
+import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { toast } from 'sonner';
+
+type SessionInvalidationReason = 'expired' | 'logged_out' | 'revoked' | 'network_recovery_failed' | 'unauthenticated';
 
 type SessionStatus = 'loading' | 'authenticated' | 'unauthenticated';
 
@@ -11,8 +22,9 @@ interface SessionContextType {
   data: ClientSession | null;
   status: SessionStatus;
   isLoading: boolean;
-  /** Re-fetch the session from the server. Handles token refresh automatically. */
-  update: () => Promise<ClientSession | null>;
+  refreshSession: () => Promise<boolean>;
+  syncSession: (options?: { allowRefresh?: boolean }) => Promise<ClientSession | null>;
+  invalidateSession: (reason: SessionInvalidationReason, options?: { broadcast?: boolean; redirectTo?: string | null }) => void;
 }
 
 export const SessionContext = createContext<SessionContextType | null>(null);
@@ -32,20 +44,6 @@ async function fetchSession(): Promise<ClientSession | null> {
   return (await response.json()) as ClientSession;
 }
 
-async function fetchSessionWithRefresh(): Promise<ClientSession | null> {
-  const session = await fetchSession();
-  if (session) return session;
-
-  try {
-    const refreshed = await tryRefreshToken();
-    if (refreshed) return fetchSession();
-  } catch {
-    // If the refresh call fails, fall through to unauthenticated.
-  }
-
-  return null;
-}
-
 const PlatformSessionProvider = ({
   children,
   initialSession,
@@ -53,6 +51,8 @@ const PlatformSessionProvider = ({
   children: ReactNode;
   initialSession?: ClientSession | null;
 }) => {
+  const router = useRouter();
+  const t = useTranslations('Auth.Login');
   const [data, setData] = useState<ClientSession | null>(initialSession ?? null);
   const [status, setStatus] = useState<SessionStatus>(() => {
     if (initialSession === undefined) return 'loading';
@@ -60,58 +60,119 @@ const PlatformSessionProvider = ({
   });
 
   const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastInvalidationNonceRef = useRef<string | null>(null);
+
+  const applySession = useCallback((next: ClientSession | null) => {
+    setData(next);
+    setStatus(next?.user ? 'authenticated' : 'unauthenticated');
+  }, []);
+
+  const clearRefreshTimer = useCallback(() => {
+    if (refreshTimerRef.current) {
+      clearTimeout(refreshTimerRef.current);
+      refreshTimerRef.current = null;
+    }
+  }, []);
 
   function scheduleRefresh(expiresAt: number) {
-    if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
+    clearRefreshTimer();
     const delay = expiresAt - Date.now() - REFRESH_BEFORE_EXPIRY_MS;
     if (delay <= 0) {
-      void performRefresh();
+      void refreshSession();
       return;
     }
-    refreshTimerRef.current = setTimeout(() => void performRefresh(), delay);
+    refreshTimerRef.current = setTimeout(() => void refreshSession(), delay);
   }
 
-  async function performRefresh() {
+  const invalidateSession = useCallback(
+    (reason: SessionInvalidationReason, options?: { broadcast?: boolean; redirectTo?: string | null }) => {
+      clearRefreshTimer();
+      applySession(null);
+      router.refresh();
+
+      if (options?.broadcast) {
+        const message = broadcastAuthInvalidation({
+          reason,
+          redirectTo: options.redirectTo,
+          returnTo: getCurrentReturnTo(),
+        });
+        lastInvalidationNonceRef.current = message.nonce;
+      }
+
+      if (reason === 'expired') {
+        toast.error(t('sessionExpired'));
+      } else if (reason === 'revoked') {
+        toast.error(t('sessionRevoked'));
+      } else if (reason === 'network_recovery_failed') {
+        toast.error(t('sessionRecoveryFailed'));
+      }
+
+      if (options?.redirectTo) {
+        globalThis.location.href = options.redirectTo;
+        return;
+      }
+
+      if (reason !== 'logged_out' && reason !== 'unauthenticated') {
+        globalThis.location.href = buildLoginRedirect();
+      }
+    },
+    [applySession, clearRefreshTimer, router, t],
+  );
+
+  const syncSession = useCallback(
+    async (options?: { allowRefresh?: boolean }): Promise<ClientSession | null> => {
+      setStatus((current) => (current === 'authenticated' ? current : 'loading'));
+
+      let next = await fetchSession();
+      if (!next && options?.allowRefresh) {
+        try {
+          const refreshed = await tryRefreshToken();
+          if (refreshed) {
+            next = await fetchSession();
+          }
+        } catch {
+          next = null;
+        }
+      }
+
+      applySession(next);
+      if (next?.expiresAt) {
+        scheduleRefresh(next.expiresAt);
+      } else {
+        clearRefreshTimer();
+      }
+
+      return next;
+    },
+    [applySession, clearRefreshTimer],
+  );
+
+  const refreshSession = useCallback(async (): Promise<boolean> => {
     try {
       const refreshed = await tryRefreshToken();
       if (!refreshed) {
-        setData(null);
-        setStatus('unauthenticated');
-        return;
+        invalidateSession('expired', { broadcast: true });
+        return false;
       }
-      // Re-fetch so expiresAt reflects the new token's actual expiry.
-      const next = await fetchSession();
-      if (next) {
-        setData(next);
-        setStatus('authenticated');
-        if (next.expiresAt) scheduleRefresh(next.expiresAt);
-      } else {
-        setData(null);
-        setStatus('unauthenticated');
-      }
-    } catch {
-      setData(null);
-      setStatus('unauthenticated');
-    }
-  }
 
-  const update = useCallback(async (): Promise<ClientSession | null> => {
-    setStatus((current) => (current === 'authenticated' ? current : 'loading'));
-    const next = await fetchSessionWithRefresh();
-    setData(next);
-    setStatus(next?.user ? 'authenticated' : 'unauthenticated');
-    if (next?.expiresAt) scheduleRefresh(next.expiresAt);
-    return next;
-    // scheduleRefresh is stable (defined outside useCallback, uses refs)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+      const next = await syncSession();
+      if (!next) {
+        invalidateSession('expired', { broadcast: true });
+        return false;
+      }
+
+      return true;
+    } catch {
+      invalidateSession('network_recovery_failed', { broadcast: true });
+      return false;
+    }
+  }, [invalidateSession, syncSession]);
 
   // Initial client-side fetch when no SSR session was provided.
   useEffect(() => {
     if (initialSession !== undefined) return;
-    void update();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    void syncSession({ allowRefresh: true });
+  }, [initialSession, syncSession]);
 
   // Schedule proactive refresh whenever authenticated session data arrives.
   useEffect(() => {
@@ -119,30 +180,36 @@ const PlatformSessionProvider = ({
       scheduleRefresh(data.expiresAt);
     }
     return () => {
-      if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
+      clearRefreshTimer();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [status, data?.expiresAt]);
+  }, [clearRefreshTimer, status, data?.expiresAt]);
 
-  // Listen for the global session-expired event dispatched by the API client.
   useEffect(() => {
-    const handleSessionExpired = () => {
-      if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
-      setData(null);
-      setStatus('unauthenticated');
-    };
-    window.addEventListener('auth:session-expired', handleSessionExpired);
-    return () => window.removeEventListener('auth:session-expired', handleSessionExpired);
-  }, []);
+    return subscribeToAuthInvalidation((detail) => {
+      if (detail.nonce && detail.nonce === lastInvalidationNonceRef.current) {
+        return;
+      }
+
+      lastInvalidationNonceRef.current = detail.nonce ?? null;
+
+      invalidateSession(detail.reason, {
+        redirectTo:
+          detail.redirectTo ??
+          (detail.reason === 'logged_out' ? null : buildLoginRedirect(detail.returnTo ?? getCurrentReturnTo())),
+      });
+    });
+  }, [invalidateSession]);
 
   const contextValue = useMemo<SessionContextType>(
     () => ({
       data,
       status,
       isLoading: status === 'loading',
-      update,
+      refreshSession,
+      syncSession,
+      invalidateSession,
     }),
-    [data, status, update],
+    [data, invalidateSession, refreshSession, status, syncSession],
   );
 
   return <SessionContext value={contextValue}>{children}</SessionContext>;

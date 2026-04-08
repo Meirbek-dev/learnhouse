@@ -36,9 +36,7 @@ const HomeClient = () => {
       <div className="mx-auto flex cursor-pointer items-center space-x-4 pt-16 text-2xl font-semibold">
         <span
           onClick={() => {
-            void logout().finally(() => {
-              globalThis.location.href = getAbsoluteUrl('/');
-            });
+            void logout({ redirectTo: getAbsoluteUrl('/') });
           }}
         >
           {t('signOut')}

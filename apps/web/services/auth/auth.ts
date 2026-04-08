@@ -1,4 +1,5 @@
 import { getAPIUrl } from '@services/config/config';
+import { notifyAuthInvalidation } from '@/lib/auth/client';
 import type { components } from '@/lib/api/generated';
 
 type AuthUser = components['schemas']['UserRead'];
@@ -11,12 +12,15 @@ interface NewAccountBody {
   last_name?: string;
 }
 
+interface LogoutOptions {
+  redirectTo?: string;
+}
+
 const AUTH_ENDPOINTS = {
   login: 'auth/login',
   googleAuthorize: 'auth/google/authorize',
   logout: 'auth/logout',
   logoutAll: 'auth/logout-all',
-  refresh: 'auth/refresh',
   forgotPassword: 'auth/forgot-password',
   resetPassword: 'auth/reset-password',
   signup: 'users',
@@ -38,18 +42,36 @@ export async function getGoogleAuthorizeUrl(frontendCallback: string): Promise<s
   return url.toString();
 }
 
-export async function logout(): Promise<Response> {
-  return fetch(`${getAPIUrl()}${AUTH_ENDPOINTS.logout}`, {
+export async function logout(options?: LogoutOptions): Promise<Response> {
+  const response = await fetch(`${getAPIUrl()}${AUTH_ENDPOINTS.logout}`, {
     method: 'POST',
     credentials: 'include',
   });
+
+  if (response.ok) {
+    notifyAuthInvalidation({
+      reason: 'logged_out',
+      redirectTo: options?.redirectTo ?? null,
+    });
+  }
+
+  return response;
 }
 
-export async function logoutAll(): Promise<Response> {
-  return fetch(`${getAPIUrl()}${AUTH_ENDPOINTS.logoutAll}`, {
+export async function logoutAll(options?: LogoutOptions): Promise<Response> {
+  const response = await fetch(`${getAPIUrl()}${AUTH_ENDPOINTS.logoutAll}`, {
     method: 'POST',
     credentials: 'include',
   });
+
+  if (response.ok) {
+    notifyAuthInvalidation({
+      reason: 'logged_out',
+      redirectTo: options?.redirectTo ?? null,
+    });
+  }
+
+  return response;
 }
 
 export async function sendResetLink(email: string): Promise<Response> {
@@ -74,23 +96,6 @@ export async function signup(body: NewAccountBody): Promise<Response> {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   });
-}
-
-/**
- * Attempt to refresh the access token using the refresh token cookie.
- * Returns true if successful, false if the session has expired and the user
- * must log in again.
- */
-export async function refreshToken(): Promise<boolean> {
-  try {
-    const res = await fetch(`${getAPIUrl()}${AUTH_ENDPOINTS.refresh}`, {
-      method: 'POST',
-      credentials: 'include',
-    });
-    return res.ok;
-  } catch {
-    return false;
-  }
 }
 
 export type { AuthUser, NewAccountBody };

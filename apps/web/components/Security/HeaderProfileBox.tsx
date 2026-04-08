@@ -250,9 +250,7 @@ export const HeaderProfileBox = () => {
                 <DropdownMenuItem
                   variant="destructive"
                   onClick={() => {
-                    void logout().finally(() => {
-                      globalThis.location.href = '/';
-                    });
+                    void logout({ redirectTo: '/' });
                   }}
                   className="flex space-x-2"
                 >

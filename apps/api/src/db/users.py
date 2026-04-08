@@ -71,6 +71,8 @@ class UserSession(PydanticStrictBaseModel):
     permissions_timestamp: int | None = (
         None  # Unix timestamp when permissions were loaded
     )
+    expires_at: int | None = None
+    session_version: int | None = None
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
