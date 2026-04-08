@@ -1,6 +1,6 @@
 'use client';
 
-import { useSession } from '@/components/Contexts/SessionProvider';
+import { useViewer } from '@/hooks/useViewer';
 import GamifiedUserAvatar from '@/components/Objects/GamifiedUserAvatar';
 import { Calendar, Flame, TrendingUp, Trophy, Zap } from 'lucide-react';
 import { GlowingLevelBadge, getLevelInfo } from '@/lib/gamification';
@@ -29,7 +29,7 @@ interface HeroSectionProps {
 export function HeroSection({ profile, userRank, className }: HeroSectionProps) {
   const t = useTranslations('DashPage.UserAccountSettings.Gamification');
   const locale = useLocale();
-  const session = useSession();
+  const viewer = useViewer();
   const numberFormatter = new Intl.NumberFormat(locale);
   const formatNumber = (value: number) => numberFormatter.format(value);
 
@@ -56,11 +56,11 @@ export function HeroSection({ profile, userRank, className }: HeroSectionProps) 
   const levelInfo = getLevelInfo(profile.level, t);
 
   // Get display name from session
-  const displayName = session?.data?.user?.first_name
-    ? [session.data.user.first_name, session.data.user.middle_name, session.data.user.last_name]
+  const displayName = viewer?.first_name
+    ? [viewer.first_name, viewer.middle_name, viewer.last_name]
         .filter(Boolean)
         .join(' ')
-    : session?.data?.user?.username;
+    : viewer?.username;
 
   return (
     <Card className={cn('py-2', className)}>

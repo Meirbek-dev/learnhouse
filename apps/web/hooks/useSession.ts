@@ -36,7 +36,17 @@ function getRefreshInterval(session: Session | null | undefined): number {
   return Math.max(refreshAt, MIN_REFRESH_INTERVAL_MS);
 }
 
-export function useSession() {
+export interface AuthSessionResult {
+  session: Session | null;
+  user: Session['user'] | null;
+  error: Error | undefined;
+  status: SessionStatus;
+  isLoading: boolean;
+  isAuthenticated: boolean;
+  mutate: ReturnType<typeof useSWR<Session | null>>['mutate'];
+}
+
+export function useAuthSession(): AuthSessionResult {
   const { data, error, isLoading, mutate } = useSWR<Session | null>(AUTH_SESSION_SWR_KEY, fetchSession, {
     revalidateOnFocus: true,
     revalidateOnReconnect: true,
@@ -51,8 +61,33 @@ export function useSession() {
       ? 'authenticated'
       : 'unauthenticated';
 
+  const session = data ?? null;
+  const user = session?.user ?? null;
+
   return {
-    data: data ?? null,
+    session,
+    user,
+    error,
+    status,
+    isLoading,
+    isAuthenticated: status === 'authenticated',
+    mutate,
+  };
+}
+
+export function useAuthStatus(): SessionStatus {
+  return useAuthSession().status;
+}
+
+export function useIsAuthenticated(): boolean {
+  return useAuthSession().isAuthenticated;
+}
+
+export function useSession() {
+  const { session, error, status, isLoading, mutate } = useAuthSession();
+
+  return {
+    data: session,
     error,
     status,
     isLoading,

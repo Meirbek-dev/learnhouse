@@ -2,12 +2,11 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from '@components/ui/avatar';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { useUserByUsername } from '@/lib/users/client';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
-import { getUserByUsername } from '@services/users/users';
 import { getAbsoluteUrl } from '@services/config/config';
 import { useTranslations } from 'next-intl';
 import { User } from 'lucide-react';
-import useSWR from 'swr';
 import { cn } from '@/lib/utils';
 
 import UserProfilePopup from './UserProfilePopup';
@@ -68,9 +67,7 @@ const UserAvatar = (props: UserAvatarProps) => {
   } = props;
 
   // useSWR deduplicates: N components with the same username → one request, shared cache.
-  const { data: userData } = useSWR(username ? `user:${username}` : null, () => getUserByUsername(username!), {
-    revalidateOnFocus: false,
-  });
+  const { data: userData } = useUserByUsername(username);
 
   const getAvatarUrl = (): string => {
     if (predefined_avatar) {
@@ -132,8 +129,10 @@ const UserAvatar = (props: UserAvatarProps) => {
     </Avatar>
   );
 
-  if (showProfilePopup && (userId || userData?.id)) {
-    return <UserProfilePopup userId={userId ?? userData?.id}>{avatarElement}</UserProfilePopup>;
+  const popupUserId = userId ?? userData?.id ?? null;
+
+  if (showProfilePopup && popupUserId) {
+    return <UserProfilePopup userId={popupUserId}>{avatarElement}</UserProfilePopup>;
   }
 
   return avatarElement;

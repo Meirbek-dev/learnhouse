@@ -21,12 +21,10 @@ import {
   Users,
 } from 'lucide-react';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
-import { useSession } from '@/components/Contexts/SessionProvider';
+import { updateProfile, updateUserAvatar, useMe } from '@/lib/users/client';
 import { logout } from '@services/auth/auth';
 import { Field, FieldError, FieldLabel } from '@components/ui/field';
-import { getUser, updateUserAvatar } from '@services/users/users';
 import { valibotResolver } from '@hookform/resolvers/valibot';
-import { updateProfile } from '@services/settings/profile';
 import { useDebouncedCallback } from '@/hooks/useDebounce';
 import { getAbsoluteUrl } from '@services/config/config';
 import UserAvatar from '@components/Objects/UserAvatar';
@@ -620,7 +618,7 @@ const UserEditForm = ({ form, profilePicture }: UserEditFormProps) => {
 };
 
 const UserEditGeneral = () => {
-  const session = useSession();
+  const { data: me } = useMe();
   const [localAvatar, setLocalAvatar] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | undefined>();
@@ -647,12 +645,10 @@ const UserEditGeneral = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (session?.data?.user?.id) {
+      if (me?.id) {
         try {
-          const [userDataResponse, localeResponse] = await Promise.all([
-            getUser(session.data.user.id),
-            getUserLocale(),
-          ]);
+          const [userDataResponse, localeResponse] = await Promise.all([Promise.resolve(me), getUserLocale()]);
+          const details = (userDataResponse.details as FormValues['details'] | undefined) ?? {};
           setUserData(userDataResponse);
           setCurrentLocale(localeResponse);
 
@@ -664,7 +660,7 @@ const UserEditGeneral = () => {
             last_name: userDataResponse.last_name || '',
             email: userDataResponse.email || '',
             bio: userDataResponse.bio || '',
-            details: userDataResponse.details || {},
+            details,
           });
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -679,7 +675,7 @@ const UserEditGeneral = () => {
     };
 
     fetchData();
-  }, [session?.data?.user?.id, form]);
+  }, [form, me]);
 
   const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -690,14 +686,14 @@ const UserEditGeneral = () => {
     setError(undefined);
     setSuccess('');
 
-    if (!session?.data?.user?.id) {
+    if (!me?.id) {
       setError(t('avatarError'));
       setIsLoading(false);
       return;
     }
 
     try {
-      const res = await updateUserAvatar(session.data.user.id, file);
+      const res = await updateUserAvatar(me.id, file);
       if (!res.success) {
         setError(res.HTTPmessage || t('avatarError'));
       } else {
@@ -737,8 +733,7 @@ const UserEditGeneral = () => {
 
     try {
       await updateProfile(values, userData.id);
-      const updatedUserData = await getUser(userData.id);
-      setUserData(updatedUserData);
+      setUserData((current: any) => ({ ...current, ...values }));
 
       toast.dismiss(loadingToast);
       if (isEmailChanged) {

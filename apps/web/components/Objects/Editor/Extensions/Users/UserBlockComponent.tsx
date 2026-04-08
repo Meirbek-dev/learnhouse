@@ -17,9 +17,10 @@ import {
   User,
   Users,
 } from 'lucide-react';
+import { getUserById, getUserByUsername } from '@/lib/users/client';
+import type { components } from '@/lib/api/generated';
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
-import { getUser, getUserByUsername } from '@services/users/users';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { NodeViewWrapper } from '@tiptap/react';
 import { Button } from '@components/ui/button';
@@ -30,25 +31,13 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 
-interface UserData {
-  id: number;
-  user_uuid: string;
-  first_name: string;
-  middle_name?: string;
-  last_name: string;
-  username: string;
-  bio?: string;
-  avatar_image?: string;
-  details?: Record<
-    string,
-    {
-      id: string;
-      label: string;
-      icon: string;
-      text: string;
-    }
-  >;
-}
+type UserData = components['schemas']['UserRead'];
+type UserDetail = {
+  id: string;
+  label: string;
+  icon: string;
+  text: string;
+};
 
 const AVAILABLE_ICONS = {
   'briefcase': Briefcase,
@@ -89,7 +78,7 @@ const UserBlockComponent = (props: any) => {
     setIsLoading(true);
     setError(null);
     try {
-      const data = await getUser(userId);
+      const data = await getUserById(userId);
       if (!data) {
         throw new Error('User not found');
       }
@@ -113,7 +102,7 @@ const UserBlockComponent = (props: any) => {
         setIsLoading(true);
         setError(null);
         try {
-          const data = await getUser(node.attrs.user_id);
+          const data = await getUserById(node.attrs.user_id);
           if (!data) throw new Error('User not found');
           setUserData(data);
           setUsername(data.username);
@@ -223,6 +212,8 @@ const UserBlockComponent = (props: any) => {
     );
   }
 
+  const details = userData.details ? (Object.values(userData.details) as UserDetail[]) : [];
+
   return (
     <NodeViewWrapper className="block-user">
       <div className="soft-shadow overflow-hidden rounded-lg bg-white">
@@ -285,9 +276,9 @@ const UserBlockComponent = (props: any) => {
         </div>
 
         {/* Details */}
-        {userData.details && Object.values(userData.details).length > 0 ? (
+        {details.length > 0 ? (
           <div className="space-y-2.5 border-t border-gray-100 px-5 pt-3.5 pb-4">
-            {Object.values(userData.details).map((detail) => (
+            {details.map((detail) => (
               <div
                 key={detail.id}
                 className="flex items-center gap-2.5"

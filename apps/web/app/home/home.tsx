@@ -1,6 +1,6 @@
 'use client';
 
-import { useSession } from '@/components/Contexts/SessionProvider';
+import { useViewer } from '@/hooks/useViewer';
 import { logout } from '@/services/auth/auth';
 import platformLogoFull from '@public/platform_logo_full.svg';
 import { getAbsoluteUrl } from '@services/config/config';
@@ -10,7 +10,7 @@ import Image from 'next/image';
 
 const HomeClient = () => {
   const t = useTranslations('HomeClient');
-  const session = useSession();
+  const viewer = useViewer();
 
   return (
     <div className="flex flex-col">
@@ -28,9 +28,7 @@ const HomeClient = () => {
       <div className="mx-auto flex items-center space-x-4 pt-16 text-2xl font-semibold">
         <span>{t('hello')},</span> <UserAvatar />{' '}
         <span className="capitalize">
-          {[session?.data?.user.first_name, session?.data?.user.middle_name, session?.data?.user.last_name]
-            .filter(Boolean)
-            .join(' ')}
+          {[viewer?.first_name, viewer?.middle_name, viewer?.last_name].filter(Boolean).join(' ')}
         </span>
       </div>
       <div className="mx-auto flex cursor-pointer items-center space-x-4 pt-16 text-2xl font-semibold">

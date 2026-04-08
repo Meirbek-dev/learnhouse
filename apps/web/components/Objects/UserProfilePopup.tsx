@@ -16,13 +16,13 @@ import {
   Users,
 } from 'lucide-react';
 import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/hover-card';
-import { useCallback, useRef, useState } from 'react';
+import { useUserById } from '@/lib/users/client';
 import { Button } from '@/components/ui/button';
-import { getUser } from '@services/users/users';
 import { Badge } from '@/components/ui/badge';
-import { useSession } from '@/components/Contexts/SessionProvider';
+import { useAuthStatus } from '@/hooks/useSession';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { useState } from 'react';
 import type { ReactNode } from 'react';
 
 interface UserProfilePopupProps {
@@ -48,6 +48,8 @@ interface UserData {
   >;
 }
 
+type UserDetail = NonNullable<UserData['details']>[string];
+
 const ICON_MAP = {
   'briefcase': Briefcase,
   'graduation-cap': GraduationCap,
@@ -72,36 +74,17 @@ const IconComponent = ({ iconName }: { iconName: string }) => {
 const UserProfilePopup = ({ children, userId }: UserProfilePopupProps) => {
   const t = useTranslations('Components.UserProfilePopup');
   const router = useRouter();
-  const { status } = useSession();
-  const [userData, setUserData] = useState<UserData | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const hasFetchedRef = useRef(false);
-
-  const fetchOnOpen = useCallback(
-    async (open: boolean) => {
-      if (!open || hasFetchedRef.current || !userId || status !== 'authenticated') return;
-      hasFetchedRef.current = true;
-
-      const token = undefined;
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        const data = await getUser(userId);
-        setUserData(data);
-      } catch (error) {
-        setError(t('loadingError'));
-        console.error('Error fetching user data:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [userId, status, t],
-  );
+  const status = useAuthStatus();
+  const [open, setOpen] = useState(false);
+  const {
+    data: userData,
+    error,
+    isLoading,
+  } = useUserById(userId, { enabled: open && status === 'authenticated' });
+  const details = userData?.details ? (Object.values(userData.details) as UserDetail[]) : [];
 
   return (
-    <HoverCard onOpenChange={fetchOnOpen}>
+    <HoverCard onOpenChange={setOpen}>
       <HoverCardTrigger render={<span />}>{children}</HoverCardTrigger>
       <HoverCardContent className="soft-shadow border-border bg-card text-card-foreground w-auto max-w-196 min-w-96 border p-0 shadow-sm backdrop-blur-md">
         {isLoading ? (
@@ -109,7 +92,7 @@ const UserProfilePopup = ({ children, userId }: UserProfilePopupProps) => {
             <Loader2 className="text-muted-foreground h-6 w-6 animate-spin" />
           </div>
         ) : error ? (
-          <div className="text-destructive p-4 text-sm">{error}</div>
+          <div className="text-destructive p-4 text-sm">{t('loadingError')}</div>
         ) : userData ? (
           <div>
             {/* Header with Avatar and Name */}
@@ -159,9 +142,9 @@ const UserProfilePopup = ({ children, userId }: UserProfilePopupProps) => {
             </div>
 
             {/* Details */}
-            {userData.details && Object.values(userData.details).length > 0 ? (
+            {details.length > 0 ? (
               <div className="border-border space-y-2.5 border-t px-5 pt-3.5 pb-4">
-                {Object.values(userData.details).map((detail) => (
+                {details.map((detail) => (
                   <div
                     key={detail.id}
                     className="flex items-center gap-2.5"

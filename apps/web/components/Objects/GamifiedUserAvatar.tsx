@@ -2,14 +2,13 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from '@components/ui/avatar';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { useUserByUsername } from '@/lib/users/client';
 import { getBackendUrl, getAbsoluteUrl } from '@services/config/config';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
 import type { UserGamificationProfile } from '@/types/gamification';
 import { AVATAR_UNLOCKS } from '@/lib/gamification/levels';
-import { getUserByUsername } from '@services/users/users';
 import { useTranslations } from 'next-intl';
 import { User } from 'lucide-react';
-import useSWR from 'swr';
 import { cn } from '@/lib/utils';
 
 import UserProfilePopup from './UserProfilePopup';
@@ -102,9 +101,7 @@ const GamifiedUserAvatar = (props: GamifiedUserAvatarProps) => {
   const showAvatarAccessories = ENABLE_AVATAR_CUSTOMIZATION && _showAvatarAccessories;
 
   // useSWR deduplicates: N components with the same username → one request, shared cache.
-  const { data: userData } = useSWR(username ? `user:${username}` : null, () => getUserByUsername(username!), {
-    revalidateOnFocus: false,
-  });
+  const { data: userData } = useUserByUsername(username);
 
   const getAvatarUrl = (): string => {
     if (predefined_avatar) return getAbsoluteUrl('/empty_avatar.webp');
@@ -168,6 +165,7 @@ const GamifiedUserAvatar = (props: GamifiedUserAvatarProps) => {
 
   const frameClass = getAvatarFrame();
   const accessoryIcon = getAvatarAccessory();
+  const popupUserId = userId ?? userData?.id ?? null;
 
   const avatarElement = (
     <div className="relative inline-block">
@@ -224,8 +222,8 @@ const GamifiedUserAvatar = (props: GamifiedUserAvatarProps) => {
     </div>
   );
 
-  if (showProfilePopup && (userId ?? userData?.id)) {
-    return <UserProfilePopup userId={userId ?? userData?.id}>{avatarElement}</UserProfilePopup>;
+  if (showProfilePopup && popupUserId) {
+    return <UserProfilePopup userId={popupUserId}>{avatarElement}</UserProfilePopup>;
   }
 
   return avatarElement;

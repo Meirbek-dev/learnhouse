@@ -49,6 +49,7 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Actions, PermissionGuard, Resources, Scopes, usePermissions } from '@/components/Security';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useAuthSession } from '@/hooks/useSession';
 import type { Permission, RoleAuditEvent, RoleWithPermissions } from '@/types/permissions';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useSession } from '@/components/Contexts/SessionProvider';
@@ -68,7 +69,7 @@ import useSWR from 'swr';
 type RoleDialogMode = 'create' | 'edit' | 'clone';
 
 export default function RBACAdminClient() {
-  const session = useSession();
+  const session = useAuthSession();
   const { can } = usePermissions();
   const t = useTranslations('Components.Roles');
 
@@ -100,9 +101,13 @@ export default function RBACAdminClient() {
   const [isAuditLoading, setIsAuditLoading] = useState(false);
   const isSuperAdmin = can(Resources.ROLE, Actions.MANAGE, Scopes.ALL);
   const currentUserMaxPriority = useMemo(() => {
-    const sessionRoles = session?.data?.roles ?? [];
-    return sessionRoles.reduce((maxPriority, assignment) => Math.max(maxPriority, assignment.role?.priority ?? 0), 0);
-  }, [session?.data?.roles]);
+    const sessionRoles = session.session?.roles ?? [];
+    return sessionRoles.reduce(
+      (maxPriority: number, assignment: (typeof sessionRoles)[number]) =>
+        Math.max(maxPriority, assignment.role?.priority ?? 0),
+      0,
+    );
+  }, [session.session?.roles]);
 
   const {
     data: permissions = [],

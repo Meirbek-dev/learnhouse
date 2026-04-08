@@ -1,4 +1,4 @@
-import { getUserByUsername } from '@services/users/users';
+import { getUserByUsername } from '@/lib/users/server';
 import { getTranslations } from 'next-intl/server';
 import type { Metadata } from 'next';
 

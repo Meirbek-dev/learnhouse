@@ -19,16 +19,15 @@ import {
 } from 'lucide-react';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@components/ui/popover';
+import { updateProfile, useMe } from '@/lib/users/client';
 import { createElement, useEffect, useEffectEvent, useState } from 'react';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
-import { updateProfile } from '@services/settings/profile';
 import { de, enUS, es, fr, ru } from 'date-fns/locale';
 import { useLocale, useTranslations } from 'next-intl';
 import { Textarea } from '@components/ui/textarea';
 import { Checkbox } from '@components/ui/checkbox';
 import { Calendar } from '@components/ui/calendar';
-import { getUser } from '@services/users/users';
 import { Button } from '@components/ui/button';
 import { Label } from '@components/ui/label';
 import { Input } from '@components/ui/input';
@@ -231,6 +230,7 @@ interface ProfileData {
 
 const UserProfileBuilder = () => {
   const currentUser = useCurrentUser();
+  const { data: me } = useMe();
   const tNotify = useTranslations('DashPage.Notifications');
   const t = useTranslations('DashPage.UserProfileBuilder');
   const [profileData, setProfileData] = useState<ProfileData>({
@@ -242,13 +242,13 @@ const UserProfileBuilder = () => {
 
   // Initialize profile data from user data
   const fetchUserDataEvent = useEffectEvent(async () => {
-    if (!currentUser?.id) {
+    if (!me) {
       return;
     }
 
     try {
       setIsLoading(true);
-      const userData = await getUser(currentUser.id);
+      const userData = me;
 
       if (userData.profile) {
         try {
@@ -273,7 +273,7 @@ const UserProfileBuilder = () => {
 
   useEffect(() => {
     fetchUserDataEvent();
-  }, [currentUser?.id]);
+  }, [fetchUserDataEvent, me]);
 
   const createEmptySection = (t: Function, type: keyof typeof SECTION_TYPE_KEYS): ProfileSection => {
     const sectionTypesConfig = getSectionTypesConfig(t);
@@ -406,13 +406,17 @@ const UserProfileBuilder = () => {
     const loadingToast = toast.loading(tNotify('savingProfile'));
 
     try {
-      // Get fresh user data before update
-      const userData = await getUser(currentUser!.id);
+      if (!currentUser?.id) {
+        throw new Error('User not found');
+      }
 
       // Update only the profile field
-      userData.profile = profileData;
+      const userData = {
+        ...(me ?? {}),
+        profile: profileData,
+      };
 
-      const res = await updateProfile(userData, userData.id);
+      const res = await updateProfile(userData, currentUser.id);
 
       if (res.status === 200) {
         toast.success(tNotify('profileUpdateSuccess'), { id: loadingToast });

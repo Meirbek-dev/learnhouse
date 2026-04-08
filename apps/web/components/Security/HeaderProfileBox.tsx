@@ -9,7 +9,7 @@ import {
 import { ChevronDown, Crown, LogOut, Shield, User as UserIcon, Users, Star } from 'lucide-react'; // Added Star
 import { Tooltip, TooltipContent, TooltipTrigger } from '@components/ui/tooltip';
 import { useNavigationPermissions } from '@/hooks/useNavigationPermissions';
-import { useSession } from '@/components/Contexts/SessionProvider';
+import { useAuthSession } from '@/hooks/useSession';
 import { logout } from '@services/auth/auth';
 import { getAbsoluteUrl } from '@services/config/config';
 import UserAvatar from '@components/Objects/UserAvatar';
@@ -35,7 +35,7 @@ interface CustomRoleInfo {
 }
 
 export const HeaderProfileBox = () => {
-  const { data: session, status } = useSession();
+  const { session, status, user } = useAuthSession();
   const { canAccessDashboard } = useNavigationPermissions();
   const t = useTranslations('Header');
 
@@ -149,7 +149,7 @@ export const HeaderProfileBox = () => {
                 <UserAvatar size="sm" />
                 <div className="flex flex-col space-y-0 text-start">
                   <div className="flex items-center space-x-2">
-                    <p className="text-foreground text-sm font-semibold capitalize">{session?.user?.username}</p>
+                    <p className="text-foreground text-sm font-semibold capitalize">{user?.username}</p>
                     {/* Updated condition here */}
                     {shouldShowBadge && userRoleInfo && (
                       <Tooltip>
@@ -197,7 +197,7 @@ export const HeaderProfileBox = () => {
                       </Tooltip>
                     ))}
                   </div>
-                  <p className="text-muted-foreground text-xs">{session?.user?.email}</p>
+                  <p className="text-muted-foreground text-xs">{user?.email}</p>
                 </div>
                 <ChevronDown
                   size={16}
@@ -212,8 +212,8 @@ export const HeaderProfileBox = () => {
                   <div className="flex items-center space-x-2">
                     <UserAvatar size="sm" />
                     <div>
-                      <p className="text-sm font-medium capitalize">{session?.user?.username}</p>
-                      <p className="text-muted-foreground text-xs">{session?.user?.email}</p>
+                      <p className="text-sm font-medium capitalize">{user?.username}</p>
+                      <p className="text-muted-foreground text-xs">{user?.email}</p>
                     </div>
                   </div>
                 </div>

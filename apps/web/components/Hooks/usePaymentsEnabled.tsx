@@ -1,6 +1,6 @@
 // hooks/usePaymentsEnabled.ts
 
-import { useSession } from '@/components/Contexts/SessionProvider';
+import { useAuthSession } from '@/hooks/useSession';
 import { getPaymentConfigs } from '@services/payments/payments';
 import type { components } from '@/lib/api/generated';
 import useSWR from 'swr';
@@ -8,8 +8,7 @@ import useSWR from 'swr';
 type PaymentsConfigRead = components['schemas']['PaymentsConfigRead'];
 
 export function usePaymentsEnabled() {
-  const session = useSession();
-  const isAuthenticated = session.status === 'authenticated' && Boolean(session.data?.user);
+  const { isAuthenticated, isLoading: sessionLoading } = useAuthSession();
   const {
     data: paymentConfigs,
     error,
@@ -22,7 +21,7 @@ export function usePaymentsEnabled() {
 
   return {
     isEnabled: Boolean(isStripeEnabled),
-    isLoading: session.isLoading || (isAuthenticated && isLoading),
+    isLoading: sessionLoading || (isAuthenticated && isLoading),
     error,
   };
 }

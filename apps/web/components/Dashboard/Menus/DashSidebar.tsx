@@ -26,7 +26,7 @@ import {
   Users,
 } from 'lucide-react';
 import { useNavigationPermissions } from '@/hooks/useNavigationPermissions';
-import { useSession } from '@/components/Contexts/SessionProvider';
+import { useAuthSession } from '@/hooks/useSession';
 import platformLogoLight from '@public/platform_logo_light.svg';
 import { logout } from '@services/auth/auth';
 import { getAbsoluteUrl } from '@services/config/config';
@@ -237,7 +237,7 @@ const NavItem = ({ item, isCollapsed }: { item: NavigationItem; isCollapsed: boo
 );
 
 const DashSidebar = ({ className }: SidebarProps) => {
-  const session = useSession();
+  const { user, isLoading } = useAuthSession();
   const { state, toggleSidebar } = useSidebar();
   const t = useTranslations('SidebarMenu');
   const navigationItems = useNavigationItems();
@@ -274,7 +274,7 @@ const DashSidebar = ({ className }: SidebarProps) => {
     };
   }, []);
 
-  if (!session.data?.user) {
+  if (isLoading || !user) {
     return <SidebarSkeleton />;
   }
 
@@ -348,7 +348,7 @@ const DashSidebar = ({ className }: SidebarProps) => {
           <div className={`flex min-w-0 items-center gap-3 ${isCollapsed ? 'flex-col gap-2' : ''}`}>
             <div className="relative shrink-0">
               <UserAvatar
-                username={session.data.user.username}
+                username={user.username}
                 size="sm"
                 variant="outline"
                 showProfilePopup
@@ -359,8 +359,8 @@ const DashSidebar = ({ className }: SidebarProps) => {
                 isCollapsed ? 'hidden w-0 opacity-0' : 'w-auto opacity-100'
               }`}
             >
-              <p className="text-sidebar-foreground truncate text-sm font-medium">@{session.data.user.username}</p>
-              <p className="text-sidebar-foreground/60 truncate text-xs">{session.data.user.email}</p>
+              <p className="text-sidebar-foreground truncate text-sm font-medium">@{user.username}</p>
+              <p className="text-sidebar-foreground/60 truncate text-xs">{user.email}</p>
             </div>
           </div>
 
@@ -373,7 +373,7 @@ const DashSidebar = ({ className }: SidebarProps) => {
                   aria-label={t('ariaLabels.userSettings')}
                 />
               }
-              tooltip={isCollapsed ? t('tooltips.userSettings', { username: session.data.user.username }) : undefined}
+              tooltip={isCollapsed ? t('tooltips.userSettings', { username: user.username }) : undefined}
               size="sm"
               className={`hover:bg-sidebar-accent/50 flex-1 transition-all duration-200 ${
                 isCollapsed ? 'w-full justify-center' : ''

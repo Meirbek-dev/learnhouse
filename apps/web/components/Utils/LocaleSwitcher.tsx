@@ -1,8 +1,8 @@
 'use client';
 
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useSession } from '@/components/Contexts/SessionProvider';
-import { updateUserLocale } from '@services/users/users';
+import { updateUserLocale } from '@/lib/users/client';
+import { useViewer } from '@/hooks/useViewer';
 import { useLocale, useTranslations } from 'next-intl';
 import { setUserLocale } from '@/i18n/locale';
 import { useRouter } from 'next/navigation';
@@ -22,7 +22,7 @@ export const LocaleSwitcher = ({ className, isMobile }: LocaleSwitcherProps) => 
   const currentLocale = useLocale();
   const [isPending, startTransition] = useTransition();
   const t = useTranslations('Components.LocaleSwitcher');
-  const session = useSession();
+  const viewer = useViewer();
 
   const localeItems = locales.map((locale) => ({ value: locale, label: t(locale) }));
 
@@ -31,9 +31,9 @@ export const LocaleSwitcher = ({ className, isMobile }: LocaleSwitcherProps) => 
       await setUserLocale(newLocale);
 
       // Sync to database if user is logged in
-      if (session?.data?.user?.id && undefined) {
+      if (viewer?.id) {
         try {
-          await updateUserLocale(session.data.user.id, newLocale);
+          await updateUserLocale(viewer.id, newLocale);
         } catch (error) {
           console.error('Failed to sync locale to server:', error);
         }

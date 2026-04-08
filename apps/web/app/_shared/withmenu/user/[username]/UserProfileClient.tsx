@@ -16,9 +16,9 @@ import {
   Users,
   X,
 } from 'lucide-react';
+import { getCoursesByUser } from '@/lib/users/client';
 import CourseThumbnail from '@components/Objects/Thumbnails/CourseThumbnail';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
-import { getCoursesByUser } from '@services/users/users';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';

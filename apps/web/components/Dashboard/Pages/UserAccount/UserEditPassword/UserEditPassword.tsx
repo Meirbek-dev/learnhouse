@@ -1,10 +1,10 @@
 'use client';
 
-import { useSession } from '@/components/Contexts/SessionProvider';
+import { updatePassword } from '@/lib/users/client';
 import { logout } from '@services/auth/auth';
+import { useViewer } from '@/hooks/useViewer';
 import PasswordInput from '@components/ui/custom/password-input';
 import { valibotResolver } from '@hookform/resolvers/valibot';
-import { updatePassword } from '@services/settings/password';
 import { getAbsoluteUrl } from '@services/config/config';
 import { useState, useTransition } from 'react';
 import { Button } from '@components/ui/button';
@@ -41,7 +41,7 @@ const createValidationSchema = (t: (key: string, values?: any) => string) =>
 type PasswordFormData = v.InferOutput<ReturnType<typeof createValidationSchema>>;
 
 const UserEditPassword = () => {
-  const session = useSession();
+  const viewer = useViewer();
   const t = useTranslations('DashPage.Notifications');
   const tPassword = useTranslations('DashPage.UserAccountSettings.UserAccount.EditPassword');
   const validationSchema = createValidationSchema(t);
@@ -64,7 +64,7 @@ const UserEditPassword = () => {
     const loadingToast = toast.loading(t('updating'));
     startTransition(() => setIsProcessing(true));
     try {
-      const user_id = session?.data?.user?.id;
+      const user_id = viewer?.id;
       if (!user_id) {
         toast.error(t('passwordUpdateError'), { id: loadingToast });
         return;

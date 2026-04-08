@@ -27,6 +27,7 @@ import { AlertTriangle, Calendar, Plus, Shield, Trash2, User } from 'lucide-reac
 import type { UserBasic, Role, UserRoleAssignment } from '@/types/permissions';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useSession } from '@/components/Contexts/SessionProvider';
+import { useAuthSession } from '@/hooks/useSession';
 import { getUserAvatarMediaDirectory } from '@/services/media/media';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ColumnDef } from '@tanstack/react-table';
@@ -40,7 +41,7 @@ import { Card } from '@/components/ui/card';
 import { toast } from 'sonner';
 
 export default function UserRolesClient() {
-  const session = useSession();
+  const session = useAuthSession();
   const t = useTranslations('Components.Roles');
   const locale = useLocale();
 

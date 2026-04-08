@@ -1,6 +1,6 @@
 'use client';
 
-import { useSession } from '@/components/Contexts/SessionProvider';
+import { useAuthSession } from '@/hooks/useSession';
 import { verifyStripeConnection } from '@services/payments/payments';
 import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import { AlertTriangle, Check, Loader2 } from 'lucide-react';
@@ -14,7 +14,7 @@ import { toast } from 'sonner';
 const StripeConnectCallback = () => {
   const t = useTranslations('Stripe');
   const searchParams = useSearchParams();
-  const session = useSession();
+  const { isAuthenticated } = useAuthSession();
   const [status, setStatus] = useState<'processing' | 'success' | 'error'>('processing');
   const [message, setMessage] = useState('');
   const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -23,7 +23,7 @@ const StripeConnectCallback = () => {
     try {
       const code = searchParams.get('code');
 
-      if (!(code && undefined)) {
+      if (!code) {
         throw new Error(t('missingParameters'));
       }
 
@@ -50,7 +50,7 @@ const StripeConnectCallback = () => {
   });
 
   useEffect(() => {
-    if (!session) return;
+    if (!isAuthenticated) return;
 
     const controller = new AbortController();
     verifyConnectionEvent(controller.signal);
@@ -61,7 +61,7 @@ const StripeConnectCallback = () => {
 
       controller.abort();
     };
-  }, [session, searchParams, t]);
+  }, [isAuthenticated, searchParams, t, verifyConnectionEvent]);
 
   return (
     <div className="bg-background text-foreground flex h-screen w-full items-center justify-center">
