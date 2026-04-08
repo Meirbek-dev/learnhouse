@@ -98,7 +98,7 @@ export default function RBACAdminClient() {
     page_size: number;
   } | null>(null);
   const [isAuditLoading, setIsAuditLoading] = useState(false);
-  const isSuperAdmin = can(Resources.ROLE, Actions.MANAGE, Scopes.ALL);
+  const isSuperAdmin = can(Actions.MANAGE, Resources.ROLE, Scopes.ALL);
   const currentUserMaxPriority = useMemo(() => {
     const sessionRoles = session.session?.roles ?? [];
     return sessionRoles.reduce(

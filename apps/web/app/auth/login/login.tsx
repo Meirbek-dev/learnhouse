@@ -9,8 +9,10 @@ import PasswordInput from '@components/ui/custom/password-input';
 import { SiGoogle } from '@icons-pack/react-simple-icons';
 import { Separator } from '@components/ui/separator';
 import { useActionState, useTransition } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { AUTH_SESSION_SWR_KEY } from '@/lib/auth/constants';
 import { Button } from '@components/ui/button';
+import { mutate } from 'swr';
 import AuthLogo from '@components/auth/logo';
 import AuthCard from '@components/auth/card';
 import { Input } from '@components/ui/input';
@@ -33,6 +35,7 @@ const LoginClient = () => {
   const validationT = useTranslations('Validation');
   const t = useTranslations('Auth.Login');
   const searchParams = useSearchParams();
+  const router = useRouter();
   const [isPendingGoogle, startGoogleTransition] = useTransition();
 
   const schema = v.object({
@@ -67,8 +70,10 @@ const LoginClient = () => {
         return { error: t('wrongCredentials'), fieldErrors: {} };
       }
 
-      // Hard navigate to clear React state and trigger server-side session check.
-      globalThis.location.href = getSafeReturnTo(searchParams.get('returnTo'));
+      // Revalidate session from server (new cookies are set by login response)
+      await mutate(AUTH_SESSION_SWR_KEY);
+      // Client-side navigation — no full-page reload
+      router.push(getSafeReturnTo(searchParams.get('returnTo')));
       return { error: null, fieldErrors: {} };
     },
     { error: null, fieldErrors: {} },

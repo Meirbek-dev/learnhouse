@@ -41,7 +41,7 @@ export function PermissionGuard({
   const { can, loading } = usePermissions();
 
   if (loading) return <>{loadingFallback ?? null}</>;
-  if (!can(resource, action, scope)) return <>{fallback}</>;
+  if (!can(action, resource, scope)) return <>{fallback}</>;
   return <>{children}</>;
 }
 

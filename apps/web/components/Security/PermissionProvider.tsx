@@ -12,7 +12,6 @@
 import type { Action, Resource, Scope } from '@/types/permissions';
 import { useAuthSession } from '@/hooks/useSession';
 import { createContext, useContext, useMemo } from 'react';
-import { Resources } from '@/types/permissions';
 import { perm } from '@/types/permissions';
 import type { ReactNode } from 'react';
 
@@ -23,11 +22,8 @@ import type { ReactNode } from 'react';
 // Role assignment shape lives in the shared `types/permissions` when needed.
 // Keep the context value minimal - only what consumers actually use.
 interface PermissionContextValue {
-  /** Check if user has a specific permission (scope is required) */
-  can: {
-    (resource: Resource, action: Action, scope: Scope): boolean;
-    (action: Action, resource: Resource, scope: Scope): boolean;
-  };
+  /** Check if user has a specific permission: can(action, resource, scope) */
+  can: (action: Action, resource: Resource, scope: Scope) => boolean;
   /** Still loading session */
   loading: boolean;
 }
@@ -54,12 +50,8 @@ export function PermissionProvider({ children }: { children: ReactNode }) {
   const permissions = useMemo(() => new Set<string>(session?.permissions), [session?.permissions]);
 
   const can = useMemo(() => {
-    return (...args: [Resource, Action, Scope] | [Action, Resource, Scope]): boolean => {
-      const [first, second, scope] = args;
+    return (action: Action, resource: Resource, scope: Scope): boolean => {
       if (status !== 'authenticated') return false;
-      const firstIsResource = Object.values(Resources).includes(first as Resource);
-      const resource = (firstIsResource ? first : second) as Resource;
-      const action = (firstIsResource ? second : first) as Action;
       return permissions.has(perm(resource, action, scope));
     };
   }, [status, permissions]);
@@ -86,7 +78,7 @@ export function PermissionProvider({ children }: { children: ReactNode }) {
  * ```tsx
  * const { can } = usePermissions();
  *
- * if (can(Resources.COURSE, Actions.CREATE, Scopes.PLATFORM)) {
+ * if (can(Actions.CREATE, Resources.COURSE, Scopes.PLATFORM)) {
  *   // Show create button
  * }
  * ```

@@ -9,8 +9,10 @@ import {
 import { ChevronDown, Crown, LogOut, Shield, User as UserIcon, Users, Star } from 'lucide-react'; // Added Star
 import { Tooltip, TooltipContent, TooltipTrigger } from '@components/ui/tooltip';
 import { useNavigationPermissions } from '@/hooks/useNavigationPermissions';
+import { AUTH_SESSION_SWR_KEY } from '@/lib/auth/constants';
 import { useAuthSession } from '@/hooks/useSession';
 import { logout } from '@services/auth/auth';
+import { mutate } from 'swr';
 import { getAbsoluteUrl } from '@services/config/config';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { RoleSlugs } from '@/types/permissions';
@@ -250,7 +252,8 @@ export const HeaderProfileBox = () => {
                 <DropdownMenuItem
                   variant="destructive"
                   onClick={() => {
-                    void logout({ redirectTo: '/' });
+                    void mutate(AUTH_SESSION_SWR_KEY, null, { revalidate: false });
+                    void logout();
                   }}
                   className="flex space-x-2"
                 >

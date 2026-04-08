@@ -1,16 +1,17 @@
 'use client';
 
-import { useViewer } from '@/hooks/useViewer';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { AUTH_SESSION_SWR_KEY } from '@/lib/auth/constants';
 import { logout } from '@/services/auth/auth';
+import { mutate } from 'swr';
 import platformLogoFull from '@public/platform_logo_full.svg';
-import { getAbsoluteUrl } from '@services/config/config';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 
 const HomeClient = () => {
   const t = useTranslations('HomeClient');
-  const viewer = useViewer();
+  const viewer = useCurrentUser();
 
   return (
     <div className="flex flex-col">
@@ -34,7 +35,8 @@ const HomeClient = () => {
       <div className="mx-auto flex cursor-pointer items-center space-x-4 pt-16 text-2xl font-semibold">
         <span
           onClick={() => {
-            void logout({ redirectTo: getAbsoluteUrl('/') });
+            void mutate(AUTH_SESSION_SWR_KEY, null, { revalidate: false });
+            void logout();
           }}
         >
           {t('signOut')}

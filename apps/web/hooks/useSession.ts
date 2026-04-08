@@ -5,7 +5,7 @@ import { AUTH_SESSION_SWR_KEY } from '@/lib/auth/constants';
 import { normalizeSession, type Session } from '@/lib/auth/types';
 import useSWR from 'swr';
 
-export type SessionStatus = 'loading' | 'authenticated' | 'unauthenticated';
+export type SessionStatus = 'loading' | 'authenticated' | 'unauthenticated' | 'error';
 
 const REFRESH_BEFORE_EXPIRY_MS = 5 * 60 * 1000;
 const MIN_REFRESH_INTERVAL_MS = 60_000;
@@ -57,9 +57,11 @@ export function useAuthSession(): AuthSessionResult {
 
   const status: SessionStatus = isLoading
     ? 'loading'
-    : data?.user
-      ? 'authenticated'
-      : 'unauthenticated';
+    : error && data === undefined
+      ? 'error'
+      : data?.user
+        ? 'authenticated'
+        : 'unauthenticated';
 
   const session = data ?? null;
   const user = session?.user ?? null;

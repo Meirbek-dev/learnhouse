@@ -1,6 +1,7 @@
 'use client';
 
 import { AuthBroadcastListener } from '@/components/auth/AuthBroadcastListener';
+import { PermissionProvider } from '@/components/Security/PermissionProvider';
 import { ThemeProvider, useTheme } from '@/components/providers/theme-provider';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { useAuthStatus } from '@/hooks/useSession';
@@ -170,7 +171,9 @@ export default function RootProviders({ children, initialSession }: RootProvider
   return (
     <AppSWRProvider initialSession={initialSession}>
       <AuthBroadcastListener />
-      <ThemeProviderWrapper>{children}</ThemeProviderWrapper>
+      <PermissionProvider>
+        <ThemeProviderWrapper>{children}</ThemeProviderWrapper>
+      </PermissionProvider>
     </AppSWRProvider>
   );
 }

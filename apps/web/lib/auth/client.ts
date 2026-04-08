@@ -61,7 +61,7 @@ function createMessage(detail: AuthInvalidationDetail): AuthInvalidationMessage 
  *
  * Pass `local: true` when the calling code has NOT already handled the
  * invalidation locally (e.g. API interceptors, auth service). The
- * SessionProvider handles its own local state directly, so it passes
+ * AuthBroadcastListener handles its own local state directly, so it passes
  * `local: false` (the default).
  */
 export function emitAuthInvalidation(

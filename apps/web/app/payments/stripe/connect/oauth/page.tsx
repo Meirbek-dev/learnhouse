@@ -61,7 +61,7 @@ const StripeConnectCallback = () => {
 
       controller.abort();
     };
-  }, [isAuthenticated, searchParams, t, verifyConnectionEvent]);
+  }, [isAuthenticated, searchParams, t]);
 
   return (
     <div className="bg-background text-foreground flex h-screen w-full items-center justify-center">

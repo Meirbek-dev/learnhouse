@@ -80,7 +80,7 @@ const UserAvatar = (props: UserAvatarProps) => {
     }
 
     if (userData?.avatar_image) {
-      const url = userData.avatar_image as string;
+      const url = userData.avatar_image;
       return isExternalUrl(url) ? url : getUserAvatarMediaDirectory(userData.user_uuid, url);
     }
 
@@ -89,8 +89,8 @@ const UserAvatar = (props: UserAvatarProps) => {
 
     // No username — show the current session user's avatar.
     if (currentUser?.avatar_image) {
-      const url = currentUser.avatar_image as string;
-      return isExternalUrl(url) ? url : getUserAvatarMediaDirectory(currentUser.user_uuid as string, url);
+      const url = currentUser.avatar_image;
+      return isExternalUrl(url) ? url : getUserAvatarMediaDirectory(currentUser.user_uuid, url);
     }
 
     return getAbsoluteUrl('/empty_avatar.webp');
@@ -100,18 +100,18 @@ const UserAvatar = (props: UserAvatarProps) => {
     if (fallbackText) return fallbackText;
 
     if (userData?.first_name && userData?.last_name) {
-      return `${(userData.first_name as string)[0]}${(userData.last_name as string)[0]}`.toUpperCase();
+      return `${(userData.first_name)[0]}${(userData.last_name)[0]}`.toUpperCase();
     }
 
     if (username) return username.charAt(0).toUpperCase();
 
     if (currentUser?.first_name && currentUser?.last_name) {
-      return `${(currentUser.first_name as string)[0]}${(currentUser.last_name as string)[0]}`.toUpperCase();
+      return `${(currentUser.first_name)[0]}${(currentUser.last_name)[0]}`.toUpperCase();
     }
 
     return (
-      (userData?.username as string | undefined)?.[0]?.toUpperCase() ??
-      (currentUser?.username as string | undefined)?.[0]?.toUpperCase() ??
+      (userData?.username)?.[0]?.toUpperCase() ??
+      (currentUser?.username)?.[0]?.toUpperCase() ??
       '?'
     );
   };

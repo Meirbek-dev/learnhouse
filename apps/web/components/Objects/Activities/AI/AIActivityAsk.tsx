@@ -2,7 +2,7 @@
 
 import { useActivityAIChat } from '@components/Contexts/AI/ActivityAIChatContext';
 import { Alert, AlertDescription, AlertTitle } from '@components/ui/alert';
-import { useViewer } from '@/hooks/useViewer';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { AlertTriangle, BadgeInfo, NotebookTabs, X } from 'lucide-react';
 import { AiMessageBubble } from '@components/Shared/AI/AiMessageBubble';
 import { AiChatInput } from '@components/Shared/AI/AiChatInput';
@@ -78,7 +78,7 @@ const AIActivityAsk = ({ activity: _activity }: AIActivityAskProps) => {
 
 const ActivityChatPanel = () => {
   const t = useTranslations('Activities.AIActivityAsk');
-  const viewer = useViewer();
+  const viewer = useCurrentUser();
 
   const {
     messages,
@@ -298,7 +298,7 @@ const ErrorDisplay = ({ errorMessage, onDismiss, t }: ErrorDisplayProps) => (
 
 interface AIMessagePlaceHolderProps {
   sendMessage: (message: string) => void;
-  viewer: ReturnType<typeof useViewer>;
+  viewer: ReturnType<typeof useCurrentUser>;
 }
 
 const AIMessagePlaceHolder = ({ sendMessage, viewer }: AIMessagePlaceHolderProps) => {

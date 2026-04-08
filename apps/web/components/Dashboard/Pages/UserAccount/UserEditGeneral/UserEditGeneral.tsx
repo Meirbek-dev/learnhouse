@@ -21,7 +21,8 @@ import {
   Users,
 } from 'lucide-react';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
-import { updateProfile, updateUserAvatar, useMe } from '@/lib/users/client';
+import { updateProfile, updateUserAvatar } from '@/lib/users/client';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { logout } from '@services/auth/auth';
 import { Field, FieldError, FieldLabel } from '@components/ui/field';
 import { valibotResolver } from '@hookform/resolvers/valibot';
@@ -618,7 +619,7 @@ const UserEditForm = ({ form, profilePicture }: UserEditFormProps) => {
 };
 
 const UserEditGeneral = () => {
-  const { data: me } = useMe();
+  const me = useCurrentUser();
   const [localAvatar, setLocalAvatar] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | undefined>();

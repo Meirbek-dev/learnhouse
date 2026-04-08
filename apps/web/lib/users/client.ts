@@ -2,7 +2,6 @@
 
 import { apiFetch } from '@/lib/api-client';
 import { AUTH_SESSION_SWR_KEY } from '@/lib/auth/constants';
-import { useAuthSession } from '@/hooks/useSession';
 import type { CustomResponseTyping } from '@services/utils/ts/requests';
 import type { components } from '@/lib/api/generated';
 import useSWR from 'swr';
@@ -16,7 +15,6 @@ type ResponseMetadata<T> = Omit<CustomResponseTyping, 'data'> & {
 };
 
 export const userKeys = {
-  me: ['viewer', 'me'] as const,
   byId: (userId: number) => ['user', 'id', userId] as const,
   byUsername: (username: string) => ['user', 'username', username] as const,
   coursesByUser: (userId: number) => ['user', 'courses', userId] as const,
@@ -85,7 +83,7 @@ export async function updateUserAvatar(userId: number, avatarFile: File): Promis
   const data = await parseJsonOrNull<UserRead>(response);
 
   if (response.ok) {
-    await Promise.all([mutate(userKeys.me), mutate(userKeys.byId(userId)), mutate(AUTH_SESSION_SWR_KEY)]);
+    await Promise.all([mutate(userKeys.byId(userId)), mutate(AUTH_SESSION_SWR_KEY)]);
   }
 
   return {
@@ -102,7 +100,7 @@ export async function updateUserLocale(userId: number, locale: string): Promise<
   });
   const data = await requireOkJson<UserRead>(response);
 
-  await Promise.all([mutate(userKeys.me), mutate(userKeys.byId(userId)), mutate(AUTH_SESSION_SWR_KEY)]);
+  await Promise.all([mutate(userKeys.byId(userId)), mutate(AUTH_SESSION_SWR_KEY)]);
 
   return data;
 }
@@ -116,7 +114,7 @@ export async function updateProfile(data: unknown, userId: number): Promise<Resp
   const payload = await parseJsonOrNull<UserRead>(response);
 
   if (response.ok) {
-    await Promise.all([mutate(userKeys.me), mutate(userKeys.byId(userId)), mutate(AUTH_SESSION_SWR_KEY)]);
+    await Promise.all([mutate(userKeys.byId(userId)), mutate(AUTH_SESSION_SWR_KEY)]);
   }
 
   return {
@@ -145,16 +143,6 @@ export async function updatePassword(userId: number, data: unknown): Promise<Res
     status: response.status,
     HTTPmessage: response.statusText,
   };
-}
-
-export function useMe(options?: { enabled?: boolean; fallbackData?: UserRead | null }) {
-  const { isAuthenticated, user } = useAuthSession();
-  const enabled = options?.enabled ?? isAuthenticated;
-
-  return useSWR<UserRead | null>(enabled ? userKeys.me : null, getCurrentUserProfile, {
-    fallbackData: options?.fallbackData ?? user ?? undefined,
-    revalidateOnFocus: false,
-  });
 }
 
 export function useUserById(userId?: number | null, options?: { enabled?: boolean }) {

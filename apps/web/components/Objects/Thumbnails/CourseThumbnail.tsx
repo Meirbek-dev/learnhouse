@@ -401,12 +401,12 @@ const AdminMenu: FC<AdminMenuProps> = ({ course, onDelete }) => {
   }, [currentUserId, course.authors, course.is_owner]);
 
   const canUpdate =
-    can(Resources.COURSE, Actions.UPDATE, Scopes.PLATFORM) ||
-    (isOwner && can(Resources.COURSE, Actions.UPDATE, Scopes.OWN));
+    can(Actions.UPDATE, Resources.COURSE, Scopes.PLATFORM) ||
+    (isOwner && can(Actions.UPDATE, Resources.COURSE, Scopes.OWN));
 
   const canDelete =
-    can(Resources.COURSE, Actions.DELETE, Scopes.PLATFORM) ||
-    (isOwner && can(Resources.COURSE, Actions.DELETE, Scopes.OWN));
+    can(Actions.DELETE, Resources.COURSE, Scopes.PLATFORM) ||
+    (isOwner && can(Actions.DELETE, Resources.COURSE, Scopes.OWN));
 
   const availableActions = [...(canUpdate ? ['update'] : []), ...(canDelete ? ['delete'] : [])];
 

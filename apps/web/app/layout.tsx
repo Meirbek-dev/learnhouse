@@ -2,6 +2,7 @@ import { getLocale, getMessages, setRequestLocale } from 'next-intl/server';
 import { connection } from 'next/server';
 import { IntlProvider } from '@/components/providers/IntlProvider';
 import DevScriptLoader from '@/components/DevScriptLoader';
+import { getSession } from '@/lib/auth/session';
 import { inter, jetBrainsMono } from '@/lib/fonts';
 import { Suspense } from 'react';
 import RootProviders from './root-providers';
@@ -12,16 +13,19 @@ const isDevEnv = process.env.NODE_ENV !== 'production';
 
 async function LocalizedApp({ children }: { children: React.ReactNode }) {
   await connection();
-  const locale = await getLocale();
+  const [locale, messages, initialSession] = await Promise.all([
+    getLocale(),
+    getMessages(),
+    getSession(),
+  ]);
   setRequestLocale(locale);
-  const messages = await getMessages();
 
   return (
     <IntlProvider
       messages={messages}
       locale={locale}
     >
-      <RootProviders>
+      <RootProviders initialSession={initialSession}>
         <main>{children}</main>
       </RootProviders>
     </IntlProvider>

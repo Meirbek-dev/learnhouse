@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@components/ui/popover';
-import { updateProfile, useMe } from '@/lib/users/client';
+import { updateProfile } from '@/lib/users/client';
 import { createElement, useEffect, useEffectEvent, useState } from 'react';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
@@ -230,7 +230,7 @@ interface ProfileData {
 
 const UserProfileBuilder = () => {
   const currentUser = useCurrentUser();
-  const { data: me } = useMe();
+  const me = currentUser;
   const tNotify = useTranslations('DashPage.Notifications');
   const t = useTranslations('DashPage.UserProfileBuilder');
   const [profileData, setProfileData] = useState<ProfileData>({
@@ -273,7 +273,7 @@ const UserProfileBuilder = () => {
 
   useEffect(() => {
     fetchUserDataEvent();
-  }, [fetchUserDataEvent, me]);
+  }, [me]);
 
   const createEmptySection = (t: Function, type: keyof typeof SECTION_TYPE_KEYS): ProfileSection => {
     const sectionTypesConfig = getSectionTypesConfig(t);
