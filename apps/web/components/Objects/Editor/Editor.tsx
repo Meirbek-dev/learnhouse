@@ -79,7 +79,6 @@ interface EditorProps {
   activity: any;
   course: any;
   platform: any;
-  session: any;
   onContentChange: (content: any) => void;
   saveState: 'idle' | 'saving' | 'saved' | 'error';
   setContent: (content: any) => void;

@@ -14,9 +14,9 @@ function getAccessTokenExpiry(token: string): number | null {
     if (!payloadSegment) return null;
 
     const padding = '='.repeat((4 - (payloadSegment.length % 4)) % 4);
-    const jsonPayload = JSON.parse(
-      Buffer.from(`${payloadSegment}${padding}`, 'base64url').toString('utf-8'),
-    ) as { exp?: number };
+    const jsonPayload = JSON.parse(Buffer.from(`${payloadSegment}${padding}`, 'base64url').toString('utf-8')) as {
+      exp?: number;
+    };
 
     return typeof jsonPayload.exp === 'number' ? jsonPayload.exp * 1000 : null;
   } catch {

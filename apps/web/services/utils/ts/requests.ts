@@ -170,9 +170,7 @@ export const fetchResponseMetadata = async (url: string): Promise<CustomResponse
  * SWR fetcher that returns both data and response headers.
  * Useful for paginated endpoints that return total count in headers.
  */
-export const swrFetcherWithHeaders = async (
-  url: string,
-): Promise<{ data: any; headers: Record<string, string> }> => {
+export const swrFetcherWithHeaders = async (url: string): Promise<{ data: any; headers: Record<string, string> }> => {
   const options: RequestInit = {
     method: 'GET',
     redirect: 'follow',

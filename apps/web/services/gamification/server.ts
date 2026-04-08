@@ -203,9 +203,7 @@ export async function getServerGamificationDashboard(): Promise<DashboardData | 
  * Fetch platform leaderboard
  * Returns null if user is not authenticated or if fetch fails
  */
-export async function getServerLeaderboard(
-  limit = 20,
-): Promise<PlatformLeaderboard | null> {
+export async function getServerLeaderboard(limit = 20): Promise<PlatformLeaderboard | null> {
   const json = await fetchLeaderboardData(limit);
   return normalizeLeaderboard(json);
 }

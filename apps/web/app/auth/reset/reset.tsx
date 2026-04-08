@@ -59,7 +59,7 @@ const ResetPasswordClient = () => {
   const { execute, error, message, setMessage, isPending } = useAuthAction<ResetPasswordFormData>(async (values) => {
     const res = await resetPassword(values.reset_code, values.new_password);
     if (!res.ok) {
-      const body = await res.json().catch(() => ({})) as { detail?: string };
+      const body = (await res.json().catch(() => ({}))) as { detail?: string };
       throw new Error(body?.detail ?? t('unknownError'));
     }
     setMessage(t('success'));
@@ -71,7 +71,11 @@ const ResetPasswordClient = () => {
       <p className="mt-4 text-xl font-semibold tracking-tight">{t('title')}</p>
       <p className="text-muted-foreground mt-2 text-center text-sm">{t('enterResetDetails')}</p>
 
-      {error ? <div className="mt-4"><AuthErrorBanner message={error} /></div> : null}
+      {error ? (
+        <div className="mt-4">
+          <AuthErrorBanner message={error} />
+        </div>
+      ) : null}
 
       {message ? (
         <div className="mt-4 w-full space-y-2">

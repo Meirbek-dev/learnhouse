@@ -20,7 +20,7 @@ import {
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@components/ui/popover';
 import { createElement, useEffect, useEffectEvent, useState } from 'react';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 import { updateProfile } from '@services/settings/profile';
 import { de, enUS, es, fr, ru } from 'date-fns/locale';
@@ -230,7 +230,7 @@ interface ProfileData {
 }
 
 const UserProfileBuilder = () => {
-  const session = usePlatformSession() as any;
+  const currentUser = useCurrentUser();
   const tNotify = useTranslations('DashPage.Notifications');
   const t = useTranslations('DashPage.UserProfileBuilder');
   const [profileData, setProfileData] = useState<ProfileData>({
@@ -242,13 +242,13 @@ const UserProfileBuilder = () => {
 
   // Initialize profile data from user data
   const fetchUserDataEvent = useEffectEvent(async () => {
-    if (!session?.data?.user?.id) {
+    if (!currentUser?.id) {
       return;
     }
 
     try {
       setIsLoading(true);
-      const userData = await getUser(session.data.user.id);
+      const userData = await getUser(currentUser.id);
 
       if (userData.profile) {
         try {
@@ -273,7 +273,7 @@ const UserProfileBuilder = () => {
 
   useEffect(() => {
     fetchUserDataEvent();
-  }, [session?.data?.user?.id]);
+  }, [currentUser?.id]);
 
   const createEmptySection = (t: Function, type: keyof typeof SECTION_TYPE_KEYS): ProfileSection => {
     const sectionTypesConfig = getSectionTypesConfig(t);
@@ -407,7 +407,7 @@ const UserProfileBuilder = () => {
 
     try {
       // Get fresh user data before update
-      const userData = await getUser(session.data.user.id);
+      const userData = await getUser(currentUser!.id);
 
       // Update only the profile field
       userData.profile = profileData;

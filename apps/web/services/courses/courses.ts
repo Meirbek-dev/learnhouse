@@ -282,13 +282,7 @@ async function fetchEditableCourses(
   return { courses, total, summary };
 }
 
-export async function getEditableCourses(
-  page = 1,
-  limit = 20,
-  query = '',
-  sortBy = 'updated',
-  preset = '',
-) {
+export async function getEditableCourses(page = 1, limit = 20, query = '', sortBy = 'updated', preset = '') {
   return fetchEditableCourses(page, limit, query, sortBy, preset);
 }
 
@@ -322,11 +316,7 @@ async function fetchCourseMetadata(
   return normalizeFullCourse((await errorHandling(result)) as FullCourseRead);
 }
 
-export async function getCourseMetadata(
-  course_uuid: string,
-  _next?: any,
-  withUnpublishedActivities = false,
-) {
+export async function getCourseMetadata(course_uuid: string, _next?: any, withUnpublishedActivities = false) {
   return fetchCourseMetadata(course_uuid, withUnpublishedActivities);
 }
 

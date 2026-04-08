@@ -173,8 +173,8 @@ function useActivityPosition(course: CourseStructure, activityId: string) {
 const ActivityActions = ({ activity, activityid, course, assignment, showNavigation = true }: ActivityActionsProps) => {
   const t = useTranslations('ActivityPage');
   const { contributorStatus } = useContributorStatus(course.course_uuid);
-  const session = usePlatformSession() as any;
-  const isAuthenticated = session.status === 'authenticated';
+  const { status } = usePlatformSession();
+  const isAuthenticated = status === 'authenticated';
   const isPaidAccessAllowed = activity?.content?.paid_access !== false || contributorStatus === 'ACTIVE';
 
   // Add SWR for trail data
@@ -238,8 +238,8 @@ const ActivityClient = (props: ActivityClientProps) => {
   const { courseuuid } = props;
   const { activity } = props;
   const { course } = props;
-  const session = usePlatformSession() as any;
-  const isAuthenticated = session.status === 'authenticated';
+  const { status } = usePlatformSession();
+  const isAuthenticated = status === 'authenticated';
   const [assignment, setAssignment] = useState(null) as any;
   const [isFocusMode, setIsFocusMode] = useState(() => {
     if (typeof globalThis.window !== 'undefined') {
@@ -1022,7 +1022,6 @@ export const MarkStatus = (props: {
 }) => {
   const { t } = props;
   const router = useRouter();
-  const session = usePlatformSession() as any;
   const [isLoading, setIsLoading] = useState(false);
   const TRAIL_KEY = getTrailSwrKey();
 
@@ -1346,7 +1345,6 @@ const AssignmentTools = (props: {
   assignment: any;
   t: ReturnType<typeof useTranslations<'ActivityPage'>>;
 }) => {
-  const session = usePlatformSession() as any;
   const { t } = props;
 
   // Use the unified grading endpoint instead of the legacy AssignmentSubmissionContext

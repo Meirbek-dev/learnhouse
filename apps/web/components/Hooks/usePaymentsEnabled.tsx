@@ -10,10 +10,11 @@ type PaymentsConfigRead = components['schemas']['PaymentsConfigRead'];
 export function usePaymentsEnabled() {
   const session = usePlatformSession();
   const isAuthenticated = session.status === 'authenticated' && Boolean(session.data?.user);
-  const { data: paymentConfigs, error, isLoading } = useSWR(
-    isAuthenticated ? '/payments/config' : null,
-    () => getPaymentConfigs(),
-  );
+  const {
+    data: paymentConfigs,
+    error,
+    isLoading,
+  } = useSWR(isAuthenticated ? '/payments/config' : null, () => getPaymentConfigs());
 
   const isStripeEnabled = paymentConfigs?.some(
     (config: PaymentsConfigRead) => config.provider === 'stripe' && config.active,

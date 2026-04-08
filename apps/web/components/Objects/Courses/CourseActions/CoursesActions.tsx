@@ -11,7 +11,7 @@ import {
   Trophy,
   UserPen,
 } from 'lucide-react';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { useContributorStatus } from '@/hooks/useContributorStatus';
 import { getProductsByCourse } from '@services/payments/products';
 import { applyForContributor } from '@services/courses/courses';
@@ -72,7 +72,7 @@ interface CourseActionsProps {
 
 const CoursesActions = ({ courseuuid, course, trailData }: CourseActionsProps) => {
   const router = useRouter();
-  const session = usePlatformSession() as any;
+  const currentUser = useCurrentUser();
   const [linkedProducts, setLinkedProducts] = useState<PaymentsProductRead[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isActionLoading, setIsActionLoading] = useState(false);
@@ -83,7 +83,7 @@ const CoursesActions = ({ courseuuid, course, trailData }: CourseActionsProps) =
   const [isProgressOpen, setIsProgressOpen] = useState(false);
   const t = useTranslations('Courses.CoursesActions');
 
-  const userId = session.data?.user?.id;
+  const userId = currentUser?.id;
 
   // one-shot guards to avoid repeated requests when context identity changes
   const fetchedLinkedProductsRef = useRef<Record<string, boolean>>({});
@@ -138,7 +138,7 @@ const CoursesActions = ({ courseuuid, course, trailData }: CourseActionsProps) =
   }, [course.id, userId, linkedProducts, t]);
 
   const handleCourseAction = async () => {
-    if (!session.data?.user) {
+    if (!currentUser) {
       router.push(getAbsoluteUrl('/signup'));
       return;
     }
@@ -209,7 +209,7 @@ const CoursesActions = ({ courseuuid, course, trailData }: CourseActionsProps) =
   };
 
   const handleApplyToContribute = async () => {
-    if (!session.data?.user) {
+    if (!currentUser) {
       router.push(getAbsoluteUrl('/signup'));
       return;
     }
@@ -235,7 +235,7 @@ const CoursesActions = ({ courseuuid, course, trailData }: CourseActionsProps) =
   };
 
   const renderActionButton = (action: 'start' | 'continue') => {
-    const isAuthenticated = Boolean(session.data?.user);
+    const isAuthenticated = Boolean(currentUser);
     const icon = action === 'start' ? <PlayCircle className="size-5" /> : <ArrowRight className="size-5" />;
     const label = action === 'start' ? t('startCourse') : t('continueLearning');
 
@@ -265,7 +265,7 @@ const CoursesActions = ({ courseuuid, course, trailData }: CourseActionsProps) =
       return null;
     }
 
-    if (!session.data?.user) {
+    if (!currentUser) {
       return (
         <Button
           variant="outline"

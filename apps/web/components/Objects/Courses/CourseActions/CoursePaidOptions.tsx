@@ -4,7 +4,7 @@ import type { components } from '@/lib/api/generated';
 
 import { getProductsByCourse, getStripeProductCheckoutSession } from '@services/payments/products';
 import { ChevronDown, ChevronUp, Loader2, RefreshCcw, SquareCheck } from 'lucide-react';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { getAbsoluteUrl } from '@services/config/config';
 import { useState, useTransition } from 'react';
 import { Button } from '@components/ui/button';
@@ -24,19 +24,18 @@ interface CoursePaidOptionsProps {
 
 const CoursePaidOptions = ({ course }: CoursePaidOptionsProps) => {
   const t = useTranslations('Courses.CoursePaidOptions');
-  const session = usePlatformSession() as any;
+  const currentUser = useCurrentUser();
   const [expandedProducts, setExpandedProducts] = useState<Record<number, boolean>>({});
   const [isProcessing, setIsProcessing] = useState<Record<number, boolean>>({});
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
 
-  const { data: linkedProducts, error } = useSWR(
-    () => (session ? [`/payments/courses/${course.id}/products`, undefined] : null),
-    () => getProductsByCourse(course.id),
+  const { data: linkedProducts, error } = useSWR([`/payments/courses/${course.id}/products`, undefined], () =>
+    getProductsByCourse(course.id),
   );
 
   const handleCheckout = async (productId: number) => {
-    if (!session.data?.user) {
+    if (!currentUser) {
       // Redirect to login if user is not authenticated
       router.push('/signup');
       return;

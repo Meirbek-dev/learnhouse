@@ -53,7 +53,7 @@ export function RecentActivityFeed({ transactions, isLoading }: RecentActivityFe
             return (
               <div
                 key={transaction.id}
-                className="flex items-center gap-3 rounded-md p-2 transition-colors hover:bg-muted/50"
+                className="hover:bg-muted/50 flex items-center gap-3 rounded-md p-2 transition-colors"
               >
                 <div className={cn('rounded-md p-2 shrink-0', theme.bgColor)}>
                   <theme.icon className={cn('h-3.5 w-3.5', theme.color)} />

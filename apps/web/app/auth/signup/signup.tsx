@@ -55,12 +55,10 @@ async function signupAndLogin(
   const res = await signup(body);
 
   if (!res.ok) {
-    const json = await res.json().catch(() => ({})) as { detail?: string | { code?: string; message?: string } };
+    const json = (await res.json().catch(() => ({}))) as { detail?: string | { code?: string; message?: string } };
     const detail = json?.detail;
     const code = typeof detail === 'object' ? detail?.code : undefined;
-    const msg = code && SIGNUP_ERROR_MAP[code]
-      ? t(SIGNUP_ERROR_MAP[code])
-      : t('errorSomethingWentWrong');
+    const msg = code && SIGNUP_ERROR_MAP[code] ? t(SIGNUP_ERROR_MAP[code]) : t('errorSomethingWentWrong');
     throw new Error(msg);
   }
 

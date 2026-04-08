@@ -58,15 +58,8 @@ export default function UserRolesClient() {
   } | null>(null);
 
   const refreshSession = useCallback(async () => {
-    const timeoutMs = 5000;
-    try {
-      await Promise.race([
-        session.update(),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), timeoutMs)),
-      ]);
-    } catch {
-      toast.warning(t('sessionRefreshWarning'));
-    }
+    const next = await session.update();
+    if (!next) toast.warning(t('sessionRefreshWarning'));
   }, [session, t]);
 
   // Fetch user roles

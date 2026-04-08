@@ -83,17 +83,19 @@ const EditCourseCertification = () => {
 
   const certificationTypeItems = useMemo(
     () =>
-      ([
-        'completion',
-        'achievement',
-        'assessment',
-        'participation',
-        'mastery',
-        'professional',
-        'continuing',
-        'workshop',
-        'specialization',
-      ] as const).map((type) => ({ value: type, label: t(`certificationTypes.${type}`) })),
+      (
+        [
+          'completion',
+          'achievement',
+          'assessment',
+          'participation',
+          'mastery',
+          'professional',
+          'continuing',
+          'workshop',
+          'specialization',
+        ] as const
+      ).map((type) => ({ value: type, label: t(`certificationTypes.${type}`) })),
     [t],
   );
 
@@ -241,7 +243,11 @@ const EditCourseCertification = () => {
     defaultValue: '',
   });
   const certificationType = useWatch({ control: form.control, name: 'certification_type', defaultValue: 'completion' });
-  const certificatePattern = useWatch({ control: form.control, name: 'certificate_pattern', defaultValue: 'professional' });
+  const certificatePattern = useWatch({
+    control: form.control,
+    name: 'certificate_pattern',
+    defaultValue: 'professional',
+  });
   const certificateInstructor = useWatch({ control: form.control, name: 'certificate_instructor', defaultValue: '' });
 
   const handleSaveCertification = form.handleSubmit(async (values) => {

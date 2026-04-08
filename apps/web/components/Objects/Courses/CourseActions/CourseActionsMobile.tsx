@@ -3,7 +3,7 @@
 import type { components } from '@/lib/api/generated';
 
 import { AlertCircle, BookOpen, Loader2, LogIn, ShoppingCart } from 'lucide-react';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
 import { useEffect, useRef, useState, useTransition } from 'react';
 import { getProductsByCourse } from '@services/payments/products';
@@ -146,8 +146,8 @@ const MultipleAuthors = ({ authors }: { authors: Author[] }) => {
 const CourseActionsMobile = ({ courseuuid, course, trailData }: CourseActionsMobileProps) => {
   const t = useTranslations('Courses.CourseActionsMobile');
   const router = useRouter();
-  const session = usePlatformSession() as any;
-  const userId = session.data?.user?.id;
+  const currentUser = useCurrentUser();
+  const userId = currentUser?.id;
 
   // one-shot guards to avoid repeated requests when context identity changes
   const fetchedLinkedProductsRef = useRef<Record<string, boolean>>({});
@@ -206,7 +206,7 @@ const CourseActionsMobile = ({ courseuuid, course, trailData }: CourseActionsMob
   }, [course.id, userId, linkedProducts]);
 
   const handleCourseAction = async () => {
-    if (!session.data?.user) {
+    if (!currentUser) {
       router.push(getAbsoluteUrl('/signup'));
       return;
     }
@@ -374,7 +374,7 @@ const CourseActionsMobile = ({ courseuuid, course, trailData }: CourseActionsMob
           >
             {isActionLoading ? (
               <Loader2 className="h-4 w-4 animate-spin" />
-            ) : !session.data?.user ? (
+            ) : !currentUser ? (
               <>
                 <LogIn className="h-4 w-4" />
                 {t('signIn')}

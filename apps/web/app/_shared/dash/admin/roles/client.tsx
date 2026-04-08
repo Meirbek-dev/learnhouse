@@ -134,17 +134,10 @@ export default function RBACAdminClient() {
     }
   }, [t]);
 
-  const refreshSession = async () => {
-    const timeoutMs = 5000;
-    try {
-      await Promise.race([
-        session.update(),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), timeoutMs)),
-      ]);
-    } catch {
-      toast.warning(t('sessionRefreshWarning'));
-    }
-  };
+  const refreshSession = useCallback(async () => {
+    const next = await session.update();
+    if (!next) toast.warning(t('sessionRefreshWarning'));
+  }, [session, t]);
 
   const loadRoleWithPermissions = async (roleId: number): Promise<RoleWithPermissions> => {
     const [role, rolePermissions] = await Promise.all([apiGetRole(roleId), getRolePermissions(roleId)]);

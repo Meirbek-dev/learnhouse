@@ -25,7 +25,7 @@ import CourseBreadcrumbs from '@components/Pages/Courses/CourseBreadcrumbs';
 import { getDiscussionsSwrKey } from '@services/courses/discussions-keys';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { CourseProvider } from '@components/Contexts/CourseContext';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { swrFetcher } from '@services/utils/ts/requests';
 // Import the new discussions component
@@ -55,7 +55,7 @@ const CourseClient = (props: any) => {
   const { courseuuid } = props;
   const { course } = props;
   const isMobile = useIsMobile();
-  const session = usePlatformSession() as any;
+  const currentUser = useCurrentUser();
 
   const {
     data: discussionPosts = [],
@@ -559,7 +559,7 @@ const CourseClient = (props: any) => {
             {/* Course Discussions - Using the new component */}
             <CourseDiscussions
               initialPosts={discussionPosts}
-              currentUser={session?.data?.user}
+              currentUser={currentUser}
               courseUuid={course?.course_uuid}
               onMutate={mutateDiscussions}
             />

@@ -3,7 +3,7 @@ import { RecentActivityFeed } from '@/components/Dashboard/Gamification/recent-a
 import GeneralWrapper from '@/components/Objects/Elements/Wrappers/GeneralWrapper';
 import { Leaderboard } from '@/components/Dashboard/Gamification/leaderboard';
 import TrailCourseElement from '@components/Pages/Trail/TrailCourseElement';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
 import UserCertificates from '@components/Pages/Trail/UserCertificates';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { useGamificationStore } from '@/stores/gamification';
@@ -17,7 +17,7 @@ import useSWR from 'swr';
 const EMPTY_RECENT_TRANSACTIONS: any[] = [];
 
 const Trail = () => {
-  const session = usePlatformSession() as any;
+  const currentUser = useCurrentUser();
   const t = useTranslations('TrailPage');
 
   const TRAIL_KEY = getTrailSwrKey();
@@ -84,7 +84,7 @@ const Trail = () => {
           {/* Leaderboard */}
           <Leaderboard
             entries={leaderboardData?.entries || []}
-            currentUserId={session?.data?.user?.id ? Number(session.data.user.id) : undefined}
+            currentUserId={currentUser?.id ? Number(currentUser.id) : undefined}
             userRank={userRankData?.rank}
           />
 

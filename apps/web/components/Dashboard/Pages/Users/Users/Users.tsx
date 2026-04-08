@@ -24,6 +24,7 @@ import {
 import { Actions, Resources, Scopes, usePermissions } from '@/components/Security';
 import RolesUpdate from '@/components/Objects/Modals/Dash/Users/RolesUpdate';
 import { usePlatformSession } from '@/components/Contexts/SessionContext';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
 import type { ColumnDef } from '@tanstack/react-table';
 import DataTable from '@/components/ui/data-table';
 
@@ -113,9 +114,10 @@ function RemoveUserButton({ userId, username, onRemove, t }: RemoveUserButtonPro
 }
 
 const Users = () => {
-  const session = usePlatformSession() as any;
+  const { data: sessionData } = usePlatformSession();
+  const currentUser = useCurrentUser();
   const t = useTranslations('DashPage.UserSettings.usersSection');
-  const userRoles = session?.data?.roles ?? [];
+  const userRoles = sessionData?.roles ?? [];
   const { can } = usePermissions();
   const canUpdateRole = can(Actions.UPDATE, Resources.ROLE, Scopes.PLATFORM);
   const canDeleteUser = can(Actions.DELETE, Resources.USER, Scopes.PLATFORM);
@@ -212,8 +214,7 @@ const Users = () => {
       enableSorting: false,
       cell: ({ row }) => {
         const user = row.original;
-        const isSelf =
-          session?.data?.user?.user_uuid === user.user.user_uuid || session?.data?.user?.id === user.user.id;
+        const isSelf = currentUser?.user_uuid === user.user.user_uuid || currentUser?.id === user.user.id;
         const targetPriority = getRolePriority(user.role);
         const canManage = !isSelf && currentUserPriority > targetPriority;
 

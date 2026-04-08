@@ -12,13 +12,13 @@ import {
   Users,
 } from 'lucide-react';
 import { useNavigationPermissions } from '@/hooks/useNavigationPermissions';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
+import { useCurrentUser } from '@/hooks/useCurrentUser';
 import ToolTip from '@/components/Objects/Elements/Tooltip/Tooltip';
 import AppLink from '@/components/ui/AppLink';
 import { useTranslations } from 'next-intl';
 
 const DashMobileMenu = () => {
-  const session = usePlatformSession() as any;
+  const currentUser = useCurrentUser();
   const t = useTranslations('SidebarMenu');
   const {
     canSeePlatform,
@@ -169,7 +169,7 @@ const DashMobileMenu = () => {
         ) : null}
         <ToolTip
           content={t('tooltips.userSettings', {
-            username: session.data.user.username,
+            username: currentUser?.username ?? '',
           })}
           slateBlack
           sideOffset={8}

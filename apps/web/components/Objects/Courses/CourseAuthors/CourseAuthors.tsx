@@ -12,7 +12,6 @@ import {
 } from '@/components/ui/alert-dialog';
 import { createCourseUpdate, deleteCourseUpdate } from '@services/courses/updates';
 import { AlertTriangle, Loader2, PencilLine, Rss, TentTree } from 'lucide-react';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { Field, FieldError, FieldLabel } from '@components/ui/field';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
 import { Actions, Resources, Scopes } from '@/types/permissions';
@@ -222,7 +221,6 @@ type UpdateFormValues = v.InferOutput<ReturnType<typeof createUpdateFormSchema>>
 
 const NewUpdateForm = ({ setSelectedView }: { setSelectedView: (view: string) => void }) => {
   const course = useCourse();
-  const session = usePlatformSession() as any;
   const t = useTranslations('Courses.CourseAuthors');
   const validationSchema = createUpdateFormSchema(t);
 
@@ -365,7 +363,6 @@ const UpdatesListView = () => {
 };
 
 const DeleteUpdateButton = ({ update }: any) => {
-  const session = usePlatformSession() as any;
   const course = useCourse();
   const t = useTranslations('Courses.CourseAuthors');
   const [isOpen, setIsOpen] = useState(false);

@@ -19,8 +19,8 @@ interface EditorWrapperProps {
 
 const EditorWrapper = (props: EditorWrapperProps): JSX.Element => {
   const t = useTranslations('DashPage.Editor.EditorWrapper');
-  const session = usePlatformSession() as any;
-  const isReady = !session.isLoading;
+  const { status } = usePlatformSession();
+  const isReady = status !== 'loading';
   const activityAutosave = useActivityAutosave({
     activityUuid: props.activity.activity_uuid,
     courseUuid: props.course.course_uuid,
@@ -58,7 +58,6 @@ const EditorWrapper = (props: EditorWrapperProps): JSX.Element => {
           }}
           saveState={activityAutosave.saveStatus}
           setContent={setContent}
-          session={session}
         />
       ) : null}
     </PlatformContextProvider>

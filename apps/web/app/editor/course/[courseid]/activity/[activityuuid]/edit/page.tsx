@@ -31,10 +31,7 @@ const EditActivity = async (props: { params: Promise<{ courseid: string; activit
   const params = await props.params;
   const { activityuuid, courseid } = params;
 
-  const [courseInfo, activity] = await Promise.all([
-    getCourseMetadata(courseid),
-    getActivity(activityuuid),
-  ]);
+  const [courseInfo, activity] = await Promise.all([getCourseMetadata(courseid), getActivity(activityuuid)]);
 
   const platform = await getPlatform();
 

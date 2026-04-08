@@ -19,7 +19,6 @@ import {
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { updateLanding, uploadLandingContent } from '@/services/platform/platform';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs';
-import { usePlatformSession } from '@/components/Contexts/SessionContext';
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 import { createElement, useEffect, useState, useTransition } from 'react';
 import { usePlatform } from '@/components/Contexts/PlatformContext';
@@ -290,7 +289,6 @@ const makeGradientDirectionItems = (t: Function) =>
 
 const EditLanding = () => {
   const platform = usePlatform() as any;
-  const session = usePlatformSession() as any;
   const [isLandingEnabled, setIsLandingEnabled] = useState(false);
   const tNotify = useTranslations('DashPage.Notifications');
   const t = useTranslations('DashPage.PlatformSettings.Landing');
@@ -1515,7 +1513,6 @@ interface ImageUploaderProps {
 }
 
 const ImageUploader: FC<ImageUploaderProps> = ({ t, onImageUploaded, className, buttonText, id }) => {
-  const session = usePlatformSession() as any;
   const [isUploading, setIsUploading] = useState(false);
   const tNotify = useTranslations('DashPage.Notifications');
   const inputId = `imageUpload-${id}`;
@@ -1997,8 +1994,6 @@ const FeaturedCoursesEditor: FC<{
   section: LandingFeaturedCourses;
   onChange: (section: LandingFeaturedCourses) => void;
 }> = ({ t, section, onChange }) => {
-  const session = usePlatformSession() as any;
-
   const { data: coursesData } = useSWR('platform-courses', () => getCourses());
   const courses = coursesData?.courses;
 

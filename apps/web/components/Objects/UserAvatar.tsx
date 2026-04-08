@@ -68,11 +68,9 @@ const UserAvatar = (props: UserAvatarProps) => {
   } = props;
 
   // useSWR deduplicates: N components with the same username → one request, shared cache.
-  const { data: userData } = useSWR(
-    username ? `user:${username}` : null,
-    () => getUserByUsername(username!),
-    { revalidateOnFocus: false },
-  );
+  const { data: userData } = useSWR(username ? `user:${username}` : null, () => getUserByUsername(username!), {
+    revalidateOnFocus: false,
+  });
 
   const getAvatarUrl = (): string => {
     if (predefined_avatar) {
@@ -114,9 +112,11 @@ const UserAvatar = (props: UserAvatarProps) => {
       return `${(currentUser.first_name as string)[0]}${(currentUser.last_name as string)[0]}`.toUpperCase();
     }
 
-    return (userData?.username as string | undefined)?.[0]?.toUpperCase()
-      ?? (currentUser?.username as string | undefined)?.[0]?.toUpperCase()
-      ?? '?';
+    return (
+      (userData?.username as string | undefined)?.[0]?.toUpperCase() ??
+      (currentUser?.username as string | undefined)?.[0]?.toUpperCase() ??
+      '?'
+    );
   };
 
   const avatarElement = (

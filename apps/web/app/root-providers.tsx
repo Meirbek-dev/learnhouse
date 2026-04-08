@@ -27,7 +27,7 @@ function AppSWRProvider({ children }: { children: ReactNode }) {
         revalidateOnFocus: false,
         revalidateOnReconnect: false,
         onErrorRetry: (error, _key, _config, revalidate, { retryCount }) => {
-          if ((error)?.status === 401) return;
+          if (error?.status === 401) return;
           if (retryCount >= 3) return;
           setTimeout(() => revalidate({ retryCount }), 5000);
         },
