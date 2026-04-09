@@ -11,6 +11,7 @@ The checker determines which scope applies.
 from __future__ import annotations
 
 import logging
+import time
 from typing import Annotated
 
 from fastapi import Depends, HTTPException, Request, status
@@ -443,6 +444,30 @@ class PermissionChecker:
 # ============================================================================
 # FastAPI Dependencies
 # ============================================================================
+
+
+async def mark_user_roles_updated(user_uuid: str) -> None:
+    """Signal that a user's roles have changed.
+
+    Writes the current timestamp to ``roles_updated:{user_uuid}`` in Redis with
+    a TTL equal to the access-token lifetime.  The next token verification will
+    compare this value against the ``rvs`` claim and reject stale tokens with a
+    ``roles_stale`` WWW-Authenticate error, prompting a silent refresh.
+
+    MUST be called (awaited) by any endpoint that assigns or revokes roles after
+    the DB transaction has been committed.
+    """
+    from src.security.auth_lifetimes import ACCESS_TOKEN_EXPIRE
+    from src.services.cache.redis_client import get_async_redis_client
+
+    r = get_async_redis_client()
+    if r:
+        ttl = int(ACCESS_TOKEN_EXPIRE.total_seconds())
+        await r.set(
+            f"roles_updated:{user_uuid}",
+            str(int(time.time())),
+            ex=ttl,
+        )
 
 
 def get_permission_checker(

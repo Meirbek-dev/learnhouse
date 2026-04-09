@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 
 AUTH_TOKEN_ISSUER = "ashyq-bilim-auth"
 AUTH_TOKEN_AUDIENCE = "ashyq-bilim-api"
+ROLES_UPDATED_PREFIX = "roles_updated:"
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 oauth2_scheme_optional = OAuth2PasswordBearer(
@@ -38,6 +39,7 @@ class TokenData(PydanticStrictBaseModel):
     session_id: str | None = None
     jti: str | None = None
     roles: list[str] = []
+    roles_version: int | None = None  # "rvs" claim — timestamp when roles were embedded
     issued_at: int | None = None
     expires_at: int | None = None
 
@@ -65,11 +67,31 @@ def create_access_token(
     user_uuid: str,
     session_id: str,
     roles: list[str] | None = None,
+    permissions: list[str] | None = None,
+    user_claims: dict | None = None,
+    role_data: list[dict] | None = None,
     expires_delta: timedelta | None = None,
 ) -> str:
+    """Create a signed EdDSA access token.
+
+    Args:
+        user_uuid:    Subject identifier (User.user_uuid).
+        session_id:   Session ID for server-side session validation.
+        roles:        Role slugs embedded for display/logging.
+        permissions:  Expanded permission strings (e.g. "course:read:own").
+                      Frontend uses these for Set.has() RBAC checks.
+        user_claims:  Minimal display fields (id, username, email, …).
+                      Allows the frontend to render the UI without a backend call.
+        role_data:    Full role objects matching the RoleRead OpenAPI schema.
+                      Allows the frontend to display role information without a
+                      backend call.
+        expires_delta: Override the default ACCESS_TOKEN_EXPIRE lifetime.
+    """
     now = datetime.now(UTC)
     expire = now + (expires_delta or ACCESS_TOKEN_EXPIRE)
-    payload = {
+    rvs = int(now.timestamp())  # roles-version = issuance time; checked against
+    #  `roles_updated:{user_uuid}` in Redis on every request.
+    payload: dict = {
         "sub": user_uuid,
         "jti": _generate_jti(),
         "sid": session_id,
@@ -77,9 +99,16 @@ def create_access_token(
         "aud": AUTH_TOKEN_AUDIENCE,
         "iat": int(now.timestamp()),
         "exp": int(expire.timestamp()),
+        "rvs": rvs,
         "roles": roles or [],
+        "perms": permissions or [],
         "type": "access",
     }
+    if user_claims:
+        payload["u"] = user_claims
+    if role_data:
+        payload["role_data"] = role_data
+
     token = jwt.encode({"alg": "EdDSA", "kid": "v1"}, payload, get_private_key())
     return token.decode("utf-8") if isinstance(token, bytes) else token
 
@@ -119,11 +148,13 @@ def decode_access_token(token: str) -> TokenData:
     roles = payload.get("roles", [])
     if not isinstance(roles, list):
         roles = []
+    rvs = payload.get("rvs")
     return TokenData(
         user_uuid=user_uuid,
         session_id=payload.get("sid"),
         jti=payload.get("jti"),
         roles=[r for r in roles if isinstance(r, str)],
+        roles_version=rvs if isinstance(rvs, int) else None,
         issued_at=payload.get("iat") if isinstance(payload.get("iat"), int) else None,
         expires_at=payload.get("exp") if isinstance(payload.get("exp"), int) else None,
     )
@@ -175,6 +206,29 @@ async def is_jti_blocklisted(jti: str) -> bool:
     return bool(await r.exists(f"{JTI_BLOCKLIST_PREFIX}{jti}"))
 
 
+# ── Roles-version staleness check ────────────────────────────────────────────
+
+
+async def _is_roles_stale(user_uuid: str, roles_version: int) -> bool:
+    """Return True when a role change was recorded AFTER this token was issued.
+
+    Reads `roles_updated:{user_uuid}` from Redis. A 401 with
+    `WWW-Authenticate: Bearer error="roles_stale"` tells the frontend to
+    silently refresh the access token (not log out).
+    """
+    r = get_async_redis_client()
+    if not r:
+        return False
+    raw = await r.get(f"{ROLES_UPDATED_PREFIX}{user_uuid}")
+    if not raw:
+        return False
+    try:
+        roles_updated_at = int(raw)
+        return roles_updated_at > roles_version
+    except (ValueError, TypeError):
+        return False
+
+
 # ── User lookup ───────────────────────────────────────────────────────────────
 
 
@@ -214,6 +268,18 @@ async def get_current_user_from_token(
     session = await get_session_by_id(token_data.session_id)
     if session is None or session.user_uuid != token_data.user_uuid:
         raise _credentials_exception()
+
+    # Roles-version check: if roles were updated after this token was issued,
+    # reject with a specific WWW-Authenticate error so the frontend can silently
+    # refresh (not log out).
+    if token_data.roles_version is not None and await _is_roles_stale(
+        token_data.user_uuid, token_data.roles_version
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token roles stale — please refresh",
+            headers={"WWW-Authenticate": 'Bearer error="roles_stale"'},
+        )
 
     user = _get_user_by_uuid(db_session, token_data.user_uuid)
     if user is None:

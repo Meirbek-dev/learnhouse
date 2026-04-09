@@ -10,23 +10,33 @@ import {
 import { buildLoginRedirect, getPostAuthRedirect, normalizeReturnTo } from '@/lib/auth/redirect';
 import { isProtectedRoute } from '@/lib/auth/routes';
 
-function resolveReturnTo(request: NextRequest): string {
-  return normalizeReturnTo(request.nextUrl.searchParams.get('returnTo'));
-}
-
-function redirectTarget(request: NextRequest, returnTo: string): URL {
-  return new URL(getPostAuthRedirect(returnTo), request.url);
-}
-
+/**
+ * Token-refresh bridge — GET only.
+ *
+ * Why GET?  The refresh token cookie has ``Path: /api/auth/refresh``, so the
+ * browser only sends it when navigating to a URL under that path.  When
+ * ``proxy.ts`` detects an expired access token it redirects the browser here;
+ * the browser follows the redirect with a GET, which finally includes the
+ * refresh token cookie.  This handler then makes a server-side POST to
+ * FastAPI's ``/auth/refresh`` endpoint (invisible to the browser) and
+ * redirects the user back to their original destination with fresh cookies.
+ *
+ * This is a navigation endpoint, not a REST mutation endpoint — the GET
+ * semantics are intentional and correct for this use-case.
+ */
 export async function GET(request: NextRequest) {
-  const returnTo = resolveReturnTo(request);
+  const returnTo = normalizeReturnTo(request.nextUrl.searchParams.get('returnTo'));
   const cookieHeader = buildRequestCookieHeader(request);
 
   if (!cookieHeader.includes(`${REFRESH_TOKEN_COOKIE_NAME}=`)) {
-    const target = isProtectedRoute(returnTo) ? buildLoginRedirect(returnTo) : getPostAuthRedirect(returnTo);
+    // No refresh token available — redirect to login so the user can re-authenticate.
+    const target = isProtectedRoute(returnTo)
+      ? buildLoginRedirect(returnTo)
+      : getPostAuthRedirect(returnTo);
     return clearAuthCookies(NextResponse.redirect(new URL(target, request.url)));
   }
 
+  // Server-side POST to FastAPI — never visible to the browser.
   const response = await fetch(`${getServerAPIUrl()}auth/refresh`, {
     method: 'POST',
     headers: cookieHeader ? { Cookie: cookieHeader } : undefined,
@@ -34,15 +44,17 @@ export async function GET(request: NextRequest) {
   });
 
   if (!response.ok) {
-    const target = isProtectedRoute(returnTo) ? buildLoginRedirect(returnTo) : getPostAuthRedirect(returnTo);
+    // Refresh rejected (revoked session, expired hard cap, etc.) — send to login.
+    const target = isProtectedRoute(returnTo)
+      ? buildLoginRedirect(returnTo)
+      : getPostAuthRedirect(returnTo);
     return clearAuthCookies(NextResponse.redirect(new URL(target, request.url)));
   }
 
-  const redirectResponse = NextResponse.redirect(redirectTarget(request, returnTo));
+  // Apply the new access + refresh cookies to the redirect response so the
+  // browser receives them alongside the navigation back to the original page.
+  const redirectTarget = new URL(getPostAuthRedirect(returnTo), request.url);
+  const redirectResponse = NextResponse.redirect(redirectTarget);
   applyResponseCookiesToNextResponse(response.headers, redirectResponse);
   return redirectResponse;
-}
-
-export async function POST(request: NextRequest) {
-  return GET(request);
 }

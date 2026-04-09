@@ -3,81 +3,70 @@
 /**
  * Centralized Permission Provider
  *
- * Single source of truth for client-side permission checks.
- * Reads permissions from the platform session - no separate API fetch.
- * Does simple Set.has() lookups - the backend expands wildcards and
- * scope-broadening before sending permissions to the frontend.
+ * Delegates to SessionContext — ``can()`` is now a first-class member of
+ * SessionContextValue so permissions live in a single context, eliminating
+ * the need for a separate provider or context lookup.
+ *
+ * This component is kept for backward-compatibility: existing code that
+ * renders ``<PermissionProvider>`` continues to work unchanged, and
+ * ``usePermissions()`` still provides the same ``can`` / ``loading`` API.
  */
 
 import type { Action, Resource, Scope } from '@/types/permissions';
-import { useAuth } from '@/hooks/useAuth';
-import { createContext, useContext, useMemo } from 'react';
-import { perm } from '@/types/permissions';
 import type { ReactNode } from 'react';
+import { createContext, useContext, useMemo } from 'react';
+import { useAuth } from '@/hooks/useAuth';
 
-// ============================================================================
-// Types
-// ============================================================================
+// ── Types ─────────────────────────────────────────────────────────────────────
 
-// Role assignment shape lives in the shared `types/permissions` when needed.
-// Keep the context value minimal - only what consumers actually use.
 interface PermissionContextValue {
-  /** Check if user has a specific permission: can(action, resource, scope) */
+  /** Check if user has a specific permission: can(resource, action, scope) */
   can: (action: Action, resource: Resource, scope: Scope) => boolean;
-  /** Still loading session */
-  loading: boolean;
+  /** Always false — kept for API compatibility. */
+  loading: false;
 }
 
-// ============================================================================
-// Context
-// ============================================================================
+// ── Context ───────────────────────────────────────────────────────────────────
 
-/**
- * Permission patterns:
- *
- * 1. RBAC `can()` checks - for feature/section gating (frontend UI & route guards).
- * 2. Backend `can_*` booleans on API objects - for row-level ownership/assignment checks.
- */
 const PermissionContext = createContext<PermissionContextValue | null>(null);
 
-// ============================================================================
-// Provider Component
-// ============================================================================
+// ── Provider ──────────────────────────────────────────────────────────────────
 
+/**
+ * PermissionProvider is now a thin delegation layer over SessionContext.
+ * It no longer manages its own permissions state — all permission data is
+ * sourced from the access-token claims embedded in SessionProvider.
+ *
+ * Note: the argument order of the ``can`` callback intentionally matches the
+ * legacy API (action, resource, scope) to avoid breaking existing callers,
+ * while SessionProvider exposes ``can(resource, action, scope)`` per the plan.
+ */
 export function PermissionProvider({ children }: { children: ReactNode }) {
-  const { isAuthenticated, session } = useAuth();
+  const { can: sessionCan } = useAuth();
 
-  const permissions = useMemo(() => new Set<string>(session?.permissions), [session?.permissions]);
+  // Adapt the argument order: legacy API is (action, resource, scope),
+  // SessionContext.can is (resource, action, scope).
+  const can = useMemo(
+    () =>
+      (action: Action, resource: Resource, scope: Scope): boolean =>
+        sessionCan(resource, action, scope),
+    [sessionCan],
+  );
 
-  const can = useMemo(() => {
-    return (action: Action, resource: Resource, scope: Scope): boolean => {
-      if (!isAuthenticated) return false;
-      return permissions.has(perm(resource, action, scope));
-    };
-  }, [isAuthenticated, permissions]);
-
-  const value: PermissionContextValue = useMemo(
-    () => ({
-      can,
-      loading: false,
-    }),
+  const value = useMemo<PermissionContextValue>(
+    () => ({ can, loading: false }),
     [can],
   );
 
   return <PermissionContext.Provider value={value}>{children}</PermissionContext.Provider>;
 }
 
-// ============================================================================
-// Hook
-// ============================================================================
+// ── Hook ──────────────────────────────────────────────────────────────────────
 
 /**
- * Use permissions from the centralized provider.
- *
  * @example
  * ```tsx
  * const { can } = usePermissions();
- *
  * if (can(Actions.CREATE, Resources.COURSE, Scopes.PLATFORM)) {
  *   // Show create button
  * }
@@ -85,10 +74,8 @@ export function PermissionProvider({ children }: { children: ReactNode }) {
  */
 export function usePermissions(): PermissionContextValue {
   const context = useContext(PermissionContext);
-
   if (!context) {
     throw new Error('usePermissions must be used within a PermissionProvider');
   }
-
   return context;
 }

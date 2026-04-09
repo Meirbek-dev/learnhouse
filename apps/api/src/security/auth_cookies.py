@@ -17,7 +17,10 @@ def set_access_cookie(response: Response, value: str) -> None:
     kwargs: dict[str, object] = {
         "httponly": True,
         "secure": bool(is_ssl),
-        "samesite": "strict",
+        # "lax" allows the cookie to be sent on top-level cross-site navigations
+        # (e.g. OAuth callback redirects, magic-link redirects) while still
+        # blocking cross-site POST/PUT/DELETE requests (CSRF protection).
+        "samesite": "lax",
         "max_age": ACCESS_COOKIE_TTL_SECONDS,
         "path": "/",
     }

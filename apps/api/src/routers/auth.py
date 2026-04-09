@@ -133,20 +133,85 @@ def _user_agent(request: Request) -> str:
     return request.headers.get("user-agent", "unknown")
 
 
-def _get_user_role_slugs(db_session: Session, user_id: int) -> list[str]:
-    """Load role slugs for a user to embed in the JWT."""
+def _get_user_token_data(
+    db_session: Session, user_id: int
+) -> tuple[list[str], list[str], list[dict]]:
+    """Compute (role_slugs, expanded_permissions, role_objects) for JWT embedding.
+
+    Runs one DB query via PermissionChecker.  The in-instance cache in
+    PermissionChecker deduplicates within a single request.
+    """
     from src.security.rbac import PermissionChecker
 
     checker = PermissionChecker(db_session)
-    return [r["slug"] for r in checker.get_user_roles(user_id)]
+    roles_data = checker.get_user_roles(user_id)
+    role_slugs = [r["slug"] for r in roles_data]
+    expanded_perms = list(checker.get_expanded_permissions(user_id))
+    role_objects = [
+        {
+            "id": r["id"],
+            "slug": r["slug"],
+            "name": r["name"],
+            "description": r.get("description"),
+            "is_system": r.get("is_system", False),
+            "priority": r.get("priority", 0),
+            # Not meaningful in JWT context — included to satisfy RoleRead schema shape.
+            "permissions_count": 0,
+            "users_count": 0,
+            # Serialize datetimes to ISO strings; always emit a non-null string.
+            "created_at": (
+                r["created_at"].isoformat()
+                if r.get("created_at") and hasattr(r["created_at"], "isoformat")
+                else (r.get("created_at") or "")
+            ),
+            "updated_at": (
+                r["updated_at"].isoformat()
+                if r.get("updated_at") and hasattr(r["updated_at"], "isoformat")
+                else (r.get("updated_at") or "")
+            ),
+        }
+        for r in roles_data
+    ]
+    return role_slugs, expanded_perms, role_objects
 
 
-def _make_access_token(session: SessionData, roles: list[str]) -> str:
-    """Create a signed access token embedding the user's current role slugs."""
+def _build_user_claims(user: User) -> dict:
+    """Build the ``u`` claim dict for JWT embedding.
+
+    Contains only stable display fields — no sensitive data.  The frontend
+    renders the UI from these claims without making a backend call.
+    """
+    return {
+        "id": user.id,
+        "user_uuid": str(user.user_uuid),
+        "username": user.username,
+        "email": str(user.email),
+        "first_name": user.first_name,
+        "last_name": user.last_name,
+        "middle_name": user.middle_name or "",
+        "avatar_image": user.avatar_image or "",
+        "bio": user.bio or "",
+        "details": user.details or {},
+        "profile": user.profile or {},
+        "theme": user.theme or "default",
+    }
+
+
+def _issue_access_token(
+    session_data: SessionData,
+    role_slugs: list[str],
+    expanded_perms: list[str],
+    user: User,
+    role_objects: list[dict],
+) -> str:
+    """Create a signed access token embedding all claims needed by the frontend."""
     return create_access_token(
-        user_uuid=session.user_uuid,
-        session_id=session.session_id,
-        roles=roles,
+        user_uuid=session_data.user_uuid,
+        session_id=session_data.session_id,
+        roles=role_slugs,
+        permissions=expanded_perms,
+        user_claims=_build_user_claims(user),
+        role_data=role_objects,
     )
 
 
@@ -203,8 +268,6 @@ async def login(
     background_tasks: BackgroundTasks,
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
-    # CSRF protection is provided by SameSite=strict cookies (set in auth_cookies.py).
-    # An Origin header check would be redundant and fragile for non-browser clients.
     ip = _client_ip(request)
     ua = _user_agent(request)
 
@@ -252,16 +315,16 @@ async def login(
 
     await clear_login_failures(body.email)
 
-    # Load roles before creating the session so they can be embedded in the JWT
-    role_slugs = _get_user_role_slugs(db_session, user.id)
+    role_slugs, expanded_perms, role_objects = _get_user_token_data(db_session, user.id)
 
     session_data, refresh_token = await create_auth_session(
-        db_session,
         user=user,
         ip_address=ip,
         user_agent=ua,
     )
-    access_token = _make_access_token(session_data, role_slugs)
+    access_token = _issue_access_token(
+        session_data, role_slugs, expanded_perms, user, role_objects
+    )
     set_access_cookie(response, access_token)
     set_refresh_cookie(response, refresh_token)
 
@@ -311,7 +374,7 @@ async def refresh(
         if inspection.status == "reused":
             if inspection.token_family_id and inspection.user_id is not None:
                 await revoke_token_family(
-                    db_session, inspection.token_family_id, inspection.user_id
+                    inspection.token_family_id, inspection.user_id
                 )
             enqueue_audit_event(
                 background_tasks,
@@ -333,7 +396,7 @@ async def refresh(
     user = db_session.exec(select(User).where(User.id == old_session.user_id)).first()
     if user is None:
         await revoke_token_family(
-            db_session, old_session.token_family_id, old_session.user_id
+            old_session.token_family_id, old_session.user_id
         )
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -342,8 +405,6 @@ async def refresh(
         )
 
     # Blocklist old access token JTI before issuing a new one.
-    # We use unverified decode here because the old AT may be expired; see the
-    # docstring on decode_token_unverified() for the security rationale.
     old_access_token = request.cookies.get(ACCESS_COOKIE_KEY)
     if old_access_token:
         old_payload = decode_token_unverified(old_access_token)
@@ -353,17 +414,18 @@ async def refresh(
             remaining = max(0, int(old_exp) - int(time.time()))
             await blocklist_jti(old_jti, remaining)
 
-    # Reload roles to keep embedded claims fresh on every rotation
-    role_slugs = _get_user_role_slugs(db_session, user.id)
+    # Reload all role/permission data so every refresh embeds fresh claims
+    role_slugs, expanded_perms, role_objects = _get_user_token_data(db_session, user.id)
 
     new_session, new_refresh_token = await rotate_session(
-        db_session,
         old_session=old_session,
         user=user,
         ip_address=_client_ip(request),
         user_agent=_user_agent(request),
     )
-    new_access_token = _make_access_token(new_session, role_slugs)
+    new_access_token = _issue_access_token(
+        new_session, role_slugs, expanded_perms, user, role_objects
+    )
     set_access_cookie(response, new_access_token)
     set_refresh_cookie(response, new_refresh_token)
 
@@ -389,14 +451,9 @@ async def logout(
     ],
     db_session: Annotated[Session, Depends(get_db_session)],
 ) -> LogoutResponse:
-    # Only blocklist / revoke when the token was fully verified.
-    # If the access token is expired the JTI is already safe (expired tokens
-    # are rejected during verification), so clearing the cookies is sufficient.
     resolved_token = get_access_token_from_request(request, token)
 
     if resolved_token and isinstance(current_user, PublicUser):
-        # Token has already been verified by get_current_user_optional —
-        # decode again (cheap, cached public key) to extract JTI and session_id.
         try:
             token_data: TokenData = decode_access_token(resolved_token)
             jti = token_data.jti
@@ -410,9 +467,7 @@ async def logout(
                     db_session, token_data.session_id
                 )
                 if user_id_hint:
-                    await revoke_session(
-                        db_session, token_data.session_id, user_id_hint
-                    )
+                    await revoke_session(token_data.session_id, user_id_hint)
         except Exception:
             # Never block logout due to token parsing errors
             pass
@@ -436,7 +491,6 @@ async def logout_all(
     db_session: Annotated[Session, Depends(get_db_session)],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
 ) -> LogoutResponse:
-    # Blocklist the current access token using the verified decode path
     resolved_token = get_access_token_from_request(request, None)
     if resolved_token:
         try:
@@ -452,7 +506,7 @@ async def logout_all(
         select(User).where(User.user_uuid == current_user.user_uuid)
     ).first()
     if user:
-        revoked = await revoke_all_user_sessions(db_session, user.id)
+        revoked = await revoke_all_user_sessions(user.id)
         enqueue_audit_event(
             background_tasks,
             event_type="logout_all",
@@ -601,14 +655,15 @@ async def google_callback(
     except HTTPException:
         return RedirectResponse(f"{frontend_callback}?error=user_error")
 
-    role_slugs = _get_user_role_slugs(db_session, user.id)
+    role_slugs, expanded_perms, role_objects = _get_user_token_data(db_session, user.id)
     session_data, refresh_token = await create_auth_session(
-        db_session,
         user=user,
         ip_address=ip,
         user_agent=_user_agent(request),
     )
-    access_token = _make_access_token(session_data, role_slugs)
+    access_token = _issue_access_token(
+        session_data, role_slugs, expanded_perms, user, role_objects
+    )
 
     redirect_response = RedirectResponse(frontend_callback)
     set_access_cookie(redirect_response, access_token)

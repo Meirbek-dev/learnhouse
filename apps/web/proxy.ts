@@ -1,9 +1,36 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
+import { createRemoteJWKSet, errors as joseErrors, jwtVerify } from 'jose';
 import { AUTH_REFRESH_BRIDGE_PATH, ACCESS_TOKEN_COOKIE_NAME } from './lib/auth/constants';
 import { isAuthRoute } from './lib/auth/routes';
 import { isAccessTokenExpired } from './lib/auth/cookie-bridge';
 import { generateUUID } from './lib/utils';
+
+// ── JWKS (in-process cache via jose, re-fetched only on key rotation) ─────────
+
+/**
+ * The internal API URL is used for JWKS lookup — only available server-side.
+ * Falls back to the public API URL (NEXT_PUBLIC_API_URL) in environments that
+ * do not set INTERNAL_API_URL.
+ *
+ * If neither env var is set, JWKS_URL is null and the proxy falls back to
+ * expiry-only checking (no signature verification).
+ */
+const _rawApiUrl: string =
+  process.env.INTERNAL_API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? '';
+
+const JWKS_URL: URL | null = _rawApiUrl
+  ? new URL('auth/.well-known/jwks.json', _rawApiUrl.endsWith('/') ? _rawApiUrl : `${_rawApiUrl}/`)
+  : null;
+
+/**
+ * JWKS function created once at module load.  jose caches the fetched key in
+ * memory and re-fetches only when it encounters an unknown KID.  Subsequent
+ * requests have zero network overhead.
+ */
+const JWKS = JWKS_URL ? createRemoteJWKSet(JWKS_URL) : null;
+
+// ── Route tables ──────────────────────────────────────────────────────────────
 
 const AUTH_REWRITE: Record<string, string> = {
   '/forgot': '/auth/forgot',
@@ -30,19 +57,22 @@ const PROTECTED_PREFIXES = [
   '/certificates',
 ] as const;
 
-function buildRequestHeaders(req: NextRequest, requestId: string) {
-  const headers = new Headers(req.headers);
+// ── Helpers ───────────────────────────────────────────────────────────────────
 
-  headers.set('x-forwarded-host', req.headers.get('host') ?? req.nextUrl.host);
-  headers.set('x-forwarded-proto', req.nextUrl.protocol.replace(':', ''));
-  headers.set('x-request-id', requestId);
-  headers.set('x-pathname', req.nextUrl.pathname);
+function buildRequestHeaders(req: NextRequest, requestId: string) {
+  const hdrs = new Headers(req.headers);
+
+  hdrs.set('x-forwarded-host', req.headers.get('host') ?? req.nextUrl.host);
+  hdrs.set('x-forwarded-proto', req.nextUrl.protocol.replace(':', ''));
+  hdrs.set('x-request-id', requestId);
+  // x-pathname is read by requireSession() to build the returnTo redirect URL.
+  hdrs.set('x-pathname', req.nextUrl.pathname);
 
   if (req.nextUrl.port) {
-    headers.set('x-forwarded-port', req.nextUrl.port);
+    hdrs.set('x-forwarded-port', req.nextUrl.port);
   }
 
-  return headers;
+  return hdrs;
 }
 
 function withRequestId(response: NextResponse, requestId: string) {
@@ -53,9 +83,7 @@ function withRequestId(response: NextResponse, requestId: string) {
 function nextWithHeaders(req: NextRequest, requestId: string) {
   return withRequestId(
     NextResponse.next({
-      request: {
-        headers: buildRequestHeaders(req, requestId),
-      },
+      request: { headers: buildRequestHeaders(req, requestId) },
     }),
     requestId,
   );
@@ -64,13 +92,54 @@ function nextWithHeaders(req: NextRequest, requestId: string) {
 function rewriteWithHeaders(req: NextRequest, requestId: string, pathname: string) {
   return withRequestId(
     NextResponse.rewrite(new URL(pathname, req.url), {
-      request: {
-        headers: buildRequestHeaders(req, requestId),
-      },
+      request: { headers: buildRequestHeaders(req, requestId) },
     }),
     requestId,
   );
 }
+
+function redirectToRefresh(
+  req: NextRequest,
+  requestId: string,
+  pathname: string,
+  search: string,
+) {
+  const refreshUrl = new URL(AUTH_REFRESH_BRIDGE_PATH, req.url);
+  refreshUrl.searchParams.set('returnTo', pathname + search);
+  return withRequestId(NextResponse.redirect(refreshUrl), requestId);
+}
+
+/**
+ * Verify the access token signature using the backend's JWKS.
+ *
+ * Returns true  → token is cryptographically valid (not necessarily fresh).
+ * Returns false → token is invalid, expired, or JWKS is unavailable.
+ *
+ * The proxy performs signature verification as a lightweight first gate.
+ * Full session validation (JTI blocklist, Redis session check) still happens
+ * server-side in FastAPI on every authenticated API call.
+ */
+async function verifyTokenSignature(token: string): Promise<boolean> {
+  if (!JWKS) {
+    // JWKS not configured — fall back to expiry-only check
+    return !isAccessTokenExpired(token);
+  }
+  try {
+    await jwtVerify(token, JWKS, {
+      issuer: 'ashyq-bilim-auth',
+      audience: 'ashyq-bilim-api',
+      algorithms: ['EdDSA'],
+    });
+    return true;
+  } catch (err) {
+    // JWTExpired is the normal case for a token that needs refresh
+    if (err instanceof joseErrors.JWTExpired) return false;
+    // Any other error (invalid signature, malformed) → reject
+    return false;
+  }
+}
+
+// ── Proxy ─────────────────────────────────────────────────────────────────────
 
 export const config = {
   matcher: [
@@ -105,17 +174,25 @@ export default async function proxy(req: NextRequest) {
 
   const isProtected = PROTECTED_PREFIXES.some((prefix) => pathname.startsWith(prefix));
   if (isProtected) {
-    if (!accessToken || isAccessTokenExpired(accessToken)) {
-      const refreshUrl = new URL(AUTH_REFRESH_BRIDGE_PATH, req.url);
-      refreshUrl.searchParams.set('returnTo', pathname + search);
-      return withRequestId(NextResponse.redirect(refreshUrl), requestId);
+    // No token at all → go to refresh bridge
+    if (!accessToken) {
+      return redirectToRefresh(req, requestId, pathname, search);
+    }
+    // Quick expiry check (no network) before full signature verification
+    if (isAccessTokenExpired(accessToken)) {
+      return redirectToRefresh(req, requestId, pathname, search);
+    }
+    // Full signature verification via JWKS
+    const valid = await verifyTokenSignature(accessToken);
+    if (!valid) {
+      return redirectToRefresh(req, requestId, pathname, search);
     }
   }
 
+  // For non-protected routes: if a token exists but is expired, proactively
+  // refresh so the user gets a new token before they hit a protected page.
   if (accessToken && !isAuthRoute(pathname) && isAccessTokenExpired(accessToken)) {
-    const refreshUrl = new URL(AUTH_REFRESH_BRIDGE_PATH, req.url);
-    refreshUrl.searchParams.set('returnTo', pathname + search);
-    return withRequestId(NextResponse.redirect(refreshUrl), requestId);
+    return redirectToRefresh(req, requestId, pathname, search);
   }
 
   // Dynamic Pages Editor
@@ -133,7 +210,6 @@ export default async function proxy(req: NextRequest) {
     const { searchParams } = req.nextUrl;
     const queryString = searchParams.toString();
     const redirectUrl = new URL('/', req.nextUrl.origin);
-
     if (queryString) {
       redirectUrl.search = queryString;
     }
