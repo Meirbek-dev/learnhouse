@@ -1,16 +1,17 @@
 'use client';
 
-import { useForm, useStore } from '@tanstack/react-form';
 import { SiFacebook, SiInstagram, SiTiktok, SiX, SiYoutube } from '@icons-pack/react-simple-icons';
 import { usePlatform } from '@/components/Contexts/PlatformContext';
 import { updatePlatform } from '@/services/settings/platform';
 import { revalidateTags } from '@services/utils/ts/requests';
 import { Field, FieldLabel } from '@components/ui/field';
+import { Controller, useForm } from 'react-hook-form';
 import { getAPIUrl } from '@services/config/config';
 import { Plus, X as XIcon } from 'lucide-react';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
+import { useTransition } from 'react';
 import { toast } from 'sonner';
 import { mutate } from 'swr';
 
@@ -47,14 +48,12 @@ export default function EditSocials() {
     links: platform?.links || {},
   };
 
-  const form = useForm({
+  const form = useForm<SocialMediaData>({
     defaultValues,
-    onSubmit: async ({ value }) => {
-      await updatePlatformSettings(value);
-    },
   });
 
-  const isSubmitting = useStore(form.store, (state) => state.isSubmitting);
+  const links = form.watch('links');
+  const [isPending, startTransition] = useTransition();
 
   const updatePlatformSettings = async (values: SocialMediaData) => {
     const loadingToast = toast.loading(t('updatingPlatform'));
@@ -69,30 +68,30 @@ export default function EditSocials() {
   };
 
   const handleLinkChange = (oldKey: string, newKey: string, value: string) => {
-    const currentLinks = form.state.values.links;
+    const currentLinks = form.getValues('links');
     const newLinks = { ...currentLinks };
     if (oldKey !== newKey) {
       delete newLinks[oldKey];
     }
     newLinks[newKey] = value;
-    form.setFieldValue('links', newLinks);
+    form.setValue('links', newLinks);
   };
 
   const removeLink = (key: string) => {
-    const currentLinks = form.state.values.links;
+    const currentLinks = form.getValues('links');
     const newLinks = { ...currentLinks };
     delete newLinks[key];
-    form.setFieldValue('links', newLinks);
+    form.setValue('links', newLinks);
   };
 
   const addNewLink = () => {
-    const currentLinks = form.state.values.links;
+    const currentLinks = form.getValues('links');
     const newLinks = { ...currentLinks };
     newLinks[`${t('Form.newCustomLinkDefaultLabel')} ${Object.keys(newLinks).length + 1}`] = '';
-    form.setFieldValue('links', newLinks);
+    form.setValue('links', newLinks);
   };
 
-  const linksEntries = Object.entries((form.state.values.links || {}) as Record<string, string>);
+  const linksEntries = Object.entries(links || {});
 
   const socialFields = [
     {
@@ -145,11 +144,11 @@ export default function EditSocials() {
   return (
     <div className="soft-shadow border-border bg-card text-card-foreground mx-0 rounded-xl border shadow-sm sm:mx-10">
       <form
-        onSubmit={(event) => {
-          event.preventDefault();
-          event.stopPropagation();
-          void form.handleSubmit();
-        }}
+        onSubmit={form.handleSubmit((values) =>
+          startTransition(() => {
+            void updatePlatformSettings(values);
+          }),
+        )}
       >
         <div className="flex flex-col gap-0">
           <div className="bg-muted mx-3 my-3 flex flex-col gap-1 rounded-md px-5 py-3">
@@ -164,10 +163,11 @@ export default function EditSocials() {
                 <div className="soft-shadow border-border bg-muted/50 mt-2 space-y-3 rounded-lg border p-4">
                   <div className="grid gap-3">
                     {socialFields.map((field) => (
-                      <form.Field
+                      <Controller
                         key={field.name}
+                        control={form.control}
                         name={field.name}
-                        children={(socialField) => (
+                        render={({ field: socialField }) => (
                           <Field>
                             <div className="flex items-center gap-3">
                               <div className={`flex h-8 w-8 items-center justify-center rounded-md ${field.bgColor}`}>
@@ -176,9 +176,7 @@ export default function EditSocials() {
                               <Input
                                 placeholder={field.placeholder}
                                 className="bg-background h-9"
-                                value={String(socialField.state.value ?? '')}
-                                onBlur={socialField.handleBlur}
-                                onChange={(event) => socialField.handleChange(event.target.value)}
+                                {...socialField}
                               />
                             </div>
                           </Field>
@@ -255,9 +253,9 @@ export default function EditSocials() {
           <div className="mx-5 mt-3 mb-5 flex flex-row-reverse">
             <Button
               type="submit"
-              disabled={isSubmitting}
+              disabled={form.formState.isSubmitting || isPending}
             >
-              {isSubmitting ? t('Form.savingButton') : t('Form.saveButton')}
+              {form.formState.isSubmitting || isPending ? t('Form.savingButton') : t('Form.saveButton')}
             </Button>
           </div>
         </div>

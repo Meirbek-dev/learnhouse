@@ -1,8 +1,10 @@
 'use client';
 
-import { useForm, useStore } from '@tanstack/react-form';
+import { valibotResolver } from '@hookform/resolvers/valibot';
+import { useFieldArray, useForm } from 'react-hook-form';
+import type { SubmitHandler } from 'react-hook-form';
 import { Grip, Plus, Trash2 } from 'lucide-react';
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import * as v from 'valibot';
 
@@ -11,6 +13,7 @@ import { Field, FieldContent, FieldDescription, FieldError, FieldLabel } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import ComboboxMultiple from '@/components/ui/custom/multiple-combobox';
+import { Controller, FormProvider } from 'react-hook-form';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
@@ -58,7 +61,7 @@ const codeChallengeFormSchema = v.object({
 });
 
 // Create a localized schema factory to supply messages from next-intl
-export function createCodeChallengeFormSchema(t: (key: string, params?: Record<string, string | number | Date>) => string) {
+export function createCodeChallengeFormSchema(t: (key: string, params?: any) => string) {
   const tc = v.object({
     id: v.string(),
     input: v.string(),
@@ -143,55 +146,57 @@ export function CodeChallengeForm({ activityUuid, initialData, onSubmit, onCance
   const t = useTranslations('Activities.CodeChallenges');
 
   const schema = useMemo(() => createCodeChallengeFormSchema(t), [t]);
-  const defaultValues: CodeChallengeFormInput = {
-    title: '',
-    description: '',
-    difficulty: 'medium',
-    time_limit_ms: 2000,
-    memory_limit_kb: 262_144,
-    grading_strategy: 'partial',
-    allowed_languages: [71],
-    test_cases: [
-      {
-        id: generateUUID(),
-        input: '',
-        expected_output: '',
-        description: '',
-        is_visible: true,
-        points: 10,
-      },
-    ],
-    enable_hints: false,
-    hints: [],
-    starter_code: {},
-    solution_code: {},
-    ...initialData,
-  };
 
-  const form = useForm({
-    defaultValues,
-    validators: {
-      onChange: schema,
-      onSubmit: schema,
-    },
-    onSubmit: async ({ value }) => {
-      try {
-        const parsed: CodeChallengeFormData = v.parse(schema, value);
-        await onSubmit(parsed);
-        toast.success(t('challengeSaved'));
-      } catch (error) {
-        toast.error(t('saveFailed'));
-        throw error;
-      }
+  const form = useForm<CodeChallengeFormInput>({
+    resolver: valibotResolver(schema),
+    defaultValues: {
+      title: '',
+      description: '',
+      difficulty: 'medium',
+      time_limit_ms: 2000,
+      memory_limit_kb: 262_144,
+      grading_strategy: 'partial',
+      allowed_languages: [71], // Python by default
+      test_cases: [
+        {
+          id: generateUUID(),
+          input: '',
+          expected_output: '',
+          description: '',
+          is_visible: true,
+          points: 10,
+        },
+      ],
+      enable_hints: false,
+      hints: [],
+      starter_code: {},
+      solution_code: {},
+      ...initialData,
     },
   });
 
-  const values = useStore(form.store, (state) => state.values);
-  const isSubmitting = useStore(form.store, (state) => state.isSubmitting);
+  const {
+    fields: testCaseFields,
+    append: appendTestCase,
+    remove: removeTestCase,
+    move: moveTestCase,
+  } = useFieldArray({
+    control: form.control,
+    name: 'test_cases',
+  });
 
-  const watchAllowedLanguages = values.allowed_languages;
-  const watchEnableHints = values.enable_hints;
-  const watchGradingStrategy = values.grading_strategy;
+  const {
+    fields: hintFields,
+    append: appendHint,
+    remove: removeHint,
+  } = useFieldArray({
+    control: form.control,
+    name: 'hints',
+  });
+
+  const watchAllowedLanguages = form.watch('allowed_languages');
+  const watchEnableHints = form.watch('enable_hints');
+  const watchGradingStrategy = form.watch('grading_strategy');
 
   // Use item arrays for Select components so we follow the shared pattern and keep labels localized.
   const difficultyItems = [
@@ -230,640 +235,638 @@ export function CodeChallengeForm({ activityUuid, initialData, onSubmit, onCance
   // Compute a safe default language id for the language Tabs (avoid undefined access)
   const defaultLanguageId = watchAllowedLanguages?.[0] ?? JUDGE0_LANGUAGES?.[0]?.id ?? 71;
 
+  const handleFormSubmit: SubmitHandler<CodeChallengeFormInput> = async (data) => {
+    try {
+      // Parse the raw input into the canonical, fully-populated output type
+      const parsed: CodeChallengeFormData = v.parse(schema, data);
+      await onSubmit(parsed);
+      toast.success(t('challengeSaved'));
+    } catch (error) {
+      // If something unexpected fails, show an error.
+      toast.error(t('saveFailed'));
+      throw error;
+    }
+  };
+
+  const addTestCase = useCallback(() => {
+    appendTestCase({
+      id: generateUUID(),
+      input: '',
+      expected_output: '',
+      description: '',
+      is_visible: true,
+      points: 10,
+    });
+  }, [appendTestCase]);
+
+  const addHint = useCallback(() => {
+    appendHint({
+      text: '',
+      penalty_percent: 10,
+    });
+  }, [appendHint]);
+
   // Popular languages for quick selection
   const popularLanguageIds = [71, 62, 63, 54, 51, 60, 68, 73, 74, 78];
 
   return (
-    <form
-      onSubmit={(event) => {
-        event.preventDefault();
-        event.stopPropagation();
-        void form.handleSubmit();
-      }}
-      className="space-y-6"
-    >
-      <Tabs
-        defaultValue="basic"
-        className="w-full"
+    <FormProvider {...form}>
+      <form
+        onSubmit={form.handleSubmit(handleFormSubmit)}
+        className="space-y-6"
       >
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="basic">{t('form.basicInfo')}</TabsTrigger>
-          <TabsTrigger value="testcases">{t('form.testCases')}</TabsTrigger>
-          <TabsTrigger value="languages">{t('form.languages')}</TabsTrigger>
-          <TabsTrigger value="advanced">{t('form.advanced')}</TabsTrigger>
-        </TabsList>
-
-        {/* Basic Info Tab */}
-        <TabsContent
-          value="basic"
-          className="space-y-4 pt-4"
+        <Tabs
+          defaultValue="basic"
+          className="w-full"
         >
-          <form.Field name="title">
-            {(field) => (
-              <Field>
-                <FieldLabel>{t('form.title')}</FieldLabel>
-                <FieldContent>
-                  <Input
-                    placeholder={t('form.titlePlaceholder')}
-                    name={field.name}
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(event) => field.handleChange(event.target.value)}
-                  />
-                </FieldContent>
-                <FieldError errors={field.state.meta.errors} />
-              </Field>
-            )}
-          </form.Field>
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="basic">{t('form.basicInfo')}</TabsTrigger>
+            <TabsTrigger value="testcases">{t('form.testCases')}</TabsTrigger>
+            <TabsTrigger value="languages">{t('form.languages')}</TabsTrigger>
+            <TabsTrigger value="advanced">{t('form.advanced')}</TabsTrigger>
+          </TabsList>
 
-          <form.Field name="description">
-            {(field) => (
-              <Field>
-                <FieldLabel>{t('form.description')}</FieldLabel>
-                <FieldContent>
-                  <Textarea
-                    placeholder={t('form.descriptionPlaceholder')}
-                    className="min-h-32"
-                    name={field.name}
-                    value={field.state.value ?? ''}
-                    onBlur={field.handleBlur}
-                    onChange={(event) => field.handleChange(event.target.value)}
-                  />
-                </FieldContent>
-                <FieldDescription>{t('form.descriptionHint')}</FieldDescription>
-                <FieldError errors={field.state.meta.errors} />
-              </Field>
-            )}
-          </form.Field>
-
-          <div className="grid gap-4 md:grid-cols-2">
-            <form.Field name="difficulty">
-              {(field) => (
-                <Field>
-                  <FieldLabel>{t('form.difficulty')}</FieldLabel>
-                  <Select
-                    items={difficultyItems}
-                    onValueChange={(value) => {
-                      if (value) {
-                        field.handleChange(value);
-                      }
-                    }}
-                    value={field.state.value}
-                  >
-                    <FieldContent>
-                      <SelectTrigger>
-                        <SelectValue placeholder={t('form.selectDifficulty')} />
-                      </SelectTrigger>
-                    </FieldContent>
-                    <SelectContent>
-                      <SelectGroup>
-                        {difficultyItems.map((item) => (
-                          <SelectItem
-                            key={item.value}
-                            value={item.value}
-                          >
-                            {item.label}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                  <FieldError errors={field.state.meta.errors} />
-                </Field>
-              )}
-            </form.Field>
-
-            <form.Field name="grading_strategy">
-              {(field) => (
-                <Field>
-                  <FieldLabel>{t('form.gradingStrategy')}</FieldLabel>
-                  <Select
-                    items={gradingStrategyItems}
-                    onValueChange={(value) => {
-                      if (value) {
-                        field.handleChange(value);
-                      }
-                    }}
-                    value={field.state.value}
-                  >
-                    <FieldContent>
-                      <SelectTrigger>
-                        <SelectValue placeholder={t('form.selectGradingStrategy')} />
-                      </SelectTrigger>
-                    </FieldContent>
-                    <SelectContent>
-                      <SelectGroup>
-                        {gradingStrategyItems.map((item) => (
-                          <SelectItem
-                            key={item.value}
-                            value={item.value}
-                          >
-                            {item.label}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                  <FieldDescription>{t(`gradingStrategyOptions.${field.state.value}Hint`)}</FieldDescription>
-                  <FieldError errors={field.state.meta.errors} />
-                </Field>
-              )}
-            </form.Field>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-2">
-            <form.Field name="time_limit_ms">
-              {(field) => (
-                <Field>
-                  <FieldLabel>{t('form.timeLimit')}</FieldLabel>
-                  <FieldContent>
-                    <Input
-                      name={field.name}
-                      type="number"
-                      min={100}
-                      max={30_000}
-                      value={field.state.value ?? 2000}
-                      onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(Number.parseInt(e.target.value) || 2000)}
-                    />
-                  </FieldContent>
-                  <FieldDescription>{t('form.timeLimitHint')}</FieldDescription>
-                  <FieldError errors={field.state.meta.errors} />
-                </Field>
-              )}
-            </form.Field>
-
-            <form.Field name="memory_limit_kb">
-              {(field) => (
-                <Field>
-                  <FieldLabel>{t('form.memoryLimit')}</FieldLabel>
-                  <FieldContent>
-                    <Input
-                      name={field.name}
-                      type="number"
-                      min={1024}
-                      max={2_097_152}
-                      value={field.state.value ?? 262_144}
-                      onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(Number.parseInt(e.target.value) || 262_144)}
-                    />
-                  </FieldContent>
-                  <FieldDescription>{t('form.memoryLimitHint')}</FieldDescription>
-                  <FieldError errors={field.state.meta.errors} />
-                </Field>
-              )}
-            </form.Field>
-          </div>
-        </TabsContent>
-
-        {/* Test Cases Tab */}
-        <TabsContent
-          value="testcases"
-          className="space-y-4 pt-4"
-        >
-          <form.Field
-            name="test_cases"
-            mode="array"
+          {/* Basic Info Tab */}
+          <TabsContent
+            value="basic"
+            className="space-y-4 pt-4"
           >
-            {(testCasesField) => (
-              <>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-lg font-medium">{t('form.testCases')}</h3>
-                    <p className="text-muted-foreground text-sm">{t('form.testCasesDescription')}</p>
-                  </div>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() =>
-                      testCasesField.pushValue({
-                        id: generateUUID(),
-                        input: '',
-                        expected_output: '',
-                        description: '',
-                        is_visible: true,
-                        points: 10,
-                      })
-                    }
-                  >
-                    <Plus className="mr-2 h-4 w-4" />
-                    {t('form.addTestCase')}
-                  </Button>
-                </div>
+            <Controller
+              control={form.control}
+              name="title"
+              render={({ field, fieldState }) => (
+                <Field>
+                  <FieldLabel>{t('form.title')}</FieldLabel>
+                  <FieldContent>
+                    <Input
+                      placeholder={t('form.titlePlaceholder')}
+                      {...field}
+                    />
+                  </FieldContent>
+                  <FieldError errors={[fieldState.error]} />
+                </Field>
+              )}
+            />
 
-                <div className="space-y-4">
-                  {testCasesField.state.value.map((field, index) => (
-                    <Card key={field.id}>
-                      <CardHeader className="pb-2">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <Grip className="text-muted-foreground h-4 w-4 cursor-move" />
-                            <CardTitle className="text-sm">
-                              {t('testCase')} #{index + 1}
-                            </CardTitle>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <form.Field name={`test_cases[${index}].is_visible`}>
-                              {(field) => (
-                                <Field className="flex items-center gap-2 space-y-0">
-                                  <FieldContent>
-                                    <Switch
-                                      checked={field.state.value ?? false}
-                                      onCheckedChange={field.handleChange}
-                                    />
-                                  </FieldContent>
-                                  <FieldLabel className="text-xs font-normal">{t('form.visible')}</FieldLabel>
-                                </Field>
-                              )}
-                            </form.Field>
-                            {testCasesField.state.value.length > 1 && (
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => testCasesField.removeValue(index)}
-                              >
-                                <Trash2 className="text-destructive h-4 w-4" />
-                              </Button>
-                            )}
-                          </div>
-                        </div>
-                      </CardHeader>
-                      <CardContent className="space-y-4">
-                        <form.Field name={`test_cases[${index}].description`}>
-                          {(field) => (
-                            <Field>
-                              <FieldLabel>{t('form.testDescription')}</FieldLabel>
+            <Controller
+              control={form.control}
+              name="description"
+              render={({ field, fieldState }) => (
+                <Field>
+                  <FieldLabel>{t('form.description')}</FieldLabel>
+                  <FieldContent>
+                    <Textarea
+                      placeholder={t('form.descriptionPlaceholder')}
+                      className="min-h-32"
+                      {...field}
+                    />
+                  </FieldContent>
+                  <FieldDescription>{t('form.descriptionHint')}</FieldDescription>
+                  <FieldError errors={[fieldState.error]} />
+                </Field>
+              )}
+            />
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <Controller
+                control={form.control}
+                name="difficulty"
+                render={({ field, fieldState }) => (
+                  <Field>
+                    <FieldLabel>{t('form.difficulty')}</FieldLabel>
+                    <Select
+                      items={difficultyItems}
+                      onValueChange={field.onChange}
+                      value={field.value}
+                    >
+                      <FieldContent>
+                        <SelectTrigger>
+                          <SelectValue placeholder={t('form.selectDifficulty')} />
+                        </SelectTrigger>
+                      </FieldContent>
+                      <SelectContent>
+                        <SelectGroup>
+                          {difficultyItems.map((item) => (
+                            <SelectItem
+                              key={item.value}
+                              value={item.value}
+                            >
+                              {item.label}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                    <FieldError errors={[fieldState.error]} />
+                  </Field>
+                )}
+              />
+
+              <Controller
+                control={form.control}
+                name="grading_strategy"
+                render={({ field, fieldState }) => (
+                  <Field>
+                    <FieldLabel>{t('form.gradingStrategy')}</FieldLabel>
+                    <Select
+                      items={gradingStrategyItems}
+                      onValueChange={field.onChange}
+                      value={field.value}
+                    >
+                      <FieldContent>
+                        <SelectTrigger>
+                          <SelectValue placeholder={t('form.selectGradingStrategy')} />
+                        </SelectTrigger>
+                      </FieldContent>
+                      <SelectContent>
+                        <SelectGroup>
+                          {gradingStrategyItems.map((item) => (
+                            <SelectItem
+                              key={item.value}
+                              value={item.value}
+                            >
+                              {item.label}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                    <FieldDescription>{t(`gradingStrategyOptions.${field.value}Hint`)}</FieldDescription>
+                    <FieldError errors={[fieldState.error]} />
+                  </Field>
+                )}
+              />
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <Controller
+                control={form.control}
+                name="time_limit_ms"
+                render={({ field, fieldState }) => (
+                  <Field>
+                    <FieldLabel>{t('form.timeLimit')}</FieldLabel>
+                    <FieldContent>
+                      <Input
+                        type="number"
+                        min={100}
+                        max={30_000}
+                        {...field}
+                        onChange={(e) => field.onChange(Number.parseInt(e.target.value) || 2000)}
+                      />
+                    </FieldContent>
+                    <FieldDescription>{t('form.timeLimitHint')}</FieldDescription>
+                    <FieldError errors={[fieldState.error]} />
+                  </Field>
+                )}
+              />
+
+              <Controller
+                control={form.control}
+                name="memory_limit_kb"
+                render={({ field, fieldState }) => (
+                  <Field>
+                    <FieldLabel>{t('form.memoryLimit')}</FieldLabel>
+                    <FieldContent>
+                      <Input
+                        type="number"
+                        min={1024}
+                        max={2_097_152}
+                        {...field}
+                        onChange={(e) => field.onChange(Number.parseInt(e.target.value) || 262_144)}
+                      />
+                    </FieldContent>
+                    <FieldDescription>{t('form.memoryLimitHint')}</FieldDescription>
+                    <FieldError errors={[fieldState.error]} />
+                  </Field>
+                )}
+              />
+            </div>
+          </TabsContent>
+
+          {/* Test Cases Tab */}
+          <TabsContent
+            value="testcases"
+            className="space-y-4 pt-4"
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-medium">{t('form.testCases')}</h3>
+                <p className="text-muted-foreground text-sm">{t('form.testCasesDescription')}</p>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={addTestCase}
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                {t('form.addTestCase')}
+              </Button>
+            </div>
+
+            <div className="space-y-4">
+              {testCaseFields.map((field, index) => (
+                <Card key={field.id}>
+                  <CardHeader className="pb-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Grip className="text-muted-foreground h-4 w-4 cursor-move" />
+                        <CardTitle className="text-sm">
+                          {t('testCase')} #{index + 1}
+                        </CardTitle>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Controller
+                          control={form.control}
+                          name={`test_cases.${index}.is_visible`}
+                          render={({ field }) => (
+                            <Field className="flex items-center gap-2 space-y-0">
                               <FieldContent>
-                                <Input
-                                  name={field.name}
-                                  placeholder={t('form.testDescriptionPlaceholder')}
-                                  value={field.state.value ?? ''}
-                                  onBlur={field.handleBlur}
-                                  onChange={(event) => field.handleChange(event.target.value)}
+                                <Switch
+                                  checked={field.value}
+                                  onCheckedChange={field.onChange}
                                 />
                               </FieldContent>
-                              <FieldError errors={field.state.meta.errors} />
+                              <FieldLabel className="text-xs font-normal">{t('form.visible')}</FieldLabel>
                             </Field>
                           )}
-                        </form.Field>
-
-                        <div className="grid gap-4 md:grid-cols-2">
-                          <form.Field name={`test_cases[${index}].input`}>
-                            {(field) => (
-                              <Field>
-                                <FieldLabel>{t('input')}</FieldLabel>
-                                <FieldContent>
-                                  <Textarea
-                                    name={field.name}
-                                    placeholder={t('form.inputPlaceholder')}
-                                    className="min-h-24 font-mono text-sm"
-                                    value={field.state.value}
-                                    onBlur={field.handleBlur}
-                                    onChange={(event) => field.handleChange(event.target.value)}
-                                  />
-                                </FieldContent>
-                                <FieldError errors={field.state.meta.errors} />
-                              </Field>
-                            )}
-                          </form.Field>
-
-                          <form.Field name={`test_cases[${index}].expected_output`}>
-                            {(field) => (
-                              <Field>
-                                <FieldLabel>{t('expectedOutput')}</FieldLabel>
-                                <FieldContent>
-                                  <Textarea
-                                    name={field.name}
-                                    placeholder={t('form.expectedOutputPlaceholder')}
-                                    className="min-h-24 font-mono text-sm"
-                                    value={field.state.value}
-                                    onBlur={field.handleBlur}
-                                    onChange={(event) => field.handleChange(event.target.value)}
-                                  />
-                                </FieldContent>
-                                <FieldError errors={field.state.meta.errors} />
-                              </Field>
-                            )}
-                          </form.Field>
-                        </div>
-
-                        {watchGradingStrategy === 'weighted' && (
-                          <form.Field name={`test_cases[${index}].points`}>
-                            {(field) => (
-                              <Field className="max-w-32">
-                                <FieldLabel>{t('form.points')}</FieldLabel>
-                                <FieldContent>
-                                  <Input
-                                    name={field.name}
-                                    type="number"
-                                    min={0}
-                                    max={10_000}
-                                    value={field.state.value ?? 0}
-                                    onBlur={field.handleBlur}
-                                    onChange={(e) => field.handleChange(Number.parseInt(e.target.value) || 0)}
-                                  />
-                                </FieldContent>
-                                <FieldError errors={field.state.meta.errors} />
-                              </Field>
-                            )}
-                          </form.Field>
-                        )}
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </>
-            )}
-          </form.Field>
-        </TabsContent>
-
-        {/* Languages Tab */}
-        <TabsContent
-          value="languages"
-          className="space-y-4 pt-4"
-        >
-          <form.Field name="allowed_languages">
-            {(field) => (
-              <Field>
-                <FieldLabel>{t('form.allowedLanguages')}</FieldLabel>
-                <FieldDescription>{t('form.allowedLanguagesHint')}</FieldDescription>
-
-                {/* Quick selection for popular languages */}
-                <div className="mb-4">
-                  <h4 className="mb-2 text-sm font-medium">{t('popularLanguages')}</h4>
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {popularLanguageIds.map((langId) => {
-                      const lang = JUDGE0_LANGUAGES.find((l) => l.id === langId);
-                      if (!lang) return null;
-                      const isSelected = (field.state.value ?? []).includes(langId);
-                      return (
-                        <Badge
-                          key={langId}
-                          variant={isSelected ? 'default' : 'outline'}
-                          className="cursor-pointer"
-                          onClick={() => {
-                            if (isSelected) {
-                              field.handleChange((field.state.value ?? []).filter((id) => id !== langId));
-                            } else {
-                              field.handleChange([...(field.state.value ?? []), langId]);
-                            }
-                          }}
-                        >
-                          {lang.name}
-                        </Badge>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                <Separator />
-
-                <div className="mt-4">
-                  <ComboboxMultiple<{ id: number; name: string }>
-                    options={JUDGE0_LANGUAGES}
-                    value={field.state.value}
-                    onChange={(vals) => field.handleChange(vals as number[])}
-                    getOptionValue={(o) => o.id}
-                    getOptionLabel={(o) => o.name}
-                    placeholder={t('form.selectLanguages')}
-                    searchPlaceholder={t('form.searchLanguages')}
-                    emptyMessage={t('form.noLanguagesFound')}
-                  />
-                  <div className="mt-2 flex gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => {
-                        const allIds = JUDGE0_LANGUAGES.map((l) => l.id);
-                        field.handleChange(allIds);
-                      }}
-                      disabled={(field.state.value ?? []).length >= JUDGE0_LANGUAGES.length}
-                    >
-                      {t('selectAll')}
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => field.handleChange([])}
-                      disabled={(field.state.value ?? []).length === 0}
-                    >
-                      {t('deselectAll')}
-                    </Button>
-                  </div>
-                </div>
-                <FieldError errors={field.state.meta.errors} />
-              </Field>
-            )}
-          </form.Field>
-
-          {/* Starter code per language */}
-          {watchAllowedLanguages.length > 0 && (
-            <div className="space-y-4 pt-4">
-              <Separator />
-              <div>
-                <h3 className="text-lg font-medium">{t('form.starterCode')}</h3>
-                <p className="text-muted-foreground text-sm">{t('form.starterCodeHint')}</p>
-              </div>
-              <Tabs defaultValue={defaultLanguageId.toString()}>
-                <TabsList className="flex-wrap">
-                  {watchAllowedLanguages.map((langId) => {
-                    const lang = JUDGE0_LANGUAGES.find((l) => l.id === langId);
-                    return (
-                      <TabsTrigger
-                        key={langId}
-                        value={langId.toString()}
-                      >
-                        {lang?.name ?? `Language ${langId}`}
-                      </TabsTrigger>
-                    );
-                  })}
-                </TabsList>
-                {watchAllowedLanguages.map((langId) => (
-                  <TabsContent
-                    key={langId}
-                    value={langId.toString()}
-                  >
-                    <form.Field name={`starter_code.${langId}`}>
-                      {(field) => (
-                        <Field>
-                          <FieldContent>
-                            <div className="h-48 overflow-hidden rounded border">
-                              <CodeEditor
-                                value={field.state.value ?? ''}
-                                onChange={field.handleChange}
-                                languageId={langId}
-                              />
-                            </div>
-                          </FieldContent>
-                          <FieldError errors={field.state.meta.errors} />
-                        </Field>
-                      )}
-                    </form.Field>
-                  </TabsContent>
-                ))}
-              </Tabs>
-            </div>
-          )}
-        </TabsContent>
-
-        {/* Advanced Tab */}
-        <TabsContent
-          value="advanced"
-          className="space-y-4 pt-4"
-        >
-          <form.Field name="max_submissions">
-            {(field) => (
-              <Field>
-                <FieldLabel>{t('form.maxSubmissions')}</FieldLabel>
-                <FieldContent>
-                  <Input
-                    name={field.name}
-                    type="number"
-                    min={0}
-                    max={10_000}
-                    placeholder={t('form.unlimitedSubmissions')}
-                    value={field.state.value ?? ''}
-                    onBlur={field.handleBlur}
-                    onChange={(e) => field.handleChange(e.target.value ? Number.parseInt(e.target.value) : undefined)}
-                  />
-                </FieldContent>
-                <FieldDescription>{t('form.maxSubmissionsHint')}</FieldDescription>
-                <FieldError errors={field.state.meta.errors} />
-              </Field>
-            )}
-          </form.Field>
-
-          <Separator />
-
-          {/* Hints Section */}
-          <form.Field name="enable_hints">
-            {(field) => (
-              <Field className="flex items-center justify-between rounded-lg border p-4">
-                <div className="space-y-0.5">
-                  <FieldLabel className="text-base">{t('form.enableHints')}</FieldLabel>
-                  <FieldDescription>{t('form.enableHintsDescription')}</FieldDescription>
-                </div>
-                <FieldContent>
-                  <Switch
-                    checked={field.state.value ?? false}
-                    onCheckedChange={field.handleChange}
-                  />
-                </FieldContent>
-              </Field>
-            )}
-          </form.Field>
-
-          {watchEnableHints && (
-            <form.Field
-              name="hints"
-              mode="array"
-            >
-              {(hintsField) => (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h4 className="font-medium">{t('form.hints')}</h4>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() =>
-                        hintsField.pushValue({
-                          text: '',
-                          penalty_percent: 10,
-                        })
-                      }
-                    >
-                      <Plus className="mr-2 h-4 w-4" />
-                      {t('form.addHint')}
-                    </Button>
-                  </div>
-                  {(hintsField.state.value ?? []).map((field, index) => (
-                    <Card key={`${index}-${field.text}`}>
-                      <CardContent className="pt-4">
-                        <div className="flex gap-4">
-                          <div className="flex-1">
-                            <form.Field name={`hints[${index}].text`}>
-                              {(field) => (
-                                <Field>
-                                  <FieldLabel>
-                                    {t('form.hint')} #{index + 1}
-                                  </FieldLabel>
-                                  <FieldContent>
-                                    <Textarea
-                                      name={field.name}
-                                      placeholder={t('form.hintPlaceholder')}
-                                      value={field.state.value}
-                                      onBlur={field.handleBlur}
-                                      onChange={(event) => field.handleChange(event.target.value)}
-                                    />
-                                  </FieldContent>
-                                  <FieldError errors={field.state.meta.errors} />
-                                </Field>
-                              )}
-                            </form.Field>
-                          </div>
-                          <div className="w-32">
-                            <form.Field name={`hints[${index}].penalty_percent`}>
-                              {(field) => (
-                                <Field>
-                                  <FieldLabel>{t('form.penalty')}</FieldLabel>
-                                  <FieldContent>
-                                    <Input
-                                      name={field.name}
-                                      type="number"
-                                      min={0}
-                                      max={100}
-                                      value={field.state.value ?? 0}
-                                      onBlur={field.handleBlur}
-                                      onChange={(e) => field.handleChange(Number.parseInt(e.target.value) || 0)}
-                                    />
-                                  </FieldContent>
-                                  <FieldDescription>%</FieldDescription>
-                                  <FieldError errors={field.state.meta.errors} />
-                                </Field>
-                              )}
-                            </form.Field>
-                          </div>
+                        />
+                        {testCaseFields.length > 1 && (
                           <Button
                             type="button"
                             variant="ghost"
                             size="sm"
-                            className="mt-8"
-                            onClick={() => hintsField.removeValue(index)}
+                            onClick={() => removeTestCase(index)}
                           >
                             <Trash2 className="text-destructive h-4 w-4" />
                           </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              )}
-            </form.Field>
-          )}
-        </TabsContent>
-      </Tabs>
+                        )}
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <Controller
+                      control={form.control}
+                      name={`test_cases.${index}.description`}
+                      render={({ field, fieldState }) => (
+                        <Field>
+                          <FieldLabel>{t('form.testDescription')}</FieldLabel>
+                          <FieldContent>
+                            <Input
+                              placeholder={t('form.testDescriptionPlaceholder')}
+                              {...field}
+                            />
+                          </FieldContent>
+                          <FieldError errors={[fieldState.error]} />
+                        </Field>
+                      )}
+                    />
 
-      {/* Form Actions */}
-      <div className="flex justify-end gap-4 pt-4">
-        {onCancel && (
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onCancel}
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <Controller
+                        control={form.control}
+                        name={`test_cases.${index}.input`}
+                        render={({ field, fieldState }) => (
+                          <Field>
+                            <FieldLabel>{t('input')}</FieldLabel>
+                            <FieldContent>
+                              <Textarea
+                                placeholder={t('form.inputPlaceholder')}
+                                className="min-h-24 font-mono text-sm"
+                                {...field}
+                              />
+                            </FieldContent>
+                            <FieldError errors={[fieldState.error]} />
+                          </Field>
+                        )}
+                      />
+
+                      <Controller
+                        control={form.control}
+                        name={`test_cases.${index}.expected_output`}
+                        render={({ field, fieldState }) => (
+                          <Field>
+                            <FieldLabel>{t('expectedOutput')}</FieldLabel>
+                            <FieldContent>
+                              <Textarea
+                                placeholder={t('form.expectedOutputPlaceholder')}
+                                className="min-h-24 font-mono text-sm"
+                                {...field}
+                              />
+                            </FieldContent>
+                            <FieldError errors={[fieldState.error]} />
+                          </Field>
+                        )}
+                      />
+                    </div>
+
+                    {watchGradingStrategy === 'weighted' && (
+                      <Controller
+                        control={form.control}
+                        name={`test_cases.${index}.points`}
+                        render={({ field, fieldState }) => (
+                          <Field className="max-w-32">
+                            <FieldLabel>{t('form.points')}</FieldLabel>
+                            <FieldContent>
+                              <Input
+                                type="number"
+                                min={0}
+                                max={10_000}
+                                {...field}
+                                onChange={(e) => field.onChange(Number.parseInt(e.target.value) || 0)}
+                              />
+                            </FieldContent>
+                            <FieldError errors={[fieldState.error]} />
+                          </Field>
+                        )}
+                      />
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
+
+          {/* Languages Tab */}
+          <TabsContent
+            value="languages"
+            className="space-y-4 pt-4"
           >
-            {t('form.cancel')}
+            <Controller
+              control={form.control}
+              name="allowed_languages"
+              render={({ field, fieldState }) => (
+                <Field>
+                  <FieldLabel>{t('form.allowedLanguages')}</FieldLabel>
+                  <FieldDescription>{t('form.allowedLanguagesHint')}</FieldDescription>
+
+                  {/* Quick selection for popular languages */}
+                  <div className="mb-4">
+                    <h4 className="mb-2 text-sm font-medium">{t('popularLanguages')}</h4>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {popularLanguageIds.map((langId) => {
+                        const lang = JUDGE0_LANGUAGES.find((l) => l.id === langId);
+                        if (!lang) return null;
+                        const isSelected = (field.value ?? []).includes(langId);
+                        return (
+                          <Badge
+                            key={langId}
+                            variant={isSelected ? 'default' : 'outline'}
+                            className="cursor-pointer"
+                            onClick={() => {
+                              if (isSelected) {
+                                field.onChange((field.value ?? []).filter((id) => id !== langId));
+                              } else {
+                                field.onChange([...(field.value ?? []), langId]);
+                              }
+                            }}
+                          >
+                            {lang.name}
+                          </Badge>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  <div className="mt-4">
+                    <ComboboxMultiple<{ id: number; name: string }>
+                      options={JUDGE0_LANGUAGES}
+                      value={field.value}
+                      onChange={(vals) => field.onChange(vals as number[])}
+                      getOptionValue={(o) => o.id}
+                      getOptionLabel={(o) => o.name}
+                      placeholder={t('form.selectLanguages')}
+                      searchPlaceholder={t('form.searchLanguages')}
+                      emptyMessage={t('form.noLanguagesFound')}
+                    />
+                    <div className="mt-2 flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          const allIds = JUDGE0_LANGUAGES.map((l) => l.id);
+                          field.onChange(allIds);
+                        }}
+                        disabled={(field.value ?? []).length >= JUDGE0_LANGUAGES.length}
+                      >
+                        {t('selectAll')}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => field.onChange([])}
+                        disabled={(field.value ?? []).length === 0}
+                      >
+                        {t('deselectAll')}
+                      </Button>
+                    </div>
+                  </div>
+                  <FieldError errors={[fieldState.error]} />
+                </Field>
+              )}
+            />
+
+            {/* Starter code per language */}
+            {watchAllowedLanguages.length > 0 && (
+              <div className="space-y-4 pt-4">
+                <Separator />
+                <div>
+                  <h3 className="text-lg font-medium">{t('form.starterCode')}</h3>
+                  <p className="text-muted-foreground text-sm">{t('form.starterCodeHint')}</p>
+                </div>
+                <Tabs defaultValue={defaultLanguageId.toString()}>
+                  <TabsList className="flex-wrap">
+                    {watchAllowedLanguages.map((langId) => {
+                      const lang = JUDGE0_LANGUAGES.find((l) => l.id === langId);
+                      return (
+                        <TabsTrigger
+                          key={langId}
+                          value={langId.toString()}
+                        >
+                          {lang?.name ?? `Language ${langId}`}
+                        </TabsTrigger>
+                      );
+                    })}
+                  </TabsList>
+                  {watchAllowedLanguages.map((langId) => (
+                    <TabsContent
+                      key={langId}
+                      value={langId.toString()}
+                    >
+                      <Controller
+                        control={form.control}
+                        name={`starter_code.${langId}`}
+                        render={({ field, fieldState }) => (
+                          <Field>
+                            <FieldContent>
+                              <div className="h-48 overflow-hidden rounded border">
+                                <CodeEditor
+                                  value={field.value ?? ''}
+                                  onChange={field.onChange}
+                                  languageId={langId}
+                                />
+                              </div>
+                            </FieldContent>
+                            <FieldError errors={[fieldState.error]} />
+                          </Field>
+                        )}
+                      />
+                    </TabsContent>
+                  ))}
+                </Tabs>
+              </div>
+            )}
+          </TabsContent>
+
+          {/* Advanced Tab */}
+          <TabsContent
+            value="advanced"
+            className="space-y-4 pt-4"
+          >
+            <Controller
+              control={form.control}
+              name="max_submissions"
+              render={({ field, fieldState }) => (
+                <Field>
+                  <FieldLabel>{t('form.maxSubmissions')}</FieldLabel>
+                  <FieldContent>
+                    <Input
+                      type="number"
+                      min={0}
+                      max={10_000}
+                      placeholder={t('form.unlimitedSubmissions')}
+                      {...field}
+                      value={field.value ?? ''}
+                      onChange={(e) => field.onChange(e.target.value ? Number.parseInt(e.target.value) : undefined)}
+                    />
+                  </FieldContent>
+                  <FieldDescription>{t('form.maxSubmissionsHint')}</FieldDescription>
+                  <FieldError errors={[fieldState.error]} />
+                </Field>
+              )}
+            />
+
+            <Separator />
+
+            {/* Hints Section */}
+            <Controller
+              control={form.control}
+              name="enable_hints"
+              render={({ field }) => (
+                <Field className="flex items-center justify-between rounded-lg border p-4">
+                  <div className="space-y-0.5">
+                    <FieldLabel className="text-base">{t('form.enableHints')}</FieldLabel>
+                    <FieldDescription>{t('form.enableHintsDescription')}</FieldDescription>
+                  </div>
+                  <FieldContent>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FieldContent>
+                </Field>
+              )}
+            />
+
+            {watchEnableHints && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-medium">{t('form.hints')}</h4>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={addHint}
+                  >
+                    <Plus className="mr-2 h-4 w-4" />
+                    {t('form.addHint')}
+                  </Button>
+                </div>
+                {hintFields.map((field, index) => (
+                  <Card key={field.id}>
+                    <CardContent className="pt-4">
+                      <div className="flex gap-4">
+                        <div className="flex-1">
+                          <Controller
+                            control={form.control}
+                            name={`hints.${index}.text`}
+                            render={({ field, fieldState }) => (
+                              <Field>
+                                <FieldLabel>
+                                  {t('form.hint')} #{index + 1}
+                                </FieldLabel>
+                                <FieldContent>
+                                  <Textarea
+                                    placeholder={t('form.hintPlaceholder')}
+                                    {...field}
+                                  />
+                                </FieldContent>
+                                <FieldError errors={[fieldState.error]} />
+                              </Field>
+                            )}
+                          />
+                        </div>
+                        <div className="w-32">
+                          <Controller
+                            control={form.control}
+                            name={`hints.${index}.penalty_percent`}
+                            render={({ field, fieldState }) => (
+                              <Field>
+                                <FieldLabel>{t('form.penalty')}</FieldLabel>
+                                <FieldContent>
+                                  <Input
+                                    type="number"
+                                    min={0}
+                                    max={100}
+                                    {...field}
+                                    onChange={(e) => field.onChange(Number.parseInt(e.target.value) || 0)}
+                                  />
+                                </FieldContent>
+                                <FieldDescription>%</FieldDescription>
+                                <FieldError errors={[fieldState.error]} />
+                              </Field>
+                            )}
+                          />
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="mt-8"
+                          onClick={() => removeHint(index)}
+                        >
+                          <Trash2 className="text-destructive h-4 w-4" />
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
+
+        {/* Form Actions */}
+        <div className="flex justify-end gap-4 pt-4">
+          {onCancel && (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onCancel}
+            >
+              {t('form.cancel')}
+            </Button>
+          )}
+          <Button
+            type="submit"
+            disabled={form.formState.isSubmitting}
+          >
+            {form.formState.isSubmitting ? t('form.saving') : t('form.save')}
           </Button>
-        )}
-        <Button
-          type="submit"
-          disabled={isSubmitting}
-        >
-          {isSubmitting ? t('form.saving') : t('form.save')}
-        </Button>
-      </div>
-    </form>
+        </div>
+      </form>
+    </FormProvider>
   );
 }
 

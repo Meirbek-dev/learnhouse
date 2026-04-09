@@ -1,6 +1,7 @@
 'use client';
 
 import { getAPIUrl } from '@services/config/config';
+import { generateUUID } from '../utils';
 
 export type AuthInvalidationReason =
   | 'expired'
@@ -50,7 +51,7 @@ function getChannel(): BroadcastChannel | null {
 function createMessage(detail: AuthInvalidationDetail): AuthInvalidationMessage {
   return {
     ...detail,
-    nonce: detail.nonce ?? crypto.randomUUID(),
+    nonce: detail.nonce ?? generateUUID(),
     sentAt: Date.now(),
   };
 }

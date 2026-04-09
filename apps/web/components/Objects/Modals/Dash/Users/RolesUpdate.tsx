@@ -1,13 +1,14 @@
 'use client';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
-import { useForm } from '@tanstack/react-form';
 import { assignRoleToUser, removeRoleFromUser } from '@/services/rbac';
 import { Field, FieldError, FieldLabel } from '@components/ui/field';
 import { BarLoader } from '@components/Objects/Loaders/BarLoader';
 import { Alert, AlertDescription } from '@components/ui/alert';
+import { valibotResolver } from '@hookform/resolvers/valibot';
 import { swrFetcher } from '@services/utils/ts/requests';
+import { Controller, useForm } from 'react-hook-form';
 import { getAPIUrl } from '@services/config/config';
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import { Button } from '@components/ui/button';
 import { useTranslations } from 'next-intl';
 import useSWR, { mutate } from 'swr';
@@ -33,38 +34,13 @@ const RolesUpdate: FC<Props> = (props) => {
   const validationT = useTranslations('Validation');
   const t = useTranslations('Components.RolesUpdate');
   const validationSchema = createValidationSchema(validationT);
+  const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<any>(null);
 
-  const form = useForm({
+  const form = useForm<FormData>({
+    resolver: valibotResolver(validationSchema),
     defaultValues: {
       role: props.alreadyAssignedRole,
-    },
-    validators: {
-      onChange: validationSchema,
-      onSubmit: validationSchema,
-    },
-    onSubmit: async ({ value }) => {
-      setError(null);
-
-      const toastId = toast.loading(t('toastLoading'));
-      try {
-        const newRoleId = Number.parseInt(value.role, 10);
-        const oldRoleId = Number.parseInt(props.alreadyAssignedRole, 10);
-        const userId = props.user.user.id;
-
-        if (!Number.isNaN(oldRoleId)) {
-          await removeRoleFromUser(userId, oldRoleId);
-        }
-        await assignRoleToUser(userId, newRoleId);
-
-        await mutate(`${getAPIUrl()}members`);
-        props.setRolesModal(false);
-        toast.success(t('toastSuccess'), { id: toastId });
-      } catch (nextError: any) {
-        const detail = nextError?.message ?? 'Unknown error';
-        setError(detail);
-        toast.error(t('toastError'), { id: toastId });
-      }
     },
   });
 
@@ -81,6 +57,32 @@ const RolesUpdate: FC<Props> = (props) => {
     if (aPriority !== bPriority) return aPriority - bPriority;
     return (a.name || '').localeCompare(b.name || '');
   });
+  const handleSubmit = async (values: FormData) => {
+    setError(null);
+
+    startTransition(async () => {
+      const toastId = toast.loading(t('toastLoading'));
+      try {
+        const newRoleId = Number.parseInt(values.role, 10);
+        const oldRoleId = Number.parseInt(props.alreadyAssignedRole, 10);
+        const userId = props.user.user.id;
+
+        // Revoke old role, then assign new one
+        if (!Number.isNaN(oldRoleId)) {
+          await removeRoleFromUser(userId, oldRoleId);
+        }
+        await assignRoleToUser(userId, newRoleId);
+
+        await mutate(`${getAPIUrl()}members`);
+        props.setRolesModal(false);
+        toast.success(t('toastSuccess'), { id: toastId });
+      } catch (error: any) {
+        const detail = error?.message ?? 'Unknown error';
+        setError(detail);
+        toast.error(t('toastError'), { id: toastId });
+      }
+    });
+  };
 
   return (
     <div className="space-y-4">
@@ -96,24 +98,18 @@ const RolesUpdate: FC<Props> = (props) => {
       )}
 
       <form
-        onSubmit={(event) => {
-          event.preventDefault();
-          event.stopPropagation();
-          void form.handleSubmit();
-        }}
+        onSubmit={form.handleSubmit(handleSubmit)}
         className="space-y-4"
       >
-        <form.Field name="role">
-          {(field) => (
+        <Controller
+          control={form.control}
+          name="role"
+          render={({ field, fieldState }) => (
             <Field>
               <FieldLabel>{t('rolesLabel')}</FieldLabel>
               <Select
-                onValueChange={(value) => {
-                  if (value) {
-                    field.handleChange(value);
-                  }
-                }}
-                value={field.state.value}
+                onValueChange={field.onChange}
+                value={field.value}
                 disabled={!roles || rolesError}
                 items={
                   !roles || rolesError
@@ -144,32 +140,27 @@ const RolesUpdate: FC<Props> = (props) => {
                   )}
                 </SelectContent>
               </Select>
-              <FieldError errors={field.state.meta.errors} />
+              <FieldError errors={[fieldState.error]} />
             </Field>
           )}
-        </form.Field>
+        />
 
         <div className="flex justify-end pt-4">
-          <form.Subscribe
-            selector={(state) => [state.canSubmit, state.isSubmitting]}
-            children={([canSubmit, isSubmitting]) => (
-              <Button
-                type="submit"
-                disabled={!canSubmit || isSubmitting || !roles || rolesError}
-                className="min-w-[100px]"
-              >
-                {isSubmitting ? (
-                  <BarLoader
-                    cssOverride={{ borderRadius: 60 }}
-                    width={60}
-                    color="#ffffff"
-                  />
-                ) : (
-                  t('updateButton')
-                )}
-              </Button>
+          <Button
+            type="submit"
+            disabled={isPending || !roles || rolesError}
+            className="min-w-[100px]"
+          >
+            {isPending ? (
+              <BarLoader
+                cssOverride={{ borderRadius: 60 }}
+                width={60}
+                color="#ffffff"
+              />
+            ) : (
+              t('updateButton')
             )}
-          />
+          </Button>
         </div>
       </form>
     </div>

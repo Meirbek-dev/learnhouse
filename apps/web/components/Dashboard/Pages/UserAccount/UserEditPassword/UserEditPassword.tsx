@@ -1,16 +1,17 @@
 'use client';
 
 import { updatePassword } from '@/lib/users/client';
-import { useForm } from '@tanstack/react-form';
 import { logout } from '@services/auth/auth';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import PasswordInput from '@components/ui/custom/password-input';
+import { valibotResolver } from '@hookform/resolvers/valibot';
 import { getAbsoluteUrl } from '@services/config/config';
-import { FieldError } from '@components/ui/field';
+import { useState, useTransition } from 'react';
 import { Button } from '@components/ui/button';
 import { Label } from '@components/ui/label';
 import { AlertTriangle } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import * as v from 'valibot';
 
@@ -20,8 +21,8 @@ const createValidationSchema = (t: (key: string, values?: any) => string) =>
       v.string(),
       v.minLength(
         1,
-        t("Form.requiredField", {
-          fieldName: t("currentPasswordLabel"),
+        t('Form.requiredField', {
+          fieldName: t('currentPasswordLabel'),
         }),
       ),
     ),
@@ -29,11 +30,11 @@ const createValidationSchema = (t: (key: string, values?: any) => string) =>
       v.string(),
       v.minLength(
         1,
-        t("Form.requiredField", {
-          fieldName: t("newPasswordLabel"),
+        t('Form.requiredField', {
+          fieldName: t('newPasswordLabel'),
         }),
       ),
-      v.minLength(8, t("Form.minChars", { count: 8 })),
+      v.minLength(8, t('Form.minChars', { count: 8 })),
     ),
   });
 
@@ -45,51 +46,60 @@ const UserEditPassword = () => {
   const tPassword = useTranslations('DashPage.UserAccountSettings.UserAccount.EditPassword');
   const validationSchema = createValidationSchema(t);
 
-  const form = useForm({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<PasswordFormData>({
+    resolver: valibotResolver(validationSchema),
     defaultValues: {
       old_password: '',
       new_password: '',
     },
-    validators: {
-      onChange: validationSchema,
-      onSubmit: validationSchema,
-    },
-    onSubmit: async ({ value }) => {
-      const loadingToast = toast.loading(t('updating'));
-      try {
-        const user_id = viewer?.id;
-        if (!user_id) {
-          toast.error(t('passwordUpdateError'), { id: loadingToast });
-          return;
-        }
-
-        const response = await updatePassword(user_id, value);
-
-        if (response.success) {
-          toast.dismiss(loadingToast);
-
-          toast.success(t('passwordUpdateSuccess'), {
-            duration: 4000,
-          });
-          toast(t('promptLogoutOnPasswordChange'), {
-            duration: 4000,
-            icon: '🔑',
-          });
-
-          setTimeout(() => {
-            void logout({ redirectTo: getAbsoluteUrl('/') });
-          }, 4000);
-        } else {
-          toast.error(t('passwordUpdateError'), {
-            id: loadingToast,
-          });
-        }
-      } catch (error: unknown) {
-        toast.error(t('passwordUpdateError'), { id: loadingToast });
-        console.error('Password update error:', error);
-      }
-    },
   });
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [isPending, startTransition] = useTransition();
+
+  const onSubmit = async (values: PasswordFormData) => {
+    const loadingToast = toast.loading(t('updating'));
+    startTransition(() => setIsProcessing(true));
+    try {
+      const user_id = viewer?.id;
+      if (!user_id) {
+        toast.error(t('passwordUpdateError'), { id: loadingToast });
+        return;
+      }
+
+      const response = await updatePassword(user_id, values);
+
+      if (response.success) {
+        toast.dismiss(loadingToast);
+
+        // Show success message and notify about logout
+        toast.success(t('passwordUpdateSuccess'), {
+          duration: 4000,
+        });
+        toast(t('promptLogoutOnPasswordChange'), {
+          duration: 4000,
+          icon: '🔑',
+        });
+
+        // Wait for 4 seconds before signing out
+        setTimeout(() => {
+          void logout({ redirectTo: getAbsoluteUrl('/') });
+        }, 4000);
+      } else {
+        toast.error(t('passwordUpdateError'), {
+          id: loadingToast,
+        });
+      }
+    } catch (error: any) {
+      toast.error(t('passwordUpdateError'), { id: loadingToast });
+      console.error('Password update error:', error);
+    } finally {
+      startTransition(() => setIsProcessing(false));
+    }
+  };
 
   return (
     <div className="soft-shadow border-border bg-card text-card-foreground mx-0 rounded-xl border shadow-sm sm:mx-10">
@@ -101,52 +111,28 @@ const UserEditPassword = () => {
 
         <div className="px-8 py-6">
           <form
-            onSubmit={(event) => {
-              event.preventDefault();
-              event.stopPropagation();
-              void form.handleSubmit();
-            }}
+            onSubmit={handleSubmit(onSubmit)}
             className="mx-auto w-full max-w-2xl space-y-6"
           >
-            <form.Field name="old_password">
-              {(field) => (
-                <div>
-                  <Label htmlFor={field.name}>{tPassword('currentPasswordLabel')}</Label>
-                  <PasswordInput
-                    id={field.name}
-                    name={field.name}
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(event) => field.handleChange(event.target.value)}
-                    className="mt-1"
-                  />
-                  <FieldError
-                    className="mt-1"
-                    errors={field.state.meta.errors}
-                  />
-                </div>
-              )}
-            </form.Field>
+            <div>
+              <Label htmlFor="old_password">{tPassword('currentPasswordLabel')}</Label>
+              <PasswordInput
+                id="old_password"
+                {...register('old_password')}
+                className="mt-1"
+              />
+              {errors.old_password ? <p className="mt-1 text-sm text-red-500">{errors.old_password.message}</p> : null}
+            </div>
 
-            <form.Field name="new_password">
-              {(field) => (
-                <div>
-                  <Label htmlFor={field.name}>{tPassword('newPasswordLabel')}</Label>
-                  <PasswordInput
-                    id={field.name}
-                    name={field.name}
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(event) => field.handleChange(event.target.value)}
-                    className="mt-1"
-                  />
-                  <FieldError
-                    className="mt-1"
-                    errors={field.state.meta.errors}
-                  />
-                </div>
-              )}
-            </form.Field>
+            <div>
+              <Label htmlFor="new_password">{tPassword('newPasswordLabel')}</Label>
+              <PasswordInput
+                id="new_password"
+                {...register('new_password')}
+                className="mt-1"
+              />
+              {errors.new_password ? <p className="mt-1 text-sm text-red-500">{errors.new_password.message}</p> : null}
+            </div>
 
             <div className="flex items-center gap-2 rounded-md border border-amber-500/20 bg-amber-500/10 p-3 text-amber-700 dark:text-amber-400">
               <AlertTriangle size={16} />
@@ -154,17 +140,12 @@ const UserEditPassword = () => {
             </div>
 
             <div className="flex justify-end pt-2">
-              <form.Subscribe
-                selector={(state) => [state.canSubmit, state.isSubmitting]}
-                children={([canSubmit, isSubmitting]) => (
-                  <Button
-                    type="submit"
-                    disabled={!canSubmit || isSubmitting}
-                  >
-                    {isSubmitting ? tPassword('updatingButton') : tPassword('updateButton')}
-                  </Button>
-                )}
-              />
+              <Button
+                type="submit"
+                disabled={isSubmitting || isProcessing || isPending}
+              >
+                {isSubmitting ? tPassword('updatingButton') : tPassword('updateButton')}
+              </Button>
             </div>
           </form>
         </div>

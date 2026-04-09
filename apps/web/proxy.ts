@@ -1,5 +1,6 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
+import { generateUUID } from './lib/utils';
 
 const AUTH_REWRITE: Record<string, string> = {
   '/forgot': '/auth/forgot',
@@ -87,7 +88,7 @@ export const config = {
 
 export default async function proxy(req: NextRequest) {
   const { pathname, search } = req.nextUrl;
-  const requestId = crypto.randomUUID();
+  const requestId = generateUUID();
 
   if (pathname === '/home') {
     return rewriteWithHeaders(req, requestId, `${pathname}${search}`);

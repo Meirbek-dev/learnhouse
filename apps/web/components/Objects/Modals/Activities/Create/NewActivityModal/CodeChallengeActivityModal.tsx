@@ -1,6 +1,7 @@
 'use client';
 
-import { useForm } from '@tanstack/react-form';
+import { Controller, FormProvider, useForm } from 'react-hook-form';
+import { valibotResolver } from '@hookform/resolvers/valibot';
 import { Code2, Loader2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import * as v from 'valibot';
@@ -42,35 +43,34 @@ export default function CodeChallengeActivityModal({
   const t = useTranslations('Components.NewActivity.CodeChallenge');
 
   const validationSchema = createValidationSchema(t);
+  type ValidationSchema = v.InferOutput<typeof validationSchema>;
 
-  const form = useForm({
+  const form = useForm<ValidationSchema>({
+    resolver: valibotResolver(validationSchema),
     defaultValues: {
       name: '',
       description: '',
       difficulty: 'medium',
       subtype: 'general',
     },
-    validators: {
-      onChange: validationSchema,
-      onSubmit: validationSchema,
-    },
-    onSubmit: async ({ value }) => {
-      const activityData = {
-        name: value.name,
-        activity_type: 'TYPE_CODE_CHALLENGE',
-        activity_sub_type: value.subtype === 'competitive' ? 'SUBTYPE_CODE_COMPETITIVE' : 'SUBTYPE_CODE_GENERAL',
-        chapter_id: chapterId,
-        published: false,
-        content: {
-          description: value.description,
-          difficulty: value.difficulty,
-        },
-      };
-
-      await submitActivity(activityData);
-      closeModal?.();
-    },
   });
+
+  const handleSubmit = async (values: FormValues) => {
+    const activityData = {
+      name: values.name,
+      activity_type: 'TYPE_CODE_CHALLENGE',
+      activity_sub_type: values.subtype === 'competitive' ? 'SUBTYPE_CODE_COMPETITIVE' : 'SUBTYPE_CODE_GENERAL',
+      chapter_id: chapterId,
+      published: false,
+      content: {
+        description: values.description,
+        difficulty: values.difficulty,
+      },
+    };
+
+    await submitActivity(activityData);
+    closeModal?.();
+  };
 
   return (
     <div className="space-y-6">
@@ -84,154 +84,149 @@ export default function CodeChallengeActivityModal({
         </div>
       </div>
 
-      <form
-        onSubmit={(event) => {
-          event.preventDefault();
-          event.stopPropagation();
-          void form.handleSubmit();
-        }}
-        className="space-y-4"
-      >
-        <form.Field name="name">
-          {(field) => (
-            <Field>
-              <FieldLabel htmlFor={field.name}>{t('name')}</FieldLabel>
-              <Input
-                id={field.name}
-                name={field.name}
-                placeholder={t('namePlaceholder')}
-                value={field.state.value}
-                onBlur={field.handleBlur}
-                onChange={(event) => field.handleChange(event.target.value)}
-              />
-              <FieldError errors={field.state.meta.errors} />
-            </Field>
-          )}
-        </form.Field>
-
-        <form.Field name="description">
-          {(field) => (
-            <Field>
-              <FieldLabel htmlFor={field.name}>{t('description')}</FieldLabel>
-              <Textarea
-                id={field.name}
-                name={field.name}
-                placeholder={t('descriptionPlaceholder')}
-                className="min-h-24"
-                value={field.state.value}
-                onBlur={field.handleBlur}
-                onChange={(event) => field.handleChange(event.target.value)}
-              />
-              <FieldDescription>{t('descriptionHint')}</FieldDescription>
-              <FieldError errors={field.state.meta.errors} />
-            </Field>
-          )}
-        </form.Field>
-
-        <div className="grid gap-4 md:grid-cols-2">
-          <form.Field name="difficulty">
-            {(field) => {
-              const difficultyItems = [
-                { value: 'easy', label: t('difficultyEasy') },
-                { value: 'medium', label: t('difficultyMedium') },
-                { value: 'hard', label: t('difficultyHard') },
-              ];
-
-              return (
-                <Field>
-                  <FieldLabel>{t('difficulty')}</FieldLabel>
-                  <Select
-                    items={difficultyItems}
-                    value={field.state.value}
-                    onValueChange={(value) => field.handleChange(value as FormValues['difficulty'])}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder={t('selectDifficulty')} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        {difficultyItems.map((item) => (
-                          <SelectItem
-                            key={item.value}
-                            value={item.value}
-                          >
-                            {item.label}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                  <FieldError errors={field.state.meta.errors} />
-                </Field>
-              );
-            }}
-          </form.Field>
-
-          <form.Field name="subtype">
-            {(field) => {
-              const subtypeItems = [
-                { value: 'general', label: t('typeGeneral') },
-                { value: 'competitive', label: t('typeCompetitive') },
-              ];
-
-              return (
-                <Field>
-                  <FieldLabel>{t('type')}</FieldLabel>
-                  <Select
-                    items={subtypeItems}
-                    value={field.state.value}
-                    onValueChange={(value) => field.handleChange(value as FormValues['subtype'])}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder={t('selectType')} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        {subtypeItems.map((item) => (
-                          <SelectItem
-                            key={item.value}
-                            value={item.value}
-                          >
-                            {item.label}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </Select>
-                  <FieldDescription>
-                    {field.state.value === 'competitive' ? t('typeCompetitiveHint') : t('typeGeneralHint')}
-                  </FieldDescription>
-                  <FieldError errors={field.state.meta.errors} />
-                </Field>
-              );
-            }}
-          </form.Field>
-        </div>
-
-        <div className="flex justify-end gap-2 pt-4">
-          {closeModal && (
-            <Button
-              type="button"
-              variant="outline"
-              onClick={closeModal}
-            >
-              {t('cancel')}
-            </Button>
-          )}
-          <form.Subscribe
-            selector={(state) => [state.canSubmit, state.isSubmitting]}
-            children={([canSubmit, isSubmitting]) => (
-              <Button
-                type="submit"
-                disabled={!canSubmit || isSubmitting}
-              >
-                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {t('create')}
-              </Button>
+      <FormProvider {...form}>
+        <form
+          onSubmit={form.handleSubmit(handleSubmit)}
+          className="space-y-4"
+        >
+          <Controller
+            control={form.control}
+            name="name"
+            render={({ field, fieldState }) => (
+              <Field>
+                <FieldLabel htmlFor={field.name}>{t('name')}</FieldLabel>
+                <Input
+                  id={field.name}
+                  placeholder={t('namePlaceholder')}
+                  {...field}
+                />
+                <FieldError errors={[fieldState.error]} />
+              </Field>
             )}
           />
-        </div>
-      </form>
+
+          <Controller
+            control={form.control}
+            name="description"
+            render={({ field, fieldState }) => (
+              <Field>
+                <FieldLabel htmlFor={field.name}>{t('description')}</FieldLabel>
+                <Textarea
+                  id={field.name}
+                  placeholder={t('descriptionPlaceholder')}
+                  className="min-h-24"
+                  {...field}
+                />
+                <FieldDescription>{t('descriptionHint')}</FieldDescription>
+                <FieldError errors={[fieldState.error]} />
+              </Field>
+            )}
+          />
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <Controller
+              control={form.control}
+              name="difficulty"
+              render={({ field, fieldState }) => {
+                const difficultyItems = [
+                  { value: 'easy', label: t('difficultyEasy') },
+                  { value: 'medium', label: t('difficultyMedium') },
+                  { value: 'hard', label: t('difficultyHard') },
+                ];
+
+                return (
+                  <Field>
+                    <FieldLabel>{t('difficulty')}</FieldLabel>
+                    <Select
+                      items={difficultyItems}
+                      value={field.value}
+                      onValueChange={field.onChange}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder={t('selectDifficulty')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          {difficultyItems.map((item) => (
+                            <SelectItem
+                              key={item.value}
+                              value={item.value}
+                            >
+                              {item.label}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                    <FieldError errors={[fieldState.error]} />
+                  </Field>
+                );
+              }}
+            />
+
+            <Controller
+              control={form.control}
+              name="subtype"
+              render={({ field, fieldState }) => {
+                const subtypeItems = [
+                  { value: 'general', label: t('typeGeneral') },
+                  { value: 'competitive', label: t('typeCompetitive') },
+                ];
+
+                return (
+                  <Field>
+                    <FieldLabel>{t('type')}</FieldLabel>
+                    <Select
+                      items={subtypeItems}
+                      value={field.value}
+                      onValueChange={field.onChange}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder={t('selectType')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          {subtypeItems.map((item) => (
+                            <SelectItem
+                              key={item.value}
+                              value={item.value}
+                            >
+                              {item.label}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                    <FieldDescription>
+                      {field.value === 'competitive' ? t('typeCompetitiveHint') : t('typeGeneralHint')}
+                    </FieldDescription>
+                    <FieldError errors={[fieldState.error]} />
+                  </Field>
+                );
+              }}
+            />
+          </div>
+
+          <div className="flex justify-end gap-2 pt-4">
+            {closeModal && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={closeModal}
+              >
+                {t('cancel')}
+              </Button>
+            )}
+            <Button
+              type="submit"
+              disabled={form.formState.isSubmitting}
+            >
+              {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {t('create')}
+            </Button>
+          </div>
+        </form>
+      </FormProvider>
     </div>
   );
 }

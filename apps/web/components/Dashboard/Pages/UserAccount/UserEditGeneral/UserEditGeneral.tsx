@@ -1,5 +1,4 @@
 'use client';
-import { useForm, useStore } from '@tanstack/react-form';
 import {
   AlertTriangle,
   ArrowBigUpDash,
@@ -26,11 +25,14 @@ import { updateProfile, updateUserAvatar } from '@/lib/users/client';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { logout } from '@services/auth/auth';
 import { Field, FieldError, FieldLabel } from '@components/ui/field';
+import { valibotResolver } from '@hookform/resolvers/valibot';
 import { useDebouncedCallback } from '@/hooks/useDebounce';
 import { getAbsoluteUrl } from '@services/config/config';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { constructAcceptValue } from '@/lib/constants';
+import { Controller, useForm } from 'react-hook-form';
 import type { ChangeEvent, ElementType } from 'react';
+import type { UseFormReturn } from 'react-hook-form';
 import { Textarea } from '@components/ui/textarea';
 import { ThemeSelector } from '@/lib/theme-system';
 import { Button } from '@components/ui/button';
@@ -87,27 +89,14 @@ const createValidationSchema = (t: (key: string, values?: any) => string) =>
   v.object({
     email: v.pipe(
       v.string(),
-      v.minLength(1, t("Form.requiredField", { fieldName: "Email" })),
-      v.email(t("Form.invalidEmail")),
+      v.minLength(1, t('Form.requiredField', { fieldName: 'Email' })),
+      v.email(t('Form.invalidEmail')),
     ),
-    username: v.pipe(
-      v.string(),
-      v.minLength(1, t("Form.requiredField", { fieldName: "Username" })),
-    ),
-    first_name: v.pipe(
-      v.string(),
-      v.minLength(1, t("Form.requiredField", { fieldName: "First name" })),
-    ),
-    middle_name: v.optional(
-      v.pipe(v.string(), v.maxLength(100, t("Form.maxChars", { count: 100 }))),
-    ),
-    last_name: v.pipe(
-      v.string(),
-      v.minLength(1, t("Form.requiredField", { fieldName: "Last name" })),
-    ),
-    bio: v.optional(
-      v.pipe(v.string(), v.maxLength(400, t("Form.maxChars", { count: 400 }))),
-    ),
+    username: v.pipe(v.string(), v.minLength(1, t('Form.requiredField', { fieldName: 'Username' }))),
+    first_name: v.pipe(v.string(), v.minLength(1, t('Form.requiredField', { fieldName: 'First name' }))),
+    middle_name: v.optional(v.pipe(v.string(), v.maxLength(100, t('Form.maxChars', { count: 100 })))),
+    last_name: v.pipe(v.string(), v.minLength(1, t('Form.requiredField', { fieldName: 'Last name' }))),
+    bio: v.optional(v.pipe(v.string(), v.maxLength(400, t('Form.maxChars', { count: 400 })))),
     details: v.record(
       v.string(),
       v.object({
@@ -248,9 +237,7 @@ const DetailCard = ({
 };
 
 interface UserEditFormProps {
-  form: any;
-  details: FormValues["details"];
-  isSubmitting: boolean;
+  form: UseFormReturn<FormValues>;
   profilePicture: {
     error: string | undefined;
     success: string;
@@ -261,7 +248,7 @@ interface UserEditFormProps {
 }
 
 // Form component to handle the details section
-const UserEditForm = ({ form, details, isSubmitting, profilePicture }: UserEditFormProps) => {
+const UserEditForm = ({ form, profilePicture }: UserEditFormProps) => {
   const tIcons = useTranslations('Components.UserProfilePopup.Icons');
   const tTemplates = useTranslations('DashPage.UserAccountSettings.generalSection.detailTemplateLabels');
   const t = useTranslations('DashPage.UserAccountSettings.generalSection');
@@ -303,6 +290,8 @@ const UserEditForm = ({ form, details, isSubmitting, profilePicture }: UserEditF
     ],
   } as const;
 
+  const details = form.watch('details');
+
   return (
     <div>
       <div className="flex flex-col gap-0">
@@ -314,119 +303,113 @@ const UserEditForm = ({ form, details, isSubmitting, profilePicture }: UserEditF
         <div className="mx-5 my-5 mt-0 flex flex-col gap-8 lg:flex-row">
           {/* Profile Information Section */}
           <div className="min-w-0 flex-1 space-y-4">
-            <form.Field name="email">
-              {(field: any) => (
+            <Controller
+              control={form.control}
+              name="email"
+              render={({ field, fieldState }) => (
                 <Field>
                   <FieldLabel htmlFor={field.name}>{t('email')}</FieldLabel>
                   <Input
                     id={field.name}
-                    name={field.name}
                     type="email"
                     placeholder={t('emailPlaceholder')}
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(event) => field.handleChange(event.target.value)}
+                    {...field}
                   />
-                  <FieldError errors={field.state.meta.errors} />
+                  <FieldError errors={[fieldState.error]} />
                   <div className="mt-2 flex items-center space-x-2 rounded-md bg-amber-50 p-2 text-amber-600">
                     <AlertTriangle size={16} />
                     <span className="text-sm">{t('emailChangeWarning')}</span>
                   </div>
                 </Field>
               )}
-            </form.Field>
+            />
 
-            <form.Field name="username">
-              {(field: any) => (
+            <Controller
+              control={form.control}
+              name="username"
+              render={({ field, fieldState }) => (
                 <Field>
                   <FieldLabel htmlFor={field.name}>{t('username')}</FieldLabel>
                   <Input
                     id={field.name}
-                    name={field.name}
                     placeholder={t('usernamePlaceholder')}
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(event) => field.handleChange(event.target.value)}
+                    {...field}
                   />
-                  <FieldError errors={field.state.meta.errors} />
+                  <FieldError errors={[fieldState.error]} />
                 </Field>
               )}
-            </form.Field>
+            />
 
-            <form.Field name="first_name">
-              {(field: any) => (
+            <Controller
+              control={form.control}
+              name="first_name"
+              render={({ field, fieldState }) => (
                 <Field>
                   <FieldLabel htmlFor={field.name}>{t('firstName')}</FieldLabel>
                   <Input
                     id={field.name}
-                    name={field.name}
                     placeholder={t('firstNamePlaceholder')}
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(event) => field.handleChange(event.target.value)}
+                    {...field}
                   />
-                  <FieldError errors={field.state.meta.errors} />
+                  <FieldError errors={[fieldState.error]} />
                 </Field>
               )}
-            </form.Field>
+            />
 
-            <form.Field name="middle_name">
-              {(field: any) => (
+            <Controller
+              control={form.control}
+              name="middle_name"
+              render={({ field, fieldState }) => (
                 <Field>
                   <FieldLabel htmlFor={field.name}>{t('middleName')}</FieldLabel>
                   <Input
                     id={field.name}
-                    name={field.name}
                     placeholder={t('middleNamePlaceholder')}
-                    value={field.state.value ?? ''}
-                    onBlur={field.handleBlur}
-                    onChange={(event) => field.handleChange(event.target.value)}
+                    {...field}
                   />
-                  <FieldError errors={field.state.meta.errors} />
+                  <FieldError errors={[fieldState.error]} />
                 </Field>
               )}
-            </form.Field>
+            />
 
-            <form.Field name="last_name">
-              {(field: any) => (
+            <Controller
+              control={form.control}
+              name="last_name"
+              render={({ field, fieldState }) => (
                 <Field>
                   <FieldLabel htmlFor={field.name}>{t('lastName')}</FieldLabel>
                   <Input
                     id={field.name}
-                    name={field.name}
                     placeholder={t('lastNamePlaceholder')}
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(event) => field.handleChange(event.target.value)}
+                    {...field}
                   />
-                  <FieldError errors={field.state.meta.errors} />
+                  <FieldError errors={[fieldState.error]} />
                 </Field>
               )}
-            </form.Field>
+            />
 
-            <form.Field name="bio">
-              {(field: any) => (
+            <Controller
+              control={form.control}
+              name="bio"
+              render={({ field, fieldState }) => (
                 <Field>
                   <FieldLabel htmlFor={field.name}>
                     {t('bio')}
                     <span className="text-sm text-gray-500">
-                      ({400 - (field.state.value?.length || 0)} {t('charactersLeft')})
+                      ({400 - (field.value?.length || 0)} {t('charactersLeft')})
                     </span>
                   </FieldLabel>
                   <Textarea
                     id={field.name}
-                    name={field.name}
                     placeholder={t('bioPlaceholder')}
                     className="min-h-[150px]"
                     maxLength={400}
-                    value={field.state.value ?? ''}
-                    onBlur={field.handleBlur}
-                    onChange={(event) => field.handleChange(event.target.value)}
+                    {...field}
                   />
-                  <FieldError errors={field.state.meta.errors} />
+                  <FieldError errors={[fieldState.error]} />
                 </Field>
               )}
-            </form.Field>
+            />
 
             {/* Theme Selector */}
             <ThemeSelector className="border-t pt-6" />
@@ -442,7 +425,7 @@ const UserEditForm = ({ form, details, isSubmitting, profilePicture }: UserEditF
                       size="sm"
                       className="text-red-500 hover:bg-red-50 hover:text-red-700"
                       onClick={() => {
-                        form.setFieldValue('details', {});
+                        form.setValue('details', {});
                       }}
                     >
                       {t('clearAll')}
@@ -460,7 +443,7 @@ const UserEditForm = ({ form, details, isSubmitting, profilePicture }: UserEditF
                           icon: '',
                           text: '',
                         };
-                        form.setFieldValue('details', newDetails);
+                        form.setValue('details', newDetails);
                       }}
                     >
                       {t('addDetail')}
@@ -486,7 +469,7 @@ const UserEditForm = ({ form, details, isSubmitting, profilePicture }: UserEditF
                           }
                         }
 
-                        form.setFieldValue('details', newDetails);
+                        form.setValue('details', newDetails);
                       }}
                     >
                       {key === 'general' && <Briefcase className="h-4 w-4" />}
@@ -515,12 +498,12 @@ const UserEditForm = ({ form, details, isSubmitting, profilePicture }: UserEditF
                         ...existingDetail,
                         [field]: value,
                       };
-                      form.setFieldValue('details', newDetails);
+                      form.setValue('details', newDetails);
                     }}
                     onRemove={(id) => {
                       const newDetails = { ...details };
                       const { [id]: removed, ...nextDetails } = newDetails;
-                      form.setFieldValue('details', nextDetails);
+                      form.setValue('details', nextDetails);
                     }}
                     onLabelChange={(id, newLabel) => {
                       const newDetails = { ...details };
@@ -532,7 +515,7 @@ const UserEditForm = ({ form, details, isSubmitting, profilePicture }: UserEditF
                         text: existingDetail?.text || '',
                         ...existingDetail,
                       };
-                      form.setFieldValue('details', newDetails);
+                      form.setValue('details', newDetails);
                     }}
                     availableIcons={AVAILABLE_ICONS}
                   />
@@ -625,9 +608,9 @@ const UserEditForm = ({ form, details, isSubmitting, profilePicture }: UserEditF
         <div className="mx-5 mt-0 mb-5 flex flex-row-reverse">
           <Button
             type="submit"
-            disabled={isSubmitting}
+            disabled={form.formState.isSubmitting}
           >
-            {isSubmitting ? t('saving') : t('saveChanges')}
+            {form.formState.isSubmitting ? t('saving') : t('saveChanges')}
           </Button>
         </div>
       </div>
@@ -646,51 +629,20 @@ const UserEditGeneral = () => {
   const [initialLoading, setInitialLoading] = useState(true);
   const t = useTranslations('DashPage.Notifications');
   const validationSchema = createValidationSchema(t);
-  const defaultValues: FormValues = {
-    username: '',
-    first_name: '',
-    middle_name: '',
-    last_name: '',
-    email: '',
-    bio: '',
-    details: {},
-  };
 
-  const form = useForm({
-    defaultValues,
-    validators: {
-      onChange: validationSchema,
-      onSubmit: validationSchema,
+  const form = useForm<FormValues>({
+    resolver: valibotResolver(validationSchema),
+    defaultValues: {
+      username: '',
+      first_name: '',
+      middle_name: '',
+      last_name: '',
+      email: '',
+      bio: '',
+      details: {},
     },
-    onSubmit: async ({ value }) => {
-      if (!userData?.id) {
-        toast.error(t('profileUpdateError'));
-        return;
-      }
-
-      const isEmailChanged = value.email !== userData.email;
-      const loadingToast = toast.loading(t('updating'));
-
-      try {
-        await updateProfile(value, userData.id);
-        setUserData((current: any) => ({ ...current, ...value }));
-
-        toast.dismiss(loadingToast);
-        if (isEmailChanged) {
-          await handleEmailChange(value.email);
-        } else {
-          toast.success(t('profileUpdateSuccess'));
-        }
-      } catch (error) {
-        console.error('Profile update error:', error);
-        toast.error(t('profileUpdateError'), {
-          id: loadingToast,
-        });
-      }
-    },
+    mode: 'onChange',
   });
-  const details = useStore(form.store, (state) => state.values.details);
-  const isSubmitting = useStore(form.store, (state) => state.isSubmitting);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -771,6 +723,33 @@ const UserEditGeneral = () => {
     await logout({ redirectTo: getAbsoluteUrl('/') });
   };
 
+  const onSubmit = async (values: FormValues) => {
+    if (!userData?.id) {
+      toast.error(t('profileUpdateError'));
+      return;
+    }
+
+    const isEmailChanged = values.email !== userData.email;
+    const loadingToast = toast.loading(t('updating'));
+
+    try {
+      await updateProfile(values, userData.id);
+      setUserData((current: any) => ({ ...current, ...values }));
+
+      toast.dismiss(loadingToast);
+      if (isEmailChanged) {
+        await handleEmailChange(values.email);
+      } else {
+        toast.success(t('profileUpdateSuccess'));
+      }
+    } catch (error) {
+      console.error('Profile update error:', error);
+      toast.error(t('profileUpdateError'), {
+        id: loadingToast,
+      });
+    }
+  };
+
   if (initialLoading || !userData || !currentLocale) {
     return (
       <div className="soft-shadow mx-0 rounded-xl bg-white p-8 sm:mx-10">
@@ -783,17 +762,9 @@ const UserEditGeneral = () => {
 
   return (
     <div className="soft-shadow mx-0 rounded-xl bg-white sm:mx-10">
-      <form
-        onSubmit={(event) => {
-          event.preventDefault();
-          event.stopPropagation();
-          void form.handleSubmit();
-        }}
-      >
+      <form onSubmit={form.handleSubmit(onSubmit)}>
         <UserEditForm
           form={form}
-          details={details}
-          isSubmitting={isSubmitting}
           profilePicture={{
             error,
             success,

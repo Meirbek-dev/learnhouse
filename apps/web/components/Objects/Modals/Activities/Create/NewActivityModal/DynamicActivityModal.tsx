@@ -1,11 +1,13 @@
 'use client';
 import { Field, FieldError, FieldLabel } from '@/components/ui/field';
-import { useForm } from '@tanstack/react-form';
+import { Controller, FormProvider, useForm } from 'react-hook-form';
 import { BarLoader } from '@components/Objects/Loaders/BarLoader';
+import { valibotResolver } from '@hookform/resolvers/valibot';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useTranslations } from 'next-intl';
+import { useTransition } from 'react';
 import * as v from 'valibot';
 
 const createValidationSchema = (t: (key: string) => string) =>
@@ -24,90 +26,85 @@ const DynamicCanvaModal = ({ submitActivity, chapterId, course }: any) => {
   const t = useTranslations('Components.DynamicCanvaModal');
   const validationSchema = createValidationSchema(validationT);
 
-  const form = useForm({
+  const form = useForm<FormValues>({
+    resolver: valibotResolver(validationSchema),
     defaultValues: {
       name: '',
       description: '',
     },
-    validators: {
-      onChange: validationSchema,
-      onSubmit: validationSchema,
-    },
-    onSubmit: async ({ value }) => {
-      await submitActivity({
-        name: value.name,
-        chapter_id: chapterId,
-        activity_type: 'TYPE_DYNAMIC',
-        activity_sub_type: 'SUBTYPE_DYNAMIC_PAGE',
-      });
-    },
   });
 
+  const [isPending, startTransition] = useTransition();
+
+  const onSubmit = (values: FormValues) => {
+    startTransition(() => {
+      void (async () => {
+        await submitActivity({
+          name: values.name,
+          chapter_id: chapterId,
+          activity_type: 'TYPE_DYNAMIC',
+          activity_sub_type: 'SUBTYPE_DYNAMIC_PAGE',
+        });
+      })();
+    });
+  };
+
   return (
-    <form
-      onSubmit={(event) => {
-        event.preventDefault();
-        event.stopPropagation();
-        void form.handleSubmit();
-      }}
-      className="space-y-4"
-    >
-      <form.Field name="name">
-        {(field) => (
-          <Field>
-            <FieldLabel htmlFor={field.name}>{t('activityName')}</FieldLabel>
-            <Input
-              id={field.name}
-              name={field.name}
-              type="text"
-              value={field.state.value}
-              onBlur={field.handleBlur}
-              onChange={(event) => field.handleChange(event.target.value)}
-            />
-            <FieldError errors={field.state.meta.errors} />
-          </Field>
-        )}
-      </form.Field>
-
-      <form.Field name="description">
-        {(field) => (
-          <Field>
-            <FieldLabel htmlFor={field.name}>{t('activityDescription')}</FieldLabel>
-            <Textarea
-              id={field.name}
-              name={field.name}
-              value={field.state.value}
-              onBlur={field.handleBlur}
-              onChange={(event) => field.handleChange(event.target.value)}
-            />
-            <FieldError errors={field.state.meta.errors} />
-          </Field>
-        )}
-      </form.Field>
-
-      <div className="mt-6 flex justify-end">
-        <form.Subscribe
-          selector={(state) => [state.canSubmit, state.isSubmitting]}
-          children={([canSubmit, isSubmitting]) => (
-            <Button
-              type="submit"
-              className="mt-2.5"
-              disabled={!canSubmit || isSubmitting}
-            >
-              {isSubmitting ? (
-                <BarLoader
-                  cssOverride={{ borderRadius: 60 }}
-                  width={60}
-                  color="#ffffff"
-                />
-              ) : (
-                t('createActivity')
-              )}
-            </Button>
+    <FormProvider {...form}>
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="space-y-4"
+      >
+        <Controller
+          control={form.control}
+          name="name"
+          render={({ field, fieldState }) => (
+            <Field>
+              <FieldLabel htmlFor={field.name}>{t('activityName')}</FieldLabel>
+              <Input
+                id={field.name}
+                type="text"
+                {...field}
+              />
+              <FieldError errors={[fieldState.error]} />
+            </Field>
           )}
         />
-      </div>
-    </form>
+
+        <Controller
+          control={form.control}
+          name="description"
+          render={({ field, fieldState }) => (
+            <Field>
+              <FieldLabel htmlFor={field.name}>{t('activityDescription')}</FieldLabel>
+              <Textarea
+                id={field.name}
+                {...field}
+              />
+              <FieldError errors={[fieldState.error]} />
+            </Field>
+          )}
+        />
+
+        <div className="mt-6 flex justify-end">
+          <Button
+            type="submit"
+            className="mt-2.5"
+            disabled={isPending || form.formState.isSubmitting}
+          >
+            {isPending || form.formState.isSubmitting ? (
+              <BarLoader
+                cssOverride={{ borderRadius: 60 }}
+                width={60}
+                color="#ffffff"
+              />
+            ) : (
+              t('createActivity')
+            )}
+          </Button>
+        </div>
+      </form>
+    </FormProvider>
   );
 };
 

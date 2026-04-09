@@ -14,6 +14,7 @@
 import { normalizeToUIMessage, stream } from '@tanstack/ai-client';
 import { getAPIUrl } from '@services/config/config';
 import type { TextPart } from '@tanstack/ai-client';
+import { generateUUID } from '@/lib/utils';
 
 /** Maximum buffer size (64 KB) to guard against a pathological server sending partial lines. */
 const MAX_BUFFER_BYTES = 65_536;
@@ -102,7 +103,7 @@ export function createActivityChatAdapter({
   const connection = stream(async function* connection(messages, _data) {
     // Extract the last user message text from the UIMessage parts array.
     const lastUser = [...messages].toReversed().find((m) => m.role === 'user');
-    const normalizedLastUser = lastUser ? normalizeToUIMessage(lastUser, () => crypto.randomUUID()) : null;
+    const normalizedLastUser = lastUser ? normalizeToUIMessage(lastUser, () => generateUUID()) : null;
     const text =
       normalizedLastUser?.parts
         .filter((p): p is TextPart => p.type === 'text')
@@ -136,8 +137,8 @@ export function createActivityChatAdapter({
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
 
-    const runId = crypto.randomUUID();
-    const messageId = crypto.randomUUID();
+    const runId = generateUUID();
+    const messageId = generateUUID();
     const now = () => Date.now();
 
     let messageStarted = false;

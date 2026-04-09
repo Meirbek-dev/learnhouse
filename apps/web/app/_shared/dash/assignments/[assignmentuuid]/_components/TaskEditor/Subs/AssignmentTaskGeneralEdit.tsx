@@ -1,14 +1,15 @@
 'use client';
-import { useForm } from '@tanstack/react-form';
 import { useAssignmentsTaskStore } from '@components/Contexts/Assignments/AssignmentsTaskContext';
 import { AlertCircle, Cloud, Download, File, Info, Loader2, UploadCloud } from 'lucide-react';
 import { updateAssignmentTask, updateReferenceFile } from '@services/courses/assignments';
 import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
 import { Field, FieldError, FieldLabel } from '@components/ui/field';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useTransition } from 'react';
 import { Alert, AlertDescription } from '@components/ui/alert';
+import { valibotResolver } from '@hookform/resolvers/valibot';
 import { getTaskRefFileDir } from '@services/media/media';
 import { constructAcceptValue } from '@/lib/constants';
+import { Controller, useForm } from 'react-hook-form';
 import { DragDropContext } from '@hello-pangea/dnd';
 import { Textarea } from '@components/ui/textarea';
 import { Button } from '@components/ui/button';
@@ -19,7 +20,6 @@ import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
 import { toast } from 'sonner';
 import * as v from 'valibot';
-import { valibotFormValidator } from '@/lib/tanstack-form';
 
 const SUPPORTED_FILES = constructAcceptValue(['pdf', 'docx', 'mp4', 'mkv', 'jpg', 'png', 'pptx', 'zip']);
 
@@ -44,7 +44,6 @@ export const AssignmentTaskGeneralEdit = () => {
   const reload = useAssignmentsTaskStore((s) => s.reload);
   const assignment = useAssignments();
   const validationSchema = createValidationSchema(t);
-  const formValidator = valibotFormValidator(validationSchema);
 
   // Check if assignment task data is loaded and task is selected
   const isTaskSelected = selectedAssignmentTaskUUID !== null;
@@ -53,49 +52,54 @@ export const AssignmentTaskGeneralEdit = () => {
     Object.keys(assignmentTask).length > 0 &&
     selectedAssignmentTaskUUID === assignmentTask.assignment_task_uuid;
 
-  const form = useForm({
+  const form = useForm<TaskFormData>({
+    resolver: valibotResolver(validationSchema),
     defaultValues: {
-      title: "",
-      description: "",
-      hint: "",
+      title: '',
+      description: '',
+      hint: '',
       max_grade_value: 20,
     },
-    validators: {
-      onChange: formValidator,
-      onSubmit: formValidator,
-    },
-    onSubmit: async ({ value }) => {
-      if (!isTaskLoaded) {
-        toast.error(t("taskNotLoaded"));
-        return;
-      }
-
-      try {
-        const assignmentTaskUUID = assignmentTask?.assignment_task_uuid;
-        const assignmentUUID = assignment?.assignment_object?.assignment_uuid;
-
-        if (!assignmentTaskUUID || !assignmentUUID) {
-          toast.error(t("saveError"));
-          return;
-        }
-
-        const res = await updateAssignmentTask({
-          body: value,
-          assignmentTaskUUID,
-          assignmentUUID,
-        });
-        if (res.success) {
-          reload();
-          toast.success(t("saveSuccess"));
-        } else {
-          toast.error(t("saveError"));
-        }
-      } catch (error) {
-        console.error("Error updating assignment task:", error);
-        toast.error(t("saveError"));
-      }
-    },
+    mode: 'onChange',
   });
+
+  const [isPending, startTransition] = useTransition();
+
+  const handleSubmit = (values: TaskFormData) => {
+    if (!isTaskLoaded) {
+      toast.error(t('taskNotLoaded'));
+      return;
+    }
+
+    startTransition(() => {
+      void (async () => {
+        try {
+          const assignmentTaskUUID = assignmentTask?.assignment_task_uuid;
+          const assignmentUUID = assignment?.assignment_object?.assignment_uuid;
+
+          if (!assignmentTaskUUID || !assignmentUUID) {
+            toast.error(t('saveError'));
+            return;
+          }
+
+          const res = await updateAssignmentTask({
+            body: values,
+            assignmentTaskUUID,
+            assignmentUUID,
+          });
+          if (res.success) {
+            reload();
+            toast.success(t('saveSuccess'));
+          } else {
+            toast.error(t('saveError'));
+          }
+        } catch (error) {
+          console.error('Error updating assignment task:', error);
+          toast.error(t('saveError'));
+        }
+      })();
+    });
+  };
 
   // Update form values when assignment task changes
   useEffect(() => {
@@ -142,66 +146,41 @@ export const AssignmentTaskGeneralEdit = () => {
 
   return (
     <form
-      onSubmit={(event) => {
-        event.preventDefault();
-        event.stopPropagation();
-        void form.handleSubmit();
-      }}
+      onSubmit={form.handleSubmit(handleSubmit)}
       className="space-y-6"
     >
-      <form.Field name="title">
-        {(field) => (
-          <Field>
-            <FieldLabel htmlFor={field.name}>{t('title')}</FieldLabel>
-            <Input
-              id={field.name}
-              name={field.name}
-              type="text"
-              placeholder={t('titlePlaceholder')}
-              value={field.state.value}
-              onBlur={field.handleBlur}
-              onChange={(event) => field.handleChange(event.target.value)}
-            />
-            <FieldError errors={field.state.meta.errors} />
-          </Field>
-        )}
-      </form.Field>
+      <Field>
+        <FieldLabel htmlFor="title">{t('title')}</FieldLabel>
+        <Input
+          id="title"
+          type="text"
+          placeholder={t('titlePlaceholder')}
+          {...form.register('title')}
+        />
+        <FieldError errors={[form.formState.errors.title]} />
+      </Field>
 
-      <form.Field name="description">
-        {(field) => (
-          <Field>
-            <FieldLabel htmlFor={field.name}>{t('description')}</FieldLabel>
-            <Textarea
-              id={field.name}
-              name={field.name}
-              placeholder={t('descriptionPlaceholder')}
-              className="min-h-[100px]"
-              value={field.state.value ?? ''}
-              onBlur={field.handleBlur}
-              onChange={(event) => field.handleChange(event.target.value)}
-            />
-            <FieldError errors={field.state.meta.errors} />
-          </Field>
-        )}
-      </form.Field>
+      <Field>
+        <FieldLabel htmlFor="description">{t('description')}</FieldLabel>
+        <Textarea
+          id="description"
+          placeholder={t('descriptionPlaceholder')}
+          className="min-h-[100px]"
+          {...form.register('description')}
+        />
+        <FieldError errors={[form.formState.errors.description]} />
+      </Field>
 
-      <form.Field name="hint">
-        {(field) => (
-          <Field>
-            <FieldLabel htmlFor={field.name}>{t('hint')}</FieldLabel>
-            <Textarea
-              id={field.name}
-              name={field.name}
-              placeholder={t('hintPlaceholder')}
-              className="min-h-[80px]"
-              value={field.state.value ?? ''}
-              onBlur={field.handleBlur}
-              onChange={(event) => field.handleChange(event.target.value)}
-            />
-            <FieldError errors={field.state.meta.errors} />
-          </Field>
-        )}
-      </form.Field>
+      <Field>
+        <FieldLabel htmlFor="hint">{t('hint')}</FieldLabel>
+        <Textarea
+          id="hint"
+          placeholder={t('hintPlaceholder')}
+          className="min-h-[80px]"
+          {...form.register('hint')}
+        />
+        <FieldError errors={[form.formState.errors.hint]} />
+      </Field>
 
       <div className="space-y-2">
         <div className="flex items-center justify-between space-x-3">
@@ -214,36 +193,32 @@ export const AssignmentTaskGeneralEdit = () => {
         <UpdateTaskRef />
       </div>
 
-      <form.Field name="max_grade_value">
-        {(field) => (
+      <Controller
+        control={form.control}
+        name="max_grade_value"
+        render={({ field, fieldState }) => (
           <Field>
             <FieldLabel htmlFor={field.name}>{t('maxGradeValue')}</FieldLabel>
             <Input
               id={field.name}
-              name={field.name}
               type="number"
-              value={field.state.value}
-              onBlur={field.handleBlur}
-              onChange={(event) => {
-                field.handleChange(Number(event.target.value));
+              {...field}
+              onChange={(e) => {
+                field.onChange(Number(e.target.value));
               }}
             />
-            <FieldError errors={field.state.meta.errors} />
+            <FieldError errors={[fieldState.error]} />
           </Field>
         )}
-      </form.Field>
+      />
 
-      <form.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting]}>
-        {([canSubmit, isSubmitting]) => (
-          <Button
-            type="submit"
-            className="mt-4 w-full bg-green-500 px-4 py-2 font-semibold text-white hover:bg-green-600"
-            disabled={!canSubmit || isSubmitting}
-          >
-            {isSubmitting ? t('saving') : t('save')}
-          </Button>
-        )}
-      </form.Subscribe>
+      <Button
+        type="submit"
+        className="mt-4 w-full bg-green-500 px-4 py-2 font-semibold text-white hover:bg-green-600"
+        disabled={isPending || form.formState.isSubmitting}
+      >
+        {isPending || form.formState.isSubmitting ? t('saving') : t('save')}
+      </Button>
     </form>
   );
 };
