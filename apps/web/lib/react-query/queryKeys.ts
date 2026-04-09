@@ -1,5 +1,9 @@
 export const queryKeys = {
+  activities: {
+    detail: (activityUuid: string) => ['activities', 'detail', activityUuid] as const,
+  },
   assignments: {
+    activity: (activityUuid: string) => ['assignments', 'activity', activityUuid] as const,
     detail: (assignmentUuid: string) => ['assignments', 'detail', assignmentUuid] as const,
     submissions: (assignmentUuid: string) => ['assignments', 'submissions', assignmentUuid] as const,
     tasks: (assignmentUuid: string) => ['assignments', 'tasks', assignmentUuid] as const,
@@ -30,6 +34,23 @@ export const queryKeys = {
     config: () => ['exams', 'config'] as const,
     myAttempt: (examUuid: string) => ['exams', 'attempts', 'me', examUuid] as const,
     questions: (examUuid: string) => ['exams', 'questions', examUuid] as const,
+  },
+  grading: {
+    detail: (submissionUuid: string) => ['grading', 'submission', submissionUuid] as const,
+    mine: (activityId: number) => ['grading', 'my-submissions', activityId] as const,
+    stats: (activityId: number) => ['grading', 'submission-stats', activityId] as const,
+    submissions: (params: {
+      activityId: number;
+      page: number;
+      pageSize: number;
+      search: string;
+      sortBy: string;
+      sortDir: 'asc' | 'desc';
+      status: string;
+    }) => ['grading', 'submissions', params] as const,
+  },
+  landing: {
+    courses: (page: number, limit: number) => ['landing', 'courses', { page, limit }] as const,
   },
   payments: {
     config: () => ['payments', 'config'] as const,

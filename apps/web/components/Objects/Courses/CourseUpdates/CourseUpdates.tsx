@@ -18,11 +18,10 @@ import { useEffectEvent, useLayoutEffect, useState, useTransition } from 'react'
 import { Field, FieldContent, FieldError, FieldLabel } from '@components/ui/field';
 import { queryKeys } from '@/lib/react-query/queryKeys';
 import { Actions, Resources, Scopes } from '@/types/permissions';
-import { getCourseUpdatesSwrKey } from '@services/courses/keys';
+import { courseUpdatesQueryOptions } from '@/features/courses/queries/course.query';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { useDateFnsLocale } from '@/hooks/useDateFnsLocale';
-import { apiFetcher } from '@services/utils/ts/requests';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { usePermissions } from '@/components/Security';
 import { format, formatDistanceToNow } from 'date-fns';
@@ -40,8 +39,7 @@ const getCourseUpdatesQueryKey = (courseUuid?: string | null) =>
 
 const useCourseUpdatesQuery = (courseUuid?: string | null) =>
   useQuery({
-    queryKey: getCourseUpdatesQueryKey(courseUuid),
-    queryFn: () => apiFetcher(getCourseUpdatesSwrKey(courseUuid)),
+    ...(courseUuid ? courseUpdatesQueryOptions(courseUuid) : { queryKey: getCourseUpdatesQueryKey(courseUuid) }),
     enabled: Boolean(courseUuid),
   });
 

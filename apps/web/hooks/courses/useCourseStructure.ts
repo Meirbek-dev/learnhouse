@@ -1,8 +1,8 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { apiFetcher } from '@services/utils/ts/requests';
-import { courseEndpoints, courseKeys } from './courseKeys';
+import { courseKeys } from './courseKeys';
+import { courseStructureQueryOptions } from '@/features/courses/queries/course.query';
 
 interface UseCourseStructureOptions<TCourseStructure> {
   withUnpublishedActivities?: boolean;
@@ -24,18 +24,25 @@ export function useCourseStructure<TCourseStructure = any>(
   const key = courseKeys.structure(courseUuid, withUnpublishedActivities);
 
   const query = useQuery({
-    queryKey: key,
-    queryFn: () => apiFetcher(courseEndpoints.structure(courseUuid, withUnpublishedActivities)) as Promise<TCourseStructure>,
+    ...courseStructureQueryOptions<TCourseStructure>(courseUuid, withUnpublishedActivities),
     enabled: Boolean(courseUuid),
     initialData: options?.fallbackData,
-    staleTime: 5000,
   });
 
   return {
-    ...query,
     courseStructure: query.data,
+    data: query.data,
+    error: query.error,
+    fetchStatus: query.fetchStatus,
+    isError: query.isError,
+    isFetching: query.isFetching,
     isLoading: query.isPending,
+    isPending: query.isPending,
+    isSuccess: query.isSuccess,
     key,
+    mutate: async () => (await query.refetch()).data,
+    refetch: query.refetch,
+    status: query.status,
   };
 }
 

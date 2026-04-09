@@ -15,12 +15,11 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Field, FieldDescription, FieldError, FieldLabel } from '@/components/ui/field';
 import { apiFetch } from '@/lib/api-client';
-import { queryKeys } from '@/lib/react-query/queryKeys';
+import { codeChallengeSettingsQueryOptions } from '@/features/code-challenges/queries/code-challenges.query';
 import ComboboxMultiple from '@/components/ui/custom/multiple-combobox';
 import { JUDGE0_LANGUAGES } from './LanguageSelector';
 import { Textarea } from '@/components/ui/textarea';
 import { Skeleton } from '@/components/ui/skeleton';
-import { getAPIUrl } from '@services/config/config';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -94,6 +93,7 @@ export function createConfigFormSchema(t: (key: string, params?: any) => string)
 
 type FormValues = v.InferOutput<typeof formSchema>;
 type FormInputValues = v.InferInput<typeof formSchema>;
+type ExistingSettings = FormValues;
 
 const fetcher = async (url: string) => {
   const res = await fetch(url, { credentials: 'include' });
@@ -111,10 +111,8 @@ export default function CodeChallengeConfigEditor({ activityUuid, courseId }: Co
 
   // Fetch existing settings
   const { data: existingSettings, isLoading } = useQuery({
-    queryKey: queryKeys.codeChallenges.settings(activityUuid),
-    queryFn: () => fetcher(`${getAPIUrl()}code-challenges/${activityUuid}/settings`),
+    ...codeChallengeSettingsQueryOptions<ExistingSettings>(activityUuid),
     enabled: Boolean(activityUuid),
-    refetchOnWindowFocus: false,
   });
 
   const schema = useMemo(() => createConfigFormSchema(t), [t]);

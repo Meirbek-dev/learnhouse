@@ -3,7 +3,8 @@
 import type { components } from '@/lib/api/generated';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { getCoursesLinkedToProduct, unlinkCourseFromProduct } from '@services/payments/products';
+import { unlinkCourseFromProduct } from '@services/payments/products';
+import { productCoursesQueryOptions } from '@/features/payments/queries/payments.query';
 import { queryKeys } from '@/lib/react-query/queryKeys';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
 import { BookOpen, Plus, Trash2 } from 'lucide-react';
@@ -28,13 +29,8 @@ export default function ProductLinkedCourses({ productId }: ProductLinkedCourses
 
   const linkedCoursesKey = queryKeys.payments.productCourses(productId);
 
-  const { data: linkedCourses, error } = useQuery({
-    queryKey: linkedCoursesKey,
-    queryFn: async () => {
-      const response = await getCoursesLinkedToProduct(productId);
-      return response.data || [];
-    },
-  });
+  const { data: linkedCoursesResponse, error } = useQuery(productCoursesQueryOptions(productId));
+  const linkedCourses = linkedCoursesResponse?.data ?? [];
 
   // Show error toast if fetch fails
   useEffect(() => {
@@ -44,8 +40,6 @@ export default function ProductLinkedCourses({ productId }: ProductLinkedCourses
   }, [error, tNotify]);
 
   const handleUnlinkCourse = async (courseId: number) => {
-    if (!linkedCourses) return;
-
     const prev = linkedCourses;
     queryClient.setQueryData(
       linkedCoursesKey,

@@ -27,8 +27,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import SubmissionsTable from '@/components/Grading/SubmissionsTable';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { AlertCircle, ClipboardList } from 'lucide-react';
-import { apiFetcher } from '@services/utils/ts/requests';
-import { getAPIUrl } from '@services/config/config';
+import { assignmentSubmissionsQueryOptions } from '@/features/assignments/queries/assignments.query';
 import { Badge } from '@/components/ui/badge';
 
 type AssignmentSubmissionStatus = 'PENDING' | 'SUBMITTED' | 'GRADED' | 'LATE' | 'NOT_SUBMITTED';
@@ -98,10 +97,9 @@ export default function AssignmentSubmissionsSubPage({ assignment_uuid }: Assign
   const activityId: number | null = assignments?.activity_object?.id ?? null;
 
   const { data: assignmentSubmissionRows, error: assignmentSubmissionRowsError } = useQuery({
-    queryKey: canonicalAssignmentUuid
-      ? ['assignments', 'submissions', canonicalAssignmentUuid]
-      : ['assignments', 'submissions', 'missing'],
-    queryFn: () => apiFetcher(`${getAPIUrl()}assignments/${canonicalAssignmentUuid}/submissions`) as Promise<AssignmentSubmissionRow[]>,
+    ...(canonicalAssignmentUuid
+      ? assignmentSubmissionsQueryOptions<AssignmentSubmissionRow>(canonicalAssignmentUuid)
+      : { queryKey: ['assignments', 'submissions', 'missing'] as const }),
     enabled: Boolean(canonicalAssignmentUuid),
   });
 
@@ -109,9 +107,11 @@ export default function AssignmentSubmissionsSubPage({ assignment_uuid }: Assign
     return <PageLoading />;
   }
 
-  const gradedCount = assignmentSubmissionRows?.filter((row) => row.submission_status === 'GRADED').length ?? 0;
+  const gradedCount = assignmentSubmissionRows?.filter((row: AssignmentSubmissionRow) => row.submission_status === 'GRADED').length ?? 0;
   const submittedCount =
-    assignmentSubmissionRows?.filter((row) => row.submission_status === 'SUBMITTED' || row.submission_status === 'LATE')
+    assignmentSubmissionRows?.filter(
+      (row: AssignmentSubmissionRow) => row.submission_status === 'SUBMITTED' || row.submission_status === 'LATE',
+    )
       .length ?? 0;
 
   return (
@@ -162,7 +162,7 @@ export default function AssignmentSubmissionsSubPage({ assignment_uuid }: Assign
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {assignmentSubmissionRows.map((row) => (
+                {assignmentSubmissionRows.map((row: AssignmentSubmissionRow) => (
                   <TableRow key={row.assignmentusersubmission_uuid}>
                     <TableCell>
                       <div className="font-medium text-slate-900">{getUserDisplayName(row.user)}</div>

@@ -8,14 +8,10 @@
  * AssignmentSubmissionContext, AssignmentsTaskContext, etc.
  */
 
-import { apiFetcher } from '@services/utils/ts/requests';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { getAPIUrl } from '@services/config/config';
 import type { Submission } from '@/types/grading';
-
-const gradingKeys = {
-  mine: (activityId: number) => ['grading', 'my-submissions', activityId] as const,
-};
+import { queryKeys } from '@/lib/react-query/queryKeys';
+import { mySubmissionQueryOptions } from '@/features/grading/queries/grading.query';
 
 export interface UseMySubmissionResult {
   submission: Submission | null;
@@ -26,10 +22,8 @@ export interface UseMySubmissionResult {
 
 export function useMySubmission(activityId: number | null): UseMySubmissionResult {
   const queryClient = useQueryClient();
-  const queryKey = activityId === null ? ['grading', 'my-submissions', 'missing'] : gradingKeys.mine(activityId);
   const query = useQuery({
-    queryKey,
-    queryFn: () => apiFetcher(`${getAPIUrl()}grading/submissions/me?activity_id=${activityId}`) as Promise<Submission[]>,
+    ...mySubmissionQueryOptions(activityId ?? 0),
     enabled: activityId !== null,
   });
 
@@ -42,11 +36,8 @@ export function useMySubmission(activityId: number | null): UseMySubmissionResul
     error: (query.error) ?? null,
     mutate: async () => {
       if (activityId === null) return undefined;
-      await queryClient.invalidateQueries({ queryKey: gradingKeys.mine(activityId) });
-      return queryClient.fetchQuery({
-        queryKey: gradingKeys.mine(activityId),
-        queryFn: () => apiFetcher(`${getAPIUrl()}grading/submissions/me?activity_id=${activityId}`) as Promise<Submission[]>,
-      });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.grading.mine(activityId) });
+      return queryClient.fetchQuery(mySubmissionQueryOptions(activityId));
     },
   };
 }

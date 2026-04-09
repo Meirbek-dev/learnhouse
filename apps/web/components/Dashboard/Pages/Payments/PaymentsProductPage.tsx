@@ -30,11 +30,11 @@ import {
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import UnconfiguredPaymentsDisclaimer from '@components/Pages/Payments/UnconfiguredPaymentsDisclaimer';
 import { queryKeys } from '@/lib/react-query/queryKeys';
-import { archiveProduct, getProducts, updateProduct } from '@services/payments/products';
+import { archiveProduct, updateProduct } from '@services/payments/products';
+import { paymentConfigsQueryOptions, paymentProductsQueryOptions } from '@/features/payments/queries/payments.query';
 import ProductLinkedCourses from './SubComponents/ProductLinkedCourses';
 import { Field, FieldContent, FieldError, FieldLabel } from '@components/ui/field';
 import CreateProductForm from './SubComponents/CreateProductForm';
-import { getPaymentConfigs } from '@services/payments/payments';
 import { usePaymentsEnabled } from '@hooks/usePaymentsEnabled';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
 import { valibotResolver } from '@hookform/resolvers/valibot';
@@ -153,15 +153,9 @@ const PaymentsProductPage = () => {
   const { isEnabled, isLoading } = usePaymentsEnabled();
   const t = useTranslations('DashPage.Payments.ProductPage');
 
-  const { data: products, error } = useQuery({
-    queryKey: queryKeys.payments.products(),
-    queryFn: () => getProducts(),
-  });
+  const { data: products, error } = useQuery(paymentProductsQueryOptions());
 
-  const { data: paymentConfigs, error: paymentConfigError } = useQuery({
-    queryKey: queryKeys.payments.config(),
-    queryFn: () => getPaymentConfigs(),
-  });
+  const { data: paymentConfigs, error: paymentConfigError } = useQuery(paymentConfigsQueryOptions());
 
   const isStripeEnabled = paymentConfigs
     ? Boolean(paymentConfigs.find((config: PaymentsConfigRead) => config.provider === 'stripe'))

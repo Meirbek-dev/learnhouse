@@ -2,7 +2,7 @@
 
 import { apiFetch } from '@/lib/api-client';
 import { useQuery } from '@tanstack/react-query';
-import { queryKeys } from '@/lib/react-query/queryKeys';
+import { examConfigQueryOptions } from '@/features/exams/queries/exams.query';
 
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,10 +10,8 @@ import { Field, FieldDescription, FieldError, FieldLabel } from '@/components/ui
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import { valibotResolver } from '@hookform/resolvers/valibot';
-import { apiFetcher } from '@services/utils/ts/requests';
 import WhitelistManagement from './WhitelistManagement';
 import { Separator } from '@/components/ui/separator';
-import { getAPIUrl } from '@services/config/config';
 import { useEffect, useMemo } from 'react';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
@@ -76,10 +74,7 @@ export default function ExamSettings({ exam, courseUuid, onSettingsUpdated }: Ex
 
   const settings = exam.settings || {};
 
-  const { data: limits, error: limitsError } = useQuery({
-    queryKey: queryKeys.exams.config(),
-    queryFn: () => apiFetcher(`${getAPIUrl()}exams/config`),
-  });
+  const { data: limits, error: limitsError } = useQuery(examConfigQueryOptions());
 
   // show a soft error; allow editing with default bounds
   if (limitsError) {

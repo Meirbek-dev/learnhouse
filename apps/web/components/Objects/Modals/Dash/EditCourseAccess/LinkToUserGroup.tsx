@@ -3,10 +3,9 @@
 import { useQuery } from '@tanstack/react-query';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { linkResourcesToUserGroup } from '@services/usergroups/usergroups';
-import { getAPIUrl, getAbsoluteUrl } from '@services/config/config';
+import { getAbsoluteUrl } from '@services/config/config';
 import { useCourse } from '@components/Contexts/CourseContext';
-import { queryKeys } from '@/lib/react-query/queryKeys';
-import { apiFetcher } from '@services/utils/ts/requests';
+import { userGroupsQueryOptions } from '@/features/users/queries/users.query';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
 import { Info } from 'lucide-react';
@@ -29,8 +28,7 @@ const LinkToUserGroup = (props: LinkToUserGroupProps) => {
   const { courseStructure } = course;
 
   const { data: usergroups } = useQuery({
-    queryKey: queryKeys.userGroups.all(),
-    queryFn: () => apiFetcher(`${getAPIUrl()}usergroups`) as Promise<UserGroup[]>,
+    ...userGroupsQueryOptions(),
     enabled: Boolean(courseStructure),
   });
   const [selectedUserGroup, setSelectedUserGroup] = useState<number | null>(null);

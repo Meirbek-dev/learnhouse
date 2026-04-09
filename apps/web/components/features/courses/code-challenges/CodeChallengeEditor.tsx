@@ -4,16 +4,18 @@ import { History, Loader2, Play, Send, Terminal } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useQuery } from '@tanstack/react-query';
+import {
+  codeChallengeSubmissionQueryOptions,
+  codeChallengeSubmissionsQueryOptions,
+} from '@/features/code-challenges/queries/code-challenges.query';
 
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { apiFetch } from '@/lib/api-client';
-import { queryKeys } from '@/lib/react-query/queryKeys';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
-import { getAPIUrl } from '@services/config/config';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
@@ -104,21 +106,17 @@ export function CodeChallengeEditor({
     data: submissions,
     refetch: refreshSubmissions,
   } = useQuery({
-    queryKey: queryKeys.codeChallenges.submissions(activityUuid),
-    queryFn: () => fetcher(`${getAPIUrl()}code-challenges/${activityUuid}/submissions`),
+    ...codeChallengeSubmissionsQueryOptions<Submission>(activityUuid),
     enabled: Boolean(activityUuid),
-    refetchOnWindowFocus: false,
   });
 
   // Poll for active submission status
   const { data: activeSubmission } = useQuery({
-    queryKey: activeSubmissionId
-      ? queryKeys.codeChallenges.submission(activeSubmissionId)
-      : (['code-challenges', 'submission', 'disabled'] as const),
-    queryFn: () => fetcher(`${getAPIUrl()}code-challenges/submissions/${activeSubmissionId}`),
+    ...(activeSubmissionId
+      ? codeChallengeSubmissionQueryOptions<Submission>(activeSubmissionId)
+      : { queryKey: ['code-challenges', 'submission', 'disabled'] as const }),
     enabled: Boolean(activeSubmissionId),
     refetchInterval: activeSubmissionId ? 1000 : false,
-    refetchOnWindowFocus: false,
   });
 
   // Handle submission completion

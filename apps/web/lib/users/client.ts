@@ -6,6 +6,7 @@ import { getQueryClient } from '@/lib/react-query/queryClient';
 import { queryKeys } from '@/lib/react-query/queryKeys';
 import type { CustomResponseTyping } from '@services/utils/ts/requests';
 import type { components } from '@/lib/api/generated';
+import { userByIdQueryOptions, userByUsernameQueryOptions } from '@/features/users/queries/users.query';
 
 type UserRead = components['schemas']['UserRead'];
 type CourseRead = components['schemas']['CourseRead'];
@@ -145,8 +146,7 @@ export function useUserById(userId?: number | null, options?: { enabled?: boolea
   const enabled = Boolean(userId) && (options?.enabled ?? true);
 
   return useQuery({
-    queryKey: enabled && userId ? userKeys.byId(userId) : ['users', 'detail', 'missing'],
-    queryFn: () => getUserById(userId!),
+    ...userByIdQueryOptions(userId ?? 0),
     enabled,
   });
 }
@@ -156,8 +156,7 @@ export function useUserByUsername(username?: string | null, options?: { enabled?
   const enabled = normalizedUsername.length > 0 && (options?.enabled ?? true);
 
   return useQuery({
-    queryKey: enabled ? userKeys.byUsername(normalizedUsername) : ['users', 'username', 'missing'],
-    queryFn: () => getUserByUsername(normalizedUsername),
+    ...(enabled ? userByUsernameQueryOptions(normalizedUsername) : { queryKey: ['users', 'username', 'missing'] as const }),
     enabled,
   });
 }

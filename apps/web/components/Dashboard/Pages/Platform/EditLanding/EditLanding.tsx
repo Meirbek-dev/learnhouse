@@ -22,9 +22,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs';
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 import { createElement, useEffect, useState, useTransition } from 'react';
 import { usePlatform } from '@/components/Contexts/PlatformContext';
-import { queryKeys } from '@/lib/react-query/queryKeys';
 import { getLandingMediaDirectory } from '@services/media/media';
-import { getCourses } from '@services/courses/courses';
+import { platformCoursesQueryOptions } from '@/features/courses/queries/course.query';
 import { Textarea } from '@components/ui/textarea';
 import NextImage from '@components/ui/NextImage';
 import { useQuery } from '@tanstack/react-query';
@@ -1995,10 +1994,7 @@ const FeaturedCoursesEditor: FC<{
   section: LandingFeaturedCourses;
   onChange: (section: LandingFeaturedCourses) => void;
 }> = ({ t, section, onChange }) => {
-  const { data: coursesData } = useQuery({
-    queryKey: queryKeys.platform.courses(),
-    queryFn: () => getCourses(),
-  });
+  const { data: coursesData } = useQuery(platformCoursesQueryOptions());
   const courses = coursesData?.courses;
 
   return (

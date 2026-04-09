@@ -1,14 +1,9 @@
 'use client';
 
-import type { SubmissionStatus, SubmissionsPage } from '@/types/grading';
+import type { SubmissionStatus } from '@/types/grading';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { apiFetcher } from '@services/utils/ts/requests';
-import { getAPIUrl } from '@services/config/config';
+import { submissionsQueryOptions } from '@/features/grading/queries/grading.query';
 import { useState, useEffect } from 'react';
-
-const gradingKeys = {
-  submissions: (params: Record<string, string | number>) => ['grading', 'submissions', params] as const,
-};
 
 export interface UseSubmissionsOptions {
   activityId: number | null;
@@ -50,12 +45,11 @@ export function useSubmissions({
     sortBy,
     sortDir,
     status: status ?? 'ALL',
-  };
-  const queryKey = gradingKeys.submissions(queryParams);
+  } as const;
+  const queryKey = submissionsQueryOptions(queryParams).queryKey;
   const queryClient = useQueryClient();
   const query = useQuery({
-    queryKey,
-    queryFn: () => apiFetcher(`${getAPIUrl()}grading/submissions?${params}`) as Promise<SubmissionsPage>,
+    ...submissionsQueryOptions(queryParams),
     enabled: Boolean(activityId),
   });
 
@@ -68,11 +62,9 @@ export function useSubmissions({
     isLoading: query.isPending,
     error: query.error ?? null,
     mutate: async () => {
+      if (!activityId) return undefined;
       await queryClient.invalidateQueries({ queryKey });
-      return queryClient.fetchQuery({
-        queryKey,
-        queryFn: () => apiFetcher(`${getAPIUrl()}grading/submissions?${params}`) as Promise<SubmissionsPage>,
-      });
+      return queryClient.fetchQuery(submissionsQueryOptions(queryParams));
     },
   };
 }

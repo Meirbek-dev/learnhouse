@@ -1,22 +1,30 @@
 'use client';
 
-import { apiFetcher } from '@services/utils/ts/requests';
 import { useQuery } from '@tanstack/react-query';
-import { courseEndpoints, courseKeys } from './courseKeys';
+import { courseKeys } from './courseKeys';
+import { courseQueryOptions } from '@/features/courses/queries/course.query';
 
 export function useCourse<TCourse = any>(courseUuid: string) {
   const key = courseKeys.detail(courseUuid);
 
   const query = useQuery({
-    queryKey: key,
-    queryFn: () => apiFetcher(courseEndpoints.detail(courseUuid)) as Promise<TCourse>,
+    ...courseQueryOptions<TCourse>(courseUuid),
     enabled: Boolean(courseUuid),
   });
 
   return {
-    ...query,
     course: query.data,
+    data: query.data,
+    error: query.error,
+    fetchStatus: query.fetchStatus,
+    isError: query.isError,
+    isFetching: query.isFetching,
     isLoading: query.isPending,
+    isPending: query.isPending,
+    isSuccess: query.isSuccess,
     key,
+    mutate: query.refetch,
+    refetch: query.refetch,
+    status: query.status,
   };
 }

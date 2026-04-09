@@ -7,12 +7,12 @@ import {
   deleteRole as apiDeleteRole,
   getRole as apiGetRole,
   getRolePermissions,
-  listAllPermissions,
   listRoleAuditLog,
   listRoles,
   removePermissionFromRole,
   updateRole as apiUpdateRole,
 } from '@/services/rbac';
+import { platformPermissionsQueryOptions } from '@/features/platform/queries/platform.query';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -49,7 +49,6 @@ import {
 } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Actions, PermissionGuard, Resources, Scopes, usePermissions } from '@/components/Security';
-import { queryKeys } from '@/lib/react-query/queryKeys';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useAuth';
 import type { Permission, RoleAuditEvent, RoleWithPermissions } from '@/types/permissions';
@@ -115,11 +114,7 @@ export default function RBACAdminClient() {
     data: permissions = [],
     isLoading: permissionsLoading,
     error: permissionsError,
-  } = useQuery({
-    queryKey: queryKeys.platform.permissions(),
-    queryFn: () => listAllPermissions(),
-    staleTime: 3_600_000,
-  });
+  } = useQuery(platformPermissionsQueryOptions());
 
   const fetchRoles = useCallback(async () => {
     setLoadingRoles(true);

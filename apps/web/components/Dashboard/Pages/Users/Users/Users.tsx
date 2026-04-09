@@ -25,6 +25,7 @@ import {
 import { Actions, Resources, Scopes, usePermissions } from '@/components/Security';
 import RolesUpdate from '@/components/Objects/Modals/Dash/Users/RolesUpdate';
 import { useAuth } from '@/hooks/useAuth';
+import { membersQueryOptions } from '@/features/users/queries/users.query';
 import type { ColumnDef } from '@tanstack/react-table';
 import DataTable from '@/components/ui/data-table';
 
@@ -33,9 +34,7 @@ import PageLoading from '@components/Objects/Loaders/PageLoading';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
 import { removeUser } from '@/services/platform/platform';
 import { queryKeys } from '@/lib/react-query/queryKeys';
-import { apiFetcher } from '@services/utils/ts/requests';
 import React, { useState, useTransition } from 'react';
-import { getAPIUrl } from '@services/config/config';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
@@ -146,10 +145,7 @@ const Users = () => {
     data: usersData,
     error,
     isLoading,
-  } = useQuery({
-    queryKey: queryKeys.users.members(currentPage, USERS_PER_PAGE),
-    queryFn: () => apiFetcher(`${getAPIUrl()}members?page=${currentPage}&per_page=${USERS_PER_PAGE}`),
-  });
+  } = useQuery(membersQueryOptions(currentPage, USERS_PER_PAGE));
 
   const totalUsers = usersData?.total ?? 0;
   const totalPages = usersData?.total_pages ?? 1;

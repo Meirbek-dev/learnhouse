@@ -8,12 +8,17 @@ import { toast } from 'sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { apiFetch } from '@/lib/api-client';
 import { queryKeys } from '@/lib/react-query/queryKeys';
-import { getAPIUrl, getAbsoluteUrl } from '@/services/config/config';
+import { getAbsoluteUrl } from '@/services/config/config';
 import { useContributorStatus } from '@/hooks/useContributorStatus';
 import { courseKeys } from '@/hooks/courses/courseKeys';
+import {
+  examActivityQueryOptions,
+  examAllAttemptsQueryOptions,
+  examMyAttemptsQueryOptions,
+  examQuestionsQueryOptions,
+} from '@/features/exams/queries/exams.query';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import type { AttemptData } from './state/examFlowReducer';
-import { apiFetcher } from '@/services/utils/ts/requests';
 import { examFlowReducer } from './state/examFlowReducer';
 import ExamResultsDashboard from './ExamResultsDashboard';
 import ExamTakingInterface from './ExamTakingInterface';
@@ -67,10 +72,7 @@ export default function ExamActivity({ activity, course }: ExamActivityProps) {
     data: exam,
     error: examError,
     refetch: mutateExam,
-  } = useQuery({
-    queryKey: queryKeys.exams.activity(activity.activity_uuid),
-    queryFn: () => apiFetcher(`${getAPIUrl()}exams/activity/${activity.activity_uuid}`),
-  });
+  } = useQuery(examActivityQueryOptions(activity.activity_uuid));
 
   // Safe exam uuid reference to avoid accessing property on undefined
   const examUuid = exam?.exam_uuid ?? null;
@@ -81,8 +83,7 @@ export default function ExamActivity({ activity, course }: ExamActivityProps) {
     error: questionsError,
     refetch: mutateQuestions,
   } = useQuery({
-    queryKey: examUuid ? queryKeys.exams.questions(examUuid) : ['exams', 'questions', 'disabled'],
-    queryFn: () => apiFetcher(`${getAPIUrl()}exams/${examUuid}/questions`),
+    ...(examUuid ? examQuestionsQueryOptions(examUuid) : { queryKey: ['exams', 'questions', 'disabled'] as const }),
     enabled: Boolean(examUuid),
   });
 
@@ -92,15 +93,13 @@ export default function ExamActivity({ activity, course }: ExamActivityProps) {
     error: attemptsError,
     refetch: mutateAttempts,
   } = useQuery({
-    queryKey: examUuid ? queryKeys.exams.myAttempt(examUuid) : ['exams', 'attempts', 'me', 'disabled'],
-    queryFn: () => apiFetcher(`${getAPIUrl()}exams/${examUuid}/attempts/me`),
+    ...(examUuid ? examMyAttemptsQueryOptions(examUuid) : { queryKey: ['exams', 'attempts', 'me', 'disabled'] as const }),
     enabled: Boolean(examUuid),
   });
 
   // Fetch all attempts for teachers
   const { data: allAttempts } = useQuery({
-    queryKey: examUuid ? queryKeys.exams.allAttempts(examUuid) : ['exams', 'attempts', 'all', 'disabled'],
-    queryFn: () => apiFetcher(`${getAPIUrl()}exams/${examUuid}/attempts/all`),
+    ...(examUuid ? examAllAttemptsQueryOptions(examUuid) : { queryKey: ['exams', 'attempts', 'all', 'disabled'] as const }),
     enabled: Boolean(examUuid && isTeacher),
   });
 

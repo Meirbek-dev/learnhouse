@@ -10,10 +10,10 @@
  * inside a modal trigger render prop — all for a single grading form.
  */
 
-import { apiFetcher } from '@services/utils/ts/requests';
-import { getAPIUrl } from '@services/config/config';
 import type { Submission } from '@/types/grading';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { queryKeys } from '@/lib/react-query/queryKeys';
+import { gradingDetailQueryOptions } from '@/features/grading/queries/grading.query';
 
 export interface UseGradingPanelResult {
   submission: Submission | null;
@@ -22,18 +22,11 @@ export interface UseGradingPanelResult {
   mutate: () => Promise<Submission | undefined>;
 }
 
-const gradingKeys = {
-  detail: (submissionUuid: string) => ['grading', 'submission', submissionUuid] as const,
-};
-
 export function useGradingPanel(submissionUuid: string | null): UseGradingPanelResult {
   const queryClient = useQueryClient();
-  const queryKey = submissionUuid ? gradingKeys.detail(submissionUuid) : ['grading', 'submission', 'missing'];
   const query = useQuery({
-    queryKey,
-    queryFn: () => apiFetcher(`${getAPIUrl()}grading/submissions/${submissionUuid}`) as Promise<Submission>,
+    ...(submissionUuid ? gradingDetailQueryOptions(submissionUuid) : { queryKey: ['grading', 'submission', 'missing'] as const }),
     enabled: submissionUuid !== null,
-    staleTime: 2000,
   });
 
   return {
@@ -42,11 +35,8 @@ export function useGradingPanel(submissionUuid: string | null): UseGradingPanelR
     error: (query.error) ?? null,
     mutate: async () => {
       if (!submissionUuid) return undefined;
-      await queryClient.invalidateQueries({ queryKey: gradingKeys.detail(submissionUuid) });
-      return queryClient.fetchQuery({
-        queryKey: gradingKeys.detail(submissionUuid),
-        queryFn: () => apiFetcher(`${getAPIUrl()}grading/submissions/${submissionUuid}`) as Promise<Submission>,
-      });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.grading.detail(submissionUuid) });
+      return queryClient.fetchQuery(gradingDetailQueryOptions(submissionUuid));
     },
   };
 }

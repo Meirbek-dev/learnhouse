@@ -29,7 +29,8 @@ import {
   X as XIcon,
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { deleteAssignmentUsingActivityUUID, getAssignmentFromActivityUUID } from '@services/courses/assignments';
+import { deleteAssignmentUsingActivityUUID } from '@services/courses/assignments';
+import { activityAssignmentUuidQueryOptions } from '@/features/courses/queries/course.query';
 import { CourseWorkflowBadge } from '@components/Dashboard/Courses/courseWorkflowUi';
 import { useActivityMutations } from '@/hooks/mutations/useActivityMutations';
 import { cleanActivityUuid, cleanCourseUuid } from '@/lib/course-management';
@@ -121,11 +122,7 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
   const [fetchAssignment, setFetchAssignment] = useState(false);
 
   const { data: assignmentUUID, isLoading: isAssignmentLoading } = useQuery({
-    queryKey: ['assignments', 'activity', activity.activity_uuid],
-    queryFn: async () => {
-      const result = await getAssignmentFromActivityUUID(activity.activity_uuid);
-      return result?.data?.assignment_uuid?.replace('assignment_', '') ?? null;
-    },
+    ...activityAssignmentUuidQueryOptions(activity.activity_uuid),
     enabled: activity.activity_type === 'TYPE_ASSIGNMENT' && fetchAssignment,
   });
 

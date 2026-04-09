@@ -4,13 +4,36 @@ import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 
 import { CodeChallengeEditor } from '@/components/features/courses/code-challenges';
+import { codeChallengeSettingsQueryOptions } from '@/features/code-challenges/queries/code-challenges.query';
 import { Skeleton } from '@/components/ui/skeleton';
-import { getAPIUrl } from '@services/config/config';
 import { Badge } from '@/components/ui/badge';
 
 interface CodeChallengeActivityProps {
   activity: any;
   course: any;
+}
+
+interface CodeChallengeTestCase {
+  id: string;
+  input: string;
+  expected_output: string;
+  description?: string;
+  is_visible: boolean;
+  weight?: number;
+}
+
+interface CodeChallengeActivitySettings {
+  uuid?: string;
+  time_limit_ms: number;
+  memory_limit_kb: number;
+  time_limit: number;
+  memory_limit: number;
+  max_submissions?: number;
+  grading_strategy: string;
+  allowed_languages: number[];
+  visible_tests: CodeChallengeTestCase[];
+  hidden_tests?: CodeChallengeTestCase[];
+  starter_code?: Record<string, string>;
 }
 
 const fetcher = async (url: string) => {
@@ -28,19 +51,21 @@ export default function CodeChallengeActivity({ activity, course }: CodeChalleng
 
   // Fetch challenge settings
   const { data: settings, isLoading } = useQuery({
-    queryKey: ['code-challenges', 'settings', activityUuid],
-    queryFn: () => fetcher(`${getAPIUrl()}code-challenges/${activityUuid}/settings`),
+    ...codeChallengeSettingsQueryOptions<CodeChallengeActivitySettings>(activityUuid),
     enabled: Boolean(activityUuid),
   });
 
   // Check if challenge is properly configured (has at least one allowed language)
   const isConfigured = settings?.allowed_languages && settings.allowed_languages.length > 0;
+  const primaryLanguageId = settings?.allowed_languages?.[0];
 
   // Get initial code from activity content or settings
   const initialCode =
-    settings?.starter_code?.[settings?.allowed_languages?.[0]?.toString()] || activity?.content?.starter_code || '';
+    (primaryLanguageId !== undefined ? settings?.starter_code?.[String(primaryLanguageId)] : undefined) ||
+    activity?.content?.starter_code ||
+    '';
 
-  const initialLanguageId = settings?.allowed_languages?.[0] || 71; // Default to Python
+  const initialLanguageId = primaryLanguageId || 71; // Default to Python
 
   if (isLoading) {
     return (

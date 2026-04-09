@@ -2,17 +2,15 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
-import { getPaymentConfigs } from '@services/payments/payments';
 import type { components } from '@/lib/api/generated';
-import { queryKeys } from '@/lib/react-query/queryKeys';
+import { paymentConfigsQueryOptions } from '@/features/payments/queries/payments.query';
 
 type PaymentsConfigRead = components['schemas']['PaymentsConfigRead'];
 
 export function usePaymentsEnabled() {
   const { isAuthenticated } = useAuth();
   const query = useQuery({
-    queryKey: queryKeys.payments.config(),
-    queryFn: () => getPaymentConfigs(),
+    ...paymentConfigsQueryOptions(),
     enabled: isAuthenticated,
   });
 

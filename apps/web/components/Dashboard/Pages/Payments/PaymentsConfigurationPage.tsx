@@ -20,6 +20,7 @@ import {
   initializePaymentConfig,
   updateStripeAccountID,
 } from '@services/payments/payments';
+import { paymentConfigsQueryOptions } from '@/features/payments/queries/payments.query';
 import {
   AlertTriangle,
   BarChart2,
@@ -104,10 +105,7 @@ function ConfirmDeleteStripeConfig({ onDelete, t }: ConfirmDeleteStripeConfigPro
 
 const PaymentsConfigurationPage: FC = () => {
   const queryClient = useQueryClient();
-  const { data: paymentConfigs, error, isLoading } = useQuery({
-    queryKey: queryKeys.payments.config(),
-    queryFn: () => getPaymentConfigs(),
-  });
+  const { data: paymentConfigs, error, isLoading } = useQuery(paymentConfigsQueryOptions());
 
   const stripeConfig = paymentConfigs?.find((config: any) => config.provider === 'stripe');
   const [isModalOpen, setIsModalOpen] = useState(false);

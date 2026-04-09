@@ -3,10 +3,11 @@
 import type { components } from '@/lib/api/generated';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { getCoursesLinkedToProduct, linkCourseToProduct } from '@services/payments/products';
+import { linkCourseToProduct } from '@services/payments/products';
+import { platformCoursesQueryOptions } from '@/features/courses/queries/course.query';
+import { productCoursesQueryOptions } from '@/features/payments/queries/payments.query';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { queryKeys } from '@/lib/react-query/queryKeys';
-import { getCourses } from '@services/courses/courses';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
@@ -88,17 +89,11 @@ export default function LinkCourseModal({ productId, onSuccess }: LinkCourseModa
   const tNotify = useTranslations('DashPage.Notifications');
   const t = useTranslations('DashPage.Payments.LinkCourseModal');
 
-  const { data: coursesData, error: coursesError } = useQuery({
-    queryKey: queryKeys.platform.courses(),
-    queryFn: () => getCourses(null),
-  });
+  const { data: coursesData, error: coursesError } = useQuery(platformCoursesQueryOptions());
 
   const courses = coursesData?.courses;
 
-  const { data: linkedCoursesData, error: linkedCoursesError } = useQuery({
-    queryKey: queryKeys.payments.productCourses(productId),
-    queryFn: () => getCoursesLinkedToProduct(productId),
-  });
+  const { data: linkedCoursesData, error: linkedCoursesError } = useQuery(productCoursesQueryOptions(productId));
 
   const handleLinkCourse = async (courseId: number) => {
     try {

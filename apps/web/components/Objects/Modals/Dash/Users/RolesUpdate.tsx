@@ -6,10 +6,9 @@ import { Field, FieldError, FieldLabel } from '@components/ui/field';
 import { BarLoader } from '@components/Objects/Loaders/BarLoader';
 import { Alert, AlertDescription } from '@components/ui/alert';
 import { valibotResolver } from '@hookform/resolvers/valibot';
-import { apiFetcher } from '@services/utils/ts/requests';
-import { Controller, useForm } from 'react-hook-form';
 import { queryKeys } from '@/lib/react-query/queryKeys';
-import { getAPIUrl } from '@services/config/config';
+import { rolesQueryOptions } from '@/features/users/queries/users.query';
+import { Controller, useForm } from 'react-hook-form';
 import { useState } from 'react';
 import { Button } from '@components/ui/button';
 import { useTranslations } from 'next-intl';
@@ -48,10 +47,7 @@ const RolesUpdate: FC<Props> = (props) => {
   });
 
   // Fetch available platform roles and sort them by system flag + priority
-  const { data: roles, error: rolesError } = useQuery({
-    queryKey: queryKeys.users.roles(),
-    queryFn: () => apiFetcher(`${getAPIUrl()}roles`),
-  });
+  const { data: roles, error: rolesError } = useQuery(rolesQueryOptions());
 
   const sortedRoles = (roles ?? []).toSorted((a: any, b: any) => {
     // System roles first, then by descending priority, then by name
@@ -113,7 +109,7 @@ const RolesUpdate: FC<Props> = (props) => {
               <Select
                 onValueChange={field.onChange}
                 value={field.value}
-                disabled={!roles || rolesError}
+                disabled={!roles || Boolean(rolesError)}
                 items={
                   !roles || rolesError
                     ? undefined
@@ -151,7 +147,7 @@ const RolesUpdate: FC<Props> = (props) => {
         <div className="flex justify-end pt-4">
           <Button
             type="submit"
-            disabled={form.formState.isSubmitting || !roles || rolesError}
+            disabled={form.formState.isSubmitting || !roles || Boolean(rolesError)}
             className="min-w-[100px]"
           >
             {form.formState.isSubmitting ? (

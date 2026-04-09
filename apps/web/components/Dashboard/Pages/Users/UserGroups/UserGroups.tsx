@@ -20,9 +20,8 @@ import ManageUsers from '@/components/Objects/Modals/Dash/UserGroups/ManageUsers
 import { deleteUserGroup } from '@services/usergroups/usergroups';
 import { queryKeys } from '@/lib/react-query/queryKeys';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
-import { apiFetcher } from '@services/utils/ts/requests';
+import { userGroupsQueryOptions } from '@/features/users/queries/users.query';
 import type { ColumnDef } from '@tanstack/react-table';
-import { getAPIUrl } from '@services/config/config';
 import DataTable from '@components/ui/data-table';
 import { useState, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
@@ -98,10 +97,7 @@ const UserGroups = () => {
   const [selectedUserGroupIdForManage, setSelectedUserGroupIdForManage] = useState<number | null>(null);
   const queryClient = useQueryClient();
 
-  const { data: usergroups, error, isLoading } = useQuery({
-    queryKey: queryKeys.userGroups.all(),
-    queryFn: () => apiFetcher(`${getAPIUrl()}usergroups`),
-  });
+  const { data: usergroups, error, isLoading } = useQuery(userGroupsQueryOptions());
 
   const deleteUserGroupUI = async (usergroup_id: number) => {
     const toastId = toast.loading(t('deletingUserGroup'));

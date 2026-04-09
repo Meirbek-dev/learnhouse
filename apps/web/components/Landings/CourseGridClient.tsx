@@ -11,11 +11,8 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination';
 import CourseThumbnail from '@components/Objects/Thumbnails/CourseThumbnail';
-import { queryKeys } from '@/lib/react-query/queryKeys';
 import { useAuth } from '@/hooks/useAuth';
-import { getCoursesSwrKey, getTrailSwrKey } from '@services/courses/keys';
-import { apiFetcherWithHeaders } from '@services/utils/ts/requests';
-import { apiFetcher } from '@services/utils/ts/requests';
+import { courseListQueryOptions, trailCurrentQueryOptions } from '@/features/courses/queries/course.query';
 import { useMemo, useState } from 'react';
 
 const COURSES_PER_PAGE = 20;
@@ -30,22 +27,19 @@ export default function CourseGridClient({ initialCourses, initialTotal }: Cours
   const [page, setPage] = useState(1);
 
   // Fetch courses with pagination
-  const COURSES_KEY = getCoursesSwrKey(page, COURSES_PER_PAGE);
   const { data: coursesResponse, isLoading: coursesLoading } = useQuery({
-    queryKey: ['landing', 'courses', page, COURSES_PER_PAGE],
-    queryFn: () => apiFetcherWithHeaders(COURSES_KEY),
-    initialData: page === 1 ? { data: initialCourses, headers: { 'x-total-count': String(initialTotal) } } : undefined,
+    ...courseListQueryOptions({ page, limit: COURSES_PER_PAGE }),
+    initialData: page === 1 ? { courses: initialCourses, total: initialTotal } : undefined,
     staleTime: 60_000,
   });
 
-  const courses = coursesResponse?.data ?? initialCourses;
-  const totalCount = Number.parseInt(coursesResponse?.headers?.['x-total-count'] ?? String(initialTotal), 10);
+  const courses = coursesResponse?.courses ?? initialCourses;
+  const totalCount = coursesResponse?.total ?? initialTotal;
   const totalPages = Math.ceil(totalCount / COURSES_PER_PAGE);
 
   // Fetch trail data to show progress on course thumbnails (auth-required)
   const { data: trailData } = useQuery({
-    queryKey: queryKeys.trail.current(),
-    queryFn: () => apiFetcher(getTrailSwrKey()),
+    ...trailCurrentQueryOptions(),
     enabled: isAuthenticated,
     staleTime: 60_000,
   });

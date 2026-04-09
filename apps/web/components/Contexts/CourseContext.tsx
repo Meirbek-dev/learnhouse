@@ -65,7 +65,7 @@ interface CourseState {
 }
 
 interface CourseContextValue extends CourseState {
-  courseMetaUrl: string;
+  courseMetaUrl: readonly unknown[];
   isEditorDataLoading: boolean;
   readiness: ReturnType<typeof getCourseReadinessSummary>;
   refreshCourseMeta: () => Promise<CourseStructure | undefined>;

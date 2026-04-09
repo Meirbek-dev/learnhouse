@@ -2,10 +2,9 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { Award, Building, Calendar, ExternalLink, Hash } from 'lucide-react';
-import { getAPIUrl, getAbsoluteUrl } from '@services/config/config';
+import { getAbsoluteUrl } from '@services/config/config';
 import { useFormatter, useTranslations } from 'next-intl';
-import { queryKeys } from '@/lib/react-query/queryKeys';
-import { apiFetcher } from '@services/utils/ts/requests';
+import { userCertificatesQueryOptions } from '@/features/courses/queries/course.query';
 import Link from '@components/ui/AppLink';
 import type React from 'react';
 
@@ -17,10 +16,7 @@ const UserCertificates: React.FC = () => {
     data: certificates,
     error,
     isLoading,
-  } = useQuery({
-    queryKey: queryKeys.certifications.userAll(),
-    queryFn: () => apiFetcher(`${getAPIUrl()}certifications/user/all`),
-  });
+  } = useQuery(userCertificatesQueryOptions());
 
   if (isLoading) {
     return (
