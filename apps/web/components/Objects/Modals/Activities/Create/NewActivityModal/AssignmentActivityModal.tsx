@@ -13,7 +13,6 @@ import { Calendar } from '@/components/ui/calendar';
 import { getAPIUrl } from '@services/config/config';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { toFieldErrors, valibotFormValidator } from '@/lib/tanstack-form';
 import { useRef } from 'react';
 import { CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
@@ -21,6 +20,7 @@ import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import * as v from 'valibot';
 import { mutate } from 'swr';
+import { valibotFormValidator } from '@/lib/tanstack-form';
 
 const createValidationSchema = (t: (key: string) => string) =>
   v.object({
@@ -75,17 +75,17 @@ const NewAssignment = ({ submitActivity, chapterId, course, closeModal }: any) =
 
   const form = useForm({
     defaultValues: {
-      name: '',
-      description: '',
-      dueDate: '',
-      gradingType: 'NUMERIC',
+      name: "",
+      description: "",
+      dueDate: "",
+      gradingType: "NUMERIC",
     },
     validators: {
       onChange: formValidator,
       onSubmit: formValidator,
     },
     onSubmit: async ({ value }) => {
-      const toastLoading = toast.loading(t('creatingAssignment'));
+      const toastLoading = toast.loading(t("creatingAssignment"));
       try {
         const res = await createAssignmentWithActivity({
           body: {
@@ -101,7 +101,7 @@ const NewAssignment = ({ submitActivity, chapterId, course, closeModal }: any) =
         });
 
         if (res.success) {
-          toast.success(t('createSuccess'));
+          toast.success(t("createSuccess"));
 
           if (course?.courseStructure?.course_uuid) {
             mutate(
@@ -109,17 +109,19 @@ const NewAssignment = ({ submitActivity, chapterId, course, closeModal }: any) =
             );
           }
 
-          await revalidateTags(['courses']);
+          await revalidateTags(["courses"]);
 
           closeModal();
         } else {
-          toast.error(t('createError', { error: res.data?.detail || t('unknownError') }));
+          toast.error(
+            t("createError", { error: res.data?.detail || t("unknownError") }),
+          );
         }
       } catch (error: any) {
-        console.error('Assignment creation failed:', error);
+        console.error("Assignment creation failed:", error);
         toast.error(
-          t('createError', {
-            error: error?.message || t('unexpectedError'),
+          t("createError", {
+            error: error?.message || t("unexpectedError"),
           }),
         );
       } finally {
@@ -149,7 +151,7 @@ const NewAssignment = ({ submitActivity, chapterId, course, closeModal }: any) =
               onBlur={field.handleBlur}
               onChange={(event) => field.handleChange(event.target.value)}
             />
-            <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+            <FieldError errors={field.state.meta.errors} />
           </Field>
         )}
       </form.Field>
@@ -165,7 +167,7 @@ const NewAssignment = ({ submitActivity, chapterId, course, closeModal }: any) =
               onBlur={field.handleBlur}
               onChange={(event) => field.handleChange(event.target.value)}
             />
-            <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+            <FieldError errors={field.state.meta.errors} />
           </Field>
         )}
       </form.Field>
@@ -216,7 +218,7 @@ const NewAssignment = ({ submitActivity, chapterId, course, closeModal }: any) =
                 />
               </PopoverContent>
             </Popover>
-            <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+            <FieldError errors={field.state.meta.errors} />
           </Field>
         )}
       </form.Field>
@@ -246,7 +248,7 @@ const NewAssignment = ({ submitActivity, chapterId, course, closeModal }: any) =
                 </SelectGroup>
               </SelectContent>
             </Select>
-            <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+            <FieldError errors={field.state.meta.errors} />
           </Field>
         )}
       </form.Field>

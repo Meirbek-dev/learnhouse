@@ -18,7 +18,6 @@ import { getUserAvatarMediaDirectory } from '@services/media/media';
 import { Actions, Resources, Scopes } from '@/types/permissions';
 import { getCourseUpdatesSwrKey } from '@services/courses/keys';
 import { useCourse } from '@components/Contexts/CourseContext';
-import { toFieldErrors } from '@/lib/tanstack-form';
 import { useDateFnsLocale } from '@/hooks/useDateFnsLocale';
 import { swrFetcher } from '@services/utils/ts/requests';
 import UserAvatar from '@components/Objects/UserAvatar';
@@ -275,7 +274,7 @@ const NewUpdateForm = ({ setSelectedView }: { setSelectedView: (view: string) =>
                 onBlur={field.handleBlur}
                 onChange={(event) => field.handleChange(event.target.value)}
               />
-              <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+              <FieldError errors={field.state.meta.errors} />
             </Field>
           )}
         </form.Field>
@@ -292,7 +291,7 @@ const NewUpdateForm = ({ setSelectedView }: { setSelectedView: (view: string) =>
                 onBlur={field.handleBlur}
                 onChange={(event) => field.handleChange(event.target.value)}
               />
-              <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+              <FieldError errors={field.state.meta.errors} />
             </Field>
           )}
         </form.Field>

@@ -12,7 +12,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import ComboboxMultiple from '@/components/ui/custom/multiple-combobox';
 import { Separator } from '@/components/ui/separator';
-import { toFieldErrors, valibotFormValidator } from '@/lib/tanstack-form';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
@@ -59,7 +58,7 @@ const codeChallengeFormSchema = v.object({
 });
 
 // Create a localized schema factory to supply messages from next-intl
-export function createCodeChallengeFormSchema(t: (key: string, params?: any) => string) {
+export function createCodeChallengeFormSchema(t: (key: string, params?: Record<string, string | number | Date>) => string) {
   const tc = v.object({
     id: v.string(),
     input: v.string(),
@@ -144,7 +143,6 @@ export function CodeChallengeForm({ activityUuid, initialData, onSubmit, onCance
   const t = useTranslations('Activities.CodeChallenges');
 
   const schema = useMemo(() => createCodeChallengeFormSchema(t), [t]);
-  const formValidator = valibotFormValidator(schema);
   const defaultValues: CodeChallengeFormInput = {
     title: '',
     description: '',
@@ -173,8 +171,8 @@ export function CodeChallengeForm({ activityUuid, initialData, onSubmit, onCance
   const form = useForm({
     defaultValues,
     validators: {
-      onChange: formValidator,
-      onSubmit: formValidator,
+      onChange: schema,
+      onSubmit: schema,
     },
     onSubmit: async ({ value }) => {
       try {
@@ -273,7 +271,7 @@ export function CodeChallengeForm({ activityUuid, initialData, onSubmit, onCance
                     onChange={(event) => field.handleChange(event.target.value)}
                   />
                 </FieldContent>
-                <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+                <FieldError errors={field.state.meta.errors} />
               </Field>
             )}
           </form.Field>
@@ -293,7 +291,7 @@ export function CodeChallengeForm({ activityUuid, initialData, onSubmit, onCance
                   />
                 </FieldContent>
                 <FieldDescription>{t('form.descriptionHint')}</FieldDescription>
-                <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+                <FieldError errors={field.state.meta.errors} />
               </Field>
             )}
           </form.Field>
@@ -330,7 +328,7 @@ export function CodeChallengeForm({ activityUuid, initialData, onSubmit, onCance
                       </SelectGroup>
                     </SelectContent>
                   </Select>
-                  <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+                  <FieldError errors={field.state.meta.errors} />
                 </Field>
               )}
             </form.Field>
@@ -367,7 +365,7 @@ export function CodeChallengeForm({ activityUuid, initialData, onSubmit, onCance
                     </SelectContent>
                   </Select>
                   <FieldDescription>{t(`gradingStrategyOptions.${field.state.value}Hint`)}</FieldDescription>
-                  <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+                  <FieldError errors={field.state.meta.errors} />
                 </Field>
               )}
             </form.Field>
@@ -390,7 +388,7 @@ export function CodeChallengeForm({ activityUuid, initialData, onSubmit, onCance
                     />
                   </FieldContent>
                   <FieldDescription>{t('form.timeLimitHint')}</FieldDescription>
-                  <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+                  <FieldError errors={field.state.meta.errors} />
                 </Field>
               )}
             </form.Field>
@@ -411,7 +409,7 @@ export function CodeChallengeForm({ activityUuid, initialData, onSubmit, onCance
                     />
                   </FieldContent>
                   <FieldDescription>{t('form.memoryLimitHint')}</FieldDescription>
-                  <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+                  <FieldError errors={field.state.meta.errors} />
                 </Field>
               )}
             </form.Field>
@@ -505,7 +503,7 @@ export function CodeChallengeForm({ activityUuid, initialData, onSubmit, onCance
                                   onChange={(event) => field.handleChange(event.target.value)}
                                 />
                               </FieldContent>
-                              <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+                              <FieldError errors={field.state.meta.errors} />
                             </Field>
                           )}
                         </form.Field>
@@ -525,7 +523,7 @@ export function CodeChallengeForm({ activityUuid, initialData, onSubmit, onCance
                                     onChange={(event) => field.handleChange(event.target.value)}
                                   />
                                 </FieldContent>
-                                <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+                                <FieldError errors={field.state.meta.errors} />
                               </Field>
                             )}
                           </form.Field>
@@ -544,7 +542,7 @@ export function CodeChallengeForm({ activityUuid, initialData, onSubmit, onCance
                                     onChange={(event) => field.handleChange(event.target.value)}
                                   />
                                 </FieldContent>
-                                <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+                                <FieldError errors={field.state.meta.errors} />
                               </Field>
                             )}
                           </form.Field>
@@ -566,7 +564,7 @@ export function CodeChallengeForm({ activityUuid, initialData, onSubmit, onCance
                                     onChange={(e) => field.handleChange(Number.parseInt(e.target.value) || 0)}
                                   />
                                 </FieldContent>
-                                <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+                                <FieldError errors={field.state.meta.errors} />
                               </Field>
                             )}
                           </form.Field>
@@ -654,7 +652,7 @@ export function CodeChallengeForm({ activityUuid, initialData, onSubmit, onCance
                     </Button>
                   </div>
                 </div>
-                <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+                <FieldError errors={field.state.meta.errors} />
               </Field>
             )}
           </form.Field>
@@ -698,7 +696,7 @@ export function CodeChallengeForm({ activityUuid, initialData, onSubmit, onCance
                               />
                             </div>
                           </FieldContent>
-                          <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+                          <FieldError errors={field.state.meta.errors} />
                         </Field>
                       )}
                     </form.Field>
@@ -731,7 +729,7 @@ export function CodeChallengeForm({ activityUuid, initialData, onSubmit, onCance
                   />
                 </FieldContent>
                 <FieldDescription>{t('form.maxSubmissionsHint')}</FieldDescription>
-                <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+                <FieldError errors={field.state.meta.errors} />
               </Field>
             )}
           </form.Field>
@@ -800,7 +798,7 @@ export function CodeChallengeForm({ activityUuid, initialData, onSubmit, onCance
                                       onChange={(event) => field.handleChange(event.target.value)}
                                     />
                                   </FieldContent>
-                                  <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+                                  <FieldError errors={field.state.meta.errors} />
                                 </Field>
                               )}
                             </form.Field>
@@ -822,7 +820,7 @@ export function CodeChallengeForm({ activityUuid, initialData, onSubmit, onCance
                                     />
                                   </FieldContent>
                                   <FieldDescription>%</FieldDescription>
-                                  <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+                                  <FieldError errors={field.state.meta.errors} />
                                 </Field>
                               )}
                             </form.Field>

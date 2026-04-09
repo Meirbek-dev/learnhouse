@@ -5,7 +5,6 @@ import { BarLoader } from '@components/Objects/Loaders/BarLoader';
 import { constructAcceptValue } from '@/lib/constants';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { toFieldErrors, valibotFormValidator } from '@/lib/tanstack-form';
 import { useTranslations } from 'next-intl';
 import * as v from 'valibot';
 
@@ -26,7 +25,6 @@ const DocumentPdfModal = ({ submitFileActivity, chapterId, course }: any) => {
   const validationT = useTranslations('Validation');
   const t = useTranslations('Components.DocumentPdfModal');
   const validationSchema = createValidationSchema(validationT);
-  const formValidator = valibotFormValidator(validationSchema);
   const defaultValues: FormValues = {
     name: '',
     file: null,
@@ -35,8 +33,8 @@ const DocumentPdfModal = ({ submitFileActivity, chapterId, course }: any) => {
   const form = useForm({
     defaultValues,
     validators: {
-      onChange: formValidator,
-      onSubmit: formValidator,
+      onChange: validationSchema,
+      onSubmit: validationSchema,
     },
     onSubmit: async ({ value }) => {
       await submitFileActivity({
@@ -74,7 +72,7 @@ const DocumentPdfModal = ({ submitFileActivity, chapterId, course }: any) => {
               onBlur={field.handleBlur}
               onChange={(event) => field.handleChange(event.target.value)}
             />
-            <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+            <FieldError errors={field.state.meta.errors} />
           </Field>
         )}
       </form.Field>
@@ -114,7 +112,7 @@ const DocumentPdfModal = ({ submitFileActivity, chapterId, course }: any) => {
                 </span>
               </div>
             </div>
-            <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+            <FieldError errors={field.state.meta.errors} />
           </Field>
         )}
       </form.Field>

@@ -3,7 +3,6 @@
 import { useForm, useStore } from '@tanstack/react-form';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { useTranslations } from 'next-intl';
-import { toFieldErrors, valibotFormValidator } from '@/lib/tanstack-form';
 import { toast } from 'sonner';
 import * as v from 'valibot';
 import useSWR from 'swr';
@@ -14,8 +13,13 @@ import { Textarea } from '@components/ui/textarea';
 import { Switch } from '@components/ui/switch';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
+import { valibotFormValidator } from '@/lib/tanstack-form';
 
-const createValidationSchema = (t: (key: string) => string, limits?: any) =>
+interface ExamLimits {
+  time_limit?: { min?: number; max?: number };
+}
+
+const createValidationSchema = (t: (key: string) => string, limits?: ExamLimits) =>
   v.object({
     exam_title: v.pipe(v.string(), v.minLength(1, t('examTitleRequired'))),
     activity_name: v.pipe(v.string(), v.minLength(1, t('activityNameRequired'))),
@@ -49,11 +53,14 @@ const NewExam = ({ submitActivity, chapterId, course, closeModal }: any) => {
 
   const form = useForm({
     defaultValues: {
-      exam_title: '',
-      activity_name: '',
-      exam_description: '',
+      exam_title: "",
+      activity_name: "",
+      exam_description: "",
       has_time_limit: true,
-      time_limit: Math.min(Math.max(50, limits?.time_limit?.min ?? 1), limits?.time_limit?.max ?? 180),
+      time_limit: Math.min(
+        Math.max(50, limits?.time_limit?.min ?? 1),
+        limits?.time_limit?.max ?? 180,
+      ),
       shuffle_questions: true,
       allow_result_review: true,
     },
@@ -62,7 +69,7 @@ const NewExam = ({ submitActivity, chapterId, course, closeModal }: any) => {
       onSubmit: formValidator,
     },
     onSubmit: async ({ value }) => {
-      const toastLoading = toast.loading(t('creatingExam'));
+      const toastLoading = toast.loading(t("creatingExam"));
       try {
         const settings = {
           time_limit: value.has_time_limit ? value.time_limit : null,
@@ -70,7 +77,7 @@ const NewExam = ({ submitActivity, chapterId, course, closeModal }: any) => {
           shuffle_questions: value.shuffle_questions,
           shuffle_answers: true,
           question_limit: null,
-          access_mode: 'NO_ACCESS',
+          access_mode: "NO_ACCESS",
           whitelist_user_ids: [],
           allow_result_review: value.allow_result_review,
           show_correct_answers: value.allow_result_review,
@@ -83,9 +90,9 @@ const NewExam = ({ submitActivity, chapterId, course, closeModal }: any) => {
         };
 
         const response = await fetch(`${getAPIUrl()}exams/with-activity`, {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({
             activity_name: value.activity_name,
@@ -97,42 +104,47 @@ const NewExam = ({ submitActivity, chapterId, course, closeModal }: any) => {
         });
 
         if (!response.ok) {
-          throw new Error('Failed to create exam');
+          throw new Error("Failed to create exam");
         }
 
         const data = await response.json();
 
         toast.dismiss(toastLoading);
-        toast.success(t('examCreatedSuccessfully'));
+        toast.success(t("examCreatedSuccessfully"));
 
         if (submitActivity) {
           submitActivity();
         }
 
         if (data.activity_uuid) {
-          const activity_uuid_clean = data.activity_uuid.replace('activity_', '');
+          const activity_uuid_clean = data.activity_uuid.replace(
+            "activity_",
+            "",
+          );
 
           let courseUuidClean: string | null = null;
           if (course?.course_uuid) {
-            courseUuidClean = course.course_uuid.replace('course_', '');
+            courseUuidClean = course.course_uuid.replace("course_", "");
           } else {
-            const parts = globalThis.location.pathname.split('/').filter(Boolean);
-            const courseIndex = parts.indexOf('course');
+            const parts = globalThis.location.pathname
+              .split("/")
+              .filter(Boolean);
+            const courseIndex = parts.indexOf("course");
             if (courseIndex !== -1 && parts.length > courseIndex + 1) {
               courseUuidClean = String(parts[courseIndex + 1]);
             }
           }
 
           globalThis.location.href = courseUuidClean
-            ? `/course/${courseUuidClean}/activity/${activity_uuid_clean}${withUnpublishedActivities ? '?withUnpublishedActivities=true' : ''}`
-            : '/courses';
+            ? `/course/${courseUuidClean}/activity/${activity_uuid_clean}${withUnpublishedActivities ? "?withUnpublishedActivities=true" : ""}`
+            : "/courses";
         }
 
         closeModal();
       } catch (error: any) {
         toast.dismiss(toastLoading);
-        toast.error(t('errorCreatingExam'));
-        console.error('Error creating exam:', error);
+        toast.error(t("errorCreatingExam"));
+        console.error("Error creating exam:", error);
       }
     },
   });
@@ -160,7 +172,7 @@ const NewExam = ({ submitActivity, chapterId, course, closeModal }: any) => {
               onChange={(event) => field.handleChange(event.target.value)}
             />
             <FieldDescription>{t('activityNameDescription')}</FieldDescription>
-            <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+            <FieldError errors={field.state.meta.errors} />
           </Field>
         )}
       </form.Field>
@@ -177,7 +189,7 @@ const NewExam = ({ submitActivity, chapterId, course, closeModal }: any) => {
               onBlur={field.handleBlur}
               onChange={(event) => field.handleChange(event.target.value)}
             />
-            <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+            <FieldError errors={field.state.meta.errors} />
           </Field>
         )}
       </form.Field>
@@ -194,7 +206,7 @@ const NewExam = ({ submitActivity, chapterId, course, closeModal }: any) => {
               onBlur={field.handleBlur}
               onChange={(event) => field.handleChange(event.target.value)}
             />
-            <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+            <FieldError errors={field.state.meta.errors} />
           </Field>
         )}
       </form.Field>
@@ -236,7 +248,7 @@ const NewExam = ({ submitActivity, chapterId, course, closeModal }: any) => {
                 }}
               />
               <FieldDescription>{t('timeLimitMinutesDescription')}</FieldDescription>
-              <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+              <FieldError errors={field.state.meta.errors} />
             </Field>
           )}
         </form.Field>

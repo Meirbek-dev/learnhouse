@@ -31,7 +31,6 @@ import { getAbsoluteUrl } from '@services/config/config';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { constructAcceptValue } from '@/lib/constants';
 import type { ChangeEvent, ElementType } from 'react';
-import { toFieldErrors, valibotFormValidator } from '@/lib/tanstack-form';
 import { Textarea } from '@components/ui/textarea';
 import { ThemeSelector } from '@/lib/theme-system';
 import { Button } from '@components/ui/button';
@@ -88,14 +87,27 @@ const createValidationSchema = (t: (key: string, values?: any) => string) =>
   v.object({
     email: v.pipe(
       v.string(),
-      v.minLength(1, t('Form.requiredField', { fieldName: 'Email' })),
-      v.email(t('Form.invalidEmail')),
+      v.minLength(1, t("Form.requiredField", { fieldName: "Email" })),
+      v.email(t("Form.invalidEmail")),
     ),
-    username: v.pipe(v.string(), v.minLength(1, t('Form.requiredField', { fieldName: 'Username' }))),
-    first_name: v.pipe(v.string(), v.minLength(1, t('Form.requiredField', { fieldName: 'First name' }))),
-    middle_name: v.optional(v.pipe(v.string(), v.maxLength(100, t('Form.maxChars', { count: 100 })))),
-    last_name: v.pipe(v.string(), v.minLength(1, t('Form.requiredField', { fieldName: 'Last name' }))),
-    bio: v.optional(v.pipe(v.string(), v.maxLength(400, t('Form.maxChars', { count: 400 })))),
+    username: v.pipe(
+      v.string(),
+      v.minLength(1, t("Form.requiredField", { fieldName: "Username" })),
+    ),
+    first_name: v.pipe(
+      v.string(),
+      v.minLength(1, t("Form.requiredField", { fieldName: "First name" })),
+    ),
+    middle_name: v.optional(
+      v.pipe(v.string(), v.maxLength(100, t("Form.maxChars", { count: 100 }))),
+    ),
+    last_name: v.pipe(
+      v.string(),
+      v.minLength(1, t("Form.requiredField", { fieldName: "Last name" })),
+    ),
+    bio: v.optional(
+      v.pipe(v.string(), v.maxLength(400, t("Form.maxChars", { count: 400 }))),
+    ),
     details: v.record(
       v.string(),
       v.object({
@@ -237,7 +249,7 @@ const DetailCard = ({
 
 interface UserEditFormProps {
   form: any;
-  details: FormValues['details'];
+  details: FormValues["details"];
   isSubmitting: boolean;
   profilePicture: {
     error: string | undefined;
@@ -315,7 +327,7 @@ const UserEditForm = ({ form, details, isSubmitting, profilePicture }: UserEditF
                     onBlur={field.handleBlur}
                     onChange={(event) => field.handleChange(event.target.value)}
                   />
-                  <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+                  <FieldError errors={field.state.meta.errors} />
                   <div className="mt-2 flex items-center space-x-2 rounded-md bg-amber-50 p-2 text-amber-600">
                     <AlertTriangle size={16} />
                     <span className="text-sm">{t('emailChangeWarning')}</span>
@@ -336,7 +348,7 @@ const UserEditForm = ({ form, details, isSubmitting, profilePicture }: UserEditF
                     onBlur={field.handleBlur}
                     onChange={(event) => field.handleChange(event.target.value)}
                   />
-                  <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+                  <FieldError errors={field.state.meta.errors} />
                 </Field>
               )}
             </form.Field>
@@ -353,7 +365,7 @@ const UserEditForm = ({ form, details, isSubmitting, profilePicture }: UserEditF
                     onBlur={field.handleBlur}
                     onChange={(event) => field.handleChange(event.target.value)}
                   />
-                  <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+                  <FieldError errors={field.state.meta.errors} />
                 </Field>
               )}
             </form.Field>
@@ -370,7 +382,7 @@ const UserEditForm = ({ form, details, isSubmitting, profilePicture }: UserEditF
                     onBlur={field.handleBlur}
                     onChange={(event) => field.handleChange(event.target.value)}
                   />
-                  <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+                  <FieldError errors={field.state.meta.errors} />
                 </Field>
               )}
             </form.Field>
@@ -387,7 +399,7 @@ const UserEditForm = ({ form, details, isSubmitting, profilePicture }: UserEditF
                     onBlur={field.handleBlur}
                     onChange={(event) => field.handleChange(event.target.value)}
                   />
-                  <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+                  <FieldError errors={field.state.meta.errors} />
                 </Field>
               )}
             </form.Field>
@@ -411,7 +423,7 @@ const UserEditForm = ({ form, details, isSubmitting, profilePicture }: UserEditF
                     onBlur={field.handleBlur}
                     onChange={(event) => field.handleChange(event.target.value)}
                   />
-                  <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+                  <FieldError errors={field.state.meta.errors} />
                 </Field>
               )}
             </form.Field>
@@ -634,7 +646,6 @@ const UserEditGeneral = () => {
   const [initialLoading, setInitialLoading] = useState(true);
   const t = useTranslations('DashPage.Notifications');
   const validationSchema = createValidationSchema(t);
-  const formValidator = valibotFormValidator(validationSchema);
   const defaultValues: FormValues = {
     username: '',
     first_name: '',
@@ -648,8 +659,8 @@ const UserEditGeneral = () => {
   const form = useForm({
     defaultValues,
     validators: {
-      onChange: formValidator,
-      onSubmit: formValidator,
+      onChange: validationSchema,
+      onSubmit: validationSchema,
     },
     onSubmit: async ({ value }) => {
       if (!userData?.id) {

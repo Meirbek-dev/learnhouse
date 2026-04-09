@@ -5,7 +5,6 @@ import { BarLoader } from '@components/Objects/Loaders/BarLoader';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { toFieldErrors } from '@/lib/tanstack-form';
 import { useTranslations } from 'next-intl';
 import * as v from 'valibot';
 
@@ -65,7 +64,7 @@ const DynamicCanvaModal = ({ submitActivity, chapterId, course }: any) => {
               onBlur={field.handleBlur}
               onChange={(event) => field.handleChange(event.target.value)}
             />
-            <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+            <FieldError errors={field.state.meta.errors} />
           </Field>
         )}
       </form.Field>
@@ -81,7 +80,7 @@ const DynamicCanvaModal = ({ submitActivity, chapterId, course }: any) => {
               onBlur={field.handleBlur}
               onChange={(event) => field.handleChange(event.target.value)}
             />
-            <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+            <FieldError errors={field.state.meta.errors} />
           </Field>
         )}
       </form.Field>

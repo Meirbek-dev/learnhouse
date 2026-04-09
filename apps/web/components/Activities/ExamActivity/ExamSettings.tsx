@@ -111,9 +111,9 @@ export default function ExamSettings({ exam, courseUuid, onSettingsUpdated }: Ex
 
         toast.success(t('settingsUpdated'), { id: toastLoading });
         onSettingsUpdated();
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error('Error updating settings:', error);
-        toast.error(error.message || t('errorUpdatingSettings'), { id: toastLoading });
+        toast.error((error instanceof Error ? error.message : undefined) || t('errorUpdatingSettings'), { id: toastLoading });
       }
     },
   });

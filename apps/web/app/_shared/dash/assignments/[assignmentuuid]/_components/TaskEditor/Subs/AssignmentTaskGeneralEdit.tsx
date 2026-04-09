@@ -10,7 +10,6 @@ import { Alert, AlertDescription } from '@components/ui/alert';
 import { getTaskRefFileDir } from '@services/media/media';
 import { constructAcceptValue } from '@/lib/constants';
 import { DragDropContext } from '@hello-pangea/dnd';
-import { toFieldErrors, valibotFormValidator } from '@/lib/tanstack-form';
 import { Textarea } from '@components/ui/textarea';
 import { Button } from '@components/ui/button';
 import { Label } from '@components/ui/label';
@@ -20,6 +19,7 @@ import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
 import { toast } from 'sonner';
 import * as v from 'valibot';
+import { valibotFormValidator } from '@/lib/tanstack-form';
 
 const SUPPORTED_FILES = constructAcceptValue(['pdf', 'docx', 'mp4', 'mkv', 'jpg', 'png', 'pptx', 'zip']);
 
@@ -55,9 +55,9 @@ export const AssignmentTaskGeneralEdit = () => {
 
   const form = useForm({
     defaultValues: {
-      title: '',
-      description: '',
-      hint: '',
+      title: "",
+      description: "",
+      hint: "",
       max_grade_value: 20,
     },
     validators: {
@@ -66,7 +66,7 @@ export const AssignmentTaskGeneralEdit = () => {
     },
     onSubmit: async ({ value }) => {
       if (!isTaskLoaded) {
-        toast.error(t('taskNotLoaded'));
+        toast.error(t("taskNotLoaded"));
         return;
       }
 
@@ -75,7 +75,7 @@ export const AssignmentTaskGeneralEdit = () => {
         const assignmentUUID = assignment?.assignment_object?.assignment_uuid;
 
         if (!assignmentTaskUUID || !assignmentUUID) {
-          toast.error(t('saveError'));
+          toast.error(t("saveError"));
           return;
         }
 
@@ -86,13 +86,13 @@ export const AssignmentTaskGeneralEdit = () => {
         });
         if (res.success) {
           reload();
-          toast.success(t('saveSuccess'));
+          toast.success(t("saveSuccess"));
         } else {
-          toast.error(t('saveError'));
+          toast.error(t("saveError"));
         }
       } catch (error) {
-        console.error('Error updating assignment task:', error);
-        toast.error(t('saveError'));
+        console.error("Error updating assignment task:", error);
+        toast.error(t("saveError"));
       }
     },
   });
@@ -162,7 +162,7 @@ export const AssignmentTaskGeneralEdit = () => {
               onBlur={field.handleBlur}
               onChange={(event) => field.handleChange(event.target.value)}
             />
-            <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+            <FieldError errors={field.state.meta.errors} />
           </Field>
         )}
       </form.Field>
@@ -180,7 +180,7 @@ export const AssignmentTaskGeneralEdit = () => {
               onBlur={field.handleBlur}
               onChange={(event) => field.handleChange(event.target.value)}
             />
-            <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+            <FieldError errors={field.state.meta.errors} />
           </Field>
         )}
       </form.Field>
@@ -198,7 +198,7 @@ export const AssignmentTaskGeneralEdit = () => {
               onBlur={field.handleBlur}
               onChange={(event) => field.handleChange(event.target.value)}
             />
-            <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+            <FieldError errors={field.state.meta.errors} />
           </Field>
         )}
       </form.Field>
@@ -228,7 +228,7 @@ export const AssignmentTaskGeneralEdit = () => {
                 field.handleChange(Number(event.target.value));
               }}
             />
-            <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+            <FieldError errors={field.state.meta.errors} />
           </Field>
         )}
       </form.Field>

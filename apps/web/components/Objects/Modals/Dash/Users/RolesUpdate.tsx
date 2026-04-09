@@ -5,7 +5,6 @@ import { assignRoleToUser, removeRoleFromUser } from '@/services/rbac';
 import { Field, FieldError, FieldLabel } from '@components/ui/field';
 import { BarLoader } from '@components/Objects/Loaders/BarLoader';
 import { Alert, AlertDescription } from '@components/ui/alert';
-import { toFieldErrors, valibotFormValidator } from '@/lib/tanstack-form';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
 import { useState } from 'react';
@@ -34,7 +33,6 @@ const RolesUpdate: FC<Props> = (props) => {
   const validationT = useTranslations('Validation');
   const t = useTranslations('Components.RolesUpdate');
   const validationSchema = createValidationSchema(validationT);
-  const formValidator = valibotFormValidator(validationSchema);
   const [error, setError] = useState<any>(null);
 
   const form = useForm({
@@ -42,8 +40,8 @@ const RolesUpdate: FC<Props> = (props) => {
       role: props.alreadyAssignedRole,
     },
     validators: {
-      onChange: formValidator,
-      onSubmit: formValidator,
+      onChange: validationSchema,
+      onSubmit: validationSchema,
     },
     onSubmit: async ({ value }) => {
       setError(null);
@@ -146,7 +144,7 @@ const RolesUpdate: FC<Props> = (props) => {
                   )}
                 </SelectContent>
               </Select>
-              <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+              <FieldError errors={field.state.meta.errors} />
             </Field>
           )}
         </form.Field>

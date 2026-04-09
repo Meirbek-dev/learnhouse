@@ -7,7 +7,6 @@ import { useCurrentUser } from '@/hooks/useCurrentUser';
 import PasswordInput from '@components/ui/custom/password-input';
 import { getAbsoluteUrl } from '@services/config/config';
 import { FieldError } from '@components/ui/field';
-import { toFieldErrors } from '@/lib/tanstack-form';
 import { Button } from '@components/ui/button';
 import { Label } from '@components/ui/label';
 import { AlertTriangle } from 'lucide-react';
@@ -21,8 +20,8 @@ const createValidationSchema = (t: (key: string, values?: any) => string) =>
       v.string(),
       v.minLength(
         1,
-        t('Form.requiredField', {
-          fieldName: t('currentPasswordLabel'),
+        t("Form.requiredField", {
+          fieldName: t("currentPasswordLabel"),
         }),
       ),
     ),
@@ -30,11 +29,11 @@ const createValidationSchema = (t: (key: string, values?: any) => string) =>
       v.string(),
       v.minLength(
         1,
-        t('Form.requiredField', {
-          fieldName: t('newPasswordLabel'),
+        t("Form.requiredField", {
+          fieldName: t("newPasswordLabel"),
         }),
       ),
-      v.minLength(8, t('Form.minChars', { count: 8 })),
+      v.minLength(8, t("Form.minChars", { count: 8 })),
     ),
   });
 
@@ -85,7 +84,7 @@ const UserEditPassword = () => {
             id: loadingToast,
           });
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         toast.error(t('passwordUpdateError'), { id: loadingToast });
         console.error('Password update error:', error);
       }
@@ -123,7 +122,7 @@ const UserEditPassword = () => {
                   />
                   <FieldError
                     className="mt-1"
-                    errors={toFieldErrors(field.state.meta.errors)}
+                    errors={field.state.meta.errors}
                   />
                 </div>
               )}
@@ -143,7 +142,7 @@ const UserEditPassword = () => {
                   />
                   <FieldError
                     className="mt-1"
-                    errors={toFieldErrors(field.state.meta.errors)}
+                    errors={field.state.meta.errors}
                   />
                 </div>
               )}

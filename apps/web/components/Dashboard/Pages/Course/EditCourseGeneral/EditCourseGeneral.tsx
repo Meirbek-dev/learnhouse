@@ -17,7 +17,6 @@ import { useEffect, useId, useMemo, useState } from 'react';
 import { useSaveSection } from '@/hooks/useSaveSection';
 import { Separator } from '@components/ui/separator';
 import LearningItemsList from './LearningItemsList';
-import { toFieldErrors, valibotFormValidator } from '@/lib/tanstack-form';
 import { Textarea } from '@components/ui/textarea';
 import ThumbnailUpdate from './ThumbnailUpdate';
 import { Input } from '@components/ui/input';
@@ -123,13 +122,12 @@ function EditCourseGeneral() {
   const { updateMetadata } = useCoursesMutations(courseStructure?.course_uuid ?? '');
 
   const serverValues = useMemo(() => buildFormValues(courseStructure), [courseStructure]);
-  const formValidator = valibotFormValidator(courseGeneralSchema);
 
   const form = useForm({
     defaultValues: serverValues,
     validators: {
-      onChange: formValidator,
-      onSubmit: formValidator,
+      onChange: courseGeneralSchema,
+      onSubmit: courseGeneralSchema,
     },
     onSubmit: async ({ value }) => {
       setError('');
@@ -258,7 +256,7 @@ function EditCourseGeneral() {
                       onBlur={field.handleBlur}
                       onChange={(event) => field.handleChange(event.target.value)}
                     />
-                    <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+                    <FieldError errors={field.state.meta.errors} />
                   </Field>
                 )}
               </form.Field>
@@ -282,7 +280,7 @@ function EditCourseGeneral() {
                       onBlur={field.handleBlur}
                       onChange={(event) => field.handleChange(event.target.value)}
                     />
-                    <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+                    <FieldError errors={field.state.meta.errors} />
                   </Field>
                 )}
               </form.Field>
@@ -305,7 +303,7 @@ function EditCourseGeneral() {
                       onBlur={field.handleBlur}
                       onChange={(event) => field.handleChange(event.target.value)}
                     />
-                    <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+                    <FieldError errors={field.state.meta.errors} />
                   </Field>
                 )}
               </form.Field>
@@ -323,10 +321,10 @@ function EditCourseGeneral() {
                       <LearningItemsList
                         value={field.state.value}
                         onChange={field.handleChange}
-                        error={toFieldErrors(field.state.meta.errors)?.[0]?.message}
+                        error={field.state.meta.errors?.[0]?.message}
                       />
                     </div>
-                    <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+                    <FieldError errors={field.state.meta.errors} />
                   </Field>
                 )}
               </form.Field>
@@ -346,7 +344,7 @@ function EditCourseGeneral() {
                       value={field.state.value || []}
                       onValueChange={field.handleChange}
                     />
-                    <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+                    <FieldError errors={field.state.meta.errors} />
                   </Field>
                 )}
               </form.Field>
@@ -397,7 +395,7 @@ function EditCourseGeneral() {
                       </SelectGroup>
                     </SelectContent>
                   </Select>
-                  <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+                  <FieldError errors={field.state.meta.errors} />
                 </Field>
               )}
             </form.Field>

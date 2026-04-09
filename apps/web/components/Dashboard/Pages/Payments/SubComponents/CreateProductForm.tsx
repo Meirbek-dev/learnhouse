@@ -8,7 +8,6 @@ import { createProduct } from '@services/payments/products';
 import { Textarea } from '@components/ui/textarea';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
-import { toFieldErrors, valibotFormValidator } from '@/lib/tanstack-form';
 import currencyCodes from '@/lib/currencies';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
@@ -19,18 +18,30 @@ import { mutate } from 'swr';
 
 const createValidationSchema = (t: (key: string, values?: any) => string) =>
   v.object({
-    name: v.pipe(v.string(), v.minLength(1, t('Payments.ProductForm.errors.nameRequired'))),
-    description: v.pipe(v.string(), v.minLength(1, t('Payments.ProductForm.errors.descriptionRequired'))),
-    amount: v.pipe(v.number(), v.minValue(1, t('Payments.ProductForm.errors.amountMin'))),
+    name: v.pipe(
+      v.string(),
+      v.minLength(1, t("Payments.ProductForm.errors.nameRequired")),
+    ),
+    description: v.pipe(
+      v.string(),
+      v.minLength(1, t("Payments.ProductForm.errors.descriptionRequired")),
+    ),
+    amount: v.pipe(
+      v.number(),
+      v.minValue(1, t("Payments.ProductForm.errors.amountMin")),
+    ),
     benefits: v.optional(v.string()),
-    currency: v.pipe(v.string(), v.minLength(1, t('Payments.ProductForm.errors.currencyRequired'))),
+    currency: v.pipe(
+      v.string(),
+      v.minLength(1, t("Payments.ProductForm.errors.currencyRequired")),
+    ),
     product_type: v.picklist(
-      ['one_time', 'subscription'] as const,
-      t('Payments.ProductForm.errors.productTypeRequired'),
+      ["one_time", "subscription"] as const,
+      t("Payments.ProductForm.errors.productTypeRequired"),
     ),
     price_type: v.picklist(
-      ['fixed_price', 'customer_choice'] as const,
-      t('Payments.ProductForm.errors.priceTypeRequired'),
+      ["fixed_price", "customer_choice"] as const,
+      t("Payments.ProductForm.errors.priceTypeRequired"),
     ),
   });
 
@@ -41,7 +52,6 @@ const CreateProductForm: FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
   const tNotify = useTranslations('DashPage.Notifications');
   const t = useTranslations('Payments.ProductForm');
   const validationSchema = createValidationSchema(t);
-  const formValidator = valibotFormValidator(validationSchema);
 
   useEffect(() => {
     const allCurrencies = currencyCodes.data.map((currency) => ({
@@ -64,8 +74,8 @@ const CreateProductForm: FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
   const form = useForm({
     defaultValues,
     validators: {
-      onChange: formValidator,
-      onSubmit: formValidator,
+      onChange: validationSchema,
+      onSubmit: validationSchema,
     },
     onSubmit: async ({ value }) => {
       const loadingToast = toast.loading(tNotify('creatingProduct'));
@@ -134,7 +144,7 @@ const CreateProductForm: FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
                 onBlur={field.handleBlur}
                 onChange={(event) => field.handleChange(event.target.value)}
               />
-              <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+              <FieldError errors={field.state.meta.errors} />
             </Field>
           )}
         </form.Field>
@@ -151,7 +161,7 @@ const CreateProductForm: FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
                 onBlur={field.handleBlur}
                 onChange={(event) => field.handleChange(event.target.value)}
               />
-              <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+              <FieldError errors={field.state.meta.errors} />
             </Field>
           )}
         </form.Field>
@@ -181,7 +191,7 @@ const CreateProductForm: FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
                   </SelectGroup>
                 </SelectContent>
               </Select>
-              <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+              <FieldError errors={field.state.meta.errors} />
             </Field>
           )}
         </form.Field>
@@ -211,7 +221,7 @@ const CreateProductForm: FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
                   </SelectGroup>
                 </SelectContent>
               </Select>
-              <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+              <FieldError errors={field.state.meta.errors} />
             </Field>
           )}
         </form.Field>
@@ -233,7 +243,7 @@ const CreateProductForm: FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
                     onBlur={field.handleBlur}
                     onChange={(event) => field.handleChange(Number(event.target.value))}
                   />
-                  <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+                  <FieldError errors={field.state.meta.errors} />
                 </Field>
               )}
             </form.Field>
@@ -268,7 +278,7 @@ const CreateProductForm: FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
                       </SelectGroup>
                     </SelectContent>
                   </Select>
-                  <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+                  <FieldError errors={field.state.meta.errors} />
                 </Field>
               )}
             </form.Field>
@@ -287,7 +297,7 @@ const CreateProductForm: FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
                 onBlur={field.handleBlur}
                 onChange={(event) => field.handleChange(event.target.value)}
               />
-              <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+              <FieldError errors={field.state.meta.errors} />
             </Field>
           )}
         </form.Field>

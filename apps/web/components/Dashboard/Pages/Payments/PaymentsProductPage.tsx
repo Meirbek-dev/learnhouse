@@ -37,7 +37,6 @@ import CreateProductForm from './SubComponents/CreateProductForm';
 import { getPaymentConfigs } from '@services/payments/payments';
 import { usePaymentsEnabled } from '@hooks/usePaymentsEnabled';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
-import { toFieldErrors, valibotFormValidator } from '@/lib/tanstack-form';
 import { Textarea } from '@components/ui/textarea';
 import { useState, useTransition } from 'react';
 import { Button } from '@components/ui/button';
@@ -48,6 +47,7 @@ import { useTranslations } from 'next-intl';
 import useSWR, { mutate } from 'swr';
 import { toast } from 'sonner';
 import * as v from 'valibot';
+import { valibotFormValidator } from '@/lib/tanstack-form';
 
 type PaymentsConfigRead = components['schemas']['PaymentsConfigRead'];
 type PaymentsProductRead = components['schemas']['PaymentsProductRead'];
@@ -58,8 +58,8 @@ const createValidationSchema = (t: (key: string, values?: any) => string) =>
       v.string(),
       v.minLength(
         1,
-        t('Components.Form.requiredField', {
-          fieldName: t('DashPage.Payments.ProductPage.editForm.nameLabel'),
+        t("Components.Form.requiredField", {
+          fieldName: t("DashPage.Payments.ProductPage.editForm.nameLabel"),
         }),
       ),
     ),
@@ -67,19 +67,24 @@ const createValidationSchema = (t: (key: string, values?: any) => string) =>
       v.string(),
       v.minLength(
         1,
-        t('Components.Form.requiredField', {
-          fieldName: t('DashPage.Payments.ProductPage.editForm.descriptionLabel'),
+        t("Components.Form.requiredField", {
+          fieldName: t(
+            "DashPage.Payments.ProductPage.editForm.descriptionLabel",
+          ),
         }),
       ),
     ),
-    amount: v.pipe(v.number(), v.minValue(0, t('Components.Form.positiveNumber'))),
+    amount: v.pipe(
+      v.number(),
+      v.minValue(0, t("Components.Form.positiveNumber")),
+    ),
     benefits: v.optional(v.string()),
     currency: v.pipe(
       v.string(),
       v.minLength(
         1,
-        t('Components.Form.requiredField', {
-          fieldName: t('DashPage.Payments.ProductPage.editForm.currencyLabel'),
+        t("Components.Form.requiredField", {
+          fieldName: t("DashPage.Payments.ProductPage.editForm.currencyLabel"),
         }),
       ),
     ),
@@ -369,10 +374,10 @@ const EditProductForm = ({
   const form = useForm({
     defaultValues: {
       name: product.name,
-      description: product.description ?? '',
+      description: product.description ?? "",
       amount: product.amount,
-      benefits: product.benefits || '',
-      currency: product.currency || '',
+      benefits: product.benefits || "",
+      currency: product.currency || "",
     },
     validators: {
       onChange: formValidator,
@@ -383,9 +388,9 @@ const EditProductForm = ({
         await updateProduct(product.id, value);
         mutate(getPaymentsProductsSwrKey());
         onSuccess();
-        toast.success(t('productUpdatedSuccess'));
+        toast.success(t("productUpdatedSuccess"));
       } catch {
-        toast.error(t('updateProductFailed'));
+        toast.error(t("updateProductFailed"));
       }
     },
   });
@@ -412,7 +417,7 @@ const EditProductForm = ({
                 onBlur={field.handleBlur}
                 onChange={(event) => field.handleChange(event.target.value)}
               />
-              <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+              <FieldError errors={field.state.meta.errors} />
             </Field>
           )}
         </form.Field>
@@ -429,7 +434,7 @@ const EditProductForm = ({
                 onBlur={field.handleBlur}
                 onChange={(event) => field.handleChange(event.target.value)}
               />
-              <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+              <FieldError errors={field.state.meta.errors} />
             </Field>
           )}
         </form.Field>
@@ -449,7 +454,7 @@ const EditProductForm = ({
                     onBlur={field.handleBlur}
                     onChange={(event) => field.handleChange(Number(event.target.value))}
                   />
-                  <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+                  <FieldError errors={field.state.meta.errors} />
                 </Field>
               )}
             </form.Field>
@@ -484,7 +489,7 @@ const EditProductForm = ({
                       </SelectGroup>
                     </SelectContent>
                   </Select>
-                  <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+                  <FieldError errors={field.state.meta.errors} />
                 </Field>
               )}
             </form.Field>
@@ -503,7 +508,7 @@ const EditProductForm = ({
                 onBlur={field.handleBlur}
                 onChange={(event) => field.handleChange(event.target.value)}
               />
-              <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+              <FieldError errors={field.state.meta.errors} />
             </Field>
           )}
         </form.Field>

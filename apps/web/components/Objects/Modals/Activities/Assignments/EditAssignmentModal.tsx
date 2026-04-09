@@ -13,7 +13,6 @@ import { Calendar } from '@/components/ui/calendar';
 import { getAPIUrl } from '@services/config/config';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { toFieldErrors } from '@/lib/tanstack-form';
 import { useRef } from 'react';
 import { CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
@@ -142,7 +141,7 @@ const EditAssignmentForm: FC<EditAssignmentFormProps> = ({ onClose, assignment }
               onBlur={field.handleBlur}
               onChange={(event) => field.handleChange(event.target.value)}
             />
-            <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+            <FieldError errors={field.state.meta.errors} />
           </Field>
         )}
       </form.Field>
@@ -158,7 +157,7 @@ const EditAssignmentForm: FC<EditAssignmentFormProps> = ({ onClose, assignment }
               onBlur={field.handleBlur}
               onChange={(event) => field.handleChange(event.target.value)}
             />
-            <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+            <FieldError errors={field.state.meta.errors} />
           </Field>
         )}
       </form.Field>
@@ -209,7 +208,7 @@ const EditAssignmentForm: FC<EditAssignmentFormProps> = ({ onClose, assignment }
                 />
               </PopoverContent>
             </Popover>
-            <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+            <FieldError errors={field.state.meta.errors} />
           </Field>
         )}
       </form.Field>
@@ -239,7 +238,7 @@ const EditAssignmentForm: FC<EditAssignmentFormProps> = ({ onClose, assignment }
                 </SelectGroup>
               </SelectContent>
             </Select>
-            <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+            <FieldError errors={field.state.meta.errors} />
           </Field>
         )}
       </form.Field>

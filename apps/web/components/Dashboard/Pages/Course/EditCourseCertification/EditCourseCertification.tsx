@@ -15,7 +15,6 @@ import { useCourse } from '@components/Contexts/CourseContext';
 import { useSaveSection } from '@/hooks/useSaveSection';
 import { Separator } from '@/components/ui/separator';
 import CertificatePreview from './CertificatePreview';
-import { toFieldErrors, valibotFormValidator } from '@/lib/tanstack-form';
 import { Textarea } from '@/components/ui/textarea';
 import { Spinner } from '@components/ui/spinner';
 import { Switch } from '@/components/ui/switch';
@@ -67,7 +66,7 @@ const _certFormSchemaForTypes = v.object({
     'academic',
     'modern',
   ] as const),
-  certificate_instructor: v.optional(v.string()),
+  certificate_instructor: v.string(),
 });
 
 type FormValues = v.InferOutput<typeof _certFormSchemaForTypes>;
@@ -143,7 +142,7 @@ const EditCourseCertification = () => {
             ],
             t('certificatePatternRequired'),
           ),
-          certificate_instructor: v.optional(v.string()),
+          certificate_instructor: v.string(),
         }),
         v.check((data) => {
           if (data.enable_certification) {
@@ -154,7 +153,6 @@ const EditCourseCertification = () => {
       ),
     [t],
   );
-  const formValidator = valibotFormValidator(formSchema);
 
   const certifications = editorData.certifications.data ?? [];
   const certificationsError = editorData.certifications.error;
@@ -171,8 +169,8 @@ const EditCourseCertification = () => {
       certificate_instructor: '',
     },
     validators: {
-      onChange: formValidator,
-      onSubmit: formValidator,
+      onChange: formSchema,
+      onSubmit: formSchema,
     },
     onSubmit: async ({ value }) => {
       if (!courseStructure || !isDirty) return;
@@ -400,7 +398,7 @@ const EditCourseCertification = () => {
                                 onBlur={field.handleBlur}
                                 onChange={(event) => field.handleChange(event.target.value)}
                               />
-                              <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+                              <FieldError errors={field.state.meta.errors} />
                             </Field>
                           )}
                         </form.Field>
@@ -436,7 +434,7 @@ const EditCourseCertification = () => {
                                   </SelectGroup>
                                 </SelectContent>
                               </Select>
-                              <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+                              <FieldError errors={field.state.meta.errors} />
                             </Field>
                           )}
                         </form.Field>
@@ -454,7 +452,7 @@ const EditCourseCertification = () => {
                                 onBlur={field.handleBlur}
                                 onChange={(event) => field.handleChange(event.target.value)}
                               />
-                              <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+                              <FieldError errors={field.state.meta.errors} />
                             </Field>
                           )}
                         </form.Field>
@@ -507,7 +505,7 @@ const EditCourseCertification = () => {
                                 </Label>
                               ))}
                             </RadioGroup>
-                            <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+                            <FieldError errors={field.state.meta.errors} />
                           </Field>
                         )}
                       </form.Field>
@@ -524,7 +522,7 @@ const EditCourseCertification = () => {
                               onBlur={field.handleBlur}
                               onChange={(event) => field.handleChange(event.target.value)}
                             />
-                            <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+                            <FieldError errors={field.state.meta.errors} />
                           </Field>
                         )}
                       </form.Field>

@@ -40,7 +40,6 @@ import { SiStripe } from '@icons-pack/react-simple-icons';
 import { getAbsoluteUrl } from '@services/config/config';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
-import { toFieldErrors } from '@/lib/tanstack-form';
 import { useTranslations } from 'next-intl';
 import useSWR, { mutate } from 'swr';
 import type { FC } from 'react';
@@ -418,7 +417,7 @@ const EditStripeConfigModal: FC<EditStripeConfigModalProps> = ({ configId, isOpe
                   onBlur={field.handleBlur}
                   onChange={(event) => field.handleChange(event.target.value)}
                 />
-                <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+                <FieldError errors={field.state.meta.errors} />
               </Field>
             )}
           </form.Field>

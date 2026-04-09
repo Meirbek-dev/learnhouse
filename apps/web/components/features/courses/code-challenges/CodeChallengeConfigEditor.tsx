@@ -16,7 +16,6 @@ import { Field, FieldDescription, FieldError, FieldLabel } from '@/components/ui
 import { apiFetch } from '@/lib/api-client';
 import ComboboxMultiple from '@/components/ui/custom/multiple-combobox';
 import { JUDGE0_LANGUAGES } from './LanguageSelector';
-import { toFieldErrors, valibotFormValidator } from '@/lib/tanstack-form';
 import { Textarea } from '@/components/ui/textarea';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getAPIUrl } from '@services/config/config';
@@ -51,7 +50,7 @@ const formSchema = v.object({
 });
 
 // Create a schema factory that accepts the translation function so validation messages are localized
-export function createConfigFormSchema(t: (key: string, params?: any) => string) {
+export function createConfigFormSchema(t: (key: string, params?: Record<string, string | number | Date>) => string) {
   const tc = v.object({
     id: v.optional(v.string()),
     input: v.string(),
@@ -114,7 +113,6 @@ export default function CodeChallengeConfigEditor({ activityUuid, courseId }: Co
   );
 
   const schema = useMemo(() => createConfigFormSchema(t), [t]);
-  const formValidator = valibotFormValidator(schema);
   const defaultValues: FormValues = {
     allowed_languages: [71],
     time_limit: 2,
@@ -130,8 +128,8 @@ export default function CodeChallengeConfigEditor({ activityUuid, courseId }: Co
   const form = useForm({
     defaultValues,
     validators: {
-      onChange: formValidator,
-      onSubmit: formValidator,
+      onChange: schema,
+      onSubmit: schema,
     },
     onSubmit: async ({ value }) => {
       setIsSaving(true);
@@ -311,7 +309,7 @@ export default function CodeChallengeConfigEditor({ activityUuid, courseId }: Co
                     </div>
                   </div>
                   <FieldDescription>{t('allowedLanguagesDescription')}</FieldDescription>
-                  <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+                  <FieldError errors={field.state.meta.errors} />
                 </Field>
               )}
             </form.Field>
@@ -333,7 +331,7 @@ export default function CodeChallengeConfigEditor({ activityUuid, courseId }: Co
                       onChange={(e) => field.handleChange(Number(e.target.value))}
                     />
                     <FieldDescription>{t('timeLimitDescription')}</FieldDescription>
-                    <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+                    <FieldError errors={field.state.meta.errors} />
                   </Field>
                 )}
               </form.Field>
@@ -354,7 +352,7 @@ export default function CodeChallengeConfigEditor({ activityUuid, courseId }: Co
                       onChange={(e) => field.handleChange(Number(e.target.value))}
                     />
                     <FieldDescription>{t('memoryLimitDescription')}</FieldDescription>
-                    <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+                    <FieldError errors={field.state.meta.errors} />
                   </Field>
                 )}
               </form.Field>
@@ -377,7 +375,7 @@ export default function CodeChallengeConfigEditor({ activityUuid, courseId }: Co
                       onChange={(e) => field.handleChange(Number(e.target.value))}
                     />
                     <FieldDescription>{t('pointsDescription')}</FieldDescription>
-                    <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+                    <FieldError errors={field.state.meta.errors} />
                   </Field>
                 )}
               </form.Field>
@@ -413,7 +411,7 @@ export default function CodeChallengeConfigEditor({ activityUuid, courseId }: Co
                       </SelectContent>
                     </Select>
                     <FieldDescription>{t('gradingStrategyDescription')}</FieldDescription>
-                    <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+                    <FieldError errors={field.state.meta.errors} />
                   </Field>
                 )}
               </form.Field>
@@ -544,7 +542,7 @@ export default function CodeChallengeConfigEditor({ activityUuid, courseId }: Co
                                   onBlur={field.handleBlur}
                                   onChange={(event) => field.handleChange(event.target.value)}
                                 />
-                                <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+                                <FieldError errors={field.state.meta.errors} />
                               </Field>
                             )}
                           </form.Field>
@@ -680,7 +678,7 @@ export default function CodeChallengeConfigEditor({ activityUuid, courseId }: Co
                                     onBlur={field.handleBlur}
                                     onChange={(event) => field.handleChange(event.target.value)}
                                   />
-                                  <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+                                  <FieldError errors={field.state.meta.errors} />
                                 </Field>
                               )}
                             </form.Field>
@@ -701,7 +699,7 @@ export default function CodeChallengeConfigEditor({ activityUuid, courseId }: Co
                                   onChange={(e) => field.handleChange(Number(e.target.value))}
                                 />
                                 <FieldDescription>{t('testWeightDescription')}</FieldDescription>
-                                <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+                                <FieldError errors={field.state.meta.errors} />
                               </Field>
                             )}
                           </form.Field>

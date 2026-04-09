@@ -10,7 +10,6 @@ import { Field, FieldDescription, FieldError, FieldLabel } from '@/components/ui
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { toFieldErrors } from '@/lib/tanstack-form';
 
 const createValidationSchema = (t: (key: string) => string) =>
   v.object({
@@ -105,7 +104,7 @@ export default function CodeChallengeActivityModal({
                 onBlur={field.handleBlur}
                 onChange={(event) => field.handleChange(event.target.value)}
               />
-              <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+              <FieldError errors={field.state.meta.errors} />
             </Field>
           )}
         </form.Field>
@@ -124,7 +123,7 @@ export default function CodeChallengeActivityModal({
                 onChange={(event) => field.handleChange(event.target.value)}
               />
               <FieldDescription>{t('descriptionHint')}</FieldDescription>
-              <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+              <FieldError errors={field.state.meta.errors} />
             </Field>
           )}
         </form.Field>
@@ -162,7 +161,7 @@ export default function CodeChallengeActivityModal({
                       </SelectGroup>
                     </SelectContent>
                   </Select>
-                  <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+                  <FieldError errors={field.state.meta.errors} />
                 </Field>
               );
             }}
@@ -202,7 +201,7 @@ export default function CodeChallengeActivityModal({
                   <FieldDescription>
                     {field.state.value === 'competitive' ? t('typeCompetitiveHint') : t('typeGeneralHint')}
                   </FieldDescription>
-                  <FieldError errors={toFieldErrors(field.state.meta.errors)} />
+                  <FieldError errors={field.state.meta.errors} />
                 </Field>
               );
             }}
