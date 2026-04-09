@@ -22,7 +22,7 @@ const SIGNUP_ERROR_MAP: Record<string, string> = {
   username_taken: 'usernameTaken',
 };
 
-type SignupState = {
+interface SignupState {
   error: string | null;
   fieldErrors: {
     firstName?: string;
@@ -31,7 +31,7 @@ type SignupState = {
     password?: string;
     confirmPassword?: string;
   };
-};
+}
 
 const SignUpClient = () => {
   const t = useTranslations('Auth.Signup');

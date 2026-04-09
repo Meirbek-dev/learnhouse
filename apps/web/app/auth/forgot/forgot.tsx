@@ -13,11 +13,11 @@ import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
 import * as v from 'valibot';
 
-type ForgotState = {
+interface ForgotState {
   error: string | null;
   message: string | null;
   fieldErrors: { email?: string };
-};
+}
 
 const ForgotPasswordClient = () => {
   const t = useTranslations('Auth.Forgot');

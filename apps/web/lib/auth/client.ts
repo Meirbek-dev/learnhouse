@@ -41,7 +41,7 @@ const PROTECTED_ROUTE_PREFIXES = [
 let _channel: BroadcastChannel | null = null;
 
 function getChannel(): BroadcastChannel | null {
-  if (typeof window === 'undefined' || !('BroadcastChannel' in window)) return null;
+  if (typeof globalThis.window === 'undefined' || !('BroadcastChannel' in globalThis)) return null;
   if (!_channel) {
     _channel = new BroadcastChannel(AUTH_BROADCAST_CHANNEL);
   }
@@ -73,8 +73,8 @@ export function emitAuthInvalidation(
 
   getChannel()?.postMessage(message);
 
-  if (options.local && typeof window !== 'undefined') {
-    window.dispatchEvent(new CustomEvent<AuthInvalidationMessage>(AUTH_INVALIDATED_EVENT, { detail: message }));
+  if (options.local && typeof globalThis.window !== 'undefined') {
+    globalThis.dispatchEvent(new CustomEvent<AuthInvalidationMessage>(AUTH_INVALIDATED_EVENT, { detail: message }));
   }
 
   return message;
@@ -86,13 +86,13 @@ export function emitAuthInvalidation(
  * cleanup.
  */
 export function subscribeToAuthInvalidation(listener: (detail: AuthInvalidationMessage) => void): () => void {
-  if (typeof window === 'undefined') return () => {};
+  if (typeof globalThis.window === 'undefined') return () => {};
 
   const handleLocal = (e: Event) => {
-    const detail = (e as CustomEvent<AuthInvalidationMessage>).detail;
+    const {detail} = (e as CustomEvent<AuthInvalidationMessage>);
     if (detail) listener(detail);
   };
-  window.addEventListener(AUTH_INVALIDATED_EVENT, handleLocal);
+  globalThis.addEventListener(AUTH_INVALIDATED_EVENT, handleLocal);
 
   const channel = getChannel();
   const handleChannel = (e: MessageEvent<AuthInvalidationMessage>) => {
@@ -101,7 +101,7 @@ export function subscribeToAuthInvalidation(listener: (detail: AuthInvalidationM
   channel?.addEventListener('message', handleChannel);
 
   return () => {
-    window.removeEventListener(AUTH_INVALIDATED_EVENT, handleLocal);
+    globalThis.removeEventListener(AUTH_INVALIDATED_EVENT, handleLocal);
     // Do not close the singleton channel — other subscribers still need it.
     channel?.removeEventListener('message', handleChannel);
   };
@@ -113,8 +113,8 @@ export function buildLoginRedirect(returnTo?: string | null): string {
 }
 
 export function getCurrentReturnTo(): string {
-  if (typeof window === 'undefined') return '/';
-  const { pathname, search } = window.location;
+  if (typeof globalThis.window === 'undefined') return '/';
+  const { pathname, search } = globalThis.location;
   return `${pathname}${search}` || '/';
 }
 
@@ -130,7 +130,7 @@ export function normalizeReturnTo(returnTo: string | null | undefined): string {
   if (!returnTo) return '/';
 
   try {
-    const origin = typeof window === 'undefined' ? 'http://localhost' : window.location.origin;
+    const origin = typeof globalThis.window === 'undefined' ? 'http://localhost' : globalThis.location.origin;
     const parsed = new URL(returnTo, origin);
     const normalizedPath = `${parsed.pathname}${parsed.search}` || '/';
 

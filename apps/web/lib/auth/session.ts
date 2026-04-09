@@ -2,7 +2,8 @@ import 'server-only';
 import { cache } from 'react';
 import { cookies, headers } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { normalizeSession, type Session, type UserSessionResponse } from './types';
+import { normalizeSession } from './types';
+import type { Session, UserSessionResponse } from './types';
 import { getServerAPIUrl } from '@services/config/config';
 
 /** Cookie names forwarded to the backend for session validation. */

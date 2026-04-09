@@ -22,22 +22,23 @@ import { Textarea } from '@components/ui/textarea';
 import ThumbnailUpdate from './ThumbnailUpdate';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
-import { generateUUID } from '@/lib/utils';
 import type * as v from 'valibot';
 
-const generateId = () => generateUUID();
+// Placeholder ID is stable across SSR and hydration; LearningItemsList replaces it
+// with a real UUID in a post-mount effect, avoiding hydration mismatches.
+const LEARNINGS_PLACEHOLDER_ID = '__placeholder_0__';
 
 function initializeLearnings(learnings: any): string {
-  if (!learnings) return JSON.stringify([{ id: generateId(), text: '', emoji: '📝' }]);
+  if (!learnings) return JSON.stringify([{ id: LEARNINGS_PLACEHOLDER_ID, text: '', emoji: '📝' }]);
   try {
     const parsed = JSON.parse(learnings);
     if (Array.isArray(parsed)) return learnings;
   } catch {
     if (typeof learnings === 'string') {
-      return JSON.stringify([{ id: generateId(), text: learnings, emoji: '📝' }]);
+      return JSON.stringify([{ id: LEARNINGS_PLACEHOLDER_ID, text: learnings, emoji: '📝' }]);
     }
   }
-  return JSON.stringify([{ id: generateId(), text: '', emoji: '📝' }]);
+  return JSON.stringify([{ id: LEARNINGS_PLACEHOLDER_ID, text: '', emoji: '📝' }]);
 }
 
 function parseTags(raw: any): string[] {

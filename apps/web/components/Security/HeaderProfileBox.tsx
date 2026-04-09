@@ -45,7 +45,7 @@ export const HeaderProfileBox = () => {
 
   let userRoleInfo: RoleInfo | null = null;
   if (userRoles && userRoles.length > 0) {
-    const sortedRoles = [...userRoles].sort((a: any, b: any) => {
+    const sortedRoles = [...userRoles].toSorted((a: any, b: any) => {
       return (b.role?.priority ?? 0) - (a.role?.priority ?? 0);
     });
 

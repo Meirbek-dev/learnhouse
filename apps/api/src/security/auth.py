@@ -10,10 +10,10 @@ from sqlmodel import Session, select
 from src.core.events.database import get_db_session
 from src.db.strict_base_model import PydanticStrictBaseModel
 from src.db.users import AnonymousUser, PublicUser, User, UserRead
-from src.security.keys import get_private_key, get_public_key
-from src.security.auth_lifetimes import ACCESS_TOKEN_EXPIRE, REFRESH_TOKEN_EXPIRE
-from src.security.rbac import AuthenticationRequired
 from src.security.auth_cookies import ACCESS_COOKIE_KEY
+from src.security.auth_lifetimes import ACCESS_TOKEN_EXPIRE, REFRESH_TOKEN_EXPIRE
+from src.security.keys import get_private_key, get_public_key
+from src.security.rbac import AuthenticationRequired
 from src.services.auth.sessions import get_session_by_id
 from src.services.cache.redis_client import get_async_redis_client
 
@@ -262,6 +262,8 @@ async def authenticate_user(
 ) -> User | None:
     from src.services.users.users import (
         security_get_user,
+    )
+    from src.services.users.users import (
         security_verify_password as verify,
     )
 

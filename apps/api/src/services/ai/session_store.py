@@ -111,8 +111,9 @@ def load_chat_session(
                 ]
                 conversation_summary = _summarize_messages(summary_messages)
         except Exception as exc:
+            msg = f"Failed to load chat session: {exc!s}"
             raise ChatSessionError(
-                f"Failed to load chat session: {exc!s}",
+                msg,
                 details={"session_id": session_id, "error_type": type(exc).__name__},
             ) from exc
 
@@ -152,8 +153,9 @@ def append_messages(
             pipe.ltrim(key, -settings.ai_config.max_history_length, -1)
         pipe.execute()
     except Exception as exc:
+        msg = f"Failed to persist chat session: {exc!s}"
         raise ChatSessionError(
-            f"Failed to persist chat session: {exc!s}",
+            msg,
             details={"session_id": session_id, "error_type": type(exc).__name__},
         ) from exc
 

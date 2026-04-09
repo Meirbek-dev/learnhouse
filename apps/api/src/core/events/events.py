@@ -1,4 +1,5 @@
 import asyncio
+import contextlib
 import logging
 from collections.abc import Callable
 
@@ -59,10 +60,8 @@ def shutdown_app(app: FastAPI) -> Callable:
         task: asyncio.Task | None = getattr(app.state, "ttl_sweep_task", None)
         if task is not None and not task.done():
             task.cancel()
-            try:
+            with contextlib.suppress(asyncio.CancelledError):
                 await task
-            except asyncio.CancelledError:
-                pass
 
         await close_database(app)
 

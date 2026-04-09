@@ -512,7 +512,7 @@ async def batch_grade_submissions(
                 )
             )
             failed += 1
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             logger.exception(
                 "Unexpected batch grading failure for submission %s",
                 grade.submission_uuid,

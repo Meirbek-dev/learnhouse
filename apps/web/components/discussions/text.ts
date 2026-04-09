@@ -1,5 +1,5 @@
 const HTML_TAG_PATTERN = /<[^>]*>/g;
-const HTML_ENTITY_PATTERNS: Array<[RegExp, string]> = [
+const HTML_ENTITY_PATTERNS: [RegExp, string][] = [
   [/&nbsp;/gi, ' '],
   [/&amp;/gi, '&'],
   [/&lt;/gi, '<'],

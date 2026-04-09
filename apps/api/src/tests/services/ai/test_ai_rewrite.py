@@ -2,9 +2,9 @@ from __future__ import annotations
 
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
+from typing import Never
 
 import pytest
-
 from pydantic_ai.models.openai import OpenAIChatModel
 from pydantic_ai.providers.openai import OpenAIProvider
 
@@ -222,8 +222,8 @@ async def test_generate_chat_answer_persists_messages(
     monkeypatch.setattr(
         "src.services.ai.service.retrieve_chunks", _fake_retrieve_chunks
     )
-    monkeypatch.setattr("src.services.ai.service.get_agent", lambda: _FakeAgent())
-    monkeypatch.setattr("src.services.ai.service.get_model", lambda: _FakeModel())
+    monkeypatch.setattr("src.services.ai.service.get_agent", _FakeAgent)
+    monkeypatch.setattr("src.services.ai.service.get_model", _FakeModel)
     monkeypatch.setattr(
         "src.services.ai.service.append_messages",
         lambda _session_id, messages: persisted.extend(messages),
@@ -248,14 +248,14 @@ async def test_generate_chat_answer_skips_retrieval_for_translation(
 ) -> None:
     persisted: list[ChatMessage] = []
 
-    async def _unexpected_retrieve_chunks(**_kwargs):
+    async def _unexpected_retrieve_chunks(**_kwargs) -> Never:
         raise AssertionError("retrieve_chunks should not run for translation prompts")
 
     monkeypatch.setattr(
         "src.services.ai.service.retrieve_chunks", _unexpected_retrieve_chunks
     )
-    monkeypatch.setattr("src.services.ai.service.get_agent", lambda: _FakeAgent())
-    monkeypatch.setattr("src.services.ai.service.get_model", lambda: _FakeModel())
+    monkeypatch.setattr("src.services.ai.service.get_agent", _FakeAgent)
+    monkeypatch.setattr("src.services.ai.service.get_model", _FakeModel)
     monkeypatch.setattr(
         "src.services.ai.service.append_messages",
         lambda _session_id, messages: persisted.extend(messages),
@@ -284,10 +284,8 @@ async def test_stream_chat_answer_localizes_status_messages(
     monkeypatch.setattr(
         "src.services.ai.service.retrieve_chunks", _fake_retrieve_chunks
     )
-    monkeypatch.setattr(
-        "src.services.ai.service.get_agent", lambda: _FakeStreamingAgent()
-    )
-    monkeypatch.setattr("src.services.ai.service.get_model", lambda: _FakeModel())
+    monkeypatch.setattr("src.services.ai.service.get_agent", _FakeStreamingAgent)
+    monkeypatch.setattr("src.services.ai.service.get_model", _FakeModel)
 
     events = [
         event

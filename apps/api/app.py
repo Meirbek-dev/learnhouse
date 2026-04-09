@@ -14,7 +14,6 @@ from config.config import get_settings
 from src.core.events.events import shutdown_app, startup_app
 from src.router import v1_router
 
-
 _STATIC_CACHE_HEADER = "public, max-age=31536000, immutable"
 
 

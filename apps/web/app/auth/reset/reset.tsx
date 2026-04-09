@@ -14,7 +14,7 @@ import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
 import * as v from 'valibot';
 
-type ResetState = {
+interface ResetState {
   error: string | null;
   message: string | null;
   fieldErrors: {
@@ -23,7 +23,7 @@ type ResetState = {
     new_password?: string;
     confirm_password?: string;
   };
-};
+}
 
 const ResetPasswordClient = () => {
   const validationT = useTranslations('Validation');

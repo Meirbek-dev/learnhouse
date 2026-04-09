@@ -4,11 +4,11 @@ import json
 import sys
 from pathlib import Path
 
+from app import app
+
 APP_ROOT = Path(__file__).resolve().parent.parent
 if str(APP_ROOT) not in sys.path:
     sys.path.insert(0, str(APP_ROOT))
-
-from app import app
 
 
 def main() -> None:

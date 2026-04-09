@@ -323,7 +323,9 @@ async def get_user_session(
             if token_data.issued_at is not None:
                 session_version = token_data.issued_at
     except Exception as e:
-        _logger.exception(f"Error resolving session expiry for user {current_user.id}: {e}")
+        _logger.exception(
+            f"Error resolving session expiry for user {current_user.id}: {e}"
+        )
 
     return UserSession(
         user=user_read,

@@ -25,7 +25,7 @@ export function AuthBroadcastListener() {
       void mutate(AUTH_SESSION_SWR_KEY, null, { revalidate: false });
       router.refresh();
 
-      const pathname = globalThis.location.pathname;
+      const {pathname} = globalThis.location;
       const onAuthRoute = isAuthRoute(pathname);
       const onProtectedRoute = isProtectedRoute(pathname);
 

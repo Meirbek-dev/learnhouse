@@ -7,10 +7,10 @@ from sqlmodel import Session
 
 from src.db.users import PublicUser
 from src.services.ai.exceptions import (
+    ActivityNotFoundError,
     AIProcessingError,
     AIServiceException,
     AITimeoutError,
-    ActivityNotFoundError,
     ChatSessionError,
     RetrievalError,
 )
@@ -133,7 +133,7 @@ async def ai_start_activity_chat_session_stream(
     current_user: PublicUser,
     db_session: Session,
     cancel_event: asyncio.Event | None = None,
-) -> AsyncGenerator[str, None]:
+) -> AsyncGenerator[str]:
     try:
         async for event in run_activity_chat_stream(
             activity_uuid=chat_session_object.activity_uuid,
@@ -159,7 +159,7 @@ async def ai_send_activity_chat_message_stream(
     current_user: PublicUser,
     db_session: Session,
     cancel_event: asyncio.Event | None = None,
-) -> AsyncGenerator[str, None]:
+) -> AsyncGenerator[str]:
     try:
         async for event in run_activity_chat_stream(
             activity_uuid=chat_session_object.activity_uuid,

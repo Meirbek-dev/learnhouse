@@ -64,15 +64,17 @@ async def embed_texts(texts: list[str], model_name: str) -> list[list[float]]:
             except Exception as exc:
                 last_error = exc
                 if attempt == 2:
+                    msg = f"Failed to create embeddings: {exc!s}"
                     raise RetrievalError(
-                        f"Failed to create embeddings: {exc!s}",
+                        msg,
                         details={"error_type": type(exc).__name__, "model": model_name},
                     ) from exc
                 await asyncio.sleep(2**attempt)
 
         if last_error is not None and len(embeddings) < start + len(batch):
+            msg = f"Failed to create embeddings: {last_error!s}"
             raise RetrievalError(
-                f"Failed to create embeddings: {last_error!s}",
+                msg,
                 details={"error_type": type(last_error).__name__, "model": model_name},
             )
 

@@ -32,12 +32,12 @@ import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 
 type UserData = components['schemas']['UserRead'];
-type UserDetail = {
+interface UserDetail {
   id: string;
   label: string;
   icon: string;
   text: string;
-};
+}
 
 const AVAILABLE_ICONS = {
   'briefcase': Briefcase,

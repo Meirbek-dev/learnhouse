@@ -84,7 +84,7 @@ const Trail = () => {
           {/* Leaderboard */}
           <Leaderboard
             entries={leaderboardData?.entries || []}
-            currentUserId={currentUser?.id ? Number(currentUser.id) : undefined}
+            currentUserId={currentUser?.id ? currentUser.id : undefined}
             userRank={userRankData?.rank}
           />
 

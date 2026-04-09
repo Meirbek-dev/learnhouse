@@ -40,7 +40,7 @@ def _generate_test_public_key() -> str:
         encoding=serialization.Encoding.PEM,
         format=serialization.PublicFormat.SubjectPublicKeyInfo,
     )
-    return public_pem.decode('utf-8')
+    return public_pem.decode("utf-8")
 
 
 def test_platform_config_accepts_public_key_only_security_config() -> None:
@@ -79,7 +79,9 @@ def test_platform_config_accepts_public_key_only_security_config() -> None:
 
 
 def test_security_config_requires_key_material() -> None:
-    with pytest.raises(ValueError, match="At least one of PLATFORM_AUTH_ED25519_PRIVATE_KEY"):
+    with pytest.raises(
+        ValueError, match="At least one of PLATFORM_AUTH_ED25519_PRIVATE_KEY"
+    ):
         SecurityConfig.model_validate(
             {
                 "PLATFORM_AUTH_ED25519_PRIVATE_KEY": None,

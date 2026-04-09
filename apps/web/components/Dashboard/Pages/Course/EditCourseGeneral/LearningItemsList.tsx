@@ -26,17 +26,21 @@ interface LearningItemsListProps {
   error?: string;
 }
 
+const PLACEHOLDER_ID_PREFIX = '__placeholder_';
+
 const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) => {
-  // Helper function to standardize items
+  // Helper function to standardize items.
+  // Uses deterministic placeholder IDs to avoid SSR/hydration mismatch;
+  // real UUIDs are assigned in a post-mount effect.
   const standardizeItems = (val?: string): LearningItem[] => {
     try {
       if (val) {
         const parsedItems = JSON.parse(val);
         if (Array.isArray(parsedItems) && parsedItems.length > 0) {
-          return parsedItems.map((item: unknown) => {
+          return parsedItems.map((item: unknown, index: number) => {
             const safeItem = item as Partial<LearningItem>;
             return {
-              id: safeItem.id || generateUUID(),
+              id: safeItem.id || `${PLACEHOLDER_ID_PREFIX}${index}`,
               text: safeItem.text ?? '',
               emoji: safeItem.emoji || '📝',
               link: safeItem.link || undefined,
@@ -50,7 +54,7 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
     // Default item
     return [
       {
-        id: generateUUID(),
+        id: `${PLACEHOLDER_ID_PREFIX}0`,
         text: '',
         emoji: '📝',
       },
@@ -61,6 +65,18 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
 
   // Use lazy initialization to parse and standardize items once
   const [items, setItems] = useState<LearningItem[]>(() => standardizeItems(value));
+
+  // Replace placeholder IDs with real UUIDs after mount to avoid SSR/hydration mismatch.
+  useEffect(() => {
+    setItems((prev) => {
+      const hasPlaceholders = prev.some((item) => item.id.startsWith(PLACEHOLDER_ID_PREFIX));
+      if (!hasPlaceholders) return prev;
+      return prev.map((item) => ({
+        ...item,
+        id: item.id.startsWith(PLACEHOLDER_ID_PREFIX) ? generateUUID() : item.id,
+      }));
+    });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const [showEmojiPicker, setShowEmojiPicker] = useState<string | null>(null);
   const [showLinkInput, setShowLinkInput] = useState<string | null>(null);

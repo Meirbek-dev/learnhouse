@@ -12,7 +12,6 @@ carry the real schema changes.
 
 from collections.abc import Sequence
 
-
 revision: str = "01298eb34544"
 down_revision: str | None = "a7aca90f424a"
 branch_labels: str | Sequence[str] | None = None

@@ -3,7 +3,15 @@ import time
 from typing import Annotated
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, Response, status
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    Depends,
+    HTTPException,
+    Request,
+    Response,
+    status,
+)
 from fastapi.responses import JSONResponse, RedirectResponse
 from sqlmodel import Session, select
 
@@ -47,8 +55,8 @@ from src.services.auth.rate_limiter import (
 from src.services.auth.sessions import (
     SessionData,
     create_auth_session,
-    get_user_active_sessions,
     get_session_owner_id,
+    get_user_active_sessions,
     inspect_refresh_session,
     revoke_all_user_sessions,
     revoke_session,
@@ -173,7 +181,9 @@ def _sanitize_callback_target(callback: str) -> str:
 
     origin = urlunsplit((parsed.scheme, parsed.netloc, "", "", "")).rstrip("/")
     settings = get_settings()
-    allowed_origins = {item.rstrip("/") for item in settings.hosting_config.allowed_origins}
+    allowed_origins = {
+        item.rstrip("/") for item in settings.hosting_config.allowed_origins
+    }
     allowed_origins.add(_current_origin())
     if origin not in allowed_origins:
         raise HTTPException(status_code=400, detail="Untrusted callback origin")
@@ -374,7 +384,9 @@ async def logout(
     response: Response,
     background_tasks: BackgroundTasks,
     token: Annotated[str | None, Depends(oauth2_scheme_optional)],
-    current_user: Annotated[PublicUser | AnonymousUser, Depends(get_current_user_optional)],
+    current_user: Annotated[
+        PublicUser | AnonymousUser, Depends(get_current_user_optional)
+    ],
     db_session: Annotated[Session, Depends(get_db_session)],
 ) -> LogoutResponse:
     # Only blocklist / revoke when the token was fully verified.
@@ -394,9 +406,13 @@ async def logout(
                 await blocklist_jti(jti, exp_remaining)
 
             if token_data.session_id:
-                user_id_hint = await get_session_owner_id(db_session, token_data.session_id)
+                user_id_hint = await get_session_owner_id(
+                    db_session, token_data.session_id
+                )
                 if user_id_hint:
-                    await revoke_session(db_session, token_data.session_id, user_id_hint)
+                    await revoke_session(
+                        db_session, token_data.session_id, user_id_hint
+                    )
         except Exception:
             # Never block logout due to token parsing errors
             pass
@@ -480,7 +496,9 @@ async def forgot_password(
 ):
     ip = _client_ip(request)
     try:
-        await check_rate_limit(key=f"forgot:ip:{ip}", max_requests=3, window_seconds=3600)
+        await check_rate_limit(
+            key=f"forgot:ip:{ip}", max_requests=3, window_seconds=3600
+        )
         await check_rate_limit(
             key=f"forgot:email:{body.email.lower()}", max_requests=1, window_seconds=300
         )

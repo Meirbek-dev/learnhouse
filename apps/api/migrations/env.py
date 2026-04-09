@@ -1,10 +1,10 @@
 import importlib
 import os
-from pathlib import Path
 from logging.config import fileConfig
+from pathlib import Path
 
-from alembic import context
 import sqlalchemy as sa
+from alembic import context
 from sqlalchemy import engine_from_config, pool
 from sqlmodel import SQLModel
 from sqlmodel.sql.sqltypes import AutoString
@@ -83,10 +83,9 @@ def include_object(object_, name: str | None, type_: str, reflected: bool, compa
         if parent_table is not None and getattr(parent_table, "name", None):
             table_name = parent_table.name
 
-    if reflected and compare_to is None and table_name in _AUTOGENERATE_EXCLUDED_TABLES:
-        return False
-
-    return True
+    return not (
+        reflected and compare_to is None and table_name in _AUTOGENERATE_EXCLUDED_TABLES
+    )
 
 
 def compare_type(
@@ -103,6 +102,7 @@ def compare_type(
         return False
 
     return None
+
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:

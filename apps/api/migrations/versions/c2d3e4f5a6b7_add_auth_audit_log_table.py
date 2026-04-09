@@ -72,7 +72,9 @@ def upgrade() -> None:
         for column_name, column_type in missing_columns.items():
             if column_name not in existing_columns:
                 default_clause = " DEFAULT 'info'" if column_name == "severity" else ""
-                nullable_clause = " NOT NULL" if column_name in {"event_type", "severity"} else ""
+                nullable_clause = (
+                    " NOT NULL" if column_name in {"event_type", "severity"} else ""
+                )
                 op.execute(
                     sa.text(
                         "ALTER TABLE auth_audit_log "
@@ -87,15 +89,11 @@ def upgrade() -> None:
         )
         op.execute(
             sa.text(
-                "ALTER TABLE auth_audit_log "
-                "ALTER COLUMN severity SET DEFAULT 'info'"
+                "ALTER TABLE auth_audit_log ALTER COLUMN severity SET DEFAULT 'info'"
             )
         )
         op.execute(
-            sa.text(
-                "ALTER TABLE auth_audit_log "
-                "ALTER COLUMN severity SET NOT NULL"
-            )
+            sa.text("ALTER TABLE auth_audit_log ALTER COLUMN severity SET NOT NULL")
         )
 
     op.execute(

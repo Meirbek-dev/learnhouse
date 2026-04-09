@@ -236,7 +236,9 @@ async def get_session_by_id(session_id: str) -> SessionData | None:
     return await _read_session_from_redis(session_id)
 
 
-async def get_session_owner_id(db_session: Session | None, session_id: str) -> int | None:
+async def get_session_owner_id(
+    db_session: Session | None, session_id: str
+) -> int | None:
     active = await _read_session_from_redis(session_id)
     if active is not None:
         return active.user_id
@@ -366,7 +368,9 @@ async def rotate_session(
     return new_data, new_refresh_token
 
 
-async def revoke_session(db_session: Session | None, session_id: str, user_id: int) -> None:
+async def revoke_session(
+    db_session: Session | None, session_id: str, user_id: int
+) -> None:
     await _delete_session_from_redis(session_id, user_id)
     _audit_revoke(db_session, session_id)
 

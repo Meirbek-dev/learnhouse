@@ -26,10 +26,10 @@ function getSafeReturnTo(raw: string | null): string {
   return normalized === '/' ? '/redirect_from_auth' : normalized;
 }
 
-type LoginState = {
+interface LoginState {
   error: string | null;
   fieldErrors: { email?: string; password?: string };
-};
+}
 
 const LoginClient = () => {
   const validationT = useTranslations('Validation');

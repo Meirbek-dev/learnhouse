@@ -2,10 +2,10 @@ import asyncio
 import hashlib
 import logging
 
-from sqlalchemy import Column, MetaData, Table, Text, delete, select, text
-from sqlalchemy.dialects.postgresql import JSONB, insert as pg_insert
-from sqlalchemy.dialects.postgresql import TIMESTAMP
 from pgvector.sqlalchemy import Vector
+from sqlalchemy import Column, MetaData, Table, Text, delete, select, text
+from sqlalchemy.dialects.postgresql import JSONB, TIMESTAMP
+from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlmodel import Session
 
 from config.config import get_settings
@@ -176,7 +176,7 @@ async def ensure_collection(
     if not documents:
         raise RetrievalError("No documents available for retrieval")
 
-    settings = get_settings().ai_config
+    get_settings().ai_config
     content_hash = _content_hash(documents)
     resolved_name = _collection_name(collection_name, content_hash)
     cache_key = f"{embedding_model_name}_{resolved_name}_{content_hash}"

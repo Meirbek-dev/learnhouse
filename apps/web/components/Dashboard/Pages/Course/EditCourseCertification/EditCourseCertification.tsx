@@ -254,7 +254,7 @@ const EditCourseCertification = () => {
   const handleSaveCertification = form.handleSubmit(async (values) => {
     if (!courseStructure || !isDirty) return;
 
-    const isCertificationEnabled = Boolean(values.enable_certification);
+    const isCertificationEnabled = values.enable_certification;
 
     const config = {
       certification_name: values.certification_name,
@@ -360,9 +360,9 @@ const EditCourseCertification = () => {
                   >
                     <Switch
                       id="cert-toggle"
-                      checked={Boolean(field.value)}
+                      checked={field.value}
                       onCheckedChange={(checked) => {
-                        field.onChange(Boolean(checked));
+                        field.onChange(checked);
                       }}
                       disabled={isSaving}
                     />

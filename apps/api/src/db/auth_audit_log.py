@@ -1,15 +1,15 @@
 from datetime import datetime
 from typing import Any
 
-from sqlmodel import Column, Field, SQLModel
 from sqlalchemy import JSON, Text
+from sqlmodel import Column, Field, SQLModel
 
 
 class AuthAuditLog(SQLModel, table=True):
     __tablename__ = "auth_audit_log"
 
     id: int | None = Field(default=None, primary_key=True)
-    created_at: datetime = Field(default_factory=lambda: datetime.utcnow())
+    created_at: datetime = Field(default_factory=datetime.utcnow)
     user_id: str | None = Field(default=None, index=True)
     event_type: str = Field(sa_column=Column(Text, nullable=False, index=True))
     session_id: str | None = Field(default=None)

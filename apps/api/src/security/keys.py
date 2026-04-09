@@ -47,11 +47,13 @@ def _raw_key_from_env_or_settings(env_var: str) -> str:
 def _pem_from_env(env_var: str) -> bytes:
     raw = _raw_key_from_env_or_settings(env_var)
     if not raw:
-        raise RuntimeError(f"{env_var} is not set")
+        msg = f"{env_var} is not set"
+        raise RuntimeError(msg)
     try:
         return base64.b64decode(raw)
     except Exception as exc:
-        raise RuntimeError(f"{env_var} is not valid base64") from exc
+        msg = f"{env_var} is not valid base64"
+        raise RuntimeError(msg) from exc
 
 
 @lru_cache(maxsize=1)

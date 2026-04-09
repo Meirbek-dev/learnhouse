@@ -6696,7 +6696,7 @@ export interface components {
             /**
              * Creation Date
              * Format: date-time
-             * @default 2026-04-08T08:36:30.994957
+             * @default 2026-04-09T09:54:00.588113
              */
             creation_date: string;
             /**
@@ -6717,7 +6717,7 @@ export interface components {
             /**
              * Update Date
              * Format: date-time
-             * @default 2026-04-08T08:36:30.994998
+             * @default 2026-04-09T09:54:00.588173
              */
             update_date: string;
         };

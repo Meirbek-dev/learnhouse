@@ -412,7 +412,7 @@ const UserProfileBuilder = () => {
 
       // Update only the profile field
       const userData = {
-        ...(me ?? {}),
+        ...me,
         profile: profileData,
       };
 

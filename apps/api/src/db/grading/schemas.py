@@ -13,8 +13,8 @@ from typing import Any, Literal
 
 from pydantic import Field
 
-from src.db.strict_base_model import PydanticStrictBaseModel
 from src.db.grading.submissions import ItemFeedback
+from src.db.strict_base_model import PydanticStrictBaseModel
 
 # ── Quiz ──────────────────────────────────────────────────────────────────────
 

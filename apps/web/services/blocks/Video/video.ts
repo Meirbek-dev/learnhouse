@@ -42,14 +42,14 @@ export async function uploadNewVideoFile(
       const fileId = dotIndex !== -1 ? savedFilename.slice(0, dotIndex) : savedFilename;
 
       return {
-        block_uuid: block_uuid,
+        block_uuid,
         content: {
           file_id: fileId,
           file_format: fileFormat,
           file_name: file.name,
           file_size: file.size,
           file_type: file.type,
-          activity_uuid: activity_uuid,
+          activity_uuid,
         },
       };
     } catch (error: any) {

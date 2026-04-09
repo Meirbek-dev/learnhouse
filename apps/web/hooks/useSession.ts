@@ -2,7 +2,8 @@
 
 import { apiFetch } from '@/lib/api-client';
 import { AUTH_SESSION_SWR_KEY } from '@/lib/auth/constants';
-import { normalizeSession, type Session } from '@/lib/auth/types';
+import { normalizeSession } from '@/lib/auth/types';
+import type { Session } from '@/lib/auth/types';
 import useSWR from 'swr';
 
 export type SessionStatus = 'loading' | 'authenticated' | 'unauthenticated' | 'error';
@@ -52,7 +53,7 @@ export function useAuthSession(): AuthSessionResult {
     revalidateOnReconnect: true,
     refreshInterval: getRefreshInterval,
     shouldRetryOnError: false,
-    dedupingInterval: 2_000,
+    dedupingInterval: 2000,
   });
 
   const status: SessionStatus = isLoading

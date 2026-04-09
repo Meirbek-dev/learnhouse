@@ -14,9 +14,9 @@ from src.db.courses.courses import Course, CourseRead
 from src.services.ai.agent import get_agent, get_model
 from src.services.ai.cache_manager import get_ai_cache_manager
 from src.services.ai.exceptions import (
+    ActivityNotFoundError,
     AIProcessingError,
     AITimeoutError,
-    ActivityNotFoundError,
     RetrievalError,
 )
 from src.services.ai.models import (
@@ -144,7 +144,7 @@ def _normalize_locale(locale: str | None) -> str:
         return "en-US"
     if lowered.startswith("ru"):
         return "ru-RU"
-    if lowered.startswith("kk") or lowered.startswith("kz"):
+    if lowered.startswith(("kk", "kz")):
         return "kk-KZ"
     return _DEFAULT_LOCALE
 
@@ -416,8 +416,9 @@ async def generate_chat_answer(
     except AITimeoutError, RetrievalError:
         raise
     except Exception as exc:
+        msg = f"Unexpected error during AI processing: {exc!s}"
         raise AIProcessingError(
-            f"Unexpected error during AI processing: {exc!s}",
+            msg,
             details={"error_type": type(exc).__name__, "session_id": ctx.session_id},
         ) from exc
 
@@ -452,7 +453,7 @@ async def stream_chat_answer(
     ctx: _ChatContext,
     question: str,
     cancel_event: asyncio.Event | None = None,
-) -> AsyncGenerator[StatusEvent | DeltaEvent | FinalEvent, None]:
+) -> AsyncGenerator[StatusEvent | DeltaEvent | FinalEvent]:
     if not question or not question.strip():
         raise AIProcessingError("Question cannot be empty")
 
@@ -564,8 +565,9 @@ async def stream_chat_answer(
     except AITimeoutError:
         raise
     except Exception as exc:
+        msg = f"Unexpected error during AI streaming: {exc!s}"
         raise AIProcessingError(
-            f"Unexpected error during AI streaming: {exc!s}",
+            msg,
             details={"error_type": type(exc).__name__, "session_id": ctx.session_id},
         ) from exc
 
@@ -636,7 +638,7 @@ async def run_activity_chat_stream(
     locale: str | None,
     request: Request | None,
     cancel_event: asyncio.Event | None = None,
-) -> AsyncGenerator[StatusEvent | DeltaEvent | FinalEvent, None]:
+) -> AsyncGenerator[StatusEvent | DeltaEvent | FinalEvent]:
     ctx = await build_chat_context(
         activity_uuid=activity_uuid,
         aichat_uuid=aichat_uuid,
