@@ -1,6 +1,6 @@
 'use client';
 
-import { Field, FieldError, FieldLabel } from '@components/ui/field';
+import { Field, FieldContent, FieldError, FieldLabel } from '@components/ui/field';
 import { createUserGroup } from '@services/usergroups/usergroups';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { getAPIUrl } from '@services/config/config';
@@ -8,7 +8,6 @@ import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
-import { useTransition } from 'react';
 import { toast } from 'sonner';
 import * as v from 'valibot';
 import { mutate } from 'swr';
@@ -24,74 +23,69 @@ const createValidationSchema = (t: (key: string) => string) =>
   });
 
 type UserGroupFormValues = v.InferOutput<ReturnType<typeof createValidationSchema>>;
+type UserGroupInputValues = v.InferInput<ReturnType<typeof createValidationSchema>>;
 
 const AddUserGroup = (props: AddUserGroupProps) => {
   const t = useTranslations('Components.AddUserGroup');
   const validationSchema = createValidationSchema(t);
 
-  const form = useForm<UserGroupFormValues>({
+  const form = useForm<UserGroupInputValues, any, UserGroupFormValues>({
     resolver: valibotResolver(validationSchema),
     defaultValues: {
       name: '',
       description: '',
     },
   });
-  const {
-    register,
-    handleSubmit: submitWithValidation,
-    formState: { errors, isSubmitting },
-  } = form;
 
-  const [isPending, startTransition] = useTransition();
-
-  const handleSubmit = (values: UserGroupFormValues) => {
+  const handleSubmit = async (values: UserGroupFormValues) => {
     const toastID = toast.loading(t('toastLoading'));
-    startTransition(() => {
-      void (async () => {
-        const res = await createUserGroup(values);
-        if (res.status === 200) {
-          mutate(`${getAPIUrl()}usergroups`);
-          props.setCreateUserGroupModal(false);
-          toast.success(t('toastSuccess'), { id: toastID });
-        } else {
-          toast.error(t('toastError'), { id: toastID });
-        }
-      })();
-    });
+    const res = await createUserGroup(values);
+    if (res.status === 200) {
+      mutate(`${getAPIUrl()}usergroups`);
+      props.setCreateUserGroupModal(false);
+      toast.success(t('toastSuccess'), { id: toastID });
+      return;
+    }
+
+    toast.error(t('toastError'), { id: toastID });
   };
 
   return (
     <form
-      onSubmit={submitWithValidation(handleSubmit)}
+      onSubmit={form.handleSubmit(handleSubmit)}
       className="space-y-4"
     >
       <Field>
         <FieldLabel htmlFor="name">{t('nameLabel')}</FieldLabel>
-        <Input
-          id="name"
-          type="text"
-          {...register('name')}
-        />
-        <FieldError errors={[errors.name]} />
+        <FieldContent>
+          <Input
+            id="name"
+            type="text"
+            {...form.register('name')}
+          />
+        </FieldContent>
+        <FieldError errors={[form.formState.errors.name]} />
       </Field>
 
       <Field>
         <FieldLabel htmlFor="description">{t('descriptionLabel')}</FieldLabel>
-        <Input
-          id="description"
-          type="text"
-          {...register('description')}
-        />
-        <FieldError errors={[errors.description]} />
+        <FieldContent>
+          <Input
+            id="description"
+            type="text"
+            {...form.register('description')}
+          />
+        </FieldContent>
+        <FieldError errors={[form.formState.errors.description]} />
       </Field>
 
       <div className="flex py-4">
         <Button
           type="submit"
           className="w-full rounded-md p-2 text-center font-bold shadow-md hover:cursor-pointer"
-          disabled={isPending || isSubmitting}
+          disabled={form.formState.isSubmitting}
         >
-          {isPending || isSubmitting ? t('loadingButton') : t('createButton')}
+          {form.formState.isSubmitting ? t('loadingButton') : t('createButton')}
         </Button>
       </div>
     </form>

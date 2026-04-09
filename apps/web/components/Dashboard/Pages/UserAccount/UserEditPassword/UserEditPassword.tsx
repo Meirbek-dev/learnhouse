@@ -3,12 +3,11 @@
 import { updatePassword } from '@/lib/users/client';
 import { logout } from '@services/auth/auth';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { Field, FieldContent, FieldDescription, FieldError, FieldLabel } from '@components/ui/field';
 import PasswordInput from '@components/ui/custom/password-input';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { getAbsoluteUrl } from '@services/config/config';
-import { useState, useTransition } from 'react';
 import { Button } from '@components/ui/button';
-import { Label } from '@components/ui/label';
 import { AlertTriangle } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
@@ -39,6 +38,7 @@ const createValidationSchema = (t: (key: string, values?: any) => string) =>
   });
 
 type PasswordFormData = v.InferOutput<ReturnType<typeof createValidationSchema>>;
+type PasswordFormValues = v.InferInput<ReturnType<typeof createValidationSchema>>;
 
 const UserEditPassword = () => {
   const viewer = useCurrentUser();
@@ -46,23 +46,16 @@ const UserEditPassword = () => {
   const tPassword = useTranslations('DashPage.UserAccountSettings.UserAccount.EditPassword');
   const validationSchema = createValidationSchema(t);
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-  } = useForm<PasswordFormData>({
+  const form = useForm<PasswordFormValues, any, PasswordFormData>({
     resolver: valibotResolver(validationSchema),
     defaultValues: {
       old_password: '',
       new_password: '',
     },
   });
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [isPending, startTransition] = useTransition();
 
   const onSubmit = async (values: PasswordFormData) => {
     const loadingToast = toast.loading(t('updating'));
-    startTransition(() => setIsProcessing(true));
     try {
       const user_id = viewer?.id;
       if (!user_id) {
@@ -83,6 +76,7 @@ const UserEditPassword = () => {
           duration: 4000,
           icon: '🔑',
         });
+        form.reset();
 
         // Wait for 4 seconds before signing out
         setTimeout(() => {
@@ -96,8 +90,6 @@ const UserEditPassword = () => {
     } catch (error: any) {
       toast.error(t('passwordUpdateError'), { id: loadingToast });
       console.error('Password update error:', error);
-    } finally {
-      startTransition(() => setIsProcessing(false));
     }
   };
 
@@ -111,28 +103,31 @@ const UserEditPassword = () => {
 
         <div className="px-8 py-6">
           <form
-            onSubmit={handleSubmit(onSubmit)}
+            onSubmit={form.handleSubmit(onSubmit)}
             className="mx-auto w-full max-w-2xl space-y-6"
           >
-            <div>
-              <Label htmlFor="old_password">{tPassword('currentPasswordLabel')}</Label>
-              <PasswordInput
-                id="old_password"
-                {...register('old_password')}
-                className="mt-1"
-              />
-              {errors.old_password ? <p className="mt-1 text-sm text-red-500">{errors.old_password.message}</p> : null}
-            </div>
+            <Field>
+              <FieldLabel htmlFor="old_password">{tPassword('currentPasswordLabel')}</FieldLabel>
+              <FieldContent>
+                <PasswordInput
+                  id="old_password"
+                  {...form.register('old_password')}
+                />
+              </FieldContent>
+              <FieldError errors={[form.formState.errors.old_password]} />
+            </Field>
 
-            <div>
-              <Label htmlFor="new_password">{tPassword('newPasswordLabel')}</Label>
-              <PasswordInput
-                id="new_password"
-                {...register('new_password')}
-                className="mt-1"
-              />
-              {errors.new_password ? <p className="mt-1 text-sm text-red-500">{errors.new_password.message}</p> : null}
-            </div>
+            <Field>
+              <FieldLabel htmlFor="new_password">{tPassword('newPasswordLabel')}</FieldLabel>
+              <FieldContent>
+                <PasswordInput
+                  id="new_password"
+                  {...form.register('new_password')}
+                />
+              </FieldContent>
+              <FieldDescription>{tPassword('logoutWarning')}</FieldDescription>
+              <FieldError errors={[form.formState.errors.new_password]} />
+            </Field>
 
             <div className="flex items-center gap-2 rounded-md border border-amber-500/20 bg-amber-500/10 p-3 text-amber-700 dark:text-amber-400">
               <AlertTriangle size={16} />
@@ -142,9 +137,9 @@ const UserEditPassword = () => {
             <div className="flex justify-end pt-2">
               <Button
                 type="submit"
-                disabled={isSubmitting || isProcessing || isPending}
+                disabled={form.formState.isSubmitting}
               >
-                {isSubmitting ? tPassword('updatingButton') : tPassword('updateButton')}
+                {form.formState.isSubmitting ? tPassword('updatingButton') : tPassword('updateButton')}
               </Button>
             </div>
           </form>

@@ -15,7 +15,7 @@ import {
 import { createCourseUpdate, deleteCourseUpdate } from '@services/courses/updates';
 import { AlertTriangle, Loader2, PencilLine, Rss, TentTree } from 'lucide-react';
 import { useEffectEvent, useLayoutEffect, useState, useTransition } from 'react';
-import { Field, FieldError, FieldLabel } from '@components/ui/field';
+import { Field, FieldContent, FieldError, FieldLabel } from '@components/ui/field';
 import { Actions, Resources, Scopes } from '@/types/permissions';
 import { getCourseUpdatesSwrKey } from '@services/courses/keys';
 import { useCourse } from '@components/Contexts/CourseContext';
@@ -138,13 +138,14 @@ const createUpdateFormSchema = (t: (key: string) => string) =>
   });
 
 type UpdateFormValues = v.InferOutput<ReturnType<typeof createUpdateFormSchema>>;
+type UpdateFormInputValues = v.InferInput<ReturnType<typeof createUpdateFormSchema>>;
 
 const NewUpdateForm = ({ setSelectedView }: any) => {
   const course = useCourse();
   const t = useTranslations('Courses.CourseUpdates');
   const validationSchema = createUpdateFormSchema(t);
 
-  const form = useForm<UpdateFormValues>({
+  const form = useForm<UpdateFormInputValues, any, UpdateFormValues>({
     resolver: valibotResolver(validationSchema),
     defaultValues: {
       title: '',
@@ -206,12 +207,14 @@ const NewUpdateForm = ({ setSelectedView }: any) => {
                 >
                   {t('title')}
                 </FieldLabel>
-                <Input
-                  {...field}
-                  id={field.name}
-                  style={{ backgroundColor: 'white' }}
-                  type="text"
-                />
+                  <FieldContent>
+                    <Input
+                      {...field}
+                      id={field.name}
+                      style={{ backgroundColor: 'white' }}
+                      type="text"
+                    />
+                  </FieldContent>
                 <FieldError errors={[fieldState.error]} />
               </Field>
             )}
@@ -227,11 +230,13 @@ const NewUpdateForm = ({ setSelectedView }: any) => {
                 >
                   {t('content')}
                 </FieldLabel>
-                <Textarea
-                  {...field}
-                  id={field.name}
-                  style={{ backgroundColor: 'white', height: '100px' }}
-                />
+                  <FieldContent>
+                    <Textarea
+                      {...field}
+                      id={field.name}
+                      style={{ backgroundColor: 'white', height: '100px' }}
+                    />
+                  </FieldContent>
                 <FieldError errors={[fieldState.error]} />
               </Field>
             )}

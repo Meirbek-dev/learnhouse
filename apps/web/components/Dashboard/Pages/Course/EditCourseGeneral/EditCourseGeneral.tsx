@@ -5,7 +5,7 @@ import { AlertTriangle, Image as ImageIcon, Loader2, Tag, Video } from 'lucide-r
 import { SectionHeader } from '@components/Dashboard/Courses/SectionHeader';
 import { useCoursesMutations } from '@/hooks/mutations/useCoursesMutations';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Field, FieldError, FieldLabel } from '@components/ui/field';
+import { Field, FieldContent, FieldError, FieldLabel } from '@components/ui/field';
 import { Card, CardContent, CardHeader } from '@components/ui/card';
 import type { CourseGeneralValues } from '@/schemas/courseSchemas';
 import { useSyncDirtySection } from '@/hooks/useSyncDirtySection';
@@ -15,7 +15,7 @@ import { courseGeneralSchema } from '@/schemas/courseSchemas';
 import { TagsInput } from '@components/ui/custom/tags-input';
 import { useEffect, useId, useMemo, useState } from 'react';
 import { useSaveSection } from '@/hooks/useSaveSection';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller, useForm, useWatch } from 'react-hook-form';
 import { Separator } from '@components/ui/separator';
 import LearningItemsList from './LearningItemsList';
 import { Textarea } from '@components/ui/textarea';
@@ -23,6 +23,7 @@ import ThumbnailUpdate from './ThumbnailUpdate';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
 import { generateUUID } from '@/lib/utils';
+import type * as v from 'valibot';
 
 const generateId = () => generateUUID();
 
@@ -124,10 +125,18 @@ function EditCourseGeneral() {
 
   const serverValues = useMemo(() => buildFormValues(courseStructure), [courseStructure]);
 
-  const form = useForm<CourseGeneralValues>({
+  type CourseGeneralInputValues = v.InferInput<typeof courseGeneralSchema>;
+
+  const form = useForm<CourseGeneralInputValues, any, CourseGeneralValues>({
     resolver: valibotResolver(courseGeneralSchema),
     defaultValues: serverValues,
     mode: 'onChange',
+  });
+
+  const thumbnailType = useWatch({
+    control: form.control,
+    name: 'thumbnail_type',
+    defaultValue: serverValues.thumbnail_type,
   });
 
   const { isDirty } = form.formState;
@@ -238,13 +247,15 @@ function EditCourseGeneral() {
                 >
                   {t('name.label')}
                 </FieldLabel>
-                <Input
-                  {...form.register('name')}
-                  id="name"
-                  placeholder={t('name.placeholder')}
-                  className="text-lg"
-                  maxLength={100}
-                />
+                <FieldContent>
+                  <Input
+                    {...form.register('name')}
+                    id="name"
+                    placeholder={t('name.placeholder')}
+                    className="text-lg"
+                    maxLength={100}
+                  />
+                </FieldContent>
                 <FieldError errors={[form.formState.errors.name]} />
               </Field>
 
@@ -255,13 +266,15 @@ function EditCourseGeneral() {
                 >
                   {t('description.label')}
                 </FieldLabel>
-                <Textarea
-                  {...form.register('description')}
-                  id="description"
-                  placeholder={t('description.placeholder')}
-                  className="min-h-[100px] resize-y"
-                  maxLength={1000}
-                />
+                <FieldContent>
+                  <Textarea
+                    {...form.register('description')}
+                    id="description"
+                    placeholder={t('description.placeholder')}
+                    className="min-h-[100px] resize-y"
+                    maxLength={1000}
+                  />
+                </FieldContent>
                 <FieldError errors={[form.formState.errors.description]} />
               </Field>
 
@@ -272,12 +285,14 @@ function EditCourseGeneral() {
                 >
                   {t('about.label')}
                 </FieldLabel>
-                <Textarea
-                  {...form.register('about')}
-                  id="about"
-                  placeholder={t('about.placeholder')}
-                  className="min-h-[120px]"
-                />
+                <FieldContent>
+                  <Textarea
+                    {...form.register('about')}
+                    id="about"
+                    placeholder={t('about.placeholder')}
+                    className="min-h-[120px]"
+                  />
+                </FieldContent>
                 <FieldError errors={[form.formState.errors.about]} />
               </Field>
 
@@ -375,7 +390,7 @@ function EditCourseGeneral() {
               )}
             />
 
-            <ThumbnailUpdate thumbnailType={form.watch('thumbnail_type')} />
+            <ThumbnailUpdate thumbnailType={thumbnailType} />
           </CardContent>
         </Card>
       </form>

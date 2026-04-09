@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { createCourseUpdate, deleteCourseUpdate } from '@services/courses/updates';
 import { AlertTriangle, Loader2, PencilLine, Rss, TentTree } from 'lucide-react';
-import { Field, FieldError, FieldLabel } from '@components/ui/field';
+import { Field, FieldContent, FieldError, FieldLabel } from '@components/ui/field';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
 import { Actions, Resources, Scopes } from '@/types/permissions';
 import { getCourseUpdatesSwrKey } from '@services/courses/keys';
@@ -218,13 +218,14 @@ const createUpdateFormSchema = (t: (key: string) => string) =>
   });
 
 type UpdateFormValues = v.InferOutput<ReturnType<typeof createUpdateFormSchema>>;
+type UpdateFormInputValues = v.InferInput<ReturnType<typeof createUpdateFormSchema>>;
 
 const NewUpdateForm = ({ setSelectedView }: { setSelectedView: (view: string) => void }) => {
   const course = useCourse();
   const t = useTranslations('Courses.CourseAuthors');
   const validationSchema = createUpdateFormSchema(t);
 
-  const form = useForm<UpdateFormValues>({
+  const form = useForm<UpdateFormInputValues, any, UpdateFormValues>({
     resolver: valibotResolver(validationSchema),
     defaultValues: {
       title: '',
@@ -261,13 +262,15 @@ const NewUpdateForm = ({ setSelectedView }: { setSelectedView: (view: string) =>
           render={({ field, fieldState }) => (
             <Field>
               <FieldLabel htmlFor={field.name}>{t('updateTitle')}</FieldLabel>
-              <Input
-                type="text"
-                id={field.name}
-                placeholder={t('updateTitlePlaceholder')}
-                className="border-neutral-200 bg-white focus:border-neutral-300 focus:ring-neutral-200"
-                {...field}
-              />
+              <FieldContent>
+                <Input
+                  type="text"
+                  id={field.name}
+                  placeholder={t('updateTitlePlaceholder')}
+                  className="border-neutral-200 bg-white focus:border-neutral-300 focus:ring-neutral-200"
+                  {...field}
+                />
+              </FieldContent>
               <FieldError errors={[fieldState.error]} />
             </Field>
           )}
@@ -278,12 +281,14 @@ const NewUpdateForm = ({ setSelectedView }: { setSelectedView: (view: string) =>
           render={({ field, fieldState }) => (
             <Field>
               <FieldLabel htmlFor={field.name}>{t('updateContent')}</FieldLabel>
-              <Textarea
-                placeholder={t('updateContentPlaceholder')}
-                id={field.name}
-                className="h-[120px] resize-none border-neutral-200 bg-white focus:border-neutral-300 focus:ring-neutral-200"
-                {...field}
-              />
+              <FieldContent>
+                <Textarea
+                  placeholder={t('updateContentPlaceholder')}
+                  id={field.name}
+                  className="h-[120px] resize-none border-neutral-200 bg-white focus:border-neutral-300 focus:ring-neutral-200"
+                  {...field}
+                />
+              </FieldContent>
               <FieldError errors={[fieldState.error]} />
             </Field>
           )}

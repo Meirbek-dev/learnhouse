@@ -1,8 +1,8 @@
 'use client';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Field, FieldError, FieldLabel } from '@/components/ui/field';
-import { Controller, FormProvider, useForm } from 'react-hook-form';
+import { Field, FieldContent, FieldError, FieldLabel } from '@/components/ui/field';
+import { Controller, useForm } from 'react-hook-form';
 import { BarLoader } from '@components/Objects/Loaders/BarLoader';
 import { updateAssignment } from '@services/courses/assignments';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
@@ -14,7 +14,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { getAPIUrl } from '@services/config/config';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useRef, useTransition } from 'react';
+import { useRef } from 'react';
 import { CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -57,6 +57,9 @@ const createValidationSchema = (t: (key: string) => string) =>
     grading_type: v.picklist(['NUMERIC', 'PERCENTAGE']),
   });
 
+type EditAssignmentInput = v.InferInput<ReturnType<typeof createValidationSchema>>;
+type EditAssignmentOutput = v.InferOutput<ReturnType<typeof createValidationSchema>>;
+
 const EditAssignmentForm: FC<EditAssignmentFormProps> = ({ onClose, assignment }) => {
   const validationT = useTranslations('Validation');
   const t = useTranslations('Components.EditAssignmentModal');
@@ -86,7 +89,7 @@ const EditAssignmentForm: FC<EditAssignmentFormProps> = ({ onClose, assignment }
   );
   const today = todayRef.current;
 
-  const form = useForm<FormValues>({
+  const form = useForm<EditAssignmentInput, any, EditAssignmentOutput>({
     resolver: valibotResolver(validationSchema),
     defaultValues: {
       title: assignment.title || '',
@@ -96,28 +99,22 @@ const EditAssignmentForm: FC<EditAssignmentFormProps> = ({ onClose, assignment }
     },
   });
 
-  const [isPending, startTransition] = useTransition();
-
-  const onSubmit = (values: FormValues) => {
+  const onSubmit = async (values: EditAssignmentOutput) => {
     const toastLoading = toast.loading(t('updateLoading'));
-    startTransition(() => {
-      void (async () => {
-        try {
-          const res = await updateAssignment(values, assignment.assignment_uuid);
-          if (res.success) {
-            mutate(`${getAPIUrl()}assignments/${assignment.assignment_uuid}`);
-            toast.success(t('updateSuccess'));
-            onClose();
-          } else {
-            toast.error(t('updateError'));
-          }
-        } catch {
-          toast.error(t('updateErrorGeneric'));
-        } finally {
-          toast.dismiss(toastLoading);
-        }
-      })();
-    });
+    try {
+      const res = await updateAssignment(values, assignment.assignment_uuid);
+      if (res.success) {
+        mutate(`${getAPIUrl()}assignments/${assignment.assignment_uuid}`);
+        toast.success(t('updateSuccess'));
+        onClose();
+      } else {
+        toast.error(t('updateError'));
+      }
+    } catch {
+      toast.error(t('updateErrorGeneric'));
+    } finally {
+      toast.dismiss(toastLoading);
+    }
   };
 
   const gradingTypes = [
@@ -126,7 +123,6 @@ const EditAssignmentForm: FC<EditAssignmentFormProps> = ({ onClose, assignment }
   ];
 
   return (
-    <FormProvider {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
         className="space-y-4"
@@ -137,11 +133,13 @@ const EditAssignmentForm: FC<EditAssignmentFormProps> = ({ onClose, assignment }
           render={({ field, fieldState }) => (
             <Field>
               <FieldLabel htmlFor={field.name}>{t('assignmentTitle')}</FieldLabel>
-              <Input
-                id={field.name}
-                type="text"
-                {...field}
-              />
+              <FieldContent>
+                <Input
+                  id={field.name}
+                  type="text"
+                  {...field}
+                />
+              </FieldContent>
               <FieldError errors={[fieldState.error]} />
             </Field>
           )}
@@ -153,10 +151,12 @@ const EditAssignmentForm: FC<EditAssignmentFormProps> = ({ onClose, assignment }
           render={({ field, fieldState }) => (
             <Field>
               <FieldLabel htmlFor={field.name}>{t('assignmentDescription')}</FieldLabel>
-              <Textarea
-                id={field.name}
-                {...field}
-              />
+              <FieldContent>
+                <Textarea
+                  id={field.name}
+                  {...field}
+                />
+              </FieldContent>
               <FieldError errors={[fieldState.error]} />
             </Field>
           )}
@@ -258,9 +258,9 @@ const EditAssignmentForm: FC<EditAssignmentFormProps> = ({ onClose, assignment }
           </Button>
           <Button
             type="submit"
-            disabled={isPending || form.formState.isSubmitting}
+            disabled={form.formState.isSubmitting}
           >
-            {isPending || form.formState.isSubmitting ? (
+            {form.formState.isSubmitting ? (
               <BarLoader
                 cssOverride={{ borderRadius: 60 }}
                 width={30}
@@ -272,7 +272,6 @@ const EditAssignmentForm: FC<EditAssignmentFormProps> = ({ onClose, assignment }
           </Button>
         </div>
       </form>
-    </FormProvider>
   );
 };
 

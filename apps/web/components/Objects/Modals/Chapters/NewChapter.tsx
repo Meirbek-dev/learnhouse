@@ -1,13 +1,12 @@
 'use client';
-import { Field, FieldError, FieldLabel } from '@/components/ui/field';
-import { Controller, FormProvider, useForm } from 'react-hook-form';
+import { Field, FieldContent, FieldError, FieldLabel } from '@/components/ui/field';
+import { useForm } from 'react-hook-form';
 import { BarLoader } from '@components/Objects/Loaders/BarLoader';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useTranslations } from 'next-intl';
-import { useTransition } from 'react';
 import * as v from 'valibot';
 
 const createValidationSchema = (t: (key: string) => string) =>
@@ -21,12 +20,14 @@ interface FormValues {
   description: string;
 }
 
+type ChapterSubmitValues = v.InferOutput<ReturnType<typeof createValidationSchema>>;
+
 const NewChapterModal = ({ submitChapter, closeModal, course }: any) => {
   const validationT = useTranslations('Validation');
   const t = useTranslations('Components.NewChapterModal');
   const validationSchema = createValidationSchema(validationT);
 
-  const form = useForm<FormValues>({
+  const form = useForm<FormValues, any, ChapterSubmitValues>({
     resolver: valibotResolver(validationSchema),
     defaultValues: {
       name: '',
@@ -34,9 +35,7 @@ const NewChapterModal = ({ submitChapter, closeModal, course }: any) => {
     },
   });
 
-  const [isPending, startTransition] = useTransition();
-
-  const onSubmit = (values: FormValues) => {
+  const onSubmit = async (values: ChapterSubmitValues) => {
     const chapter_object = {
       name: values.name,
       description: values.description,
@@ -44,57 +43,44 @@ const NewChapterModal = ({ submitChapter, closeModal, course }: any) => {
       course_id: course.id,
     };
 
-    startTransition(() => {
-      void (async () => {
-        await submitChapter(chapter_object);
-      })();
-    });
+    await submitChapter(chapter_object);
   };
 
   return (
-    <FormProvider {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-4"
-      >
-        <Controller
-          control={form.control}
-          name="name"
-          render={({ field, fieldState }) => (
-            <Field>
-              <FieldLabel htmlFor={field.name}>{t('chapterName')}</FieldLabel>
-              <Input
-                id={field.name}
-                type="text"
-                {...field}
-              />
-              <FieldError errors={[fieldState.error]} />
-            </Field>
-          )}
-        />
+    <form
+      onSubmit={form.handleSubmit(onSubmit)}
+      className="space-y-4"
+    >
+        <Field>
+          <FieldLabel htmlFor="name">{t('chapterName')}</FieldLabel>
+          <FieldContent>
+            <Input
+              id="name"
+              type="text"
+              {...form.register('name')}
+            />
+          </FieldContent>
+          <FieldError errors={[form.formState.errors.name]} />
+        </Field>
 
-        <Controller
-          control={form.control}
-          name="description"
-          render={({ field, fieldState }) => (
-            <Field>
-              <FieldLabel htmlFor={field.name}>{t('chapterDescription')}</FieldLabel>
-              <Textarea
-                id={field.name}
-                {...field}
-              />
-              <FieldError errors={[fieldState.error]} />
-            </Field>
-          )}
-        />
+        <Field>
+          <FieldLabel htmlFor="description">{t('chapterDescription')}</FieldLabel>
+          <FieldContent>
+            <Textarea
+              id="description"
+              {...form.register('description')}
+            />
+          </FieldContent>
+          <FieldError errors={[form.formState.errors.description]} />
+        </Field>
 
         <div className="mt-6 flex justify-end">
           <Button
             type="submit"
             className="mt-2.5"
-            disabled={isPending || form.formState.isSubmitting}
+            disabled={form.formState.isSubmitting}
           >
-            {isPending || form.formState.isSubmitting ? (
+            {form.formState.isSubmitting ? (
               <BarLoader
                 cssOverride={{ borderRadius: 60 }}
                 width={60}
@@ -105,8 +91,7 @@ const NewChapterModal = ({ submitChapter, closeModal, course }: any) => {
             )}
           </Button>
         </div>
-      </form>
-    </FormProvider>
+    </form>
   );
 };
 

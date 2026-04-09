@@ -3,11 +3,11 @@
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { createCertification, deleteCertification, updateCertification } from '@services/courses/certifications';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Controller, FormProvider, useForm, useWatch } from 'react-hook-form';
+import { Controller, useForm, useWatch } from 'react-hook-form';
 import { SectionHeader } from '@components/Dashboard/Courses/SectionHeader';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { AlertTriangle, Award, FileText, Sparkles } from 'lucide-react';
-import { Field, FieldError, FieldLabel } from '@/components/ui/field';
+import { Field, FieldContent, FieldError, FieldLabel } from '@/components/ui/field';
 import { useSyncDirtySection } from '@/hooks/useSyncDirtySection';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -71,6 +71,7 @@ const _certFormSchemaForTypes = v.object({
 });
 
 type FormValues = v.InferOutput<typeof _certFormSchemaForTypes>;
+type FormInputValues = v.InferInput<typeof _certFormSchemaForTypes>;
 
 const EditCourseCertification = () => {
   const [error, setError] = useState('');
@@ -160,7 +161,7 @@ const EditCourseCertification = () => {
   const [existingCertification] = certifications;
   const hasExistingCertification = Boolean(existingCertification);
 
-  const form = useForm<FormValues>({
+  const form = useForm<FormInputValues, any, FormValues>({
     resolver: valibotResolver(formSchema),
     defaultValues: {
       enable_certification: false,
@@ -383,8 +384,7 @@ const EditCourseCertification = () => {
             )}
 
             {isEnabled && (
-              <FormProvider {...form}>
-                <form className="space-y-8">
+                <div className="space-y-8">
                   <div className="grid gap-8 lg:grid-cols-5">
                     {/* Configuration */}
                     <div className="space-y-8 lg:col-span-3">
@@ -404,11 +404,13 @@ const EditCourseCertification = () => {
                             render={({ field, fieldState }) => (
                               <Field className="sm:col-span-2">
                                 <FieldLabel htmlFor={field.name}>{t('certificationName')}</FieldLabel>
-                                <Input
-                                  id={field.name}
-                                  {...field}
-                                  placeholder={t('certificationNamePlaceholder')}
-                                />
+                                <FieldContent>
+                                  <Input
+                                    id={field.name}
+                                    {...field}
+                                    placeholder={t('certificationNamePlaceholder')}
+                                  />
+                                </FieldContent>
                                 <FieldError errors={[fieldState.error]} />
                               </Field>
                             )}
@@ -452,12 +454,14 @@ const EditCourseCertification = () => {
                             render={({ field, fieldState }) => (
                               <Field className="sm:col-span-2">
                                 <FieldLabel htmlFor={field.name}>{t('certificationDescription')}</FieldLabel>
-                                <Textarea
-                                  id={field.name}
-                                  {...field}
-                                  placeholder={t('certificationDescriptionPlaceholder')}
-                                  className="min-h-[120px] resize-none"
-                                />
+                                <FieldContent>
+                                  <Textarea
+                                    id={field.name}
+                                    {...field}
+                                    placeholder={t('certificationDescriptionPlaceholder')}
+                                    className="min-h-[120px] resize-none"
+                                  />
+                                </FieldContent>
                                 <FieldError errors={[fieldState.error]} />
                               </Field>
                             )}
@@ -524,11 +528,13 @@ const EditCourseCertification = () => {
                           render={({ field, fieldState }) => (
                             <Field>
                               <FieldLabel htmlFor={field.name}>{t('certificateInstructor')}</FieldLabel>
-                              <Input
-                                id={field.name}
-                                {...field}
-                                placeholder={t('certificateInstructorPlaceholder')}
-                              />
+                              <FieldContent>
+                                <Input
+                                  id={field.name}
+                                  {...field}
+                                  placeholder={t('certificateInstructorPlaceholder')}
+                                />
+                              </FieldContent>
                               <FieldError errors={[fieldState.error]} />
                             </Field>
                           )}
@@ -560,8 +566,7 @@ const EditCourseCertification = () => {
                       </div>
                     </div>
                   </div>
-                </form>
-              </FormProvider>
+                </div>
             )}
 
             {!isEnabled && (

@@ -2,10 +2,9 @@
 
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { swrFetcher } from '@services/utils/ts/requests';
-import { Controller, useForm } from 'react-hook-form';
-import type { SubmitHandler } from 'react-hook-form';
+import { Controller, useForm, useWatch } from 'react-hook-form';
 import { useTranslations } from 'next-intl';
-import { useTransition } from 'react';
+import { useEffect } from 'react';
 import { toast } from 'sonner';
 import * as v from 'valibot';
 import useSWR from 'swr';
@@ -40,110 +39,118 @@ interface FormValues {
   allow_result_review: boolean;
 }
 
+type SubmitValues = v.InferOutput<ReturnType<typeof createValidationSchema>>;
+
+const getDefaultTimeLimit = (limits?: any) => Math.min(Math.max(50, limits?.time_limit?.min ?? 1), limits?.time_limit?.max ?? 180);
+
 const NewExam = ({ submitActivity, chapterId, course, closeModal }: any) => {
   const validationT = useTranslations('Validation');
   const t = useTranslations('Components.NewExamModal');
 
   const { data: limits } = useSWR(`${getAPIUrl()}exams/config`, swrFetcher);
   const validationSchema = createValidationSchema(validationT, limits);
-  type ZFormValues = v.InferOutput<typeof validationSchema>;
   const withUnpublishedActivities = course ? course.withUnpublishedActivities : false;
 
-  const form = useForm<ZFormValues, any, ZFormValues>({
+  const form = useForm<FormValues, any, SubmitValues>({
     resolver: valibotResolver(validationSchema),
     defaultValues: {
       exam_title: '',
       activity_name: '',
       exam_description: '',
       has_time_limit: true,
-      time_limit: Math.min(Math.max(50, limits?.time_limit?.min ?? 1), limits?.time_limit?.max ?? 180),
+      time_limit: getDefaultTimeLimit(limits),
       shuffle_questions: true,
       allow_result_review: true,
     },
   });
 
-  const [isPending, startTransition] = useTransition();
+  const hasTimeLimit = useWatch({ control: form.control, name: 'has_time_limit', defaultValue: true });
 
-  const onSubmit: SubmitHandler<ZFormValues> = (values) => {
+  useEffect(() => {
+    if (!limits) return;
+
+    const currentValue = form.getValues('time_limit');
+    const nextValue =
+      currentValue === undefined
+        ? getDefaultTimeLimit(limits)
+        : Math.min(Math.max(currentValue, limits?.time_limit?.min ?? 1), limits?.time_limit?.max ?? 180);
+
+    form.setValue('time_limit', nextValue, { shouldDirty: false, shouldValidate: false });
+  }, [form, limits]);
+
+  const onSubmit = async (values: SubmitValues) => {
     const toastLoading = toast.loading(t('creatingExam'));
-    startTransition(() => {
-      void (async () => {
-        try {
-          const settings = {
-            time_limit: values.has_time_limit ? values.time_limit : null,
-            attempt_limit: 1,
-            shuffle_questions: values.shuffle_questions,
-            shuffle_answers: true,
-            question_limit: null,
-            access_mode: 'NO_ACCESS',
-            whitelist_user_ids: [],
-            allow_result_review: values.allow_result_review,
-            show_correct_answers: values.allow_result_review,
-            copy_paste_protection: true,
-            tab_switch_detection: true,
-            devtools_detection: true,
-            right_click_disable: true,
-            fullscreen_enforcement: true,
-            violation_threshold: 3,
-          };
+    try {
+      const settings = {
+        time_limit: values.has_time_limit ? values.time_limit : null,
+        attempt_limit: 1,
+        shuffle_questions: values.shuffle_questions,
+        shuffle_answers: true,
+        question_limit: null,
+        access_mode: 'NO_ACCESS',
+        whitelist_user_ids: [],
+        allow_result_review: values.allow_result_review,
+        show_correct_answers: values.allow_result_review,
+        copy_paste_protection: true,
+        tab_switch_detection: true,
+        devtools_detection: true,
+        right_click_disable: true,
+        fullscreen_enforcement: true,
+        violation_threshold: 3,
+      };
 
-          const response = await fetch(`${getAPIUrl()}exams/with-activity`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              activity_name: values.activity_name,
-              chapter_id: chapterId,
-              exam_title: values.exam_title,
-              exam_description: values.exam_description,
-              settings,
-            }),
-          });
+      const response = await fetch(`${getAPIUrl()}exams/with-activity`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          activity_name: values.activity_name,
+          chapter_id: chapterId,
+          exam_title: values.exam_title,
+          exam_description: values.exam_description,
+          settings,
+        }),
+      });
 
-          if (!response.ok) {
-            throw new Error('Failed to create exam');
+      if (!response.ok) {
+        throw new Error('Failed to create exam');
+      }
+
+      const data = await response.json();
+
+      toast.dismiss(toastLoading);
+      toast.success(t('examCreatedSuccessfully'));
+
+      if (submitActivity) {
+        submitActivity();
+      }
+
+      if (data.activity_uuid) {
+        const activity_uuid_clean = data.activity_uuid.replace('activity_', '');
+
+        let courseUuidClean: string | null = null;
+        if (course?.course_uuid) {
+          courseUuidClean = course.course_uuid.replace('course_', '');
+        } else {
+          const parts = globalThis.location.pathname.split('/').filter(Boolean);
+          const courseIndex = parts.indexOf('course');
+          if (courseIndex !== -1 && parts.length > courseIndex + 1) {
+            courseUuidClean = String(parts[courseIndex + 1]);
           }
-
-          const data = await response.json();
-
-          toast.dismiss(toastLoading);
-          toast.success(t('examCreatedSuccessfully'));
-
-          // Reload course data
-          if (submitActivity) {
-            submitActivity();
-          }
-
-          // Navigate to the new activity
-          if (data.activity_uuid) {
-            const activity_uuid_clean = data.activity_uuid.replace('activity_', '');
-
-            // Prefer the provided course prop, but fall back to parsing the current pathname
-            let courseUuidClean: string | null = null;
-            if (course?.course_uuid) {
-              courseUuidClean = course.course_uuid.replace('course_', '');
-            } else {
-              const parts = globalThis.location.pathname.split('/').filter(Boolean);
-              const courseIndex = parts.indexOf('course');
-              if (courseIndex !== -1 && parts.length > courseIndex + 1) {
-                courseUuidClean = String(parts[courseIndex + 1]);
-              }
-            }
-
-            globalThis.location.href = courseUuidClean
-              ? `/course/${courseUuidClean}/activity/${activity_uuid_clean}${withUnpublishedActivities ? '?withUnpublishedActivities=true' : ''}`
-              : '/courses';
-          }
-
-          closeModal();
-        } catch (error: any) {
-          toast.dismiss(toastLoading);
-          toast.error(t('errorCreatingExam'));
-          console.error('Error creating exam:', error);
         }
-      })();
-    });
+
+        globalThis.location.href = courseUuidClean
+          ? `/course/${courseUuidClean}/activity/${activity_uuid_clean}${withUnpublishedActivities ? '?withUnpublishedActivities=true' : ''}`
+          : '/courses';
+      }
+
+      closeModal();
+    } catch (error: any) {
+      toast.dismiss(toastLoading);
+      toast.error(t('errorCreatingExam'));
+      console.error('Error creating exam:', error);
+    }
   };
 
   return (
@@ -199,7 +206,7 @@ const NewExam = ({ submitActivity, chapterId, course, closeModal }: any) => {
         )}
       />
 
-      {form.watch('has_time_limit') && (
+      {hasTimeLimit && (
         <Controller
           control={form.control}
           name="time_limit"
@@ -213,11 +220,9 @@ const NewExam = ({ submitActivity, chapterId, course, closeModal }: any) => {
                 max={limits?.time_limit?.max ?? 180}
                 placeholder="60"
                 {...field}
+                value={field.value ?? ''}
                 onChange={(e) => {
-                  field.onChange(
-                    Number.parseInt(e.target.value) ||
-                      Math.min(Math.max(50, limits?.time_limit?.min ?? 1), limits?.time_limit?.max ?? 180),
-                  );
+                  field.onChange(e.target.value === '' ? undefined : Number.parseInt(e.target.value, 10));
                 }}
               />
               <FieldDescription>{t('timeLimitMinutesDescription')}</FieldDescription>
@@ -266,15 +271,15 @@ const NewExam = ({ submitActivity, chapterId, course, closeModal }: any) => {
           type="button"
           variant="outline"
           onClick={closeModal}
-          disabled={isPending}
+          disabled={form.formState.isSubmitting}
         >
           {t('cancel')}
         </Button>
         <Button
           type="submit"
-          disabled={isPending}
+          disabled={form.formState.isSubmitting}
         >
-          {isPending ? t('creating') : t('createExam')}
+          {form.formState.isSubmitting ? t('creating') : t('createExam')}
         </Button>
       </div>
     </form>

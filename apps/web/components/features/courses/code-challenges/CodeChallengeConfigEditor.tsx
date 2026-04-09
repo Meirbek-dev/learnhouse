@@ -2,7 +2,7 @@
 
 import { ArrowLeft, Eye, EyeOff, Loader2, Plus, Trash2 } from 'lucide-react';
 import { valibotResolver } from '@hookform/resolvers/valibot';
-import { useFieldArray, useForm } from 'react-hook-form';
+import { useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -92,6 +92,7 @@ export function createConfigFormSchema(t: (key: string, params?: any) => string)
 }
 
 type FormValues = v.InferOutput<typeof formSchema>;
+type FormInputValues = v.InferInput<typeof formSchema>;
 
 const fetcher = async (url: string) => {
   const res = await fetch(url, { credentials: 'include' });
@@ -116,7 +117,7 @@ export default function CodeChallengeConfigEditor({ activityUuid, courseId }: Co
 
   const schema = useMemo(() => createConfigFormSchema(t), [t]);
 
-  const form = useForm<FormValues>({
+  const form = useForm<FormInputValues, any, FormValues>({
     resolver: valibotResolver(schema),
     defaultValues: {
       allowed_languages: [71],
@@ -156,6 +157,9 @@ export default function CodeChallengeConfigEditor({ activityUuid, courseId }: Co
     control: form.control,
     name: 'hidden_tests',
   });
+
+  const visibleTests = useWatch({ control: form.control, name: 'visible_tests', defaultValue: [] });
+  const hiddenTests = useWatch({ control: form.control, name: 'hidden_tests', defaultValue: [] });
 
   // Controlled accordion state to avoid changing defaultValue after initialization
   const [visibleAccordionValue, setVisibleAccordionValue] = useState(visibleTestFields.map((_, i) => `visible-${i}`));
@@ -493,9 +497,9 @@ export default function CodeChallengeConfigEditor({ activityUuid, courseId }: Co
                       <span>
                         {t('testCase')} #{index + 1}
                       </span>
-                      {form.watch(`visible_tests.${index}.description`) && (
+                      {visibleTests[index]?.description && (
                         <span className="text-muted-foreground text-sm">
-                          - {form.watch(`visible_tests.${index}.description`)}
+                          - {visibleTests[index]?.description}
                         </span>
                       )}
                     </div>
@@ -618,9 +622,9 @@ export default function CodeChallengeConfigEditor({ activityUuid, courseId }: Co
                         <span>
                           {t('hiddenTest')} #{index + 1}
                         </span>
-                        {form.watch(`hidden_tests.${index}.description`) && (
+                          {hiddenTests[index]?.description && (
                           <span className="text-muted-foreground text-sm">
-                            - {form.watch(`hidden_tests.${index}.description`)}
+                              - {hiddenTests[index]?.description}
                           </span>
                         )}
                       </div>

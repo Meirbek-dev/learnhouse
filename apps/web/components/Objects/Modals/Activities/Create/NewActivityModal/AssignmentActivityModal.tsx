@@ -2,8 +2,8 @@
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { createAssignmentWithActivity } from '@services/courses/assignments';
-import { Field, FieldError, FieldLabel } from '@/components/ui/field';
-import { Controller, FormProvider, useForm } from 'react-hook-form';
+import { Field, FieldContent, FieldError, FieldLabel } from '@/components/ui/field';
+import { Controller, useForm } from 'react-hook-form';
 import { BarLoader } from '@components/Objects/Loaders/BarLoader';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { revalidateTags } from '@services/utils/ts/requests';
@@ -14,7 +14,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { getAPIUrl } from '@services/config/config';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { useRef, useTransition } from 'react';
+import { useRef } from 'react';
 import { CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -36,6 +36,8 @@ interface FormValues {
   dueDate?: string;
   gradingType: 'NUMERIC' | 'PERCENTAGE';
 }
+
+type AssignmentSubmitValues = v.InferOutput<ReturnType<typeof createValidationSchema>>;
 
 const NewAssignment = ({ submitActivity, chapterId, course, closeModal }: any) => {
   const validationT = useTranslations('Validation');
@@ -72,7 +74,7 @@ const NewAssignment = ({ submitActivity, chapterId, course, closeModal }: any) =
   );
   const today = todayRef.current;
 
-  const form = useForm<FormValues>({
+  const form = useForm<FormValues, any, AssignmentSubmitValues>({
     resolver: valibotResolver(validationSchema),
     defaultValues: {
       name: '',
@@ -82,75 +84,66 @@ const NewAssignment = ({ submitActivity, chapterId, course, closeModal }: any) =
     },
   });
 
-  const [isPending, startTransition] = useTransition();
-
-  const onSubmit = (values: FormValues) => {
+  const onSubmit = async (values: AssignmentSubmitValues) => {
     const toastLoading = toast.loading(t('creatingAssignment'));
-    startTransition(() => {
-      void (async () => {
-        try {
-          // Use combined endpoint for better performance
-          const res = await createAssignmentWithActivity({
-            body: {
-              title: values.name,
-              description: values.description,
-              due_date: values.dueDate,
-              grading_type: values.gradingType,
-              course_id: course?.courseStructure.id,
-              chapter_id: chapterId,
-            },
-            chapterId,
-            activityName: values.name,
-          });
+    try {
+      const res = await createAssignmentWithActivity({
+        body: {
+          title: values.name,
+          description: values.description,
+          due_date: values.dueDate,
+          grading_type: values.gradingType,
+          course_id: course?.courseStructure.id,
+          chapter_id: chapterId,
+        },
+        chapterId,
+        activityName: values.name,
+      });
 
-          if (res.success) {
-            toast.success(t('createSuccess'));
+      if (res.success) {
+        toast.success(t('createSuccess'));
 
-            // Only revalidate if we have valid course data
-            if (course?.courseStructure?.course_uuid) {
-              // Revalidate cache with proper parameters
-              mutate(
-                `${getAPIUrl()}courses/${course.courseStructure.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`,
-              );
-            }
-
-            await revalidateTags(['courses']);
-
-            closeModal();
-          } else {
-            toast.error(t('createError', { error: res.data?.detail || t('unknownError') }));
-          }
-        } catch (error: any) {
-          console.error('Assignment creation failed:', error);
-          toast.error(
-            t('createError', {
-              error: error?.message || t('unexpectedError'),
-            }),
+        if (course?.courseStructure?.course_uuid) {
+          mutate(
+            `${getAPIUrl()}courses/${course.courseStructure.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`,
           );
-        } finally {
-          toast.dismiss(toastLoading);
         }
-      })();
-    });
+
+        await revalidateTags(['courses']);
+        closeModal();
+      } else {
+        toast.error(t('createError', { error: res.data?.detail || t('unknownError') }));
+      }
+    } catch (error: any) {
+      console.error('Assignment creation failed:', error);
+      toast.error(
+        t('createError', {
+          error: error?.message || t('unexpectedError'),
+        }),
+      );
+    } finally {
+      toast.dismiss(toastLoading);
+    }
   };
 
   return (
-    <FormProvider {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-4"
-      >
+    <form
+      onSubmit={form.handleSubmit(onSubmit)}
+      className="space-y-4"
+    >
         <Controller
           control={form.control}
           name="name"
           render={({ field, fieldState }) => (
             <Field>
               <FieldLabel htmlFor={field.name}>{t('assignmentTitle')}</FieldLabel>
-              <Input
-                id={field.name}
-                type="text"
-                {...field}
-              />
+              <FieldContent>
+                <Input
+                  id={field.name}
+                  type="text"
+                  {...field}
+                />
+              </FieldContent>
               <FieldError errors={[fieldState.error]} />
             </Field>
           )}
@@ -162,10 +155,12 @@ const NewAssignment = ({ submitActivity, chapterId, course, closeModal }: any) =
           render={({ field, fieldState }) => (
             <Field>
               <FieldLabel htmlFor={field.name}>{t('assignmentDescription')}</FieldLabel>
-              <Textarea
-                id={field.name}
-                {...field}
-              />
+              <FieldContent>
+                <Textarea
+                  id={field.name}
+                  {...field}
+                />
+              </FieldContent>
               <FieldError errors={[fieldState.error]} />
             </Field>
           )}
@@ -261,9 +256,9 @@ const NewAssignment = ({ submitActivity, chapterId, course, closeModal }: any) =
           <Button
             type="submit"
             className="mt-2.5"
-            disabled={isPending || form.formState.isSubmitting}
+            disabled={form.formState.isSubmitting}
           >
-            {isPending || form.formState.isSubmitting ? (
+            {form.formState.isSubmitting ? (
               <BarLoader
                 cssOverride={{ borderRadius: 60 }}
                 width={60}
@@ -274,8 +269,7 @@ const NewAssignment = ({ submitActivity, chapterId, course, closeModal }: any) =
             )}
           </Button>
         </div>
-      </form>
-    </FormProvider>
+    </form>
   );
 };
 

@@ -30,7 +30,7 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 import UnconfiguredPaymentsDisclaimer from '@components/Pages/Payments/UnconfiguredPaymentsDisclaimer';
 import { archiveProduct, getProducts, updateProduct } from '@services/payments/products';
 import ProductLinkedCourses from './SubComponents/ProductLinkedCourses';
-import { Field, FieldError, FieldLabel } from '@components/ui/field';
+import { Field, FieldContent, FieldError, FieldLabel } from '@components/ui/field';
 import { getPaymentsProductsSwrKey } from '@services/payments/keys';
 import CreateProductForm from './SubComponents/CreateProductForm';
 import { getPaymentConfigs } from '@services/payments/payments';
@@ -355,18 +355,16 @@ const EditProductForm = ({
   onSuccess: () => void;
   onCancel: () => void;
 }) => {
-  const currencies = currencyCodes.data.map((currency) => ({
-    code: currency.code,
-    name: `${currency.code} - ${currency.currency}`,
-  }));
-  const currencyItems = currencies.map((currency) => ({
+  const currencyItems = currencyCodes.data.map((currency) => ({
     value: currency.code,
-    label: currency.name,
+    label: `${currency.code} - ${currency.currency}`,
   }));
   const t = useTranslations('DashPage.Payments.ProductPage.editForm');
   const validationSchema = createValidationSchema(t);
 
-  const form = useForm<EditProductFormData>({
+  type EditProductFormInput = v.InferInput<ReturnType<typeof createValidationSchema>>;
+
+  const form = useForm<EditProductFormInput, any, EditProductFormData>({
     resolver: valibotResolver(validationSchema),
     defaultValues: {
       name: product.name,
@@ -397,21 +395,25 @@ const EditProductForm = ({
       <div className="flex-col space-y-3 px-1.5 py-2">
         <Field>
           <FieldLabel htmlFor="name">{t('nameLabel')}</FieldLabel>
-          <Input
-            id="name"
-            placeholder={t('namePlaceholder')}
-            {...form.register('name')}
-          />
+          <FieldContent>
+            <Input
+              id="name"
+              placeholder={t('namePlaceholder')}
+              {...form.register('name')}
+            />
+          </FieldContent>
           <FieldError errors={[form.formState.errors.name]} />
         </Field>
 
         <Field>
           <FieldLabel htmlFor="description">{t('descriptionLabel')}</FieldLabel>
-          <Textarea
-            id="description"
-            placeholder={t('descriptionPlaceholder')}
-            {...form.register('description')}
-          />
+          <FieldContent>
+            <Textarea
+              id="description"
+              placeholder={t('descriptionPlaceholder')}
+              {...form.register('description')}
+            />
+          </FieldContent>
           <FieldError errors={[form.formState.errors.description]} />
         </Field>
 
@@ -423,15 +425,19 @@ const EditProductForm = ({
               render={({ field, fieldState }) => (
                 <Field>
                   <FieldLabel htmlFor={field.name}>{t('priceLabel')}</FieldLabel>
-                  <Input
-                    id={field.name}
-                    type="number"
-                    placeholder={t('pricePlaceholder')}
-                    {...field}
-                    onChange={(e) => {
-                      field.onChange(Number(e.target.value));
-                    }}
-                  />
+                  <FieldContent>
+                    <Input
+                      id={field.name}
+                      type="number"
+                      inputMode="decimal"
+                      placeholder={t('pricePlaceholder')}
+                      {...field}
+                      value={field.value ?? ''}
+                      onChange={(e) => {
+                        field.onChange(e.target.value === '' ? undefined : Number(e.target.value));
+                      }}
+                    />
+                  </FieldContent>
                   <FieldError errors={[fieldState.error]} />
                 </Field>
               )}
@@ -474,11 +480,13 @@ const EditProductForm = ({
 
         <Field>
           <FieldLabel htmlFor="benefits">{t('benefitsLabel')}</FieldLabel>
-          <Textarea
-            id="benefits"
-            placeholder={t('benefitsPlaceholder')}
-            {...form.register('benefits')}
-          />
+          <FieldContent>
+            <Textarea
+              id="benefits"
+              placeholder={t('benefitsPlaceholder')}
+              {...form.register('benefits')}
+            />
+          </FieldContent>
           <FieldError errors={[form.formState.errors.benefits]} />
         </Field>
       </div>

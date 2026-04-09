@@ -4,18 +4,17 @@ import { apiFetch } from '@/lib/api-client';
 
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Field, FieldDescription, FieldLabel } from '@/components/ui/field';
+import { Field, FieldDescription, FieldError, FieldLabel } from '@/components/ui/field';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Controller, FormProvider, useForm } from 'react-hook-form';
+import { Controller, useForm, useWatch } from 'react-hook-form';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { swrFetcher } from '@services/utils/ts/requests';
 import WhitelistManagement from './WhitelistManagement';
 import { Separator } from '@/components/ui/separator';
 import { getAPIUrl } from '@services/config/config';
-import { useEffect, useTransition } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
@@ -61,9 +60,18 @@ interface ExamSettingsProps {
   onSettingsUpdated: () => void;
 }
 
+type ExamSettingsFormValues = v.InferInput<ReturnType<typeof createValidationSchema>>;
+type ExamSettingsSubmitValues = v.InferOutput<ReturnType<typeof createValidationSchema>>;
+
+const clampNullableNumber = (value: number | null | undefined, min?: number, max?: number) => {
+  if (value === null || value === undefined) return null;
+  if (min !== undefined && value < min) return min;
+  if (max !== undefined && value > max) return max;
+  return value;
+};
+
 export default function ExamSettings({ exam, courseUuid, onSettingsUpdated }: ExamSettingsProps) {
   const t = useTranslations('Components.ExamSettings');
-  const [isPending, startTransition] = useTransition();
 
   const settings = exam.settings || {};
 
@@ -74,9 +82,9 @@ export default function ExamSettings({ exam, courseUuid, onSettingsUpdated }: Ex
     console.error('Failed to load exam config limits', limitsError);
   }
 
-  const validationSchema = createValidationSchema(limits);
+  const validationSchema = useMemo(() => createValidationSchema(limits), [limits]);
 
-  const form = useForm({
+  const form = useForm<ExamSettingsFormValues, any, ExamSettingsSubmitValues>({
     resolver: valibotResolver(validationSchema),
     defaultValues: {
       time_limit: settings.time_limit || null,
@@ -98,56 +106,43 @@ export default function ExamSettings({ exam, courseUuid, onSettingsUpdated }: Ex
   // If limits arrive after initial render, we could reset the form to clamp values to new defaults
   useEffect(() => {
     if (!limits) return;
-    // clamp currently set values to the allowed ranges
-    const clamp = (v: number | null | undefined, min?: number, max?: number) => {
-      if (v === null || v === undefined) return null;
-      if (min !== undefined && v < min) return min;
-      if (max !== undefined && v > max) return max;
-      return v;
-    };
-
     const current = form.getValues();
     const newValues = {
       ...current,
-      time_limit: clamp(current.time_limit, limits?.time_limit?.min, limits?.time_limit?.max),
-      attempt_limit: clamp(current.attempt_limit, limits?.attempt_limit?.min, limits?.attempt_limit?.max),
-      question_limit: clamp(current.question_limit, limits?.question_limit?.min),
-      violation_threshold: clamp(
+      time_limit: clampNullableNumber(current.time_limit, limits?.time_limit?.min, limits?.time_limit?.max),
+      attempt_limit: clampNullableNumber(current.attempt_limit, limits?.attempt_limit?.min, limits?.attempt_limit?.max),
+      question_limit: clampNullableNumber(current.question_limit, limits?.question_limit?.min),
+      violation_threshold: clampNullableNumber(
         current.violation_threshold,
         limits?.violation_threshold?.min,
         limits?.violation_threshold?.max,
       ),
     };
 
-    form.reset(newValues);
+    form.reset(newValues, { keepDirtyValues: true });
   }, [limits, form]);
 
-  const onSubmit = (values: any) => {
+  const onSubmit = async (values: ExamSettingsSubmitValues) => {
     const toastLoading = toast.loading(t('savingSettings'));
-    startTransition(() => {
-      void (async () => {
-        try {
-          // Always enforce shuffle_answers=true
-          const payload = { ...values, shuffle_answers: true };
-          const response = await apiFetch(`exams/${exam.exam_uuid}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ settings: payload }),
-          });
+    try {
+      const payload = { ...values, shuffle_answers: true };
+      const response = await apiFetch(`exams/${exam.exam_uuid}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ settings: payload }),
+      });
 
-          if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.detail || 'Failed to update settings');
-          }
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.detail || 'Failed to update settings');
+      }
 
-          toast.success(t('settingsUpdated'), { id: toastLoading });
-          onSettingsUpdated();
-        } catch (error: any) {
-          console.error('Error updating settings:', error);
-          toast.error(error.message || t('errorUpdatingSettings'), { id: toastLoading });
-        }
-      })();
-    });
+      toast.success(t('settingsUpdated'), { id: toastLoading });
+      onSettingsUpdated();
+    } catch (error: any) {
+      console.error('Error updating settings:', error);
+      toast.error(error.message || t('errorUpdatingSettings'), { id: toastLoading });
+    }
   };
 
   // Reset to sane defaults (uses server-provided limits when available)
@@ -172,16 +167,48 @@ export default function ExamSettings({ exam, courseUuid, onSettingsUpdated }: Ex
     toast.success(t('settingsReset'));
   };
 
-  const hasTimeLimit = form.watch('time_limit') !== null;
-  const hasAttemptLimit = form.watch('attempt_limit') !== null;
-  const hasQuestionLimit = form.watch('question_limit') !== null;
-  const hasViolationThreshold = form.watch('violation_threshold') !== null;
+  const timeLimit = useWatch({ control: form.control, name: 'time_limit' });
+  const attemptLimit = useWatch({ control: form.control, name: 'attempt_limit' });
+  const questionLimit = useWatch({ control: form.control, name: 'question_limit' });
+  const accessMode = useWatch({ control: form.control, name: 'access_mode', defaultValue: settings.access_mode || 'NO_ACCESS' });
+  const allowResultReview = useWatch({
+    control: form.control,
+    name: 'allow_result_review',
+    defaultValue: settings.allow_result_review ?? true,
+  });
+  const copyPasteProtection = useWatch({
+    control: form.control,
+    name: 'copy_paste_protection',
+    defaultValue: settings.copy_paste_protection ?? true,
+  });
+  const tabSwitchDetection = useWatch({
+    control: form.control,
+    name: 'tab_switch_detection',
+    defaultValue: settings.tab_switch_detection ?? true,
+  });
+  const devtoolsDetection = useWatch({
+    control: form.control,
+    name: 'devtools_detection',
+    defaultValue: settings.devtools_detection ?? true,
+  });
+  const rightClickDisable = useWatch({
+    control: form.control,
+    name: 'right_click_disable',
+    defaultValue: settings.right_click_disable ?? true,
+  });
+  const fullscreenEnforcement = useWatch({
+    control: form.control,
+    name: 'fullscreen_enforcement',
+    defaultValue: settings.fullscreen_enforcement ?? true,
+  });
+  const violationThreshold = useWatch({ control: form.control, name: 'violation_threshold' });
+
+  const hasTimeLimit = timeLimit !== null && timeLimit !== undefined;
+  const hasAttemptLimit = attemptLimit !== null && attemptLimit !== undefined;
+  const hasQuestionLimit = questionLimit !== null && questionLimit !== undefined;
+  const hasViolationThreshold = violationThreshold !== null && violationThreshold !== undefined;
   const anyAntiCheatEnabled =
-    form.watch('copy_paste_protection') ||
-    form.watch('tab_switch_detection') ||
-    form.watch('devtools_detection') ||
-    form.watch('right_click_disable') ||
-    form.watch('fullscreen_enforcement');
+    copyPasteProtection || tabSwitchDetection || devtoolsDetection || rightClickDisable || fullscreenEnforcement;
 
   const initialAccessMode = settings.access_mode || 'NO_ACCESS';
 
@@ -198,11 +225,10 @@ export default function ExamSettings({ exam, courseUuid, onSettingsUpdated }: Ex
         <CardDescription>{t('configureExamBehavior')}</CardDescription>
       </CardHeader>
       <CardContent>
-        <FormProvider {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-8"
-          >
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="space-y-8"
+        >
             {/* Time & Attempts */}
             <div className="space-y-4">
               <div>
@@ -213,8 +239,8 @@ export default function ExamSettings({ exam, courseUuid, onSettingsUpdated }: Ex
               <div className="space-y-4">
                 <div className="flex items-center justify-between rounded-lg border p-4">
                   <div className="space-y-0.5">
-                    <Label>{t('enableTimeLimit')}</Label>
-                    <p className="text-muted-foreground text-sm">{t('timeLimitDescription')}</p>
+                    <FieldLabel>{t('enableTimeLimit')}</FieldLabel>
+                    <FieldDescription>{t('timeLimitDescription')}</FieldDescription>
                   </div>
                   <Switch
                     checked={hasTimeLimit}
@@ -228,7 +254,7 @@ export default function ExamSettings({ exam, courseUuid, onSettingsUpdated }: Ex
                   <Controller
                     control={form.control}
                     name="time_limit"
-                    render={({ field }) => (
+                    render={({ field, fieldState }) => (
                       <Field>
                         <FieldLabel htmlFor={field.name}>{t('timeLimitMinutes')}</FieldLabel>
                         <Input
@@ -237,10 +263,11 @@ export default function ExamSettings({ exam, courseUuid, onSettingsUpdated }: Ex
                           min={limits?.time_limit?.min ?? 1}
                           max={limits?.time_limit?.max ?? 180}
                           {...field}
-                          value={field.value || ''}
-                          onChange={(e) => field.onChange(e.target.value ? Number.parseInt(e.target.value) : null)}
+                          value={field.value ?? ''}
+                          onChange={(e) => field.onChange(e.target.value === '' ? null : Number.parseInt(e.target.value, 10))}
                         />
                         <FieldDescription>{t('timeLimitMinutesDescription')}</FieldDescription>
+                        <FieldError errors={[fieldState.error]} />
                       </Field>
                     )}
                   />
@@ -248,8 +275,8 @@ export default function ExamSettings({ exam, courseUuid, onSettingsUpdated }: Ex
 
                 <div className="flex items-center justify-between rounded-lg border p-4">
                   <div className="space-y-0.5">
-                    <Label>{t('enableAttemptLimit')}</Label>
-                    <p className="text-muted-foreground text-sm">{t('attemptLimitDescription')}</p>
+                    <FieldLabel>{t('enableAttemptLimit')}</FieldLabel>
+                    <FieldDescription>{t('attemptLimitDescription')}</FieldDescription>
                   </div>
                   <Switch
                     checked={hasAttemptLimit}
@@ -263,7 +290,7 @@ export default function ExamSettings({ exam, courseUuid, onSettingsUpdated }: Ex
                   <Controller
                     control={form.control}
                     name="attempt_limit"
-                    render={({ field }) => (
+                    render={({ field, fieldState }) => (
                       <Field>
                         <FieldLabel htmlFor={field.name}>{t('attemptLimit')}</FieldLabel>
                         <Input
@@ -272,10 +299,11 @@ export default function ExamSettings({ exam, courseUuid, onSettingsUpdated }: Ex
                           min={limits?.attempt_limit?.min ?? 1}
                           max={limits?.attempt_limit?.max ?? 5}
                           {...field}
-                          value={field.value || ''}
-                          onChange={(e) => field.onChange(e.target.value ? Number.parseInt(e.target.value) : null)}
+                          value={field.value ?? ''}
+                          onChange={(e) => field.onChange(e.target.value === '' ? null : Number.parseInt(e.target.value, 10))}
                         />
                         <FieldDescription>{t('attemptLimitInputDescription')}</FieldDescription>
+                        <FieldError errors={[fieldState.error]} />
                       </Field>
                     )}
                   />
@@ -315,8 +343,8 @@ export default function ExamSettings({ exam, courseUuid, onSettingsUpdated }: Ex
 
                 <div className="flex items-center justify-between rounded-lg border p-4 opacity-50">
                   <div className="space-y-0.5">
-                    <Label>{t('shuffleAnswers')}</Label>
-                    <p className="text-muted-foreground text-sm">{t('shuffleAnswersDescription')}</p>
+                    <FieldLabel>{t('shuffleAnswers')}</FieldLabel>
+                    <FieldDescription>{t('shuffleAnswersDescription')}</FieldDescription>
                   </div>
                   <Switch
                     checked
@@ -326,8 +354,8 @@ export default function ExamSettings({ exam, courseUuid, onSettingsUpdated }: Ex
 
                 <div className="flex items-center justify-between rounded-lg border p-4">
                   <div className="space-y-0.5">
-                    <Label>{t('enableQuestionLimit')}</Label>
-                    <p className="text-muted-foreground text-sm">{t('questionLimitDescription')}</p>
+                    <FieldLabel>{t('enableQuestionLimit')}</FieldLabel>
+                    <FieldDescription>{t('questionLimitDescription')}</FieldDescription>
                   </div>
                   <Switch
                     checked={hasQuestionLimit}
@@ -341,7 +369,7 @@ export default function ExamSettings({ exam, courseUuid, onSettingsUpdated }: Ex
                   <Controller
                     control={form.control}
                     name="question_limit"
-                    render={({ field }) => (
+                    render={({ field, fieldState }) => (
                       <Field>
                         <FieldLabel htmlFor={field.name}>{t('questionLimit')}</FieldLabel>
                         <Input
@@ -349,10 +377,11 @@ export default function ExamSettings({ exam, courseUuid, onSettingsUpdated }: Ex
                           type="number"
                           min={limits?.question_limit?.min ?? 1}
                           {...field}
-                          value={field.value || ''}
-                          onChange={(e) => field.onChange(e.target.value ? Number.parseInt(e.target.value) : null)}
+                          value={field.value ?? ''}
+                          onChange={(e) => field.onChange(e.target.value === '' ? null : Number.parseInt(e.target.value, 10))}
                         />
                         <FieldDescription>{t('questionLimitInputDescription')}</FieldDescription>
+                        <FieldError errors={[fieldState.error]} />
                       </Field>
                     )}
                   />
@@ -397,12 +426,13 @@ export default function ExamSettings({ exam, courseUuid, onSettingsUpdated }: Ex
                       </SelectContent>
                     </Select>
                     <FieldDescription>{t('accessModeDescription')}</FieldDescription>
+                    <FieldError errors={[form.formState.errors.access_mode]} />
                   </Field>
                 )}
               />
 
               {/* Warning if switching away from whitelist - stored list will remain but be ignored */}
-              {initialAccessMode === 'WHITELIST' && form.watch('access_mode') !== 'WHITELIST' && (
+              {initialAccessMode === 'WHITELIST' && accessMode !== 'WHITELIST' && (
                 <Alert>
                   <AlertTitle>{t('whitelistWillBeIgnored')}</AlertTitle>
                   <AlertDescription>{t('whitelistWillBeIgnoredDescription')}</AlertDescription>
@@ -410,7 +440,7 @@ export default function ExamSettings({ exam, courseUuid, onSettingsUpdated }: Ex
               )}
 
               {/* Whitelist Management - Only show when access mode is WHITELIST */}
-              {form.watch('access_mode') === 'WHITELIST' && (
+              {accessMode === 'WHITELIST' && (
                 <WhitelistManagement
                   examUuid={exam.exam_uuid}
                   courseUuid={courseUuid}
@@ -588,8 +618,8 @@ export default function ExamSettings({ exam, courseUuid, onSettingsUpdated }: Ex
                   <>
                     <div className="flex items-center justify-between rounded-lg border p-4">
                       <div className="space-y-0.5">
-                        <Label>{t('enableViolationThreshold')}</Label>
-                        <p className="text-muted-foreground text-sm">{t('violationThresholdDescription')}</p>
+                        <FieldLabel>{t('enableViolationThreshold')}</FieldLabel>
+                        <FieldDescription>{t('violationThresholdDescription')}</FieldDescription>
                       </div>
                       <Switch
                         checked={hasViolationThreshold}
@@ -603,7 +633,7 @@ export default function ExamSettings({ exam, courseUuid, onSettingsUpdated }: Ex
                       <Controller
                         control={form.control}
                         name="violation_threshold"
-                        render={({ field }) => (
+                        render={({ field, fieldState }) => (
                           <Field>
                             <FieldLabel htmlFor={field.name}>{t('violationThreshold')}</FieldLabel>
                             <Input
@@ -612,10 +642,11 @@ export default function ExamSettings({ exam, courseUuid, onSettingsUpdated }: Ex
                               min={limits?.violation_threshold?.min ?? 1}
                               max={limits?.violation_threshold?.max ?? 10}
                               {...field}
-                              value={field.value || ''}
-                              onChange={(e) => field.onChange(e.target.value ? Number.parseInt(e.target.value) : null)}
+                              value={field.value ?? ''}
+                              onChange={(e) => field.onChange(e.target.value === '' ? null : Number.parseInt(e.target.value, 10))}
                             />
                             <FieldDescription>{t('violationThresholdInputDescription')}</FieldDescription>
+                            <FieldError errors={[fieldState.error]} />
                           </Field>
                         )}
                       />
@@ -627,6 +658,7 @@ export default function ExamSettings({ exam, courseUuid, onSettingsUpdated }: Ex
 
             <div className="flex justify-end gap-2">
               <Button
+                type="button"
                 variant="outline"
                 onClick={resetToDefaults}
               >
@@ -634,13 +666,12 @@ export default function ExamSettings({ exam, courseUuid, onSettingsUpdated }: Ex
               </Button>
               <Button
                 type="submit"
-                disabled={isPending}
+                disabled={form.formState.isSubmitting}
               >
-                {isPending ? t('saving') : t('saveSettings')}
+                {form.formState.isSubmitting ? t('saving') : t('saveSettings')}
               </Button>
             </div>
-          </form>
-        </FormProvider>
+        </form>
       </CardContent>
     </Card>
   );

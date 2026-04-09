@@ -3,8 +3,8 @@ import { useAssignmentsTaskStore } from '@components/Contexts/Assignments/Assign
 import { AlertCircle, Cloud, Download, File, Info, Loader2, UploadCloud } from 'lucide-react';
 import { updateAssignmentTask, updateReferenceFile } from '@services/courses/assignments';
 import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
-import { Field, FieldError, FieldLabel } from '@components/ui/field';
-import { useEffect, useRef, useState, useTransition } from 'react';
+import { Field, FieldContent, FieldError, FieldLabel } from '@components/ui/field';
+import { useEffect, useRef, useState } from 'react';
 import { Alert, AlertDescription } from '@components/ui/alert';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { getTaskRefFileDir } from '@services/media/media';
@@ -36,6 +36,7 @@ const createValidationSchema = (t: (key: string) => string) =>
   });
 
 type TaskFormData = v.InferOutput<ReturnType<typeof createValidationSchema>>;
+type TaskFormInput = v.InferInput<ReturnType<typeof createValidationSchema>>;
 
 export const AssignmentTaskGeneralEdit = () => {
   const t = useTranslations('DashPage.Assignments.TaskGeneralEdit');
@@ -52,7 +53,7 @@ export const AssignmentTaskGeneralEdit = () => {
     Object.keys(assignmentTask).length > 0 &&
     selectedAssignmentTaskUUID === assignmentTask.assignment_task_uuid;
 
-  const form = useForm<TaskFormData>({
+  const form = useForm<TaskFormInput, any, TaskFormData>({
     resolver: valibotResolver(validationSchema),
     defaultValues: {
       title: '',
@@ -63,53 +64,40 @@ export const AssignmentTaskGeneralEdit = () => {
     mode: 'onChange',
   });
 
-  const [isPending, startTransition] = useTransition();
-
-  const handleSubmit = (values: TaskFormData) => {
+  const handleSubmit = async (values: TaskFormData) => {
     if (!isTaskLoaded) {
       toast.error(t('taskNotLoaded'));
       return;
     }
 
-    startTransition(() => {
-      void (async () => {
-        try {
-          const assignmentTaskUUID = assignmentTask?.assignment_task_uuid;
-          const assignmentUUID = assignment?.assignment_object?.assignment_uuid;
+    try {
+      const assignmentTaskUUID = assignmentTask?.assignment_task_uuid;
+      const assignmentUUID = assignment?.assignment_object?.assignment_uuid;
 
-          if (!assignmentTaskUUID || !assignmentUUID) {
-            toast.error(t('saveError'));
-            return;
-          }
+      if (!assignmentTaskUUID || !assignmentUUID) {
+        toast.error(t('saveError'));
+        return;
+      }
 
-          const res = await updateAssignmentTask({
-            body: values,
-            assignmentTaskUUID,
-            assignmentUUID,
-          });
-          if (res.success) {
-            reload();
-            toast.success(t('saveSuccess'));
-          } else {
-            toast.error(t('saveError'));
-          }
-        } catch (error) {
-          console.error('Error updating assignment task:', error);
-          toast.error(t('saveError'));
-        }
-      })();
-    });
+      const res = await updateAssignmentTask({
+        body: values,
+        assignmentTaskUUID,
+        assignmentUUID,
+      });
+      if (res.success) {
+        reload();
+        toast.success(t('saveSuccess'));
+      } else {
+        toast.error(t('saveError'));
+      }
+    } catch (error) {
+      console.error('Error updating assignment task:', error);
+      toast.error(t('saveError'));
+    }
   };
 
   // Update form values when assignment task changes
   useEffect(() => {
-    console.log('Form data update:', {
-      isTaskLoaded,
-      selectedTaskUUID: selectedAssignmentTaskUUID,
-      taskUUID: assignmentTask?.assignment_task_uuid,
-      taskData: assignmentTask,
-    });
-
     if (isTaskLoaded) {
       const taskData = assignmentTask;
       form.reset({
@@ -151,34 +139,40 @@ export const AssignmentTaskGeneralEdit = () => {
     >
       <Field>
         <FieldLabel htmlFor="title">{t('title')}</FieldLabel>
-        <Input
-          id="title"
-          type="text"
-          placeholder={t('titlePlaceholder')}
-          {...form.register('title')}
-        />
+        <FieldContent>
+          <Input
+            id="title"
+            type="text"
+            placeholder={t('titlePlaceholder')}
+            {...form.register('title')}
+          />
+        </FieldContent>
         <FieldError errors={[form.formState.errors.title]} />
       </Field>
 
       <Field>
         <FieldLabel htmlFor="description">{t('description')}</FieldLabel>
-        <Textarea
-          id="description"
-          placeholder={t('descriptionPlaceholder')}
-          className="min-h-[100px]"
-          {...form.register('description')}
-        />
+        <FieldContent>
+          <Textarea
+            id="description"
+            placeholder={t('descriptionPlaceholder')}
+            className="min-h-[100px]"
+            {...form.register('description')}
+          />
+        </FieldContent>
         <FieldError errors={[form.formState.errors.description]} />
       </Field>
 
       <Field>
         <FieldLabel htmlFor="hint">{t('hint')}</FieldLabel>
-        <Textarea
-          id="hint"
-          placeholder={t('hintPlaceholder')}
-          className="min-h-[80px]"
-          {...form.register('hint')}
-        />
+        <FieldContent>
+          <Textarea
+            id="hint"
+            placeholder={t('hintPlaceholder')}
+            className="min-h-[80px]"
+            {...form.register('hint')}
+          />
+        </FieldContent>
         <FieldError errors={[form.formState.errors.hint]} />
       </Field>
 
@@ -199,14 +193,17 @@ export const AssignmentTaskGeneralEdit = () => {
         render={({ field, fieldState }) => (
           <Field>
             <FieldLabel htmlFor={field.name}>{t('maxGradeValue')}</FieldLabel>
-            <Input
-              id={field.name}
-              type="number"
-              {...field}
-              onChange={(e) => {
-                field.onChange(Number(e.target.value));
-              }}
-            />
+            <FieldContent>
+              <Input
+                id={field.name}
+                type="number"
+                {...field}
+                value={field.value ?? ''}
+                onChange={(e) => {
+                  field.onChange(e.target.value === '' ? undefined : Number(e.target.value));
+                }}
+              />
+            </FieldContent>
             <FieldError errors={[fieldState.error]} />
           </Field>
         )}
@@ -215,9 +212,9 @@ export const AssignmentTaskGeneralEdit = () => {
       <Button
         type="submit"
         className="mt-4 w-full bg-green-500 px-4 py-2 font-semibold text-white hover:bg-green-600"
-        disabled={isPending || form.formState.isSubmitting}
+        disabled={form.formState.isSubmitting}
       >
-        {isPending || form.formState.isSubmitting ? t('saving') : t('save')}
+        {form.formState.isSubmitting ? t('saving') : t('save')}
       </Button>
     </form>
   );

@@ -1,17 +1,17 @@
 'use client';
 
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
-import { Field, FieldError, FieldLabel } from '@components/ui/field';
+import { Field, FieldContent, FieldError, FieldLabel } from '@components/ui/field';
 import { getPaymentsProductsSwrKey } from '@services/payments/keys';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { createProduct } from '@services/payments/products';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller, useForm, useWatch } from 'react-hook-form';
 import { Textarea } from '@components/ui/textarea';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
 import currencyCodes from '@/lib/currencies';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 import type { FC } from 'react';
 import { toast } from 'sonner';
 import * as v from 'valibot';
@@ -35,22 +35,14 @@ const createValidationSchema = (t: (key: string, values?: any) => string) =>
   });
 
 type ProductFormValues = v.InferOutput<ReturnType<typeof createValidationSchema>>;
+type ProductFormInputValues = v.InferInput<ReturnType<typeof createValidationSchema>>;
 
 const CreateProductForm: FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
-  const [currencies, setCurrencies] = useState<{ code: string; name: string }[]>([]);
   const tNotify = useTranslations('DashPage.Notifications');
   const t = useTranslations('Payments.ProductForm');
   const validationSchema = createValidationSchema(t);
 
-  useEffect(() => {
-    const allCurrencies = currencyCodes.data.map((currency) => ({
-      code: currency.code,
-      name: `${currency.code} - ${currency.currency}`,
-    }));
-    setCurrencies(allCurrencies);
-  }, []);
-
-  const form = useForm<ProductFormValues>({
+  const form = useForm<ProductFormInputValues, any, ProductFormValues>({
     resolver: valibotResolver(validationSchema),
     defaultValues: {
       name: '',
@@ -64,8 +56,8 @@ const CreateProductForm: FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
     mode: 'onChange',
   });
 
-  const productType = form.watch('product_type');
-  const priceType = form.watch('price_type');
+  const productType = useWatch({ control: form.control, name: 'product_type', defaultValue: 'one_time' });
+  const priceType = useWatch({ control: form.control, name: 'price_type', defaultValue: 'fixed_price' });
 
   const productTypeItems = [
     { value: 'one_time', label: t('productTypes.one_time') },
@@ -80,10 +72,20 @@ const CreateProductForm: FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
         ]
       : [{ value: 'fixed_price', label: t('priceTypes.fixed_price') }];
 
-  const currencyItems = currencies.map((currency) => ({
-    value: currency.code,
-    label: currency.name,
-  }));
+  const currencyItems = useMemo(
+    () =>
+      currencyCodes.data.map((currency) => ({
+        value: currency.code,
+        label: `${currency.code} - ${currency.currency}`,
+      })),
+    [],
+  );
+
+  useEffect(() => {
+    if (productType === 'subscription' && priceType !== 'fixed_price') {
+      form.setValue('price_type', 'fixed_price', { shouldDirty: true, shouldValidate: true });
+    }
+  }, [form, priceType, productType]);
 
   const handleSubmit = async (values: ProductFormValues) => {
     const loadingToast = toast.loading(tNotify('creatingProduct'));
@@ -116,21 +118,25 @@ const CreateProductForm: FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
       <div className="flex-col space-y-3 px-1.5 py-2">
         <Field>
           <FieldLabel htmlFor="name">{t('nameLabel')}</FieldLabel>
-          <Input
-            id="name"
-            placeholder={t('namePlaceholder')}
-            {...form.register('name')}
-          />
+          <FieldContent>
+            <Input
+              id="name"
+              placeholder={t('namePlaceholder')}
+              {...form.register('name')}
+            />
+          </FieldContent>
           <FieldError errors={[form.formState.errors.name]} />
         </Field>
 
         <Field>
           <FieldLabel htmlFor="description">{t('descriptionLabel')}</FieldLabel>
-          <Textarea
-            id="description"
-            placeholder={t('descriptionPlaceholder')}
-            {...form.register('description')}
-          />
+          <FieldContent>
+            <Textarea
+              id="description"
+              placeholder={t('descriptionPlaceholder')}
+              {...form.register('description')}
+            />
+          </FieldContent>
           <FieldError errors={[form.formState.errors.description]} />
         </Field>
 
@@ -208,15 +214,19 @@ const CreateProductForm: FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
                   <FieldLabel htmlFor={field.name}>
                     {priceType === 'fixed_price' ? t('priceLabel') : t('minAmountLabel')}
                   </FieldLabel>
-                  <Input
-                    id={field.name}
-                    type="number"
-                    placeholder={priceType === 'fixed_price' ? t('priceLabel') : t('minAmountLabel')}
-                    {...field}
-                    onChange={(e) => {
-                      field.onChange(Number(e.target.value));
-                    }}
-                  />
+                  <FieldContent>
+                    <Input
+                      id={field.name}
+                      type="number"
+                      inputMode="decimal"
+                      placeholder={priceType === 'fixed_price' ? t('priceLabel') : t('minAmountLabel')}
+                      {...field}
+                      value={field.value ?? ''}
+                      onChange={(e) => {
+                        field.onChange(e.target.value === '' ? undefined : Number(e.target.value));
+                      }}
+                    />
+                  </FieldContent>
                   <FieldError errors={[fieldState.error]} />
                 </Field>
               )}
@@ -259,11 +269,13 @@ const CreateProductForm: FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
 
         <Field>
           <FieldLabel htmlFor="benefits">{t('benefitsLabel')}</FieldLabel>
-          <Textarea
-            id="benefits"
-            placeholder={t('benefitsPlaceholder')}
-            {...form.register('benefits')}
-          />
+          <FieldContent>
+            <Textarea
+              id="benefits"
+              placeholder={t('benefitsPlaceholder')}
+              {...form.register('benefits')}
+            />
+          </FieldContent>
           <FieldError errors={[form.formState.errors.benefits]} />
         </Field>
       </div>

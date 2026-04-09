@@ -24,13 +24,13 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 import { updateProfile, updateUserAvatar } from '@/lib/users/client';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { logout } from '@services/auth/auth';
-import { Field, FieldError, FieldLabel } from '@components/ui/field';
+import { Field, FieldContent, FieldError, FieldLabel } from '@components/ui/field';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { useDebouncedCallback } from '@/hooks/useDebounce';
 import { getAbsoluteUrl } from '@services/config/config';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { constructAcceptValue } from '@/lib/constants';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller, useForm, useWatch } from 'react-hook-form';
 import type { ChangeEvent, ElementType } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 import { Textarea } from '@components/ui/textarea';
@@ -290,7 +290,7 @@ const UserEditForm = ({ form, profilePicture }: UserEditFormProps) => {
     ],
   } as const;
 
-  const details = form.watch('details');
+  const details = useWatch({ control: form.control, name: 'details', defaultValue: {} });
 
   return (
     <div>
@@ -309,12 +309,14 @@ const UserEditForm = ({ form, profilePicture }: UserEditFormProps) => {
               render={({ field, fieldState }) => (
                 <Field>
                   <FieldLabel htmlFor={field.name}>{t('email')}</FieldLabel>
-                  <Input
-                    id={field.name}
-                    type="email"
-                    placeholder={t('emailPlaceholder')}
-                    {...field}
-                  />
+                  <FieldContent>
+                    <Input
+                      id={field.name}
+                      type="email"
+                      placeholder={t('emailPlaceholder')}
+                      {...field}
+                    />
+                  </FieldContent>
                   <FieldError errors={[fieldState.error]} />
                   <div className="mt-2 flex items-center space-x-2 rounded-md bg-amber-50 p-2 text-amber-600">
                     <AlertTriangle size={16} />
@@ -330,11 +332,13 @@ const UserEditForm = ({ form, profilePicture }: UserEditFormProps) => {
               render={({ field, fieldState }) => (
                 <Field>
                   <FieldLabel htmlFor={field.name}>{t('username')}</FieldLabel>
-                  <Input
-                    id={field.name}
-                    placeholder={t('usernamePlaceholder')}
-                    {...field}
-                  />
+                  <FieldContent>
+                    <Input
+                      id={field.name}
+                      placeholder={t('usernamePlaceholder')}
+                      {...field}
+                    />
+                  </FieldContent>
                   <FieldError errors={[fieldState.error]} />
                 </Field>
               )}
@@ -346,11 +350,13 @@ const UserEditForm = ({ form, profilePicture }: UserEditFormProps) => {
               render={({ field, fieldState }) => (
                 <Field>
                   <FieldLabel htmlFor={field.name}>{t('firstName')}</FieldLabel>
-                  <Input
-                    id={field.name}
-                    placeholder={t('firstNamePlaceholder')}
-                    {...field}
-                  />
+                  <FieldContent>
+                    <Input
+                      id={field.name}
+                      placeholder={t('firstNamePlaceholder')}
+                      {...field}
+                    />
+                  </FieldContent>
                   <FieldError errors={[fieldState.error]} />
                 </Field>
               )}
@@ -362,11 +368,13 @@ const UserEditForm = ({ form, profilePicture }: UserEditFormProps) => {
               render={({ field, fieldState }) => (
                 <Field>
                   <FieldLabel htmlFor={field.name}>{t('middleName')}</FieldLabel>
-                  <Input
-                    id={field.name}
-                    placeholder={t('middleNamePlaceholder')}
-                    {...field}
-                  />
+                  <FieldContent>
+                    <Input
+                      id={field.name}
+                      placeholder={t('middleNamePlaceholder')}
+                      {...field}
+                    />
+                  </FieldContent>
                   <FieldError errors={[fieldState.error]} />
                 </Field>
               )}
@@ -378,11 +386,13 @@ const UserEditForm = ({ form, profilePicture }: UserEditFormProps) => {
               render={({ field, fieldState }) => (
                 <Field>
                   <FieldLabel htmlFor={field.name}>{t('lastName')}</FieldLabel>
-                  <Input
-                    id={field.name}
-                    placeholder={t('lastNamePlaceholder')}
-                    {...field}
-                  />
+                  <FieldContent>
+                    <Input
+                      id={field.name}
+                      placeholder={t('lastNamePlaceholder')}
+                      {...field}
+                    />
+                  </FieldContent>
                   <FieldError errors={[fieldState.error]} />
                 </Field>
               )}
@@ -399,13 +409,15 @@ const UserEditForm = ({ form, profilePicture }: UserEditFormProps) => {
                       ({400 - (field.value?.length || 0)} {t('charactersLeft')})
                     </span>
                   </FieldLabel>
-                  <Textarea
-                    id={field.name}
-                    placeholder={t('bioPlaceholder')}
-                    className="min-h-[150px]"
-                    maxLength={400}
-                    {...field}
-                  />
+                  <FieldContent>
+                    <Textarea
+                      id={field.name}
+                      placeholder={t('bioPlaceholder')}
+                      className="min-h-[150px]"
+                      maxLength={400}
+                      {...field}
+                    />
+                  </FieldContent>
                   <FieldError errors={[fieldState.error]} />
                 </Field>
               )}
@@ -630,7 +642,9 @@ const UserEditGeneral = () => {
   const t = useTranslations('DashPage.Notifications');
   const validationSchema = createValidationSchema(t);
 
-  const form = useForm<FormValues>({
+  type UserEditFormInput = v.InferInput<ReturnType<typeof createValidationSchema>>;
+
+  const form = useForm<UserEditFormInput, any, FormValues>({
     resolver: valibotResolver(validationSchema),
     defaultValues: {
       username: '',

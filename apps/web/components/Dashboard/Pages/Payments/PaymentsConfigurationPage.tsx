@@ -33,7 +33,7 @@ import {
 } from 'lucide-react';
 import { useEffect, useEffectEvent, useRef, useState, useTransition } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@components/ui/alert';
-import { Field, FieldError, FieldLabel } from '@components/ui/field';
+import { Field, FieldContent, FieldError, FieldLabel } from '@components/ui/field';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { SiStripe } from '@icons-pack/react-simple-icons';
@@ -330,12 +330,13 @@ const createStripeConfigSchema = (t: (key: string) => string) =>
   });
 
 type StripeConfigFormValues = v.InferOutput<ReturnType<typeof createStripeConfigSchema>>;
+type StripeConfigInputValues = v.InferInput<ReturnType<typeof createStripeConfigSchema>>;
 
 const EditStripeConfigModal: FC<EditStripeConfigModalProps> = ({ configId, isOpen, onClose }) => {
   const t = useTranslations('Payments.Configuration');
   const validationSchema = createStripeConfigSchema(t);
 
-  const form = useForm<StripeConfigFormValues>({
+  const form = useForm<StripeConfigInputValues, any, StripeConfigFormValues>({
     resolver: valibotResolver(validationSchema),
     defaultValues: {
       stripeAccountId: '',
@@ -405,12 +406,14 @@ const EditStripeConfigModal: FC<EditStripeConfigModalProps> = ({ configId, isOpe
             render={({ field, fieldState }) => (
               <Field>
                 <FieldLabel htmlFor={field.name}>{t('stripeAccountIdLabel')}</FieldLabel>
-                <Input
-                  id={field.name}
-                  type="text"
-                  placeholder="acct_..."
-                  {...field}
-                />
+                <FieldContent>
+                  <Input
+                    id={field.name}
+                    type="text"
+                    placeholder="acct_..."
+                    {...field}
+                  />
+                </FieldContent>
                 <FieldError errors={[fieldState.error]} />
               </Field>
             )}

@@ -1,13 +1,13 @@
 'use client';
 
-import { Controller, FormProvider, useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { Code2, Loader2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import * as v from 'valibot';
 
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Field, FieldDescription, FieldError, FieldLabel } from '@/components/ui/field';
+import { Field, FieldContent, FieldDescription, FieldError, FieldLabel } from '@/components/ui/field';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -43,9 +43,10 @@ export default function CodeChallengeActivityModal({
   const t = useTranslations('Components.NewActivity.CodeChallenge');
 
   const validationSchema = createValidationSchema(t);
-  type ValidationSchema = v.InferOutput<typeof validationSchema>;
+  type ValidationInput = v.InferInput<typeof validationSchema>;
+  type ValidationOutput = v.InferOutput<typeof validationSchema>;
 
-  const form = useForm<ValidationSchema>({
+  const form = useForm<ValidationInput, any, ValidationOutput>({
     resolver: valibotResolver(validationSchema),
     defaultValues: {
       name: '',
@@ -55,7 +56,7 @@ export default function CodeChallengeActivityModal({
     },
   });
 
-  const handleSubmit = async (values: FormValues) => {
+  const handleSubmit = async (values: ValidationOutput) => {
     const activityData = {
       name: values.name,
       activity_type: 'TYPE_CODE_CHALLENGE',
@@ -84,22 +85,23 @@ export default function CodeChallengeActivityModal({
         </div>
       </div>
 
-      <FormProvider {...form}>
-        <form
-          onSubmit={form.handleSubmit(handleSubmit)}
-          className="space-y-4"
-        >
+      <form
+        onSubmit={form.handleSubmit(handleSubmit)}
+        className="space-y-4"
+      >
           <Controller
             control={form.control}
             name="name"
             render={({ field, fieldState }) => (
               <Field>
                 <FieldLabel htmlFor={field.name}>{t('name')}</FieldLabel>
-                <Input
-                  id={field.name}
-                  placeholder={t('namePlaceholder')}
-                  {...field}
-                />
+                <FieldContent>
+                  <Input
+                    id={field.name}
+                    placeholder={t('namePlaceholder')}
+                    {...field}
+                  />
+                </FieldContent>
                 <FieldError errors={[fieldState.error]} />
               </Field>
             )}
@@ -111,12 +113,14 @@ export default function CodeChallengeActivityModal({
             render={({ field, fieldState }) => (
               <Field>
                 <FieldLabel htmlFor={field.name}>{t('description')}</FieldLabel>
-                <Textarea
-                  id={field.name}
-                  placeholder={t('descriptionPlaceholder')}
-                  className="min-h-24"
-                  {...field}
-                />
+                <FieldContent>
+                  <Textarea
+                    id={field.name}
+                    placeholder={t('descriptionPlaceholder')}
+                    className="min-h-24"
+                    {...field}
+                  />
+                </FieldContent>
                 <FieldDescription>{t('descriptionHint')}</FieldDescription>
                 <FieldError errors={[fieldState.error]} />
               </Field>
@@ -225,8 +229,7 @@ export default function CodeChallengeActivityModal({
               {t('create')}
             </Button>
           </div>
-        </form>
-      </FormProvider>
+      </form>
     </div>
   );
 }

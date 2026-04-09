@@ -3,9 +3,10 @@
 import { buildCourseWorkspacePath, cleanCourseUuid, prefixedCourseUuid } from '@/lib/course-management';
 import { createNewCourse, getCourseMetadata, searchEditableCourses } from '@services/courses/courses';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Field, FieldContent, FieldError, FieldLabel } from '@/components/ui/field';
 import { CourseChoiceCard, courseWorkflowSummaryCardClass } from './courseWorkflowUi';
 import { CheckCircle2, ChevronDown, Loader2, Search, Sparkles } from 'lucide-react';
-import { useCallback, useEffect, useRef, useState, useTransition } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { CourseWizardValues } from '@/schemas/courseSchemas';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { courseWizardSchema } from '@/schemas/courseSchemas';
@@ -16,9 +17,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useTranslations } from 'next-intl';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import type * as v from 'valibot';
 
 export default function CourseCreationWizard() {
   const t = useTranslations('DashPage.CourseManagement.Wizard');
@@ -27,7 +29,9 @@ export default function CourseCreationWizard() {
   const searchParams = useSearchParams();
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
 
-  const form = useForm<CourseWizardValues>({
+  type CourseWizardInputValues = v.InferInput<typeof courseWizardSchema>;
+
+  const form = useForm<CourseWizardInputValues, any, CourseWizardValues>({
     resolver: valibotResolver(courseWizardSchema),
     defaultValues: {
       name: '',
@@ -38,9 +42,11 @@ export default function CourseCreationWizard() {
     },
   });
 
-  const { name, description, template, sourceCourseUuid, public: isPublic } = form.watch();
-
-  const [isPending, startTransition] = useTransition();
+  const name = useWatch({ control: form.control, name: 'name', defaultValue: '' });
+  const description = useWatch({ control: form.control, name: 'description', defaultValue: '' });
+  const template = useWatch({ control: form.control, name: 'template', defaultValue: 'blank' });
+  const sourceCourseUuid = useWatch({ control: form.control, name: 'sourceCourseUuid', defaultValue: '' });
+  const isPublic = useWatch({ control: form.control, name: 'public', defaultValue: false });
 
   // ── Async source-course combobox ──────────────────────────────────────────
   const [sourceQuery, setSourceQuery] = useState('');
@@ -114,48 +120,38 @@ export default function CourseCreationWizard() {
     }
   };
 
-  const handleCreate = form.handleSubmit((values) => {
-    startTransition(() => {
-      void (async () => {
-        try {
-          const result = await createNewCourse(
-            {
-              name: values.name.trim(),
-              description: values.description.trim(),
-              learnings: JSON.stringify([]),
-              tags: JSON.stringify([]),
-              visibility: values.public,
-              // 'starter' template → backend seeds chapters atomically
-              // 'outline' → we copy from source after creation
-              // 'blank' → no seeding
-              template: values.template !== 'outline' ? values.template : undefined,
-            },
-            null,
-          );
+  const handleCreate = form.handleSubmit(async (values) => {
+    try {
+      const result = await createNewCourse(
+        {
+          name: values.name.trim(),
+          description: values.description.trim(),
+          learnings: JSON.stringify([]),
+          tags: JSON.stringify([]),
+          visibility: values.public,
+          template: values.template !== 'outline' ? values.template : undefined,
+        },
+        null,
+      );
 
-          const createdCourse = result.data;
+      const createdCourse = result.data;
 
-          if (!result.success || !createdCourse || !('course_uuid' in createdCourse)) {
-            const detail =
-              createdCourse && typeof createdCourse === 'object' && 'detail' in createdCourse
-                ? createdCourse.detail
-                : undefined;
-            throw new Error((typeof detail === 'string' ? detail : undefined) || t('errors.creationFailed'));
-          }
+      if (!result.success || !createdCourse || !('course_uuid' in createdCourse)) {
+        const detail =
+          createdCourse && typeof createdCourse === 'object' && 'detail' in createdCourse ? createdCourse.detail : undefined;
+        throw new Error((typeof detail === 'string' ? detail : undefined) || t('errors.creationFailed'));
+      }
 
-          // (backend doesn't know which source to copy from)
-          if (values.template === 'outline') {
-            await createOutlineFromSource(createdCourse);
-          }
+      if (values.template === 'outline') {
+        await createOutlineFromSource(createdCourse);
+      }
 
-          toast.success(t('toasts.created'));
-          router.replace(buildCourseWorkspacePath(createdCourse.course_uuid, 'curriculum'));
-          router.refresh();
-        } catch (error: any) {
-          toast.error(error?.message || t('errors.createWorkspace'));
-        }
-      })();
-    });
+      toast.success(t('toasts.created'));
+      router.replace(buildCourseWorkspacePath(createdCourse.course_uuid, 'curriculum'));
+      router.refresh();
+    } catch (error: any) {
+      toast.error(error?.message || t('errors.createWorkspace'));
+    }
   });
 
   const summaryContent = (
@@ -224,33 +220,29 @@ export default function CourseCreationWizard() {
                 <div className="text-foreground text-sm font-semibold">{t('steps.basics')}</div>
                 <div className="text-muted-foreground mt-1 text-sm">{t('basics.description')}</div>
               </div>
-              <div className="space-y-2">
-                <label
-                  htmlFor="course-title"
-                  className="text-foreground text-sm font-medium"
-                >
-                  {t('basics.courseTitle')}
-                </label>
-                <Input
-                  id="course-title"
-                  {...form.register('name')}
-                  placeholder={t('basics.courseTitlePlaceholder')}
-                />
-              </div>
-              <div className="space-y-2">
-                <label
-                  htmlFor="course-description"
-                  className="text-foreground text-sm font-medium"
-                >
-                  {t('basics.shortDescription')}
-                </label>
-                <Textarea
-                  id="course-description"
-                  {...form.register('description')}
-                  placeholder={t('basics.shortDescriptionPlaceholder')}
-                  className="min-h-32"
-                />
-              </div>
+              <Field>
+                <FieldLabel htmlFor="course-title">{t('basics.courseTitle')}</FieldLabel>
+                <FieldContent>
+                  <Input
+                    id="course-title"
+                    {...form.register('name')}
+                    placeholder={t('basics.courseTitlePlaceholder')}
+                  />
+                </FieldContent>
+                <FieldError errors={[form.formState.errors.name]} />
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="course-description">{t('basics.shortDescription')}</FieldLabel>
+                <FieldContent>
+                  <Textarea
+                    id="course-description"
+                    {...form.register('description')}
+                    placeholder={t('basics.shortDescriptionPlaceholder')}
+                    className="min-h-32"
+                  />
+                </FieldContent>
+                <FieldError errors={[form.formState.errors.description]} />
+              </Field>
 
               <fieldset className="space-y-3">
                 <legend className="text-foreground text-sm font-medium">{t('basics.audienceDefault')}</legend>
@@ -406,7 +398,7 @@ export default function CourseCreationWizard() {
                 type="button"
                 variant="outline"
                 onClick={() => router.push('/dash/courses')}
-                disabled={isPending}
+                disabled={form.formState.isSubmitting}
               >
                 {tCommon('cancel')}
               </Button>
@@ -414,9 +406,9 @@ export default function CourseCreationWizard() {
               <Button
                 type="button"
                 onClick={handleCreate}
-                disabled={!canCreate || isPending}
+                disabled={!canCreate || form.formState.isSubmitting}
               >
-                {isPending ? <Loader2 className="size-4 animate-spin" /> : <CheckCircle2 className="size-4" />}
+                {form.formState.isSubmitting ? <Loader2 className="size-4 animate-spin" /> : <CheckCircle2 className="size-4" />}
                 {t('actions.createWorkspace')}
               </Button>
             </div>

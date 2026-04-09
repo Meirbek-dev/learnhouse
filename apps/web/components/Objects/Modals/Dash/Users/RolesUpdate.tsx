@@ -8,7 +8,7 @@ import { valibotResolver } from '@hookform/resolvers/valibot';
 import { swrFetcher } from '@services/utils/ts/requests';
 import { Controller, useForm } from 'react-hook-form';
 import { getAPIUrl } from '@services/config/config';
-import { useState, useTransition } from 'react';
+import { useState } from 'react';
 import { Button } from '@components/ui/button';
 import { useTranslations } from 'next-intl';
 import useSWR, { mutate } from 'swr';
@@ -30,14 +30,15 @@ interface FormData {
   role: string;
 }
 
+type RoleFormValues = v.InferOutput<ReturnType<typeof createValidationSchema>>;
+
 const RolesUpdate: FC<Props> = (props) => {
   const validationT = useTranslations('Validation');
   const t = useTranslations('Components.RolesUpdate');
   const validationSchema = createValidationSchema(validationT);
-  const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<any>(null);
 
-  const form = useForm<FormData>({
+  const form = useForm<FormData, any, RoleFormValues>({
     resolver: valibotResolver(validationSchema),
     defaultValues: {
       role: props.alreadyAssignedRole,
@@ -60,28 +61,25 @@ const RolesUpdate: FC<Props> = (props) => {
   const handleSubmit = async (values: FormData) => {
     setError(null);
 
-    startTransition(async () => {
-      const toastId = toast.loading(t('toastLoading'));
-      try {
-        const newRoleId = Number.parseInt(values.role, 10);
-        const oldRoleId = Number.parseInt(props.alreadyAssignedRole, 10);
-        const userId = props.user.user.id;
+    const toastId = toast.loading(t('toastLoading'));
+    try {
+      const newRoleId = Number.parseInt(values.role, 10);
+      const oldRoleId = Number.parseInt(props.alreadyAssignedRole, 10);
+      const userId = props.user.user.id;
 
-        // Revoke old role, then assign new one
-        if (!Number.isNaN(oldRoleId)) {
-          await removeRoleFromUser(userId, oldRoleId);
-        }
-        await assignRoleToUser(userId, newRoleId);
-
-        await mutate(`${getAPIUrl()}members`);
-        props.setRolesModal(false);
-        toast.success(t('toastSuccess'), { id: toastId });
-      } catch (error: any) {
-        const detail = error?.message ?? 'Unknown error';
-        setError(detail);
-        toast.error(t('toastError'), { id: toastId });
+      if (!Number.isNaN(oldRoleId)) {
+        await removeRoleFromUser(userId, oldRoleId);
       }
-    });
+      await assignRoleToUser(userId, newRoleId);
+
+      await mutate(`${getAPIUrl()}members`);
+      props.setRolesModal(false);
+      toast.success(t('toastSuccess'), { id: toastId });
+    } catch (error: any) {
+      const detail = error?.message ?? 'Unknown error';
+      setError(detail);
+      toast.error(t('toastError'), { id: toastId });
+    }
   };
 
   return (
@@ -148,10 +146,10 @@ const RolesUpdate: FC<Props> = (props) => {
         <div className="flex justify-end pt-4">
           <Button
             type="submit"
-            disabled={isPending || !roles || rolesError}
+            disabled={form.formState.isSubmitting || !roles || rolesError}
             className="min-w-[100px]"
           >
-            {isPending ? (
+            {form.formState.isSubmitting ? (
               <BarLoader
                 cssOverride={{ borderRadius: 60 }}
                 width={60}
