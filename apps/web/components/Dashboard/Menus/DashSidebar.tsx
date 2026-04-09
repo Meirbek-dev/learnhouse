@@ -237,7 +237,7 @@ const NavItem = ({ item, isCollapsed }: { item: NavigationItem; isCollapsed: boo
 );
 
 const DashSidebar = ({ className }: SidebarProps) => {
-  const { user, isLoading } = useAuth();
+  const { user } = useAuth();
   const { state, toggleSidebar } = useSidebar();
   const t = useTranslations('SidebarMenu');
   const navigationItems = useNavigationItems();
@@ -274,7 +274,7 @@ const DashSidebar = ({ className }: SidebarProps) => {
     };
   }, []);
 
-  if (isLoading || !user) {
+  if (!user) {
     return <SidebarSkeleton />;
   }
 

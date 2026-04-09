@@ -8,7 +8,7 @@ import useSWR from 'swr';
 type PaymentsConfigRead = components['schemas']['PaymentsConfigRead'];
 
 export function usePaymentsEnabled() {
-  const { isAuthenticated, isLoading: sessionLoading } = useAuth();
+  const { isAuthenticated } = useAuth();
   const {
     data: paymentConfigs,
     error,
@@ -21,7 +21,7 @@ export function usePaymentsEnabled() {
 
   return {
     isEnabled: Boolean(isStripeEnabled),
-    isLoading: sessionLoading || (isAuthenticated && isLoading),
+    isLoading: isAuthenticated && isLoading,
     error,
   };
 }

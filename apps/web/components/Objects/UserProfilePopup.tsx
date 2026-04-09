@@ -74,13 +74,13 @@ const IconComponent = ({ iconName }: { iconName: string }) => {
 const UserProfilePopup = ({ children, userId }: UserProfilePopupProps) => {
   const t = useTranslations('Components.UserProfilePopup');
   const router = useRouter();
-  const { status } = useAuth();
+  const { isAuthenticated } = useAuth();
   const [open, setOpen] = useState(false);
   const {
     data: userData,
     error,
     isLoading,
-  } = useUserById(userId, { enabled: open && status === 'authenticated' });
+  } = useUserById(userId, { enabled: open && isAuthenticated });
   const details = userData?.details ? (Object.values(userData.details) as UserDetail[]) : [];
 
   return (

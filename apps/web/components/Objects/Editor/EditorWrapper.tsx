@@ -19,8 +19,6 @@ interface EditorWrapperProps {
 
 const EditorWrapper = (props: EditorWrapperProps): JSX.Element => {
   const t = useTranslations('DashPage.Editor.EditorWrapper');
-  const { status } = useAuth();
-  const isReady = status !== 'loading';
   const activityAutosave = useActivityAutosave({
     activityUuid: props.activity.activity_uuid,
     courseUuid: props.course.course_uuid,
@@ -45,21 +43,19 @@ const EditorWrapper = (props: EditorWrapperProps): JSX.Element => {
 
   return (
     <PlatformContextProvider initialPlatform={props.platform}>
-      {isReady ? (
-        <Editor
-          platform={props.platform}
-          course={props.course}
-          activity={props.activity}
-          content={props.content}
-          onContentChange={(content) => {
-            const plainContent = structuredClone(content);
-            const updatedActivity = { ...props.activity, content: plainContent };
-            activityAutosave.onChange(updatedActivity);
-          }}
-          saveState={activityAutosave.saveStatus}
-          setContent={setContent}
-        />
-      ) : null}
+      <Editor
+        platform={props.platform}
+        course={props.course}
+        activity={props.activity}
+        content={props.content}
+        onContentChange={(content) => {
+          const plainContent = structuredClone(content);
+          const updatedActivity = { ...props.activity, content: plainContent };
+          activityAutosave.onChange(updatedActivity);
+        }}
+        saveState={activityAutosave.saveStatus}
+        setContent={setContent}
+      />
     </PlatformContextProvider>
   );
 };

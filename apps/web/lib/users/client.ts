@@ -1,7 +1,6 @@
 'use client';
 
 import { apiFetch } from '@/lib/api-client';
-import { AUTH_SESSION_SWR_KEY } from '@/lib/auth/constants';
 import type { CustomResponseTyping } from '@services/utils/ts/requests';
 import type { components } from '@/lib/api/generated';
 import useSWR from 'swr';
@@ -83,7 +82,7 @@ export async function updateUserAvatar(userId: number, avatarFile: File): Promis
   const data = await parseJsonOrNull<UserRead>(response);
 
   if (response.ok) {
-    await Promise.all([mutate(userKeys.byId(userId)), mutate(AUTH_SESSION_SWR_KEY)]);
+    await mutate(userKeys.byId(userId));
   }
 
   return {
@@ -100,7 +99,7 @@ export async function updateUserLocale(userId: number, locale: string): Promise<
   });
   const data = await requireOkJson<UserRead>(response);
 
-  await Promise.all([mutate(userKeys.byId(userId)), mutate(AUTH_SESSION_SWR_KEY)]);
+  await mutate(userKeys.byId(userId));
 
   return data;
 }
@@ -114,7 +113,7 @@ export async function updateProfile(data: unknown, userId: number): Promise<Resp
   const payload = await parseJsonOrNull<UserRead>(response);
 
   if (response.ok) {
-    await Promise.all([mutate(userKeys.byId(userId)), mutate(AUTH_SESSION_SWR_KEY)]);
+    await mutate(userKeys.byId(userId));
   }
 
   return {
@@ -132,10 +131,6 @@ export async function updatePassword(userId: number, data: unknown): Promise<Res
     body: JSON.stringify(data),
   });
   const payload = await parseJsonOrNull<unknown>(response);
-
-  if (response.ok) {
-    await mutate(AUTH_SESSION_SWR_KEY);
-  }
 
   return {
     success: response.status === 200,

@@ -1,5 +1,8 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
+import { AUTH_REFRESH_BRIDGE_PATH, ACCESS_TOKEN_COOKIE_NAME } from './lib/auth/constants';
+import { isAuthRoute } from './lib/auth/routes';
+import { isAccessTokenExpired } from './lib/auth/cookie-bridge';
 import { generateUUID } from './lib/utils';
 
 const AUTH_REWRITE: Record<string, string> = {
@@ -89,6 +92,7 @@ export const config = {
 export default async function proxy(req: NextRequest) {
   const { pathname, search } = req.nextUrl;
   const requestId = generateUUID();
+  const accessToken = req.cookies.get(ACCESS_TOKEN_COOKIE_NAME)?.value;
 
   if (pathname === '/home') {
     return rewriteWithHeaders(req, requestId, `${pathname}${search}`);
@@ -101,13 +105,17 @@ export default async function proxy(req: NextRequest) {
 
   const isProtected = PROTECTED_PREFIXES.some((prefix) => pathname.startsWith(prefix));
   if (isProtected) {
-    const hasAuthCookie = req.cookies.has('access_token_cookie') || req.cookies.has('refresh_token_cookie');
-
-    if (!hasAuthCookie) {
-      const returnTo = encodeURIComponent(pathname + search);
-      const loginUrl = new URL(`/login?returnTo=${returnTo}`, req.url);
-      return withRequestId(NextResponse.redirect(loginUrl), requestId);
+    if (!accessToken || isAccessTokenExpired(accessToken)) {
+      const refreshUrl = new URL(AUTH_REFRESH_BRIDGE_PATH, req.url);
+      refreshUrl.searchParams.set('returnTo', pathname + search);
+      return withRequestId(NextResponse.redirect(refreshUrl), requestId);
     }
+  }
+
+  if (accessToken && !isAuthRoute(pathname) && isAccessTokenExpired(accessToken)) {
+    const refreshUrl = new URL(AUTH_REFRESH_BRIDGE_PATH, req.url);
+    refreshUrl.searchParams.set('returnTo', pathname + search);
+    return withRequestId(NextResponse.redirect(refreshUrl), requestId);
   }
 
   // Dynamic Pages Editor

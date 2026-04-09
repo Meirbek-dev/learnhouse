@@ -30,6 +30,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { getUserAvatarMediaDirectory } from '@/services/media/media';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ColumnDef } from '@tanstack/react-table';
+import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { Skeleton } from '@/components/ui/skeleton';
 import DataTable from '@/components/ui/data-table';
@@ -43,6 +44,7 @@ export default function UserRolesClient() {
   const session = useAuth();
   const t = useTranslations('Components.Roles');
   const locale = useLocale();
+  const router = useRouter();
 
   const [userRoles, setUserRoles] = useState<UserRoleAssignment[]>([]);
   const [availableRoles, setAvailableRoles] = useState<Role[]>([]);
@@ -58,9 +60,9 @@ export default function UserRolesClient() {
   } | null>(null);
 
   const refreshSession = useCallback(async () => {
-    const next = await session.mutate();
-    if (!next?.user) toast.warning(t('sessionRefreshWarning'));
-  }, [session, t]);
+    router.refresh();
+    if (!session.user) toast.warning(t('sessionRefreshWarning'));
+  }, [router, session.user, t]);
 
   // Fetch user roles
   const fetchUserRolesData = useCallback(async () => {

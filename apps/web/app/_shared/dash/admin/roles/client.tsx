@@ -52,6 +52,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useAuth } from '@/hooks/useAuth';
 import type { Permission, RoleAuditEvent, RoleWithPermissions } from '@/types/permissions';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ColumnDef } from '@tanstack/react-table';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -71,6 +72,7 @@ export default function RBACAdminClient() {
   const session = useAuth();
   const { can } = usePermissions();
   const t = useTranslations('Components.Roles');
+  const router = useRouter();
 
   const [roles, setRoles] = useState<RoleWithPermissions[]>([]);
   const [loadingRoles, setLoadingRoles] = useState(true);
@@ -139,9 +141,9 @@ export default function RBACAdminClient() {
   }, [t]);
 
   const refreshSession = useCallback(async () => {
-    const next = await session.mutate();
-    if (!next?.user) toast.warning(t('sessionRefreshWarning'));
-  }, [session, t]);
+    router.refresh();
+    if (!session.user) toast.warning(t('sessionRefreshWarning'));
+  }, [router, session.user, t]);
 
   const loadRoleWithPermissions = async (roleId: number): Promise<RoleWithPermissions> => {
     const [role, rolePermissions] = await Promise.all([apiGetRole(roleId), getRolePermissions(roleId)]);

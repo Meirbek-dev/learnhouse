@@ -45,23 +45,23 @@ const PermissionContext = createContext<PermissionContextValue | null>(null);
 // ============================================================================
 
 export function PermissionProvider({ children }: { children: ReactNode }) {
-  const { session, status } = useAuth();
+  const { isAuthenticated, session } = useAuth();
 
   const permissions = useMemo(() => new Set<string>(session?.permissions), [session?.permissions]);
 
   const can = useMemo(() => {
     return (action: Action, resource: Resource, scope: Scope): boolean => {
-      if (status !== 'authenticated') return false;
+      if (!isAuthenticated) return false;
       return permissions.has(perm(resource, action, scope));
     };
-  }, [status, permissions]);
+  }, [isAuthenticated, permissions]);
 
   const value: PermissionContextValue = useMemo(
     () => ({
       can,
-      loading: status === 'loading',
+      loading: false,
     }),
-    [can, status],
+    [can],
   );
 
   return <PermissionContext.Provider value={value}>{children}</PermissionContext.Provider>;

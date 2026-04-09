@@ -9,16 +9,17 @@ import {
 import { ChevronDown, Crown, LogOut, Shield, User as UserIcon, Users, Star } from 'lucide-react'; // Added Star
 import { Tooltip, TooltipContent, TooltipTrigger } from '@components/ui/tooltip';
 import { useNavigationPermissions } from '@/hooks/useNavigationPermissions';
-import { AUTH_SESSION_SWR_KEY } from '@/lib/auth/constants';
 import { useAuth } from '@/hooks/useAuth';
 import { logout } from '@services/auth/auth';
-import { mutate } from 'swr';
 import { getAbsoluteUrl } from '@services/config/config';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { RoleSlugs } from '@/types/permissions';
 import { Button } from '@components/ui/button';
 import { Badge } from '@components/ui/badge';
+import type { Session } from '@/lib/auth/types';
 import { useTranslations } from 'next-intl';
+import { useRouter } from 'next/navigation';
+import { useTransition } from 'react';
 import Link from '@components/ui/AppLink';
 import type { ReactNode } from 'react';
 
@@ -36,16 +37,20 @@ interface CustomRoleInfo {
   description?: string;
 }
 
+type SessionRole = Session['roles'][number];
+
 export const HeaderProfileBox = () => {
-  const { session, status, user } = useAuth();
+  const { isAuthenticated, session, user } = useAuth();
   const { canAccessDashboard } = useNavigationPermissions();
   const t = useTranslations('Header');
+  const router = useRouter();
+  const [isLoggingOut, startLogoutTransition] = useTransition();
 
   const userRoles = session?.roles ?? [];
 
   let userRoleInfo: RoleInfo | null = null;
   if (userRoles && userRoles.length > 0) {
-    const sortedRoles = [...userRoles].toSorted((a: any, b: any) => {
+    const sortedRoles = [...userRoles].toSorted((a: SessionRole, b: SessionRole) => {
       return (b.role?.priority ?? 0) - (a.role?.priority ?? 0);
     });
 
@@ -99,16 +104,24 @@ export const HeaderProfileBox = () => {
   const customRoles: CustomRoleInfo[] =
     userRoles.length > 0
       ? userRoles
-          .filter((role: any) => !role.role?.is_system)
-          .map((role: any) => ({
-            name: (role.role.name as string) || t('profile.customRole'),
-            description: role.role.description,
+          .filter((role: SessionRole) => !role.role?.is_system)
+          .map((role: SessionRole) => ({
+            name: role.role.name || t('profile.customRole'),
+            description: role.role.description ?? undefined,
           }))
       : [];
 
+  const handleLogout = () => {
+    startLogoutTransition(() => {
+      void logout().then(() => {
+        router.refresh();
+      });
+    });
+  };
+
   return (
     <div className="flex items-center">
-      {status === 'unauthenticated' && (
+      {!isAuthenticated && (
         <div className="text-foreground flex grow rounded-lg p-1.5 px-2 text-sm font-bold">
           <ul className="flex items-center space-x-3">
             <li>
@@ -135,7 +148,7 @@ export const HeaderProfileBox = () => {
           </ul>
         </div>
       )}
-      {status === 'authenticated' && (
+      {isAuthenticated && (
         <div className="flex items-center">
           <div className="flex items-center space-x-3">
             <DropdownMenu>
@@ -251,10 +264,8 @@ export const HeaderProfileBox = () => {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   variant="destructive"
-                  onClick={() => {
-                    void mutate(AUTH_SESSION_SWR_KEY, null, { revalidate: false });
-                    void logout();
-                  }}
+                  onClick={handleLogout}
+                  disabled={isLoggingOut}
                   className="flex space-x-2"
                 >
                   <LogOut size={16} />

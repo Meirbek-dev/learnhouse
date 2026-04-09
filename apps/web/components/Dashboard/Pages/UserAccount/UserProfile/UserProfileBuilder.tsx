@@ -24,6 +24,7 @@ import { createElement, useEffect, useEffectEvent, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 import { de, enUS, es, fr, ru } from 'date-fns/locale';
+import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { Textarea } from '@components/ui/textarea';
 import { Checkbox } from '@components/ui/checkbox';
@@ -229,6 +230,7 @@ interface ProfileData {
 }
 
 const UserProfileBuilder = () => {
+  const router = useRouter();
   const { user: currentUser } = useAuth();
   const me = currentUser;
   const tNotify = useTranslations('DashPage.Notifications');
@@ -419,6 +421,7 @@ const UserProfileBuilder = () => {
       const res = await updateProfile(userData, currentUser.id);
 
       if (res.status === 200) {
+        router.refresh();
         toast.success(tNotify('profileUpdateSuccess'), { id: loadingToast });
       } else {
         toast.error(tNotify('profileUpdateFailed'), { id: loadingToast });

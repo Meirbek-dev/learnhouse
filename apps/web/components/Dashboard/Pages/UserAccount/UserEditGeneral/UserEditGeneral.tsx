@@ -40,6 +40,7 @@ import { getUserLocale } from '@/i18n/locale';
 import { Label } from '@components/ui/label';
 import { Input } from '@components/ui/input';
 import type { Locale } from '@/i18n/config';
+import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
@@ -631,6 +632,7 @@ const UserEditForm = ({ form, profilePicture }: UserEditFormProps) => {
 };
 
 const UserEditGeneral = () => {
+  const router = useRouter();
   const { user: me } = useAuth();
   const [localAvatar, setLocalAvatar] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -713,6 +715,7 @@ const UserEditGeneral = () => {
         setError(res.HTTPmessage || t('avatarError'));
       } else {
         setSuccess(t('avatarSuccess'));
+        router.refresh();
       }
     } catch (error) {
       console.error('Avatar upload error:', error);
@@ -754,6 +757,7 @@ const UserEditGeneral = () => {
       if (isEmailChanged) {
         await handleEmailChange(values.email);
       } else {
+        router.refresh();
         toast.success(t('profileUpdateSuccess'));
       }
     } catch (error) {

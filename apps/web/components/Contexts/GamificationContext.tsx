@@ -30,7 +30,7 @@ interface GamificationProviderProps {
 }
 
 export function GamificationProvider({ children, initialData }: GamificationProviderProps) {
-  const { status } = useAuth();
+  const { isAuthenticated } = useAuth();
   const { ToastContainer, showXPToast: showEnhancedXPToast } = useXPToast();
 
   const hydrate = useGamificationStore((s) => s._hydrate);
@@ -52,10 +52,10 @@ export function GamificationProvider({ children, initialData }: GamificationProv
   }, [initialData, hydrate]);
 
   useEffect(() => {
-    if (initialData === undefined && status === 'authenticated') {
+    if (initialData === undefined && isAuthenticated) {
       void fetchIfNeeded();
     }
-  }, [initialData, fetchIfNeeded, status]);
+  }, [initialData, fetchIfNeeded, isAuthenticated]);
 
   useEffect(() => {
     if (pendingXPToasts.length === 0) return;

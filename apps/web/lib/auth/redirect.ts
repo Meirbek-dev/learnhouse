@@ -1,5 +1,3 @@
-'use client';
-
 import { isAuthRoute } from './routes';
 
 export function getCurrentReturnTo(): string {
@@ -29,6 +27,11 @@ export function normalizeReturnTo(returnTo: string | null | undefined): string {
     const [pathname] = returnTo.split('?');
     return isAuthRoute(pathname || '/') ? '/' : returnTo;
   }
+}
+
+export function getPostAuthRedirect(returnTo: string | null | undefined): string {
+  const normalized = normalizeReturnTo(returnTo);
+  return normalized === '/' ? '/redirect_from_auth' : normalized;
 }
 
 export function buildLoginRedirect(returnTo?: string | null): string {

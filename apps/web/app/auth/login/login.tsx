@@ -3,16 +3,14 @@
 import { Field, FieldContent, FieldError, FieldLabel } from '@components/ui/field';
 import { AuthErrorBanner, AuthSubmitButton } from '@components/auth/AuthForm';
 import { getAbsoluteUrl, getPublicAPIUrl } from '@services/config/config';
-import { loginAndGetToken } from '@services/auth/auth';
-import { normalizeReturnTo } from '@/lib/auth/redirect';
+import { loginAction } from '@/app/actions/auth';
+import { getPostAuthRedirect, normalizeReturnTo } from '@/lib/auth/redirect';
 import PasswordInput from '@components/ui/custom/password-input';
 import { SiGoogle } from '@icons-pack/react-simple-icons';
 import { Separator } from '@components/ui/separator';
 import { useActionState, useTransition } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { AUTH_SESSION_SWR_KEY } from '@/lib/auth/constants';
+import { useSearchParams } from 'next/navigation';
 import { Button } from '@components/ui/button';
-import { mutate } from 'swr';
 import AuthLogo from '@components/auth/logo';
 import AuthCard from '@components/auth/card';
 import { Input } from '@components/ui/input';
@@ -22,8 +20,7 @@ import * as v from 'valibot';
 
 /** Validates returnTo, rejecting open-redirect attempts. */
 function getSafeReturnTo(raw: string | null): string {
-  const normalized = normalizeReturnTo(raw);
-  return normalized === '/' ? '/redirect_from_auth' : normalized;
+  return getPostAuthRedirect(normalizeReturnTo(raw));
 }
 
 interface LoginState {
@@ -35,7 +32,6 @@ const LoginClient = () => {
   const validationT = useTranslations('Validation');
   const t = useTranslations('Auth.Login');
   const searchParams = useSearchParams();
-  const router = useRouter();
   const [isPendingGoogle, startGoogleTransition] = useTransition();
 
   const schema = v.object({
@@ -65,15 +61,16 @@ const LoginClient = () => {
         };
       }
 
-      const response = await loginAndGetToken(result.output.email, result.output.password);
+      const response = await loginAction({
+        email: result.output.email,
+        password: result.output.password,
+        returnTo: searchParams.get('returnTo'),
+      });
+
       if (!response.ok) {
         return { error: t('wrongCredentials'), fieldErrors: {} };
       }
 
-      // Revalidate session from server (new cookies are set by login response)
-      await mutate(AUTH_SESSION_SWR_KEY);
-      // Client-side navigation — no full-page reload
-      router.push(getSafeReturnTo(searchParams.get('returnTo')));
       return { error: null, fieldErrors: {} };
     },
     { error: null, fieldErrors: {} },
@@ -125,6 +122,11 @@ const LoginClient = () => {
         className="w-full space-y-4"
         action={action}
       >
+        <input
+          type="hidden"
+          name="returnTo"
+          value={searchParams.get('returnTo') ?? ''}
+        />
         <Field>
           <FieldLabel>{t('email')}</FieldLabel>
           <FieldContent>

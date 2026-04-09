@@ -3,7 +3,7 @@
 import { Field, FieldContent, FieldError, FieldLabel } from '@components/ui/field';
 import { AuthErrorBanner, AuthSubmitButton } from '@components/auth/AuthForm';
 import { getAbsoluteUrl, getPublicAPIUrl } from '@services/config/config';
-import { loginAndGetToken, signup } from '@services/auth/auth';
+import { signupAction } from '@/app/actions/auth';
 import PasswordInput from '@components/ui/custom/password-input';
 import { SiGoogle } from '@icons-pack/react-simple-icons';
 import { Separator } from '@components/ui/separator';
@@ -81,15 +81,15 @@ const SignUpClient = () => {
       }
 
       const { firstName, lastName, email, password } = result.output;
-      const username = `${firstName.toLowerCase()}.${lastName.toLowerCase()}`;
+      const response = await signupAction({
+        email,
+        firstName,
+        lastName,
+        password,
+      });
 
-      const res = await signup({ username, email, password, first_name: firstName, last_name: lastName });
-      if (!res.ok) {
-        const json = (await res.json().catch(() => ({}))) as {
-          detail?: string | { code?: string };
-        };
-        const detail = json?.detail;
-        const code = typeof detail === 'object' ? detail?.code : undefined;
+      if (!response.ok) {
+        const code = response.signupCode;
         const msgKey = code && SIGNUP_ERROR_MAP[code] ? SIGNUP_ERROR_MAP[code] : null;
         return {
           error: msgKey ? t(msgKey) : t('errorSomethingWentWrong'),
@@ -97,12 +97,6 @@ const SignUpClient = () => {
         };
       }
 
-      const loginRes = await loginAndGetToken(email, password);
-      if (!loginRes.ok) {
-        return { error: t('loginAfterSignupFailed'), fieldErrors: {} };
-      }
-
-      globalThis.location.href = '/redirect_from_auth';
       return { error: null, fieldErrors: {} };
     },
     { error: null, fieldErrors: {} },

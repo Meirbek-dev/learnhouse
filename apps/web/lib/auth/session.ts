@@ -5,13 +5,11 @@ import { redirect } from 'next/navigation';
 import { normalizeSession } from './session-utils';
 import type { Session, UserSessionResponse } from './types';
 import { getServerAPIUrl } from '@services/config/config';
-
-/** Cookie names forwarded to the backend for session validation. */
-const AUTH_COOKIE_NAMES = ['access_token_cookie', 'refresh_token_cookie'] as const;
+import { ACCESS_TOKEN_COOKIE_NAME, AUTH_COOKIE_NAMES } from './constants';
 
 export const getSession = cache(async (): Promise<Session | null> => {
   const cookieStore = await cookies();
-  const accessToken = cookieStore.get('access_token_cookie')?.value;
+  const accessToken = cookieStore.get(ACCESS_TOKEN_COOKIE_NAME)?.value;
 
   if (!accessToken) return null;
 
@@ -22,19 +20,17 @@ export const getSession = cache(async (): Promise<Session | null> => {
     .map((c) => `${c.name}=${c.value}`)
     .join('; ');
 
-  try {
-    const response = await fetch(`${getServerAPIUrl()}users/session`, {
-      headers: { Cookie: cookieHeader },
-      cache: 'no-store',
-    });
+  const response = await fetch(`${getServerAPIUrl()}users/session`, {
+    headers: { Cookie: cookieHeader },
+    cache: 'no-store',
+  });
 
-    if (!response.ok) return null;
-
-    const sessionData = (await response.json()) as UserSessionResponse;
-    return normalizeSession(sessionData);
-  } catch {
+  if (response.status === 401 || !response.ok) {
     return null;
   }
+
+  const sessionData = (await response.json()) as UserSessionResponse;
+  return normalizeSession(sessionData);
 });
 
 export async function requireSession(): Promise<Session> {

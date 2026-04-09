@@ -2,22 +2,16 @@
  * Unified API fetch client.
  *
  * Server-side: forwards only auth cookies from the incoming request so the
- * backend receives the access token cookie automatically. Server requests do
- * not attempt hidden refreshes.
+ * backend receives auth cookies automatically.
  *
  * Client-side: uses credentials:"include" so cookies are sent automatically.
- * On 401, posts to /auth/refresh and retries once. On second 401 emits a
- * centralized auth invalidation event so auth listeners can clear state
- * and redirect consistently.
+ * A 401 is treated as a hard logout condition and redirects the user to login.
  */
 
 import { getAPIUrl, getServerAPIUrl } from '@services/config/config';
-import { AUTH_SESSION_SWR_KEY } from '@/lib/auth/constants';
-import { emitAuthInvalidation } from '@/lib/auth/broadcast';
-import { tryRefreshToken } from '@services/auth/token-refresh';
-
-/** Only these cookies are forwarded to the backend on server-side requests. */
-const AUTH_COOKIE_NAMES = ['access_token_cookie', 'refresh_token_cookie'] as const;
+import { buildLoginRedirect } from '@/lib/auth/redirect';
+import { isAuthRoute } from '@/lib/auth/routes';
+import { AUTH_COOKIE_NAMES } from '@/lib/auth/constants';
 
 type ApiFetchInit = Omit<RequestInit, 'credentials'> & {
   /** Override which base URL to use (defaults to environment-aware selection). */
@@ -35,14 +29,6 @@ function resolveRequestUrl(pathOrUrl: string, base: string): string {
   }
 
   return `${base.replace(/\/+$/, '')}/${pathOrUrl.replace(/^\/+/, '')}`;
-}
-
-function isSessionRequest(url: string): boolean {
-  try {
-    return new URL(url).pathname.endsWith('/users/session');
-  } catch {
-    return url.endsWith('/users/session');
-  }
 }
 
 function isRequestCookieUnavailableError(error: unknown): boolean {
@@ -72,11 +58,6 @@ async function getServerCookieHeader(): Promise<string> {
   }
 }
 
-async function revalidateAuthSession(): Promise<void> {
-  const { mutate } = await import('swr');
-  await mutate(AUTH_SESSION_SWR_KEY);
-}
-
 export async function apiFetch(path: string, init: ApiFetchInit = {}): Promise<Response> {
   const isServer = typeof globalThis.window === 'undefined';
   const { baseUrl, ...fetchInit } = init;
@@ -93,20 +74,12 @@ export async function apiFetch(path: string, init: ApiFetchInit = {}): Promise<R
     }
   }
 
-  let response = await fetch(url, options);
+  const response = await fetch(url, options);
 
   if (!isServer && response.status === 401) {
-    const sessionRequest = isSessionRequest(url);
-    const refreshed = await tryRefreshToken();
-    if (refreshed) {
-      response = await fetch(url, options);
-      if (!sessionRequest) {
-        void revalidateAuthSession();
-      }
-    }
-
-    if (response.status === 401) {
-      emitAuthInvalidation({ reason: sessionRequest ? 'unauthenticated' : 'expired' }, { local: true });
+    const pathname = globalThis.location.pathname;
+    if (!isAuthRoute(pathname)) {
+      globalThis.location.assign(buildLoginRedirect());
     }
   }
 
