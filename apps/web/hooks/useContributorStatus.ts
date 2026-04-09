@@ -1,4 +1,4 @@
-import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { useAuth } from '@/hooks/useAuth';
 import { getCourseContributors } from '@services/courses/courses';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
@@ -13,7 +13,7 @@ interface Contributor {
 }
 
 export function useContributorStatus(courseUuid: string) {
-  const viewer = useCurrentUser();
+  const { user: viewer } = useAuth();
   const [contributorStatus, setContributorStatus] = useState<ContributorStatus>('NONE');
   const [isLoading, setIsLoading] = useState(true);
   const [refetchTrigger, setRefetchTrigger] = useState(0);

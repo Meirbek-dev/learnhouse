@@ -10,7 +10,7 @@
  */
 
 import type { Action, Resource, Scope } from '@/types/permissions';
-import { useAuthSession } from '@/hooks/useSession';
+import { useAuth } from '@/hooks/useAuth';
 import { createContext, useContext, useMemo } from 'react';
 import { perm } from '@/types/permissions';
 import type { ReactNode } from 'react';
@@ -45,7 +45,7 @@ const PermissionContext = createContext<PermissionContextValue | null>(null);
 // ============================================================================
 
 export function PermissionProvider({ children }: { children: ReactNode }) {
-  const { session, status } = useAuthSession();
+  const { session, status } = useAuth();
 
   const permissions = useMemo(() => new Set<string>(session?.permissions), [session?.permissions]);
 

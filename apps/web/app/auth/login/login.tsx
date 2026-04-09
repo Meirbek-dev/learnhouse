@@ -4,7 +4,7 @@ import { Field, FieldContent, FieldError, FieldLabel } from '@components/ui/fiel
 import { AuthErrorBanner, AuthSubmitButton } from '@components/auth/AuthForm';
 import { getAbsoluteUrl, getPublicAPIUrl } from '@services/config/config';
 import { loginAndGetToken } from '@services/auth/auth';
-import { normalizeReturnTo } from '@/lib/auth/client';
+import { normalizeReturnTo } from '@/lib/auth/redirect';
 import PasswordInput from '@components/ui/custom/password-input';
 import { SiGoogle } from '@icons-pack/react-simple-icons';
 import { Separator } from '@components/ui/separator';

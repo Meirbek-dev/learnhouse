@@ -49,7 +49,7 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Actions, PermissionGuard, Resources, Scopes, usePermissions } from '@/components/Security';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useAuthSession } from '@/hooks/useSession';
+import { useAuth } from '@/hooks/useAuth';
 import type { Permission, RoleAuditEvent, RoleWithPermissions } from '@/types/permissions';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -68,7 +68,7 @@ import useSWR from 'swr';
 type RoleDialogMode = 'create' | 'edit' | 'clone';
 
 export default function RBACAdminClient() {
-  const session = useAuthSession();
+  const session = useAuth();
   const { can } = usePermissions();
   const t = useTranslations('Components.Roles');
 

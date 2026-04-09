@@ -1,6 +1,6 @@
 'use client';
 
-import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { useAuth } from '@/hooks/useAuth';
 import GamifiedUserAvatar from '@/components/Objects/GamifiedUserAvatar';
 import { Calendar, Flame, TrendingUp, Trophy, Zap } from 'lucide-react';
 import { GlowingLevelBadge, getLevelInfo } from '@/lib/gamification';
@@ -29,7 +29,7 @@ interface HeroSectionProps {
 export function HeroSection({ profile, userRank, className }: HeroSectionProps) {
   const t = useTranslations('DashPage.UserAccountSettings.Gamification');
   const locale = useLocale();
-  const viewer = useCurrentUser();
+  const { user: viewer } = useAuth();
   const numberFormatter = new Intl.NumberFormat(locale);
   const formatNumber = (value: number) => numberFormatter.format(value);
 

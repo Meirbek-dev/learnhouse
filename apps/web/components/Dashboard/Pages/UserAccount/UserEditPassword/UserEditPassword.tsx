@@ -2,7 +2,7 @@
 
 import { updatePassword } from '@/lib/users/client';
 import { logout } from '@services/auth/auth';
-import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { useAuth } from '@/hooks/useAuth';
 import { Field, FieldContent, FieldDescription, FieldError, FieldLabel } from '@components/ui/field';
 import PasswordInput from '@components/ui/custom/password-input';
 import { valibotResolver } from '@hookform/resolvers/valibot';
@@ -41,7 +41,7 @@ type PasswordFormData = v.InferOutput<ReturnType<typeof createValidationSchema>>
 type PasswordFormValues = v.InferInput<ReturnType<typeof createValidationSchema>>;
 
 const UserEditPassword = () => {
-  const viewer = useCurrentUser();
+  const { user: viewer } = useAuth();
   const t = useTranslations('DashPage.Notifications');
   const tPassword = useTranslations('DashPage.UserAccountSettings.UserAccount.EditPassword');
   const validationSchema = createValidationSchema(t);

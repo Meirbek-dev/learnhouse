@@ -1,6 +1,6 @@
 'use client';
 
-import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { useAuth } from '@/hooks/useAuth';
 import { AUTH_SESSION_SWR_KEY } from '@/lib/auth/constants';
 import { logout } from '@/services/auth/auth';
 import { mutate } from 'swr';
@@ -11,7 +11,7 @@ import Image from 'next/image';
 
 const HomeClient = () => {
   const t = useTranslations('HomeClient');
-  const viewer = useCurrentUser();
+  const { user: viewer } = useAuth();
 
   return (
     <div className="flex flex-col">

@@ -3,7 +3,7 @@ import { RecentActivityFeed } from '@/components/Dashboard/Gamification/recent-a
 import GeneralWrapper from '@/components/Objects/Elements/Wrappers/GeneralWrapper';
 import { Leaderboard } from '@/components/Dashboard/Gamification/leaderboard';
 import TrailCourseElement from '@components/Pages/Trail/TrailCourseElement';
-import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { useAuth } from '@/hooks/useAuth';
 import UserCertificates from '@components/Pages/Trail/UserCertificates';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { useGamificationStore } from '@/stores/gamification';
@@ -17,7 +17,7 @@ import useSWR from 'swr';
 const EMPTY_RECENT_TRANSACTIONS: any[] = [];
 
 const Trail = () => {
-  const currentUser = useCurrentUser();
+  const { user: currentUser } = useAuth();
   const t = useTranslations('TrailPage');
 
   const TRAIL_KEY = getTrailSwrKey();

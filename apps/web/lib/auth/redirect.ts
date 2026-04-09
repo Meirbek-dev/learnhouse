@@ -1,0 +1,37 @@
+'use client';
+
+import { isAuthRoute } from './routes';
+
+export function getCurrentReturnTo(): string {
+  if (typeof window === 'undefined') return '/';
+  const { pathname, search } = window.location;
+  return `${pathname}${search}` || '/';
+}
+
+export function normalizeReturnTo(returnTo: string | null | undefined): string {
+  if (!returnTo) return '/';
+
+  try {
+    const origin = typeof window === 'undefined' ? 'http://localhost' : window.location.origin;
+    const parsed = new URL(returnTo, origin);
+    const normalizedPath = `${parsed.pathname}${parsed.search}` || '/';
+
+    if (parsed.origin !== origin || isAuthRoute(parsed.pathname)) {
+      return '/';
+    }
+
+    return normalizedPath;
+  } catch {
+    if (!returnTo.startsWith('/') || returnTo.startsWith('//')) {
+      return '/';
+    }
+
+    const [pathname] = returnTo.split('?');
+    return isAuthRoute(pathname || '/') ? '/' : returnTo;
+  }
+}
+
+export function buildLoginRedirect(returnTo?: string | null): string {
+  const resolved = normalizeReturnTo(returnTo ?? getCurrentReturnTo());
+  return `/login?returnTo=${encodeURIComponent(resolved)}`;
+}

@@ -1,5 +1,5 @@
 import { getAPIUrl } from '@services/config/config';
-import { emitAuthInvalidation } from '@/lib/auth/client';
+import { emitAuthInvalidation } from '@/lib/auth/broadcast';
 import { apiFetch } from '@/lib/api-client';
 import type { components } from '@/lib/api/generated';
 

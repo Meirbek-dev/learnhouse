@@ -11,7 +11,7 @@ import {
   Trophy,
   UserPen,
 } from 'lucide-react';
-import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { useAuth } from '@/hooks/useAuth';
 import { useContributorStatus } from '@/hooks/useContributorStatus';
 import { getProductsByCourse } from '@services/payments/products';
 import { applyForContributor } from '@services/courses/courses';
@@ -72,7 +72,7 @@ interface CourseActionsProps {
 
 const CoursesActions = ({ courseuuid, course, trailData }: CourseActionsProps) => {
   const router = useRouter();
-  const currentUser = useCurrentUser();
+  const { user: currentUser } = useAuth();
   const [linkedProducts, setLinkedProducts] = useState<PaymentsProductRead[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isActionLoading, setIsActionLoading] = useState(false);

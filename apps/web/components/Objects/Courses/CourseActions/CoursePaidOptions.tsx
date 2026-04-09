@@ -4,7 +4,7 @@ import type { components } from '@/lib/api/generated';
 
 import { getProductsByCourse, getStripeProductCheckoutSession } from '@services/payments/products';
 import { ChevronDown, ChevronUp, Loader2, RefreshCcw, SquareCheck } from 'lucide-react';
-import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { useAuth } from '@/hooks/useAuth';
 import { getAbsoluteUrl } from '@services/config/config';
 import { useState, useTransition } from 'react';
 import { Button } from '@components/ui/button';
@@ -24,7 +24,7 @@ interface CoursePaidOptionsProps {
 
 const CoursePaidOptions = ({ course }: CoursePaidOptionsProps) => {
   const t = useTranslations('Courses.CoursePaidOptions');
-  const currentUser = useCurrentUser();
+  const { user: currentUser } = useAuth();
   const [expandedProducts, setExpandedProducts] = useState<Record<number, boolean>>({});
   const [isProcessing, setIsProcessing] = useState<Record<number, boolean>>({});
   const [isPending, startTransition] = useTransition();

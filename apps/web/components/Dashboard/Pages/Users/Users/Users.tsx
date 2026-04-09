@@ -23,8 +23,7 @@ import {
 } from '@/components/ui/pagination';
 import { Actions, Resources, Scopes, usePermissions } from '@/components/Security';
 import RolesUpdate from '@/components/Objects/Modals/Dash/Users/RolesUpdate';
-import { useAuthSession } from '@/hooks/useSession';
-import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { useAuth } from '@/hooks/useAuth';
 import type { ColumnDef } from '@tanstack/react-table';
 import DataTable from '@/components/ui/data-table';
 
@@ -114,8 +113,7 @@ function RemoveUserButton({ userId, username, onRemove, t }: RemoveUserButtonPro
 }
 
 const Users = () => {
-  const { session: sessionData } = useAuthSession();
-  const currentUser = useCurrentUser();
+  const { session: sessionData, user: currentUser } = useAuth();
   const t = useTranslations('DashPage.UserSettings.usersSection');
   const userRoles = sessionData?.roles ?? [];
   const { can } = usePermissions();

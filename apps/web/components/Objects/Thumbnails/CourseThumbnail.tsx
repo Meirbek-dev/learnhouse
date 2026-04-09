@@ -32,7 +32,7 @@ import {
 import { ResourceActionsMenu } from '@/components/Utils/ResourceActionsMenu';
 import type { ResourceAction } from '@/components/Utils/ResourceActionsMenu';
 import { usePermissions } from '@/components/Security/PermissionProvider';
-import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardFooter } from '@components/ui/card';
 import { Resources, Actions, Scopes } from '@/types/permissions';
 import UserAvatar from '@components/Objects/UserAvatar';
@@ -388,7 +388,8 @@ const AdminMenu: FC<AdminMenuProps> = ({ course, onDelete }) => {
   const { can } = usePermissions();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
-  const currentUserId = useCurrentUser()?.id;
+  const { user: _thumbnailUser } = useAuth();
+  const currentUserId = _thumbnailUser?.id;
 
   const isOwner = useMemo(() => {
     if (!currentUserId || !course.authors?.length) return course.is_owner ?? false;
@@ -518,7 +519,7 @@ const CourseThumbnail: FC<CourseThumbnailProps> = ({
   const t = useTranslations('Components.CourseThumbnail');
   const locale = useLocale();
   const router = useRouter();
-  const currentUser = useCurrentUser();
+  const { user: currentUser } = useAuth();
 
   // Memoized computed values
   const activeAuthors = useMemo(

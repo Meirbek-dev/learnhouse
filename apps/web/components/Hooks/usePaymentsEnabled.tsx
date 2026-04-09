@@ -1,6 +1,6 @@
 // hooks/usePaymentsEnabled.ts
 
-import { useAuthSession } from '@/hooks/useSession';
+import { useAuth } from '@/hooks/useAuth';
 import { getPaymentConfigs } from '@services/payments/payments';
 import type { components } from '@/lib/api/generated';
 import useSWR from 'swr';
@@ -8,7 +8,7 @@ import useSWR from 'swr';
 type PaymentsConfigRead = components['schemas']['PaymentsConfigRead'];
 
 export function usePaymentsEnabled() {
-  const { isAuthenticated, isLoading: sessionLoading } = useAuthSession();
+  const { isAuthenticated, isLoading: sessionLoading } = useAuth();
   const {
     data: paymentConfigs,
     error,

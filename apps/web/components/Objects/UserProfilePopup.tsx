@@ -19,7 +19,7 @@ import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/h
 import { useUserById } from '@/lib/users/client';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { useAuthStatus } from '@/hooks/useSession';
+import { useAuth } from '@/hooks/useAuth';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
@@ -74,7 +74,7 @@ const IconComponent = ({ iconName }: { iconName: string }) => {
 const UserProfilePopup = ({ children, userId }: UserProfilePopupProps) => {
   const t = useTranslations('Components.UserProfilePopup');
   const router = useRouter();
-  const status = useAuthStatus();
+  const { status } = useAuth();
   const [open, setOpen] = useState(false);
   const {
     data: userData,

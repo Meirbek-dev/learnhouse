@@ -25,7 +25,7 @@ import CourseBreadcrumbs from '@components/Pages/Courses/CourseBreadcrumbs';
 import { getDiscussionsSwrKey } from '@services/courses/discussions-keys';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { CourseProvider } from '@components/Contexts/CourseContext';
-import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { useAuth } from '@/hooks/useAuth';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { swrFetcher } from '@services/utils/ts/requests';
 // Import the new discussions component
@@ -55,7 +55,7 @@ const CourseClient = (props: any) => {
   const { courseuuid } = props;
   const { course } = props;
   const isMobile = useIsMobile();
-  const currentUser = useCurrentUser();
+  const { user: currentUser } = useAuth();
 
   const {
     data: discussionPosts = [],

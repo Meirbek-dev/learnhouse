@@ -13,7 +13,8 @@
 
 import { getAPIUrl, getServerAPIUrl } from '@services/config/config';
 import { AUTH_SESSION_SWR_KEY } from '@/lib/auth/constants';
-import { emitAuthInvalidation, tryRefreshToken } from '@/lib/auth/client';
+import { emitAuthInvalidation } from '@/lib/auth/broadcast';
+import { tryRefreshToken } from '@services/auth/token-refresh';
 
 /** Only these cookies are forwarded to the backend on server-side requests. */
 const AUTH_COOKIE_NAMES = ['access_token_cookie', 'refresh_token_cookie'] as const;
@@ -99,7 +100,7 @@ export async function apiFetch(path: string, init: ApiFetchInit = {}): Promise<R
     const refreshed = await tryRefreshToken();
     if (refreshed) {
       response = await fetch(url, options);
-      if (!isSessionRequest(url)) {
+      if (!sessionRequest) {
         void revalidateAuthSession();
       }
     }

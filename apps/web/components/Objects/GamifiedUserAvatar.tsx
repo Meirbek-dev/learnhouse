@@ -1,7 +1,7 @@
 'use client';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@components/ui/avatar';
-import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { useAuth } from '@/hooks/useAuth';
 import { useUserByUsername } from '@/lib/users/client';
 import { getBackendUrl, getAbsoluteUrl } from '@services/config/config';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
@@ -77,7 +77,7 @@ const extractExternalUrl = (url: string): string | null => {
 
 const GamifiedUserAvatar = (props: GamifiedUserAvatarProps) => {
   const t = useTranslations('Components.UserAvatar');
-  const currentUser = useCurrentUser();
+  const { user: currentUser } = useAuth();
 
   const {
     size = 'md',

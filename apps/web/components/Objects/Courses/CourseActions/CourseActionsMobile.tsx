@@ -3,7 +3,7 @@
 import type { components } from '@/lib/api/generated';
 
 import { AlertCircle, BookOpen, Loader2, LogIn, ShoppingCart } from 'lucide-react';
-import { useCurrentUser } from '@/hooks/useCurrentUser';
+import { useAuth } from '@/hooks/useAuth';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
 import { useEffect, useRef, useState, useTransition } from 'react';
 import { getProductsByCourse } from '@services/payments/products';
@@ -146,7 +146,7 @@ const MultipleAuthors = ({ authors }: { authors: Author[] }) => {
 const CourseActionsMobile = ({ courseuuid, course, trailData }: CourseActionsMobileProps) => {
   const t = useTranslations('Courses.CourseActionsMobile');
   const router = useRouter();
-  const currentUser = useCurrentUser();
+  const { user: currentUser } = useAuth();
   const userId = currentUser?.id;
 
   // one-shot guards to avoid repeated requests when context identity changes

@@ -10,7 +10,7 @@ import { ChevronDown, Crown, LogOut, Shield, User as UserIcon, Users, Star } fro
 import { Tooltip, TooltipContent, TooltipTrigger } from '@components/ui/tooltip';
 import { useNavigationPermissions } from '@/hooks/useNavigationPermissions';
 import { AUTH_SESSION_SWR_KEY } from '@/lib/auth/constants';
-import { useAuthSession } from '@/hooks/useSession';
+import { useAuth } from '@/hooks/useAuth';
 import { logout } from '@services/auth/auth';
 import { mutate } from 'swr';
 import { getAbsoluteUrl } from '@services/config/config';
@@ -37,7 +37,7 @@ interface CustomRoleInfo {
 }
 
 export const HeaderProfileBox = () => {
-  const { session, status, user } = useAuthSession();
+  const { session, status, user } = useAuth();
   const { canAccessDashboard } = useNavigationPermissions();
   const t = useTranslations('Header');
 

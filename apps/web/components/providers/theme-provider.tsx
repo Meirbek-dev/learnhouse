@@ -3,6 +3,8 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { applyTheme, getStoredTheme, getTheme } from '@/lib/themes';
 import { loadTheme } from '@/lib/theme-lazy-loader';
+import { useAuth } from '@/hooks/useAuth';
+import { useThemeSync } from '@/hooks/useThemeSync';
 import type { Theme } from '@/lib/themes';
 import type { ReactNode } from 'react';
 
@@ -18,16 +20,15 @@ const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 interface ThemeProviderProps {
   children: ReactNode;
   defaultThemeName?: string;
-  userTheme?: string | null;
 }
 
-export function ThemeProvider({ children, defaultThemeName = 'default', userTheme }: ThemeProviderProps) {
+export function ThemeProvider({ children, defaultThemeName = 'default' }: ThemeProviderProps) {
+  const { user } = useAuth();
+  const userTheme = user?.theme ?? null;
   const initialThemeName = userTheme || defaultThemeName;
   const [themeName, setThemeName] = useState(initialThemeName);
-
   const [isLoading, setIsLoading] = useState(false);
 
-  // Theme object
   const theme = getTheme(themeName);
 
   useEffect(() => {
@@ -41,8 +42,8 @@ export function ThemeProvider({ children, defaultThemeName = 'default', userThem
   }, [defaultThemeName, themeName, userTheme]);
 
   const setTheme = async (newThemeName: string, syncToServer = true) => {
+    void syncToServer; // sync is handled by useThemeSync inside this provider
     setIsLoading(true);
-    // Lazy load theme (uses cache for core themes like 'default' and 'black')
     const newTheme = await loadTheme(newThemeName);
     setIsLoading(false);
 
@@ -50,7 +51,6 @@ export function ThemeProvider({ children, defaultThemeName = 'default', userThem
       setThemeName(newThemeName);
       applyTheme(newTheme);
     } else {
-      // Fallback to default theme if load fails
       console.warn(`Failed to load theme: ${newThemeName}, falling back to default`);
       const fallbackTheme = getTheme('default');
       setThemeName('default');
@@ -58,8 +58,9 @@ export function ThemeProvider({ children, defaultThemeName = 'default', userThem
     }
   };
 
-  // Context value (no memo)
-  const contextValue = {
+  useThemeSync(themeName);
+
+  const contextValue: ThemeContextValue = {
     theme,
     themeName,
     setTheme,
@@ -69,10 +70,7 @@ export function ThemeProvider({ children, defaultThemeName = 'default', userThem
   return <ThemeContext.Provider value={contextValue}>{children}</ThemeContext.Provider>;
 }
 
-/**
- * Hook to access theme context
- */
-export function useTheme() {
+export function useTheme(): ThemeContextValue {
   const context = useContext(ThemeContext);
 
   if (context === undefined) {

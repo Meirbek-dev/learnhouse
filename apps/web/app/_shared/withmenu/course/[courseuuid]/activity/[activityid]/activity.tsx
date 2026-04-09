@@ -32,7 +32,7 @@ import type { Activity, Chapter, CourseStructure } from '@components/Contexts/Co
 import ActivityChapterDropdown from '@components/Pages/Activity/ActivityChapterDropdown';
 import { AssignmentProvider } from '@components/Contexts/Assignments/AssignmentContext';
 import { ActivityAIChatProvider } from '@components/Contexts/AI/ActivityAIChatContext';
-import { useAuthStatus } from '@/hooks/useSession';
+import { useAuth } from '@/hooks/useAuth';
 import GeneralWrapper from '@/components/Objects/Elements/Wrappers/GeneralWrapper';
 import { Suspense, lazy, useEffect, useRef, useState, useTransition } from 'react';
 import ActivityBreadcrumbs from '@components/Pages/Activity/ActivityBreadcrumbs';
@@ -173,8 +173,7 @@ function useActivityPosition(course: CourseStructure, activityId: string) {
 const ActivityActions = ({ activity, activityid, course, assignment, showNavigation = true }: ActivityActionsProps) => {
   const t = useTranslations('ActivityPage');
   const { contributorStatus } = useContributorStatus(course.course_uuid);
-  const status = useAuthStatus();
-  const isAuthenticated = status === 'authenticated';
+  const { isAuthenticated } = useAuth();
   const isPaidAccessAllowed = activity?.content?.paid_access !== false || contributorStatus === 'ACTIVE';
 
   // Add SWR for trail data
@@ -238,8 +237,7 @@ const ActivityClient = (props: ActivityClientProps) => {
   const { courseuuid } = props;
   const { activity } = props;
   const { course } = props;
-  const status = useAuthStatus();
-  const isAuthenticated = status === 'authenticated';
+  const { isAuthenticated } = useAuth();
   const [assignment, setAssignment] = useState(null) as any;
   const [isFocusMode, setIsFocusMode] = useState(() => {
     if (typeof globalThis.window !== 'undefined') {
