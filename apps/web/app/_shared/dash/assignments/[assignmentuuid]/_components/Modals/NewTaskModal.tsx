@@ -1,14 +1,15 @@
+import { useQueryClient } from '@tanstack/react-query';
 import { useAssignmentsTaskStore } from '@components/Contexts/Assignments/AssignmentsTaskContext';
 import { createAssignmentTask } from '@services/courses/assignments';
 import { AArrowUp, FileUp, ListTodo } from 'lucide-react';
-import { getAPIUrl } from '@services/config/config';
+import { queryKeys } from '@/lib/react-query/queryKeys';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { mutate } from 'swr';
 
 const NewTaskModal = ({ closeModal, assignment_uuid }: any) => {
   const t = useTranslations('DashPage.Assignments.NewTaskModal');
   const setSelectedTaskUUID = useAssignmentsTaskStore((s) => s.setSelectedTaskUUID);
+  const queryClient = useQueryClient();
 
   function showReminderToast() {
     // Check if the reminder has already been shown using sessionStorage
@@ -38,7 +39,7 @@ const NewTaskModal = ({ closeModal, assignment_uuid }: any) => {
     const res = await createAssignmentTask(task_object, assignment_uuid);
     toast.success(t('createSuccess'));
     showReminderToast();
-    mutate(`${getAPIUrl()}assignments/${assignment_uuid}/tasks`);
+    await queryClient.invalidateQueries({ queryKey: queryKeys.assignments.tasks(assignment_uuid) });
     setSelectedTaskUUID(res.data.assignment_task_uuid);
     closeModal(false);
   }

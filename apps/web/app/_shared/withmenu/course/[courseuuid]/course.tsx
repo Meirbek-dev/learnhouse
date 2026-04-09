@@ -22,12 +22,14 @@ import CourseAuthors from '@components/Objects/Courses/CourseAuthors/CourseAutho
 import GeneralWrapper from '@/components/Objects/Elements/Wrappers/GeneralWrapper';
 import ActivityIndicators from '@components/Pages/Courses/ActivityIndicators';
 import CourseBreadcrumbs from '@components/Pages/Courses/CourseBreadcrumbs';
+import { queryKeys } from '@/lib/react-query/queryKeys';
 import { getDiscussionsSwrKey } from '@services/courses/discussions-keys';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { CourseProvider } from '@components/Contexts/CourseContext';
 import { useAuth } from '@/hooks/useAuth';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
-import { swrFetcher } from '@services/utils/ts/requests';
+import { apiFetcher } from '@services/utils/ts/requests';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 // Import the new discussions component
 import CourseDiscussions from '@/components/discussions';
 import { getAbsoluteUrl } from '@services/config/config';
@@ -44,7 +46,6 @@ import { Badge } from '@/components/ui/badge';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
 import { cn } from '@/lib/utils';
-import useSWR from 'swr';
 
 const CourseClient = (props: any) => {
   const t = useTranslations('CoursePage');
@@ -56,18 +57,28 @@ const CourseClient = (props: any) => {
   const { course } = props;
   const isMobile = useIsMobile();
   const { user: currentUser } = useAuth();
+  const queryClient = useQueryClient();
+  const discussionsQueryKey = course?.course_uuid
+    ? queryKeys.discussions.list(course.course_uuid, true, 50, 0)
+    : (['courses', 'discussions', 'disabled'] as const);
 
   const {
     data: discussionPosts = [],
-    error: discussionsError,
-    mutate: mutateDiscussions,
-  } = useSWR(course?.course_uuid ? getDiscussionsSwrKey(course.course_uuid, true, 50, 0) : null, (url) =>
-    swrFetcher(url),
-  );
+  } = useQuery({
+    queryKey: discussionsQueryKey,
+    queryFn: () => apiFetcher(getDiscussionsSwrKey(course.course_uuid, true, 50, 0)),
+    enabled: Boolean(course?.course_uuid),
+  });
 
-  // Add SWR for trail data
-  const TRAIL_KEY = getTrailSwrKey();
-  const { data: trailData } = useSWR(TRAIL_KEY || null, (url) => swrFetcher(url));
+  const { data: trailData } = useQuery({
+    queryKey: queryKeys.trail.current(),
+    queryFn: () => apiFetcher(getTrailSwrKey()),
+  });
+
+  const mutateDiscussions = () => {
+    if (!course?.course_uuid) return;
+    void queryClient.invalidateQueries({ queryKey: discussionsQueryKey });
+  };
 
   // Normalizes various formats of `course.learnings` into an array that the UI can render
   const normalizedLearnings = useMemo(() => {

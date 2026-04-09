@@ -16,12 +16,14 @@ import { createCourseUpdate, deleteCourseUpdate } from '@services/courses/update
 import { AlertTriangle, Loader2, PencilLine, Rss, TentTree } from 'lucide-react';
 import { useEffectEvent, useLayoutEffect, useState, useTransition } from 'react';
 import { Field, FieldContent, FieldError, FieldLabel } from '@components/ui/field';
+import { queryKeys } from '@/lib/react-query/queryKeys';
 import { Actions, Resources, Scopes } from '@/types/permissions';
 import { getCourseUpdatesSwrKey } from '@services/courses/keys';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { useDateFnsLocale } from '@/hooks/useDateFnsLocale';
-import { swrFetcher } from '@services/utils/ts/requests';
+import { apiFetcher } from '@services/utils/ts/requests';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { usePermissions } from '@/components/Security';
 import { format, formatDistanceToNow } from 'date-fns';
 import { Controller, useForm } from 'react-hook-form';
@@ -30,16 +32,22 @@ import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
 import { motion } from 'motion/react';
-import useSWR, { mutate } from 'swr';
 import { toast } from 'sonner';
 import * as v from 'valibot';
 
+const getCourseUpdatesQueryKey = (courseUuid?: string | null) =>
+  courseUuid ? queryKeys.courses.updates(courseUuid) : (['courses', 'updates', 'disabled'] as const);
+
+const useCourseUpdatesQuery = (courseUuid?: string | null) =>
+  useQuery({
+    queryKey: getCourseUpdatesQueryKey(courseUuid),
+    queryFn: () => apiFetcher(getCourseUpdatesSwrKey(courseUuid)),
+    enabled: Boolean(courseUuid),
+  });
+
 const CourseUpdates = () => {
   const course = useCourse();
-  const UPDATES_KEY = course?.courseStructure?.course_uuid
-    ? getCourseUpdatesSwrKey(course?.courseStructure?.course_uuid)
-    : null;
-  const { data: updates } = useSWR(UPDATES_KEY || null, (url) => swrFetcher(url));
+  const { data: updates } = useCourseUpdatesQuery(course?.courseStructure?.course_uuid);
   const [isModelOpen, setIsModelOpen] = useState(false);
   const t = useTranslations('Courses.CourseUpdates');
 
@@ -142,6 +150,7 @@ type UpdateFormInputValues = v.InferInput<ReturnType<typeof createUpdateFormSche
 
 const NewUpdateForm = ({ setSelectedView }: any) => {
   const course = useCourse();
+  const queryClient = useQueryClient();
   const t = useTranslations('Courses.CourseUpdates');
   const validationSchema = createUpdateFormSchema(t);
 
@@ -154,12 +163,13 @@ const NewUpdateForm = ({ setSelectedView }: any) => {
   });
 
   const onSubmit = async (values: UpdateFormValues) => {
+    const courseUuid = course.courseStructure.course_uuid;
+    const updatesQueryKey = getCourseUpdatesQueryKey(courseUuid);
     const body = {
       title: values.title,
       content: values.content,
-      course_uuid: course.courseStructure.course_uuid,
+      course_uuid: courseUuid,
     };
-    const UPDATES_KEY = getCourseUpdatesSwrKey(course.courseStructure.course_uuid);
 
     const optimistic = {
       id: `temp-${Date.now()}`,
@@ -169,7 +179,7 @@ const NewUpdateForm = ({ setSelectedView }: any) => {
     };
 
     // Optimistically add the update to the list
-    await mutate([UPDATES_KEY, undefined] as any, (prev: any) => [optimistic, ...(prev || [])], false);
+    queryClient.setQueryData(updatesQueryKey, (prev: any[] | undefined) => [optimistic, ...(prev || [])]);
 
     const res = await createCourseUpdate(body);
     if (res.status === 200) {
@@ -177,10 +187,10 @@ const NewUpdateForm = ({ setSelectedView }: any) => {
       setSelectedView('list');
       form.reset();
       // Revalidate to get the actual server-side object and remove optimistic placeholder
-      mutate(UPDATES_KEY);
+      void queryClient.invalidateQueries({ queryKey: updatesQueryKey });
     } else {
       // Rollback by revalidating
-      mutate(UPDATES_KEY);
+      void queryClient.invalidateQueries({ queryKey: updatesQueryKey });
       toast.error(t('updateAddFailed'));
     }
   };
@@ -268,10 +278,7 @@ const UpdatesListView = () => {
   const { can } = usePermissions();
   const canUpdateCourse =
     can(Actions.UPDATE, Resources.COURSE, Scopes.OWN) || can(Actions.UPDATE, Resources.COURSE, Scopes.PLATFORM);
-  const UPDATES_KEY = course?.courseStructure?.course_uuid
-    ? getCourseUpdatesSwrKey(course?.courseStructure?.course_uuid)
-    : null;
-  const { data: updates } = useSWR(UPDATES_KEY || null, (url) => swrFetcher(url));
+  const { data: updates } = useCourseUpdatesQuery(course?.courseStructure?.course_uuid);
   const t = useTranslations('Courses.CourseUpdates');
   const locale = useDateFnsLocale();
 
@@ -319,6 +326,7 @@ const UpdatesListView = () => {
 
 const DeleteUpdateButton = ({ update }: any) => {
   const course = useCourse();
+  const queryClient = useQueryClient();
   const t = useTranslations('Courses.CourseUpdates');
   const [isOpen, setIsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -330,7 +338,9 @@ const DeleteUpdateButton = ({ update }: any) => {
       if (res.status === 200) {
         toast.dismiss(toast_loading);
         toast.success(t('successfullDelete'));
-        mutate(getCourseUpdatesSwrKey(course?.courseStructure.course_uuid));
+        void queryClient.invalidateQueries({
+          queryKey: getCourseUpdatesQueryKey(course?.courseStructure.course_uuid),
+        });
         setIsOpen(false);
       } else {
         toast.dismiss(toast_loading);

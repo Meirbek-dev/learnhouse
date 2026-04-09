@@ -1,12 +1,13 @@
 'use client';
 
+import { useQuery } from '@tanstack/react-query';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
-import { swrFetcher } from '@services/utils/ts/requests';
+import { apiFetcher } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
+import { queryKeys } from '@/lib/react-query/queryKeys';
 import type { Platform } from '@/types/platform';
 import { createContext, use } from 'react';
 import type { ReactNode } from 'react';
-import useSWR from 'swr';
 
 export const PlatformContext = createContext<Platform | null>(null);
 
@@ -19,16 +20,12 @@ export const PlatformContextProvider = ({
 }) => {
   const platformContextKey = `${getAPIUrl()}platform`;
 
-  const { data: platform, isLoading: isPlatformLoading } = useSWR(
-    platformContextKey,
-    (url: string) => swrFetcher(url),
-    {
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
-      revalidateIfStale: !initialPlatform,
-      fallbackData: initialPlatform || undefined,
-    },
-  );
+  const { data: platform, isPending: isPlatformLoading } = useQuery({
+    queryKey: queryKeys.platform.config(),
+    queryFn: () => apiFetcher(platformContextKey) as Promise<Platform>,
+    initialData: initialPlatform || undefined,
+    staleTime: initialPlatform ? 60_000 : 0,
+  });
 
   // Only block on platform data — session state is independent of platform config.
   if (!platform && isPlatformLoading) return <PageLoading />;

@@ -1,8 +1,5 @@
 import { getAPIUrl } from '@services/config/config';
 
-/**
- * SWR key builders for course-related resources
- */
 export function getTrailSwrKey() {
   return `${getAPIUrl()}trail`;
 }

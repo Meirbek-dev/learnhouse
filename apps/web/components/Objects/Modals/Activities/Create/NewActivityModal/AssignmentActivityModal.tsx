@@ -1,7 +1,9 @@
 'use client';
+import { useQueryClient } from '@tanstack/react-query';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { createAssignmentWithActivity } from '@services/courses/assignments';
+import { courseKeys } from '@/hooks/courses/courseKeys';
 import { Field, FieldContent, FieldError, FieldLabel } from '@/components/ui/field';
 import { Controller, useForm } from 'react-hook-form';
 import { BarLoader } from '@components/Objects/Loaders/BarLoader';
@@ -11,7 +13,6 @@ import { de, enUS, es, fr, ru } from 'date-fns/locale';
 import { useLocale, useTranslations } from 'next-intl';
 import { Textarea } from '@/components/ui/textarea';
 import { Calendar } from '@/components/ui/calendar';
-import { getAPIUrl } from '@services/config/config';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useRef } from 'react';
@@ -20,7 +21,6 @@ import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import * as v from 'valibot';
-import { mutate } from 'swr';
 
 const createValidationSchema = (t: (key: string) => string) =>
   v.object({
@@ -40,6 +40,7 @@ interface FormValues {
 type AssignmentSubmitValues = v.InferOutput<ReturnType<typeof createValidationSchema>>;
 
 const NewAssignment = ({ submitActivity, chapterId, course, closeModal }: any) => {
+  const queryClient = useQueryClient();
   const validationT = useTranslations('Validation');
   const t = useTranslations('Components.NewAssignmentModal');
   const fullLocale = useLocale();
@@ -104,9 +105,9 @@ const NewAssignment = ({ submitActivity, chapterId, course, closeModal }: any) =
         toast.success(t('createSuccess'));
 
         if (course?.courseStructure?.course_uuid) {
-          mutate(
-            `${getAPIUrl()}courses/${course.courseStructure.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`,
-          );
+          await queryClient.invalidateQueries({
+            queryKey: courseKeys.structure(course.courseStructure.course_uuid, withUnpublishedActivities),
+          });
         }
 
         await revalidateTags(['courses']);

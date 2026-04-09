@@ -1,5 +1,6 @@
 'use client';
 
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   createActivity,
   createExternalVideoActivity,
@@ -10,118 +11,134 @@ import {
 import type { ActivityCreateValues, ActivityUpdateValues } from '@/schemas/activitySchemas';
 import { courseKeys } from '@/hooks/courses/courseKeys';
 import { assertSuccess } from '@/lib/api/assertSuccess';
-import { useSWRConfig } from 'swr';
 
 export function useActivityMutations(courseUuid: string, withUnpublishedActivities = true) {
-  const { mutate, cache } = useSWRConfig();
+  const queryClient = useQueryClient();
   const structureKey = courseKeys.structure(courseUuid, withUnpublishedActivities);
+  const updateActivityMutation = useMutation({
+    mutationFn: async ({ activityUuid, payload }: { activityUuid: string; payload: Partial<ActivityUpdateValues> }) =>
+      assertSuccess(await updateActivity(payload, activityUuid)),
+    onMutate: async ({ activityUuid, payload }) => {
+      const activityKey = courseKeys.activity(activityUuid);
 
-  const captureSnapshot = (key: string) => (cache.get(key as any) as any)?.data ?? undefined;
-
-  const updateActivityMutation = async (activityUuid: string, payload: Partial<ActivityUpdateValues>) => {
-    const previousStructure = captureSnapshot(structureKey);
-    const activityKey = courseKeys.activity(activityUuid);
-    const previousActivity = captureSnapshot(activityKey);
-
-    await mutate(
-      structureKey,
-      (current: any) =>
-        current
-          ? {
-              ...current,
-              chapters: (current.chapters ?? []).map((chapter: any) =>
-                Object.assign(chapter, {
-                  activities: (chapter.activities ?? []).map((activity: any) =>
-                    activity.activity_uuid === activityUuid ? Object.assign(activity, payload) : activity,
-                  ),
-                }),
-              ),
-            }
-          : current,
-      { revalidate: false },
-    );
-
-    await mutate(activityKey, (current: any) => (current ? { ...current, ...payload } : current), {
-      revalidate: false,
-    });
-
-    try {
-      const response = assertSuccess(await updateActivity(payload, activityUuid));
-      await Promise.all([mutate(structureKey), mutate(activityKey)]);
-      return response;
-    } catch (error) {
       await Promise.all([
-        mutate(structureKey, previousStructure, { revalidate: false }),
-        mutate(activityKey, previousActivity, { revalidate: false }),
+        queryClient.cancelQueries({ queryKey: structureKey }),
+        queryClient.cancelQueries({ queryKey: activityKey }),
       ]);
-      throw error;
-    }
-  };
 
-  const deleteActivityMutation = async (activityUuid: string) => {
-    const previousStructure = captureSnapshot(structureKey);
+      const previousStructure = queryClient.getQueryData(structureKey);
+      const previousActivity = queryClient.getQueryData(activityKey);
 
-    await mutate(
-      structureKey,
-      (current: any) =>
+      queryClient.setQueryData(structureKey, (current: any) =>
         current
           ? {
               ...current,
-              chapters: (current.chapters ?? []).map((chapter: any) =>
-                Object.assign(chapter, {
-                  activities: (chapter.activities ?? []).filter(
-                    (activity: any) => activity.activity_uuid !== activityUuid,
-                  ),
-                }),
-              ),
+              chapters: (current.chapters ?? []).map((chapter: any) => (Object.assign(chapter, {activities:(chapter.activities??[]).map((activity:any)=>activity.activity_uuid===activityUuid?{...activity,...payload}:activity)}))),
             }
           : current,
-      { revalidate: false },
-    );
+      );
 
-    try {
-      const response = assertSuccess(await deleteActivity(activityUuid));
-      await mutate(structureKey);
-      return response;
-    } catch (error) {
-      await mutate(structureKey, previousStructure, { revalidate: false });
-      throw error;
-    }
-  };
+      queryClient.setQueryData(activityKey, (current: any) => (current ? { ...current, ...payload } : current));
 
-  const createActivityMutation = async (payload: ActivityCreateValues, chapterId: number) => {
-    const response = assertSuccess(await createActivity(payload, chapterId));
-    await mutate(structureKey);
-    return response;
-  };
+      return { activityKey, previousActivity, previousStructure };
+    },
+    onError: (_error, _variables, context) => {
+      if (!context) return;
+      queryClient.setQueryData(structureKey, context.previousStructure);
+      queryClient.setQueryData(context.activityKey, context.previousActivity);
+    },
+    onSettled: async (_data, _error, variables) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: structureKey }),
+        queryClient.invalidateQueries({ queryKey: courseKeys.activity(variables.activityUuid) }),
+      ]);
+    },
+  });
 
-  const createFileActivityMutation = async (
-    file: File,
-    type: string,
-    payload: Partial<ActivityCreateValues>,
-    chapterId: number,
-    onProgress?: (progress: { percentage: number }) => void,
-  ) => {
-    const response = await createFileActivity(file, type, payload, chapterId, undefined, onProgress);
-    await mutate(structureKey);
-    return response;
-  };
+  const deleteActivityMutation = useMutation({
+    mutationFn: async (activityUuid: string) => assertSuccess(await deleteActivity(activityUuid)),
+    onMutate: async (activityUuid) => {
+      await queryClient.cancelQueries({ queryKey: structureKey });
+      const previousStructure = queryClient.getQueryData(structureKey);
 
-  const createExternalVideoMutation = async (
-    externalVideoData: Record<string, unknown>,
-    activityPayload: Partial<ActivityCreateValues>,
-    chapterId: number,
-  ) => {
-    const response = assertSuccess(await createExternalVideoActivity(externalVideoData, activityPayload, chapterId));
-    await mutate(structureKey);
-    return response;
-  };
+      queryClient.setQueryData(structureKey, (current: any) =>
+        current
+          ? {
+              ...current,
+              chapters: (current.chapters ?? []).map((chapter: any) => (Object.assign(chapter, {activities:(chapter.activities??[]).filter((activity:any)=>activity.activity_uuid!==activityUuid)}))),
+            }
+          : current,
+      );
+
+      return { previousStructure };
+    },
+    onError: (_error, _variables, context) => {
+      queryClient.setQueryData(structureKey, context?.previousStructure);
+    },
+    onSettled: async () => {
+      await queryClient.invalidateQueries({ queryKey: structureKey });
+    },
+  });
+
+  const createActivityMutation = useMutation({
+    mutationFn: async ({ chapterId, payload }: { chapterId: number; payload: ActivityCreateValues }) =>
+      assertSuccess(await createActivity(payload, chapterId)),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: structureKey });
+    },
+  });
+
+  const createFileActivityMutation = useMutation({
+    mutationFn: async ({
+      chapterId,
+      file,
+      onProgress,
+      payload,
+      type,
+    }: {
+      chapterId: number;
+      file: File;
+      onProgress?: (progress: { percentage: number }) => void;
+      payload: Partial<ActivityCreateValues>;
+      type: string;
+    }) => createFileActivity(file, type, payload, chapterId, undefined, onProgress),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: structureKey });
+    },
+  });
+
+  const createExternalVideoMutation = useMutation({
+    mutationFn: async ({
+      activityPayload,
+      chapterId,
+      externalVideoData,
+    }: {
+      activityPayload: Partial<ActivityCreateValues>;
+      chapterId: number;
+      externalVideoData: Record<string, unknown>;
+    }) => assertSuccess(await createExternalVideoActivity(externalVideoData, activityPayload, chapterId)),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: structureKey });
+    },
+  });
 
   return {
-    createActivity: createActivityMutation,
-    createExternalVideo: createExternalVideoMutation,
-    createFileActivity: createFileActivityMutation,
-    deleteActivity: deleteActivityMutation,
-    updateActivity: updateActivityMutation,
+    createActivity: async (payload: ActivityCreateValues, chapterId: number) =>
+      createActivityMutation.mutateAsync({ chapterId, payload }),
+    createExternalVideo: async (
+      externalVideoData: Record<string, unknown>,
+      activityPayload: Partial<ActivityCreateValues>,
+      chapterId: number,
+    ) => createExternalVideoMutation.mutateAsync({ activityPayload, chapterId, externalVideoData }),
+    createFileActivity: async (
+      file: File,
+      type: string,
+      payload: Partial<ActivityCreateValues>,
+      chapterId: number,
+      onProgress?: (progress: { percentage: number }) => void,
+    ) => createFileActivityMutation.mutateAsync({ chapterId, file, onProgress, payload, type }),
+    deleteActivity: async (activityUuid: string) => deleteActivityMutation.mutateAsync(activityUuid),
+    updateActivity: async (activityUuid: string, payload: Partial<ActivityUpdateValues>) =>
+      updateActivityMutation.mutateAsync({ activityUuid, payload }),
   };
 }

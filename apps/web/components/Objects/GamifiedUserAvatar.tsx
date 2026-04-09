@@ -100,7 +100,7 @@ const GamifiedUserAvatar = (props: GamifiedUserAvatarProps) => {
   const showAvatarFrame = ENABLE_AVATAR_CUSTOMIZATION && _showAvatarFrame;
   const showAvatarAccessories = ENABLE_AVATAR_CUSTOMIZATION && _showAvatarAccessories;
 
-  // useSWR deduplicates: N components with the same username → one request, shared cache.
+  // Shared query caching deduplicates identical username lookups across components.
   const { data: userData } = useUserByUsername(username);
 
   const getAvatarUrl = (): string => {

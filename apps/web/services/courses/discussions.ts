@@ -6,7 +6,6 @@ import { tags } from '@/lib/cacheTags';
 
 /*
  This file includes POST, PUT, DELETE requests for course discussions
- GET requests are called from the frontend using SWR (https://swr.vercel.app/)
 */
 
 export interface DiscussionCreate {

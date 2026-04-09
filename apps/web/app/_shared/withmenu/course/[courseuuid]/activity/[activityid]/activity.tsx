@@ -46,15 +46,16 @@ import { useContributorStatus } from '@/hooks/useContributorStatus';
 import { submitAssessment } from '@services/grading/grading';
 import { useGamificationStore } from '@/stores/gamification';
 import { useMySubmission } from '@/hooks/useMySubmission';
-import { swrFetcher } from '@services/utils/ts/requests';
+import { queryKeys } from '@/lib/react-query/queryKeys';
+import { apiFetcher } from '@services/utils/ts/requests';
 import { getAbsoluteUrl } from '@services/config/config';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { getTrailSwrKey } from '@services/courses/keys';
 import { AnimatePresence, motion } from 'motion/react';
 import NextImage from '@components/ui/NextImage';
 import { useRouter } from 'next/navigation';
 import Link from '@components/ui/AppLink';
-import useSWR, { mutate } from 'swr';
 import { toast } from 'sonner';
 
 // Lazy load heavy components
@@ -176,9 +177,10 @@ const ActivityActions = ({ activity, activityid, course, assignment, showNavigat
   const { isAuthenticated } = useAuth();
   const isPaidAccessAllowed = activity?.content?.paid_access !== false || contributorStatus === 'ACTIVE';
 
-  // Add SWR for trail data
-  const TRAIL_KEY = getTrailSwrKey();
-  const { data: trailData } = useSWR(TRAIL_KEY || null, (url) => swrFetcher(url));
+  const { data: trailData } = useQuery({
+    queryKey: queryKeys.trail.current(),
+    queryFn: () => apiFetcher(getTrailSwrKey()),
+  });
 
   return (
     <div className="flex items-center space-x-2">
@@ -278,9 +280,10 @@ const ActivityClient = (props: ActivityClientProps) => {
     return format.relativeTime(date, now);
   };
 
-  // Add SWR for trail data
-  const TRAIL_KEY = getTrailSwrKey();
-  const { data: trailData } = useSWR(TRAIL_KEY || null, (url) => swrFetcher(url));
+  const { data: trailData } = useQuery({
+    queryKey: queryKeys.trail.current(),
+    queryFn: () => apiFetcher(getTrailSwrKey()),
+  });
 
   const { allActivities, currentIndex } = useActivityPosition(course, activityid);
 
@@ -1020,8 +1023,8 @@ export const MarkStatus = (props: {
 }) => {
   const { t } = props;
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = useState(false);
-  const TRAIL_KEY = getTrailSwrKey();
 
   const refetchGamification = useGamificationStore((s) => s.refetch);
 
@@ -1057,7 +1060,7 @@ export const MarkStatus = (props: {
 
       await markActivityAsComplete(props.activity.activity_uuid);
 
-      await mutate(TRAIL_KEY);
+  await queryClient.invalidateQueries({ queryKey: queryKeys.trail.current() });
 
       // Show XP feedback and update profile
       if (useGamificationStore.getState().profile) {
@@ -1091,7 +1094,7 @@ export const MarkStatus = (props: {
       setIsLoading(true);
       await unmarkActivityAsComplete(props.activity.activity_uuid);
 
-      await mutate(TRAIL_KEY);
+      await queryClient.invalidateQueries({ queryKey: queryKeys.trail.current() });
     } catch {
       toast.error(t('unmarkCompleteError'));
     } finally {

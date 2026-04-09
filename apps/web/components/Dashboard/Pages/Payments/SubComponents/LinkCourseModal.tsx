@@ -1,16 +1,16 @@
 'use client';
 
 import type { components } from '@/lib/api/generated';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { getCoursesLinkedToProduct, linkCourseToProduct } from '@services/payments/products';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
-import { getPaymentsProductsSwrKey } from '@services/payments/keys';
+import { queryKeys } from '@/lib/react-query/queryKeys';
 import { getCourses } from '@services/courses/courses';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
 import { Search } from 'lucide-react';
-import useSWR, { mutate } from 'swr';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
@@ -83,25 +83,31 @@ const CoursePreview = ({ course, onLink, isLinked }: CoursePreviewProps) => {
 };
 
 export default function LinkCourseModal({ productId, onSuccess }: LinkCourseModalProps) {
+  const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
   const tNotify = useTranslations('DashPage.Notifications');
   const t = useTranslations('DashPage.Payments.LinkCourseModal');
 
-  const PRODUCTS_KEY = getPaymentsProductsSwrKey();
-
-  const { data: coursesData, error: coursesError } = useSWR('platform-courses', () => getCourses(null));
+  const { data: coursesData, error: coursesError } = useQuery({
+    queryKey: queryKeys.platform.courses(),
+    queryFn: () => getCourses(null),
+  });
 
   const courses = coursesData?.courses;
 
-  const { data: linkedCoursesData, error: linkedCoursesError } = useSWR(`/payments/products/${productId}/courses`, () =>
-    getCoursesLinkedToProduct(productId),
-  );
+  const { data: linkedCoursesData, error: linkedCoursesError } = useQuery({
+    queryKey: queryKeys.payments.productCourses(productId),
+    queryFn: () => getCoursesLinkedToProduct(productId),
+  });
 
   const handleLinkCourse = async (courseId: number) => {
     try {
       const response = await linkCourseToProduct(productId, courseId);
       if (response.success) {
-        mutate(getPaymentsProductsSwrKey());
+        await Promise.all([
+          queryClient.invalidateQueries({ queryKey: queryKeys.payments.products() }),
+          queryClient.invalidateQueries({ queryKey: queryKeys.payments.productCourses(productId) }),
+        ]);
         toast.success(tNotify('courseLinkedSuccess'));
         onSuccess();
       } else {

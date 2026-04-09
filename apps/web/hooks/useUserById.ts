@@ -1,8 +1,16 @@
 'use client';
-import { swrFetcher } from '@services/utils/ts/requests';
+
+import { useQuery } from '@tanstack/react-query';
+import { apiFetcher } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
-import useSWR from 'swr';
+import { queryKeys } from '@/lib/react-query/queryKeys';
 
 export function useUserById(userId: number | string | undefined) {
-  return useSWR(userId !== null ? `${getAPIUrl()}users/id/${userId}` : null, (url: string) => swrFetcher(url));
+  const normalizedUserId = userId === undefined || userId === null ? null : Number(userId);
+
+  return useQuery({
+    queryKey: normalizedUserId === null ? ['users', 'detail', 'missing'] : queryKeys.users.byId(normalizedUserId),
+    queryFn: () => apiFetcher(`${getAPIUrl()}users/id/${normalizedUserId}`),
+    enabled: normalizedUserId !== null,
+  });
 }

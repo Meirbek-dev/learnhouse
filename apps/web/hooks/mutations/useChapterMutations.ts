@@ -1,68 +1,56 @@
 'use client';
 
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createChapter, deleteChapter, updateChapter, updateCourseOrderStructure } from '@services/courses/chapters';
 import type { ChapterCreateValues, ChapterUpdateValues, CourseOrderPayload } from '@/schemas/chapterSchemas';
 import { courseKeys } from '@/hooks/courses/courseKeys';
-import { useSWRConfig } from 'swr';
 
 export function useChapterMutations(courseUuid: string, withUnpublishedActivities = true) {
-  const { mutate, cache } = useSWRConfig();
+  const queryClient = useQueryClient();
   const structureKey = courseKeys.structure(courseUuid, withUnpublishedActivities);
+  const createChapterMutation = useMutation({
+    mutationFn: async ({ payload }: { payload: ChapterCreateValues }) => createChapter(payload),
+    onMutate: async ({ payload }) => {
+      const tempId = `temp_chapter_${Date.now()}`;
+      const optimisticChapter = { ...payload, id: tempId, chapter_uuid: tempId, activities: [] };
 
-  const captureSnapshot = (key: string): unknown | undefined => (cache.get(key) as any)?.data as unknown | undefined;
+      await queryClient.cancelQueries({ queryKey: structureKey });
+      const previousStructure = queryClient.getQueryData(structureKey);
 
-  const createChapterMutation = async (payload: ChapterCreateValues) => {
-    const tempId = `temp_chapter_${Date.now()}`;
-    const optimisticChapter = { ...payload, id: tempId, chapter_uuid: tempId, activities: [] };
-
-    await mutate(
-      structureKey,
-      (current: any) =>
+      queryClient.setQueryData(structureKey, (current: any) =>
         current ? { ...current, chapters: [...(current.chapters ?? []), optimisticChapter] } : current,
-      { revalidate: false },
-    );
-
-    try {
-      const createdChapter = await createChapter(payload);
-
-      await mutate(
-        structureKey,
-        (current: any) =>
-          current
-            ? {
-                ...current,
-                chapters: (current.chapters ?? []).map((chapter: any) =>
-                  chapter.chapter_uuid === tempId ? createdChapter : chapter,
-                ),
-              }
-            : current,
-        { revalidate: false },
       );
 
-      await mutate(structureKey);
-      return createdChapter;
-    } catch (error) {
-      await mutate(
-        structureKey,
-        (current: any) =>
-          current
-            ? {
-                ...current,
-                chapters: (current.chapters ?? []).filter((chapter: any) => chapter.chapter_uuid !== tempId),
-              }
-            : current,
-        { revalidate: false },
+      return { previousStructure, tempId };
+    },
+    onSuccess: (createdChapter, _variables, context) => {
+      queryClient.setQueryData(structureKey, (current: any) =>
+        current
+          ? {
+              ...current,
+              chapters: (current.chapters ?? []).map((chapter: any) =>
+                chapter.chapter_uuid === context?.tempId ? createdChapter : chapter,
+              ),
+            }
+          : current,
       );
-      throw error;
-    }
-  };
+    },
+    onError: (_error, _variables, context) => {
+      queryClient.setQueryData(structureKey, context?.previousStructure);
+    },
+    onSettled: async () => {
+      await queryClient.invalidateQueries({ queryKey: structureKey });
+    },
+  });
 
-  const updateChapterMutation = async (chapterUuid: string, payload: ChapterUpdateValues) => {
-    const previous = captureSnapshot(structureKey);
+  const updateChapterMutation = useMutation({
+    mutationFn: async ({ chapterUuid, payload }: { chapterUuid: string; payload: ChapterUpdateValues }) =>
+      updateChapter(chapterUuid, payload),
+    onMutate: async ({ chapterUuid, payload }) => {
+      await queryClient.cancelQueries({ queryKey: structureKey });
+      const previousStructure = queryClient.getQueryData(structureKey);
 
-    await mutate(
-      structureKey,
-      (current: any) =>
+      queryClient.setQueryData(structureKey, (current: any) =>
         current
           ? {
               ...current,
@@ -71,63 +59,66 @@ export function useChapterMutations(courseUuid: string, withUnpublishedActivitie
               ),
             }
           : current,
-      { revalidate: false },
-    );
+      );
 
-    try {
-      const response = await updateChapter(chapterUuid, payload);
-      await mutate(structureKey);
-      return response;
-    } catch (error) {
-      await mutate(structureKey, previous, { revalidate: false });
-      throw error;
-    }
-  };
+      return { previousStructure };
+    },
+    onError: (_error, _variables, context) => {
+      queryClient.setQueryData(structureKey, context?.previousStructure);
+    },
+    onSettled: async () => {
+      await queryClient.invalidateQueries({ queryKey: structureKey });
+    },
+  });
 
-  const deleteChapterMutation = async (chapterUuid: string) => {
-    const previous = captureSnapshot(structureKey);
+  const deleteChapterMutation = useMutation({
+    mutationFn: async (chapterUuid: string) => deleteChapter(chapterUuid),
+    onMutate: async (chapterUuid) => {
+      await queryClient.cancelQueries({ queryKey: structureKey });
+      const previousStructure = queryClient.getQueryData(structureKey);
 
-    await mutate(
-      structureKey,
-      (current: any) =>
+      queryClient.setQueryData(structureKey, (current: any) =>
         current
           ? {
               ...current,
               chapters: (current.chapters ?? []).filter((chapter: any) => chapter.chapter_uuid !== chapterUuid),
             }
           : current,
-      { revalidate: false },
-    );
+      );
 
-    try {
-      const response = await deleteChapter(chapterUuid);
-      await mutate(structureKey);
-      return response;
-    } catch (error) {
-      await mutate(structureKey, previous, { revalidate: false });
-      throw error;
-    }
-  };
+      return { previousStructure };
+    },
+    onError: (_error, _variables, context) => {
+      queryClient.setQueryData(structureKey, context?.previousStructure);
+    },
+    onSettled: async () => {
+      await queryClient.invalidateQueries({ queryKey: structureKey });
+    },
+  });
 
-  const reorderStructure = async (nextStructure: any, payload: CourseOrderPayload) => {
-    const previousStructure = captureSnapshot(structureKey);
-
-    await mutate(structureKey, nextStructure, { revalidate: false });
-
-    try {
-      await updateCourseOrderStructure(courseUuid, payload);
-      await mutate(structureKey);
-    } catch (error) {
-      await mutate(structureKey, previousStructure, { revalidate: false });
-      await mutate(structureKey);
-      throw error;
-    }
-  };
+  const reorderStructureMutation = useMutation({
+    mutationFn: async ({ payload }: { nextStructure: any; payload: CourseOrderPayload }) =>
+      updateCourseOrderStructure(courseUuid, payload),
+    onMutate: async ({ nextStructure }) => {
+      await queryClient.cancelQueries({ queryKey: structureKey });
+      const previousStructure = queryClient.getQueryData(structureKey);
+      queryClient.setQueryData(structureKey, nextStructure);
+      return { previousStructure };
+    },
+    onError: (_error, _variables, context) => {
+      queryClient.setQueryData(structureKey, context?.previousStructure);
+    },
+    onSettled: async () => {
+      await queryClient.invalidateQueries({ queryKey: structureKey });
+    },
+  });
 
   return {
-    createChapter: createChapterMutation,
-    deleteChapter: deleteChapterMutation,
-    reorderStructure,
-    updateChapter: updateChapterMutation,
+    createChapter: async (payload: ChapterCreateValues) => createChapterMutation.mutateAsync({ payload }),
+    deleteChapter: async (chapterUuid: string) => deleteChapterMutation.mutateAsync(chapterUuid),
+    reorderStructure: async (nextStructure: any, payload: CourseOrderPayload) =>
+      reorderStructureMutation.mutateAsync({ nextStructure, payload }),
+    updateChapter: async (chapterUuid: string, payload: ChapterUpdateValues) =>
+      updateChapterMutation.mutateAsync({ chapterUuid, payload }),
   };
 }

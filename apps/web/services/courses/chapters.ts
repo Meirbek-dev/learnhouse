@@ -6,7 +6,6 @@ import type { CourseOrderPayload } from '@/schemas/chapterSchemas';
 
 /*
  This file includes only POST, PATCH, DELETE requests
- GET requests are called from the frontend using SWR (https://swr.vercel.app/)
 */
 
 export async function updateChapter(chapterUuid: string, data: any) {

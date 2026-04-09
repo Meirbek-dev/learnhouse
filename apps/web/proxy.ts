@@ -131,9 +131,9 @@ async function verifyTokenSignature(token: string): Promise<boolean> {
       algorithms: ['EdDSA'],
     });
     return true;
-  } catch (err) {
+  } catch (error) {
     // JWTExpired is the normal case for a token that needs refresh
-    if (err instanceof joseErrors.JWTExpired) return false;
+    if (error instanceof joseErrors.JWTExpired) return false;
     // Any other error (invalid signature, malformed) → reject
     return false;
   }

@@ -1,16 +1,16 @@
 'use client';
 
+import { useQueryClient } from '@tanstack/react-query';
 import { Field, FieldContent, FieldError, FieldLabel } from '@components/ui/field';
+import { queryKeys } from '@/lib/react-query/queryKeys';
 import { createUserGroup } from '@services/usergroups/usergroups';
 import { valibotResolver } from '@hookform/resolvers/valibot';
-import { getAPIUrl } from '@services/config/config';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import * as v from 'valibot';
-import { mutate } from 'swr';
 
 interface AddUserGroupProps {
   setCreateUserGroupModal: any;
@@ -26,6 +26,7 @@ type UserGroupFormValues = v.InferOutput<ReturnType<typeof createValidationSchem
 type UserGroupInputValues = v.InferInput<ReturnType<typeof createValidationSchema>>;
 
 const AddUserGroup = (props: AddUserGroupProps) => {
+  const queryClient = useQueryClient();
   const t = useTranslations('Components.AddUserGroup');
   const validationSchema = createValidationSchema(t);
 
@@ -41,7 +42,7 @@ const AddUserGroup = (props: AddUserGroupProps) => {
     const toastID = toast.loading(t('toastLoading'));
     const res = await createUserGroup(values);
     if (res.status === 200) {
-      mutate(`${getAPIUrl()}usergroups`);
+      await queryClient.invalidateQueries({ queryKey: queryKeys.userGroups.all() });
       props.setCreateUserGroupModal(false);
       toast.success(t('toastSuccess'), { id: toastID });
       return;

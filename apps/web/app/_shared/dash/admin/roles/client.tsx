@@ -1,5 +1,6 @@
 'use client';
 
+import { useQuery } from '@tanstack/react-query';
 import {
   addPermissionToRole,
   createRole as apiCreateRole,
@@ -48,6 +49,7 @@ import {
 } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Actions, PermissionGuard, Resources, Scopes, usePermissions } from '@/components/Security';
+import { queryKeys } from '@/lib/react-query/queryKeys';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/hooks/useAuth';
 import type { Permission, RoleAuditEvent, RoleWithPermissions } from '@/types/permissions';
@@ -64,7 +66,6 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import useSWR from 'swr';
 
 type RoleDialogMode = 'create' | 'edit' | 'clone';
 
@@ -114,9 +115,10 @@ export default function RBACAdminClient() {
     data: permissions = [],
     isLoading: permissionsLoading,
     error: permissionsError,
-  } = useSWR('rbac-permissions', () => listAllPermissions(), {
-    dedupingInterval: 3_600_000,
-    revalidateOnFocus: false,
+  } = useQuery({
+    queryKey: queryKeys.platform.permissions(),
+    queryFn: () => listAllPermissions(),
+    staleTime: 3_600_000,
   });
 
   const fetchRoles = useCallback(async () => {

@@ -1,12 +1,13 @@
 'use client';
 
+import { useQuery } from '@tanstack/react-query';
 import { Award, Building, Calendar, ExternalLink, Hash } from 'lucide-react';
 import { getAPIUrl, getAbsoluteUrl } from '@services/config/config';
 import { useFormatter, useTranslations } from 'next-intl';
-import { swrFetcher } from '@services/utils/ts/requests';
+import { queryKeys } from '@/lib/react-query/queryKeys';
+import { apiFetcher } from '@services/utils/ts/requests';
 import Link from '@components/ui/AppLink';
 import type React from 'react';
-import useSWR from 'swr';
 
 const UserCertificates: React.FC = () => {
   const format = useFormatter();
@@ -16,7 +17,10 @@ const UserCertificates: React.FC = () => {
     data: certificates,
     error,
     isLoading,
-  } = useSWR(`${getAPIUrl()}certifications/user/all`, (url) => swrFetcher(url));
+  } = useQuery({
+    queryKey: queryKeys.certifications.userAll(),
+    queryFn: () => apiFetcher(`${getAPIUrl()}certifications/user/all`),
+  });
 
   if (isLoading) {
     return (

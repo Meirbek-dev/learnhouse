@@ -1,8 +1,8 @@
 import { getAPIUrl } from '@services/config/config';
 
 /**
- * SWR key builder for getting course discussions
- * Usage: useSWR(getDiscussionsSwrKey(course_uuid, true, 50, 0), swrFetcher)
+ * key builder for getting course discussions
+ * Usage: use this key builder with the discussions query fetcher for course discussions.
  */
 export function getDiscussionsSwrKey(course_uuid: string, include_replies = false, limit = 50, offset = 0) {
   const params = new URLSearchParams({
@@ -14,8 +14,8 @@ export function getDiscussionsSwrKey(course_uuid: string, include_replies = fals
 }
 
 /**
- * SWR key builder for getting discussion replies
- * Usage: useSWR(getDiscussionRepliesSwrKey(course_uuid, discussion_uuid, 50, 0), swrFetcher)
+ * key builder for getting discussion replies
+ * Usage: use this key builder with the discussions query fetcher for discussion replies.
  */
 export function getDiscussionRepliesSwrKey(course_uuid: string, discussion_uuid: string, limit = 50, offset = 0) {
   const params = new URLSearchParams({

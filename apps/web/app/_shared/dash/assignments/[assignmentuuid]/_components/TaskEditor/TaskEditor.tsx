@@ -1,14 +1,14 @@
 'use client';
 
+import { useQueryClient } from '@tanstack/react-query';
 import { useAssignmentsTaskStore } from '@components/Contexts/Assignments/AssignmentsTaskContext';
 import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
 import { GalleryVerticalEnd, Info, TentTree, Trash } from 'lucide-react';
 import { deleteAssignmentTask } from '@services/courses/assignments';
-import { getAPIUrl } from '@services/config/config';
+import { queryKeys } from '@/lib/react-query/queryKeys';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
-import { useSWRConfig } from 'swr';
 import { toast } from 'sonner';
 
 import { AssignmentTaskGeneralEdit } from './Subs/AssignmentTaskGeneralEdit';
@@ -21,7 +21,7 @@ const AssignmentTaskEditor = ({ page }: any) => {
   const assignmentTask = useAssignmentsTaskStore((s) => s.assignmentTask);
   const setSelectedTaskUUID = useAssignmentsTaskStore((s) => s.setSelectedTaskUUID);
   const setAssignmentTask = useAssignmentsTaskStore((s) => s.setAssignmentTask);
-  const { mutate } = useSWRConfig();
+  const queryClient = useQueryClient();
 
   const [taskUUIDKey, setTaskUUIDKey] = useState(assignmentTask.assignment_task_uuid);
   const [selectedSubPage, setSelectedSubPage] = useState(page);
@@ -51,7 +51,9 @@ const AssignmentTaskEditor = ({ page }: any) => {
       setSelectedTaskUUID('');
 
       try {
-        await mutate(`${getAPIUrl()}assignments/${assignment.assignment_object.assignment_uuid}/tasks`);
+        await queryClient.invalidateQueries({
+          queryKey: queryKeys.assignments.tasks(assignment.assignment_object.assignment_uuid),
+        });
       } catch (error) {
         console.warn('Failed to revalidate assignment tasks after delete', error);
       }

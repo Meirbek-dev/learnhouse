@@ -1,8 +1,8 @@
 import { isAuthRoute } from './routes';
 
 export function getCurrentReturnTo(): string {
-  if (typeof window === 'undefined') return '/';
-  const { pathname, search } = window.location;
+  if (typeof globalThis.window === 'undefined') return '/';
+  const { pathname, search } = globalThis.location;
   return `${pathname}${search}` || '/';
 }
 
@@ -10,7 +10,7 @@ export function normalizeReturnTo(returnTo: string | null | undefined): string {
   if (!returnTo) return '/';
 
   try {
-    const origin = typeof window === 'undefined' ? 'http://localhost' : window.location.origin;
+    const origin = typeof globalThis.window === 'undefined' ? 'http://localhost' : globalThis.location.origin;
     const parsed = new URL(returnTo, origin);
     const normalizedPath = `${parsed.pathname}${parsed.search}` || '/';
 

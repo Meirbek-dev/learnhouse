@@ -1,10 +1,14 @@
 'use client';
 
 import type { SubmissionStatus, SubmissionsPage } from '@/types/grading';
-import { swrFetcher } from '@services/utils/ts/requests';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { apiFetcher } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
 import { useState, useEffect } from 'react';
-import useSWR from 'swr';
+
+const gradingKeys = {
+  submissions: (params: Record<string, string | number>) => ['grading', 'submissions', params] as const,
+};
 
 export interface UseSubmissionsOptions {
   activityId: number | null;
@@ -38,19 +42,37 @@ export function useSubmissions({
   params.set('page', String(page));
   params.set('page_size', String(pageSize));
 
-  const { data, error, isLoading, mutate } = useSWR<SubmissionsPage>(
-    activityId ? `${getAPIUrl()}grading/submissions?${params}` : null,
-    (url: string) => swrFetcher(url),
-  );
+  const queryParams = {
+    activityId: activityId ?? 0,
+    page,
+    pageSize,
+    search: search ?? '',
+    sortBy,
+    sortDir,
+    status: status ?? 'ALL',
+  };
+  const queryKey = gradingKeys.submissions(queryParams);
+  const queryClient = useQueryClient();
+  const query = useQuery({
+    queryKey,
+    queryFn: () => apiFetcher(`${getAPIUrl()}grading/submissions?${params}`) as Promise<SubmissionsPage>,
+    enabled: Boolean(activityId),
+  });
 
   return {
-    submissions: data?.items ?? [],
-    total: data?.total ?? 0,
-    pages: data?.pages ?? 1,
+    submissions: query.data?.items ?? [],
+    total: query.data?.total ?? 0,
+    pages: query.data?.pages ?? 1,
     page,
     setPage,
-    isLoading,
-    error: error ?? null,
-    mutate,
+    isLoading: query.isPending,
+    error: query.error ?? null,
+    mutate: async () => {
+      await queryClient.invalidateQueries({ queryKey });
+      return queryClient.fetchQuery({
+        queryKey,
+        queryFn: () => apiFetcher(`${getAPIUrl()}grading/submissions?${params}`) as Promise<SubmissionsPage>,
+      });
+    },
   };
 }

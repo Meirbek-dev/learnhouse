@@ -1,19 +1,19 @@
 'use client';
 
+import { useQueryClient } from '@tanstack/react-query';
 import { SiFacebook, SiInstagram, SiTiktok, SiX, SiYoutube } from '@icons-pack/react-simple-icons';
 import { usePlatform } from '@/components/Contexts/PlatformContext';
+import { queryKeys } from '@/lib/react-query/queryKeys';
 import { updatePlatform } from '@/services/settings/platform';
 import { revalidateTags } from '@services/utils/ts/requests';
 import { Field, FieldLabel } from '@components/ui/field';
 import { Controller, useForm } from 'react-hook-form';
-import { getAPIUrl } from '@services/config/config';
 import { Plus, X as XIcon } from 'lucide-react';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
 import { useTransition } from 'react';
 import { toast } from 'sonner';
-import { mutate } from 'swr';
 
 interface SocialMediaData {
   socials: {
@@ -28,6 +28,7 @@ interface SocialMediaData {
 }
 
 export default function EditSocials() {
+  const queryClient = useQueryClient();
   const platform = usePlatform() as any;
   const t = useTranslations('DashPage.PlatformSettings.Socials');
 
@@ -60,7 +61,7 @@ export default function EditSocials() {
     try {
       await updatePlatform(values);
       await revalidateTags(['platform']);
-      mutate(`${getAPIUrl()}platform`);
+      await queryClient.invalidateQueries({ queryKey: queryKeys.platform.config() });
       toast.success(t('platformUpdatedSuccess'), { id: loadingToast });
     } catch {
       toast.error(t('platformUpdateFailed'), { id: loadingToast });

@@ -19,6 +19,7 @@
  */
 
 import { useTranslations } from 'next-intl';
+import { useQuery } from '@tanstack/react-query';
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
@@ -26,10 +27,9 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import SubmissionsTable from '@/components/Grading/SubmissionsTable';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { AlertCircle, ClipboardList } from 'lucide-react';
-import { swrFetcher } from '@services/utils/ts/requests';
+import { apiFetcher } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
 import { Badge } from '@/components/ui/badge';
-import useSWR from 'swr';
 
 type AssignmentSubmissionStatus = 'PENDING' | 'SUBMITTED' | 'GRADED' | 'LATE' | 'NOT_SUBMITTED';
 
@@ -97,10 +97,13 @@ export default function AssignmentSubmissionsSubPage({ assignment_uuid }: Assign
   // activity_object is fetched by AssignmentProvider and contains the numeric id
   const activityId: number | null = assignments?.activity_object?.id ?? null;
 
-  const { data: assignmentSubmissionRows, error: assignmentSubmissionRowsError } = useSWR<AssignmentSubmissionRow[]>(
-    canonicalAssignmentUuid ? `${getAPIUrl()}assignments/${canonicalAssignmentUuid}/submissions` : null,
-    (url: string) => swrFetcher(url),
-  );
+  const { data: assignmentSubmissionRows, error: assignmentSubmissionRowsError } = useQuery({
+    queryKey: canonicalAssignmentUuid
+      ? ['assignments', 'submissions', canonicalAssignmentUuid]
+      : ['assignments', 'submissions', 'missing'],
+    queryFn: () => apiFetcher(`${getAPIUrl()}assignments/${canonicalAssignmentUuid}/submissions`) as Promise<AssignmentSubmissionRow[]>,
+    enabled: Boolean(canonicalAssignmentUuid),
+  });
 
   if (!activityId) {
     return <PageLoading />;

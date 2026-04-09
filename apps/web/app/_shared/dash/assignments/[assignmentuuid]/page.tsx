@@ -1,4 +1,5 @@
 'use client';
+import { useQueryClient } from '@tanstack/react-query';
 import { BookOpen, BookX, EllipsisVertical, Eye, Layers2, Monitor, Pencil, UserRoundPen } from 'lucide-react';
 import EditAssignmentModal from '@components/Objects/Modals/Activities/Assignments/EditAssignmentModal';
 import { AssignmentProvider, useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
@@ -6,15 +7,14 @@ import ToolTip from '@/components/Objects/Elements/Tooltip/Tooltip';
 import BreadCrumbs from '@components/Dashboard/Misc/BreadCrumbs';
 import { updateAssignment } from '@services/courses/assignments';
 import { updateActivity } from '@services/courses/activities';
+import { queryKeys } from '@/lib/react-query/queryKeys';
 import { useParams, useSearchParams } from 'next/navigation';
-import { getAPIUrl } from '@services/config/config';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
 import dynamic from 'next/dynamic';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import { mutate } from 'swr';
 
 import AssignmentEditorSubPage from './subpages/AssignmentEditorSubPage';
 
@@ -117,6 +117,7 @@ const BrdCmpx = () => {
 };
 
 const PublishingState = () => {
+  const queryClient = useQueryClient();
   const t = useTranslations('DashPage.Assignments.AssignmentPage');
   const assignment = useAssignments();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -129,7 +130,7 @@ const PublishingState = () => {
     );
     const toast_loading = toast.loading(t('updateLoading'));
     if (res.success && res2) {
-      mutate(`${getAPIUrl()}assignments/${assignmentUUID}`);
+      await queryClient.invalidateQueries({ queryKey: queryKeys.assignments.detail(assignmentUUID) });
       toast.success(t('updateSuccess'));
       toast.dismiss(toast_loading);
     } else {

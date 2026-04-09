@@ -1,5 +1,6 @@
 'use client';
 
+import { useQuery } from '@tanstack/react-query';
 import {
   Pagination,
   PaginationContent,
@@ -10,12 +11,12 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination';
 import CourseThumbnail from '@components/Objects/Thumbnails/CourseThumbnail';
+import { queryKeys } from '@/lib/react-query/queryKeys';
 import { useAuth } from '@/hooks/useAuth';
 import { getCoursesSwrKey, getTrailSwrKey } from '@services/courses/keys';
-import { swrFetcherWithHeaders } from '@services/utils/ts/requests';
-import { swrFetcher } from '@services/utils/ts/requests';
+import { apiFetcherWithHeaders } from '@services/utils/ts/requests';
+import { apiFetcher } from '@services/utils/ts/requests';
 import { useMemo, useState } from 'react';
-import useSWR from 'swr';
 
 const COURSES_PER_PAGE = 20;
 
@@ -30,29 +31,23 @@ export default function CourseGridClient({ initialCourses, initialTotal }: Cours
 
   // Fetch courses with pagination
   const COURSES_KEY = getCoursesSwrKey(page, COURSES_PER_PAGE);
-  const { data: coursesResponse, isLoading: coursesLoading } = useSWR(
-    COURSES_KEY,
-    (url) => swrFetcherWithHeaders(url),
-    {
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
-      revalidateIfStale: page !== 1,
-      dedupingInterval: 60_000,
-      fallbackData:
-        page === 1 ? { data: initialCourses, headers: { 'x-total-count': String(initialTotal) } } : undefined,
-    },
-  );
+  const { data: coursesResponse, isLoading: coursesLoading } = useQuery({
+    queryKey: ['landing', 'courses', page, COURSES_PER_PAGE],
+    queryFn: () => apiFetcherWithHeaders(COURSES_KEY),
+    initialData: page === 1 ? { data: initialCourses, headers: { 'x-total-count': String(initialTotal) } } : undefined,
+    staleTime: 60_000,
+  });
 
   const courses = coursesResponse?.data ?? initialCourses;
   const totalCount = Number.parseInt(coursesResponse?.headers?.['x-total-count'] ?? String(initialTotal), 10);
   const totalPages = Math.ceil(totalCount / COURSES_PER_PAGE);
 
   // Fetch trail data to show progress on course thumbnails (auth-required)
-  const TRAIL_KEY = isAuthenticated ? getTrailSwrKey() : null;
-  const { data: trailData } = useSWR(TRAIL_KEY, (url) => swrFetcher(url), {
-    revalidateOnFocus: false,
-    revalidateOnReconnect: false,
-    dedupingInterval: 60_000,
+  const { data: trailData } = useQuery({
+    queryKey: queryKeys.trail.current(),
+    queryFn: () => apiFetcher(getTrailSwrKey()),
+    enabled: isAuthenticated,
+    staleTime: 60_000,
   });
 
   const isTrailLoading = !trailData;

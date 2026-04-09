@@ -62,9 +62,9 @@ function parseSetCookieHeader(setCookieHeader: string): ParsedSetCookie | null {
   for (const attribute of attributes) {
     const attributeSeparatorIndex = attribute.indexOf('=');
     const rawKey =
-      attributeSeparatorIndex >= 0 ? attribute.slice(0, attributeSeparatorIndex) : attribute;
+      attributeSeparatorIndex !== -1 ? attribute.slice(0, attributeSeparatorIndex) : attribute;
     const rawValue =
-      attributeSeparatorIndex >= 0 ? attribute.slice(attributeSeparatorIndex + 1) : '';
+      attributeSeparatorIndex !== -1 ? attribute.slice(attributeSeparatorIndex + 1) : '';
     const key = rawKey.trim().toLowerCase();
     const optionValue = rawValue.trim();
 

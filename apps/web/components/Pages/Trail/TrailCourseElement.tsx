@@ -1,17 +1,17 @@
 'use client';
+import { useQueryClient } from '@tanstack/react-query';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { getUserCertificates } from '@services/courses/certifications';
+import { queryKeys } from '@/lib/react-query/queryKeys';
 import { revalidateTags } from '@services/utils/ts/requests';
 import { Award, ExternalLink, Loader2 } from 'lucide-react';
 import { removeCourse } from '@services/courses/activity';
 import { getAbsoluteUrl } from '@services/config/config';
-import { getTrailSwrKey } from '@services/courses/keys';
 import { Card, CardContent } from '@components/ui/card';
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
-import { mutate } from 'swr';
 
 interface TrailCourseElementProps {
   course: any;
@@ -19,6 +19,7 @@ interface TrailCourseElementProps {
 }
 
 const TrailCourseElement = ({ course, run }: TrailCourseElementProps) => {
+  const queryClient = useQueryClient();
   const courseid = course.course_uuid.replace('course_', '');
   const router = useRouter();
   const t = useTranslations('Trail');
@@ -36,8 +37,7 @@ const TrailCourseElement = ({ course, run }: TrailCourseElementProps) => {
     await revalidateTags(['courses']);
     router.refresh();
 
-    // Mutate
-    mutate(getTrailSwrKey());
+    await queryClient.invalidateQueries({ queryKey: queryKeys.trail.current() });
   }
 
   // Fetch certificate for this course

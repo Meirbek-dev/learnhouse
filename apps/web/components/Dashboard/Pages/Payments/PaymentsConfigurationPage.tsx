@@ -1,5 +1,6 @@
 'use client';
 
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -34,6 +35,7 @@ import {
 import { useEffect, useEffectEvent, useRef, useState, useTransition } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@components/ui/alert';
 import { Field, FieldContent, FieldError, FieldLabel } from '@components/ui/field';
+import { queryKeys } from '@/lib/react-query/queryKeys';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { SiStripe } from '@icons-pack/react-simple-icons';
@@ -42,7 +44,6 @@ import { Controller, useForm } from 'react-hook-form';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
-import useSWR, { mutate } from 'swr';
 import type { FC } from 'react';
 import { toast } from 'sonner';
 import * as v from 'valibot';
@@ -102,7 +103,11 @@ function ConfirmDeleteStripeConfig({ onDelete, t }: ConfirmDeleteStripeConfigPro
 }
 
 const PaymentsConfigurationPage: FC = () => {
-  const { data: paymentConfigs, error, isLoading } = useSWR('/payments/config', () => getPaymentConfigs());
+  const queryClient = useQueryClient();
+  const { data: paymentConfigs, error, isLoading } = useQuery({
+    queryKey: queryKeys.payments.config(),
+    queryFn: () => getPaymentConfigs(),
+  });
 
   const stripeConfig = paymentConfigs?.find((config: any) => config.provider === 'stripe');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -118,7 +123,7 @@ const PaymentsConfigurationPage: FC = () => {
       const newConfig = { provider: 'stripe' as const, enabled: true };
       const _config = await initializePaymentConfig(newConfig, 'stripe');
       toast.success(t('stripeEnabledSuccess'), { id: loadingToast });
-      mutate('/payments/config');
+      await queryClient.invalidateQueries({ queryKey: queryKeys.payments.config() });
     } catch (error) {
       console.error('Error enabling Stripe:', error);
       toast.error(t('errors.enableStripeFailed'), { id: loadingToast });
@@ -140,7 +145,7 @@ const PaymentsConfigurationPage: FC = () => {
 
       await deletePaymentConfig(stripeConfig.id);
       toast.success(t('stripeConfigDeletedSuccess'), { id: loadingToast });
-      mutate('/payments/config');
+      await queryClient.invalidateQueries({ queryKey: queryKeys.payments.config() });
     } catch (error) {
       console.error('Error deleting Stripe configuration:', error);
       toast.error(t('errors.deleteStripeConfigFailed'), {
@@ -333,6 +338,7 @@ type StripeConfigFormValues = v.InferOutput<ReturnType<typeof createStripeConfig
 type StripeConfigInputValues = v.InferInput<ReturnType<typeof createStripeConfigSchema>>;
 
 const EditStripeConfigModal: FC<EditStripeConfigModalProps> = ({ configId, isOpen, onClose }) => {
+  const queryClient = useQueryClient();
   const t = useTranslations('Payments.Configuration');
   const validationSchema = createStripeConfigSchema(t);
 
@@ -381,7 +387,7 @@ const EditStripeConfigModal: FC<EditStripeConfigModalProps> = ({ configId, isOpe
       };
       await updateStripeAccountID(stripe_config);
       toast.success(t('configUpdatedSuccess'), { id: loadingToast });
-      mutate('/payments/config');
+      await queryClient.invalidateQueries({ queryKey: queryKeys.payments.config() });
       onClose();
     } catch (error) {
       console.error('Error updating config:', error);

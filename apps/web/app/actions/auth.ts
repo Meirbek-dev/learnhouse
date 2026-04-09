@@ -77,7 +77,7 @@ function getSignupCode(payload: unknown): string | undefined {
     return undefined;
   }
 
-  const detail = payload.detail;
+  const {detail} = payload;
   if (typeof detail !== 'object' || detail === null || !('code' in detail)) {
     return undefined;
   }

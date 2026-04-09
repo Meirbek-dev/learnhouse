@@ -1,9 +1,11 @@
 'use client';
 
 import type { components } from '@/lib/api/generated';
+import { useQuery } from '@tanstack/react-query';
 
 import { getProductsByCourse, getStripeProductCheckoutSession } from '@services/payments/products';
 import { ChevronDown, ChevronUp, Loader2, RefreshCcw, SquareCheck } from 'lucide-react';
+import { queryKeys } from '@/lib/react-query/queryKeys';
 import { useAuth } from '@/hooks/useAuth';
 import { getAbsoluteUrl } from '@services/config/config';
 import { useState, useTransition } from 'react';
@@ -12,7 +14,6 @@ import { Badge } from '@components/ui/badge';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import useSWR from 'swr';
 
 type PaymentsProductRead = components['schemas']['PaymentsProductRead'];
 
@@ -30,9 +31,10 @@ const CoursePaidOptions = ({ course }: CoursePaidOptionsProps) => {
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
 
-  const { data: linkedProducts, error } = useSWR([`/payments/courses/${course.id}/products`, undefined], () =>
-    getProductsByCourse(course.id),
-  );
+  const { data: linkedProducts, error } = useQuery({
+    queryKey: queryKeys.payments.courseProducts(course.id),
+    queryFn: () => getProductsByCourse(course.id),
+  });
 
   const handleCheckout = async (productId: number) => {
     if (!currentUser) {

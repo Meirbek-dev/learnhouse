@@ -1,5 +1,6 @@
 'use client';
 
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,11 +32,11 @@ import { AlertTriangle, KeyRound, Loader2, LogOut } from 'lucide-react';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
 import { removeUser } from '@/services/platform/platform';
-import { swrFetcher } from '@services/utils/ts/requests';
+import { queryKeys } from '@/lib/react-query/queryKeys';
+import { apiFetcher } from '@services/utils/ts/requests';
 import React, { useState, useTransition } from 'react';
 import { getAPIUrl } from '@services/config/config';
 import { useTranslations } from 'next-intl';
-import useSWR, { mutate } from 'swr';
 import { toast } from 'sonner';
 
 const USERS_PER_PAGE = 20;
@@ -139,12 +140,16 @@ const Users = () => {
   })();
 
   const [currentPage, setCurrentPage] = useState(1);
+  const queryClient = useQueryClient();
 
   const {
     data: usersData,
     error,
     isLoading,
-  } = useSWR(`${getAPIUrl()}members?page=${currentPage}&per_page=${USERS_PER_PAGE}`, (url) => swrFetcher(url));
+  } = useQuery({
+    queryKey: queryKeys.users.members(currentPage, USERS_PER_PAGE),
+    queryFn: () => apiFetcher(`${getAPIUrl()}members?page=${currentPage}&per_page=${USERS_PER_PAGE}`),
+  });
 
   const totalUsers = usersData?.total ?? 0;
   const totalPages = usersData?.total_pages ?? 1;
@@ -167,8 +172,7 @@ const Users = () => {
     try {
       const res = await removeUser(user_id);
       if (res.status === 200) {
-        // Revalidate the current page data
-        await mutate(`${getAPIUrl()}members?page=${currentPage}&per_page=${USERS_PER_PAGE}`);
+        await queryClient.invalidateQueries({ queryKey: queryKeys.users.members(currentPage, USERS_PER_PAGE) });
         toast.success(t('userRemovedSuccess'), { id: toastId });
       } else {
         toast.error(t('errors.removeUserFailed'), { id: toastId });

@@ -1,5 +1,6 @@
 'use client';
 
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,14 +18,14 @@ import EditUserGroup from '@/components/Objects/Modals/Dash/UserGroups/EditUserG
 import AddUserGroup from '@/components/Objects/Modals/Dash/UserGroups/AddUserGroup';
 import ManageUsers from '@/components/Objects/Modals/Dash/UserGroups/ManageUsers';
 import { deleteUserGroup } from '@services/usergroups/usergroups';
+import { queryKeys } from '@/lib/react-query/queryKeys';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
-import { swrFetcher } from '@services/utils/ts/requests';
+import { apiFetcher } from '@services/utils/ts/requests';
 import type { ColumnDef } from '@tanstack/react-table';
 import { getAPIUrl } from '@services/config/config';
 import DataTable from '@components/ui/data-table';
 import { useState, useTransition } from 'react';
 import { useTranslations } from 'next-intl';
-import useSWR, { mutate } from 'swr';
 import { toast } from 'sonner';
 
 interface DeleteUserGroupButtonProps {
@@ -95,15 +96,19 @@ const UserGroups = () => {
   const [selectedUserGroup, setSelectedUserGroup] = useState<any | null>(null);
   const [selectedUserGroupIdForEdit, setSelectedUserGroupIdForEdit] = useState<number | null>(null);
   const [selectedUserGroupIdForManage, setSelectedUserGroupIdForManage] = useState<number | null>(null);
+  const queryClient = useQueryClient();
 
-  const { data: usergroups, error, isLoading } = useSWR(`${getAPIUrl()}usergroups`, (url) => swrFetcher(url));
+  const { data: usergroups, error, isLoading } = useQuery({
+    queryKey: queryKeys.userGroups.all(),
+    queryFn: () => apiFetcher(`${getAPIUrl()}usergroups`),
+  });
 
   const deleteUserGroupUI = async (usergroup_id: number) => {
     const toastId = toast.loading(t('deletingUserGroup'));
     try {
       const res = await deleteUserGroup(usergroup_id);
       if (res.status === 200) {
-        mutate(`${getAPIUrl()}usergroups`);
+        await queryClient.invalidateQueries({ queryKey: queryKeys.userGroups.all() });
         toast.success(t('userGroupDeletedSuccess'), { id: toastId });
       } else {
         toast.error(t('errors.deleteUserGroupFailed'), { id: toastId });

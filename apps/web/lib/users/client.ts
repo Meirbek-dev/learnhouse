@@ -1,10 +1,11 @@
 'use client';
 
+import { useQuery } from '@tanstack/react-query';
 import { apiFetch } from '@/lib/api-client';
+import { getQueryClient } from '@/lib/react-query/queryClient';
+import { queryKeys } from '@/lib/react-query/queryKeys';
 import type { CustomResponseTyping } from '@services/utils/ts/requests';
 import type { components } from '@/lib/api/generated';
-import useSWR from 'swr';
-import { mutate } from 'swr';
 
 type UserRead = components['schemas']['UserRead'];
 type CourseRead = components['schemas']['CourseRead'];
@@ -14,8 +15,8 @@ type ResponseMetadata<T> = Omit<CustomResponseTyping, 'data'> & {
 };
 
 export const userKeys = {
-  byId: (userId: number) => ['user', 'id', userId] as const,
-  byUsername: (username: string) => ['user', 'username', username] as const,
+  byId: (userId: number) => queryKeys.users.byId(userId),
+  byUsername: (username: string) => queryKeys.users.byUsername(username),
   coursesByUser: (userId: number) => ['user', 'courses', userId] as const,
 };
 
@@ -82,7 +83,7 @@ export async function updateUserAvatar(userId: number, avatarFile: File): Promis
   const data = await parseJsonOrNull<UserRead>(response);
 
   if (response.ok) {
-    await mutate(userKeys.byId(userId));
+    await getQueryClient().invalidateQueries({ queryKey: userKeys.byId(userId) });
   }
 
   return {
@@ -99,7 +100,7 @@ export async function updateUserLocale(userId: number, locale: string): Promise<
   });
   const data = await requireOkJson<UserRead>(response);
 
-  await mutate(userKeys.byId(userId));
+  await getQueryClient().invalidateQueries({ queryKey: userKeys.byId(userId) });
 
   return data;
 }
@@ -113,7 +114,7 @@ export async function updateProfile(data: unknown, userId: number): Promise<Resp
   const payload = await parseJsonOrNull<UserRead>(response);
 
   if (response.ok) {
-    await mutate(userKeys.byId(userId));
+    await getQueryClient().invalidateQueries({ queryKey: userKeys.byId(userId) });
   }
 
   return {
@@ -143,8 +144,10 @@ export async function updatePassword(userId: number, data: unknown): Promise<Res
 export function useUserById(userId?: number | null, options?: { enabled?: boolean }) {
   const enabled = Boolean(userId) && (options?.enabled ?? true);
 
-  return useSWR<UserRead>(enabled && userId ? userKeys.byId(userId) : null, () => getUserById(userId!), {
-    revalidateOnFocus: false,
+  return useQuery({
+    queryKey: enabled && userId ? userKeys.byId(userId) : ['users', 'detail', 'missing'],
+    queryFn: () => getUserById(userId!),
+    enabled,
   });
 }
 
@@ -152,11 +155,9 @@ export function useUserByUsername(username?: string | null, options?: { enabled?
   const normalizedUsername = username?.trim() ?? '';
   const enabled = normalizedUsername.length > 0 && (options?.enabled ?? true);
 
-  return useSWR<UserRead>(
-    enabled ? userKeys.byUsername(normalizedUsername) : null,
-    () => getUserByUsername(normalizedUsername),
-    {
-      revalidateOnFocus: false,
-    },
-  );
+  return useQuery({
+    queryKey: enabled ? userKeys.byUsername(normalizedUsername) : ['users', 'username', 'missing'],
+    queryFn: () => getUserByUsername(normalizedUsername),
+    enabled,
+  });
 }

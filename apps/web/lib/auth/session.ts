@@ -104,15 +104,15 @@ export const getSession = cache(async (): Promise<Session | null> => {
     }
 
     return sessionFromPayload(payload);
-  } catch (err) {
+  } catch (error) {
     // JWTExpired is the normal case when the access token has timed out.
     // The proxy.ts / refresh route handles getting a new token.
-    if (err instanceof joseErrors.JWTExpired) {
+    if (error instanceof joseErrors.JWTExpired) {
       return null;
     }
     // Other errors (invalid signature, malformed token, JWKS fetch failure)
     // are unexpected — log and treat as unauthenticated.
-    const message = err instanceof Error ? err.message : String(err);
+    const message = error instanceof Error ? error.message : String(error);
     console.warn('[getSession] JWT verification failed:', message);
     return null;
   }

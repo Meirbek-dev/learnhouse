@@ -1,19 +1,22 @@
 'use client';
 
-import { swrFetcher } from '@services/utils/ts/requests';
-import { courseKeys } from './courseKeys';
-import useSWR from 'swr';
+import { apiFetcher } from '@services/utils/ts/requests';
+import { useQuery } from '@tanstack/react-query';
+import { courseEndpoints, courseKeys } from './courseKeys';
 
 export function useCourse<TCourse = any>(courseUuid: string) {
   const key = courseKeys.detail(courseUuid);
 
-  const swr = useSWR<TCourse>(key, (url: string) => swrFetcher(url), {
-    revalidateOnFocus: false,
+  const query = useQuery({
+    queryKey: key,
+    queryFn: () => apiFetcher(courseEndpoints.detail(courseUuid)) as Promise<TCourse>,
+    enabled: Boolean(courseUuid),
   });
 
   return {
-    ...swr,
-    course: swr.data,
-    key: key?.[0] ?? null,
+    ...query,
+    course: query.data,
+    isLoading: query.isPending,
+    key,
   };
 }

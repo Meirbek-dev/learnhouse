@@ -1,6 +1,8 @@
 'use client';
 
 import { apiFetch } from '@/lib/api-client';
+import { useQuery } from '@tanstack/react-query';
+import { queryKeys } from '@/lib/react-query/queryKeys';
 
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,7 +10,7 @@ import { Field, FieldDescription, FieldError, FieldLabel } from '@/components/ui
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import { valibotResolver } from '@hookform/resolvers/valibot';
-import { swrFetcher } from '@services/utils/ts/requests';
+import { apiFetcher } from '@services/utils/ts/requests';
 import WhitelistManagement from './WhitelistManagement';
 import { Separator } from '@/components/ui/separator';
 import { getAPIUrl } from '@services/config/config';
@@ -19,7 +21,6 @@ import { Input } from '@/components/ui/input';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 import * as v from 'valibot';
-import useSWR from 'swr';
 
 const createValidationSchema = (
   limits = {
@@ -75,7 +76,10 @@ export default function ExamSettings({ exam, courseUuid, onSettingsUpdated }: Ex
 
   const settings = exam.settings || {};
 
-  const { data: limits, error: limitsError } = useSWR(`${getAPIUrl()}exams/config`, swrFetcher);
+  const { data: limits, error: limitsError } = useQuery({
+    queryKey: queryKeys.exams.config(),
+    queryFn: () => apiFetcher(`${getAPIUrl()}exams/config`),
+  });
 
   // show a soft error; allow editing with default bounds
   if (limitsError) {

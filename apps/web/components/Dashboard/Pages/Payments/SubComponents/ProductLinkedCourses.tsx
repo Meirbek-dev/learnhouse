@@ -1,17 +1,17 @@
 'use client';
 
 import type { components } from '@/lib/api/generated';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { getCoursesLinkedToProduct, unlinkCourseFromProduct } from '@services/payments/products';
+import { queryKeys } from '@/lib/react-query/queryKeys';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
 import { BookOpen, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@components/ui/button';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
-import useSWR, { mutate } from 'swr';
 import { toast } from 'sonner';
 
-import { getPaymentsProductsSwrKey, getProductLinkedCoursesSwrKey } from '@services/payments/keys';
 import LinkCourseModal from './LinkCourseModal';
 
 type CourseRead = components['schemas']['CourseRead'];
@@ -21,21 +21,19 @@ interface ProductLinkedCoursesProps {
 }
 
 export default function ProductLinkedCourses({ productId }: ProductLinkedCoursesProps) {
+  const queryClient = useQueryClient();
   const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
   const tNotify = useTranslations('DashPage.Notifications');
   const t = useTranslations('DashPage.Payments.LinkedCourses');
 
-  // Use SWR to fetch linked courses
-  const LINKED_COURSES_KEY = productId ? getProductLinkedCoursesSwrKey(String(productId)) : null;
-  const PRODUCTS_KEY = getPaymentsProductsSwrKey();
+  const linkedCoursesKey = queryKeys.payments.productCourses(productId);
 
-  const {
-    data: linkedCourses,
-    mutate: mutateLinkedCourses,
-    error,
-  } = useSWR(LINKED_COURSES_KEY || null, async () => {
-    const response = await getCoursesLinkedToProduct(productId);
-    return response.data || [];
+  const { data: linkedCourses, error } = useQuery({
+    queryKey: linkedCoursesKey,
+    queryFn: async () => {
+      const response = await getCoursesLinkedToProduct(productId);
+      return response.data || [];
+    },
   });
 
   // Show error toast if fetch fails
@@ -49,22 +47,21 @@ export default function ProductLinkedCourses({ productId }: ProductLinkedCourses
     if (!linkedCourses) return;
 
     const prev = linkedCourses;
-    // Optimistically remove from local list
-    await mutateLinkedCourses(
+    queryClient.setQueryData(
+      linkedCoursesKey,
       prev.filter((course: CourseRead) => course.id !== courseId),
-      false,
     );
 
     try {
       const response = await unlinkCourseFromProduct(productId, courseId);
       if (response.success) {
-        // Revalidate products list and linked courses list from server
-        mutate(PRODUCTS_KEY);
-        mutateLinkedCourses();
+        await Promise.all([
+          queryClient.invalidateQueries({ queryKey: queryKeys.payments.products() }),
+          queryClient.invalidateQueries({ queryKey: linkedCoursesKey }),
+        ]);
         toast.success(tNotify('courseUnlinkedSuccess'));
       } else {
-        // rollback
-        mutateLinkedCourses(prev, false);
+        queryClient.setQueryData(linkedCoursesKey, prev);
         toast.error(
           tNotify('errors.unlinkCourseFailed', {
             error: response.data?.message || '',
@@ -72,8 +69,7 @@ export default function ProductLinkedCourses({ productId }: ProductLinkedCourses
         );
       }
     } catch {
-      // rollback
-      mutateLinkedCourses(prev, false);
+      queryClient.setQueryData(linkedCoursesKey, prev);
       toast.error(tNotify('errors.unlinkCourseFailed', { error: '' }));
     }
   };
@@ -92,7 +88,7 @@ export default function ProductLinkedCourses({ productId }: ProductLinkedCourses
               productId={productId}
               onSuccess={() => {
                 setIsLinkModalOpen(false);
-                mutateLinkedCourses();
+                void queryClient.invalidateQueries({ queryKey: linkedCoursesKey });
               }}
             />
           }

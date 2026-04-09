@@ -1,8 +1,9 @@
 'use client';
 
+import { useQueryClient } from '@tanstack/react-query';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { Field, FieldContent, FieldError, FieldLabel } from '@components/ui/field';
-import { getPaymentsProductsSwrKey } from '@services/payments/keys';
+import { queryKeys } from '@/lib/react-query/queryKeys';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { createProduct } from '@services/payments/products';
 import { Controller, useForm, useWatch } from 'react-hook-form';
@@ -15,7 +16,6 @@ import { useEffect, useMemo } from 'react';
 import type { FC } from 'react';
 import { toast } from 'sonner';
 import * as v from 'valibot';
-import { mutate } from 'swr';
 
 const createValidationSchema = (t: (key: string, values?: any) => string) =>
   v.object({
@@ -38,6 +38,7 @@ type ProductFormValues = v.InferOutput<ReturnType<typeof createValidationSchema>
 type ProductFormInputValues = v.InferInput<ReturnType<typeof createValidationSchema>>;
 
 const CreateProductForm: FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
+  const queryClient = useQueryClient();
   const tNotify = useTranslations('DashPage.Notifications');
   const t = useTranslations('Payments.ProductForm');
   const validationSchema = createValidationSchema(t);
@@ -96,7 +97,7 @@ const CreateProductForm: FC<{ onSuccess: () => void }> = ({ onSuccess }) => {
       });
       if (res.success) {
         toast.success(tNotify('productCreatedSuccess'), { id: loadingToast });
-        mutate(getPaymentsProductsSwrKey());
+        await queryClient.invalidateQueries({ queryKey: queryKeys.payments.products() });
         form.reset();
         onSuccess();
       } else {

@@ -1,19 +1,20 @@
 'use client';
 
 import type { components } from '@/lib/api/generated';
+import { useQuery } from '@tanstack/react-query';
 
 import UnconfiguredPaymentsDisclaimer from '@components/Pages/Payments/UnconfiguredPaymentsDisclaimer';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { usePaymentsEnabled } from '@hooks/usePaymentsEnabled';
 import { getCustomers } from '@services/payments/payments';
+import { queryKeys } from '@/lib/react-query/queryKeys';
 import UserAvatar from '@components/Objects/UserAvatar';
 import type { ColumnDef } from '@tanstack/react-table';
 import { RefreshCcw, SquareCheck } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import DataTable from '@components/ui/data-table';
 import { Badge } from '@components/ui/badge';
-import useSWR from 'swr';
 
 type PaymentUserData = components['schemas']['PaymentsCustomerRead'];
 
@@ -128,7 +129,10 @@ const PaymentsCustomersPage = () => {
   const { isEnabled, isLoading } = usePaymentsEnabled();
   const t = useTranslations('Payments.CustomersPage');
 
-  const { data: customers, error, isLoading: customersLoading } = useSWR('/payments/customers', () => getCustomers());
+  const { data: customers, error, isLoading: customersLoading } = useQuery({
+    queryKey: queryKeys.payments.customers(),
+    queryFn: () => getCustomers(),
+  });
 
   if (!(isEnabled || isLoading)) {
     return <UnconfiguredPaymentsDisclaimer />;

@@ -1,17 +1,18 @@
 'use client';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { assignRoleToUser, removeRoleFromUser } from '@/services/rbac';
 import { Field, FieldError, FieldLabel } from '@components/ui/field';
 import { BarLoader } from '@components/Objects/Loaders/BarLoader';
 import { Alert, AlertDescription } from '@components/ui/alert';
 import { valibotResolver } from '@hookform/resolvers/valibot';
-import { swrFetcher } from '@services/utils/ts/requests';
+import { apiFetcher } from '@services/utils/ts/requests';
 import { Controller, useForm } from 'react-hook-form';
+import { queryKeys } from '@/lib/react-query/queryKeys';
 import { getAPIUrl } from '@services/config/config';
 import { useState } from 'react';
 import { Button } from '@components/ui/button';
 import { useTranslations } from 'next-intl';
-import useSWR, { mutate } from 'swr';
 import type { FC } from 'react';
 import { toast } from 'sonner';
 import * as v from 'valibot';
@@ -33,6 +34,7 @@ interface FormData {
 type RoleFormValues = v.InferOutput<ReturnType<typeof createValidationSchema>>;
 
 const RolesUpdate: FC<Props> = (props) => {
+  const queryClient = useQueryClient();
   const validationT = useTranslations('Validation');
   const t = useTranslations('Components.RolesUpdate');
   const validationSchema = createValidationSchema(validationT);
@@ -46,7 +48,10 @@ const RolesUpdate: FC<Props> = (props) => {
   });
 
   // Fetch available platform roles and sort them by system flag + priority
-  const { data: roles, error: rolesError } = useSWR(`${getAPIUrl()}roles`, swrFetcher);
+  const { data: roles, error: rolesError } = useQuery({
+    queryKey: queryKeys.users.roles(),
+    queryFn: () => apiFetcher(`${getAPIUrl()}roles`),
+  });
 
   const sortedRoles = (roles ?? []).toSorted((a: any, b: any) => {
     // System roles first, then by descending priority, then by name
@@ -72,7 +77,7 @@ const RolesUpdate: FC<Props> = (props) => {
       }
       await assignRoleToUser(userId, newRoleId);
 
-      await mutate(`${getAPIUrl()}members`);
+      await queryClient.invalidateQueries({ queryKey: queryKeys.users.allMembers() });
       props.setRolesModal(false);
       toast.success(t('toastSuccess'), { id: toastId });
     } catch (error: any) {

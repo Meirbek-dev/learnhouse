@@ -89,7 +89,7 @@ const createRequestInit = (
 /**
  * Thin fetch wrapper that automatically refreshes the access token on 401
  * and retries the original request once.  All existing helper functions
- * (swrFetcher, RequestBody, etc.) are built on this.
+ * (apiFetcher, RequestBody, etc.) are built on this.
  *
  * Only runs on the client side — on the server (SSR) we never have a refresh
  * token cookie available, so we skip the retry logic there.
@@ -104,7 +104,7 @@ export const RequestBody = (method: string, data: any, next: any) => {
   return createRequestInit(method, { data, next });
 };
 
-export const swrFetcher = async (url: string) => {
+export const apiFetcher = async (url: string) => {
   const options: RequestInit = {
     method: 'GET',
     redirect: 'follow',
@@ -125,10 +125,10 @@ export const fetchResponseMetadata = async (url: string): Promise<CustomResponse
 };
 
 /**
- * SWR fetcher that returns both data and response headers.
+ * Fetcher that returns both data and response headers.
  * Useful for paginated endpoints that return total count in headers.
  */
-export const swrFetcherWithHeaders = async (url: string): Promise<{ data: any; headers: Record<string, string> }> => {
+export const apiFetcherWithHeaders = async (url: string): Promise<{ data: any; headers: Record<string, string> }> => {
   const options: RequestInit = {
     method: 'GET',
     redirect: 'follow',

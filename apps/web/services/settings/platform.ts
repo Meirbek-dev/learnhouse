@@ -6,7 +6,6 @@ import { tags } from '@/lib/cacheTags';
 
 /*
  This file includes only POST, PUT, DELETE requests
- GET requests are called from the frontend using SWR (https://swr.vercel.app/)
 */
 
 export async function updatePlatform(data: any) {

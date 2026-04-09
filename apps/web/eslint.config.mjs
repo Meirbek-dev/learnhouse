@@ -11,6 +11,7 @@ import reactHooks from 'eslint-plugin-react-hooks';
 import jsxA11y from 'eslint-plugin-jsx-a11y';
 import next from '@next/eslint-plugin-next';
 import react from 'eslint-plugin-react';
+import pluginQuery from '@tanstack/eslint-plugin-query'
 
 /* -------------------------------------------------------------------------- */
 /* Shared rules                                                               */
@@ -66,12 +67,12 @@ export default defineConfig(
 
   {
     ignores: [
-      '**/node_modules/**',
-      '**/.next/**',
-      '**/out/**',
-      '**/build/**',
-      'next-env.d.ts',
-      '*.config.{js,mjs,cjs,ts}',
+      "**/node_modules/**",
+      "**/.next/**",
+      "**/out/**",
+      "**/build/**",
+      "next-env.d.ts",
+      "*.config.{js,mjs,cjs,ts}",
     ],
   },
 
@@ -80,6 +81,12 @@ export default defineConfig(
   /* ------------------------------------------------------------------------ */
 
   js.configs.recommended,
+
+  /* ------------------------------------------------------------------------ */
+  /* TanStack Query strict                                                    */
+  /* ------------------------------------------------------------------------ */
+
+  ...pluginQuery.configs["flat/recommended-strict"],
 
   /* ------------------------------------------------------------------------ */
   /* TypeScript recommended (typed)                                           */
@@ -93,18 +100,18 @@ export default defineConfig(
 
   {
     plugins: {
-      '@typescript-eslint': tseslint.plugin,
+      "@typescript-eslint": tseslint.plugin,
       react,
-      'react-hooks': /** @type {any} */ (reactHooks),
-      '@next/next': next,
-      'unused-imports': unusedImports,
-      'jsx-a11y': /** @type {any} */ (jsxA11y),
+      "react-hooks": /** @type {any} */ (reactHooks),
+      "@next/next": next,
+      "unused-imports": unusedImports,
+      "jsx-a11y": /** @type {any} */ (jsxA11y),
     },
 
     languageOptions: {
       parser: tseslint.parser,
-      ecmaVersion: 'latest',
-      sourceType: 'module',
+      ecmaVersion: "latest",
+      sourceType: "module",
       parserOptions: {
         projectService: true,
         ecmaFeatures: { jsx: true },
@@ -112,7 +119,7 @@ export default defineConfig(
     },
 
     settings: {
-      react: { version: 'detect' },
+      react: { version: "detect" },
     },
   },
 
@@ -121,8 +128,8 @@ export default defineConfig(
   /* ------------------------------------------------------------------------ */
 
   {
-    name: 'js/jsx',
-    files: ['**/*.{js,jsx,mjs,cjs}'],
+    name: "js/jsx",
+    files: ["**/*.{js,jsx,mjs,cjs}"],
 
     extends: [tseslint.configs.disableTypeChecked],
 
@@ -134,51 +141,51 @@ export default defineConfig(
   /* ------------------------------------------------------------------------ */
 
   {
-    name: 'ts/tsx',
-    files: ['**/*.{ts,tsx}'],
+    name: "ts/tsx",
+    files: ["**/*.{ts,tsx}"],
 
     rules: /** @type {any} */ ({
       ...COMMON_RULES,
 
       /* TypeScript */
 
-      '@typescript-eslint/no-explicit-any': 'off',
-      '@typescript-eslint/no-unused-vars': 'off',
-      '@typescript-eslint/no-require-imports': 'warn',
-      '@typescript-eslint/no-unsafe-function-type': 'off',
-      '@typescript-eslint/triple-slash-reference': 'warn',
-      '@typescript-eslint/no-misused-promises': 'off',
-      '@typescript-eslint/no-floating-promises': 'off',
-      '@typescript-eslint/promise-function-async': 'off',
-      '@typescript-eslint/consistent-type-imports': [
-        'warn',
+      "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/no-unused-vars": "off",
+      "@typescript-eslint/no-require-imports": "warn",
+      "@typescript-eslint/no-unsafe-function-type": "off",
+      "@typescript-eslint/triple-slash-reference": "warn",
+      "@typescript-eslint/no-misused-promises": "off",
+      "@typescript-eslint/no-floating-promises": "off",
+      "@typescript-eslint/promise-function-async": "off",
+      "@typescript-eslint/consistent-type-imports": [
+        "warn",
         {
-          prefer: 'type-imports',
-          fixStyle: 'inline-type-imports',
+          prefer: "type-imports",
+          fixStyle: "inline-type-imports",
         },
       ],
 
       /* Disable core rules replaced by TS */
 
-      'no-undef': 'off',
-      'no-redeclare': 'off',
+      "no-undef": "off",
+      "no-redeclare": "off",
 
-      '@typescript-eslint/no-redeclare': 'warn',
+      "@typescript-eslint/no-redeclare": "warn",
 
       // Should enable at some point
-      '@typescript-eslint/no-unsafe-assignment': 'off',
-      '@typescript-eslint/no-unsafe-return': 'off',
-      '@typescript-eslint/no-unsafe-member-access': 'off',
-      '@typescript-eslint/no-unsafe-argument': 'off',
-      '@typescript-eslint/no-unsafe-call': 'off',
-      '@typescript-eslint/require-await': 'off',
-      '@typescript-eslint/no-redundant-type-constituents': 'off',
-      '@typescript-eslint/restrict-template-expressions': 'off',
-      '@typescript-eslint/only-throw-error': 'off',
-      '@typescript-eslint/no-unsafe-enum-comparison': 'off',
-      '@typescript-eslint/no-base-to-string': 'off',
-      '@typescript-eslint/ban-ts-comment': 'off',
-      '@typescript-eslint/prefer-promise-reject-errors': 'off',
+      "@typescript-eslint/no-unsafe-assignment": "off",
+      "@typescript-eslint/no-unsafe-return": "off",
+      "@typescript-eslint/no-unsafe-member-access": "off",
+      "@typescript-eslint/no-unsafe-argument": "off",
+      "@typescript-eslint/no-unsafe-call": "off",
+      "@typescript-eslint/require-await": "off",
+      "@typescript-eslint/no-redundant-type-constituents": "off",
+      "@typescript-eslint/restrict-template-expressions": "off",
+      "@typescript-eslint/only-throw-error": "off",
+      "@typescript-eslint/no-unsafe-enum-comparison": "off",
+      "@typescript-eslint/no-base-to-string": "off",
+      "@typescript-eslint/ban-ts-comment": "off",
+      "@typescript-eslint/prefer-promise-reject-errors": "off",
     }),
   },
 
@@ -187,14 +194,14 @@ export default defineConfig(
   /* ------------------------------------------------------------------------ */
 
   {
-    name: 'course-management-design-guard',
+    name: "course-management-design-guard",
 
     files: [
-      'app/(platform)/dash/courses/**/*.{ts,tsx}',
-      'components/Dashboard/Courses/**/*.{ts,tsx}',
-      'components/Dashboard/Pages/Course/**/*.{ts,tsx}',
-      'components/Landings/CreateCourseTrigger.tsx',
-      'app/(platform)/(withmenu)/courses/**/*.{ts,tsx}',
+      "app/(platform)/dash/courses/**/*.{ts,tsx}",
+      "components/Dashboard/Courses/**/*.{ts,tsx}",
+      "components/Dashboard/Pages/Course/**/*.{ts,tsx}",
+      "components/Landings/CreateCourseTrigger.tsx",
+      "app/(platform)/(withmenu)/courses/**/*.{ts,tsx}",
     ],
   },
 );

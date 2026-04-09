@@ -1,13 +1,14 @@
 'use client';
 
+import { useQuery } from '@tanstack/react-query';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import ErrorUI from '@/components/Objects/Elements/Error/Error';
-import { swrFetcher } from '@services/utils/ts/requests';
+import { queryKeys } from '@/lib/react-query/queryKeys';
+import { apiFetcher } from '@services/utils/ts/requests';
 import { getAPIUrl } from '@services/config/config';
 import { createContext, use, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
-import useSWR from 'swr';
 
 interface AssignmentContextType {
   assignment_object: any | null;
@@ -66,29 +67,36 @@ export const AssignmentProvider = ({
 }) => {
   const t = useTranslations('Contexts.Assignment');
 
-  const { data: assignment, error: assignmentError } = useSWR(
-    assignment_uuid && assignment_uuid !== 'undefined' ? `${getAPIUrl()}assignments/${assignment_uuid}` : null,
-    (url) => swrFetcher(url),
-  );
+  const assignmentKey = assignment_uuid && assignment_uuid !== 'undefined' ? queryKeys.assignments.detail(assignment_uuid) : null;
+  const { data: assignment, error: assignmentError } = useQuery({
+    queryKey: assignmentKey ?? ['assignments', 'detail', 'missing'],
+    queryFn: () => apiFetcher(`${getAPIUrl()}assignments/${assignment_uuid}`),
+    enabled: Boolean(assignmentKey),
+  });
 
-  const { data: assignment_tasks, error: assignmentTasksError } = useSWR(
-    assignment_uuid && assignment_uuid !== 'undefined' ? `${getAPIUrl()}assignments/${assignment_uuid}/tasks` : null,
-    (url) => swrFetcher(url),
-  );
+  const { data: assignment_tasks, error: assignmentTasksError } = useQuery({
+    queryKey: assignment_uuid && assignment_uuid !== 'undefined'
+      ? queryKeys.assignments.tasks(assignment_uuid)
+      : ['assignments', 'tasks', 'missing'],
+    queryFn: () => apiFetcher(`${getAPIUrl()}assignments/${assignment_uuid}/tasks`),
+    enabled: Boolean(assignment_uuid && assignment_uuid !== 'undefined'),
+  });
 
   const course_uuid = assignment?.course_uuid;
 
-  const { data: course_object, error: courseObjectError } = useSWR(
-    course_uuid ? `${getAPIUrl()}courses/${course_uuid}` : null,
-    (url) => swrFetcher(url),
-  );
+  const { data: course_object, error: courseObjectError } = useQuery({
+    queryKey: course_uuid ? queryKeys.courses.metadata(course_uuid) : ['courses', 'metadata', 'missing'],
+    queryFn: () => apiFetcher(`${getAPIUrl()}courses/${course_uuid}`),
+    enabled: Boolean(course_uuid),
+  });
 
   const activity_uuid = assignment?.activity_uuid;
 
-  const { data: activity_object, error: activityObjectError } = useSWR(
-    activity_uuid ? `${getAPIUrl()}activities/${activity_uuid}` : null,
-    (url) => swrFetcher(url),
-  );
+  const { data: activity_object, error: activityObjectError } = useQuery({
+    queryKey: activity_uuid ? ['activities', 'detail', activity_uuid] : ['activities', 'detail', 'missing'],
+    queryFn: () => apiFetcher(`${getAPIUrl()}activities/${activity_uuid}`),
+    enabled: Boolean(activity_uuid),
+  });
 
   // Derive assignmentsFull (memoized to avoid unnecessary context value changes)
   const assignmentsFull: AssignmentContextType = useMemo(

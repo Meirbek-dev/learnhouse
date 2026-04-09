@@ -1,7 +1,7 @@
 'use client';
 
+import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import useSWR from 'swr';
 
 import { CodeChallengeEditor } from '@/components/features/courses/code-challenges';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -27,11 +27,11 @@ export default function CodeChallengeActivity({ activity, course }: CodeChalleng
   const activityUuid = activity?.activity_uuid?.replace('activity_', '') || '';
 
   // Fetch challenge settings
-  const { data: settings, isLoading } = useSWR(
-    activityUuid ? `${getAPIUrl()}code-challenges/${activityUuid}/settings` : null,
-    fetcher,
-    { revalidateOnFocus: false },
-  );
+  const { data: settings, isLoading } = useQuery({
+    queryKey: ['code-challenges', 'settings', activityUuid],
+    queryFn: () => fetcher(`${getAPIUrl()}code-challenges/${activityUuid}/settings`),
+    enabled: Boolean(activityUuid),
+  });
 
   // Check if challenge is properly configured (has at least one allowed language)
   const isConfigured = settings?.allowed_languages && settings.allowed_languages.length > 0;

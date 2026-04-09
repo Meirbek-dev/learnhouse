@@ -1,13 +1,14 @@
 'use client';
 
 import { valibotResolver } from '@hookform/resolvers/valibot';
-import { swrFetcher } from '@services/utils/ts/requests';
+import { useQuery } from '@tanstack/react-query';
+import { apiFetcher } from '@services/utils/ts/requests';
 import { Controller, useForm, useWatch } from 'react-hook-form';
+import { queryKeys } from '@/lib/react-query/queryKeys';
 import { useTranslations } from 'next-intl';
 import { useEffect } from 'react';
 import { toast } from 'sonner';
 import * as v from 'valibot';
-import useSWR from 'swr';
 
 import { Field, FieldDescription, FieldError, FieldLabel } from '@components/ui/field';
 import { getAPIUrl } from '@/services/config/config';
@@ -47,7 +48,10 @@ const NewExam = ({ submitActivity, chapterId, course, closeModal }: any) => {
   const validationT = useTranslations('Validation');
   const t = useTranslations('Components.NewExamModal');
 
-  const { data: limits } = useSWR(`${getAPIUrl()}exams/config`, swrFetcher);
+  const { data: limits } = useQuery({
+    queryKey: queryKeys.exams.config(),
+    queryFn: () => apiFetcher(`${getAPIUrl()}exams/config`),
+  });
   const validationSchema = createValidationSchema(validationT, limits);
   const withUnpublishedActivities = course ? course.withUnpublishedActivities : false;
 

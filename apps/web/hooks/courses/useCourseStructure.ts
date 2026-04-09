@@ -1,7 +1,8 @@
 'use client';
 
-import { courseKeys } from './courseKeys';
-import useSWR from 'swr';
+import { useQuery } from '@tanstack/react-query';
+import { apiFetcher } from '@services/utils/ts/requests';
+import { courseEndpoints, courseKeys } from './courseKeys';
 
 interface UseCourseStructureOptions<TCourseStructure> {
   withUnpublishedActivities?: boolean;
@@ -22,17 +23,18 @@ export function useCourseStructure<TCourseStructure = any>(
   const withUnpublishedActivities = options?.withUnpublishedActivities ?? false;
   const key = courseKeys.structure(courseUuid, withUnpublishedActivities);
 
-  const swr = useSWR<TCourseStructure>(key, {
-    fallbackData: options?.fallbackData,
-    revalidateOnMount: options?.fallbackData ? false : undefined,
-    revalidateIfStale: options?.fallbackData ? false : undefined,
-    revalidateOnFocus: false,
-    dedupingInterval: 5000,
+  const query = useQuery({
+    queryKey: key,
+    queryFn: () => apiFetcher(courseEndpoints.structure(courseUuid, withUnpublishedActivities)) as Promise<TCourseStructure>,
+    enabled: Boolean(courseUuid),
+    initialData: options?.fallbackData,
+    staleTime: 5000,
   });
 
   return {
-    ...swr,
-    courseStructure: swr.data,
+    ...query,
+    courseStructure: query.data,
+    isLoading: query.isPending,
     key,
   };
 }

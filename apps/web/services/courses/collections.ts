@@ -8,7 +8,6 @@ import { getAPIUrl } from '../config/config';
 
 /*
  This file includes POST, PUT, DELETE requests and cached GET requests
- Client-side GET requests are called from the frontend using SWR
 */
 
 export async function deleteCollection(collection_uuid: string) {

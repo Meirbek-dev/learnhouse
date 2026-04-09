@@ -2,19 +2,20 @@
 
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import useSWR, { mutate } from 'swr';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { apiFetch } from '@/lib/api-client';
+import { queryKeys } from '@/lib/react-query/queryKeys';
 import { getAPIUrl, getAbsoluteUrl } from '@/services/config/config';
 import { useContributorStatus } from '@/hooks/useContributorStatus';
+import { courseKeys } from '@/hooks/courses/courseKeys';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import type { AttemptData } from './state/examFlowReducer';
-import { swrFetcher } from '@/services/utils/ts/requests';
+import { apiFetcher } from '@/services/utils/ts/requests';
 import { examFlowReducer } from './state/examFlowReducer';
 import ExamResultsDashboard from './ExamResultsDashboard';
-import { getTrailSwrKey } from '@services/courses/keys';
 import ExamTakingInterface from './ExamTakingInterface';
 import QuestionManagement from './QuestionManagement';
 import { examActions } from './state/examActions';
@@ -52,6 +53,7 @@ interface ExamActivityProps {
 export default function ExamActivity({ activity, course }: ExamActivityProps) {
   const t = useTranslations('Activities.ExamActivity');
   const { contributorStatus } = useContributorStatus(course.course_uuid);
+  const queryClient = useQueryClient();
 
   // Centralized state management with reducer
   const [state, dispatch] = useReducer(examFlowReducer, { phase: 'loading' });
@@ -64,8 +66,11 @@ export default function ExamActivity({ activity, course }: ExamActivityProps) {
   const {
     data: exam,
     error: examError,
-    mutate: mutateExam,
-  } = useSWR(`${getAPIUrl()}exams/activity/${activity.activity_uuid}`, swrFetcher);
+    refetch: mutateExam,
+  } = useQuery({
+    queryKey: queryKeys.exams.activity(activity.activity_uuid),
+    queryFn: () => apiFetcher(`${getAPIUrl()}exams/activity/${activity.activity_uuid}`),
+  });
 
   // Safe exam uuid reference to avoid accessing property on undefined
   const examUuid = exam?.exam_uuid ?? null;
@@ -74,21 +79,30 @@ export default function ExamActivity({ activity, course }: ExamActivityProps) {
   const {
     data: questions,
     error: questionsError,
-    mutate: mutateQuestions,
-  } = useSWR(examUuid ? `${getAPIUrl()}exams/${examUuid}/questions` : null, swrFetcher);
+    refetch: mutateQuestions,
+  } = useQuery({
+    queryKey: examUuid ? queryKeys.exams.questions(examUuid) : ['exams', 'questions', 'disabled'],
+    queryFn: () => apiFetcher(`${getAPIUrl()}exams/${examUuid}/questions`),
+    enabled: Boolean(examUuid),
+  });
 
   // Fetch user's attempts (fetch for both students and teachers now)
   const {
     data: userAttempts,
     error: attemptsError,
-    mutate: mutateAttempts,
-  } = useSWR(examUuid ? `${getAPIUrl()}exams/${examUuid}/attempts/me` : null, swrFetcher);
+    refetch: mutateAttempts,
+  } = useQuery({
+    queryKey: examUuid ? queryKeys.exams.myAttempt(examUuid) : ['exams', 'attempts', 'me', 'disabled'],
+    queryFn: () => apiFetcher(`${getAPIUrl()}exams/${examUuid}/attempts/me`),
+    enabled: Boolean(examUuid),
+  });
 
   // Fetch all attempts for teachers
-  const { data: allAttempts } = useSWR(
-    examUuid && isTeacher ? `${getAPIUrl()}exams/${examUuid}/attempts/all` : null,
-    swrFetcher,
-  );
+  const { data: allAttempts } = useQuery({
+    queryKey: examUuid ? queryKeys.exams.allAttempts(examUuid) : ['exams', 'attempts', 'all', 'disabled'],
+    queryFn: () => apiFetcher(`${getAPIUrl()}exams/${examUuid}/attempts/all`),
+    enabled: Boolean(examUuid && isTeacher),
+  });
 
   // Update state based on loaded data
   useEffect(() => {
@@ -145,7 +159,7 @@ export default function ExamActivity({ activity, course }: ExamActivityProps) {
 
     // Revalidate trail data
     try {
-      await mutate(getTrailSwrKey());
+      await queryClient.invalidateQueries({ queryKey: queryKeys.trail.current() });
     } catch (error) {
       console.warn('Failed to revalidate trail after exam completion', error);
     }
@@ -153,9 +167,9 @@ export default function ExamActivity({ activity, course }: ExamActivityProps) {
     // Revalidate course meta
     try {
       const withUnpublishedActivities = course?.withUnpublishedActivities || false;
-      await mutate(
-        `${getAPIUrl()}courses/${course?.course_uuid}/meta?with_unpublished_activities=${withUnpublishedActivities}`,
-      );
+      await queryClient.invalidateQueries({
+        queryKey: courseKeys.structure(course?.course_uuid, withUnpublishedActivities),
+      });
     } catch (error) {
       console.warn('Failed to revalidate course meta after exam completion', error);
     }
@@ -166,7 +180,7 @@ export default function ExamActivity({ activity, course }: ExamActivityProps) {
     const lastAttempt = completedAttempt[0];
     dispatch(examActions.submitExam(lastAttempt));
     isCompletingRef.current = false;
-  }, [mutateAttempts, course, examUuid]);
+  }, [mutateAttempts, course, examUuid, queryClient]);
 
   const router = useRouter();
 

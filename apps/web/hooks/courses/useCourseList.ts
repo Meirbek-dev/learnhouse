@@ -1,9 +1,9 @@
 'use client';
 
-import { swrFetcherWithHeaders } from '@services/utils/ts/requests';
+import { useQuery } from '@tanstack/react-query';
+import { apiFetcherWithHeaders } from '@services/utils/ts/requests';
 import type { CourseListKeyOptions } from './courseKeys';
-import { courseKeys } from './courseKeys';
-import useSWR from 'swr';
+import { courseEndpoints, courseKeys } from './courseKeys';
 
 interface CourseListResponse<TCourse> {
   courses: TCourse[];
@@ -18,36 +18,36 @@ interface CourseListResponse<TCourse> {
 
 export function useCourseList<TCourse = any>(options: CourseListKeyOptions = {}) {
   const key = courseKeys.list(options);
+  const url = courseEndpoints.list(options);
 
-  const swr = useSWR<CourseListResponse<TCourse>>(
-    key,
-    async (url: string) => {
-      const response = await swrFetcherWithHeaders(url);
+  const query = useQuery({
+    queryKey: key,
+    queryFn: async () => {
+      const response = await apiFetcherWithHeaders(url);
       return {
         courses: Array.isArray(response.data) ? response.data : [],
         total: Number.parseInt(response.headers['x-total-count'] ?? '0', 10),
       };
     },
-    {
-      revalidateOnFocus: false,
-    },
-  );
+  });
 
   return {
-    ...swr,
-    data: swr.data?.courses ?? [],
-    total: swr.data?.total ?? 0,
-    courses: swr.data?.courses ?? [],
+    ...query,
+    courses: query.data?.courses ?? [],
+    data: query.data?.courses ?? [],
+    isLoading: query.isPending,
+    total: query.data?.total ?? 0,
   };
 }
 
 export function useEditableCourseList<TCourse = any>(options: CourseListKeyOptions = {}) {
   const key = courseKeys.editable(options);
+  const url = courseEndpoints.editable(options);
 
-  const swr = useSWR<CourseListResponse<TCourse>>(
-    key,
-    async (url: string) => {
-      const response = await swrFetcherWithHeaders(url);
+  const query = useQuery({
+    queryKey: key,
+    queryFn: async () => {
+      const response = await apiFetcherWithHeaders(url);
       return {
         courses: Array.isArray(response.data) ? response.data : [],
         total: Number.parseInt(response.headers['x-total-count'] ?? '0', 10),
@@ -59,16 +59,14 @@ export function useEditableCourseList<TCourse = any>(options: CourseListKeyOptio
         },
       };
     },
-    {
-      revalidateOnFocus: false,
-    },
-  );
+  });
 
   return {
-    ...swr,
-    data: swr.data?.courses ?? [],
-    total: swr.data?.total ?? 0,
-    summary: swr.data?.summary,
-    courses: swr.data?.courses ?? [],
+    ...query,
+    courses: query.data?.courses ?? [],
+    data: query.data?.courses ?? [],
+    isLoading: query.isPending,
+    summary: query.data?.summary,
+    total: query.data?.total ?? 0,
   };
 }

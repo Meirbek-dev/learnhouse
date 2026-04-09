@@ -28,6 +28,7 @@ import {
   Video,
   X as XIcon,
 } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import { deleteAssignmentUsingActivityUUID, getAssignmentFromActivityUUID } from '@services/courses/assignments';
 import { CourseWorkflowBadge } from '@components/Dashboard/Courses/courseWorkflowUi';
 import { useActivityMutations } from '@/hooks/mutations/useActivityMutations';
@@ -43,7 +44,6 @@ import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import useSWR from 'swr';
 
 type ActivityType =
   | 'TYPE_VIDEO'
@@ -120,13 +120,14 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
   const [isDeletingActivity, setIsDeletingActivity] = useState(false);
   const [fetchAssignment, setFetchAssignment] = useState(false);
 
-  const { data: assignmentUUID, isLoading: isAssignmentLoading } = useSWR(
-    activity.activity_type === 'TYPE_ASSIGNMENT' && fetchAssignment ? `assignment-${activity.activity_uuid}` : null,
-    async () => {
+  const { data: assignmentUUID, isLoading: isAssignmentLoading } = useQuery({
+    queryKey: ['assignments', 'activity', activity.activity_uuid],
+    queryFn: async () => {
       const result = await getAssignmentFromActivityUUID(activity.activity_uuid);
       return result?.data?.assignment_uuid?.replace('assignment_', '') ?? null;
     },
-  );
+    enabled: activity.activity_type === 'TYPE_ASSIGNMENT' && fetchAssignment,
+  });
 
   const canUpdate = activity.can_update ?? false;
   const canDelete = activity.can_delete ?? false;

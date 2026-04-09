@@ -1,5 +1,6 @@
 'use client';
 
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   bulkAddContributors,
   bulkRemoveContributors,
@@ -13,7 +14,6 @@ import type { CourseEditorBundle } from '@services/courses/editor';
 import { courseKeys } from '@/hooks/courses/courseKeys';
 import { assertSuccess } from '@/lib/api/assertSuccess';
 import { useCourseEditorStore } from '@/stores/courses';
-import { useSWRConfig } from 'swr';
 
 interface MutationOptions {
   lastKnownUpdateDate?: string | null;
@@ -57,202 +57,231 @@ const buildOptimisticContributor = (user: ContributorDraftUser) => {
 };
 
 export function useCoursesMutations(courseUuid: string, withUnpublishedActivities = true) {
-  const { mutate, cache } = useSWRConfig();
+  const queryClient = useQueryClient();
   const structureKey = courseKeys.structure(courseUuid, withUnpublishedActivities);
   const detailKey = courseKeys.detail(courseUuid);
 
-  // Read current SWR cache value synchronously — no identity-mutate hack needed.
-  const captureSnapshot = (key: string | readonly unknown[]): unknown | undefined =>
-    (cache.get(key as any) as any)?.data as unknown | undefined;
-
   const refreshCourse = async () => {
-    await Promise.all([mutate(structureKey), mutate(detailKey)]);
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: structureKey }),
+      queryClient.invalidateQueries({ queryKey: detailKey }),
+    ]);
   };
 
   const refreshEditorBundle = async () => {
     const editorBundleKey = courseKeys.editorBundle(courseUuid);
     if (!editorBundleKey) return;
-    await mutate(editorBundleKey as any);
+    await queryClient.invalidateQueries({ queryKey: editorBundleKey });
   };
-
-  const updateMetadata = async (payload: Partial<CourseGeneralValues>, options: MutationOptions) => {
-    const previousStructure = captureSnapshot(structureKey);
-
-    await mutate(structureKey, (current: any) => (current ? { ...current, ...payload } : current), {
-      revalidate: false,
-    });
-
-    try {
-      const response = assertSuccess(
+  const updateMetadataMutation = useMutation({
+    mutationFn: async ({ options, payload }: { options: MutationOptions; payload: Partial<CourseGeneralValues> }) =>
+      assertSuccess(
         await updateCourseMetadata(courseUuid, payload, {
           lastKnownUpdateDate: options.lastKnownUpdateDate,
         }),
-      );
+      ),
+    onMutate: async ({ payload }) => {
+      await queryClient.cancelQueries({ queryKey: structureKey });
+      const previousStructure = queryClient.getQueryData(structureKey);
+      queryClient.setQueryData(structureKey, (current: any) => (current ? { ...current, ...payload } : current));
+      return { previousStructure };
+    },
+    onError: (_error, _variables, context) => {
+      queryClient.setQueryData(structureKey, context?.previousStructure);
+    },
+    onSuccess: async (response) => {
       useCourseEditorStore.getState().syncLastKnownUpdateDate(response?.data?.update_date);
       await refreshCourse();
-      return response;
-    } catch (error) {
-      await mutate(structureKey, previousStructure, { revalidate: false });
-      throw error;
-    }
-  };
+    },
+  });
 
-  const updateAccess = async (
-    payload: Partial<CourseAccessValues & { open_to_contributors?: boolean }>,
-    options: MutationOptions,
-  ) => {
-    const previousStructure = captureSnapshot(structureKey);
-
-    await mutate(structureKey, (current: any) => (current ? { ...current, ...payload } : current), {
-      revalidate: false,
-    });
-
-    try {
-      const response = assertSuccess(
+  const updateAccessMutation = useMutation({
+    mutationFn: async ({
+      options,
+      payload,
+    }: {
+      options: MutationOptions;
+      payload: Partial<CourseAccessValues & { open_to_contributors?: boolean }>;
+    }) =>
+      assertSuccess(
         await updateCourseAccess(courseUuid, payload, {
           lastKnownUpdateDate: options.lastKnownUpdateDate,
         }),
-      );
+      ),
+    onMutate: async ({ payload }) => {
+      await queryClient.cancelQueries({ queryKey: structureKey });
+      const previousStructure = queryClient.getQueryData(structureKey);
+      queryClient.setQueryData(structureKey, (current: any) => (current ? { ...current, ...payload } : current));
+      return { previousStructure };
+    },
+    onError: (_error, _variables, context) => {
+      queryClient.setQueryData(structureKey, context?.previousStructure);
+    },
+    onSuccess: async (response) => {
       useCourseEditorStore.getState().syncLastKnownUpdateDate(response?.data?.update_date);
       await refreshCourse();
-      return response;
-    } catch (error) {
-      await mutate(structureKey, previousStructure, { revalidate: false });
-      throw error;
-    }
-  };
+    },
+  });
 
-  const updateThumbnail = async (formData: FormData, options: MutationOptions) => {
-    const response = assertSuccess(
-      await updateCourseThumbnail(courseUuid, formData, {
-        lastKnownUpdateDate: options.lastKnownUpdateDate,
-      }),
-    );
-    useCourseEditorStore.getState().syncLastKnownUpdateDate(response?.data?.update_date);
-    await refreshCourse();
-    return response;
-  };
+  const updateThumbnailMutation = useMutation({
+    mutationFn: async ({ formData, options }: { formData: FormData; options: MutationOptions }) =>
+      assertSuccess(
+        await updateCourseThumbnail(courseUuid, formData, {
+          lastKnownUpdateDate: options.lastKnownUpdateDate,
+        }),
+      ),
+    onSuccess: async (response) => {
+      useCourseEditorStore.getState().syncLastKnownUpdateDate(response?.data?.update_date);
+      await refreshCourse();
+    },
+  });
 
-  const addContributors = async (usernames: string[], users: ContributorDraftUser[], options: MutationOptions) => {
-    const editorBundleKey = courseKeys.editorBundle(courseUuid);
-    const previousEditorBundle = editorBundleKey ? captureSnapshot(editorBundleKey) : undefined;
+  const addContributorsMutation = useMutation({
+    mutationFn: async ({ usernames }: { options: MutationOptions; usernames: string[]; users: ContributorDraftUser[] }) =>
+      assertSuccess(await bulkAddContributors(courseUuid, usernames)),
+    onMutate: async ({ users }) => {
+      const editorBundleKey = courseKeys.editorBundle(courseUuid);
+      if (!editorBundleKey) {
+        return { editorBundleKey: null, previousEditorBundle: undefined };
+      }
 
-    if (editorBundleKey && users.length > 0) {
-      await mutate(
-        editorBundleKey as any,
-        (current: CourseEditorBundle | undefined) => {
+      await queryClient.cancelQueries({ queryKey: editorBundleKey });
+      const previousEditorBundle = queryClient.getQueryData(editorBundleKey);
+
+      if (users.length > 0) {
+        queryClient.setQueryData(editorBundleKey, (current: CourseEditorBundle | undefined) => {
           if (!current) return current;
           const existingContributors = current.contributors.data ?? [];
           const existingUsernames = new Set(existingContributors.map((contributor: any) => contributor.user?.username));
           const optimisticContributors = users
             .filter((user) => !existingUsernames.has(user.username))
             .map((user) => buildOptimisticContributor(user));
+
           return {
             ...current,
             contributors: {
               ...current.contributors,
+              available: true,
               data: [...existingContributors, ...optimisticContributors],
               error: null,
-              available: true,
             },
           };
-        },
-        { revalidate: false },
-      );
-    }
+        });
+      }
 
-    try {
-      const response = assertSuccess(await bulkAddContributors(courseUuid, usernames));
+      return { editorBundleKey, previousEditorBundle };
+    },
+    onError: (_error, _variables, context) => {
+      if (context?.editorBundleKey) {
+        queryClient.setQueryData(context.editorBundleKey, context.previousEditorBundle);
+      }
+    },
+    onSuccess: async () => {
       await Promise.all([refreshCourse(), refreshEditorBundle()]);
-      return response;
-    } catch (error) {
-      if (editorBundleKey) await mutate(editorBundleKey as any, previousEditorBundle, { revalidate: false });
-      throw error;
-    }
-  };
+    },
+  });
 
-  const updateContributor = async (
-    contributorUserId: number,
-    payload: ContributorMutationPayload,
-    options: MutationOptions,
-  ) => {
-    const editorBundleKey = courseKeys.editorBundle(courseUuid);
-    const previousEditorBundle = editorBundleKey ? captureSnapshot(editorBundleKey) : undefined;
+  const updateContributorMutation = useMutation({
+    mutationFn: async ({
+      contributorUserId,
+      payload,
+    }: {
+      contributorUserId: number;
+      options: MutationOptions;
+      payload: ContributorMutationPayload;
+    }) =>
+      assertSuccess(await editContributor(courseUuid, contributorUserId, payload.authorship, payload.authorship_status)),
+    onMutate: async ({ contributorUserId, payload }) => {
+      const editorBundleKey = courseKeys.editorBundle(courseUuid);
+      if (!editorBundleKey) {
+        return { editorBundleKey: null, previousEditorBundle: undefined };
+      }
 
-    if (editorBundleKey) {
-      await mutate(
-        editorBundleKey as any,
-        (current: CourseEditorBundle | undefined) => {
-          if (!current) return current;
-          return {
-            ...current,
-            contributors: {
-              ...current.contributors,
-              data: (current.contributors.data ?? []).map((contributor: any) =>
-                contributor.user_id === contributorUserId ? Object.assign(contributor, payload) : contributor,
-              ),
-            },
-          };
-        },
-        { revalidate: false },
-      );
-    }
+      await queryClient.cancelQueries({ queryKey: editorBundleKey });
+      const previousEditorBundle = queryClient.getQueryData(editorBundleKey);
 
-    try {
-      const response = assertSuccess(
-        await editContributor(courseUuid, contributorUserId, payload.authorship, payload.authorship_status),
-      );
+      queryClient.setQueryData(editorBundleKey, (current: CourseEditorBundle | undefined) => {
+        if (!current) return current;
+        return {
+          ...current,
+          contributors: {
+            ...current.contributors,
+            data: (current.contributors.data ?? []).map((contributor: any) =>
+              contributor.user_id === contributorUserId ? Object.assign(contributor, payload) : contributor,
+            ),
+          },
+        };
+      });
+
+      return { editorBundleKey, previousEditorBundle };
+    },
+    onError: (_error, _variables, context) => {
+      if (context?.editorBundleKey) {
+        queryClient.setQueryData(context.editorBundleKey, context.previousEditorBundle);
+      }
+    },
+    onSuccess: async () => {
       await Promise.all([refreshCourse(), refreshEditorBundle()]);
-      return response;
-    } catch (error) {
-      if (editorBundleKey) await mutate(editorBundleKey as any, previousEditorBundle, { revalidate: false });
-      throw error;
-    }
-  };
+    },
+  });
 
-  const removeContributors = async (usernames: string[], userIds: number[], options: MutationOptions) => {
-    const editorBundleKey = courseKeys.editorBundle(courseUuid);
-    const previousEditorBundle = editorBundleKey ? captureSnapshot(editorBundleKey) : undefined;
+  const removeContributorsMutation = useMutation({
+    mutationFn: async ({ usernames }: { options: MutationOptions; userIds: number[]; usernames: string[] }) =>
+      assertSuccess(await bulkRemoveContributors(courseUuid, usernames)),
+    onMutate: async ({ userIds, usernames }) => {
+      const editorBundleKey = courseKeys.editorBundle(courseUuid);
+      if (!editorBundleKey) {
+        return { editorBundleKey: null, previousEditorBundle: undefined };
+      }
 
-    if (editorBundleKey) {
+      await queryClient.cancelQueries({ queryKey: editorBundleKey });
+      const previousEditorBundle = queryClient.getQueryData(editorBundleKey);
       const usernameSet = new Set(usernames);
       const userIdSet = new Set(userIds);
-      await mutate(
-        editorBundleKey as any,
-        (current: CourseEditorBundle | undefined) => {
-          if (!current) return current;
-          return {
-            ...current,
-            contributors: {
-              ...current.contributors,
-              data: (current.contributors.data ?? []).filter(
-                (contributor: any) =>
-                  !userIdSet.has(contributor.user_id) && !usernameSet.has(contributor.user?.username),
-              ),
-            },
-          };
-        },
-        { revalidate: false },
-      );
-    }
 
-    try {
-      const response = assertSuccess(await bulkRemoveContributors(courseUuid, usernames));
+      queryClient.setQueryData(editorBundleKey, (current: CourseEditorBundle | undefined) => {
+        if (!current) return current;
+        return {
+          ...current,
+          contributors: {
+            ...current.contributors,
+            data: (current.contributors.data ?? []).filter(
+              (contributor: any) => !userIdSet.has(contributor.user_id) && !usernameSet.has(contributor.user?.username),
+            ),
+          },
+        };
+      });
+
+      return { editorBundleKey, previousEditorBundle };
+    },
+    onError: (_error, _variables, context) => {
+      if (context?.editorBundleKey) {
+        queryClient.setQueryData(context.editorBundleKey, context.previousEditorBundle);
+      }
+    },
+    onSuccess: async () => {
       await Promise.all([refreshCourse(), refreshEditorBundle()]);
-      return response;
-    } catch (error) {
-      if (editorBundleKey) await mutate(editorBundleKey as any, previousEditorBundle, { revalidate: false });
-      throw error;
-    }
-  };
+    },
+  });
 
   return {
-    addContributors,
+    addContributors: async (usernames: string[], users: ContributorDraftUser[], options: MutationOptions) =>
+      addContributorsMutation.mutateAsync({ options, usernames, users }),
     refreshCourse,
-    removeContributors,
-    updateContributor,
-    updateAccess,
-    updateMetadata,
-    updateThumbnail,
+    removeContributors: async (usernames: string[], userIds: number[], options: MutationOptions) =>
+      removeContributorsMutation.mutateAsync({ options, userIds, usernames }),
+    updateContributor: async (
+      contributorUserId: number,
+      payload: ContributorMutationPayload,
+      options: MutationOptions,
+    ) => updateContributorMutation.mutateAsync({ contributorUserId, options, payload }),
+    updateAccess: async (
+      payload: Partial<CourseAccessValues & { open_to_contributors?: boolean }>,
+      options: MutationOptions,
+    ) => updateAccessMutation.mutateAsync({ options, payload }),
+    updateMetadata: async (payload: Partial<CourseGeneralValues>, options: MutationOptions) =>
+      updateMetadataMutation.mutateAsync({ options, payload }),
+    updateThumbnail: async (formData: FormData, options: MutationOptions) =>
+      updateThumbnailMutation.mutateAsync({ formData, options }),
   };
 }

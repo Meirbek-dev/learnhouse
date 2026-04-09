@@ -1,6 +1,5 @@
 'use client';
 
-import { useAuth } from '@/hooks/useAuth';
 import { useActivityAutosave } from '@/hooks/useActivityAutosave';
 
 import { PlatformContextProvider } from '@/components/Contexts/PlatformContext';

@@ -22,10 +22,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs';
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 import { createElement, useEffect, useState, useTransition } from 'react';
 import { usePlatform } from '@/components/Contexts/PlatformContext';
+import { queryKeys } from '@/lib/react-query/queryKeys';
 import { getLandingMediaDirectory } from '@services/media/media';
 import { getCourses } from '@services/courses/courses';
 import { Textarea } from '@components/ui/textarea';
 import NextImage from '@components/ui/NextImage';
+import { useQuery } from '@tanstack/react-query';
 
 import { Switch } from '@components/ui/switch';
 import { Button } from '@components/ui/button';
@@ -34,7 +36,6 @@ import { Input } from '@components/ui/input';
 import type { ChangeEvent, FC } from 'react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import useSWR from 'swr';
 
 import type {
   LandingButton,
@@ -1994,7 +1995,10 @@ const FeaturedCoursesEditor: FC<{
   section: LandingFeaturedCourses;
   onChange: (section: LandingFeaturedCourses) => void;
 }> = ({ t, section, onChange }) => {
-  const { data: coursesData } = useSWR('platform-courses', () => getCourses());
+  const { data: coursesData } = useQuery({
+    queryKey: queryKeys.platform.courses(),
+    queryFn: () => getCourses(),
+  });
   const courses = coursesData?.courses;
 
   return (

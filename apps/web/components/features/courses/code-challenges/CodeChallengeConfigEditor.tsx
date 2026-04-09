@@ -6,15 +6,16 @@ import { useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import * as v from 'valibot';
-import useSWR from 'swr';
 
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Field, FieldDescription, FieldError, FieldLabel } from '@/components/ui/field';
 import { apiFetch } from '@/lib/api-client';
+import { queryKeys } from '@/lib/react-query/queryKeys';
 import ComboboxMultiple from '@/components/ui/custom/multiple-combobox';
 import { JUDGE0_LANGUAGES } from './LanguageSelector';
 import { Textarea } from '@/components/ui/textarea';
@@ -109,11 +110,12 @@ export default function CodeChallengeConfigEditor({ activityUuid, courseId }: Co
   const [isSaving, setIsSaving] = useState(false);
 
   // Fetch existing settings
-  const { data: existingSettings, isLoading } = useSWR(
-    activityUuid ? `${getAPIUrl()}code-challenges/${activityUuid}/settings` : null,
-    fetcher,
-    { revalidateOnFocus: false },
-  );
+  const { data: existingSettings, isLoading } = useQuery({
+    queryKey: queryKeys.codeChallenges.settings(activityUuid),
+    queryFn: () => fetcher(`${getAPIUrl()}code-challenges/${activityUuid}/settings`),
+    enabled: Boolean(activityUuid),
+    refetchOnWindowFocus: false,
+  });
 
   const schema = useMemo(() => createConfigFormSchema(t), [t]);
 

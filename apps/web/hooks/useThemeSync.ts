@@ -15,7 +15,7 @@ export function useThemeSync(themeName: string): void {
   const userId = user?.id;
 
   const pendingThemeRef = useRef<string | null>(null);
-  const syncedThemeRef = useRef<string | null>(user?.theme ?? null);
+  const syncedThemeRef = useRef(user?.theme ?? null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Reset sync state when the user changes (login/logout/switch).

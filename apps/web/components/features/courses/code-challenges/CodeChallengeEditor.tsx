@@ -3,12 +3,13 @@
 import { History, Loader2, Play, Send, Terminal } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import useSWR from 'swr';
+import { useQuery } from '@tanstack/react-query';
 
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { apiFetch } from '@/lib/api-client';
+import { queryKeys } from '@/lib/react-query/queryKeys';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
@@ -99,21 +100,26 @@ export function CodeChallengeEditor({
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Fetch submissions history
-  const { data: submissions, mutate: refreshSubmissions } = useSWR<Submission[]>(
-    activityUuid ? `${getAPIUrl()}code-challenges/${activityUuid}/submissions` : null,
-    fetcher,
-    { revalidateOnFocus: false },
-  );
+  const {
+    data: submissions,
+    refetch: refreshSubmissions,
+  } = useQuery({
+    queryKey: queryKeys.codeChallenges.submissions(activityUuid),
+    queryFn: () => fetcher(`${getAPIUrl()}code-challenges/${activityUuid}/submissions`),
+    enabled: Boolean(activityUuid),
+    refetchOnWindowFocus: false,
+  });
 
   // Poll for active submission status
-  const { data: activeSubmission } = useSWR<Submission>(
-    activeSubmissionId ? `${getAPIUrl()}code-challenges/submissions/${activeSubmissionId}` : null,
-    fetcher,
-    {
-      refreshInterval: activeSubmissionId ? 1000 : 0,
-      revalidateOnFocus: false,
-    },
-  );
+  const { data: activeSubmission } = useQuery({
+    queryKey: activeSubmissionId
+      ? queryKeys.codeChallenges.submission(activeSubmissionId)
+      : (['code-challenges', 'submission', 'disabled'] as const),
+    queryFn: () => fetcher(`${getAPIUrl()}code-challenges/submissions/${activeSubmissionId}`),
+    enabled: Boolean(activeSubmissionId),
+    refetchInterval: activeSubmissionId ? 1000 : false,
+    refetchOnWindowFocus: false,
+  });
 
   // Handle submission completion
   useEffect(() => {

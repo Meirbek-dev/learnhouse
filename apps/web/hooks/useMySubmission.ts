@@ -8,10 +8,14 @@
  * AssignmentSubmissionContext, AssignmentsTaskContext, etc.
  */
 
-import { swrFetcher } from '@services/utils/ts/requests';
+import { apiFetcher } from '@services/utils/ts/requests';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { getAPIUrl } from '@services/config/config';
 import type { Submission } from '@/types/grading';
-import useSWR from 'swr';
+
+const gradingKeys = {
+  mine: (activityId: number) => ['grading', 'my-submissions', activityId] as const,
+};
 
 export interface UseMySubmissionResult {
   submission: Submission | null;
@@ -21,18 +25,28 @@ export interface UseMySubmissionResult {
 }
 
 export function useMySubmission(activityId: number | null): UseMySubmissionResult {
-  const { data, error, isLoading, mutate } = useSWR<Submission[]>(
-    activityId ? `${getAPIUrl()}grading/submissions/me?activity_id=${activityId}` : null,
-    (url: string) => swrFetcher(url),
-  );
+  const queryClient = useQueryClient();
+  const queryKey = activityId === null ? ['grading', 'my-submissions', 'missing'] : gradingKeys.mine(activityId);
+  const query = useQuery({
+    queryKey,
+    queryFn: () => apiFetcher(`${getAPIUrl()}grading/submissions/me?activity_id=${activityId}`) as Promise<Submission[]>,
+    enabled: activityId !== null,
+  });
 
   // Return the most recent submission (first in list — API sorts by created_at desc)
-  const submission = data?.[0] ?? null;
+  const submission = query.data?.[0] ?? null;
 
   return {
     submission,
-    isLoading,
-    error: error ?? null,
-    mutate,
+    isLoading: query.isPending,
+    error: (query.error) ?? null,
+    mutate: async () => {
+      if (activityId === null) return undefined;
+      await queryClient.invalidateQueries({ queryKey: gradingKeys.mine(activityId) });
+      return queryClient.fetchQuery({
+        queryKey: gradingKeys.mine(activityId),
+        queryFn: () => apiFetcher(`${getAPIUrl()}grading/submissions/me?activity_id=${activityId}`) as Promise<Submission[]>,
+      });
+    },
   };
 }

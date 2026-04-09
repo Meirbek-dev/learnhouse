@@ -76,7 +76,7 @@ const LearningItemsList = ({ value, onChange, error }: LearningItemsListProps) =
         id: item.id.startsWith(PLACEHOLDER_ID_PREFIX) ? generateUUID() : item.id,
       }));
     });
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);  
 
   const [showEmojiPicker, setShowEmojiPicker] = useState<string | null>(null);
   const [showLinkInput, setShowLinkInput] = useState<string | null>(null);

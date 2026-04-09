@@ -1,16 +1,17 @@
 'use client';
 
+import { useQuery } from '@tanstack/react-query';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { linkResourcesToUserGroup } from '@services/usergroups/usergroups';
 import { getAPIUrl, getAbsoluteUrl } from '@services/config/config';
 import { useCourse } from '@components/Contexts/CourseContext';
-import { swrFetcher } from '@services/utils/ts/requests';
+import { queryKeys } from '@/lib/react-query/queryKeys';
+import { apiFetcher } from '@services/utils/ts/requests';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
 import { Info } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import useSWR from 'swr';
 
 interface UserGroup {
   id: number;
@@ -27,7 +28,11 @@ const LinkToUserGroup = (props: LinkToUserGroupProps) => {
   const course = useCourse();
   const { courseStructure } = course;
 
-  const { data: usergroups } = useSWR(courseStructure ? `${getAPIUrl()}usergroups` : null, (url) => swrFetcher(url));
+  const { data: usergroups } = useQuery({
+    queryKey: queryKeys.userGroups.all(),
+    queryFn: () => apiFetcher(`${getAPIUrl()}usergroups`) as Promise<UserGroup[]>,
+    enabled: Boolean(courseStructure),
+  });
   const [selectedUserGroup, setSelectedUserGroup] = useState<number | null>(null);
 
   // Use first usergroup as default if not explicitly set

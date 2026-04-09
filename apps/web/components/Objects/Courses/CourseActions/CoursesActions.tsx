@@ -11,6 +11,8 @@ import {
   Trophy,
   UserPen,
 } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
+import { queryKeys } from '@/lib/react-query/queryKeys';
 import { useAuth } from '@/hooks/useAuth';
 import { useContributorStatus } from '@/hooks/useContributorStatus';
 import { getProductsByCourse } from '@services/payments/products';
@@ -23,7 +25,6 @@ import { startCourse } from '@services/courses/activity';
 import { getAbsoluteUrl } from '@services/config/config';
 import { Card, CardContent } from '@/components/ui/card';
 import UserAvatar from '@components/Objects/UserAvatar';
-import { getTrailSwrKey } from '@services/courses/keys';
 import type { components } from '@/lib/api/generated';
 import CoursePaidOptions from './CoursePaidOptions';
 import { useEffect, useRef, useState } from 'react';
@@ -33,7 +34,6 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
-import { mutate } from 'swr';
 
 type PaymentsProductRead = components['schemas']['PaymentsProductRead'];
 
@@ -71,6 +71,7 @@ interface CourseActionsProps {
 }
 
 const CoursesActions = ({ courseuuid, course, trailData }: CourseActionsProps) => {
+  const queryClient = useQueryClient();
   const router = useRouter();
   const { user: currentUser } = useAuth();
   const [linkedProducts, setLinkedProducts] = useState<PaymentsProductRead[]>([]);
@@ -182,7 +183,7 @@ const CoursesActions = ({ courseuuid, course, trailData }: CourseActionsProps) =
 
     try {
       await startCourse(`course_${courseuuid}`);
-      mutate(getTrailSwrKey());
+      await queryClient.invalidateQueries({ queryKey: queryKeys.trail.current() });
       toast.success(t('startedCourseSuccess'), { id: loadingToast });
 
       // Get the first activity from the first chapter
@@ -195,7 +196,7 @@ const CoursesActions = ({ courseuuid, course, trailData }: CourseActionsProps) =
           `${getAbsoluteUrl('')}/course/${courseuuid}/activity/${firstActivity.activity_uuid.replace('activity_', '')}`,
         );
       } else {
-        mutate(getTrailSwrKey());
+        await queryClient.invalidateQueries({ queryKey: queryKeys.trail.current() });
         router.refresh();
       }
     } catch (error) {

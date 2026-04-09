@@ -8,7 +8,6 @@ import { getAPIUrl } from '@services/config/config';
 
 /*
  This file includes POST, PUT, DELETE requests and cached GET requests
- Client-side GET requests are called from the frontend using SWR
 */
 
 type CourseRead = components['schemas']['CourseRead'];

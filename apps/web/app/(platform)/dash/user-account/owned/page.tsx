@@ -1,11 +1,12 @@
 'use client';
 
+import { useQuery } from '@tanstack/react-query';
 import CourseThumbnail from '@components/Objects/Thumbnails/CourseThumbnail';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { getOwnedCourses } from '@services/payments/payments';
+import { queryKeys } from '@/lib/react-query/queryKeys';
 import { Package2, ShoppingCart } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import useSWR from 'swr';
 
 export default function PlatformOwnedCoursesPage() {
   const t = useTranslations('DashPage.Courses');
@@ -14,9 +15,10 @@ export default function PlatformOwnedCoursesPage() {
     data: ownedCourses,
     error,
     isLoading,
-  } = useSWR('/payments/courses/owned', () => getOwnedCourses(), {
-    revalidateOnFocus: false,
-    dedupingInterval: 60_000,
+  } = useQuery({
+    queryKey: queryKeys.payments.ownedCourses(),
+    queryFn: () => getOwnedCourses(),
+    staleTime: 60_000,
   });
 
   if (isLoading) return <PageLoading />;

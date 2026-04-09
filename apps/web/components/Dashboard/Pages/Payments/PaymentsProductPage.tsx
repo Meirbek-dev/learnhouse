@@ -1,6 +1,7 @@
 'use client';
 
 import type { components } from '@/lib/api/generated';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 import {
   AlertDialog,
@@ -28,10 +29,10 @@ import {
 } from 'lucide-react';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import UnconfiguredPaymentsDisclaimer from '@components/Pages/Payments/UnconfiguredPaymentsDisclaimer';
+import { queryKeys } from '@/lib/react-query/queryKeys';
 import { archiveProduct, getProducts, updateProduct } from '@services/payments/products';
 import ProductLinkedCourses from './SubComponents/ProductLinkedCourses';
 import { Field, FieldContent, FieldError, FieldLabel } from '@components/ui/field';
-import { getPaymentsProductsSwrKey } from '@services/payments/keys';
 import CreateProductForm from './SubComponents/CreateProductForm';
 import { getPaymentConfigs } from '@services/payments/payments';
 import { usePaymentsEnabled } from '@hooks/usePaymentsEnabled';
@@ -46,7 +47,6 @@ import { Input } from '@components/ui/input';
 import { Badge } from '@components/ui/badge';
 import currencyCodes from '@/lib/currencies';
 import { useTranslations } from 'next-intl';
-import useSWR, { mutate } from 'swr';
 import { toast } from 'sonner';
 import * as v from 'valibot';
 
@@ -146,15 +146,22 @@ function ArchiveProductButton({ productId, productName, onArchive, t }: ArchiveP
 }
 
 const PaymentsProductPage = () => {
+  const queryClient = useQueryClient();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingProductId, setEditingProductId] = useState<number | null>(null);
   const [expandedProducts, setExpandedProducts] = useState<Record<number, boolean>>({});
   const { isEnabled, isLoading } = usePaymentsEnabled();
   const t = useTranslations('DashPage.Payments.ProductPage');
 
-  const { data: products, error } = useSWR(getPaymentsProductsSwrKey(), () => getProducts());
+  const { data: products, error } = useQuery({
+    queryKey: queryKeys.payments.products(),
+    queryFn: () => getProducts(),
+  });
 
-  const { data: paymentConfigs, error: paymentConfigError } = useSWR('/payments/config', () => getPaymentConfigs());
+  const { data: paymentConfigs, error: paymentConfigError } = useQuery({
+    queryKey: queryKeys.payments.config(),
+    queryFn: () => getPaymentConfigs(),
+  });
 
   const isStripeEnabled = paymentConfigs
     ? Boolean(paymentConfigs.find((config: PaymentsConfigRead) => config.provider === 'stripe'))
@@ -163,7 +170,7 @@ const PaymentsProductPage = () => {
   const handleArchiveProduct = async (productId: number) => {
     try {
       const res = await archiveProduct(productId);
-      mutate(getPaymentsProductsSwrKey());
+      await queryClient.invalidateQueries({ queryKey: queryKeys.payments.products() });
       if (res.status === 200) {
         toast.success(t('productArchivedSuccess'));
       } else {
@@ -355,6 +362,7 @@ const EditProductForm = ({
   onSuccess: () => void;
   onCancel: () => void;
 }) => {
+  const queryClient = useQueryClient();
   const currencyItems = currencyCodes.data.map((currency) => ({
     value: currency.code,
     label: `${currency.code} - ${currency.currency}`,
@@ -379,7 +387,7 @@ const EditProductForm = ({
   const handleSubmit: SubmitHandler<EditProductFormData> = async (values) => {
     try {
       await updateProduct(product.id, values);
-      mutate(getPaymentsProductsSwrKey());
+      await queryClient.invalidateQueries({ queryKey: queryKeys.payments.products() });
       onSuccess();
       toast.success(t('productUpdatedSuccess'));
     } catch {

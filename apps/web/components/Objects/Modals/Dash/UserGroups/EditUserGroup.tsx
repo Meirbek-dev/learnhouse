@@ -1,16 +1,16 @@
 'use client';
 
+import { useQueryClient } from '@tanstack/react-query';
 import { Field, FieldContent, FieldError, FieldLabel } from '@components/ui/field';
+import { queryKeys } from '@/lib/react-query/queryKeys';
 import { updateUserGroup } from '@services/usergroups/usergroups';
 import { valibotResolver } from '@hookform/resolvers/valibot';
-import { getAPIUrl } from '@services/config/config';
 import { Button } from '@components/ui/button';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import * as v from 'valibot';
-import { mutate } from 'swr';
 
 interface EditUserGroupProps {
   usergroup: {
@@ -30,6 +30,7 @@ type UserGroupFormValues = v.InferOutput<ReturnType<typeof createValidationSchem
 type UserGroupInputValues = v.InferInput<ReturnType<typeof createValidationSchema>>;
 
 const EditUserGroup = (props: EditUserGroupProps) => {
+  const queryClient = useQueryClient();
   const t = useTranslations('Components.EditUserGroup');
   const validationSchema = createValidationSchema(t);
 
@@ -46,7 +47,7 @@ const EditUserGroup = (props: EditUserGroupProps) => {
 
     if (res.status === 200) {
       toast.success(t('toastSuccess'));
-      mutate(`${getAPIUrl()}usergroups`);
+      await queryClient.invalidateQueries({ queryKey: queryKeys.userGroups.all() });
       return;
     }
 

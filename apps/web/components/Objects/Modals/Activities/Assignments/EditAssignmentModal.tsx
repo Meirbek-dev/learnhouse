@@ -1,17 +1,18 @@
 'use client';
+import { useQueryClient } from '@tanstack/react-query';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Field, FieldContent, FieldError, FieldLabel } from '@/components/ui/field';
 import { Controller, useForm } from 'react-hook-form';
 import { BarLoader } from '@components/Objects/Loaders/BarLoader';
 import { updateAssignment } from '@services/courses/assignments';
+import { queryKeys } from '@/lib/react-query/queryKeys';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { de, enUS, es, fr, ru } from 'date-fns/locale';
 import { useLocale, useTranslations } from 'next-intl';
 import { Textarea } from '@/components/ui/textarea';
 import { Calendar } from '@/components/ui/calendar';
-import { getAPIUrl } from '@services/config/config';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useRef } from 'react';
@@ -21,7 +22,6 @@ import { cn } from '@/lib/utils';
 import type { FC } from 'react';
 import { toast } from 'sonner';
 import * as v from 'valibot';
-import { mutate } from 'swr';
 
 interface Assignment {
   assignment_uuid: string;
@@ -61,6 +61,7 @@ type EditAssignmentInput = v.InferInput<ReturnType<typeof createValidationSchema
 type EditAssignmentOutput = v.InferOutput<ReturnType<typeof createValidationSchema>>;
 
 const EditAssignmentForm: FC<EditAssignmentFormProps> = ({ onClose, assignment }) => {
+  const queryClient = useQueryClient();
   const validationT = useTranslations('Validation');
   const t = useTranslations('Components.EditAssignmentModal');
   const fullLocale = useLocale();
@@ -104,7 +105,7 @@ const EditAssignmentForm: FC<EditAssignmentFormProps> = ({ onClose, assignment }
     try {
       const res = await updateAssignment(values, assignment.assignment_uuid);
       if (res.success) {
-        mutate(`${getAPIUrl()}assignments/${assignment.assignment_uuid}`);
+        await queryClient.invalidateQueries({ queryKey: queryKeys.assignments.detail(assignment.assignment_uuid) });
         toast.success(t('updateSuccess'));
         onClose();
       } else {

@@ -44,7 +44,7 @@ interface SessionProviderProps {
 
 export function SessionProvider({ children, initialSession = null }: SessionProviderProps) {
   const router = useRouter();
-  const [session, setSession] = useState<Session | null>(initialSession);
+  const [session, setSession] = useState(initialSession);
 
   // Trigger a full RSC refresh; Next.js re-runs getSession() server-side and
   // streams fresh data to the client without a navigation.
@@ -55,7 +55,7 @@ export function SessionProvider({ children, initialSession = null }: SessionProv
   // Lazily build a permission Set so lookup is O(1).  Recomputed only when
   // session.permissions reference changes.
   const permissionsSet = useMemo(
-    () => new Set<string>(session?.permissions ?? []),
+    () => new Set<string>(session?.permissions),
     [session?.permissions],
   );
 
