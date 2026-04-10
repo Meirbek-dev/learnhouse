@@ -4,6 +4,7 @@ import { createContext, use, useCallback, useEffect, useMemo, useRef, useState }
 import { useRouter } from 'next/navigation';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiFetch } from '@/lib/api-client';
+import { AUTH_PERMISSION_WILDCARD } from '@/lib/auth/types';
 import type { ReactNode } from 'react';
 import type { Action, Resource, Scope } from '@/types/permissions';
 import { perm } from '@/types/permissions';
@@ -171,7 +172,7 @@ export function SessionProvider({ children, initialSession = null }: SessionProv
   const can = useCallback(
     (resource: Resource, action: Action, scope: Scope): boolean => {
       if (!mergedSession) return false;
-      return permissionsSet.has(perm(resource, action, scope));
+      return permissionsSet.has(AUTH_PERMISSION_WILDCARD) || permissionsSet.has(perm(resource, action, scope));
     },
     [mergedSession, permissionsSet],
   );

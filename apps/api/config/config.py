@@ -227,6 +227,10 @@ class AIConfig(PlatformSectionSettings):
 class HostingConfig(PlatformSectionSettings):
     domain: str = Field(validation_alias="PLATFORM_DOMAIN")
     ssl: bool = Field(default=False, validation_alias="PLATFORM_SSL")
+    cookie_secure: bool | None = Field(
+        default=None,
+        validation_alias="PLATFORM_COOKIE_SECURE",
+    )
     port: int = Field(default=8000, validation_alias="PLATFORM_PORT")
     # Number of trusted reverse proxies in front of the app.
     # Set to 1 when running behind a single nginx/load-balancer.
@@ -299,6 +303,12 @@ class HostingConfig(PlatformSectionSettings):
             self.cookie_config = CookieConfig(domain=self.cookie_domain)
 
         return self
+
+    def cookies_use_secure_transport(self) -> bool:
+        if self.cookie_secure is not None:
+            return self.cookie_secure
+
+        return self.ssl
 
 
 class MailingConfig(PlatformSectionSettings):

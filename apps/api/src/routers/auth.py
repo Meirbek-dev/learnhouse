@@ -18,6 +18,7 @@ from sqlmodel import Session, select
 
 from config.config import get_settings
 from src.core.events.database import get_db_session
+from src.db.permission_enums import RoleSlug
 from src.db.strict_base_model import PydanticStrictBaseModel
 from src.db.users import AnonymousUser, PublicUser, User, UserSession
 from src.security.auth import (
@@ -77,6 +78,7 @@ from src.services.users.users import (
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
+TOKEN_PERMISSION_WILDCARD = "*"
 
 
 # ── Schemas ───────────────────────────────────────────────────────────────────
@@ -188,6 +190,16 @@ def _build_user_claims(user: User) -> dict:
     }
 
 
+def _compact_permissions_for_token(
+    role_slugs: list[str],
+    expanded_perms: list[str],
+) -> list[str]:
+    if RoleSlug.ADMIN in role_slugs:
+        return [TOKEN_PERMISSION_WILDCARD]
+
+    return expanded_perms
+
+
 def _issue_access_token(
     session_data: SessionData,
     role_slugs: list[str],
@@ -203,7 +215,7 @@ def _issue_access_token(
         user_uuid=session_data.user_uuid,
         session_id=session_data.session_id,
         roles=role_slugs,
-        permissions=expanded_perms,
+        permissions=_compact_permissions_for_token(role_slugs, expanded_perms),
         user_claims=_build_user_claims(user),
     )
 

@@ -1,5 +1,6 @@
 import type { Action, Resource, Scope } from '@/types/permissions';
 import type { Session } from './types';
+import { AUTH_PERMISSION_WILDCARD } from './types';
 import { perm } from '@/types/permissions';
 import { requireSession } from './session';
 import { redirect } from 'next/navigation';
@@ -12,7 +13,7 @@ export function sessionCan(
   permsSet?: Set<string>,
 ): boolean {
   const perms = permsSet ?? new Set<string>(session?.permissions);
-  return perms.has(perm(resource, action, scope));
+  return perms.has(AUTH_PERMISSION_WILDCARD) || perms.has(perm(resource, action, scope));
 }
 
 export async function requirePermission(action: Action, resource: Resource, scope: Scope, redirectTo?: string) {

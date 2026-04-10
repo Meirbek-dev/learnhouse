@@ -48,7 +48,6 @@ const EDITOR_PATH_RE = /^\/course\/[\w-]+\/activity\/[\w-]+\/edit$/;
  */
 const PROTECTED_PREFIXES = [
   '/dash',
-  '/courses',
   '/profile',
   '/settings',
   '/admin',

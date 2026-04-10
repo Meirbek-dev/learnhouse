@@ -21,12 +21,14 @@ from src.security.auth import (
     get_current_user_from_token,
     get_current_user_optional,
 )
+from src.routers.auth import _compact_permissions_for_token
 from src.security.auth_cookies import (
     ACCESS_COOKIE_TTL_SECONDS,
     set_access_cookie,
     set_refresh_cookie,
 )
 from src.security.keys import get_private_key, get_public_key, reload_key_cache
+from config.config import reload_platform_config_cache
 from src.services.auth.sessions import (
     SessionData,
     hash_refresh_token,
@@ -56,10 +58,12 @@ def configure_test_signing_keys() -> None:
         public_pem
     ).decode("utf-8")
     reload_key_cache()
+    reload_platform_config_cache()
 
     yield
 
     reload_key_cache()
+    reload_platform_config_cache()
 
 
 def _mock_user() -> Mock:
@@ -315,3 +319,37 @@ class TestAuthCookies:
         cookie_header = response.headers["set-cookie"]
         assert "refresh_token_cookie=refresh-token" in cookie_header
         assert "Path=/api/auth/refresh" in cookie_header
+
+    def test_cookie_secure_override_disables_secure_attribute(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        monkeypatch.setenv("PLATFORM_SSL", "true")
+        monkeypatch.setenv("PLATFORM_COOKIE_SECURE", "false")
+        reload_platform_config_cache()
+
+        access_response = Response()
+        refresh_response = Response()
+
+        set_access_cookie(access_response, "access-token")
+        set_refresh_cookie(refresh_response, "refresh-token")
+
+        assert "Secure" not in access_response.headers["set-cookie"]
+        assert "Secure" not in refresh_response.headers["set-cookie"]
+
+
+class TestTokenPermissionCompaction:
+    def test_admin_permissions_are_compacted_for_token(self) -> None:
+        result = _compact_permissions_for_token(
+            ["admin", "user"],
+            ["course:read:all", "platform:update:all"],
+        )
+
+        assert result == ["*"]
+
+    def test_non_admin_permissions_are_preserved_for_token(self) -> None:
+        permissions = ["course:read:all", "platform:update:assigned"]
+
+        result = _compact_permissions_for_token(["maintainer"], permissions)
+
+        assert result == permissions

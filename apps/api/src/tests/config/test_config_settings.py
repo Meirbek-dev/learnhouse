@@ -33,6 +33,20 @@ def test_hosting_config_parses_comma_separated_origins(
     assert cfg.cookie_config.domain == "example.com"
 
 
+def test_hosting_config_cookie_secure_override(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("PLATFORM_DOMAIN", "example.com")
+    monkeypatch.setenv("PLATFORM_SSL", "true")
+    monkeypatch.setenv("PLATFORM_COOKIE_SECURE", "false")
+
+    cfg = HostingConfig(_env_file=None)
+
+    assert cfg.ssl is True
+    assert cfg.cookie_secure is False
+    assert cfg.cookies_use_secure_transport() is False
+
+
 def _generate_test_public_key() -> str:
     private_key = Ed25519PrivateKey.generate()
     public_key = private_key.public_key()
@@ -53,6 +67,7 @@ def test_platform_config_accepts_public_key_only_security_config() -> None:
         hosting_config=HostingConfig.model_construct(
             domain="example.com",
             ssl=True,
+            cookie_secure=None,
             port=9000,
             allowed_origins=["https://example.com"],
             allowed_regexp=r"^https?://example\.com$",

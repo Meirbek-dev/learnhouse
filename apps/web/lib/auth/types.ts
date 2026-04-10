@@ -37,6 +37,7 @@ export const REFRESH_TOKEN_COOKIE_NAME = 'refresh_token_cookie';
 export const AUTH_COOKIE_NAMES = [ACCESS_TOKEN_COOKIE_NAME, REFRESH_TOKEN_COOKIE_NAME] as const;
 
 export const AUTH_REFRESH_BRIDGE_PATH = '/api/auth/refresh';
+export const AUTH_PERMISSION_WILDCARD = '*';
 
 // ── JWT claim types ───────────────────────────────────────────────────────────
 
@@ -62,7 +63,8 @@ export interface RawUserClaims {
  *   rvs        — roles-version timestamp; compared against ``roles_updated:{uuid}``
  *                in Redis to detect stale role embeddings.
  *   roles      — role slugs (for display / logging).
- *   perms      — fully expanded permission strings ("resource:action:scope").
+ *   perms      — fully expanded permission strings ("resource:action:scope")
+ *                or `*` for a token-level full-access sentinel.
  *   u          — slim user display claims (id, name, email, avatar).
  *
  * Full role objects and extended user profile fields are no longer embedded in
@@ -86,9 +88,9 @@ export interface AccessTokenPayload {
   rvs: number;
   /** Role slugs — embedded for display and logging. */
   roles: string[];
-  /** Fully expanded permission strings ("resource:action:scope").
-   *  Frontend does exact Set.has() lookups; the backend expands wildcards
-   *  and scope-broadening before embedding. */
+  /** Fully expanded permission strings ("resource:action:scope") or `*`.
+   *  Frontend accepts the wildcard sentinel as full access; otherwise it does
+   *  exact Set.has() lookups. */
   perms: string[];
   type: 'access';
   /** Slim user display claims — id, name, email, avatar only. */
