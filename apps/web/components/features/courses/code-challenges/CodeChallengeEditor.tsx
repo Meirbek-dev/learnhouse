@@ -3,11 +3,7 @@
 import { History, Loader2, Play, Send, Terminal } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { useQuery } from '@tanstack/react-query';
-import {
-  codeChallengeSubmissionQueryOptions,
-  codeChallengeSubmissionsQueryOptions,
-} from '@/features/code-challenges/queries/code-challenges.query';
+import { useCodeChallengeSubmission, useCodeChallengeSubmissions } from '@/features/code-challenges/hooks/useCodeChallenge';
 
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -105,19 +101,13 @@ export function CodeChallengeEditor({
   const {
     data: submissions,
     refetch: refreshSubmissions,
-  } = useQuery({
-    ...codeChallengeSubmissionsQueryOptions<Submission>(activityUuid),
-    enabled: Boolean(activityUuid),
-  });
+  } = useCodeChallengeSubmissions<Submission>(activityUuid);
 
   // Poll for active submission status
-  const { data: activeSubmission } = useQuery({
-    ...(activeSubmissionId
-      ? codeChallengeSubmissionQueryOptions<Submission>(activeSubmissionId)
-      : { queryKey: ['code-challenges', 'submission', 'disabled'] as const }),
-    enabled: Boolean(activeSubmissionId),
-    refetchInterval: activeSubmissionId ? 1000 : false,
-  });
+  const { data: activeSubmission } = useCodeChallengeSubmission<Submission>(
+    activeSubmissionId,
+    { refetchInterval: activeSubmissionId ? 1000 : false },
+  );
 
   // Handle submission completion
   useEffect(() => {

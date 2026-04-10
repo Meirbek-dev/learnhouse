@@ -1,19 +1,16 @@
 'use client';
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import {
-  bulkAddContributors,
-  bulkRemoveContributors,
-  editContributor,
-  updateCourseAccess,
-  updateCourseMetadata,
-  updateCourseThumbnail,
-} from '@services/courses/courses';
 import type { CourseGeneralValues, CourseAccessValues } from '@/schemas/courseSchemas';
-import type { CourseEditorBundle } from '@services/courses/editor';
 import { courseKeys } from '@/hooks/courses/courseKeys';
-import { assertSuccess } from '@/lib/api/assertSuccess';
-import { useCourseEditorStore } from '@/stores/courses';
+import {
+  addCourseContributorsMutationOptions,
+  removeCourseContributorsMutationOptions,
+  updateCourseAccessMutationOptions,
+  updateCourseContributorMutationOptions,
+  updateCourseMetadataMutationOptions,
+  updateCourseThumbnailMutationOptions,
+} from '@/features/courses/mutations/course.mutation';
 
 interface MutationOptions {
   lastKnownUpdateDate?: string | null;
@@ -35,27 +32,6 @@ interface ContributorMutationPayload {
   authorship_status?: string;
 }
 
-const buildOptimisticContributor = (user: ContributorDraftUser) => {
-  const now = new Date().toISOString();
-  return {
-    id: `temp-${user.user_uuid ?? user.id}`,
-    user_id: user.id,
-    authorship: 'CONTRIBUTOR',
-    authorship_status: 'PENDING',
-    creation_date: now,
-    update_date: now,
-    user: {
-      username: user.username,
-      first_name: user.first_name ?? '',
-      middle_name: user.middle_name ?? '',
-      last_name: user.last_name ?? '',
-      email: user.email ?? '',
-      avatar_image: user.avatar_image ?? '',
-      user_uuid: user.user_uuid ?? '',
-    },
-  };
-};
-
 export function useCoursesMutations(courseUuid: string, withUnpublishedActivities = true) {
   const queryClient = useQueryClient();
   const structureKey = courseKeys.structure(courseUuid, withUnpublishedActivities);
@@ -68,201 +44,18 @@ export function useCoursesMutations(courseUuid: string, withUnpublishedActivitie
     ]);
   };
 
-  const refreshEditorBundle = async () => {
-    const editorBundleKey = courseKeys.editorBundle(courseUuid);
-    if (!editorBundleKey) return;
-    await queryClient.invalidateQueries({ queryKey: editorBundleKey });
-  };
-  const updateMetadataMutation = useMutation({
-    mutationFn: async ({ options, payload }: { options: MutationOptions; payload: Partial<CourseGeneralValues> }) =>
-      assertSuccess(
-        await updateCourseMetadata(courseUuid, payload, {
-          lastKnownUpdateDate: options.lastKnownUpdateDate,
-        }),
-      ),
-    onMutate: async ({ payload }) => {
-      await queryClient.cancelQueries({ queryKey: structureKey });
-      const previousStructure = queryClient.getQueryData(structureKey);
-      queryClient.setQueryData(structureKey, (current: any) => (current ? { ...current, ...payload } : current));
-      return { previousStructure };
-    },
-    onError: (_error, _variables, context) => {
-      queryClient.setQueryData(structureKey, context?.previousStructure);
-    },
-    onSuccess: async (response) => {
-      useCourseEditorStore.getState().syncLastKnownUpdateDate(response?.data?.update_date);
-      await refreshCourse();
-    },
-  });
-
-  const updateAccessMutation = useMutation({
-    mutationFn: async ({
-      options,
-      payload,
-    }: {
-      options: MutationOptions;
-      payload: Partial<CourseAccessValues & { open_to_contributors?: boolean }>;
-    }) =>
-      assertSuccess(
-        await updateCourseAccess(courseUuid, payload, {
-          lastKnownUpdateDate: options.lastKnownUpdateDate,
-        }),
-      ),
-    onMutate: async ({ payload }) => {
-      await queryClient.cancelQueries({ queryKey: structureKey });
-      const previousStructure = queryClient.getQueryData(structureKey);
-      queryClient.setQueryData(structureKey, (current: any) => (current ? { ...current, ...payload } : current));
-      return { previousStructure };
-    },
-    onError: (_error, _variables, context) => {
-      queryClient.setQueryData(structureKey, context?.previousStructure);
-    },
-    onSuccess: async (response) => {
-      useCourseEditorStore.getState().syncLastKnownUpdateDate(response?.data?.update_date);
-      await refreshCourse();
-    },
-  });
-
-  const updateThumbnailMutation = useMutation({
-    mutationFn: async ({ formData, options }: { formData: FormData; options: MutationOptions }) =>
-      assertSuccess(
-        await updateCourseThumbnail(courseUuid, formData, {
-          lastKnownUpdateDate: options.lastKnownUpdateDate,
-        }),
-      ),
-    onSuccess: async (response) => {
-      useCourseEditorStore.getState().syncLastKnownUpdateDate(response?.data?.update_date);
-      await refreshCourse();
-    },
-  });
-
-  const addContributorsMutation = useMutation({
-    mutationFn: async ({ usernames }: { options: MutationOptions; usernames: string[]; users: ContributorDraftUser[] }) =>
-      assertSuccess(await bulkAddContributors(courseUuid, usernames)),
-    onMutate: async ({ users }) => {
-      const editorBundleKey = courseKeys.editorBundle(courseUuid);
-      if (!editorBundleKey) {
-        return { editorBundleKey: null, previousEditorBundle: undefined };
-      }
-
-      await queryClient.cancelQueries({ queryKey: editorBundleKey });
-      const previousEditorBundle = queryClient.getQueryData(editorBundleKey);
-
-      if (users.length > 0) {
-        queryClient.setQueryData(editorBundleKey, (current: CourseEditorBundle | undefined) => {
-          if (!current) return current;
-          const existingContributors = current.contributors.data ?? [];
-          const existingUsernames = new Set(existingContributors.map((contributor: any) => contributor.user?.username));
-          const optimisticContributors = users
-            .filter((user) => !existingUsernames.has(user.username))
-            .map((user) => buildOptimisticContributor(user));
-
-          return {
-            ...current,
-            contributors: {
-              ...current.contributors,
-              available: true,
-              data: [...existingContributors, ...optimisticContributors],
-              error: null,
-            },
-          };
-        });
-      }
-
-      return { editorBundleKey, previousEditorBundle };
-    },
-    onError: (_error, _variables, context) => {
-      if (context?.editorBundleKey) {
-        queryClient.setQueryData(context.editorBundleKey, context.previousEditorBundle);
-      }
-    },
-    onSuccess: async () => {
-      await Promise.all([refreshCourse(), refreshEditorBundle()]);
-    },
-  });
-
-  const updateContributorMutation = useMutation({
-    mutationFn: async ({
-      contributorUserId,
-      payload,
-    }: {
-      contributorUserId: number;
-      options: MutationOptions;
-      payload: ContributorMutationPayload;
-    }) =>
-      assertSuccess(await editContributor(courseUuid, contributorUserId, payload.authorship, payload.authorship_status)),
-    onMutate: async ({ contributorUserId, payload }) => {
-      const editorBundleKey = courseKeys.editorBundle(courseUuid);
-      if (!editorBundleKey) {
-        return { editorBundleKey: null, previousEditorBundle: undefined };
-      }
-
-      await queryClient.cancelQueries({ queryKey: editorBundleKey });
-      const previousEditorBundle = queryClient.getQueryData(editorBundleKey);
-
-      queryClient.setQueryData(editorBundleKey, (current: CourseEditorBundle | undefined) => {
-        if (!current) return current;
-        return {
-          ...current,
-          contributors: {
-            ...current.contributors,
-            data: (current.contributors.data ?? []).map((contributor: any) =>
-              contributor.user_id === contributorUserId ? Object.assign(contributor, payload) : contributor,
-            ),
-          },
-        };
-      });
-
-      return { editorBundleKey, previousEditorBundle };
-    },
-    onError: (_error, _variables, context) => {
-      if (context?.editorBundleKey) {
-        queryClient.setQueryData(context.editorBundleKey, context.previousEditorBundle);
-      }
-    },
-    onSuccess: async () => {
-      await Promise.all([refreshCourse(), refreshEditorBundle()]);
-    },
-  });
-
-  const removeContributorsMutation = useMutation({
-    mutationFn: async ({ usernames }: { options: MutationOptions; userIds: number[]; usernames: string[] }) =>
-      assertSuccess(await bulkRemoveContributors(courseUuid, usernames)),
-    onMutate: async ({ userIds, usernames }) => {
-      const editorBundleKey = courseKeys.editorBundle(courseUuid);
-      if (!editorBundleKey) {
-        return { editorBundleKey: null, previousEditorBundle: undefined };
-      }
-
-      await queryClient.cancelQueries({ queryKey: editorBundleKey });
-      const previousEditorBundle = queryClient.getQueryData(editorBundleKey);
-      const usernameSet = new Set(usernames);
-      const userIdSet = new Set(userIds);
-
-      queryClient.setQueryData(editorBundleKey, (current: CourseEditorBundle | undefined) => {
-        if (!current) return current;
-        return {
-          ...current,
-          contributors: {
-            ...current.contributors,
-            data: (current.contributors.data ?? []).filter(
-              (contributor: any) => !userIdSet.has(contributor.user_id) && !usernameSet.has(contributor.user?.username),
-            ),
-          },
-        };
-      });
-
-      return { editorBundleKey, previousEditorBundle };
-    },
-    onError: (_error, _variables, context) => {
-      if (context?.editorBundleKey) {
-        queryClient.setQueryData(context.editorBundleKey, context.previousEditorBundle);
-      }
-    },
-    onSuccess: async () => {
-      await Promise.all([refreshCourse(), refreshEditorBundle()]);
-    },
-  });
+  const updateMetadataMutation = useMutation(
+    updateCourseMetadataMutationOptions(courseUuid, queryClient, structureKey, detailKey),
+  );
+  const updateAccessMutation = useMutation(
+    updateCourseAccessMutationOptions(courseUuid, queryClient, structureKey, detailKey),
+  );
+  const updateThumbnailMutation = useMutation(
+    updateCourseThumbnailMutationOptions(courseUuid, queryClient, structureKey, detailKey),
+  );
+  const addContributorsMutation = useMutation(addCourseContributorsMutationOptions(courseUuid, queryClient));
+  const updateContributorMutation = useMutation(updateCourseContributorMutationOptions(courseUuid, queryClient));
+  const removeContributorsMutation = useMutation(removeCourseContributorsMutationOptions(courseUuid, queryClient));
 
   return {
     addContributors: async (usernames: string[], users: ContributorDraftUser[], options: MutationOptions) =>

@@ -6,8 +6,8 @@ import { useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { useCodeChallengeSettings } from '@/features/code-challenges/hooks/useCodeChallenge';
 import * as v from 'valibot';
 
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -15,7 +15,6 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Field, FieldDescription, FieldError, FieldLabel } from '@/components/ui/field';
 import { apiFetch } from '@/lib/api-client';
-import { codeChallengeSettingsQueryOptions } from '@/features/code-challenges/queries/code-challenges.query';
 import ComboboxMultiple from '@/components/ui/custom/multiple-combobox';
 import { JUDGE0_LANGUAGES } from './LanguageSelector';
 import { Textarea } from '@/components/ui/textarea';
@@ -110,10 +109,8 @@ export default function CodeChallengeConfigEditor({ activityUuid, courseId }: Co
   const [isSaving, setIsSaving] = useState(false);
 
   // Fetch existing settings
-  const { data: existingSettings, isLoading } = useQuery({
-    ...codeChallengeSettingsQueryOptions<ExistingSettings>(activityUuid),
-    enabled: Boolean(activityUuid),
-  });
+  const { data: existingSettings, isLoading } = useCodeChallengeSettings<ExistingSettings>(activityUuid);
+
 
   const schema = useMemo(() => createConfigFormSchema(t), [t]);
 

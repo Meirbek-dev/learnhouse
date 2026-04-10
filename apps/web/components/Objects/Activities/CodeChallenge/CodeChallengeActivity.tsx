@@ -1,10 +1,9 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 
 import { CodeChallengeEditor } from '@/components/features/courses/code-challenges';
-import { codeChallengeSettingsQueryOptions } from '@/features/code-challenges/queries/code-challenges.query';
+import { useCodeChallengeSettings } from '@/features/code-challenges/hooks/useCodeChallenge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 
@@ -50,10 +49,7 @@ export default function CodeChallengeActivity({ activity, course }: CodeChalleng
   const activityUuid = activity?.activity_uuid?.replace('activity_', '') || '';
 
   // Fetch challenge settings
-  const { data: settings, isLoading } = useQuery({
-    ...codeChallengeSettingsQueryOptions<CodeChallengeActivitySettings>(activityUuid),
-    enabled: Boolean(activityUuid),
-  });
+  const { data: settings, isLoading } = useCodeChallengeSettings<CodeChallengeActivitySettings>(activityUuid);
 
   // Check if challenge is properly configured (has at least one allowed language)
   const isConfigured = settings?.allowed_languages && settings.allowed_languages.length > 0;

@@ -156,7 +156,7 @@ export function useUserByUsername(username?: string | null, options?: { enabled?
   const enabled = normalizedUsername.length > 0 && (options?.enabled ?? true);
 
   return useQuery({
-    ...(enabled ? userByUsernameQueryOptions(normalizedUsername) : { queryKey: ['users', 'username', 'missing'] as const }),
+    ...userByUsernameQueryOptions(normalizedUsername || '__disabled__'),
     enabled,
   });
 }

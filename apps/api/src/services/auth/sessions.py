@@ -142,6 +142,12 @@ async def _write_session_to_redis(data: SessionData, ttl: int) -> None:
     now = _now_ts()
     payload = json.dumps(_session_data_to_dict(data))
     user_key = _user_sessions_key(data.user_id)
+    # Migrate stale keys: a previous implementation may have stored a non-zset
+    # value under this key. Delete it so ZADD doesn't raise WRONGTYPE.
+    key_type = await r.type(user_key)
+    if key_type not in (b"zset", b"none", "zset", "none"):
+        logger.warning("Deleting stale Redis key %s with type %s", user_key, key_type)
+        await r.delete(user_key)
     async with r.pipeline(transaction=False) as pipe:
         # Session data with sliding-window TTL
         await pipe.set(_session_key(data.session_id), payload, ex=ttl)

@@ -1,9 +1,8 @@
 'use client';
 
 import { valibotResolver } from '@hookform/resolvers/valibot';
-import { useQuery } from '@tanstack/react-query';
 import { Controller, useForm, useWatch } from 'react-hook-form';
-import { examConfigQueryOptions } from '@/features/exams/queries/exams.query';
+import { useExamConfig } from '@/features/exams/hooks/useExam';
 import { useTranslations } from 'next-intl';
 import { useEffect } from 'react';
 import { toast } from 'sonner';
@@ -47,7 +46,7 @@ const NewExam = ({ submitActivity, chapterId, course, closeModal }: any) => {
   const validationT = useTranslations('Validation');
   const t = useTranslations('Components.NewExamModal');
 
-  const { data: limits } = useQuery(examConfigQueryOptions());
+  const { data: limits } = useExamConfig();
   const validationSchema = createValidationSchema(validationT, limits);
   const withUnpublishedActivities = course ? course.withUnpublishedActivities : false;
 

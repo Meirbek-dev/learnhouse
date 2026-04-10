@@ -1,8 +1,7 @@
 'use client';
 
 import { apiFetch } from '@/lib/api-client';
-import { useQuery } from '@tanstack/react-query';
-import { examConfigQueryOptions } from '@/features/exams/queries/exams.query';
+import { useExamConfig } from '@/features/exams/hooks/useExam';
 
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -74,7 +73,7 @@ export default function ExamSettings({ exam, courseUuid, onSettingsUpdated }: Ex
 
   const settings = exam.settings || {};
 
-  const { data: limits, error: limitsError } = useQuery(examConfigQueryOptions());
+  const { data: limits, error: limitsError } = useExamConfig();
 
   // show a soft error; allow editing with default bounds
   if (limitsError) {

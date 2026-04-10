@@ -1,6 +1,6 @@
 'use client';
 
-import { isServer, QueryClient } from '@tanstack/react-query';
+import { environmentManager, QueryClient } from '@tanstack/react-query';
 
 const FIVE_MINUTES = 5 * 60 * 1000;
 
@@ -35,7 +35,7 @@ function makeQueryClient() {
 let browserQueryClient: QueryClient | undefined;
 
 export function getQueryClient() {
-  if (isServer) {
+  if (environmentManager.isServer()) {
     return makeQueryClient();
   }
 

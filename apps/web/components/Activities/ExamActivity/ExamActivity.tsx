@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -12,11 +12,11 @@ import { getAbsoluteUrl } from '@/services/config/config';
 import { useContributorStatus } from '@/hooks/useContributorStatus';
 import { courseKeys } from '@/hooks/courses/courseKeys';
 import {
-  examActivityQueryOptions,
-  examAllAttemptsQueryOptions,
-  examMyAttemptsQueryOptions,
-  examQuestionsQueryOptions,
-} from '@/features/exams/queries/exams.query';
+  useExamActivity,
+  useExamAllAttempts,
+  useExamMyAttempts,
+  useExamQuestions,
+} from '@/features/exams/hooks/useExam';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import type { AttemptData } from './state/examFlowReducer';
 import { examFlowReducer } from './state/examFlowReducer';
@@ -72,7 +72,7 @@ export default function ExamActivity({ activity, course }: ExamActivityProps) {
     data: exam,
     error: examError,
     refetch: mutateExam,
-  } = useQuery(examActivityQueryOptions(activity.activity_uuid));
+  } = useExamActivity(activity.activity_uuid);
 
   // Safe exam uuid reference to avoid accessing property on undefined
   const examUuid = exam?.exam_uuid ?? null;
@@ -82,26 +82,17 @@ export default function ExamActivity({ activity, course }: ExamActivityProps) {
     data: questions,
     error: questionsError,
     refetch: mutateQuestions,
-  } = useQuery({
-    ...(examUuid ? examQuestionsQueryOptions(examUuid) : { queryKey: ['exams', 'questions', 'disabled'] as const }),
-    enabled: Boolean(examUuid),
-  });
+  } = useExamQuestions(examUuid);
 
   // Fetch user's attempts (fetch for both students and teachers now)
   const {
     data: userAttempts,
     error: attemptsError,
     refetch: mutateAttempts,
-  } = useQuery({
-    ...(examUuid ? examMyAttemptsQueryOptions(examUuid) : { queryKey: ['exams', 'attempts', 'me', 'disabled'] as const }),
-    enabled: Boolean(examUuid),
-  });
+  } = useExamMyAttempts(examUuid);
 
   // Fetch all attempts for teachers
-  const { data: allAttempts } = useQuery({
-    ...(examUuid ? examAllAttemptsQueryOptions(examUuid) : { queryKey: ['exams', 'attempts', 'all', 'disabled'] as const }),
-    enabled: Boolean(examUuid && isTeacher),
-  });
+  const { data: allAttempts } = useExamAllAttempts(examUuid, { enabled: isTeacher });
 
   // Update state based on loaded data
   useEffect(() => {
