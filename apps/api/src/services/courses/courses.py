@@ -99,6 +99,28 @@ def _apply_course_sort(query, sort_by: str | None):
     return query.order_by(Course.update_date.desc(), Course.id.desc())
 
 
+def _course_uuid_candidates(course_uuid: str) -> tuple[str, ...]:
+    normalized = course_uuid.strip()
+    if not normalized:
+        return (course_uuid,)
+
+    if normalized.startswith("course_"):
+        raw_uuid = normalized.removeprefix("course_")
+        return (normalized, raw_uuid) if raw_uuid else (normalized,)
+
+    return (f"course_{normalized}", normalized)
+
+
+def _get_course_by_uuid(db_session: Session, course_uuid: str) -> Course | None:
+    for candidate in _course_uuid_candidates(course_uuid):
+        statement = select(Course).where(Course.course_uuid == candidate)
+        course = db_session.exec(statement).first()
+        if course:
+            return course
+
+    return None
+
+
 def _is_course_recent(updated_at: datetime) -> bool:
     if updated_at.tzinfo is None:
         updated_at = updated_at.replace(tzinfo=UTC)
@@ -392,8 +414,7 @@ async def get_course(
     db_session: Session,
     checker: PermissionChecker,
 ):
-    statement = select(Course).where(Course.course_uuid == course_uuid)
-    course = db_session.exec(statement).first()
+    course = _get_course_by_uuid(db_session, course_uuid)
 
     if not course:
         raise HTTPException(
@@ -490,21 +511,23 @@ async def get_course_meta(
     # Avoid circular import
     from src.services.courses.chapters import get_course_chapters
 
+    resolved_course = _get_course_by_uuid(db_session, course_uuid)
+
+    if not resolved_course:
+        raise HTTPException(
+            status_code=404,
+            detail="Course not found",
+        )
+
     # Get course with authors in a single query using joins
     course_statement = (
         select(Course, ResourceAuthor, User)
         .outerjoin(ResourceAuthor, ResourceAuthor.resource_uuid == Course.course_uuid)
         .outerjoin(User, ResourceAuthor.user_id == User.id)
-        .where(Course.course_uuid == course_uuid)
+        .where(Course.course_uuid == resolved_course.course_uuid)
         .order_by(ResourceAuthor.id.asc())
     )
     results = db_session.exec(course_statement).all()
-
-    if not results:
-        raise HTTPException(
-            status_code=404,
-            detail="Course not found",
-        )
 
     # Extract course and authors from results
     course = results[0][0]  # First result's Course
@@ -955,8 +978,7 @@ async def update_course_thumbnail(
     last_known_update_date: datetime | None = None,
     checker: PermissionChecker | None = None,
 ):
-    statement = select(Course).where(Course.course_uuid == course_uuid)
-    course = db_session.exec(statement).first()
+    course = _get_course_by_uuid(db_session, course_uuid)
 
     if not course:
         raise HTTPException(
@@ -979,7 +1001,7 @@ async def update_course_thumbnail(
     name_in_disk = None
     if thumbnail_file and thumbnail_file.filename:
         name_in_disk = (
-            f"{course_uuid}_thumbnail_{ULID()}.{thumbnail_file.filename.split('.')[-1]}"
+            f"{course.course_uuid}_thumbnail_{ULID()}.{thumbnail_file.filename.split('.')[-1]}"
         )
         await upload_thumbnail(
             thumbnail_file,
@@ -1056,8 +1078,7 @@ async def update_course(
     - Sensitive fields (public, open_to_contributors) require additional validation
     - Cannot change course access settings without proper permissions
     """
-    statement = select(Course).where(Course.course_uuid == course_uuid)
-    course = db_session.exec(statement).first()
+    course = _get_course_by_uuid(db_session, course_uuid)
 
     if not course:
         raise HTTPException(
@@ -1136,8 +1157,7 @@ async def update_course_metadata(
     db_session: Session,
     checker: PermissionChecker | None = None,
 ):
-    statement = select(Course).where(Course.course_uuid == course_uuid)
-    course = db_session.exec(statement).first()
+    course = _get_course_by_uuid(db_session, course_uuid)
 
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")
@@ -1175,8 +1195,7 @@ async def update_course_access(
     db_session: Session,
     checker: PermissionChecker | None = None,
 ):
-    statement = select(Course).where(Course.course_uuid == course_uuid)
-    course = db_session.exec(statement).first()
+    course = _get_course_by_uuid(db_session, course_uuid)
 
     if not course:
         raise HTTPException(status_code=404, detail="Course not found")
@@ -1221,8 +1240,7 @@ async def delete_course(
     db_session: Session,
     checker: PermissionChecker | None = None,
 ):
-    statement = select(Course).where(Course.course_uuid == course_uuid)
-    course = db_session.exec(statement).first()
+    course = _get_course_by_uuid(db_session, course_uuid)
 
     if not course:
         raise HTTPException(
@@ -1530,8 +1548,7 @@ async def get_course_user_rights(
     - Safe to expose to UI as it only returns permission information
     """
     # Check if course exists
-    statement = select(Course).where(Course.course_uuid == course_uuid)
-    course = db_session.exec(statement).first()
+    course = _get_course_by_uuid(db_session, course_uuid)
 
     if not course:
         raise HTTPException(
@@ -1541,7 +1558,7 @@ async def get_course_user_rights(
 
     # Initialize rights object
     rights = {
-        "course_uuid": course_uuid,
+        "course_uuid": course.course_uuid,
         "user_id": current_user.id,
         "is_anonymous": current_user.id == 0,
         "permissions": {
