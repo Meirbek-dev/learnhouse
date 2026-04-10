@@ -1,6 +1,6 @@
 'use client';
 
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,7 +25,7 @@ import {
 import { Actions, Resources, Scopes, usePermissions } from '@/components/Security';
 import RolesUpdate from '@/components/Objects/Modals/Dash/Users/RolesUpdate';
 import { useAuth } from '@/hooks/useAuth';
-import { membersQueryOptions } from '@/features/users/queries/users.query';
+import { useMembers } from '@/features/users/hooks/useUsers';
 import type { ColumnDef } from '@tanstack/react-table';
 import DataTable from '@/components/ui/data-table';
 
@@ -145,7 +145,7 @@ const Users = () => {
     data: usersData,
     error,
     isLoading,
-  } = useQuery(membersQueryOptions(currentPage, USERS_PER_PAGE));
+  } = useMembers(currentPage, USERS_PER_PAGE);
 
   const totalUsers = usersData?.total ?? 0;
   const totalPages = usersData?.total_pages ?? 1;

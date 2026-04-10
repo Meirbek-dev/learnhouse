@@ -1,10 +1,9 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
 import { Award, Building, Calendar, ExternalLink, Hash } from 'lucide-react';
 import { getAbsoluteUrl } from '@services/config/config';
 import { useFormatter, useTranslations } from 'next-intl';
-import { userCertificatesQueryOptions } from '@/features/courses/queries/course.query';
+import { useUserCertificates } from '@/features/certifications/hooks/useCertifications';
 import Link from '@components/ui/AppLink';
 import type React from 'react';
 
@@ -16,7 +15,7 @@ const UserCertificates: React.FC = () => {
     data: certificates,
     error,
     isLoading,
-  } = useQuery(userCertificatesQueryOptions());
+  } = useUserCertificates();
 
   if (isLoading) {
     return (

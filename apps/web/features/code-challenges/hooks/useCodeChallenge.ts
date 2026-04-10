@@ -1,33 +1,54 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { queryOptions, useQuery } from '@tanstack/react-query';
 import {
   codeChallengeSettingsQueryOptions,
   codeChallengeSubmissionQueryOptions,
   codeChallengeSubmissionsQueryOptions,
 } from '../queries/code-challenges.query';
 
-export function useCodeChallengeSettings<TSettings = unknown>(activityUuid: string | null | undefined) {
-  return useQuery({
-    ...codeChallengeSettingsQueryOptions<TSettings>(activityUuid ?? ''),
+function codeChallengeSettingsHookOptions<TSettings = unknown>(activityUuid: string | null | undefined) {
+  const normalizedActivityUuid = activityUuid ?? '';
+
+  return queryOptions({
+    ...codeChallengeSettingsQueryOptions<TSettings>(normalizedActivityUuid),
     enabled: Boolean(activityUuid),
   });
 }
 
-export function useCodeChallengeSubmissions<TSubmission = unknown>(activityUuid: string | null | undefined) {
-  return useQuery({
-    ...codeChallengeSubmissionsQueryOptions<TSubmission>(activityUuid ?? ''),
+function codeChallengeSubmissionsHookOptions<TSubmission = unknown>(activityUuid: string | null | undefined) {
+  const normalizedActivityUuid = activityUuid ?? '';
+
+  return queryOptions({
+    ...codeChallengeSubmissionsQueryOptions<TSubmission>(normalizedActivityUuid),
     enabled: Boolean(activityUuid),
   });
+}
+
+function codeChallengeSubmissionHookOptions<TSubmission = unknown>(
+  submissionUuid: string | null,
+  options?: { refetchInterval?: number | false },
+) {
+  const normalizedSubmissionUuid = submissionUuid ?? '';
+
+  return queryOptions({
+    ...codeChallengeSubmissionQueryOptions<TSubmission>(normalizedSubmissionUuid),
+    enabled: Boolean(submissionUuid),
+    refetchInterval: options?.refetchInterval,
+  });
+}
+
+export function useCodeChallengeSettings<TSettings = unknown>(activityUuid: string | null | undefined) {
+  return useQuery(codeChallengeSettingsHookOptions<TSettings>(activityUuid));
+}
+
+export function useCodeChallengeSubmissions<TSubmission = unknown>(activityUuid: string | null | undefined) {
+  return useQuery(codeChallengeSubmissionsHookOptions<TSubmission>(activityUuid));
 }
 
 export function useCodeChallengeSubmission<TSubmission = unknown>(
   submissionUuid: string | null,
   options?: { refetchInterval?: number | false },
 ) {
-  return useQuery({
-    ...codeChallengeSubmissionQueryOptions<TSubmission>(submissionUuid ?? ''),
-    enabled: Boolean(submissionUuid),
-    refetchInterval: options?.refetchInterval,
-  });
+  return useQuery(codeChallengeSubmissionHookOptions<TSubmission>(submissionUuid, options));
 }

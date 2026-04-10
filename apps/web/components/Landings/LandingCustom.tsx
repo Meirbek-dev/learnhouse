@@ -1,10 +1,9 @@
 'use client';
 
 import type { LandingSection } from '@/components/Dashboard/Pages/Platform/EditLanding/landing_types';
-import { useQuery } from '@tanstack/react-query';
 import { LoginBonusHandler } from '@/app/_shared/withmenu/_components/LoginBonusHandler';
 import { GamificationProvider } from '@/components/Contexts/GamificationContext';
-import { platformCoursesQueryOptions } from '@/features/courses/queries/course.query';
+import { usePlatformCourses } from '@/features/platform/hooks/usePlatform';
 import CourseThumbnail from '@components/Objects/Thumbnails/CourseThumbnail';
 import type { DashboardData } from '@/types/gamification';
 import UserAvatar from '@components/Objects/UserAvatar';
@@ -23,7 +22,7 @@ const LandingCustom = ({ landing, gamificationData }: LandingCustomProps) => {
   const t = useTranslations('LandingCustom');
 
   // Fetch all courses for the platform
-  const { data: coursesData } = useQuery(platformCoursesQueryOptions());
+  const { data: coursesData } = usePlatformCourses();
   const allCourses = coursesData?.courses;
 
   const renderSection = (section: LandingSection) => {

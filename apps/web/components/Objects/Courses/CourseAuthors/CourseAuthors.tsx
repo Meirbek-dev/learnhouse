@@ -16,11 +16,11 @@ import { Field, FieldContent, FieldError, FieldLabel } from '@components/ui/fiel
 import { getUserAvatarMediaDirectory } from '@services/media/media';
 import { queryKeys } from '@/lib/react-query/queryKeys';
 import { Actions, Resources, Scopes } from '@/types/permissions';
-import { courseUpdatesQueryOptions } from '@/features/courses/queries/course.query';
+import { useCourseUpdates } from '@/features/courses/hooks/useCourseQueries';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { useDateFnsLocale } from '@/hooks/useDateFnsLocale';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { usePermissions } from '@/components/Security';
 import { format, formatDistanceToNow } from 'date-fns';
@@ -37,12 +37,6 @@ import * as v from 'valibot';
 
 const getCourseUpdatesQueryKey = (courseUuid?: string | null) =>
   courseUuid ? queryKeys.courses.updates(courseUuid) : (['courses', 'updates', 'disabled'] as const);
-
-const useCourseUpdatesQuery = (courseUuid?: string | null) =>
-  useQuery({
-    ...(courseUuid ? courseUpdatesQueryOptions(courseUuid) : { queryKey: getCourseUpdatesQueryKey(courseUuid) }),
-    enabled: Boolean(courseUuid),
-  });
 
 interface Author {
   user: {
@@ -165,7 +159,7 @@ const UpdatesSection = () => {
   const canManageCourse =
     can(Actions.MANAGE, Resources.COURSE, Scopes.OWN) || can(Actions.MANAGE, Resources.COURSE, Scopes.PLATFORM);
   const course = useCourse();
-  const { data: updates } = useCourseUpdatesQuery(course?.courseStructure?.course_uuid);
+  const { data: updates } = useCourseUpdates(course?.courseStructure?.course_uuid);
   const t = useTranslations('Courses.CourseAuthors');
 
   return (
@@ -320,7 +314,7 @@ const UpdatesListView = () => {
   const { can } = usePermissions();
   const canManageCourse =
     can(Actions.MANAGE, Resources.COURSE, Scopes.OWN) || can(Actions.MANAGE, Resources.COURSE, Scopes.PLATFORM);
-  const { data: updates } = useCourseUpdatesQuery(course?.courseStructure?.course_uuid);
+  const { data: updates } = useCourseUpdates(course?.courseStructure?.course_uuid);
   const t = useTranslations('Courses.CourseAuthors');
   const locale = useDateFnsLocale();
 

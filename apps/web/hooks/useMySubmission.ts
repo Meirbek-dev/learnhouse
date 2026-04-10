@@ -8,7 +8,7 @@
  * AssignmentSubmissionContext, AssignmentsTaskContext, etc.
  */
 
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { queryOptions, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { Submission } from '@/types/grading';
 import { queryKeys } from '@/lib/react-query/queryKeys';
 import { mySubmissionQueryOptions } from '@/features/grading/queries/grading.query';
@@ -20,12 +20,18 @@ export interface UseMySubmissionResult {
   mutate: () => Promise<Submission[] | undefined>;
 }
 
-export function useMySubmission(activityId: number | null): UseMySubmissionResult {
-  const queryClient = useQueryClient();
-  const query = useQuery({
-    ...mySubmissionQueryOptions(activityId ?? 0),
+function mySubmissionHookOptions(activityId: number | null) {
+  const normalizedActivityId = activityId ?? 0;
+
+  return queryOptions({
+    ...mySubmissionQueryOptions(normalizedActivityId),
     enabled: activityId !== null,
   });
+}
+
+export function useMySubmission(activityId: number | null): UseMySubmissionResult {
+  const queryClient = useQueryClient();
+  const query = useQuery(mySubmissionHookOptions(activityId));
 
   // Return the most recent submission (first in list — API sorts by created_at desc)
   const submission = query.data?.[0] ?? null;

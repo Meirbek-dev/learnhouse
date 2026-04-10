@@ -172,7 +172,9 @@ export default async function proxy(req: NextRequest) {
     return rewriteWithHeaders(req, requestId, `${authRewrite}${search}`);
   }
 
-  const isProtected = PROTECTED_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+  const isProtected =
+    PROTECTED_PREFIXES.some((prefix) => pathname.startsWith(prefix)) ||
+    EDITOR_PATH_RE.test(pathname);
   if (isProtected) {
     // No token at all → go to refresh bridge
     if (!accessToken) {

@@ -7,8 +7,7 @@ import { useAuth } from '@/hooks/useAuth';
 import UserCertificates from '@components/Pages/Trail/UserCertificates';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { useGamificationStore } from '@/stores/gamification';
-import { useQuery } from '@tanstack/react-query';
-import { trailCurrentQueryOptions, trailLeaderboardQueryOptions } from '@/features/courses/queries/course.query';
+import { useTrailCurrent, useTrailLeaderboard } from '@/features/trail/hooks/useTrail';
 import { useTranslations } from 'next-intl';
 import { BookOpen } from 'lucide-react';
 
@@ -18,7 +17,7 @@ const Trail = () => {
   const { user: currentUser } = useAuth();
   const t = useTranslations('TrailPage');
 
-  const { data: trail } = useQuery(trailCurrentQueryOptions());
+  const { data: trail } = useTrailCurrent();
 
   const gamificationProfile = useGamificationStore((s) => s.profile);
   const recentTransactions = useGamificationStore((s) => s.dashboard?.recent_transactions ?? EMPTY_RECENT_TRANSACTIONS);
@@ -30,7 +29,7 @@ const Trail = () => {
     user_rank: userRank,
   };
 
-  const { data: leaderboardData } = useQuery(trailLeaderboardQueryOptions(10));
+  const { data: leaderboardData } = useTrailLeaderboard(10);
 
   const userRankData = { rank: gamificationData.user_rank };
 

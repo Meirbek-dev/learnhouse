@@ -1,5 +1,5 @@
 'use client';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { assignRoleToUser, removeRoleFromUser } from '@/services/rbac';
 import { Field, FieldError, FieldLabel } from '@components/ui/field';
@@ -7,7 +7,7 @@ import { BarLoader } from '@components/Objects/Loaders/BarLoader';
 import { Alert, AlertDescription } from '@components/ui/alert';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { queryKeys } from '@/lib/react-query/queryKeys';
-import { rolesQueryOptions } from '@/features/users/queries/users.query';
+import { useRoles } from '@/features/users/hooks/useUsers';
 import { Controller, useForm } from 'react-hook-form';
 import { useState } from 'react';
 import { Button } from '@components/ui/button';
@@ -47,7 +47,7 @@ const RolesUpdate: FC<Props> = (props) => {
   });
 
   // Fetch available platform roles and sort them by system flag + priority
-  const { data: roles, error: rolesError } = useQuery(rolesQueryOptions());
+  const { data: roles, error: rolesError } = useRoles();
 
   const sortedRoles = (roles ?? []).toSorted((a: any, b: any) => {
     // System roles first, then by descending priority, then by name

@@ -1,18 +1,16 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import ErrorUI from '@/components/Objects/Elements/Error/Error';
-import { queryKeys } from '@/lib/react-query/queryKeys';
 import { createContext, use, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import type { ReactNode } from 'react';
 import {
-  activityDetailQueryOptions,
-  assignmentDetailQueryOptions,
-  assignmentTasksQueryOptions,
-} from '@/features/assignments/queries/assignments.query';
-import { courseMetadataQueryOptions } from '@/features/courses/queries/course.query';
+  useAssignmentActivity,
+  useAssignmentDetail,
+  useAssignmentTasks,
+} from '@/features/assignments/hooks/useAssignments';
+import { useCourseMetadata } from '@/features/courses/hooks/useCourseQueries';
 
 interface AssignmentContextType {
   assignment_object: any | null;
@@ -71,34 +69,17 @@ export const AssignmentProvider = ({
 }) => {
   const t = useTranslations('Contexts.Assignment');
 
-  const assignmentKey = assignment_uuid && assignment_uuid !== 'undefined' ? queryKeys.assignments.detail(assignment_uuid) : null;
-  const { data: assignment, error: assignmentError } = useQuery({
-    ...(assignment_uuid && assignment_uuid !== 'undefined'
-      ? assignmentDetailQueryOptions(assignment_uuid)
-      : { queryKey: assignmentKey ?? (['assignments', 'detail', 'missing'] as const) }),
-    enabled: Boolean(assignmentKey),
-  });
+  const { data: assignment, error: assignmentError } = useAssignmentDetail(assignment_uuid);
 
-  const { data: assignment_tasks, error: assignmentTasksError } = useQuery({
-    ...(assignment_uuid && assignment_uuid !== 'undefined'
-      ? assignmentTasksQueryOptions(assignment_uuid)
-      : { queryKey: ['assignments', 'tasks', 'missing'] as const }),
-    enabled: Boolean(assignment_uuid && assignment_uuid !== 'undefined'),
-  });
+  const { data: assignment_tasks, error: assignmentTasksError } = useAssignmentTasks(assignment_uuid);
 
   const course_uuid = assignment?.course_uuid;
 
-  const { data: course_object, error: courseObjectError } = useQuery({
-    ...(course_uuid ? courseMetadataQueryOptions(course_uuid) : { queryKey: ['courses', 'metadata', 'missing'] as const }),
-    enabled: Boolean(course_uuid),
-  });
+  const { data: course_object, error: courseObjectError } = useCourseMetadata(course_uuid);
 
   const activity_uuid = assignment?.activity_uuid;
 
-  const { data: activity_object, error: activityObjectError } = useQuery({
-    ...(activity_uuid ? activityDetailQueryOptions(activity_uuid) : { queryKey: ['activities', 'detail', 'missing'] as const }),
-    enabled: Boolean(activity_uuid),
-  });
+  const { data: activity_object, error: activityObjectError } = useAssignmentActivity(activity_uuid);
 
   // Derive assignmentsFull (memoized to avoid unnecessary context value changes)
   const assignmentsFull: AssignmentContextType = useMemo(

@@ -1,11 +1,11 @@
 'use client';
 
 import type { components } from '@/lib/api/generated';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 
 import { linkCourseToProduct } from '@services/payments/products';
-import { platformCoursesQueryOptions } from '@/features/courses/queries/course.query';
-import { productCoursesQueryOptions } from '@/features/payments/queries/payments.query';
+import { useProductCourses } from '@/features/payments/hooks/usePayments';
+import { usePlatformCourses } from '@/features/platform/hooks/usePlatform';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { queryKeys } from '@/lib/react-query/queryKeys';
 import { Button } from '@components/ui/button';
@@ -89,11 +89,11 @@ export default function LinkCourseModal({ productId, onSuccess }: LinkCourseModa
   const tNotify = useTranslations('DashPage.Notifications');
   const t = useTranslations('DashPage.Payments.LinkCourseModal');
 
-  const { data: coursesData, error: coursesError } = useQuery(platformCoursesQueryOptions());
+  const { data: coursesData, error: coursesError } = usePlatformCourses();
 
   const courses = coursesData?.courses;
 
-  const { data: linkedCoursesData, error: linkedCoursesError } = useQuery(productCoursesQueryOptions(productId));
+  const { data: linkedCoursesData, error: linkedCoursesError } = useProductCourses(productId);
 
   const handleLinkCourse = async (courseId: number) => {
     try {

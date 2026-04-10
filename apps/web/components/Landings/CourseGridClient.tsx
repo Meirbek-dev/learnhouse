@@ -1,6 +1,5 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
 import {
   Pagination,
   PaginationContent,
@@ -12,7 +11,8 @@ import {
 } from '@/components/ui/pagination';
 import CourseThumbnail from '@components/Objects/Thumbnails/CourseThumbnail';
 import { useAuth } from '@/hooks/useAuth';
-import { courseListQueryOptions, trailCurrentQueryOptions } from '@/features/courses/queries/course.query';
+import { useCourseListQuery } from '@/features/courses/hooks/useCourseQueries';
+import { useTrailCurrent } from '@/features/trail/hooks/useTrail';
 import { useMemo, useState } from 'react';
 
 const COURSES_PER_PAGE = 20;
@@ -27,22 +27,20 @@ export default function CourseGridClient({ initialCourses, initialTotal }: Cours
   const [page, setPage] = useState(1);
 
   // Fetch courses with pagination
-  const { data: coursesResponse, isLoading: coursesLoading } = useQuery({
-    ...courseListQueryOptions({ page, limit: COURSES_PER_PAGE }),
-    initialData: page === 1 ? { courses: initialCourses, total: initialTotal } : undefined,
-    staleTime: 60_000,
-  });
+  const { data: coursesResponse, isLoading: coursesLoading } = useCourseListQuery(
+    { page, limit: COURSES_PER_PAGE },
+    {
+      initialData: page === 1 ? { courses: initialCourses, total: initialTotal } : undefined,
+      staleTime: 60_000,
+    },
+  );
 
   const courses = coursesResponse?.courses ?? initialCourses;
   const totalCount = coursesResponse?.total ?? initialTotal;
   const totalPages = Math.ceil(totalCount / COURSES_PER_PAGE);
 
   // Fetch trail data to show progress on course thumbnails (auth-required)
-  const { data: trailData } = useQuery({
-    ...trailCurrentQueryOptions(),
-    enabled: isAuthenticated,
-    staleTime: 60_000,
-  });
+  const { data: trailData } = useTrailCurrent({ enabled: isAuthenticated });
 
   const isTrailLoading = !trailData;
 

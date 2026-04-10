@@ -1,11 +1,10 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import type { Platform } from '@/types/platform';
 import { createContext, use } from 'react';
 import type { ReactNode } from 'react';
-import { platformConfigQueryOptions } from '@/features/platform/queries/platform.query';
+import { usePlatformConfig } from '@/features/platform/hooks/usePlatform';
 
 export const PlatformContext = createContext<Platform | null>(null);
 
@@ -16,8 +15,7 @@ export const PlatformContextProvider = ({
   children: ReactNode;
   initialPlatform?: any;
 }) => {
-  const { data: platform, isPending: isPlatformLoading } = useQuery({
-    ...platformConfigQueryOptions(),
+  const { data: platform, isPending: isPlatformLoading } = usePlatformConfig({
     initialData: initialPlatform || undefined,
     staleTime: initialPlatform ? 60_000 : 0,
   });
@@ -25,7 +23,7 @@ export const PlatformContextProvider = ({
   // Only block on platform data — session state is independent of platform config.
   if (!platform && isPlatformLoading) return <PageLoading />;
 
-  return <PlatformContext.Provider value={platform}>{children}</PlatformContext.Provider>;
+  return <PlatformContext.Provider value={platform ?? null}>{children}</PlatformContext.Provider>;
 };
 
 export function usePlatform(): Platform | null {

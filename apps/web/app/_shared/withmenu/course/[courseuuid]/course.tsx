@@ -26,8 +26,9 @@ import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { CourseProvider } from '@components/Contexts/CourseContext';
 import { useAuth } from '@/hooks/useAuth';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { courseDiscussionsQueryOptions, trailCurrentQueryOptions } from '@/features/courses/queries/course.query';
+import { useQueryClient } from '@tanstack/react-query';
+import { useCourseDiscussions } from '@/features/courses/hooks/useCourseQueries';
+import { useTrailCurrent } from '@/features/trail/hooks/useTrail';
 // Import the new discussions component
 import CourseDiscussions from '@/components/discussions';
 import { getAbsoluteUrl } from '@services/config/config';
@@ -42,6 +43,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
+import { queryKeys } from '@/lib/react-query/queryKeys';
 import { cn } from '@/lib/utils';
 
 const CourseClient = (props: any) => {
@@ -55,17 +57,11 @@ const CourseClient = (props: any) => {
   const isMobile = useIsMobile();
   const { user: currentUser } = useAuth();
   const queryClient = useQueryClient();
-  const discussionsQuery = courseDiscussionsQueryOptions(course?.course_uuid ?? 'disabled', { includeReplies: true });
-  const discussionsQueryKey = discussionsQuery.queryKey;
+  const discussionsQueryKey = queryKeys.discussions.list(course?.course_uuid ?? 'disabled', true, 50, 0);
 
-  const {
-    data: discussionPosts = [],
-  } = useQuery({
-    ...discussionsQuery,
-    enabled: Boolean(course?.course_uuid),
-  });
+  const { data: discussionPosts = [] } = useCourseDiscussions(course?.course_uuid, { includeReplies: true });
 
-  const { data: trailData } = useQuery(trailCurrentQueryOptions());
+  const { data: trailData } = useTrailCurrent();
 
   const mutateDiscussions = () => {
     if (!course?.course_uuid) return;

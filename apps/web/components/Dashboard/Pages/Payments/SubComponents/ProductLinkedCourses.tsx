@@ -1,10 +1,10 @@
 'use client';
 
 import type { components } from '@/lib/api/generated';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 
 import { unlinkCourseFromProduct } from '@services/payments/products';
-import { productCoursesQueryOptions } from '@/features/payments/queries/payments.query';
+import { useProductCourses } from '@/features/payments/hooks/usePayments';
 import { queryKeys } from '@/lib/react-query/queryKeys';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
 import { BookOpen, Plus, Trash2 } from 'lucide-react';
@@ -29,7 +29,7 @@ export default function ProductLinkedCourses({ productId }: ProductLinkedCourses
 
   const linkedCoursesKey = queryKeys.payments.productCourses(productId);
 
-  const { data: linkedCoursesResponse, error } = useQuery(productCoursesQueryOptions(productId));
+  const { data: linkedCoursesResponse, error } = useProductCourses(productId);
   const linkedCourses = linkedCoursesResponse?.data ?? [];
 
   // Show error toast if fetch fails

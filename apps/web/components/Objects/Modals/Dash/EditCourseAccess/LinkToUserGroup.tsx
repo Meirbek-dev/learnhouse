@@ -1,11 +1,10 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@components/ui/select';
 import { linkResourcesToUserGroup } from '@services/usergroups/usergroups';
 import { getAbsoluteUrl } from '@services/config/config';
 import { useCourse } from '@components/Contexts/CourseContext';
-import { userGroupsQueryOptions } from '@/features/users/queries/users.query';
+import { useUserGroups } from '@/features/users/hooks/useUsers';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
 import { Info } from 'lucide-react';
@@ -27,10 +26,7 @@ const LinkToUserGroup = (props: LinkToUserGroupProps) => {
   const course = useCourse();
   const { courseStructure } = course;
 
-  const { data: usergroups } = useQuery({
-    ...userGroupsQueryOptions(),
-    enabled: Boolean(courseStructure),
-  });
+  const { data: usergroups } = useUserGroups({ enabled: Boolean(courseStructure) });
   const [selectedUserGroup, setSelectedUserGroup] = useState<number | null>(null);
 
   // Use first usergroup as default if not explicitly set

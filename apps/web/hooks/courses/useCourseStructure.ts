@@ -1,6 +1,6 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { queryOptions, useQuery } from '@tanstack/react-query';
 import { courseKeys } from './courseKeys';
 import { courseStructureQueryOptions } from '@/features/courses/queries/course.query';
 
@@ -12,10 +12,23 @@ interface UseCourseStructureOptions<TCourseStructure> {
 /**
  * Fetches the course structure (meta + chapters + activities).
  *
- * The auth token is NOT included in the SWR key.  It is injected automatically
- * by the global SWR provider fetcher in root-providers.tsx.  This keeps
+ * The auth token is NOT included in the query key. It is injected automatically
+ * by the shared API client in root providers. This keeps
  * cache entries stable across token refreshes.
  */
+function courseStructureHookOptions<TCourseStructure = unknown>(
+  courseUuid: string,
+  options?: UseCourseStructureOptions<TCourseStructure>,
+) {
+  const withUnpublishedActivities = options?.withUnpublishedActivities ?? false;
+
+  return queryOptions({
+    ...courseStructureQueryOptions<TCourseStructure>(courseUuid, withUnpublishedActivities),
+    enabled: Boolean(courseUuid),
+    initialData: options?.fallbackData,
+  });
+}
+
 export function useCourseStructure<TCourseStructure = any>(
   courseUuid: string,
   options?: UseCourseStructureOptions<TCourseStructure>,
@@ -23,11 +36,7 @@ export function useCourseStructure<TCourseStructure = any>(
   const withUnpublishedActivities = options?.withUnpublishedActivities ?? false;
   const key = courseKeys.structure(courseUuid, withUnpublishedActivities);
 
-  const query = useQuery({
-    ...courseStructureQueryOptions<TCourseStructure>(courseUuid, withUnpublishedActivities),
-    enabled: Boolean(courseUuid),
-    initialData: options?.fallbackData,
-  });
+  const query = useQuery(courseStructureHookOptions<TCourseStructure>(courseUuid, options));
 
   return {
     courseStructure: query.data,

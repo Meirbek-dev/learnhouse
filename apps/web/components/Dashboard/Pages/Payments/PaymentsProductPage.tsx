@@ -1,7 +1,7 @@
 'use client';
 
 import type { components } from '@/lib/api/generated';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 
 import {
   AlertDialog,
@@ -31,7 +31,7 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 import UnconfiguredPaymentsDisclaimer from '@components/Pages/Payments/UnconfiguredPaymentsDisclaimer';
 import { queryKeys } from '@/lib/react-query/queryKeys';
 import { archiveProduct, updateProduct } from '@services/payments/products';
-import { paymentConfigsQueryOptions, paymentProductsQueryOptions } from '@/features/payments/queries/payments.query';
+import { usePaymentConfigs, usePaymentProducts } from '@/features/payments/hooks/usePayments';
 import ProductLinkedCourses from './SubComponents/ProductLinkedCourses';
 import { Field, FieldContent, FieldError, FieldLabel } from '@components/ui/field';
 import CreateProductForm from './SubComponents/CreateProductForm';
@@ -153,9 +153,9 @@ const PaymentsProductPage = () => {
   const { isEnabled, isLoading } = usePaymentsEnabled();
   const t = useTranslations('DashPage.Payments.ProductPage');
 
-  const { data: products, error } = useQuery(paymentProductsQueryOptions());
+  const { data: products, error } = usePaymentProducts();
 
-  const { data: paymentConfigs, error: paymentConfigError } = useQuery(paymentConfigsQueryOptions());
+  const { data: paymentConfigs, error: paymentConfigError } = usePaymentConfigs();
 
   const isStripeEnabled = paymentConfigs
     ? Boolean(paymentConfigs.find((config: PaymentsConfigRead) => config.provider === 'stripe'))

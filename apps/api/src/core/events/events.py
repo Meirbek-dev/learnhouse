@@ -22,7 +22,12 @@ async def _ttl_sweep_loop(retention_seconds: int) -> None:
             from src.services.ai.retrieval import delete_expired_chunks
 
             removed = await asyncio.to_thread(delete_expired_chunks, retention_seconds)
-            if removed:
+            if removed == -1:
+                logger.warning(
+                    "Vector TTL sweep skipped: document_chunks table not found "
+                    "(run: alembic upgrade head)"
+                )
+            elif removed:
                 logger.info("Vector TTL sweep removed %d expired chunk(s)", removed)
         except Exception:
             logger.exception("Vector TTL sweep failed")

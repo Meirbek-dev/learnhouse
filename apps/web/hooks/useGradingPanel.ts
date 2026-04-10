@@ -11,7 +11,7 @@
  */
 
 import type { Submission } from '@/types/grading';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { queryOptions, useQuery, useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/react-query/queryKeys';
 import { gradingDetailQueryOptions } from '@/features/grading/queries/grading.query';
 
@@ -22,12 +22,18 @@ export interface UseGradingPanelResult {
   mutate: () => Promise<Submission | undefined>;
 }
 
+function gradingPanelHookOptions(submissionUuid: string | null) {
+  const normalizedSubmissionUuid = submissionUuid ?? '';
+
+  return queryOptions({
+    ...gradingDetailQueryOptions(normalizedSubmissionUuid),
+    enabled: Boolean(submissionUuid),
+  });
+}
+
 export function useGradingPanel(submissionUuid: string | null): UseGradingPanelResult {
   const queryClient = useQueryClient();
-  const query = useQuery({
-    ...(submissionUuid ? gradingDetailQueryOptions(submissionUuid) : { queryKey: ['grading', 'submission', 'missing'] as const }),
-    enabled: submissionUuid !== null,
-  });
+  const query = useQuery(gradingPanelHookOptions(submissionUuid));
 
   return {
     submission: query.data ?? null,

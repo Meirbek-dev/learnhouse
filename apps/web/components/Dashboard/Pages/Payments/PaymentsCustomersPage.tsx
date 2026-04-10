@@ -1,13 +1,12 @@
 'use client';
 
 import type { components } from '@/lib/api/generated';
-import { useQuery } from '@tanstack/react-query';
 
 import UnconfiguredPaymentsDisclaimer from '@components/Pages/Payments/UnconfiguredPaymentsDisclaimer';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { usePaymentsEnabled } from '@hooks/usePaymentsEnabled';
-import { paymentCustomersQueryOptions } from '@/features/payments/queries/payments.query';
+import { usePaymentCustomers } from '@/features/payments/hooks/usePayments';
 import UserAvatar from '@components/Objects/UserAvatar';
 import type { ColumnDef } from '@tanstack/react-table';
 import { RefreshCcw, SquareCheck } from 'lucide-react';
@@ -128,7 +127,7 @@ const PaymentsCustomersPage = () => {
   const { isEnabled, isLoading } = usePaymentsEnabled();
   const t = useTranslations('Payments.CustomersPage');
 
-  const { data: customers, error, isLoading: customersLoading } = useQuery(paymentCustomersQueryOptions());
+  const { data: customers, error, isLoading: customersLoading } = usePaymentCustomers();
 
   if (!(isEnabled || isLoading)) {
     return <UnconfiguredPaymentsDisclaimer />;

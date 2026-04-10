@@ -1,6 +1,5 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
 import {
   addPermissionToRole,
   createRole as apiCreateRole,
@@ -12,7 +11,7 @@ import {
   removePermissionFromRole,
   updateRole as apiUpdateRole,
 } from '@/services/rbac';
-import { platformPermissionsQueryOptions } from '@/features/platform/queries/platform.query';
+import { usePlatformPermissions } from '@/features/platform/hooks/usePlatform';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -114,7 +113,7 @@ export default function RBACAdminClient() {
     data: permissions = [],
     isLoading: permissionsLoading,
     error: permissionsError,
-  } = useQuery(platformPermissionsQueryOptions());
+  } = usePlatformPermissions();
 
   const fetchRoles = useCallback(async () => {
     setLoadingRoles(true);

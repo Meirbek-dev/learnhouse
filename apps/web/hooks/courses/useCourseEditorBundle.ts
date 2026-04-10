@@ -1,16 +1,22 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { queryOptions, useQuery } from '@tanstack/react-query';
 import { courseKeys } from './courseKeys';
 import { courseEditorBundleQueryOptions } from '@/features/courses/queries/course.query';
+
+function courseEditorBundleHookOptions(courseUuid?: string | null) {
+  const normalizedCourseUuid = courseUuid ?? '';
+
+  return queryOptions({
+    ...courseEditorBundleQueryOptions(normalizedCourseUuid),
+    enabled: Boolean(courseUuid),
+  });
+}
 
 export function useCourseEditorBundle(courseUuid?: string | null) {
   const key = courseUuid ? courseKeys.editorBundle(courseUuid) : null;
 
-  const query = useQuery({
-    ...(courseUuid ? courseEditorBundleQueryOptions(courseUuid) : { queryKey: ['courses', 'editor-bundle', 'missing'] as const }),
-    enabled: Boolean(courseUuid),
-  });
+  const query = useQuery(courseEditorBundleHookOptions(courseUuid));
 
   return {
     data: query.data,

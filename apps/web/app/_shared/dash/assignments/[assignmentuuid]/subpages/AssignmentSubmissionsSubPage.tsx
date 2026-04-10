@@ -19,7 +19,6 @@
  */
 
 import { useTranslations } from 'next-intl';
-import { useQuery } from '@tanstack/react-query';
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
@@ -27,7 +26,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import SubmissionsTable from '@/components/Grading/SubmissionsTable';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { AlertCircle, ClipboardList } from 'lucide-react';
-import { assignmentSubmissionsQueryOptions } from '@/features/assignments/queries/assignments.query';
+import { useAssignmentSubmissions } from '@/features/assignments/hooks/useAssignments';
 import { Badge } from '@/components/ui/badge';
 
 type AssignmentSubmissionStatus = 'PENDING' | 'SUBMITTED' | 'GRADED' | 'LATE' | 'NOT_SUBMITTED';
@@ -96,12 +95,10 @@ export default function AssignmentSubmissionsSubPage({ assignment_uuid }: Assign
   // activity_object is fetched by AssignmentProvider and contains the numeric id
   const activityId: number | null = assignments?.activity_object?.id ?? null;
 
-  const { data: assignmentSubmissionRows, error: assignmentSubmissionRowsError } = useQuery({
-    ...(canonicalAssignmentUuid
-      ? assignmentSubmissionsQueryOptions<AssignmentSubmissionRow>(canonicalAssignmentUuid)
-      : { queryKey: ['assignments', 'submissions', 'missing'] as const }),
-    enabled: Boolean(canonicalAssignmentUuid),
-  });
+  const {
+    data: assignmentSubmissionRows,
+    error: assignmentSubmissionRowsError,
+  } = useAssignmentSubmissions<AssignmentSubmissionRow>(canonicalAssignmentUuid);
 
   if (!activityId) {
     return <PageLoading />;

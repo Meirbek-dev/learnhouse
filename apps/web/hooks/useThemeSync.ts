@@ -7,7 +7,7 @@ import { useAuth } from '@/hooks/useAuth';
  * Syncs the active theme name to the server with 1-second debounce.
  * Uses sendBeacon on page unload to flush any pending sync.
  *
- * Must be called inside a component that has access to both SWRConfig
+ * Must be called inside a component that has access to the shared session/query providers
  * (for useAuth) and the current theme name as a parameter.
  */
 export function useThemeSync(themeName: string): void {

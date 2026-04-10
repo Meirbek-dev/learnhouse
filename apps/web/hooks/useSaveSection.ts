@@ -39,7 +39,7 @@ function normalizeResponse(response: SaveResponse) {
  *  - handling 409 conflict via the course editor store
  *  - showing a toast on success or error
  *  - calling onSuccess (e.g. markClean)
- *  - refreshing SWR when the caller is not already using an optimistic mutation flow
+ *  - refreshing cached course queries when the caller is not already using an optimistic mutation flow
  */
 export function useSaveSection(options?: SaveSectionOptions) {
   const [isSaving, setIsSaving] = useState(false);

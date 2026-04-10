@@ -47,9 +47,9 @@ import { submitAssessment } from '@services/grading/grading';
 import { useGamificationStore } from '@/stores/gamification';
 import { useMySubmission } from '@/hooks/useMySubmission';
 import { queryKeys } from '@/lib/react-query/queryKeys';
-import { trailCurrentQueryOptions } from '@/features/courses/queries/course.query';
+import { useTrailCurrent } from '@/features/trail/hooks/useTrail';
 import { getAbsoluteUrl } from '@services/config/config';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { AnimatePresence, motion } from 'motion/react';
 import NextImage from '@components/ui/NextImage';
@@ -176,7 +176,7 @@ const ActivityActions = ({ activity, activityid, course, assignment, showNavigat
   const { isAuthenticated } = useAuth();
   const isPaidAccessAllowed = activity?.content?.paid_access !== false || contributorStatus === 'ACTIVE';
 
-  const { data: trailData } = useQuery(trailCurrentQueryOptions());
+  const { data: trailData } = useTrailCurrent();
 
   return (
     <div className="flex items-center space-x-2">
@@ -276,7 +276,7 @@ const ActivityClient = (props: ActivityClientProps) => {
     return format.relativeTime(date, now);
   };
 
-  const { data: trailData } = useQuery(trailCurrentQueryOptions());
+  const { data: trailData } = useTrailCurrent();
 
   const { allActivities, currentIndex } = useActivityPosition(course, activityid);
 

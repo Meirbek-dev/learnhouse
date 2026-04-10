@@ -1,7 +1,7 @@
 'use client';
 
 import type { SubmissionStatus } from '@/types/grading';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { queryOptions, useQuery, useQueryClient } from '@tanstack/react-query';
 import { submissionsQueryOptions } from '@/features/grading/queries/grading.query';
 import { useState, useEffect } from 'react';
 
@@ -12,6 +12,29 @@ export interface UseSubmissionsOptions {
   sortBy?: string;
   sortDir?: 'asc' | 'desc';
   pageSize?: number;
+}
+
+function submissionsHookOptions(
+  activityId: number | null,
+  page: number,
+  pageSize: number,
+  search: string,
+  sortBy: string,
+  sortDir: 'asc' | 'desc',
+  status: SubmissionStatus | 'NEEDS_GRADING' | 'ALL',
+) {
+  return queryOptions({
+    ...submissionsQueryOptions({
+      activityId: activityId ?? 0,
+      page,
+      pageSize,
+      search,
+      sortBy,
+      sortDir,
+      status,
+    }),
+    enabled: Boolean(activityId),
+  });
 }
 
 export function useSubmissions({
@@ -28,15 +51,6 @@ export function useSubmissions({
     setPage(1);
   }, [activityId]);
 
-  const params = new URLSearchParams();
-  if (activityId) params.set('activity_id', String(activityId));
-  if (status) params.set('status', status);
-  if (search) params.set('search', search);
-  params.set('sort_by', sortBy);
-  params.set('sort_dir', sortDir);
-  params.set('page', String(page));
-  params.set('page_size', String(pageSize));
-
   const queryParams = {
     activityId: activityId ?? 0,
     page,
@@ -48,10 +62,9 @@ export function useSubmissions({
   } as const;
   const queryKey = submissionsQueryOptions(queryParams).queryKey;
   const queryClient = useQueryClient();
-  const query = useQuery({
-    ...submissionsQueryOptions(queryParams),
-    enabled: Boolean(activityId),
-  });
+  const query = useQuery(
+    submissionsHookOptions(activityId, page, pageSize, search ?? '', sortBy, sortDir, status ?? 'ALL'),
+  );
 
   return {
     submissions: query.data?.items ?? [],

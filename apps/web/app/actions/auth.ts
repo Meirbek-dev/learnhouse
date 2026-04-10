@@ -106,10 +106,15 @@ async function postAuthenticated(path: string): Promise<Response> {
 
 export async function loginAction(input: LoginActionInput): Promise<AuthActionResult> {
   const requestHeaders = await headers();
-  const response = await postAuthJson('auth/login', {
-    email: input.email.trim().toLowerCase(),
-    password: input.password,
-  }, requestHeaders);
+  let response: Response;
+  try {
+    response = await postAuthJson('auth/login', {
+      email: input.email.trim().toLowerCase(),
+      password: input.password,
+    }, requestHeaders);
+  } catch {
+    return { ok: false, reason: 'service_unavailable' };
+  }
 
   if (!response.ok) {
     const reason = response.status === 503 ? 'service_unavailable' : 'login_failed';
@@ -124,17 +129,22 @@ export async function loginAction(input: LoginActionInput): Promise<AuthActionRe
 export async function signupAction(input: SignupActionInput): Promise<AuthActionResult> {
   const requestHeaders = await headers();
   const username = `${input.firstName.toLowerCase()}.${input.lastName.toLowerCase()}`;
-  const signupResponse = await postAuthJson(
-    'users',
-    {
-      email: input.email,
-      first_name: input.firstName,
-      last_name: input.lastName,
-      password: input.password,
-      username,
-    },
-    requestHeaders,
-  );
+  let signupResponse: Response;
+  try {
+    signupResponse = await postAuthJson(
+      'users',
+      {
+        email: input.email,
+        first_name: input.firstName,
+        last_name: input.lastName,
+        password: input.password,
+        username,
+      },
+      requestHeaders,
+    );
+  } catch {
+    return { ok: false, reason: 'service_unavailable' };
+  }
 
   if (!signupResponse.ok) {
     const payload = await signupResponse.json().catch(() => null);
@@ -142,14 +152,19 @@ export async function signupAction(input: SignupActionInput): Promise<AuthAction
     return { ok: false, reason: 'signup_failed', signupCode };
   }
 
-  const loginResponse = await postAuthJson(
-    'auth/login',
-    {
-      email: input.email.trim().toLowerCase(),
-      password: input.password,
-    },
-    requestHeaders,
-  );
+  let loginResponse: Response;
+  try {
+    loginResponse = await postAuthJson(
+      'auth/login',
+      {
+        email: input.email.trim().toLowerCase(),
+        password: input.password,
+      },
+      requestHeaders,
+    );
+  } catch {
+    return { ok: false, reason: 'login_after_signup_failed' };
+  }
 
   if (!loginResponse.ok) {
     return { ok: false, reason: 'login_after_signup_failed' };

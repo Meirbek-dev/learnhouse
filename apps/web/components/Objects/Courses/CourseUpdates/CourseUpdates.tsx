@@ -18,11 +18,11 @@ import { useEffectEvent, useLayoutEffect, useState, useTransition } from 'react'
 import { Field, FieldContent, FieldError, FieldLabel } from '@components/ui/field';
 import { queryKeys } from '@/lib/react-query/queryKeys';
 import { Actions, Resources, Scopes } from '@/types/permissions';
-import { courseUpdatesQueryOptions } from '@/features/courses/queries/course.query';
+import { useCourseUpdates } from '@/features/courses/hooks/useCourseQueries';
 import { useCourse } from '@components/Contexts/CourseContext';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { useDateFnsLocale } from '@/hooks/useDateFnsLocale';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { usePermissions } from '@/components/Security';
 import { format, formatDistanceToNow } from 'date-fns';
 import { Controller, useForm } from 'react-hook-form';
@@ -37,15 +37,9 @@ import * as v from 'valibot';
 const getCourseUpdatesQueryKey = (courseUuid?: string | null) =>
   courseUuid ? queryKeys.courses.updates(courseUuid) : (['courses', 'updates', 'disabled'] as const);
 
-const useCourseUpdatesQuery = (courseUuid?: string | null) =>
-  useQuery({
-    ...(courseUuid ? courseUpdatesQueryOptions(courseUuid) : { queryKey: getCourseUpdatesQueryKey(courseUuid) }),
-    enabled: Boolean(courseUuid),
-  });
-
 const CourseUpdates = () => {
   const course = useCourse();
-  const { data: updates } = useCourseUpdatesQuery(course?.courseStructure?.course_uuid);
+  const { data: updates } = useCourseUpdates(course?.courseStructure?.course_uuid);
   const [isModelOpen, setIsModelOpen] = useState(false);
   const t = useTranslations('Courses.CourseUpdates');
 
@@ -276,7 +270,7 @@ const UpdatesListView = () => {
   const { can } = usePermissions();
   const canUpdateCourse =
     can(Actions.UPDATE, Resources.COURSE, Scopes.OWN) || can(Actions.UPDATE, Resources.COURSE, Scopes.PLATFORM);
-  const { data: updates } = useCourseUpdatesQuery(course?.courseStructure?.course_uuid);
+  const { data: updates } = useCourseUpdates(course?.courseStructure?.course_uuid);
   const t = useTranslations('Courses.CourseUpdates');
   const locale = useDateFnsLocale();
 

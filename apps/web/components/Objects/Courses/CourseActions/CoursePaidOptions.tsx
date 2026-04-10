@@ -1,10 +1,9 @@
 'use client';
 
 import type { components } from '@/lib/api/generated';
-import { useQuery } from '@tanstack/react-query';
 
 import { getStripeProductCheckoutSession } from '@services/payments/products';
-import { courseProductsQueryOptions } from '@/features/payments/queries/payments.query';
+import { useCourseProducts } from '@/features/payments/hooks/usePayments';
 import { ChevronDown, ChevronUp, Loader2, RefreshCcw, SquareCheck } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { getAbsoluteUrl } from '@services/config/config';
@@ -31,7 +30,7 @@ const CoursePaidOptions = ({ course }: CoursePaidOptionsProps) => {
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
 
-  const { data: linkedProducts, error } = useQuery(courseProductsQueryOptions(course.id));
+  const { data: linkedProducts, error } = useCourseProducts(course.id);
 
   const handleCheckout = async (productId: number) => {
     if (!currentUser) {

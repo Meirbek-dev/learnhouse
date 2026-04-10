@@ -149,17 +149,30 @@ def _sync_query_collection(
 
 
 def delete_expired_chunks(retention_seconds: int) -> int:
-    """Delete chunks older than *retention_seconds*. Returns the row count removed."""
+    """Delete chunks older than *retention_seconds*.
+
+    Returns the row count removed, or -1 if the table does not exist yet
+    (migration pending).
+    """
+    import sqlalchemy.exc
+
     engine = get_database_engine()
     with Session(engine) as session:
-        result = session.execute(
-            delete(_document_chunks).where(
-                _document_chunks.c.inserted_at
-                < text(f"now() - interval '{retention_seconds} seconds'")
+        try:
+            result = session.execute(
+                delete(_document_chunks).where(
+                    _document_chunks.c.inserted_at
+                    < text(f"now() - interval '{retention_seconds} seconds'")
+                )
             )
-        )
-        session.commit()
-        return result.rowcount
+            session.commit()
+            return result.rowcount
+        except sqlalchemy.exc.ProgrammingError as exc:
+            # Table doesn't exist yet — migration not yet applied.
+            session.rollback()
+            if "document_chunks" in str(exc.orig):
+                return -1
+            raise
 
 
 # ---------------------------------------------------------------------------

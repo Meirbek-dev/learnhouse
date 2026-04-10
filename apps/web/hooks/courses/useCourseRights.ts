@@ -1,16 +1,20 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { queryOptions, useQuery } from '@tanstack/react-query';
 import { courseKeys } from './courseKeys';
 import { courseRightsQueryOptions } from '@/features/courses/queries/course.query';
+
+function courseRightsHookOptions<TRights = unknown>(courseUuid: string) {
+  return queryOptions({
+    ...courseRightsQueryOptions<TRights>(courseUuid),
+    enabled: Boolean(courseUuid),
+  });
+}
 
 export function useCourseRights<TRights = any>(courseUuid: string) {
   const key = courseKeys.rights(courseUuid);
 
-  const query = useQuery({
-    ...courseRightsQueryOptions<TRights>(courseUuid),
-    enabled: Boolean(courseUuid),
-  });
+  const query = useQuery(courseRightsHookOptions<TRights>(courseUuid));
 
   return {
     data: query.data,

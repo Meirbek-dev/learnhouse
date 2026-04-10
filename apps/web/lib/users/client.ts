@@ -1,12 +1,10 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
 import { apiFetch } from '@/lib/api-client';
 import { getQueryClient } from '@/lib/react-query/queryClient';
 import { queryKeys } from '@/lib/react-query/queryKeys';
 import type { CustomResponseTyping } from '@services/utils/ts/requests';
 import type { components } from '@/lib/api/generated';
-import { userByIdQueryOptions, userByUsernameQueryOptions } from '@/features/users/queries/users.query';
 
 type UserRead = components['schemas']['UserRead'];
 type CourseRead = components['schemas']['CourseRead'];
@@ -142,21 +140,4 @@ export async function updatePassword(userId: number, data: unknown): Promise<Res
   };
 }
 
-export function useUserById(userId?: number | null, options?: { enabled?: boolean }) {
-  const enabled = Boolean(userId) && (options?.enabled ?? true);
-
-  return useQuery({
-    ...userByIdQueryOptions(userId ?? 0),
-    enabled,
-  });
-}
-
-export function useUserByUsername(username?: string | null, options?: { enabled?: boolean }) {
-  const normalizedUsername = username?.trim() ?? '';
-  const enabled = normalizedUsername.length > 0 && (options?.enabled ?? true);
-
-  return useQuery({
-    ...userByUsernameQueryOptions(normalizedUsername || '__disabled__'),
-    enabled,
-  });
-}
+export { useUserByIdQuery as useUserById, useUserByUsernameQuery as useUserByUsername } from '@/features/users/hooks/useUsers';

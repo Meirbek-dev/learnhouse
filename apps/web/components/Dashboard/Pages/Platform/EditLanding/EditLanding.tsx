@@ -23,10 +23,9 @@ import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 import { createElement, useEffect, useState, useTransition } from 'react';
 import { usePlatform } from '@/components/Contexts/PlatformContext';
 import { getLandingMediaDirectory } from '@services/media/media';
-import { platformCoursesQueryOptions } from '@/features/courses/queries/course.query';
+import { usePlatformCourses } from '@/features/platform/hooks/usePlatform';
 import { Textarea } from '@components/ui/textarea';
 import NextImage from '@components/ui/NextImage';
-import { useQuery } from '@tanstack/react-query';
 
 import { Switch } from '@components/ui/switch';
 import { Button } from '@components/ui/button';
@@ -1994,7 +1993,7 @@ const FeaturedCoursesEditor: FC<{
   section: LandingFeaturedCourses;
   onChange: (section: LandingFeaturedCourses) => void;
 }> = ({ t, section, onChange }) => {
-  const { data: coursesData } = useQuery(platformCoursesQueryOptions());
+  const { data: coursesData } = usePlatformCourses();
   const courses = coursesData?.courses;
 
   return (

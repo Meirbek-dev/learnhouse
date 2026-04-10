@@ -1,8 +1,6 @@
 'use client';
 
 import { getCourseEditorBundle } from '@services/courses/editor';
-import { getCourseUpdatesSwrKey, getTrailSwrKey } from '@services/courses/keys';
-import { getDiscussionsSwrKey } from '@services/courses/discussions-keys';
 import { getAssignmentFromActivityUUID } from '@services/courses/assignments';
 import { getCourses } from '@services/courses/courses';
 import { getAPIUrl } from '@services/config/config';
@@ -98,7 +96,7 @@ export function editableCourseListQueryOptions<TCourse = unknown>(options: Cours
 export function courseUpdatesQueryOptions(courseUuid: string) {
   return queryOptions({
     queryKey: queryKeys.courses.updates(courseUuid),
-    queryFn: () => apiFetcher(getCourseUpdatesSwrKey(courseUuid)),
+    queryFn: () => apiFetcher(`${courseEndpoints.detail(courseUuid)}/updates`),
   });
 }
 
@@ -110,14 +108,22 @@ export function courseDiscussionsQueryOptions(
 
   return queryOptions({
     queryKey: queryKeys.discussions.list(courseUuid, includeReplies, limit, offset),
-    queryFn: () => apiFetcher(getDiscussionsSwrKey(courseUuid, includeReplies, limit, offset)),
+    queryFn: () => {
+      const queryString = new URLSearchParams({
+        include_replies: String(includeReplies),
+        limit: String(limit),
+        offset: String(offset),
+      }).toString();
+
+      return apiFetcher(`${courseEndpoints.detail(courseUuid)}/discussions?${queryString}`);
+    },
   });
 }
 
 export function trailCurrentQueryOptions() {
   return queryOptions({
     queryKey: queryKeys.trail.current(),
-    queryFn: () => apiFetcher(getTrailSwrKey()),
+    queryFn: () => apiFetcher(`${getAPIUrl()}trail`),
   });
 }
 

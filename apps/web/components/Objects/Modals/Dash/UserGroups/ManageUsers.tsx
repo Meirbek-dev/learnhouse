@@ -1,8 +1,8 @@
 'use client';
 
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { linkUserToUserGroup, unLinkUserToUserGroup } from '@services/usergroups/usergroups';
-import { allMembersQueryOptions, userGroupUsersQueryOptions } from '@/features/users/queries/users.query';
+import { useAllMembers, useUserGroupUsers } from '@/features/users/hooks/useUsers';
 import type { ColumnDef } from '@tanstack/react-table';
 import { queryKeys } from '@/lib/react-query/queryKeys';
 import DataTable from '@components/ui/data-table';
@@ -27,9 +27,9 @@ interface UserRow {
 const ManageUsers = (props: ManageUsersProps) => {
   const t = useTranslations('Components.ManageUsers');
   const queryClient = useQueryClient();
-  const { data: Users } = useQuery(allMembersQueryOptions());
+  const { data: Users } = useAllMembers();
   const userGroupUsersKey = queryKeys.userGroups.users(props.usergroup_id);
-  const { data: UGusers } = useQuery(userGroupUsersQueryOptions(props.usergroup_id));
+  const { data: UGusers } = useUserGroupUsers(props.usergroup_id);
 
   // Normalize Users response which may be either an array or a paginated object { users: [], total, ... }
   const platformUsersList = (data: any) => {
