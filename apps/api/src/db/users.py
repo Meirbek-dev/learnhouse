@@ -1,7 +1,9 @@
+from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
+import uuid as uuid_lib
 from pydantic import ConfigDict, EmailStr
-from sqlalchemy import JSON, Column, UniqueConstraint
+from sqlalchemy import JSON, Column, DateTime, UniqueConstraint, func
 from sqlmodel import Field
 
 from src.db.permissions import RoleRead
@@ -51,6 +53,7 @@ class UserUpdatePassword(SQLModelStrictBaseModel):
 class UserRead(UserBase):
     id: int
     user_uuid: str
+    auth_provider: str = "local"
 
 
 class PublicUser(UserRead):
@@ -97,11 +100,34 @@ class User(UserBase, table=True):
     )
 
     id: int | None = Field(default=None, primary_key=True)
-    password: str = ""
-    user_uuid: str = ""
+    password: str | None = Field(default=None)
+    user_uuid: str = Field(
+        default_factory=lambda: f"user_{uuid_lib.uuid4().hex[:26]}",
+    )
     email_verified: bool = False
-    creation_date: str = ""
-    update_date: str = ""
+    email_verified_at: datetime | None = Field(
+        default=None,
+        sa_column=Column(DateTime(timezone=True), nullable=True),
+    )
+    auth_provider: str = Field(default="local")
+    google_sub: str | None = Field(default=None)
+    created_at: datetime = Field(
+        default_factory=lambda: datetime.now(UTC),
+        sa_column=Column(
+            DateTime(timezone=True),
+            nullable=False,
+            server_default=func.now(),
+        ),
+    )
+    updated_at: datetime = Field(
+        default_factory=lambda: datetime.now(UTC),
+        sa_column=Column(
+            DateTime(timezone=True),
+            nullable=False,
+            server_default=func.now(),
+            onupdate=func.now(),
+        ),
+    )
 
 
 def rebuild_user_models() -> None:

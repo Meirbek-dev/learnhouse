@@ -34,6 +34,7 @@ async def find_or_create_google_user(
         given_name = google_user_data.get("given_name", "")
         family_name = google_user_data.get("family_name", "")
         picture = google_user_data.get("picture", "")
+        google_sub = google_user_data.get("sub", "")
 
         username_parts = []
         if given_name:
@@ -58,9 +59,25 @@ async def find_or_create_google_user(
             avatar_image=picture,
         )
 
-        return await create_user_without_platform(
+        user_read = await create_user_without_platform(
             request, db_session, current_user, user_object
         )
+
+        # Mark as Google OAuth user
+        created_user = db_session.exec(
+            select(User).where(User.user_uuid == user_read.user_uuid)
+        ).first()
+        if created_user:
+            created_user.auth_provider = "google"
+            created_user.google_sub = google_sub or None
+            created_user.email_verified = True
+            from datetime import UTC, datetime
+
+            created_user.email_verified_at = datetime.now(UTC)
+            db_session.add(created_user)
+            db_session.commit()
+
+        return user_read
 
     await ensure_user_has_default_role(db_session, user.id)
     return UserRead.model_validate(user)

@@ -153,7 +153,7 @@ async def update_user(
     for key, value in user_data.items():
         setattr(user, key, value)
 
-    user.update_date = str(datetime.now())
+    # updated_at is handled by the database via onupdate=func.now()
 
     # Update user in database
     db_session.add(user)
@@ -238,7 +238,6 @@ async def update_user_password(
 
     # Update user
     user.password = security_hash_password(form.new_password)
-    user.update_date = str(datetime.now())
 
     # Add password_changed_at field for session invalidation tracking
     if user.profile is None:
@@ -426,15 +425,24 @@ async def _create_and_validate_user(
     # Create user with completed fields
     user = User.model_validate(user_object)
     user.user_uuid = f"user_{ULID()}"
-    user.password = security_hash_password(user_object.password)
+    user.password = security_hash_password(user_object.password) if user_object.password else None
     user.email_verified = False
-    user.creation_date = str(datetime.now())
-    user.update_date = str(datetime.now())
+    user.auth_provider = "local"
 
     # Add user to database
     db_session.add(user)
     db_session.commit()
     db_session.refresh(user)
+
+    # Send verification email (best-effort, non-blocking)
+    try:
+        from src.services.users.email_verification import send_verification_email
+
+        import asyncio
+
+        asyncio.create_task(send_verification_email(db_session, user))
+    except Exception:
+        _logger.warning("Failed to enqueue verification email for user %s", user.email)
 
     return user
 

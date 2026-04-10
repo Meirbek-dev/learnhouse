@@ -37,6 +37,7 @@ const AUTH_REWRITE: Record<string, string> = {
   '/login': '/auth/login',
   '/reset': '/auth/reset',
   '/signup': '/auth/signup',
+  '/verify-email': '/auth/verify-email',
 };
 
 const EDITOR_PATH_RE = /^\/course\/[\w-]+\/activity\/[\w-]+\/edit$/;

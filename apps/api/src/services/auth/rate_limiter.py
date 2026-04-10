@@ -5,10 +5,13 @@ All functions are async and use the async Redis client so they never block
 the asyncio event loop.
 """
 
+import logging
 import secrets
 import time
 
 from src.services.cache.redis_client import get_async_redis_client
+
+logger = logging.getLogger(__name__)
 
 
 class RateLimitExceeded(Exception):
@@ -70,7 +73,11 @@ async def check_account_locked(email: str) -> bool:
 async def record_login_failure(
     email: str, *, lock_after: int = 5, lock_duration: int = 900
 ) -> None:
-    """Record a failed login attempt and lock the account if threshold is reached."""
+    """Record a failed login attempt and lock the account if threshold is reached.
+
+    When the lockout threshold is reached for the first time, enqueues a
+    lockout notification email to warn the user about suspicious activity.
+    """
     r = get_async_redis_client()
     if not r:
         return
@@ -80,7 +87,36 @@ async def record_login_failure(
     await r.expire(counter_key, lock_duration)
 
     if count >= lock_after:
-        await r.set(f"account_locked:{email.lower()}", "1", ex=lock_duration)
+        lock_key = f"account_locked:{email.lower()}"
+        # Only send notification the first time the lock is set
+        was_locked = await r.exists(lock_key)
+        await r.set(lock_key, "1", ex=lock_duration)
+
+        if not was_locked:
+            _send_lockout_notification(email)
+
+
+def _send_lockout_notification(email: str) -> None:
+    """Send a lockout notification email (best-effort, non-blocking).
+
+    Uses fire-and-forget asyncio.create_task so the login flow is never
+    blocked by email delivery.
+    """
+    import asyncio
+
+    async def _send() -> None:
+        try:
+            from src.services.users.emails import send_lockout_notification_email
+
+            send_lockout_notification_email(email=email)
+        except Exception:
+            logger.warning("Failed to send lockout notification to %s", email)
+
+    try:
+        asyncio.create_task(_send())
+    except RuntimeError:
+        # No event loop running — skip notification
+        pass
 
 
 async def clear_login_failures(email: str) -> None:

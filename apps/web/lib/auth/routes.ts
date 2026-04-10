@@ -1,4 +1,4 @@
-const AUTH_ROUTE_PREFIXES = ['/login', '/signup', '/forgot', '/reset'] as const;
+const AUTH_ROUTE_PREFIXES = ['/login', '/signup', '/forgot', '/reset', '/verify-email'] as const;
 
 const PROTECTED_ROUTE_PREFIXES = [
   '/dash',

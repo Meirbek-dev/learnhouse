@@ -32,45 +32,18 @@ export interface Session extends Omit<UserSessionResponse, 'user'> {
 // ── JWT claim types ───────────────────────────────────────────────────────────
 
 /**
- * Role object embedded in the JWT ``role_data`` claim.
- * Shape matches the backend ``RoleRead`` Pydantic model / OpenAPI schema,
- * including the computed aggregate fields (permissions_count, users_count)
- * which are embedded as 0 since accurate counts are not needed for session UI.
- */
-export interface RawRoleClaim {
-  id: number;
-  slug: string;
-  name: string;
-  description?: string | null;
-  is_system: boolean;
-  priority: number;
-  /** ISO-8601 string. */
-  created_at: string;
-  /** ISO-8601 string. */
-  updated_at: string;
-  /** Embedded as 0 — not meaningful in session context. */
-  permissions_count: number;
-  /** Embedded as 0 — not meaningful in session context. */
-  users_count: number;
-}
-
-/**
- * User display claims embedded in the JWT ``u`` claim.
- * Contains only the fields needed to render the UI without a backend round-trip.
+ * Slim user display claims embedded in the JWT ``u`` claim.
+ *
+ * Contains only the fields needed to render the session chrome (nav bar, avatar)
+ * without a backend round-trip.  Full profile data (bio, details, theme, role
+ * objects) is served via ``GET /auth/me`` on demand.
  */
 export interface RawUserClaims {
   id: number;
-  user_uuid: string;
-  username: string;
+  uuid: string;
+  name: string;
   email: string;
-  first_name: string;
-  last_name: string;
-  middle_name: string | null;
-  avatar_image: string | null;
-  bio: string | null;
-  details: Record<string, unknown> | null;
-  profile: Record<string, unknown> | null;
-  theme: string | null;
+  avatar: string;
 }
 
 /**
@@ -81,8 +54,10 @@ export interface RawUserClaims {
  *                in Redis to detect stale role embeddings.
  *   roles      — role slugs (for display / logging).
  *   perms      — fully expanded permission strings ("resource:action:scope").
- *   u          — user display claims (rendered without a backend call).
- *   role_data  — full role objects matching the RoleRead OpenAPI schema.
+ *   u          — slim user display claims (id, name, email, avatar).
+ *
+ * Full role objects and extended user profile fields are no longer embedded in
+ * the JWT — they are served via ``GET /auth/me`` to keep the token ~800 bytes.
  */
 export interface AccessTokenPayload {
   /** User UUID — maps to Session.user.user_uuid. */
@@ -107,8 +82,6 @@ export interface AccessTokenPayload {
    *  and scope-broadening before embedding. */
   perms: string[];
   type: 'access';
-  /** Minimal user display claims — lets the frontend render without a backend call. */
+  /** Slim user display claims — id, name, email, avatar only. */
   u: RawUserClaims;
-  /** Full role objects matching the RoleRead OpenAPI schema. */
-  role_data: RawRoleClaim[];
 }

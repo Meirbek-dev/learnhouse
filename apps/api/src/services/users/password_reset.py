@@ -120,6 +120,6 @@ async def change_password_with_reset_code(
     db_session.commit()
 
     # Revoke all sessions — force re-login on all devices after password change
-    await revoke_all_user_sessions(db_session, user.id)
+    await revoke_all_user_sessions(user.id)
 
     return "Password changed successfully"

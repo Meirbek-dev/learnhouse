@@ -57,3 +57,46 @@ def send_password_reset_email(
 </html>
 """,
     )
+
+
+def send_lockout_notification_email(email: str) -> None:
+    """Notify a user that their account has been locked due to repeated failed login attempts."""
+    return send_email(
+        to=email,
+        subject=f"{PLATFORM_BRAND_NAME} — Suspicious login activity",
+        body=f"""
+<html>
+    <body>
+        <p>Hello,</p>
+        <p>We detected multiple failed login attempts on your {PLATFORM_BRAND_NAME} account.</p>
+        <p>Your account has been temporarily locked for 15 minutes as a security precaution.</p>
+        <p>If this was you, please wait and try again later.  If you did not attempt to log in,
+           we recommend resetting your password immediately.</p>
+        <p><a href="{_get_public_web_origin()}/forgot">Reset your password</a></p>
+    </body>
+</html>
+""",
+    )
+
+
+def send_email_verification_email(
+    user: UserRead,
+    email: str,
+    verification_token: str,
+) -> None:
+    """Send an email verification link to the user."""
+    verify_link = f"{_get_public_web_origin()}/verify-email?token={verification_token}"
+    return send_email(
+        to=email,
+        subject=f"Verify your email — {PLATFORM_BRAND_NAME}",
+        body=f"""
+<html>
+    <body>
+        <p>Hello {user.username},</p>
+        <p>Please verify your email address by clicking the link below:</p>
+        <p><a href="{verify_link}">Verify Email</a></p>
+        <p>This link expires in 24 hours.</p>
+    </body>
+</html>
+""",
+    )

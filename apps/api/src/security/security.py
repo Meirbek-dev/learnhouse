@@ -30,8 +30,14 @@ def security_hash_password(password: str) -> str:
     return pwd_hasher.hash(password)
 
 
-def security_verify_password(plain_password: str, hashed_password: str) -> bool:
-    """Verify a password against its Argon2id hash."""
+def security_verify_password(plain_password: str, hashed_password: str | None) -> bool:
+    """Verify a password against its Argon2id hash.
+
+    Returns False when hashed_password is None (OAuth-only users have no local
+    password set).
+    """
+    if hashed_password is None:
+        return False
     try:
         pwd_hasher.verify(hashed_password, plain_password)
         return True

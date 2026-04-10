@@ -33,6 +33,7 @@ logger = logging.getLogger(__name__)
 
 REFRESH_SESSION_TTL = int(timedelta(days=7).total_seconds())
 REFRESH_SESSION_HARD_CAP = int(timedelta(days=30).total_seconds())
+MAX_SESSIONS_PER_USER = 10
 SESSION_PREFIX = "session:"
 USER_SESSIONS_PREFIX = "user_sessions:"
 
@@ -336,8 +337,21 @@ async def create_auth_session(
 ) -> tuple[SessionData, str]:
     """Create a new auth session in Redis and schedule an async audit write.
 
+    Enforces a maximum of MAX_SESSIONS_PER_USER active sessions.  When the
+    limit is reached, the oldest session (lowest score in the sorted set) is
+    evicted automatically.
+
     No DB session required — audit uses its own engine connection.
     """
+    # Enforce session concurrency limit
+    active_ids = await _get_active_session_ids(user.id)
+    if len(active_ids) >= MAX_SESSIONS_PER_USER:
+        # Evict oldest sessions until we're under the limit
+        sessions_to_evict = active_ids[: len(active_ids) - MAX_SESSIONS_PER_USER + 1]
+        for oldest_sid in sessions_to_evict:
+            await _delete_session_from_redis(oldest_sid, user.id)
+            _fire_audit_revoke(oldest_sid)
+
     now = _now_ts()
     session_id = _generate_session_id()
     refresh_token = _generate_refresh_token(session_id)

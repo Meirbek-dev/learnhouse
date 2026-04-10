@@ -1,3 +1,6 @@
+import asyncio
+import base64
+import json
 import logging
 import uuid
 from datetime import UTC, datetime, timedelta
@@ -69,7 +72,6 @@ def create_access_token(
     roles: list[str] | None = None,
     permissions: list[str] | None = None,
     user_claims: dict | None = None,
-    role_data: list[dict] | None = None,
     expires_delta: timedelta | None = None,
 ) -> str:
     """Create a signed EdDSA access token.
@@ -80,10 +82,8 @@ def create_access_token(
         roles:        Role slugs embedded for display/logging.
         permissions:  Expanded permission strings (e.g. "course:read:own").
                       Frontend uses these for Set.has() RBAC checks.
-        user_claims:  Minimal display fields (id, username, email, …).
-                      Allows the frontend to render the UI without a backend call.
-        role_data:    Full role objects matching the RoleRead OpenAPI schema.
-                      Allows the frontend to display role information without a
+        user_claims:  Minimal display fields (id, name, email, avatar).
+                      Allows the frontend to render the session UI without a
                       backend call.
         expires_delta: Override the default ACCESS_TOKEN_EXPIRE lifetime.
     """
@@ -106,8 +106,6 @@ def create_access_token(
     }
     if user_claims:
         payload["u"] = user_claims
-    if role_data:
-        payload["role_data"] = role_data
 
     token = jwt.encode({"alg": "EdDSA", "kid": "v1"}, payload, get_private_key())
     return token.decode("utf-8") if isinstance(token, bytes) else token
@@ -175,9 +173,6 @@ def decode_token_unverified(token: str) -> dict:
 
     DO NOT use this function to make authorization decisions.
     """
-    import base64
-    import json
-
     try:
         parts = token.split(".")
         if len(parts) != 3:
@@ -281,7 +276,8 @@ async def get_current_user_from_token(
             headers={"WWW-Authenticate": 'Bearer error="roles_stale"'},
         )
 
-    user = _get_user_by_uuid(db_session, token_data.user_uuid)
+    # Run sync DB query in a thread to avoid blocking the event loop
+    user = await asyncio.to_thread(_get_user_by_uuid, db_session, token_data.user_uuid)
     if user is None:
         raise _credentials_exception()
     return PublicUser(**user.model_dump())

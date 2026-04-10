@@ -24,36 +24,42 @@ const JWKS = createRemoteJWKSet(
 /**
  * Build a fully-typed Session from a verified AccessTokenPayload.
  *
- * All fields required by the Session interface are sourced directly from JWT
- * claims — no backend call is made.  The shape satisfies
- * ``Session extends Omit<UserSessionResponse, 'user'>`` because:
+ * The JWT carries only a slim ``u`` claim (id, uuid, name, email, avatar).
+ * Heavy fields (bio, details, profile, theme, role objects) are served via
+ * ``GET /auth/me`` on demand.  The frontend calls this once on app load and
+ * caches the result via ``useFullProfile()``.
  *
- *   roles            → payload.role_data wrapped as {role: RawRoleClaim}[]
- *   permissions      → payload.perms
+ * Fields sourced from JWT:
+ *   permissions      → payload.perms  (full RBAC set, O(1) lookups)
  *   permissions_timestamp → payload.rvs
  *   expires_at       → payload.exp   (seconds)
  *   session_version  → payload.iat
- *   expiresAt        → payload.exp * 1000  (ms, added by Session)
- *   sessionVersion   → payload.iat         (added by Session)
- *   user             → payload.u           (SessionUser pick)
+ *   expiresAt        → payload.exp * 1000  (ms)
+ *   sessionVersion   → payload.iat
+ *   user             → payload.u  (slim: id, name, email, avatar)
+ *   roles            → [] (full role objects served via GET /auth/me)
  */
 function sessionFromPayload(payload: AccessTokenPayload): Session {
+  const nameParts = payload.u.name.split(' ');
+  const firstName = nameParts[0] ?? '';
+  const lastName = nameParts.slice(1).join(' ');
+
   return {
     user: {
       id: payload.u.id,
-      user_uuid: payload.u.user_uuid,
-      username: payload.u.username,
+      user_uuid: payload.u.uuid,
+      username: '',
       email: payload.u.email,
-      first_name: payload.u.first_name,
-      last_name: payload.u.last_name,
-      middle_name: payload.u.middle_name,
-      avatar_image: payload.u.avatar_image,
-      bio: payload.u.bio,
-      details: payload.u.details,
-      profile: payload.u.profile,
-      theme: payload.u.theme,
+      first_name: firstName,
+      last_name: lastName,
+      middle_name: null,
+      avatar_image: payload.u.avatar || null,
+      bio: null,
+      details: null,
+      profile: null,
+      theme: null,
     },
-    roles: payload.role_data.map((r) => ({ role: r })),
+    roles: [],
     permissions: payload.perms,
     permissions_timestamp: payload.rvs,
     expires_at: payload.exp,
@@ -97,9 +103,9 @@ export const getSession = cache(async (): Promise<Session | null> => {
     });
 
     // Guard: tokens issued before the new claim fields were added will be
-    // missing `u`, `perms`, or `role_data`.  Treat them as expired so the
-    // user refreshes to a full token.
-    if (!payload.u || !payload.perms || !payload.role_data) {
+    // missing `u` or `perms`.  Treat them as expired so the user refreshes
+    // to a full token.
+    if (!payload.u || !payload.perms) {
       return null;
     }
 
