@@ -22,6 +22,7 @@ from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from typing import Literal
 
+from fastapi import HTTPException, status
 from sqlmodel import Session, select
 
 from src.db.auth_sessions import AuthSession
@@ -164,7 +165,11 @@ async def _read_session_from_redis(session_id: str) -> SessionData | None:
     r = get_async_redis_client()
     if not r:
         return None
-    raw = await r.get(_session_key(session_id))
+    try:
+        raw = await r.get(_session_key(session_id))
+    except Exception:
+        logger.warning("Redis error reading session %s", session_id)
+        return None
     if not raw:
         return None
     data = _parse_session_data(raw)
@@ -349,7 +354,14 @@ async def create_auth_session(
         rotated_count=0,
         absolute_expires_at=now + REFRESH_SESSION_HARD_CAP,
     )
-    await _write_session_to_redis(data, REFRESH_SESSION_TTL)
+    try:
+        await _write_session_to_redis(data, REFRESH_SESSION_TTL)
+    except Exception as exc:
+        logger.error("Redis unavailable — cannot persist session: %s", exc)
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Authentication service temporarily unavailable",
+        ) from exc
     _fire_audit_create(data)
     return data, refresh_token
 

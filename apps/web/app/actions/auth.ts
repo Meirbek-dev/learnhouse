@@ -27,7 +27,7 @@ interface SignupFailurePayload {
 
 interface AuthActionResult {
   ok: boolean;
-  reason?: 'login_failed' | 'login_after_signup_failed' | 'signup_failed';
+  reason?: 'login_failed' | 'login_after_signup_failed' | 'signup_failed' | 'service_unavailable';
   signupCode?: string;
 }
 
@@ -112,7 +112,8 @@ export async function loginAction(input: LoginActionInput): Promise<AuthActionRe
   }, requestHeaders);
 
   if (!response.ok) {
-    return { ok: false, reason: 'login_failed' };
+    const reason = response.status === 503 ? 'service_unavailable' : 'login_failed';
+    return { ok: false, reason };
   }
 
   await applyResponseCookies(response.headers);

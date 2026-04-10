@@ -68,7 +68,10 @@ const LoginClient = () => {
       });
 
       if (!response.ok) {
-        return { error: t('wrongCredentials'), fieldErrors: {} };
+        const message = response.reason === 'service_unavailable'
+          ? t('serviceUnavailable')
+          : t('wrongCredentials');
+        return { error: message, fieldErrors: {} };
       }
 
       return { error: null, fieldErrors: {} };

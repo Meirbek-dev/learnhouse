@@ -40,16 +40,19 @@ async def check_rate_limit(
     window_start = now - window_seconds
     redis_key = f"rl:{key}"
 
-    async with r.pipeline(transaction=False) as pipe:
-        # Remove entries outside the window
-        await pipe.zremrangebyscore(redis_key, 0, window_start)
-        # Count entries within the window
-        await pipe.zcard(redis_key)
-        # Add current request
-        await pipe.zadd(redis_key, {secrets.token_hex(8): now})
-        # Expire the set after the window to avoid unbounded growth
-        await pipe.expire(redis_key, window_seconds + 1)
-        results = await pipe.execute()
+    try:
+        async with r.pipeline(transaction=False) as pipe:
+            # Remove entries outside the window
+            await pipe.zremrangebyscore(redis_key, 0, window_start)
+            # Count entries within the window
+            await pipe.zcard(redis_key)
+            # Add current request
+            await pipe.zadd(redis_key, {secrets.token_hex(8): now})
+            # Expire the set after the window to avoid unbounded growth
+            await pipe.expire(redis_key, window_seconds + 1)
+            results = await pipe.execute()
+    except Exception:
+        return  # Redis error – fail open, same as unavailable
 
     current_count = results[1]
     if current_count >= max_requests:
