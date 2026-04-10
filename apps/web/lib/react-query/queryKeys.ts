@@ -15,9 +15,11 @@ export const queryKeys = {
   },
   certifications: {
     course: (courseUuid: string) => ['certifications', 'course', courseUuid] as const,
+    detail: (certificateUuid: string) => ['certifications', 'detail', certificateUuid] as const,
     userAll: () => ['certifications', 'user-all'] as const,
   },
   courses: {
+    contributors: (courseUuid: string) => ['courses', 'contributors', courseUuid] as const,
     metadata: (courseUuid: string) => ['courses', 'metadata', courseUuid] as const,
     updates: (courseUuid: string) => ['courses', 'updates', courseUuid] as const,
   },
@@ -32,6 +34,7 @@ export const queryKeys = {
     allAttempts: (examUuid: string) => ['exams', 'attempts', 'all', examUuid] as const,
     attempts: (examUuid: string) => ['exams', 'attempts', examUuid] as const,
     config: () => ['exams', 'config'] as const,
+    detail: (examUuid: string) => ['exams', 'detail', examUuid] as const,
     myAttempt: (examUuid: string) => ['exams', 'attempts', 'me', examUuid] as const,
     questions: (examUuid: string) => ['exams', 'questions', examUuid] as const,
   },
@@ -59,6 +62,10 @@ export const queryKeys = {
     ownedCourses: () => ['payments', 'owned-courses'] as const,
     productCourses: (productId: number | string) => ['payments', 'product-courses', productId] as const,
     products: () => ['payments', 'products'] as const,
+    stripeConnection: (code: string) => ['payments', 'stripe-connection', code] as const,
+  },
+  search: {
+    content: (query: string, page: number, limit: number) => ['search', 'content', { query, page, limit }] as const,
   },
   platform: {
     config: () => ['platform', 'config'] as const,
@@ -76,9 +83,13 @@ export const queryKeys = {
   },
   users: {
     allMembers: () => ['users', 'members', 'all'] as const,
+    basicList: (limit = 100) => ['users', 'basic-list', { limit }] as const,
     byId: (userId: number) => ['users', 'detail', userId] as const,
     byUsername: (username: string) => ['users', 'username', username] as const,
+    courses: (userId: number) => ['users', 'courses', userId] as const,
     members: (page: number, perPage: number) => ['users', 'members', { page, perPage }] as const,
+    roleAuditLog: (page: number, pageSize: number) => ['users', 'role-audit-log', { page, pageSize }] as const,
+    roleAssignments: () => ['users', 'role-assignments'] as const,
     roles: () => ['users', 'roles'] as const,
   },
 };

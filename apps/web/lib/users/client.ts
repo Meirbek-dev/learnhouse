@@ -16,7 +16,7 @@ type ResponseMetadata<T> = Omit<CustomResponseTyping, 'data'> & {
 export const userKeys = {
   byId: (userId: number) => queryKeys.users.byId(userId),
   byUsername: (username: string) => queryKeys.users.byUsername(username),
-  coursesByUser: (userId: number) => ['user', 'courses', userId] as const,
+  coursesByUser: (userId: number) => queryKeys.users.courses(userId),
 };
 
 async function parseJsonOrNull<T>(response: Response): Promise<T | null> {

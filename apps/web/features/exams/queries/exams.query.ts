@@ -12,6 +12,13 @@ export function examActivityQueryOptions(activityUuid: string) {
   });
 }
 
+export function examDetailQueryOptions(examUuid: string) {
+  return queryOptions({
+    queryKey: queryKeys.exams.detail(examUuid),
+    queryFn: () => apiFetcher(`${getAPIUrl()}exams/${examUuid}`),
+  });
+}
+
 export function examQuestionsQueryOptions(examUuid: string) {
   return queryOptions({
     queryKey: queryKeys.exams.questions(examUuid),

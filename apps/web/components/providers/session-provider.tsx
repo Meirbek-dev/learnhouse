@@ -2,7 +2,7 @@
 
 import { createContext, use, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { queryOptions, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiFetch } from '@/lib/api-client';
 import { AUTH_PERMISSION_WILDCARD } from '@/lib/auth/types';
 import type { ReactNode } from 'react';
@@ -58,19 +58,23 @@ const SessionContext = createContext<SessionContextValue | undefined>(undefined)
 // ── Full profile hook ─────────────────────────────────────────────────────────
 
 function useFullProfile(userId: number | null) {
-  return useQuery({
-    queryKey: ['auth', 'me', userId],
-    queryFn: async (): Promise<UserSessionResponse> => {
-      const response = await apiFetch('auth/me');
-      if (!response.ok) {
-        throw new Error(`Failed to fetch profile: ${String(response.status)}`);
-      }
-      return response.json() as Promise<UserSessionResponse>;
-    },
-    enabled: userId !== null,
-    staleTime: 5 * 60 * 1000,
-    refetchOnWindowFocus: false,
-  });
+  const normalizedUserId = userId ?? 0;
+
+  return useQuery(
+    queryOptions({
+      queryKey: ['auth', 'me', normalizedUserId],
+      queryFn: async (): Promise<UserSessionResponse> => {
+        const response = await apiFetch('auth/me');
+        if (!response.ok) {
+          throw new Error(`Failed to fetch profile: ${String(response.status)}`);
+        }
+        return response.json() as Promise<UserSessionResponse>;
+      },
+      enabled: userId !== null,
+      staleTime: 5 * 60 * 1000,
+      refetchOnWindowFocus: false,
+    }),
+  );
 }
 
 // ── Cross-tab broadcast listener ──────────────────────────────────────────────

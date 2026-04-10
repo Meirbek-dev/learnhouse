@@ -8,6 +8,7 @@ import {
   paymentCustomersQueryOptions,
   paymentProductsQueryOptions,
   productCoursesQueryOptions,
+  stripeConnectionQueryOptions,
 } from '../queries/payments.query';
 
 function paymentConfigsHookOptions(enabled = true) {
@@ -35,6 +36,15 @@ function courseProductsHookOptions(courseId: number | null | undefined) {
   });
 }
 
+function stripeConnectionHookOptions(code: string | null | undefined, enabled = true) {
+  const normalizedCode = code?.trim() ?? '';
+
+  return queryOptions({
+    ...stripeConnectionQueryOptions(normalizedCode || '__disabled__'),
+    enabled: enabled && normalizedCode.length > 0,
+  });
+}
+
 export function usePaymentConfigs(options?: { enabled?: boolean }) {
   return useQuery(paymentConfigsHookOptions(options?.enabled ?? true));
 }
@@ -57,4 +67,8 @@ export function useCourseProducts(courseId: number | null | undefined) {
 
 export function useOwnedCourses() {
   return useQuery(ownedCoursesQueryOptions());
+}
+
+export function useStripeConnectionVerification(code: string | null | undefined, options?: { enabled?: boolean }) {
+  return useQuery(stripeConnectionHookOptions(code, options?.enabled ?? true));
 }

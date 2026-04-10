@@ -5992,7 +5992,7 @@
             "type": "boolean"
           },
           "creation_date": {
-            "default": "2026-04-09T09:54:00.588113",
+            "default": "2026-04-10T21:57:51.358223",
             "format": "date-time",
             "title": "Creation Date",
             "type": "string"
@@ -6034,7 +6034,7 @@
             "title": "Provider Specific Id"
           },
           "update_date": {
-            "default": "2026-04-09T09:54:00.588173",
+            "default": "2026-04-10T21:57:51.358269",
             "format": "date-time",
             "title": "Update Date",
             "type": "string"
@@ -10162,6 +10162,11 @@
       },
       "UserRead": {
         "properties": {
+          "auth_provider": {
+            "default": "local",
+            "title": "Auth Provider",
+            "type": "string"
+          },
           "avatar_image": {
             "anyOf": [
               {
@@ -10694,6 +10699,19 @@
           "type"
         ],
         "title": "ValidationError",
+        "type": "object"
+      },
+      "VerifyEmailRequest": {
+        "properties": {
+          "token": {
+            "title": "Token",
+            "type": "string"
+          }
+        },
+        "required": [
+          "token"
+        ],
+        "title": "VerifyEmailRequest",
         "type": "object"
       },
       "XPAwardRequest": {
@@ -15303,6 +15321,33 @@
         ]
       }
     },
+    "/api/v1/auth/me": {
+      "get": {
+        "description": "Return full session data including roles, permissions, and user profile.\n\nThe JWT carries only a slim ``u`` claim (id, name, email, avatar).\nThis endpoint provides the complete ``UserSession`` payload for features\nthat need the full user profile (bio, details, theme, role objects, etc.).\nThe frontend calls this once on app load and caches the result.",
+        "operationId": "get_me_api_v1_auth_me_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserSession"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Get Me",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
     "/api/v1/auth/refresh": {
       "post": {
         "operationId": "refresh_api_v1_auth_refresh_post",
@@ -15319,6 +15364,31 @@
           }
         },
         "summary": "Refresh",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/auth/resend-verification": {
+      "post": {
+        "description": "Resend the verification email for the currently authenticated user.",
+        "operationId": "resend_verification_api_v1_auth_resend_verification_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "summary": "Resend Verification",
         "tags": [
           "auth"
         ]
@@ -15382,6 +15452,46 @@
           }
         ],
         "summary": "List Sessions",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/v1/auth/verify-email": {
+      "post": {
+        "description": "Verify email using the token from the verification link.",
+        "operationId": "verify_email_api_v1_auth_verify_email_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyEmailRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Verify Email",
         "tags": [
           "auth"
         ]

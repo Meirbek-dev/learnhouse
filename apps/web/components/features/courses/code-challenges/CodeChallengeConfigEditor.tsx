@@ -7,14 +7,13 @@ import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { useCodeChallengeSettings } from '@/features/code-challenges/hooks/useCodeChallenge';
+import { useCodeChallengeSettings, useSaveCodeChallengeSettings } from '@/features/code-challenges/hooks/useCodeChallenge';
 import * as v from 'valibot';
 
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Field, FieldDescription, FieldError, FieldLabel } from '@/components/ui/field';
-import { apiFetch } from '@/lib/api-client';
 import ComboboxMultiple from '@/components/ui/custom/multiple-combobox';
 import { JUDGE0_LANGUAGES } from './LanguageSelector';
 import { Textarea } from '@/components/ui/textarea';
@@ -94,19 +93,11 @@ type FormValues = v.InferOutput<typeof formSchema>;
 type FormInputValues = v.InferInput<typeof formSchema>;
 type ExistingSettings = FormValues;
 
-const fetcher = async (url: string) => {
-  const res = await fetch(url, { credentials: 'include' });
-  if (!res.ok) {
-    if (res.status === 404) return null;
-    throw new Error('Failed to fetch');
-  }
-  return res.json();
-};
-
 export default function CodeChallengeConfigEditor({ activityUuid, courseId }: CodeChallengeConfigEditorProps) {
   const t = useTranslations('Activities.CodeChallenges');
   const router = useRouter();
-  const [isSaving, setIsSaving] = useState(false);
+  const saveSettingsMutation = useSaveCodeChallengeSettings(activityUuid);
+  const isSaving = saveSettingsMutation.isPending;
 
   // Fetch existing settings
   const { data: existingSettings, isLoading } = useCodeChallengeSettings<ExistingSettings>(activityUuid);
@@ -202,36 +193,26 @@ export default function CodeChallengeConfigEditor({ activityUuid, courseId }: Co
   }, [existingSettings, form]);
 
   const onSubmit = async (values: FormValues) => {
-    setIsSaving(true);
     const loadingToast = toast.loading(t('savingConfig'));
 
     try {
-      const response = await apiFetch(`code-challenges/${activityUuid}/settings`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          allowed_languages: values.allowed_languages,
-          time_limit: values.time_limit,
-          memory_limit: values.memory_limit,
-          grading_strategy: values.grading_strategy,
-          execution_mode: values.execution_mode,
-          allow_custom_input: values.allow_custom_input,
-          points: values.points,
-          visible_tests: values.visible_tests.map((tc) => ({
-            ...tc,
-            is_visible: true,
-          })),
-          hidden_tests: values.hidden_tests.map((tc) => ({
-            ...tc,
-            is_visible: false,
-          })),
-        }),
+      await saveSettingsMutation.mutateAsync({
+        allowed_languages: values.allowed_languages,
+        time_limit: values.time_limit,
+        memory_limit: values.memory_limit,
+        grading_strategy: values.grading_strategy,
+        execution_mode: values.execution_mode,
+        allow_custom_input: values.allow_custom_input,
+        points: values.points,
+        visible_tests: values.visible_tests.map((tc) => ({
+          ...tc,
+          is_visible: true,
+        })),
+        hidden_tests: values.hidden_tests.map((tc) => ({
+          ...tc,
+          is_visible: false,
+        })),
       });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.detail || 'Failed to save configuration');
-      }
 
       toast.success(t('configSaved'), { id: loadingToast });
       router.back();
@@ -240,8 +221,6 @@ export default function CodeChallengeConfigEditor({ activityUuid, courseId }: Co
       toast.error(error instanceof Error ? error.message : t('configSaveFailed'), {
         id: loadingToast,
       });
-    } finally {
-      setIsSaving(false);
     }
   };
 

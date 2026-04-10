@@ -1,8 +1,8 @@
 'use client';
 
+import { useStripeConnectionVerification } from '@/features/payments/hooks/usePayments';
 import { useSession } from '@/hooks/useSession';
-import { verifyStripeConnection } from '@services/payments/payments';
-import { useEffect, useEffectEvent, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AlertTriangle, Check, Loader2 } from 'lucide-react';
 import platformLogo from '@public/platform_logo.svg';
 import { useSearchParams } from 'next/navigation';
@@ -18,50 +18,61 @@ const StripeConnectCallback = () => {
   const [status, setStatus] = useState<'processing' | 'success' | 'error'>('processing');
   const [message, setMessage] = useState('');
   const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const resultHandledRef = useRef(false);
+  const code = searchParams.get('code');
+  const verificationQuery = useStripeConnectionVerification(code, {
+    enabled: isAuthenticated,
+  });
 
-  const verifyConnectionEvent = useEffectEvent(async (signal?: AbortSignal) => {
-    try {
-      const code = searchParams.get('code');
+  useEffect(() => {
+    if (!isAuthenticated) return;
 
-      if (!code) {
-        throw new Error(t('missingParameters'));
-      }
+    if (!code) {
+      setStatus('error');
+      setMessage(t('missingParameters'));
+      return;
+    }
 
-      const _response = await verifyStripeConnection(code);
+    if (verificationQuery.isPending) {
+      setStatus('processing');
+      setMessage('');
+      return;
+    }
 
-      // small delay for UX
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+    if (resultHandledRef.current) return;
 
-      if (signal?.aborted) return;
+    if (verificationQuery.isError) {
+      resultHandledRef.current = true;
+      console.error('Error verifying Stripe connection:', verificationQuery.error);
+      setStatus('error');
+      setMessage(t('connectionFailed'));
+      toast.error(t('connectError'));
+      return;
+    }
 
+    if (!verificationQuery.isSuccess) return;
+
+    resultHandledRef.current = true;
+
+    const successTimeout = globalThis.setTimeout(() => {
       setStatus('success');
       setMessage(t('connectionSuccess'));
 
       closeTimeoutRef.current = globalThis.setTimeout(() => {
         window.close();
       }, 2000);
-    } catch (error) {
-      console.error('Error verifying Stripe connection:', error);
-      if (signal?.aborted) return;
-      setStatus('error');
-      setMessage(t('connectionFailed'));
-      toast.error(t('connectError'));
-    }
-  });
-
-  useEffect(() => {
-    if (!isAuthenticated) return;
-
-    const controller = new AbortController();
-    verifyConnectionEvent(controller.signal);
+    }, 1000);
 
     return () => {
-      // Clear timeout if present
-      if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
-
-      controller.abort();
+      clearTimeout(successTimeout);
     };
-  }, [isAuthenticated, searchParams, t]);
+  }, [code, isAuthenticated, t, verificationQuery.error, verificationQuery.isError, verificationQuery.isPending, verificationQuery.isSuccess]);
+
+  useEffect(() => {
+    return () => {
+      if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
+    };
+  }, []);
 
   return (
     <div className="bg-background text-foreground flex h-screen w-full items-center justify-center">

@@ -3,12 +3,16 @@
 import { queryOptions, useQuery } from '@tanstack/react-query';
 import {
   allMembersQueryOptions,
+  basicUsersQueryOptions,
   membersQueryOptions,
+  roleAuditLogQueryOptions,
   rolesQueryOptions,
+  userCoursesQueryOptions,
   userByIdQueryOptions,
   userByUsernameQueryOptions,
   userGroupUsersQueryOptions,
   userGroupsQueryOptions,
+  userRoleAssignmentsQueryOptions,
 } from '../queries/users.query';
 
 function userGroupsHookOptions(enabled = true) {
@@ -45,6 +49,36 @@ function userByUsernameHookOptions(username: string | null | undefined, enabled 
   });
 }
 
+function userCoursesHookOptions(userId: number | null | undefined, enabled = true) {
+  const normalizedUserId = userId ?? 0;
+
+  return queryOptions({
+    ...userCoursesQueryOptions(normalizedUserId),
+    enabled: enabled && userId !== null && userId !== undefined,
+  });
+}
+
+function userRoleAssignmentsHookOptions(enabled = true) {
+  return queryOptions({
+    ...userRoleAssignmentsQueryOptions(),
+    enabled,
+  });
+}
+
+function basicUsersHookOptions(limit = 100, enabled = true) {
+  return queryOptions({
+    ...basicUsersQueryOptions(limit),
+    enabled,
+  });
+}
+
+function roleAuditLogHookOptions(page: number, pageSize = 20, enabled = true) {
+  return queryOptions({
+    ...roleAuditLogQueryOptions(page, pageSize),
+    enabled,
+  });
+}
+
 export function useUserGroups(options?: { enabled?: boolean }) {
   return useQuery(userGroupsHookOptions(options?.enabled ?? true));
 }
@@ -63,6 +97,22 @@ export function useMembers(page: number, perPage: number) {
 
 export function useRoles() {
   return useQuery(rolesQueryOptions());
+}
+
+export function useRoleAuditLog(page: number, pageSize = 20, options?: { enabled?: boolean }) {
+  return useQuery(roleAuditLogHookOptions(page, pageSize, options?.enabled ?? true));
+}
+
+export function useUserRoleAssignments(options?: { enabled?: boolean }) {
+  return useQuery(userRoleAssignmentsHookOptions(options?.enabled ?? true));
+}
+
+export function useBasicUsers(limit = 100, options?: { enabled?: boolean }) {
+  return useQuery(basicUsersHookOptions(limit, options?.enabled ?? true));
+}
+
+export function useUserCourses(userId: number | null | undefined, options?: { enabled?: boolean }) {
+  return useQuery(userCoursesHookOptions(userId, options?.enabled ?? true));
 }
 
 export function useUserByIdQuery(userId: number | null | undefined, options?: { enabled?: boolean }) {

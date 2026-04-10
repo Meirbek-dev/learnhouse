@@ -15,7 +15,6 @@ import {
 } from '@/components/ui/alert-dialog';
 import {
   deletePaymentConfig,
-  getPaymentConfigs,
   getStripeOnboardingLink,
   initializePaymentConfig,
   updateStripeAccountID,
@@ -33,7 +32,7 @@ import {
   Trash2,
   UnplugIcon,
 } from 'lucide-react';
-import { useEffect, useEffectEvent, useRef, useState, useTransition } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@components/ui/alert';
 import { Field, FieldContent, FieldError, FieldLabel } from '@components/ui/field';
 import { queryKeys } from '@/lib/react-query/queryKeys';
@@ -310,8 +309,8 @@ const PaymentsConfigurationPage: FC = () => {
       </div>
       {stripeConfig ? (
         <EditStripeConfigModal
-          configId={stripeConfig.id}
           isOpen={isModalOpen}
+          initialStripeAccountId={stripeConfig.provider_specific_id ?? ''}
           onClose={() => {
             setIsModalOpen(false);
           }}
@@ -322,8 +321,8 @@ const PaymentsConfigurationPage: FC = () => {
 };
 
 interface EditStripeConfigModalProps {
-  configId: number;
   isOpen: boolean;
+  initialStripeAccountId: string;
   onClose: () => void;
 }
 
@@ -335,7 +334,7 @@ const createStripeConfigSchema = (t: (key: string) => string) =>
 type StripeConfigFormValues = v.InferOutput<ReturnType<typeof createStripeConfigSchema>>;
 type StripeConfigInputValues = v.InferInput<ReturnType<typeof createStripeConfigSchema>>;
 
-const EditStripeConfigModal: FC<EditStripeConfigModalProps> = ({ configId, isOpen, onClose }) => {
+const EditStripeConfigModal: FC<EditStripeConfigModalProps> = ({ isOpen, initialStripeAccountId, onClose }) => {
   const queryClient = useQueryClient();
   const t = useTranslations('Payments.Configuration');
   const validationSchema = createStripeConfigSchema(t);
@@ -347,35 +346,11 @@ const EditStripeConfigModal: FC<EditStripeConfigModalProps> = ({ configId, isOpe
     },
   });
 
-  const fetchedConfigRef = useRef<Record<string, boolean>>({});
-
-  const fetchConfigEvent = useEffectEvent(async (signal?: AbortSignal) => {
-    try {
-      const config = await getPaymentConfigs();
-      if (signal?.aborted) return;
-      const stripeConfig = config.find((c: any) => c.id === configId);
-      if (stripeConfig?.provider_specific_id) {
-        form.setValue('stripeAccountId', stripeConfig.provider_specific_id || '');
-      }
-    } catch (error) {
-      if (signal?.aborted) return;
-      console.error('Error fetching Stripe configuration:', error);
-      toast.error(t('errors.loadStripeConfigFailed'));
-    }
-  });
-
   useEffect(() => {
-    const key = `${isOpen ? 'open' : 'closed'}:${configId}`;
-
-    if (isOpen && !fetchedConfigRef.current[key]) {
-      fetchedConfigRef.current[key] = true;
-      const controller = new AbortController();
-      fetchConfigEvent(controller.signal);
-      return () => controller.abort();
+    if (isOpen) {
+      form.reset({ stripeAccountId: initialStripeAccountId });
     }
-
-    return;
-  }, [isOpen, configId, t, form]);
+  }, [form, initialStripeAccountId, isOpen]);
 
   const handleSubmit = async (values: StripeConfigFormValues) => {
     const loadingToast = toast.loading(t('updatingConfig'));

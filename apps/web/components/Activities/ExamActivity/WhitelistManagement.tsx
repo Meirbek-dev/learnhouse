@@ -1,8 +1,9 @@
 'use client';
 
-import { apiFetch } from '@/lib/api-client';
+import { useExamDetail, useUpdateExamSettings } from '@/features/exams/hooks/useExam';
+import { useCourseContributors } from '@/hooks/courses/useCourseContributors';
 
-import { useEffect, useEffectEvent, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Search, UserCheck, UserX } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
@@ -34,47 +35,35 @@ export default function WhitelistManagement({
   onWhitelistUpdated,
 }: WhitelistManagementProps) {
   const t = useTranslations('Components.WhitelistManagement');
-  const [students, setStudents] = useState<Student[]>([]);
   const [selectedUserIds, setSelectedUserIds] = useState(new Set(currentWhitelist));
   const [searchQuery, setSearchQuery] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
+  const normalizedCourseUuid = courseUuid.startsWith('course_') ? courseUuid : `course_${courseUuid}`;
+  const contributorsQuery = useCourseContributors(normalizedCourseUuid);
+  const { data: examData, refetch: refetchExam } = useExamDetail(examUuid);
+  const updateExamSettingsMutation = useUpdateExamSettings(examUuid);
+  const isLoading = contributorsQuery.isPending;
+  const isSaving = updateExamSettingsMutation.isPending;
+  const students = useMemo<Student[]>(() => {
+    const contributors = Array.isArray(contributorsQuery.data?.data) ? contributorsQuery.data.data : [];
 
-  const fetchEnrolledStudents = useEffectEvent(async () => {
-    try {
-      setIsLoading(true);
-
-      const response = await apiFetch(`courses/${courseUuid}/contributors`);
-
-      if (!response.ok) throw new Error('Failed to fetch contributors');
-
-      const data = await response.json();
-
-      // Transform contributor data to student format,
-      const studentsData = data.map((contributor: any) => ({
-        id: contributor.user_id,
-        user_id: contributor.user_id,
-        user_name:
-          (contributor.user &&
-            ((contributor.user.first_name || '') + ' ' + (contributor.user.last_name || '')).trim()) ||
-          contributor.user?.username ||
-          contributor.user?.email ||
-          'Unknown',
-        user_email: contributor.user?.email || '',
-      }));
-
-      setStudents(studentsData);
-    } catch (error) {
-      console.error('Error fetching students:', error);
-      toast.error(t('errorFetchingStudents'));
-    } finally {
-      setIsLoading(false);
-    }
-  });
+    return contributors.map((contributor: any) => ({
+      id: contributor.user_id,
+      user_id: contributor.user_id,
+      user_name:
+        (contributor.user && ((contributor.user.first_name || '') + ' ' + (contributor.user.last_name || '')).trim()) ||
+        contributor.user?.username ||
+        contributor.user?.email ||
+        'Unknown',
+      user_email: contributor.user?.email || '',
+    }));
+  }, [contributorsQuery.data?.data]);
 
   useEffect(() => {
-    fetchEnrolledStudents();
-  }, [courseUuid]);
+    if (contributorsQuery.error) {
+      console.error('Error fetching students:', contributorsQuery.error);
+      toast.error(t('errorFetchingStudents'));
+    }
+  }, [contributorsQuery.error, t]);
 
   useEffect(() => {
     setSelectedUserIds(new Set(currentWhitelist));
@@ -100,14 +89,10 @@ export default function WhitelistManagement({
 
   const handleSaveWhitelist = async () => {
     try {
-      setIsSaving(true);
+      const latestExamData = (examData ?? (await refetchExam()).data) as { settings?: Record<string, unknown> } | undefined;
 
-      // Fetch current exam settings so we merge user-provided whitelist into existing settings,
-      const examResp = await apiFetch(`exams/${examUuid}`);
-
-      if (!examResp.ok) throw new Error('Failed to fetch exam settings');
-      const examData = await examResp.json();
-      const existingSettings = examData.settings || {};
+      if (!latestExamData) throw new Error('Failed to fetch exam settings');
+      const existingSettings = latestExamData.settings || {};
 
       // Merge and ensure access mode is WHITELIST so changes persist and the whitelist is effective,
       const mergedSettings = {
@@ -116,13 +101,7 @@ export default function WhitelistManagement({
         access_mode: existingSettings.access_mode === 'WHITELIST' ? 'WHITELIST' : 'WHITELIST',
       };
 
-      const response = await apiFetch(`exams/${examUuid}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ settings: mergedSettings }),
-      });
-
-      if (!response.ok) throw new Error('Failed to update whitelist');
+      await updateExamSettingsMutation.mutateAsync(mergedSettings);
 
       // If access_mode was not WHITELIST before, inform the user that it has been set,
       if (existingSettings.access_mode !== 'WHITELIST') {
@@ -135,8 +114,6 @@ export default function WhitelistManagement({
     } catch (error) {
       console.error('Error updating whitelist:', error);
       toast.error(t('errorUpdatingWhitelist'));
-    } finally {
-      setIsSaving(false);
     }
   };
 

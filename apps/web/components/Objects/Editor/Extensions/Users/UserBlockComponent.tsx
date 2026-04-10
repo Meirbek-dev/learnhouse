@@ -17,7 +17,7 @@ import {
   User,
   Users,
 } from 'lucide-react';
-import { getUserById, getUserByUsername } from '@/lib/users/client';
+import { useUserByIdQuery, useUserByUsernameQuery } from '@/features/users/hooks/useUsers';
 import type { components } from '@/lib/api/generated';
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
@@ -67,82 +67,62 @@ const UserBlockComponent = (props: any) => {
   const router = useRouter();
 
   const [username, setUsername] = useState('');
+  const [submittedUsername, setSubmittedUsername] = useState<string | null>(null);
   const [userData, setUserData] = useState<UserData | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Destructure props to avoid dependency on entire props object
   const { updateAttributes, node } = props;
-
-  async function fetchUserById(userId: number) {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const data = await getUserById(userId);
-      if (!data) {
-        throw new Error('User not found');
-      }
-      setUserData(data);
-      setUsername(data.username);
-    } catch (error: any) {
-      console.error('Error fetching user by ID:', error);
-      setError(error.detail || t('errorNotFound'));
-      // Clear the invalid user_id from the node attributes
-      updateAttributes({
-        user_id: null,
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  }
+  const userId = typeof node.attrs.user_id === 'number' ? node.attrs.user_id : null;
+  const userByIdQuery = useUserByIdQuery(userId, { enabled: userId !== null });
+  const userByUsernameQuery = useUserByUsernameQuery(submittedUsername, {
+    enabled: Boolean(submittedUsername && submittedUsername.trim().length > 0),
+  });
+  const isLoading = userByIdQuery.isPending || userByUsernameQuery.isPending;
 
   useEffect(() => {
-    if (node.attrs.user_id) {
-      (async () => {
-        setIsLoading(true);
-        setError(null);
-        try {
-          const data = await getUserById(node.attrs.user_id);
-          if (!data) throw new Error('User not found');
-          setUserData(data);
-          setUsername(data.username);
-        } catch (error: any) {
-          console.error('Error fetching user by ID:', error);
-          setError(error.detail || t('errorNotFound'));
-          // Clear the invalid user_id from the node attributes
-          updateAttributes({ user_id: null });
-        } finally {
-          setIsLoading(false);
-        }
-      })();
-    }
-  }, [node.attrs.user_id, updateAttributes, t]);
+    if (!userId) return;
 
-  const fetchUserByUsername = async (username: string) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const data = await getUserByUsername(username);
-      if (!data) {
-        throw new Error('User not found');
-      }
-      setUserData(data);
-      updateAttributes({
-        user_id: data.id,
-      });
-    } catch (error: any) {
-      console.error('Error fetching user by username:', error);
-      setError(error.detail || t('errorNotFound'));
-    } finally {
-      setIsLoading(false);
+    if (userByIdQuery.data) {
+      setUserData(userByIdQuery.data);
+      setUsername(userByIdQuery.data.username);
+      setError(null);
+      return;
     }
-  };
+
+    if (userByIdQuery.error) {
+      console.error('Error fetching user by ID:', userByIdQuery.error);
+      setError(userByIdQuery.error instanceof Error ? userByIdQuery.error.message : t('errorNotFound'));
+      updateAttributes({ user_id: null });
+    }
+  }, [t, updateAttributes, userByIdQuery.data, userByIdQuery.error, userId]);
+
+  useEffect(() => {
+    if (!submittedUsername) return;
+
+    if (userByUsernameQuery.data) {
+      setUserData(userByUsernameQuery.data);
+      setUsername(userByUsernameQuery.data.username);
+      setError(null);
+      updateAttributes({
+        user_id: userByUsernameQuery.data.id,
+      });
+      setSubmittedUsername(null);
+      return;
+    }
+
+    if (userByUsernameQuery.error) {
+      console.error('Error fetching user by username:', userByUsernameQuery.error);
+      setError(userByUsernameQuery.error instanceof Error ? userByUsernameQuery.error.message : t('errorNotFound'));
+      setSubmittedUsername(null);
+    }
+  }, [submittedUsername, t, updateAttributes, userByUsernameQuery.data, userByUsernameQuery.error]);
 
   const handleUsernameSubmit = async (formData: FormData) => {
-    const submittedUsername = String(formData.get('username') ?? '').trim();
+    const nextUsername = String(formData.get('username') ?? '').trim();
 
-    if (!submittedUsername) return;
-    await fetchUserByUsername(submittedUsername);
+    if (!nextUsername) return;
+    setError(null);
+    setSubmittedUsername(nextUsername);
   };
 
   if (isEditable && !userData) {
@@ -217,15 +197,11 @@ const UserBlockComponent = (props: any) => {
   return (
     <NodeViewWrapper className="block-user">
       <div className="soft-shadow overflow-hidden rounded-lg bg-white">
-        {/* Header with Avatar and Name */}
         <div className="relative">
-          {/* Background gradient */}
           <div className="absolute inset-0 h-28 rounded-t-lg bg-linear-to-b from-gray-100/30 to-transparent" />
 
-          {/* Content */}
           <div className="relative px-5 pt-5 pb-4">
             <div className="flex items-start gap-4">
-              {/* Avatar */}
               <div className="shrink-0">
                 <div className="rounded-full">
                   <UserAvatar
@@ -242,7 +218,6 @@ const UserBlockComponent = (props: any) => {
                 </div>
               </div>
 
-              {/* Name, Bio, and Button */}
               <div className="min-w-0 flex-1">
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex min-w-0 items-center gap-2">
@@ -275,7 +250,6 @@ const UserBlockComponent = (props: any) => {
           </div>
         </div>
 
-        {/* Details */}
         {details.length > 0 ? (
           <div className="space-y-2.5 border-t border-gray-100 px-5 pt-3.5 pb-4">
             {details.map((detail) => (

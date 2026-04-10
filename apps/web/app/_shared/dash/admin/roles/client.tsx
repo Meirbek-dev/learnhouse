@@ -6,12 +6,11 @@ import {
   deleteRole as apiDeleteRole,
   getRole as apiGetRole,
   getRolePermissions,
-  listRoleAuditLog,
-  listRoles,
   removePermissionFromRole,
   updateRole as apiUpdateRole,
 } from '@/services/rbac';
 import { usePlatformPermissions } from '@/features/platform/hooks/usePlatform';
+import { useRoleAuditLog, useRoles } from '@/features/users/hooks/useUsers';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -74,7 +73,6 @@ export default function RBACAdminClient() {
   const router = useRouter();
 
   const [roles, setRoles] = useState<RoleWithPermissions[]>([]);
-  const [loadingRoles, setLoadingRoles] = useState(true);
   const [activeTab, setActiveTab] = useState('roles');
 
   const [isRoleDialogOpen, setIsRoleDialogOpen] = useState(false);
@@ -93,12 +91,6 @@ export default function RBACAdminClient() {
   const [roleToDelete, setRoleToDelete] = useState<RoleWithPermissions | null>(null);
 
   const [auditPage, setAuditPage] = useState(1);
-  const [auditData, setAuditData] = useState<{
-    items: RoleAuditEvent[];
-    total: number;
-    page_size: number;
-  } | null>(null);
-  const [isAuditLoading, setIsAuditLoading] = useState(false);
   const isSuperAdmin = can(Resources.ROLE, Actions.MANAGE, Scopes.ALL);
   const currentUserMaxPriority = useMemo(() => {
     const sessionRoles = session.session?.roles ?? [];
@@ -114,27 +106,36 @@ export default function RBACAdminClient() {
     isLoading: permissionsLoading,
     error: permissionsError,
   } = usePlatformPermissions();
+  const { data: fetchedRoles = [], isLoading: loadingRoles, error: rolesError, refetch: refetchRoles } = useRoles();
+  const auditLogQuery = useRoleAuditLog(auditPage, 20, {
+    enabled: activeTab === 'audit',
+  });
+  const auditData = useMemo(() => {
+    if (!auditLogQuery.data) {
+      return null;
+    }
+
+    return {
+      items: Array.isArray(auditLogQuery.data.items) ? auditLogQuery.data.items : [],
+      total: typeof auditLogQuery.data.total === 'number' ? auditLogQuery.data.total : 0,
+      page_size:
+        typeof auditLogQuery.data.page_size === 'number' && auditLogQuery.data.page_size > 0
+          ? auditLogQuery.data.page_size
+          : 20,
+    } satisfies {
+      items: RoleAuditEvent[];
+      total: number;
+      page_size: number;
+    };
+  }, [auditLogQuery.data]);
+  const isAuditLoading = activeTab === 'audit' && (auditLogQuery.isLoading || auditLogQuery.isFetching);
 
   const fetchRoles = useCallback(async () => {
-    setLoadingRoles(true);
-    try {
-      const rolesData = await listRoles();
-      const sortedRoles = rolesData
-        .toSorted((a, b) => {
-          const aSystem = a.is_system ? 0 : 1;
-          const bSystem = b.is_system ? 0 : 1;
-          if (aSystem !== bSystem) return aSystem - bSystem;
-          return (b.priority ?? 0) - (a.priority ?? 0);
-        })
-        .map((role) => Object.assign(role, { permissions: [] }));
-      setRoles(sortedRoles);
-    } catch (error) {
-      console.error('Failed to fetch RBAC roles:', error);
-      toast.error(t('loadFailed'));
-    } finally {
-      setLoadingRoles(false);
+    const result = await refetchRoles();
+    if (result.error) {
+      throw result.error;
     }
-  }, [t]);
+  }, [refetchRoles]);
 
   const refreshSession = useCallback(async () => {
     router.refresh();
@@ -167,8 +168,20 @@ export default function RBACAdminClient() {
   };
 
   useEffect(() => {
-    fetchRoles();
-  }, [fetchRoles]);
+     const sortedRoles = fetchedRoles
+      .toSorted((a, b) => {
+        const aSystem = a.is_system ? 0 : 1;
+        const bSystem = b.is_system ? 0 : 1;
+        if (aSystem !== bSystem) return aSystem - bSystem;
+        return (b.priority ?? 0) - (a.priority ?? 0);
+      })
+      .map((role) => ({
+        ...role,
+        permissions: [],
+      }));
+
+    setRoles(sortedRoles);
+  }, [fetchedRoles]);
 
   useEffect(() => {
     if (permissionsError) {
@@ -177,26 +190,20 @@ export default function RBACAdminClient() {
   }, [permissionsError, t]);
 
   useEffect(() => {
-    const fetchAudit = async () => {
-      if (activeTab !== 'audit') return;
-      setIsAuditLoading(true);
-      try {
-        const data = await listRoleAuditLog(auditPage, 20);
-        setAuditData({
-          items: Array.isArray(data.items) ? data.items : [],
-          total: typeof data.total === 'number' ? data.total : 0,
-          page_size: typeof data.page_size === 'number' && data.page_size > 0 ? data.page_size : 20,
-        });
-      } catch (error) {
-        console.error('Failed to fetch audit log:', error);
-        toast.error(t('auditLogLoadFailed'));
-      } finally {
-        setIsAuditLoading(false);
-      }
-    };
+    if (rolesError) {
+      console.error('Failed to fetch RBAC roles:', rolesError);
+      toast.error(t('loadFailed'));
+    }
+  }, [rolesError, t]);
 
-    fetchAudit();
-  }, [activeTab, auditPage, t]);
+  useEffect(() => {
+    if (activeTab !== 'audit' || !auditLogQuery.error) {
+      return;
+    }
+
+    console.error('Failed to fetch audit log:', auditLogQuery.error);
+    toast.error(t('auditLogLoadFailed'));
+  }, [activeTab, auditLogQuery.error, t]);
 
   const permissionsByResource = permissions.reduce<Record<string, Permission[]>>((acc, permission) => {
     if (!acc[permission.resource_type]) {

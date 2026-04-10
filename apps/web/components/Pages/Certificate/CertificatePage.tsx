@@ -1,12 +1,12 @@
 'use client';
 
 import CertificatePreview from '@components/Dashboard/Pages/Course/EditCourseCertification/CertificatePreview';
-import { getUserCertificates } from '@services/courses/certifications';
+import { useUserCertificateByCourse } from '@/features/certifications/hooks/useCertifications';
 import SimpleAlertDialog from '@/components/ui/alert-dialog-simple';
 import { ArrowLeft, Download, Loader2 } from 'lucide-react';
 import { getAbsoluteUrl } from '@services/config/config';
 import { useLocale, useTranslations } from 'next-intl';
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import Link from '@components/ui/AppLink';
 import type React from 'react';
 import QRCode from 'qrcode';
@@ -17,45 +17,15 @@ interface CertificatePageProps {
 }
 
 const CertificatePage: React.FC<CertificatePageProps> = ({ courseid, qrCodeLink }) => {
-  const [userCertificate, setUserCertificate] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const locale = useLocale();
   const t = useTranslations('Certificates.CertificatePage');
   const [dialogAlertOpen, setDialogAlertOpen] = useState(false);
   const [dialogAlertMessage, setDialogAlertMessage] = useState('');
-  const fetchedCertificateRef = useRef<Record<string, boolean>>({});
-
-  // Fetch user certificate
-  useEffect(() => {
-    // Avoid repeated fetches if access token refreshes or session object changes
-    if (fetchedCertificateRef.current[courseid]) {
-      setIsLoading(false);
-      return;
-    }
-
-    const fetchCertificate = async () => {
-      fetchedCertificateRef.current[courseid] = true;
-
-      try {
-        const cleanCourseId = courseid.replace('course_', '');
-        const result = await getUserCertificates(`course_${cleanCourseId}`);
-
-        if (result.success && result.data && result.data.length > 0) {
-          setUserCertificate(result.data[0]);
-        } else {
-          setError(t('noCertificate'));
-        }
-      } catch (error) {
-        console.error('Error fetching certificate:', error);
-        setError(t('error'));
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchCertificate();
-  }, [courseid, t]);
+  const normalizedCourseId = courseid.startsWith('course_') ? courseid : `course_${courseid}`;
+  const certificateQuery = useUserCertificateByCourse(normalizedCourseId);
+  const userCertificate = certificateQuery.data?.data?.[0] ?? null;
+  const isLoading = certificateQuery.isPending;
+  const certificateError = certificateQuery.error ? t('error') : !isLoading && !userCertificate ? t('noCertificate') : null;
 
   // Certificate type translation helper
   const getCertificationTypeLabel = (type: string): string => {
@@ -648,7 +618,7 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ courseid, qrCodeLink 
     );
   }
 
-  if (error) {
+  if (certificateError) {
     return (
       <div className="bg-background flex min-h-screen items-center justify-center">
         <div className="mx-auto max-w-md p-6 text-center">
@@ -669,7 +639,7 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ courseid, qrCodeLink 
               </svg>
             </div>
             <h2 className="text-foreground mb-3 text-2xl font-bold">{t('errorNonAvailable')}</h2>
-            <p className="text-muted-foreground mb-6 text-base">{error}</p>
+            <p className="text-muted-foreground mb-6 text-base">{certificateError}</p>
             <Link
               href={`${getAbsoluteUrl('')}/course/${courseid}`}
               className="bg-primary text-primary-foreground inline-flex items-center space-x-2 rounded-xl px-8 py-3.5 font-medium shadow-lg transition-all duration-200 hover:scale-105 hover:opacity-90"

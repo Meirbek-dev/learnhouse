@@ -1,6 +1,12 @@
 'use client';
 
-import { queryOptions, useQuery } from '@tanstack/react-query';
+import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  runCodeChallengeTestsMutationOptions,
+  runCustomTestMutationOptions,
+  saveCodeChallengeSettingsMutationOptions,
+  submitCodeChallengeMutationOptions,
+} from '../mutations/code-challenges.mutation';
 import {
   codeChallengeSettingsQueryOptions,
   codeChallengeSubmissionQueryOptions,
@@ -51,4 +57,22 @@ export function useCodeChallengeSubmission<TSubmission = unknown>(
   options?: { refetchInterval?: number | false },
 ) {
   return useQuery(codeChallengeSubmissionHookOptions<TSubmission>(submissionUuid, options));
+}
+
+export function useRunCustomTest(activityUuid: string) {
+  return useMutation(runCustomTestMutationOptions(activityUuid));
+}
+
+export function useRunCodeChallengeTests(activityUuid: string) {
+  return useMutation(runCodeChallengeTestsMutationOptions(activityUuid));
+}
+
+export function useSubmitCodeChallenge(activityUuid: string) {
+  const queryClient = useQueryClient();
+  return useMutation(submitCodeChallengeMutationOptions(activityUuid, queryClient));
+}
+
+export function useSaveCodeChallengeSettings(activityUuid: string) {
+  const queryClient = useQueryClient();
+  return useMutation(saveCodeChallengeSettingsMutationOptions(activityUuid, queryClient));
 }

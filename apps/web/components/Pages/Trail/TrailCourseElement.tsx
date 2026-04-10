@@ -1,14 +1,13 @@
 'use client';
 import { useQueryClient } from '@tanstack/react-query';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
-import { getUserCertificates } from '@services/courses/certifications';
+import { useUserCertificateByCourse } from '@/features/certifications/hooks/useCertifications';
 import { queryKeys } from '@/lib/react-query/queryKeys';
 import { revalidateTags } from '@/lib/api-client';
 import { Award, ExternalLink, Loader2 } from 'lucide-react';
 import { removeCourse } from '@services/courses/activity';
 import { getAbsoluteUrl } from '@services/config/config';
 import { Card, CardContent } from '@components/ui/card';
-import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
@@ -26,9 +25,9 @@ const TrailCourseElement = ({ course, run }: TrailCourseElementProps) => {
   const { course_total_steps } = run;
   const course_completed_steps = run.steps.length;
   const course_progress = course_total_steps > 0 ? Math.round((course_completed_steps / course_total_steps) * 100) : 0;
-  const [courseCertificate, setCourseCertificate] = useState<any>(null);
-  const [isLoadingCertificate, setIsLoadingCertificate] = useState(false);
-  const fetchedCourseCertificateRef = useRef<Record<string, boolean>>({});
+  const certificateQuery = useUserCertificateByCourse(course_progress === 100 ? course.course_uuid : null);
+  const courseCertificate = certificateQuery.data?.data?.[0] ?? null;
+  const isLoadingCertificate = course_progress === 100 && certificateQuery.isPending;
 
   async function quitCourse(course_uuid: string) {
     // Close activity
@@ -39,31 +38,6 @@ const TrailCourseElement = ({ course, run }: TrailCourseElementProps) => {
 
     await queryClient.invalidateQueries({ queryKey: queryKeys.trail.current() });
   }
-
-  // Fetch certificate for this course
-  useEffect(() => {
-    // Avoid repeated fetches for the same course if we've already tried
-    if (course_progress < 100) return;
-    if (fetchedCourseCertificateRef.current[course.course_uuid]) return;
-
-    const fetchCourseCertificate = async () => {
-      fetchedCourseCertificateRef.current[course.course_uuid] = true;
-      setIsLoadingCertificate(true);
-      try {
-        const result = await getUserCertificates(course.course_uuid);
-
-        if (result.success && result.data && result.data.length > 0) {
-          setCourseCertificate(result.data[0]);
-        }
-      } catch (error) {
-        console.error('Error fetching course certificate:', error);
-      } finally {
-        setIsLoadingCertificate(false);
-      }
-    };
-
-    fetchCourseCertificate();
-  }, [course_progress, course.course_uuid]);
 
   return (
     <Card className="trailcoursebox border-border bg-card text-card-foreground flex rounded-xl border p-3 shadow-sm">

@@ -2,9 +2,8 @@
 
 import CertificatePreview from '@components/Dashboard/Pages/Course/EditCourseCertification/CertificatePreview';
 import { AlertTriangle, ArrowLeft, CheckCircle, Loader2, Shield, XCircle } from 'lucide-react';
+import { useCertificateByUuid } from '@/features/certifications/hooks/useCertifications';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
-import { getCertificateByUuid } from '@services/courses/certifications';
-import { useEffect, useEffectEvent, useState } from 'react';
 import { getAbsoluteUrl } from '@services/config/config';
 import { useLocale, useTranslations } from 'next-intl';
 import { Label } from '@/components/ui/label';
@@ -16,48 +15,23 @@ interface CertificateVerificationPageProps {
 }
 
 const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = ({ certificateUuid }) => {
-  const [certificateData, setCertificateData] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [verificationStatus, setVerificationStatus] = useState<'valid' | 'invalid' | 'loading'>('loading');
   const locale = useLocale();
   const t = useTranslations('Certificates.CertificateVerificationPage');
+  const certificateQuery = useCertificateByUuid(certificateUuid);
+  const certificateData = certificateQuery.data?.data ?? null;
+  const isLoading = certificateQuery.isPending;
+  const error = certificateQuery.error ? t('verificationFailed') : !isLoading && !certificateData ? t('certificateNotFound') : null;
+  const verificationStatus: 'valid' | 'invalid' | 'loading' = isLoading
+    ? 'loading'
+    : certificateData
+      ? 'valid'
+      : 'invalid';
+
   // Certificate type translation helper
   const getCertificationTypeLabel = (type: string): string => {
     const typeKey = type as keyof typeof t;
     return t(typeKey) || t('completion');
   };
-
-  // Fetch certificate data
-  const fetchCertificateEvent = useEffectEvent(async (signal?: AbortSignal) => {
-    try {
-      const result = await getCertificateByUuid(certificateUuid);
-
-      if (signal?.aborted) return;
-
-      if (result.success && result.data) {
-        setCertificateData(result.data);
-        setVerificationStatus('valid');
-      } else {
-        setError(t('certificateNotFound'));
-        setVerificationStatus('invalid');
-      }
-    } catch (error) {
-      console.error('Error fetching certificate:', error);
-      if (signal?.aborted) return;
-      setError(t('verificationFailed'));
-      setVerificationStatus('invalid');
-    } finally {
-      if (!signal?.aborted) setIsLoading(false);
-    }
-  });
-
-  useEffect(() => {
-    const controller = new AbortController();
-    setIsLoading(true);
-    fetchCertificateEvent(controller.signal);
-    return () => controller.abort();
-  }, [certificateUuid]);
 
   const getVerificationStatusIcon = () => {
     switch (verificationStatus) {

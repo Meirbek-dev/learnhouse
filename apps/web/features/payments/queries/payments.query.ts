@@ -1,6 +1,6 @@
 'use client';
 
-import { getCustomers, getOwnedCourses, getPaymentConfigs } from '@services/payments/payments';
+import { getCustomers, getOwnedCourses, getPaymentConfigs, verifyStripeConnection } from '@services/payments/payments';
 import { getCoursesLinkedToProduct, getProducts, getProductsByCourse } from '@services/payments/products';
 import { queryOptions } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/react-query/queryKeys';
@@ -45,5 +45,14 @@ export function ownedCoursesQueryOptions() {
     queryKey: queryKeys.payments.ownedCourses(),
     queryFn: () => getOwnedCourses(),
     staleTime: 60_000,
+  });
+}
+
+export function stripeConnectionQueryOptions(code: string) {
+  return queryOptions({
+    queryKey: queryKeys.payments.stripeConnection(code),
+    queryFn: () => verifyStripeConnection(code),
+    retry: false,
+    staleTime: Number.POSITIVE_INFINITY,
   });
 }

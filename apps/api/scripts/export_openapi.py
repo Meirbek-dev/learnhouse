@@ -4,7 +4,6 @@ import json
 import sys
 from pathlib import Path
 
-from app import app
 
 APP_ROOT = Path(__file__).resolve().parent.parent
 if str(APP_ROOT) not in sys.path:
@@ -12,6 +11,7 @@ if str(APP_ROOT) not in sys.path:
 
 
 def main() -> None:
+    from app import app
     output_path = APP_ROOT / "openapi.json"
     schema = app.openapi()
 

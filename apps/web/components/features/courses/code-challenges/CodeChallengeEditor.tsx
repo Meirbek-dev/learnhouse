@@ -1,14 +1,19 @@
 'use client';
 
 import { History, Loader2, Play, Send, Terminal } from 'lucide-react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { useCodeChallengeSubmission, useCodeChallengeSubmissions } from '@/features/code-challenges/hooks/useCodeChallenge';
+import {
+  useCodeChallengeSubmission,
+  useCodeChallengeSubmissions,
+  useRunCodeChallengeTests,
+  useRunCustomTest,
+  useSubmitCodeChallenge,
+} from '@/features/code-challenges/hooks/useCodeChallenge';
 
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { apiFetch } from '@/lib/api-client';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
@@ -67,12 +72,6 @@ interface CodeChallengeEditorProps {
   onSubmissionComplete?: (submission: Submission) => void;
 }
 
-const fetcher = async (url: string) => {
-  const res = await fetch(url, { credentials: 'include' });
-  if (!res.ok) throw new Error('Failed to fetch');
-  return res.json();
-};
-
 export function CodeChallengeEditor({
   activityUuid,
   challengeTitle,
@@ -92,10 +91,12 @@ export function CodeChallengeEditor({
   const [customOutput, setCustomOutput] = useState('');
   const [testResults, setTestResults] = useState<TestCaseResult[] | null>(null);
   const [activeSubmissionId, setActiveSubmissionId] = useState<string | null>(null);
-  const [isRunning, setIsRunning] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState('testcases');
-  const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const runCustomTestMutation = useRunCustomTest(activityUuid);
+  const runCodeChallengeTestsMutation = useRunCodeChallengeTests(activityUuid);
+  const submitCodeChallengeMutation = useSubmitCodeChallenge(activityUuid);
+  const isRunning = runCustomTestMutation.isPending || runCodeChallengeTestsMutation.isPending;
 
   // Fetch submissions history
   const {
@@ -127,17 +128,6 @@ export function CodeChallengeEditor({
     }
   }, [activeSubmission, refreshSubmissions, onSubmissionComplete, t]);
 
-  // Cleanup polling on unmount
-  useEffect(() => {
-    return () => {
-      const id = pollIntervalRef.current;
-      if (id) {
-        clearInterval(id);
-        pollIntervalRef.current = null;
-      }
-    };
-  }, []);
-
   // Set initial code from starter template
   useEffect(() => {
     if (settings?.starter_code && !code) {
@@ -155,35 +145,21 @@ export function CodeChallengeEditor({
       return;
     }
 
-    setIsRunning(true);
     setCustomOutput('');
     setActiveTab('custom');
 
     try {
-      const res = await apiFetch(`code-challenges/${activityUuid}/custom-test`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          source_code: btoa(code),
-          language_id: selectedLanguageId,
-          stdin: btoa(customInput),
-        }),
+      const result = await runCustomTestMutation.mutateAsync({
+        sourceCode: btoa(code),
+        languageId: selectedLanguageId,
+        stdin: btoa(customInput),
       });
-
-      if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.detail || 'Run failed');
-      }
-
-      const result = await res.json();
       setCustomOutput(result.compile_output || result.stderr || result.stdout || t('noOutput'));
     } catch (error) {
       toast.error(error instanceof Error ? error.message : t('runFailed'));
       setCustomOutput(error instanceof Error ? error.message : t('runFailed'));
-    } finally {
-      setIsRunning(false);
     }
-  }, [code, selectedLanguageId, customInput, activityUuid, t]);
+  }, [code, customInput, runCustomTestMutation, selectedLanguageId, t]);
 
   // Run against sample test cases
   const handleTestAgainstSamples = useCallback(async () => {
@@ -192,33 +168,19 @@ export function CodeChallengeEditor({
       return;
     }
 
-    setIsRunning(true);
     setTestResults(null);
     setActiveTab('results');
 
     try {
-      const res = await apiFetch(`code-challenges/${activityUuid}/test`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          source_code: btoa(code),
-          language_id: selectedLanguageId,
-        }),
+      const result = await runCodeChallengeTestsMutation.mutateAsync({
+        sourceCode: btoa(code),
+        languageId: selectedLanguageId,
       });
-
-      if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.detail || 'Test failed');
-      }
-
-      const result = await res.json();
       setTestResults(result.results);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : t('testFailed'));
-    } finally {
-      setIsRunning(false);
     }
-  }, [code, selectedLanguageId, activityUuid, t]);
+  }, [code, runCodeChallengeTestsMutation, selectedLanguageId, t]);
 
   // Submit solution
   const handleSubmit = useCallback(async () => {
@@ -231,28 +193,21 @@ export function CodeChallengeEditor({
     setTestResults(null);
 
     try {
-      const res = await apiFetch(`code-challenges/${activityUuid}/submit`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          source_code: btoa(code),
-          language_id: selectedLanguageId,
-        }),
+      const submission = await submitCodeChallengeMutation.mutateAsync({
+        sourceCode: btoa(code),
+        languageId: selectedLanguageId,
       });
-
-      if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.detail || 'Submission failed');
-      }
-
-      const submission = await res.json();
-      setActiveSubmissionId(submission.submission_uuid);
+      const nextSubmissionId =
+        typeof submission === 'object' && submission !== null && 'submission_uuid' in submission
+          ? String(submission.submission_uuid)
+          : submission.uuid;
+      setActiveSubmissionId(nextSubmissionId);
       toast.info(t('submissionQueued'));
     } catch (error) {
       setIsSubmitting(false);
       toast.error(error instanceof Error ? error.message : t('submissionFailed'));
     }
-  }, [code, selectedLanguageId, activityUuid, t]);
+  }, [code, selectedLanguageId, submitCodeChallengeMutation, t]);
 
   // Get language name from ID
   const getLanguageName = (languageId: number): string => {

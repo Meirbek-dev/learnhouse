@@ -16,12 +16,12 @@ import {
   Users,
   X,
 } from 'lucide-react';
-import { getCoursesByUser } from '@/lib/users/client';
+import { useUserCourses } from '@/features/users/hooks/useUsers';
 import CourseThumbnail from '@components/Objects/Thumbnails/CourseThumbnail';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import type { FC } from 'react';
 import Image from 'next/image';
 
@@ -83,30 +83,10 @@ const UserProfileClient = ({ userData, profile }: UserProfileClientProps) => {
     url: string;
     caption?: string;
   } | null>(null);
-  const [userCourses, setUserCourses] = useState<any[]>([]);
-  const [isLoadingCourses, setIsLoadingCourses] = useState(false);
-  const [error, setError] = useState(false);
-
-  useEffect(() => {
-    const fetchUserCourses = async () => {
-      if (userData.id) {
-        try {
-          setIsLoadingCourses(true);
-          const coursesData = await getCoursesByUser(userData.id);
-          if (coursesData.data) {
-            setUserCourses(coursesData.data);
-          }
-        } catch (error) {
-          console.error(t('fetchError'), error);
-          setError(true);
-        } finally {
-          setIsLoadingCourses(false);
-        }
-      }
-    };
-
-    fetchUserCourses();
-  }, [userData.id, t]);
+  const userCoursesQuery = useUserCourses(userData.id, { enabled: Boolean(userData.id) });
+  const userCourses = userCoursesQuery.data ?? [];
+  const isLoadingCourses = userCoursesQuery.isPending;
+  const error = userCoursesQuery.isError;
 
   return (
     <div className="text-foreground container mx-auto py-8">
@@ -347,7 +327,26 @@ const UserProfileClient = ({ userData, profile }: UserProfileClientProps) => {
                                   key={course.id}
                                   className="mx-auto w-full max-w-[300px]"
                                 >
-                                  <CourseThumbnail course={course} />
+                                  <CourseThumbnail
+                                    course={{
+                                      ...course,
+                                      authors: course.authors?.map((author) => ({
+                                        authorship: author.authorship,
+                                        authorship_status: author.authorship_status,
+                                        user: {
+                                          id: author.user.id,
+                                          user_uuid: author.user.user_uuid,
+                                          avatar_image: author.user.avatar_image ?? '',
+                                          first_name: author.user.first_name,
+                                          middle_name: author.user.middle_name ?? undefined,
+                                          last_name: author.user.last_name,
+                                          username: author.user.username,
+                                        },
+                                      })),
+                                      description: course.description ?? '',
+                                      thumbnail_image: course.thumbnail_image ?? '',
+                                    }}
+                                  />
                                 </div>
                               ))}
                             </div>

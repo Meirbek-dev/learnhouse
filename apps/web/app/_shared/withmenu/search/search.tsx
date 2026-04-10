@@ -3,10 +3,10 @@
 import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media';
 import { removeCoursePrefix } from '@components/Objects/Thumbnails/CourseThumbnail';
 import { Book, GraduationCap, Search, Users } from 'lucide-react';
+import { useSearchContent } from '@/features/search/hooks/useSearch';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { getAbsoluteUrl } from '@services/config/config';
 import UserAvatar from '@components/Objects/UserAvatar';
-import { searchContent } from '@services/search/search';
 import NextImage from '@components/ui/NextImage';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
@@ -167,16 +167,6 @@ const SearchPage = () => {
   const searchParams = useSearchParams();
   const t = useTranslations('SearchPage');
 
-  // Search state
-  const [searchResults, setSearchResults] = useState<SearchResults>({
-    courses: [],
-    collections: [],
-    users: [],
-    total_courses: 0,
-    total_collections: 0,
-    total_users: 0,
-  });
-  const [isLoading, setIsLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
 
   // URL parameters
@@ -184,9 +174,27 @@ const SearchPage = () => {
   const page = Number.parseInt(searchParams.get('page') || '1', 10);
   const type = (searchParams.get('type') as ContentType) || 'all';
   const perPage = 9;
-
-  // Filter state
-  const [selectedType, setSelectedType] = useState<ContentType>(type);
+  const selectedType = type;
+  const searchResultsQuery = useSearchContent(query, { page, limit: perPage });
+  const rawSearchResults = searchResultsQuery.data?.data;
+  const searchResults: SearchResults = query.trim()
+    ? {
+        courses: Array.isArray(rawSearchResults?.courses) ? rawSearchResults.courses : [],
+        collections: Array.isArray(rawSearchResults?.collections) ? rawSearchResults.collections : [],
+        users: Array.isArray(rawSearchResults?.users) ? rawSearchResults.users : [],
+        total_courses: Array.isArray(rawSearchResults?.courses) ? rawSearchResults.courses.length : 0,
+        total_collections: Array.isArray(rawSearchResults?.collections) ? rawSearchResults.collections.length : 0,
+        total_users: Array.isArray(rawSearchResults?.users) ? rawSearchResults.users.length : 0,
+      }
+    : {
+        courses: [],
+        collections: [],
+        users: [],
+        total_courses: 0,
+        total_collections: 0,
+        total_users: 0,
+      };
+  const isLoading = query.trim().length > 0 && searchResultsQuery.isPending;
 
   const updateSearchParams = (updates: Record<string, string>) => {
     const current = new URLSearchParams([...searchParams.entries()]);
@@ -211,57 +219,6 @@ const SearchPage = () => {
   useEffect(() => {
     setSearchQuery(query);
   }, [query]);
-
-  useEffect(() => {
-    const fetchResults = async () => {
-      if (!query.trim()) {
-        setSearchResults({
-          courses: [],
-          collections: [],
-          users: [],
-          total_courses: 0,
-          total_collections: 0,
-          total_users: 0,
-        });
-        return;
-      }
-
-      setIsLoading(true);
-      try {
-        const response = await searchContent({
-          query,
-          page,
-          limit: perPage,
-          next: selectedType === 'all' ? null : selectedType,
-        });
-
-        // The response data is directly what we need
-        const results = response.data;
-
-        setSearchResults({
-          courses: results.courses || [],
-          collections: results.collections || [],
-          users: results.users || [],
-          total_courses: results.courses?.length || 0,
-          total_collections: results.collections?.length || 0,
-          total_users: results.users?.length || 0,
-        });
-      } catch (error) {
-        console.error('Error searching content:', error);
-        setSearchResults({
-          courses: [],
-          collections: [],
-          users: [],
-          total_courses: 0,
-          total_collections: 0,
-          total_users: 0,
-        });
-      }
-      setIsLoading(false);
-    };
-
-    fetchResults();
-  }, [query, page, selectedType]);
 
   const totalResults = searchResults.total_courses + searchResults.total_collections + searchResults.total_users;
   const totalPages = Math.ceil(totalResults / perPage);
@@ -311,7 +268,6 @@ const SearchPage = () => {
                 icon={Search}
                 selectedType={selectedType}
                 onTypeChange={(type) => {
-                  setSelectedType(type);
                   updateSearchParams({
                     type: type === 'all' ? '' : type,
                     page: '1',
@@ -325,7 +281,6 @@ const SearchPage = () => {
                 icon={GraduationCap}
                 selectedType={selectedType}
                 onTypeChange={(type) => {
-                  setSelectedType(type);
                   updateSearchParams({
                     type: type === 'all' ? '' : type,
                     page: '1',
@@ -339,7 +294,6 @@ const SearchPage = () => {
                 icon={Book}
                 selectedType={selectedType}
                 onTypeChange={(type) => {
-                  setSelectedType(type);
                   updateSearchParams({
                     type: type === 'all' ? '' : type,
                     page: '1',
@@ -353,7 +307,6 @@ const SearchPage = () => {
                 icon={Users}
                 selectedType={selectedType}
                 onTypeChange={(type) => {
-                  setSelectedType(type);
                   updateSearchParams({
                     type: type === 'all' ? '' : type,
                     page: '1',

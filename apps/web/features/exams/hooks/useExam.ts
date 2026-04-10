@@ -1,10 +1,12 @@
 'use client';
 
-import { queryOptions, useQuery } from '@tanstack/react-query';
+import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { updateExamSettingsMutationOptions } from '../mutations/exams.mutation';
 import {
   examActivityQueryOptions,
   examAllAttemptsQueryOptions,
   examConfigQueryOptions,
+  examDetailQueryOptions,
   examMyAttemptsQueryOptions,
   examQuestionsQueryOptions,
 } from '../queries/exams.query';
@@ -23,6 +25,15 @@ function examQuestionsHookOptions(examUuid: string | null | undefined) {
 
   return queryOptions({
     ...examQuestionsQueryOptions(normalizedExamUuid),
+    enabled: Boolean(examUuid),
+  });
+}
+
+function examDetailHookOptions(examUuid: string | null | undefined) {
+  const normalizedExamUuid = examUuid ?? '';
+
+  return queryOptions({
+    ...examDetailQueryOptions(normalizedExamUuid),
     enabled: Boolean(examUuid),
   });
 }
@@ -53,6 +64,10 @@ export function useExamQuestions(examUuid: string | null | undefined) {
   return useQuery(examQuestionsHookOptions(examUuid));
 }
 
+export function useExamDetail(examUuid: string | null | undefined) {
+  return useQuery(examDetailHookOptions(examUuid));
+}
+
 export function useExamMyAttempts(examUuid: string | null | undefined) {
   return useQuery(examMyAttemptsHookOptions(examUuid));
 }
@@ -63,4 +78,9 @@ export function useExamAllAttempts(examUuid: string | null | undefined, options?
 
 export function useExamConfig() {
   return useQuery(examConfigQueryOptions());
+}
+
+export function useUpdateExamSettings(examUuid: string) {
+  const queryClient = useQueryClient();
+  return useMutation(updateExamSettingsMutationOptions(examUuid, queryClient));
 }

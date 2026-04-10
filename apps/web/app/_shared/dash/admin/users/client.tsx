@@ -20,15 +20,16 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { assignRoleToUser, listUsers, listRoles, listUserRoles, removeRoleFromUser } from '@/services/rbac';
+import { assignRoleToUser, removeRoleFromUser } from '@/services/rbac';
+import { useBasicUsers, useRoles, useUserRoleAssignments } from '@/features/users/hooks/useUsers';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Actions, PermissionGuard, Resources, Scopes } from '@/components/Security';
 import { AlertTriangle, Calendar, Plus, Shield, Trash2, User } from 'lucide-react';
-import type { UserBasic, Role, UserRoleAssignment } from '@/types/permissions';
+import type { UserRoleAssignment } from '@/types/permissions';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useSession } from '@/hooks/useSession';
 import { getUserAvatarMediaDirectory } from '@/services/media/media';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import type { ColumnDef } from '@tanstack/react-table';
 import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
@@ -45,11 +46,15 @@ export default function UserRolesClient() {
   const t = useTranslations('Components.Roles');
   const locale = useLocale();
   const router = useRouter();
+  const {
+    data: userRoles = [],
+    error: userRolesError,
+    isPending: userRolesLoading,
+    refetch: refetchUserRoles,
+  } = useUserRoleAssignments();
+  const { data: availableRoles = [], error: rolesError, isPending: rolesLoading } = useRoles();
+  const { data: users = [], error: usersError, isPending: usersLoading } = useBasicUsers();
 
-  const [userRoles, setUserRoles] = useState<UserRoleAssignment[]>([]);
-  const [availableRoles, setAvailableRoles] = useState<Role[]>([]);
-  const [users, setUsers] = useState<UserBasic[]>([]);
-  const [loading, setLoading] = useState(true);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
   const [selectedRoleId, setSelectedRoleId] = useState<number | null>(null);
@@ -63,45 +68,7 @@ export default function UserRolesClient() {
     router.refresh();
     if (!session.user) toast.warning(t('sessionRefreshWarning'));
   }, [router, session.user, t]);
-
-  // Fetch user roles
-  const fetchUserRolesData = useCallback(async () => {
-    try {
-      const data = await listUserRoles();
-      setUserRoles(data);
-    } catch (error) {
-      console.error('Failed to fetch user roles:', error);
-      toast.error(t('loadFailed'));
-    }
-  }, [t]);
-
-  // Fetch available roles
-  const fetchRoles = useCallback(async () => {
-    try {
-      const data = await listRoles();
-      setAvailableRoles(data);
-    } catch (error) {
-      console.error('Failed to fetch roles:', error);
-    }
-  }, []);
-
-  // Fetch users for search
-  const fetchUsers = useCallback(async () => {
-    try {
-      const data = await listUsers();
-      setUsers(data);
-    } catch (error) {
-      console.error('Failed to fetch users:', error);
-    }
-  }, []);
-  useEffect(() => {
-    const fetchAll = async () => {
-      setLoading(true);
-      await Promise.all([fetchUserRolesData(), fetchRoles(), fetchUsers()]);
-      setLoading(false);
-    };
-    fetchAll();
-  }, [fetchUserRolesData, fetchRoles, fetchUsers]);
+  const loading = userRolesLoading || rolesLoading || usersLoading;
 
   // Add role to user
   const handleAddUserRole = async () => {
@@ -113,7 +80,7 @@ export default function UserRolesClient() {
       setIsAddDialogOpen(false);
       setSelectedUserId(null);
       setSelectedRoleId(null);
-      await fetchUserRolesData();
+      await refetchUserRoles();
       // Refresh session so permission changes take effect immediately
       await refreshSession();
     } catch (error) {
@@ -137,7 +104,7 @@ export default function UserRolesClient() {
     try {
       await removeRoleFromUser(userId, roleId);
       toast.success(t('removedRoleSuccess'));
-      await fetchUserRolesData();
+      await refetchUserRoles();
       // Refresh session so permission changes take effect immediately
       await refreshSession();
     } catch (error) {
@@ -243,6 +210,10 @@ export default function UserRolesClient() {
         <Skeleton className="h-96" />
       </div>
     );
+  }
+
+  if (userRolesError || rolesError || usersError) {
+    return <div className="container mx-auto p-6 text-sm text-destructive">{t('loadFailed')}</div>;
   }
 
   return (

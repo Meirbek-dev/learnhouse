@@ -1,8 +1,8 @@
 import CertificatePreview from '@components/Dashboard/Pages/Course/EditCourseCertification/CertificatePreview';
+import { useUserCertificateByCourse } from '@/features/certifications/hooks/useCertifications';
 import { Document, Font, Image, Page, StyleSheet, Text, View, pdf } from '@react-pdf/renderer';
 import { ArrowLeft, BookOpen, Download, Loader2, Shield, Target, Trophy } from 'lucide-react';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
-import { getUserCertificates } from '@services/courses/certifications';
 import SimpleAlertDialog from '@/components/ui/alert-dialog-simple';
 import { useGamificationStore } from '@/stores/gamification';
 import { getAbsoluteUrl } from '@services/config/config';
@@ -25,23 +25,16 @@ interface CourseEndViewProps {
 }
 
 const CourseEndView: FC<CourseEndViewProps> = ({ courseName, courseUuid, thumbnailImage, course, trailData }) => {
-  const [userCertificate, setUserCertificate] = useState<any>(null);
-  const [isLoadingCertificate, setIsLoadingCertificate] = useState(false);
-  const [certificateError, setCertificateError] = useState<string | null>(null);
   const locale = useLocale();
   const t = useTranslations('Certificates.CourseEndView');
   const [dialogAlertOpen, setDialogAlertOpen] = useState(false);
   const [dialogAlertMessage, setDialogAlertMessage] = useState('');
-  const qrCodeLink = getAbsoluteUrl(
-    `/certificates/${userCertificate?.certificate_user.user_certification_uuid}/verify`,
-  );
 
   const gamificationProfile = useGamificationStore((s) => s.profile);
   const gamificationRefetch = useGamificationStore((s) => s.refetch);
 
-  // Refs to prevent repeated runs that may trigger network loops
-  const fetchedCertificateRef = useRef(false);
   const refetchedOnMountRef = useRef(false);
+  const refetchedOnCertificateRef = useRef(false);
 
   // Check if course is actually completed
   const isCourseCompleted = (() => {
@@ -73,47 +66,28 @@ const CourseEndView: FC<CourseEndViewProps> = ({ courseName, courseUuid, thumbna
     const completedActivities = allActivities.filter((activity: any) => isActivityDone(activity)).length;
     return totalActivities > 0 && completedActivities === totalActivities;
   })();
+  const normalizedCourseUuid = courseUuid.startsWith('course_') ? courseUuid : `course_${courseUuid}`;
+  const certificateQuery = useUserCertificateByCourse(isCourseCompleted ? normalizedCourseUuid : null);
+  const userCertificate = certificateQuery.data?.data?.[0] ?? null;
+  const isLoadingCertificate = isCourseCompleted && certificateQuery.isPending;
+  const certificateError = certificateQuery.error
+    ? t('loadingError')
+    : !isLoadingCertificate && isCourseCompleted && !userCertificate
+      ? t('noCertificateFound')
+      : null;
+  const qrCodeLink = getAbsoluteUrl(
+    `/certificates/${userCertificate?.certificate_user.user_certification_uuid}/verify`,
+  );
 
-  // Fetch user certificate when course is completed
   useEffect(() => {
-    // Prevent repeated requests if we've already tried fetching the certificate
-    if (!isCourseCompleted || fetchedCertificateRef.current) return;
+    if (!userCertificate || typeof gamificationRefetch !== 'function') return;
+    if (refetchedOnCertificateRef.current) return;
 
-    const fetchUserCertificate = async () => {
-      // Mark as attempted to avoid loops; we can reset this manually if needed
-      fetchedCertificateRef.current = true;
-
-      setIsLoadingCertificate(true);
-      setCertificateError(null);
-      try {
-        const cleanCourseUuid = courseUuid.replace('course_', '');
-        const result = await getUserCertificates(`course_${cleanCourseUuid}`);
-
-        if (result.success && result.data && result.data.length > 0) {
-          setUserCertificate(result.data[0]);
-
-          // Refetch gamification data to show course completion XP in recent activity
-          if (typeof gamificationRefetch === 'function') {
-            gamificationRefetch().catch((error: unknown) =>
-              console.warn('Failed to refetch gamification after course completion:', error),
-            );
-          }
-        } else {
-          console.warn('No certificate found. Result:', result);
-          setCertificateError(t('noCertificateFound'));
-        }
-      } catch (error) {
-        console.error('Error fetching user certificate:', error);
-        setCertificateError(t('loadingError'));
-      } finally {
-        setIsLoadingCertificate(false);
-      }
-    };
-
-    fetchUserCertificate();
-    // Only depend on stable primitives and the refetch function to avoid
-    // triggering this effect when the whole context object identity changes.
-  }, [isCourseCompleted, courseUuid, t, gamificationRefetch]);
+    refetchedOnCertificateRef.current = true;
+    gamificationRefetch().catch((error: unknown) =>
+      console.warn('Failed to refetch gamification after course completion:', error),
+    );
+  }, [userCertificate, gamificationRefetch]);
 
   // Refetch gamification data on mount if course is completed
   // This ensures recent activity feed shows course completion XP

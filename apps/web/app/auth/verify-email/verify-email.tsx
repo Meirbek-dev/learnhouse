@@ -1,8 +1,8 @@
 'use client';
 
+import { useResendVerification, useVerifyEmail } from '@/features/auth/hooks/useEmailVerification';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
-import { apiFetch } from '@/lib/api-client';
 import { useSession } from '@/hooks/useSession';
 
 type VerifyState = 'idle' | 'verifying' | 'success' | 'error' | 'resent';
@@ -12,6 +12,8 @@ export default function VerifyEmailClient() {
   const router = useRouter();
   const { isAuthenticated, user } = useSession();
   const token = searchParams.get('token');
+  const verifyEmailMutation = useVerifyEmail();
+  const resendVerificationMutation = useResendVerification();
 
   const [state, setState] = useState<VerifyState>(token ? 'verifying' : 'idle');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -21,58 +23,39 @@ export default function VerifyEmailClient() {
 
     let cancelled = false;
 
-    async function verify() {
-      try {
-        const response = await apiFetch('auth/verify-email', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ token }),
-        });
+    setState('verifying');
+    setErrorMessage(null);
 
+    verifyEmailMutation.mutate(token, {
+      onSuccess: () => {
         if (cancelled) return;
+        setState('success');
+        globalThis.setTimeout(() => {
+          router.push('/');
+        }, 3000);
+      },
+      onError: (error) => {
+        if (cancelled) return;
+        setState('error');
+        setErrorMessage(error instanceof Error ? error.message : 'Network error. Please try again.');
+      },
+    });
 
-        if (response.ok) {
-          setState('success');
-          globalThis.setTimeout(() => {
-            router.push('/');
-          }, 3000);
-        } else {
-          const data = await response.json().catch(() => null) as { detail?: string } | null;
-          setState('error');
-          setErrorMessage(
-            typeof data?.detail === 'string'
-              ? data.detail
-              : 'Verification failed. The link may have expired.'
-          );
-        }
-      } catch {
-        if (!cancelled) {
-          setState('error');
-          setErrorMessage('Network error. Please try again.');
-        }
-      }
-    }
-
-    void verify();
     return () => {
       cancelled = true;
     };
-  }, [token, router]);
+  }, [router, token, verifyEmailMutation]);
 
   const handleResend = useCallback(async () => {
-    try {
-      const response = await apiFetch('auth/resend-verification', {
-        method: 'POST',
-      });
-      if (response.ok) {
+    resendVerificationMutation.mutate(undefined, {
+      onSuccess: () => {
         setState('resent');
-      } else {
-        setErrorMessage('Failed to resend verification email.');
-      }
-    } catch {
-      setErrorMessage('Network error. Please try again.');
-    }
-  }, []);
+      },
+      onError: (error) => {
+        setErrorMessage(error instanceof Error ? error.message : 'Network error. Please try again.');
+      },
+    });
+  }, [resendVerificationMutation]);
 
   return (
     <div className="flex min-h-screen items-center justify-center px-4">

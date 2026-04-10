@@ -25,10 +25,10 @@ import { useCourse } from '@components/Contexts/CourseContext';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { RadioGroup } from '@/components/ui/radio-group';
 import UserAvatar from '@components/Objects/UserAvatar';
-import { searchContent } from '@services/search/search';
 import { useSaveSection } from '@/hooks/useSaveSection';
 import { useDebouncedValue } from '@/hooks/useDebounce';
 import { useCourseEditorStore } from '@/stores/courses';
+import { useSearchContent } from '@/features/search/hooks/useSearch';
 import { useLocale, useTranslations } from 'next-intl';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useEffect, useRef, useState } from 'react';
@@ -190,12 +190,24 @@ const EditCourseContributors = () => {
   );
   const [searchQuery, setSearchQuery] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
-  const [searchResults, setSearchResults] = useState<SearchUser[]>([]);
+  const [searchResultsOverride, setSearchResultsOverride] = useState<SearchUser[] | null>(null);
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const debouncedSearch = useDebouncedValue(searchQuery, 300);
   const [selectedContributors, setSelectedContributors] = useState<number[]>([]);
+  const hasSearchQuery = debouncedSearch.trim().length > 0;
+  const { data: contributorSearchResponse, isFetching: isSearching } = useSearchContent(debouncedSearch, {
+    limit: 5,
+    enabled: hasSearchQuery,
+  });
+  const fetchedSearchResults: SearchUser[] =
+    contributorSearchResponse?.success && contributorSearchResponse.data?.users
+      ? contributorSearchResponse.data.users.map((user: SearchUser) => ({
+          ...user,
+          avatar_url: user.avatar_image ? getUserAvatarMediaDirectory(user.user_uuid, user.avatar_image) : '',
+        }))
+      : [];
+  const searchResults: SearchUser[] = hasSearchQuery ? searchResultsOverride ?? fetchedSearchResults : [];
 
   const isDirtyRef = useRef(false);
   isDirtyRef.current =
@@ -216,44 +228,6 @@ const EditCourseContributors = () => {
       setIsOpenToContributors(courseStructure?.open_to_contributors);
     }
   }, [courseStructure?.open_to_contributors]);
-
-  // Debounced user search
-  useEffect(() => {
-    const searchUsers = async () => {
-      if (debouncedSearch.trim().length === 0) {
-        setSearchResults([]);
-        setIsSearching(false);
-        setSearchOpen(false);
-        return;
-      }
-      setIsSearching(true);
-      setSearchOpen(true);
-      try {
-        const response = await searchContent({
-          query: debouncedSearch,
-          page: 1,
-          limit: 5,
-          next: null,
-        });
-        if (response.success && response.data?.users) {
-          const users = response.data.users.map((user: SearchUser) =>
-            Object.assign(user, {
-              avatar_url: user.avatar_image ? getUserAvatarMediaDirectory(user.user_uuid, user.avatar_image) : '',
-            }),
-          );
-          setSearchResults(users);
-        } else {
-          setSearchResults([]);
-        }
-      } catch (error) {
-        console.error(t('errorSearchingUsers'), error);
-        setSearchResults([]);
-      }
-      setIsSearching(false);
-    };
-
-    searchUsers();
-  }, [debouncedSearch, t]);
 
   const masterCheckboxChecked = (() => {
     const nonCreatorContributors = contributors.filter((c) => c.authorship !== 'CREATOR');
@@ -294,7 +268,7 @@ const EditCourseContributors = () => {
       setSelectedUsers(result.failed.map((failure) => failure.username));
       setSearchQuery(result.failed.length > 0 ? searchQuery : '');
       setSearchOpen(result.failed.length > 0);
-      setSearchResults((current) => current.filter((user) => failedUsernames.has(user.username)));
+      setSearchResultsOverride(searchResults.filter((user) => failedUsernames.has(user.username)));
     } catch (error: any) {
       if (error?.status === 409) {
         raiseContributorConflict(error?.detail || error?.message, async () => {
@@ -521,8 +495,10 @@ const EditCourseContributors = () => {
                       value={searchQuery}
                       onFocus={() => setSearchOpen(true)}
                       onChange={(e) => {
-                        setSearchQuery(e.target.value);
-                        if (e.target.value.trim()) setSearchOpen(true);
+                        const nextQuery = e.target.value;
+                        setSearchQuery(nextQuery);
+                        setSearchResultsOverride(null);
+                        if (nextQuery.trim()) setSearchOpen(true);
                         else setSearchOpen(false);
                       }}
                     />

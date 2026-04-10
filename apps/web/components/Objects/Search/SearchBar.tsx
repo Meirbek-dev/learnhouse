@@ -11,11 +11,11 @@ import {
   Users,
 } from 'lucide-react';
 import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media';
+import { useSearchContent } from '@/features/search/hooks/useSearch';
 import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import { removeCoursePrefix } from '../Thumbnails/CourseThumbnail';
 import type { ChangeEvent, FC, KeyboardEvent } from 'react';
 import { getAbsoluteUrl } from '@services/config/config';
-import { searchContent } from '@services/search/search';
 import { useDebouncedValue } from '@/hooks/useDebounce';
 import NextImage from '@components/ui/NextImage';
 import { Input } from '@components/ui/input';
@@ -108,18 +108,19 @@ const CourseResultsSkeleton = () => (
 export const SearchBar: FC<SearchBarProps> = ({ className = '', isMobile = false, showSearchSuggestions = false }) => {
   const t = useTranslations('Components.SearchBar');
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<SearchResults>({
-    courses: [],
-    collections: [],
-    users: [],
-  });
-  const [isLoading, setIsLoading] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
 
   // Debounce the search query value
   const debouncedSearch = useDebouncedValue(searchQuery, 300);
+  const searchQueryResult = useSearchContent(debouncedSearch, { page: 1, limit: 3 });
+  const rawSearchResults = searchQueryResult.data?.data;
+  const searchResults: SearchResults = {
+    courses: Array.isArray(rawSearchResults?.courses) ? rawSearchResults.courses : [],
+    collections: Array.isArray(rawSearchResults?.collections) ? rawSearchResults.collections : [],
+    users: Array.isArray(rawSearchResults?.users) ? rawSearchResults.users : [],
+  };
+  const isLoading = debouncedSearch.trim().length > 0 && searchQueryResult.isPending;
 
   const handleClickOutside = useEffectEvent((event: MouseEvent) => {
     if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
@@ -134,57 +135,6 @@ export const SearchBar: FC<SearchBarProps> = ({ className = '', isMobile = false
     };
   }, []);
 
-  useEffect(() => {
-    const controller = new AbortController();
-    const currentQuery = debouncedSearch.trim();
-
-    if (currentQuery.length === 0) {
-      setSearchResults({ courses: [], collections: [], users: [] });
-      setIsLoading(false);
-      setIsInitialLoad(false);
-      return () => {};
-    }
-
-    setIsLoading(true);
-
-    (async () => {
-      try {
-        const response = await searchContent({
-          query: currentQuery,
-          page: 1,
-          limit: 3,
-        });
-        if (controller.signal.aborted) return;
-
-        // Type assertion and safe access
-        const typedResponse = response.data;
-
-        // Ensure we have the correct structure and handle potential undefined values
-        const processedResults: SearchResults = {
-          courses: Array.isArray(typedResponse?.courses) ? typedResponse.courses : [],
-          collections: Array.isArray(typedResponse?.collections) ? typedResponse.collections : [],
-          users: Array.isArray(typedResponse?.users) ? typedResponse.users : [],
-        };
-
-        setSearchResults(processedResults);
-      } catch (error: any) {
-        if (controller.signal.aborted) return;
-        if (error?.name === 'AbortError') return;
-        console.error('Error searching content:', error);
-        setSearchResults({ courses: [], collections: [], users: [] });
-      } finally {
-        if (!controller.signal.aborted) {
-          setIsLoading(false);
-          setIsInitialLoad(false);
-        }
-      }
-    })();
-
-    return () => {
-      controller.abort();
-    };
-  }, [debouncedSearch]);
-
   const MemoizedEmptyState = !searchQuery.trim() ? (
     <div className="px-4 py-8">
       <div className="flex flex-col items-center text-center">
@@ -198,17 +148,6 @@ export const SearchBar: FC<SearchBarProps> = ({ className = '', isMobile = false
   ) : null;
 
   // Calculate if we should show the dropdown
-  const shouldShowDropdown = (() => {
-    if (!showResults) return false;
-
-    // Show if there's a search query with content
-    if (searchQuery.trim()) return true;
-
-    // Show empty state only if focused and no initial load
-    if (!isInitialLoad && showResults) return true;
-
-    return false;
-  })();
 
   const searchTerms = [
     {
@@ -445,10 +384,10 @@ export const SearchBar: FC<SearchBarProps> = ({ className = '', isMobile = false
       </div>
 
       <div
-        className={`soft-shadow divide-border border-border bg-card text-card-foreground absolute z-50 mt-2 w-full divide-y overflow-hidden rounded-xl border transition-all duration-200 ease-in-out ${shouldShowDropdown ? 'translate-y-0 opacity-100' : 'pointer-events-none -translate-y-2 opacity-0'} ${isMobile ? 'max-w-full' : 'min-w-[240px]'}`}
+        className={`soft-shadow divide-border border-border bg-card text-card-foreground absolute z-50 mt-2 w-full divide-y overflow-hidden rounded-xl border transition-all duration-200 ease-in-out ${showResults ? 'translate-y-0 opacity-100' : 'pointer-events-none -translate-y-2 opacity-0'} ${isMobile ? 'max-w-full' : 'min-w-[240px]'}`}
       >
-        {shouldShowDropdown &&
-          (!searchQuery.trim() || isInitialLoad ? (
+        {showResults ? (
+          !searchQuery.trim() ? (
             MemoizedEmptyState
           ) : (
             <>
@@ -474,7 +413,8 @@ export const SearchBar: FC<SearchBarProps> = ({ className = '', isMobile = false
                 </>
               )}
             </>
-          ))}
+          )
+        ) : null}
       </div>
     </div>
   );

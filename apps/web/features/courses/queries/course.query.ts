@@ -4,7 +4,7 @@ import { getCourseEditorBundle } from '@services/courses/editor';
 import { getAssignmentFromActivityUUID } from '@services/courses/assignments';
 import { getCourses } from '@services/courses/courses';
 import { getAPIUrl } from '@services/config/config';
-import { apiFetcher, apiFetcherWithHeaders } from '@/lib/api-client';
+import { apiFetcher, apiFetcherWithHeaders, fetchResponseMetadata } from '@/lib/api-client';
 import { queryOptions } from '@tanstack/react-query';
 import type { CourseListKeyOptions } from '@/hooks/courses/courseKeys';
 import { courseEndpoints, courseKeys } from '@/hooks/courses/courseKeys';
@@ -138,6 +138,27 @@ export function userCertificatesQueryOptions() {
   return queryOptions({
     queryKey: queryKeys.certifications.userAll(),
     queryFn: () => apiFetcher(`${getAPIUrl()}certifications/user/all`),
+  });
+}
+
+export function userCourseCertificatesQueryOptions(courseUuid: string) {
+  return queryOptions({
+    queryKey: queryKeys.certifications.course(courseUuid),
+    queryFn: () => fetchResponseMetadata(`${getAPIUrl()}certifications/user/course/${courseUuid}`),
+  });
+}
+
+export function certificateDetailQueryOptions(certificateUuid: string) {
+  return queryOptions({
+    queryKey: queryKeys.certifications.detail(certificateUuid),
+    queryFn: () => fetchResponseMetadata(`${getAPIUrl()}certifications/certificate/${certificateUuid}`),
+  });
+}
+
+export function courseContributorsQueryOptions(courseUuid: string) {
+  return queryOptions({
+    queryKey: queryKeys.courses.contributors(courseUuid),
+    queryFn: () => fetchResponseMetadata(`${getAPIUrl()}courses/${courseUuid}/contributors`),
   });
 }
 
