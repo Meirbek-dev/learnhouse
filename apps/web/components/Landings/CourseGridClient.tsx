@@ -42,7 +42,9 @@ export default function CourseGridClient({ initialCourses, initialTotal }: Cours
   // Fetch trail data to show progress on course thumbnails (auth-required)
   const { data: trailData } = useTrailCurrent({ enabled: isAuthenticated });
 
-  const isTrailLoading = !trailData;
+  // Only show loading state for authenticated users; unauthenticated users
+  // never fetch trail data so !trailData would be true forever.
+  const isTrailLoading = isAuthenticated && !trailData;
 
   // Generate pagination range
   const paginationRange = useMemo(() => {

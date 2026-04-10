@@ -72,7 +72,6 @@ export interface Course {
   chapters?: {
     activities: any[];
   }[];
-  // Backend permission metadata
   can_update?: boolean;
   can_delete?: boolean;
   can_manage_contributors?: boolean;
@@ -141,27 +140,24 @@ const CourseImage: FC<CourseImageProps> = ({
     aria-label={t('openCourse', { course: courseName })}
   >
     <div className="bg-muted relative aspect-video w-full overflow-hidden">
-      <div className="relative h-full w-full">
-        <NextImage
-          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-          src={thumbnailUrl}
-          alt={courseName}
-          fill
-          sizes="100vw"
-          priority={priority}
-        />
-      </div>
+      <NextImage
+        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+        src={thumbnailUrl}
+        alt={courseName}
+        fill
+        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+        priority={priority}
+      />
 
       <div
-        className="pointer-events-none absolute inset-0 bg-black/15"
+        className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent"
         aria-hidden="true"
       />
 
       {isOwner && (
-        // aria-hidden: badge text is decorative; the card aria-label already conveys ownership
         <Badge
           variant="default"
-          className="absolute top-2 left-2 gap-1 backdrop-blur-sm"
+          className="absolute top-2.5 left-2.5 gap-1 text-xs backdrop-blur-sm"
           aria-hidden="true"
         >
           <Crown className="h-3 w-3" />
@@ -170,10 +166,9 @@ const CourseImage: FC<CourseImageProps> = ({
       )}
 
       {updateDate && (
-        // aria-hidden: date is decorative inside the link; the link aria-label names the course
         <Badge
           variant="secondary"
-          className="bg-background/90 absolute right-2 bottom-2 text-xs backdrop-blur-sm"
+          className="bg-background/80 absolute right-2.5 bottom-2.5 text-[11px] backdrop-blur-sm"
           aria-hidden="true"
         >
           <Calendar className="mr-1 h-3 w-3" />
@@ -208,12 +203,12 @@ const AuthorsDisplay: FC<AuthorsDisplayProps> = ({ authors, t }) => {
   if (authors.length === 0) return null;
 
   return (
-    <div className="flex items-center gap-2">
-      <div className="flex items-center -space-x-2">
+    <div className="flex items-center gap-2 pt-1">
+      <div className="flex items-center -space-x-1.5">
         {displayedAuthors.map((author, idx) => (
           <div
             key={author.user.user_uuid}
-            className="relative transition-transform hover:z-20 hover:scale-110"
+            className="ring-card relative rounded-full ring-2 transition-transform hover:z-20 hover:scale-110"
             style={{ zIndex: displayedAuthors.length - idx }}
           >
             <UserAvatar
@@ -231,13 +226,13 @@ const AuthorsDisplay: FC<AuthorsDisplayProps> = ({ authors, t }) => {
           </div>
         ))}
         {hasMoreAuthors && (
-          <div className="border-background bg-muted text-muted-foreground flex h-8 w-8 items-center justify-center rounded-full border-2 text-xs font-medium">
+          <div className="border-card bg-muted text-muted-foreground flex h-7 w-7 items-center justify-center rounded-full border-2 text-[10px] font-medium">
             +{remainingCount}
           </div>
         )}
       </div>
       <span
-        className="text-muted-foreground truncate text-xs"
+        className="text-muted-foreground truncate text-xs leading-tight"
         aria-label={authorsText}
       >
         {authorsText}
@@ -253,9 +248,9 @@ interface ProgressBarProps {
 }
 
 const ProgressBar: FC<ProgressBarProps> = ({ percentage, courseName, t }) => (
-  <div className="flex items-center gap-2">
+  <div className="flex items-center gap-2.5">
     <div
-      className="bg-muted h-1.5 flex-1 overflow-hidden rounded-full"
+      className="bg-primary/15 h-1.5 flex-1 overflow-hidden rounded-full"
       role="progressbar"
       aria-valuemin={0}
       aria-valuemax={100}
@@ -263,33 +258,11 @@ const ProgressBar: FC<ProgressBarProps> = ({ percentage, courseName, t }) => (
       aria-label={t('progressBarAria', { course: courseName })}
     >
       <div
-        className="bg-primary h-full transition-all duration-300"
+        className="bg-primary h-full rounded-full transition-all duration-500 ease-out"
         style={{ width: `${percentage}%` }}
       />
     </div>
-    <span className="text-muted-foreground w-10 text-right text-xs">{percentage}%</span>
-  </div>
-);
-
-interface LoadingProgressBarProps {
-  courseName: string;
-  t: any;
-}
-
-const LoadingProgressBar: FC<LoadingProgressBarProps> = ({ courseName, t }) => (
-  <div className="flex items-center gap-2">
-    <div
-      className="bg-muted h-1.5 flex-1 overflow-hidden rounded-full"
-      role="progressbar"
-      aria-busy="true"
-      aria-label={t('progressLoading', {
-        course: courseName,
-        defaultValue: 'Loading progress…',
-      })}
-    >
-      <div className="bg-muted/70 h-full w-3/5 animate-pulse" />
-    </div>
-    <span className="text-muted-foreground w-10 text-right text-xs">-%</span>
+    <span className="text-muted-foreground text-xs tabular-nums">{percentage}%</span>
   </div>
 );
 
@@ -312,18 +285,20 @@ const CourseActions: FC<CourseActionsProps> = ({
 }) => {
   if (isLoading) {
     return (
-      <div className="w-full space-y-1.5">
-        <LoadingProgressBar
-          courseName={courseName}
-          t={t}
-        />
+      <div className="w-full space-y-2">
+        <div className="flex items-center gap-2.5">
+          <div className="bg-muted h-1.5 flex-1 overflow-hidden rounded-full">
+            <div className="bg-muted-foreground/20 h-full w-2/5 animate-pulse rounded-full" />
+          </div>
+          <span className="text-muted-foreground/50 text-xs">…</span>
+        </div>
         <Button
           size="sm"
           className="w-full"
           disabled
           aria-disabled
         >
-          <Play className="mr-2 h-4 w-4 opacity-60" />
+          <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
           {t('loading', { defaultValue: 'Loading…' })}
         </Button>
       </div>
@@ -332,7 +307,7 @@ const CourseActions: FC<CourseActionsProps> = ({
 
   if (isEnrolled) {
     return (
-      <div className="w-full space-y-1.5">
+      <div className="w-full space-y-2">
         <ProgressBar
           percentage={progressPercentage}
           courseName={courseName}
@@ -350,7 +325,7 @@ const CourseActions: FC<CourseActionsProps> = ({
           size="sm"
           className="w-full"
         >
-          <Play className="mr-2 h-4 w-4" />
+          <Play className="mr-2 h-3.5 w-3.5" />
           {t('continueLearning', { defaultValue: 'Continue Learning' })}
         </Button>
       </div>
@@ -368,9 +343,10 @@ const CourseActions: FC<CourseActionsProps> = ({
       }
       aria-label={t('startLearning')}
       size="sm"
+      variant="outline"
       className="w-full"
     >
-      <Play className="mr-2 h-4 w-4" />
+      <Play className="mr-2 h-3.5 w-3.5" />
       {t('startLearning')}
     </Button>
   );
@@ -418,7 +394,6 @@ const AdminMenu: FC<AdminMenuProps> = ({ course, onDelete }) => {
 
   const courseIdClean = removeCoursePrefix(course.course_uuid);
 
-  // Define available actions using CommonActions helper
   const actions: ResourceAction[] = [
     {
       id: 'edit-content',
@@ -445,12 +420,11 @@ const AdminMenu: FC<AdminMenuProps> = ({ course, onDelete }) => {
     },
   ];
 
-  // Custom trigger with owner badge
   const trigger = (
     <Button
       variant="secondary"
       size="icon"
-      className="bg-background/90 hover:bg-background h-8 w-8 rounded-full border-0 shadow-lg backdrop-blur-md transition-all hover:scale-110"
+      className="bg-background/80 hover:bg-background h-8 w-8 rounded-full border-0 shadow-sm backdrop-blur-md transition-all hover:scale-105"
       aria-label={t('courseOptions', { defaultValue: 'Course options' })}
     >
       <MoreVertical className="h-4 w-4" />
@@ -459,7 +433,7 @@ const AdminMenu: FC<AdminMenuProps> = ({ course, onDelete }) => {
 
   return (
     <>
-      <div className="absolute top-2 right-2 z-20 opacity-0 transition-all duration-200 group-hover:opacity-100">
+      <div className="absolute top-2 right-2 z-20 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
         <ResourceActionsMenu
           availableActions={availableActions}
           actions={actions}
@@ -467,7 +441,6 @@ const AdminMenu: FC<AdminMenuProps> = ({ course, onDelete }) => {
         />
       </div>
 
-      {/* Delete confirmation dialog */}
       <AlertDialog
         open={isDeleteDialogOpen}
         onOpenChange={setIsDeleteDialogOpen}
@@ -517,9 +490,12 @@ const CourseThumbnail: FC<CourseThumbnailProps> = ({
   const t = useTranslations('Components.CourseThumbnail');
   const locale = useLocale();
   const router = useRouter();
-  const { user: currentUser } = useSession();
+  const { user: currentUser, isAuthenticated } = useSession();
 
-  // Memoized computed values
+  // Defensive: never show loading state for unauthenticated users even if
+  // the parent accidentally passes trailLoading=true without trail data.
+  const effectiveTrailLoading = isAuthenticated && trailLoading;
+
   const activeAuthors = useMemo(
     () => course.authors?.filter((a) => a.authorship_status === 'ACTIVE') || [],
     [course.authors],
@@ -534,7 +510,7 @@ const CourseThumbnail: FC<CourseThumbnailProps> = ({
     });
   }, [trailData, cleanCourseUuid]);
 
-  const { totalActivities, completedActivities, progressPercentage } = useMemo(() => {
+  const { progressPercentage } = useMemo(() => {
     const total =
       courseRun?.course_total_steps ||
       course.chapters?.reduce((acc, chapter) => acc + chapter.activities.length, 0) ||
@@ -542,11 +518,7 @@ const CourseThumbnail: FC<CourseThumbnailProps> = ({
     const completed = courseRun?.steps?.filter((step: any) => step.complete === true)?.length || 0;
     const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
 
-    return {
-      totalActivities: total,
-      completedActivities: completed,
-      progressPercentage: percentage,
-    };
+    return { progressPercentage: percentage };
   }, [courseRun, course.chapters]);
 
   const thumbnailUrl = useMemo(() => {
@@ -563,14 +535,12 @@ const CourseThumbnail: FC<CourseThumbnailProps> = ({
   const isEnrolled = Boolean(courseRun);
   const titleId = `course-title-${cleanCourseUuid}`;
 
-  // Check if current user is the course owner/creator
   const currentUserId = currentUser?.id;
   const isOwner = useMemo(() => {
     if (!currentUserId || !activeAuthors.length) return false;
     return activeAuthors.some((author) => author.authorship === 'CREATOR' && author.user.id === currentUserId);
   }, [currentUserId, activeAuthors]);
 
-  // Delete handler
   const handleDelete = async () => {
     const toastId = toast.loading(t('deleting'));
     try {
@@ -588,7 +558,7 @@ const CourseThumbnail: FC<CourseThumbnailProps> = ({
     <Card
       role="article"
       aria-labelledby={titleId}
-      className="group bg-card focus-visible:ring-primary/60 relative flex h-full w-full max-w-sm min-w-[260px] flex-col overflow-hidden border-0 p-0 shadow-md transition-all duration-200 hover:shadow-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+      className="group bg-card focus-visible:ring-primary/60 relative flex h-full w-full max-w-sm min-w-[260px] flex-col overflow-hidden rounded-lg border p-0 shadow-sm transition-shadow duration-200 hover:shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
       tabIndex={0}
     >
       <AdminMenu
@@ -607,22 +577,22 @@ const CourseThumbnail: FC<CourseThumbnailProps> = ({
         priority={priority}
       />
 
-      <CardContent className="flex flex-1 flex-col gap-1 px-4 pb-2">
+      <CardContent className="flex flex-1 flex-col gap-1.5 px-4 pt-3 pb-2">
         <div className="flex-1 space-y-1">
           <Link
             prefetch={false}
             href={courseUrl}
-            className="group-hover:text-primary block transition-colors"
+            className="group-hover:text-primary block transition-colors duration-150"
             aria-label={t('openCourse', { course: course.name })}
           >
             <h3
               id={titleId}
-              className="text-foreground line-clamp-2 leading-tight font-semibold tracking-tight"
+              className="text-foreground line-clamp-2 text-[15px] leading-snug font-semibold tracking-tight"
             >
               {course.name}
             </h3>
           </Link>
-          <p className="text-muted-foreground line-clamp-2 text-sm">{course.description}</p>
+          <p className="text-muted-foreground line-clamp-2 text-sm leading-relaxed">{course.description}</p>
         </div>
 
         <AuthorsDisplay
@@ -631,10 +601,10 @@ const CourseThumbnail: FC<CourseThumbnailProps> = ({
         />
       </CardContent>
 
-      <CardFooter className="bg-muted/30 mt-auto border-t p-3">
+      <CardFooter className="bg-muted/20 mt-auto border-t px-4 py-3">
         <CourseActions
           isEnrolled={isEnrolled}
-          isLoading={trailLoading}
+          isLoading={effectiveTrailLoading}
           progressPercentage={progressPercentage}
           courseUrl={courseUrl}
           courseName={course.name}
