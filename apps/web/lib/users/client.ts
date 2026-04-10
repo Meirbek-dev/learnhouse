@@ -3,7 +3,7 @@
 import { apiFetch } from '@/lib/api-client';
 import { getQueryClient } from '@/lib/react-query/queryClient';
 import { queryKeys } from '@/lib/react-query/queryKeys';
-import type { CustomResponseTyping } from '@services/utils/ts/requests';
+import type { CustomResponseTyping } from '@/lib/api-client';
 import type { components } from '@/lib/api/generated';
 
 type UserRead = components['schemas']['UserRead'];

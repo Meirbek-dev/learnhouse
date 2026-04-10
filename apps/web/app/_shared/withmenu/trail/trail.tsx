@@ -3,7 +3,7 @@ import { RecentActivityFeed } from '@/components/Dashboard/Gamification/recent-a
 import GeneralWrapper from '@/components/Objects/Elements/Wrappers/GeneralWrapper';
 import { Leaderboard } from '@/components/Dashboard/Gamification/leaderboard';
 import TrailCourseElement from '@components/Pages/Trail/TrailCourseElement';
-import { useAuth } from '@/hooks/useAuth';
+import { useSession } from '@/hooks/useSession';
 import UserCertificates from '@components/Pages/Trail/UserCertificates';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { useGamificationStore } from '@/stores/gamification';
@@ -14,7 +14,7 @@ import { BookOpen } from 'lucide-react';
 const EMPTY_RECENT_TRANSACTIONS: any[] = [];
 
 const Trail = () => {
-  const { user: currentUser } = useAuth();
+  const { user: currentUser } = useSession();
   const t = useTranslations('TrailPage');
 
   const { data: trail } = useTrailCurrent();

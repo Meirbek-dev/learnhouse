@@ -1,6 +1,6 @@
 'use server';
 
-import { getResponseMetadata } from '@services/utils/ts/requests';
+import { getResponseMetadata } from '@/lib/api-client';
 import { apiFetch } from '@/lib/api-client';
 
 export async function updatePassword(user_id: number, data: any) {

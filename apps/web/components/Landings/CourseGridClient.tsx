@@ -10,7 +10,7 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination';
 import CourseThumbnail from '@components/Objects/Thumbnails/CourseThumbnail';
-import { useAuth } from '@/hooks/useAuth';
+import { useSession } from '@/hooks/useSession';
 import { useCourseListQuery } from '@/features/courses/hooks/useCourseQueries';
 import { useTrailCurrent } from '@/features/trail/hooks/useTrail';
 import { useMemo, useState } from 'react';
@@ -23,7 +23,7 @@ interface CourseGridClientProps {
 }
 
 export default function CourseGridClient({ initialCourses, initialTotal }: CourseGridClientProps) {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated } = useSession();
   const [page, setPage] = useState(1);
 
   // Fetch courses with pagination

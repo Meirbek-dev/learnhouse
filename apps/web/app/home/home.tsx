@@ -1,17 +1,15 @@
 'use client';
 
-import { useAuth } from '@/hooks/useAuth';
+import { useSession } from '@/hooks/useSession';
 import { logout } from '@/services/auth/auth';
 import platformLogoFull from '@public/platform_logo_full.svg';
 import UserAvatar from '@components/Objects/UserAvatar';
-import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 
 const HomeClient = () => {
   const t = useTranslations('HomeClient');
-  const { user: viewer } = useAuth();
-  const router = useRouter();
+  const { user: viewer } = useSession();
 
   return (
     <div className="flex flex-col">
@@ -35,9 +33,7 @@ const HomeClient = () => {
       <div className="mx-auto flex cursor-pointer items-center space-x-4 pt-16 text-2xl font-semibold">
         <span
           onClick={() => {
-            void logout().then(() => {
-              router.refresh();
-            });
+            void logout();
           }}
         >
           {t('signOut')}

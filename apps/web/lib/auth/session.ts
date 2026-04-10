@@ -4,7 +4,7 @@ import { cookies, headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { createRemoteJWKSet, errors as joseErrors, jwtVerify } from 'jose';
 import { getServerAPIUrl } from '@services/config/config';
-import { ACCESS_TOKEN_COOKIE_NAME } from './constants';
+import { ACCESS_TOKEN_COOKIE_NAME } from './types';
 import type { AccessTokenPayload, Session } from './types';
 
 // ── JWKS (cached in-process by jose, re-fetched only on key rotation) ─────────

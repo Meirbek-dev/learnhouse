@@ -3,7 +3,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { applyTheme, getStoredTheme, getTheme } from '@/lib/themes';
 import { loadTheme } from '@/lib/theme-lazy-loader';
-import { useAuth } from '@/hooks/useAuth';
+import { useSession } from '@/hooks/useSession';
 import { useThemeSync } from '@/hooks/useThemeSync';
 import type { Theme } from '@/lib/themes';
 import type { ReactNode } from 'react';
@@ -23,7 +23,7 @@ interface ThemeProviderProps {
 }
 
 export function ThemeProvider({ children, defaultThemeName = 'default' }: ThemeProviderProps) {
-  const { user } = useAuth();
+  const { user } = useSession();
   const userTheme = user?.theme ?? null;
   const initialThemeName = userTheme || defaultThemeName;
   const [themeName, setThemeName] = useState(initialThemeName);

@@ -24,7 +24,7 @@ import OnBoardMore from '@public/onboarding/OnBoardMore.png';
 import OnBoardUGs from '@public/onboarding/OnBoardUGs.png';
 import OnBoardAI from '@public/onboarding/OnBoardAI.png';
 import { getAbsoluteUrl } from '@services/config/config';
-import { usePermissions } from '@/components/Security';
+import { useSession } from '@/hooks/useSession';
 import type { StaticImageData } from 'next/image';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useRouter } from 'next/navigation';
@@ -95,9 +95,9 @@ const Onboarding: FC = () => {
   });
   const isMobile = useIsMobile();
   const router = useRouter();
-  const { can } = usePermissions();
+  const { can } = useSession();
   const canManagePlatform =
-    can(Actions.MANAGE, Resources.PLATFORM, Scopes.OWN) || can(Actions.MANAGE, Resources.PLATFORM, Scopes.PLATFORM);
+    can(Resources.PLATFORM, Actions.MANAGE, Scopes.OWN) || can(Resources.PLATFORM, Actions.MANAGE, Scopes.PLATFORM);
 
   const onboardingData: OnboardingStep[] = [
     {

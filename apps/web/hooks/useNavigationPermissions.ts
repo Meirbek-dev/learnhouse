@@ -9,10 +9,10 @@ import {
   canSeeUsers,
 } from '@/lib/rbac/navigation-policy';
 import { usePaymentsEnabled } from '@components/Hooks/usePaymentsEnabled';
-import { usePermissions } from '@/components/Security';
+import { useSession } from '@/hooks/useSession';
 
 export function useNavigationPermissions() {
-  const { can } = usePermissions();
+  const { can } = useSession();
   const { isEnabled: arePaymentsEnabled } = usePaymentsEnabled();
 
   const hasPlatformAccess = canSeePlatform(can);

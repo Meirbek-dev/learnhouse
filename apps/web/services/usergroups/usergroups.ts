@@ -1,6 +1,6 @@
 'use server';
 
-import { getResponseMetadata } from '@services/utils/ts/requests';
+import { getResponseMetadata } from '@/lib/api-client';
 import { apiFetch } from '@/lib/api-client';
 import { courseTag, tags } from '@/lib/cacheTags';
 

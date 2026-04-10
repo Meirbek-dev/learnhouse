@@ -1,6 +1,6 @@
 'use client';
 
-import { apiFetcher } from '@services/utils/ts/requests';
+import { apiFetcher } from '@/lib/api-client';
 import { getAPIUrl } from '@services/config/config';
 import { listRoles } from '@services/rbac';
 import { queryOptions } from '@tanstack/react-query';

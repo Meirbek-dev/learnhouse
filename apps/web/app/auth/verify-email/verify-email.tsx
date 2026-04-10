@@ -3,14 +3,14 @@
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api-client';
-import { useAuth } from '@/hooks/useAuth';
+import { useSession } from '@/hooks/useSession';
 
 type VerifyState = 'idle' | 'verifying' | 'success' | 'error' | 'resent';
 
 export default function VerifyEmailClient() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user } = useSession();
   const token = searchParams.get('token');
 
   const [state, setState] = useState<VerifyState>(token ? 'verifying' : 'idle');
@@ -26,7 +26,7 @@ export default function VerifyEmailClient() {
         const response = await apiFetch('auth/verify-email', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ token, new_password: '' }),
+          body: JSON.stringify({ token }),
         });
 
         if (cancelled) return;

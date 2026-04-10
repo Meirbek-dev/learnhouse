@@ -3,13 +3,13 @@
 import type { components } from '@/lib/api/generated';
 
 import { AlertCircle, BookOpen, Loader2, LogIn, ShoppingCart } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
+import { useSession } from '@/hooks/useSession';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
 import { useEffect, useRef, useState, useTransition } from 'react';
 import { getProductsByCourse } from '@services/payments/products';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
 import { checkPaidAccess } from '@services/payments/payments';
-import { revalidateTags } from '@services/utils/ts/requests';
+import { revalidateTags } from '@/lib/api-client';
 import { startCourse } from '@services/courses/activity';
 import { getAbsoluteUrl } from '@services/config/config';
 import { useRouter } from 'next/navigation';
@@ -146,7 +146,7 @@ const MultipleAuthors = ({ authors }: { authors: Author[] }) => {
 const CourseActionsMobile = ({ courseuuid, course, trailData }: CourseActionsMobileProps) => {
   const t = useTranslations('Courses.CourseActionsMobile');
   const router = useRouter();
-  const { user: currentUser } = useAuth();
+  const { user: currentUser } = useSession();
   const userId = currentUser?.id;
 
   // one-shot guards to avoid repeated requests when context identity changes

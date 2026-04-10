@@ -2,7 +2,7 @@
 
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { updateUserLocale } from '@/lib/users/client';
-import { useAuth } from '@/hooks/useAuth';
+import { useSession } from '@/hooks/useSession';
 import { useLocale, useTranslations } from 'next-intl';
 import { setUserLocale } from '@/i18n/locale';
 import { useRouter } from 'next/navigation';
@@ -22,7 +22,7 @@ export const LocaleSwitcher = ({ className, isMobile }: LocaleSwitcherProps) => 
   const currentLocale = useLocale();
   const [isPending, startTransition] = useTransition();
   const t = useTranslations('Components.LocaleSwitcher');
-  const { user: viewer } = useAuth();
+  const { user: viewer } = useSession();
 
   const localeItems = locales.map((locale) => ({ value: locale, label: t(locale) }));
 

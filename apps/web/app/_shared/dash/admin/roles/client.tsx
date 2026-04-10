@@ -47,9 +47,9 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Actions, PermissionGuard, Resources, Scopes, usePermissions } from '@/components/Security';
+import { Actions, PermissionGuard, Resources, Scopes } from '@/components/Security';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useAuth } from '@/hooks/useAuth';
+import { useSession } from '@/hooks/useSession';
 import type { Permission, RoleAuditEvent, RoleWithPermissions } from '@/types/permissions';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useRouter } from 'next/navigation';
@@ -68,8 +68,8 @@ import { toast } from 'sonner';
 type RoleDialogMode = 'create' | 'edit' | 'clone';
 
 export default function RBACAdminClient() {
-  const session = useAuth();
-  const { can } = usePermissions();
+  const session = useSession();
+  const { can } = session;
   const t = useTranslations('Components.Roles');
   const router = useRouter();
 
@@ -99,7 +99,7 @@ export default function RBACAdminClient() {
     page_size: number;
   } | null>(null);
   const [isAuditLoading, setIsAuditLoading] = useState(false);
-  const isSuperAdmin = can(Actions.MANAGE, Resources.ROLE, Scopes.ALL);
+  const isSuperAdmin = can(Resources.ROLE, Actions.MANAGE, Scopes.ALL);
   const currentUserMaxPriority = useMemo(() => {
     const sessionRoles = session.session?.roles ?? [];
     return sessionRoles.reduce(

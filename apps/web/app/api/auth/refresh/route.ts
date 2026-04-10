@@ -1,14 +1,13 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { getServerAPIUrl } from '@services/config/config';
-import { REFRESH_TOKEN_COOKIE_NAME } from '@/lib/auth/constants';
+import { REFRESH_TOKEN_COOKIE_NAME } from '@/lib/auth/types';
 import {
   applyResponseCookiesToNextResponse,
   buildRequestCookieHeader,
   clearAuthCookies,
 } from '@/lib/auth/cookie-bridge';
-import { buildLoginRedirect, getPostAuthRedirect, normalizeReturnTo } from '@/lib/auth/redirect';
-import { isProtectedRoute } from '@/lib/auth/routes';
+import { buildLoginRedirect, getPostAuthRedirect, isProtectedRoute, normalizeReturnTo } from '@/lib/auth/redirect';
 
 /**
  * Token-refresh bridge — GET only.

@@ -12,13 +12,13 @@ import {
   Users,
 } from 'lucide-react';
 import { useNavigationPermissions } from '@/hooks/useNavigationPermissions';
-import { useAuth } from '@/hooks/useAuth';
+import { useSession } from '@/hooks/useSession';
 import ToolTip from '@/components/Objects/Elements/Tooltip/Tooltip';
 import AppLink from '@/components/ui/AppLink';
 import { useTranslations } from 'next-intl';
 
 const DashMobileMenu = () => {
-  const { user: currentUser } = useAuth();
+  const { user: currentUser } = useSession();
   const t = useTranslations('SidebarMenu');
   const {
     canSeePlatform,

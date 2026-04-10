@@ -21,7 +21,7 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 import { Popover, PopoverContent, PopoverTrigger } from '@components/ui/popover';
 import { updateProfile } from '@/lib/users/client';
 import { createElement, useEffect, useEffectEvent, useState } from 'react';
-import { useAuth } from '@/hooks/useAuth';
+import { useSession } from '@/hooks/useSession';
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 import { de, enUS, es, fr, ru } from 'date-fns/locale';
 import { useRouter } from 'next/navigation';
@@ -231,7 +231,7 @@ interface ProfileData {
 
 const UserProfileBuilder = () => {
   const router = useRouter();
-  const { user: currentUser } = useAuth();
+  const { user: currentUser } = useSession();
   const me = currentUser;
   const tNotify = useTranslations('DashPage.Notifications');
   const t = useTranslations('DashPage.UserProfileBuilder');

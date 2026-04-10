@@ -2,12 +2,16 @@
 
 import { createContext, use, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiFetch } from '@/lib/api-client';
 import type { ReactNode } from 'react';
 import type { Action, Resource, Scope } from '@/types/permissions';
 import { perm } from '@/types/permissions';
 import type { Session, UserSessionResponse } from '@/lib/auth/types';
+
+// ── Types ─────────────────────────────────────────────────────────────────────
+
+export type SessionStatus = 'loading' | 'authenticated' | 'unauthenticated' | 'error';
 
 // ── Broadcast channel name for cross-tab session sync ─────────────────────────
 
@@ -20,11 +24,16 @@ type AuthBroadcastMessage =
 // ── Context value ─────────────────────────────────────────────────────────────
 
 export interface SessionContextValue {
+  /** Discriminated session status — distinguishes loading from unauthenticated. */
+  status: SessionStatus;
+  /** Convenience boolean — equivalent to `status === 'authenticated'`. */
   isAuthenticated: boolean;
   session: Session | null;
   user: Session['user'] | null;
   /**
    * Check whether the current user holds a specific RBAC permission.
+   *
+   * Argument order: ``can(resource, action, scope)``.
    *
    * Delegates to the permission set embedded in the session (expanded by the
    * backend before being placed in the JWT).  Uses an exact Set.has() lookup —
@@ -45,14 +54,46 @@ export interface SessionContextValue {
 
 const SessionContext = createContext<SessionContextValue | undefined>(undefined);
 
-// ── Full profile fetcher ──────────────────────────────────────────────────────
+// ── Full profile hook ─────────────────────────────────────────────────────────
 
-async function fetchFullProfile(): Promise<UserSessionResponse> {
-  const response = await apiFetch('auth/me');
-  if (!response.ok) {
-    throw new Error(`Failed to fetch profile: ${String(response.status)}`);
-  }
-  return response.json() as Promise<UserSessionResponse>;
+function useFullProfile(userId: number | null) {
+  return useQuery({
+    queryKey: ['auth', 'me', userId],
+    queryFn: async (): Promise<UserSessionResponse> => {
+      const response = await apiFetch('auth/me');
+      if (!response.ok) {
+        throw new Error(`Failed to fetch profile: ${String(response.status)}`);
+      }
+      return response.json() as Promise<UserSessionResponse>;
+    },
+    enabled: userId !== null,
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
+  });
+}
+
+// ── Cross-tab broadcast listener ──────────────────────────────────────────────
+
+function useSessionBroadcastListener(
+  onLogout: () => void,
+  onSessionRefresh: () => void,
+) {
+  useEffect(() => {
+    if (typeof BroadcastChannel === 'undefined') return;
+
+    const channel = new BroadcastChannel(AUTH_BROADCAST_CHANNEL);
+    channel.onmessage = (event: MessageEvent<AuthBroadcastMessage>) => {
+      if (event.data.type === 'logout') {
+        onLogout();
+      }
+      if (event.data.type === 'session_refresh') {
+        onSessionRefresh();
+      }
+    };
+    return () => {
+      channel.close();
+    };
+  }, [onLogout, onSessionRefresh]);
 }
 
 // ── Provider ──────────────────────────────────────────────────────────────────
@@ -64,6 +105,7 @@ interface SessionProviderProps {
 
 export function SessionProvider({ children, initialSession = null }: SessionProviderProps) {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const [session, setSession] = useState<Session | null>(initialSession);
 
   // Sync session state when RSC re-renders with a new initialSession (e.g.
@@ -77,16 +119,8 @@ export function SessionProvider({ children, initialSession = null }: SessionProv
   }, [initialSession]);
 
   // ── Full profile fetch via TanStack Query ─────────────────────────────────
-  // The JWT carries only slim user claims (id, name, email, avatar).  Fetch
-  // the full profile (bio, details, theme, role objects) once on mount.
   const userId = session?.user.id ?? null;
-  const { data: fullProfile } = useQuery({
-    queryKey: ['auth', 'me', userId],
-    queryFn: fetchFullProfile,
-    enabled: userId !== null,
-    staleTime: 5 * 60 * 1000,
-    refetchOnWindowFocus: false,
-  });
+  const { data: fullProfile, isError: profileError } = useFullProfile(userId);
 
   // Merge full profile data into session when available
   const mergedSession = useMemo<Session | null>(() => {
@@ -101,24 +135,25 @@ export function SessionProvider({ children, initialSession = null }: SessionProv
     };
   }, [session, fullProfile]);
 
-  // ── Cross-tab session sync via BroadcastChannel ───────────────────────────
-  useEffect(() => {
-    if (typeof BroadcastChannel === 'undefined') return;
+  // ── Session status ────────────────────────────────────────────────────────
+  const status = useMemo<SessionStatus>(() => {
+    if (profileError) return 'error';
+    if (mergedSession !== null) return 'authenticated';
+    return 'unauthenticated';
+  }, [mergedSession, profileError]);
 
-    const channel = new BroadcastChannel(AUTH_BROADCAST_CHANNEL);
-    channel.onmessage = (event: MessageEvent<AuthBroadcastMessage>) => {
-      if (event.data.type === 'logout') {
-        setSession(null);
-        router.push('/login');
-      }
-      if (event.data.type === 'session_refresh') {
-        router.refresh();
-      }
-    };
-    return () => {
-      channel.close();
-    };
+  // ── Cross-tab session sync via BroadcastChannel ───────────────────────────
+  const handleBroadcastLogout = useCallback(() => {
+    setSession(null);
+    queryClient.clear();
+    router.push('/login');
+  }, [queryClient, router]);
+
+  const handleBroadcastRefresh = useCallback(() => {
+    router.refresh();
   }, [router]);
+
+  useSessionBroadcastListener(handleBroadcastLogout, handleBroadcastRefresh);
 
   // Trigger a full RSC refresh; Next.js re-runs getSession() server-side and
   // streams fresh data to the client without a navigation.
@@ -143,13 +178,14 @@ export function SessionProvider({ children, initialSession = null }: SessionProv
 
   const value = useMemo<SessionContextValue>(
     () => ({
-      isAuthenticated: mergedSession !== null,
+      status,
+      isAuthenticated: status === 'authenticated',
       session: mergedSession,
       user: mergedSession?.user ?? null,
       can,
       refresh,
     }),
-    [mergedSession, can, refresh],
+    [status, mergedSession, can, refresh],
   );
 
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;

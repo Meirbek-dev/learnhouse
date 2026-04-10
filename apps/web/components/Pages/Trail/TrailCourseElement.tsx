@@ -3,7 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { getUserCertificates } from '@services/courses/certifications';
 import { queryKeys } from '@/lib/react-query/queryKeys';
-import { revalidateTags } from '@services/utils/ts/requests';
+import { revalidateTags } from '@/lib/api-client';
 import { Award, ExternalLink, Loader2 } from 'lucide-react';
 import { removeCourse } from '@services/courses/activity';
 import { getAbsoluteUrl } from '@services/config/config';

@@ -31,8 +31,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { ResourceActionsMenu } from '@/components/Utils/ResourceActionsMenu';
 import type { ResourceAction } from '@/components/Utils/ResourceActionsMenu';
-import { usePermissions } from '@/components/Security/PermissionProvider';
-import { useAuth } from '@/hooks/useAuth';
+import { useSession } from '@/hooks/useSession';
 import { Card, CardContent, CardFooter } from '@components/ui/card';
 import { Resources, Actions, Scopes } from '@/types/permissions';
 import UserAvatar from '@components/Objects/UserAvatar';
@@ -385,10 +384,9 @@ interface AdminMenuProps {
 const AdminMenu: FC<AdminMenuProps> = ({ course, onDelete }) => {
   const t = useTranslations('Components.CourseThumbnail');
   const router = useRouter();
-  const { can } = usePermissions();
+  const { can, user: _thumbnailUser } = useSession();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
-  const { user: _thumbnailUser } = useAuth();
   const currentUserId = _thumbnailUser?.id;
 
   const isOwner = useMemo(() => {
@@ -402,12 +400,12 @@ const AdminMenu: FC<AdminMenuProps> = ({ course, onDelete }) => {
   }, [currentUserId, course.authors, course.is_owner]);
 
   const canUpdate =
-    can(Actions.UPDATE, Resources.COURSE, Scopes.PLATFORM) ||
-    (isOwner && can(Actions.UPDATE, Resources.COURSE, Scopes.OWN));
+    can(Resources.COURSE, Actions.UPDATE, Scopes.PLATFORM) ||
+    (isOwner && can(Resources.COURSE, Actions.UPDATE, Scopes.OWN));
 
   const canDelete =
-    can(Actions.DELETE, Resources.COURSE, Scopes.PLATFORM) ||
-    (isOwner && can(Actions.DELETE, Resources.COURSE, Scopes.OWN));
+    can(Resources.COURSE, Actions.DELETE, Scopes.PLATFORM) ||
+    (isOwner && can(Resources.COURSE, Actions.DELETE, Scopes.OWN));
 
   const availableActions = [...(canUpdate ? ['update'] : []), ...(canDelete ? ['delete'] : [])];
 
@@ -519,7 +517,7 @@ const CourseThumbnail: FC<CourseThumbnailProps> = ({
   const t = useTranslations('Components.CourseThumbnail');
   const locale = useLocale();
   const router = useRouter();
-  const { user: currentUser } = useAuth();
+  const { user: currentUser } = useSession();
 
   // Memoized computed values
   const activeAuthors = useMemo(

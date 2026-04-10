@@ -181,6 +181,7 @@ def _build_user_claims(user: User) -> dict:
     return {
         "id": user.id,
         "uuid": str(user.user_uuid),
+        "username": user.username,
         "name": f"{user.first_name} {user.last_name}".strip(),
         "email": str(user.email),
         "avatar": user.avatar_image or "",
@@ -560,10 +561,14 @@ class ResendVerificationRequest(PydanticStrictBaseModel):
     email: str
 
 
+class VerifyEmailRequest(PydanticStrictBaseModel):
+    token: str
+
+
 @router.post("/verify-email")
 async def verify_email(
     request: Request,
-    body: ResetPasswordRequest,
+    body: VerifyEmailRequest,
     db_session: Annotated[Session, Depends(get_db_session)],
 ):
     """Verify email using the token from the verification link."""

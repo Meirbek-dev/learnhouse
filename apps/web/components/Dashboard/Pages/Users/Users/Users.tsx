@@ -22,9 +22,9 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination';
-import { Actions, Resources, Scopes, usePermissions } from '@/components/Security';
+import { Actions, Resources, Scopes } from '@/components/Security';
 import RolesUpdate from '@/components/Objects/Modals/Dash/Users/RolesUpdate';
-import { useAuth } from '@/hooks/useAuth';
+import { useSession } from '@/hooks/useSession';
 import { useMembers } from '@/features/users/hooks/useUsers';
 import type { ColumnDef } from '@tanstack/react-table';
 import DataTable from '@/components/ui/data-table';
@@ -113,12 +113,11 @@ function RemoveUserButton({ userId, username, onRemove, t }: RemoveUserButtonPro
 }
 
 const Users = () => {
-  const { session: sessionData, user: currentUser } = useAuth();
+  const { session: sessionData, user: currentUser, can } = useSession();
   const t = useTranslations('DashPage.UserSettings.usersSection');
   const userRoles = sessionData?.roles ?? [];
-  const { can } = usePermissions();
-  const canUpdateRole = can(Actions.UPDATE, Resources.ROLE, Scopes.PLATFORM);
-  const canDeleteUser = can(Actions.DELETE, Resources.USER, Scopes.PLATFORM);
+  const canUpdateRole = can(Resources.ROLE, Actions.UPDATE, Scopes.PLATFORM);
+  const canDeleteUser = can(Resources.USER, Actions.DELETE, Scopes.PLATFORM);
 
   const getRolePriority = (roleObj: any) => {
     if (!roleObj) return 0;

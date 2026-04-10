@@ -2,7 +2,7 @@
 
 import { NavigationMenu, NavigationMenuList, NavigationMenuItem } from '@/components/ui/navigation-menu';
 import { HeaderProfileBox } from '@/components/Security/HeaderProfileBox';
-import { useAuth } from '@/hooks/useAuth';
+import { useSession } from '@/hooks/useSession';
 import { BookCopy, Menu, Signpost, SquareLibrary, X } from 'lucide-react';
 import { LocaleSwitcher } from '@/components/Utils/LocaleSwitcher';
 import { SearchBar } from '@/components/Objects/Search/SearchBar';
@@ -60,7 +60,7 @@ export default function NavBar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();
   const t = useTranslations('Components.NavMenu');
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated } = useSession();
 
   // Use local state for focus mode from localStorage (avoid getSnapshot sync warning)
   const isOnActivityPage = pathname?.includes('/activity/') ?? false;

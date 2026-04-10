@@ -24,7 +24,7 @@ import ActivityIndicators from '@components/Pages/Courses/ActivityIndicators';
 import CourseBreadcrumbs from '@components/Pages/Courses/CourseBreadcrumbs';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { CourseProvider } from '@components/Contexts/CourseContext';
-import { useAuth } from '@/hooks/useAuth';
+import { useSession } from '@/hooks/useSession';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCourseDiscussions } from '@/features/courses/hooks/useCourseQueries';
@@ -55,7 +55,7 @@ const CourseClient = (props: any) => {
   const { courseuuid } = props;
   const { course } = props;
   const isMobile = useIsMobile();
-  const { user: currentUser } = useAuth();
+  const { user: currentUser } = useSession();
   const queryClient = useQueryClient();
   const discussionsQueryKey = queryKeys.discussions.list(course?.course_uuid ?? 'disabled', true, 50, 0);
 

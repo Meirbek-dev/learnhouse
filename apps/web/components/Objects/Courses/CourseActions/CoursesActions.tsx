@@ -13,14 +13,14 @@ import {
 } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/react-query/queryKeys';
-import { useAuth } from '@/hooks/useAuth';
+import { useSession } from '@/hooks/useSession';
 import { useContributorStatus } from '@/hooks/useContributorStatus';
 import { getProductsByCourse } from '@services/payments/products';
 import { applyForContributor } from '@services/courses/courses';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
 import CourseProgress from '../CourseProgress/CourseProgress';
 import { checkPaidAccess } from '@services/payments/payments';
-import { revalidateTags } from '@services/utils/ts/requests';
+import { revalidateTags } from '@/lib/api-client';
 import { startCourse } from '@services/courses/activity';
 import { getAbsoluteUrl } from '@services/config/config';
 import { Card, CardContent } from '@/components/ui/card';
@@ -73,7 +73,7 @@ interface CourseActionsProps {
 const CoursesActions = ({ courseuuid, course, trailData }: CourseActionsProps) => {
   const queryClient = useQueryClient();
   const router = useRouter();
-  const { user: currentUser } = useAuth();
+  const { user: currentUser } = useSession();
   const [linkedProducts, setLinkedProducts] = useState<PaymentsProductRead[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isActionLoading, setIsActionLoading] = useState(false);

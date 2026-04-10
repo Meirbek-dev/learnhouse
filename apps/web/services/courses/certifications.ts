@@ -1,6 +1,6 @@
 'use server';
 
-import { errorHandling, getResponseMetadata } from '@services/utils/ts/requests';
+import { errorHandling, getResponseMetadata } from '@/lib/api-client';
 import { apiFetch } from '@/lib/api-client';
 
 export async function getCourseCertifications(course_uuid: string, next?: any) {

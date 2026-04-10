@@ -1,7 +1,7 @@
 'use server';
-import { getResponseMetadata } from '@services/utils/ts/requests';
+import { getResponseMetadata } from '@/lib/api-client';
 import { apiFetch } from '@/lib/api-client';
-import type { CustomResponseTyping } from '@services/utils/ts/requests';
+import type { CustomResponseTyping } from '@/lib/api-client';
 import type { components } from '@/lib/api/generated';
 import { tags } from '@/lib/cacheTags';
 

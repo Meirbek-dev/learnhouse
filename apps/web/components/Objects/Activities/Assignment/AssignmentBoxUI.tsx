@@ -1,7 +1,7 @@
 'use client';
 
 import { BookPlus, BookUser, FileUp, Forward, InfoIcon, ListTodo, Save, Type } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
+import { useSession } from '@/hooks/useSession';
 import { Alert, AlertDescription } from '@components/ui/alert';
 import { CardContent, CardHeader } from '@components/ui/card';
 import { Separator } from '@components/ui/separator';
@@ -47,7 +47,7 @@ const AssignmentBoxUI = ({
 }: AssignmentBoxProps) => {
   const t = useTranslations('Activities.AssignmentBoxUI');
   const [customGrade, setCustomGrade] = useState('');
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated } = useSession();
   const showStudentSubmitButton = view === 'student' && isAuthenticated && !hasExistingSubmission;
 
   const handleCustomGradeSubmit = () => {

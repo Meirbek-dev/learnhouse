@@ -7,7 +7,7 @@ import { signupAction } from '@/app/actions/auth';
 import PasswordInput from '@components/ui/custom/password-input';
 import { SiGoogle } from '@icons-pack/react-simple-icons';
 import { Separator } from '@components/ui/separator';
-import { passwordSchema } from '@/lib/schemas/auth';
+import { passwordSchema } from '@/lib/auth/schemas';
 import { useActionState, useTransition } from 'react';
 import { Button } from '@components/ui/button';
 import AuthLogo from '@components/auth/logo';

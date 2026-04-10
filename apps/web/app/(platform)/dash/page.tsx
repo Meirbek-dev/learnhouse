@@ -26,7 +26,7 @@ export default async function PlatformDashHomePage() {
   const t = await getTranslations('DashPage.Card');
   const session = await requireSession();
   const permsSet = new Set<string>(session.permissions);
-  const can = (action: Action, resource: Resource, scope: Scope): boolean =>
+  const can = (resource: Resource, action: Action, scope: Scope): boolean =>
     sessionCan(session, resource, action, scope, permsSet);
 
   const hasCoursesAccess = canSeeCourses(can);

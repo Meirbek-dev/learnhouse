@@ -10,7 +10,7 @@ import { AlertCircle, Cloud, Download, File, Info, Loader2, UploadCloud } from '
 import AssignmentBoxUI from '@components/Objects/Activities/Assignment/AssignmentBoxUI';
 import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
 import { usePlatform } from '@/components/Contexts/PlatformContext';
-import { useAuth } from '@/hooks/useAuth';
+import { useSession } from '@/hooks/useSession';
 import { getTaskFileSubmissionDir } from '@services/media/media';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
@@ -93,7 +93,7 @@ const formatUUID = (uuid: string): string => `${uuid.slice(0, UUID_PREVIEW_START
 // ================= Component =================
 export default function TaskFileObject({ view, user_id, assignmentTaskUUID }: TaskFileObjectProps) {
   const t = useTranslations('DashPage.Assignments.TaskFileObject');
-  const { user: viewer } = useAuth();
+  const { user: viewer } = useSession();
   usePlatform();
   const assignment = useAssignments() as Assignment | null;
   const reload = useAssignmentsTaskStore((s) => s.reload);

@@ -2,7 +2,7 @@
 
 import { useActivityAIChat } from '@components/Contexts/AI/ActivityAIChatContext';
 import { Alert, AlertDescription, AlertTitle } from '@components/ui/alert';
-import { useAuth } from '@/hooks/useAuth';
+import { useSession } from '@/hooks/useSession';
 import type { Session } from '@/lib/auth/types';
 import { AlertTriangle, BadgeInfo, NotebookTabs, X } from 'lucide-react';
 import { AiMessageBubble } from '@components/Shared/AI/AiMessageBubble';
@@ -79,7 +79,7 @@ const AIActivityAsk = ({ activity: _activity }: AIActivityAskProps) => {
 
 const ActivityChatPanel = () => {
   const t = useTranslations('Activities.AIActivityAsk');
-  const { user: viewer } = useAuth();
+  const { user: viewer } = useSession();
 
   const {
     messages,

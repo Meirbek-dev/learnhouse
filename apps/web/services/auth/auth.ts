@@ -18,12 +18,12 @@ export async function getGoogleAuthorizeUrl(frontendCallback: string): Promise<s
 
 export async function logout(options?: LogoutOptions): Promise<void> {
   broadcastLogout();
-  await logoutAction(options?.redirectTo ?? null);
+  await logoutAction(options?.redirectTo ?? '/login');
 }
 
 export async function logoutAll(options?: LogoutOptions): Promise<void> {
   broadcastLogout();
-  await logoutAllAction(options?.redirectTo ?? null);
+  await logoutAllAction(options?.redirectTo ?? '/login');
 }
 
 export async function sendResetLink(email: string): Promise<Response> {

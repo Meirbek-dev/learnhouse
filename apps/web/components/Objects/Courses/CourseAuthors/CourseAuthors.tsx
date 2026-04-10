@@ -22,7 +22,7 @@ import { valibotResolver } from '@hookform/resolvers/valibot';
 import { useDateFnsLocale } from '@/hooks/useDateFnsLocale';
 import { useQueryClient } from '@tanstack/react-query';
 import UserAvatar from '@components/Objects/UserAvatar';
-import { usePermissions } from '@/components/Security';
+import { useSession } from '@/hooks/useSession';
 import { format, formatDistanceToNow } from 'date-fns';
 import { Controller, useForm } from 'react-hook-form';
 import { Textarea } from '@components/ui/textarea';
@@ -155,9 +155,9 @@ const MultipleAuthors = ({ authors, isMobile }: { authors: Author[]; isMobile: b
 
 const UpdatesSection = () => {
   const [selectedView, setSelectedView] = useState('list');
-  const { can } = usePermissions();
+  const { can } = useSession();
   const canManageCourse =
-    can(Actions.MANAGE, Resources.COURSE, Scopes.OWN) || can(Actions.MANAGE, Resources.COURSE, Scopes.PLATFORM);
+    can(Resources.COURSE, Actions.MANAGE, Scopes.OWN) || can(Resources.COURSE, Actions.MANAGE, Scopes.PLATFORM);
   const course = useCourse();
   const { data: updates } = useCourseUpdates(course?.courseStructure?.course_uuid);
   const t = useTranslations('Courses.CourseAuthors');
@@ -311,9 +311,9 @@ const NewUpdateForm = ({ setSelectedView }: { setSelectedView: (view: string) =>
 
 const UpdatesListView = () => {
   const course = useCourse();
-  const { can } = usePermissions();
+  const { can } = useSession();
   const canManageCourse =
-    can(Actions.MANAGE, Resources.COURSE, Scopes.OWN) || can(Actions.MANAGE, Resources.COURSE, Scopes.PLATFORM);
+    can(Resources.COURSE, Actions.MANAGE, Scopes.OWN) || can(Resources.COURSE, Actions.MANAGE, Scopes.PLATFORM);
   const { data: updates } = useCourseUpdates(course?.courseStructure?.course_uuid);
   const t = useTranslations('Courses.CourseAuthors');
   const locale = useDateFnsLocale();

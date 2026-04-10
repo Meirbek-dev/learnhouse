@@ -1,6 +1,6 @@
 'use server';
 
-import { errorHandling } from '@services/utils/ts/requests';
+import { errorHandling } from '@/lib/api-client';
 import { apiFetch } from '@/lib/api-client';
 import { tags } from '@/lib/cacheTags';
 

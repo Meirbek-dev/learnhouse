@@ -9,7 +9,7 @@ import type {
   SubmissionStats,
   TeacherGradeInput,
 } from '@/types/grading';
-import { getResponseMetadata } from '@services/utils/ts/requests';
+import { getResponseMetadata } from '@/lib/api-client';
 import { apiFetch } from '@/lib/api-client';
 import { revalidateTag } from 'next/cache';
 

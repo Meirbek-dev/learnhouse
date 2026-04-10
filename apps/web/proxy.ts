@@ -1,8 +1,7 @@
 import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 import { createRemoteJWKSet, errors as joseErrors, jwtVerify } from 'jose';
-import { AUTH_REFRESH_BRIDGE_PATH, ACCESS_TOKEN_COOKIE_NAME } from './lib/auth/constants';
-import { isAuthRoute } from './lib/auth/routes';
+import { AUTH_REFRESH_BRIDGE_PATH, ACCESS_TOKEN_COOKIE_NAME } from './lib/auth/types';
 import { isAccessTokenExpired } from './lib/auth/cookie-bridge';
 import { generateUUID } from './lib/utils';
 
@@ -190,12 +189,6 @@ export default async function proxy(req: NextRequest) {
     if (!valid) {
       return redirectToRefresh(req, requestId, pathname, search);
     }
-  }
-
-  // For non-protected routes: if a token exists but is expired, proactively
-  // refresh so the user gets a new token before they hit a protected page.
-  if (accessToken && !isAuthRoute(pathname) && isAccessTokenExpired(accessToken)) {
-    return redirectToRefresh(req, requestId, pathname, search);
   }
 
   // Dynamic Pages Editor

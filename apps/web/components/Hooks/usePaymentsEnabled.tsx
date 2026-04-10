@@ -1,13 +1,13 @@
 // hooks/usePaymentsEnabled.ts
 
-import { useAuth } from '@/hooks/useAuth';
+import { useSession } from '@/hooks/useSession';
 import type { components } from '@/lib/api/generated';
 import { usePaymentConfigs } from '@/features/payments/hooks/usePayments';
 
 type PaymentsConfigRead = components['schemas']['PaymentsConfigRead'];
 
 export function usePaymentsEnabled() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated } = useSession();
   const query = usePaymentConfigs({ enabled: isAuthenticated });
 
   const isStripeEnabled = query.data?.some(

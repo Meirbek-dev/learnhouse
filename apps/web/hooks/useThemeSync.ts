@@ -1,17 +1,17 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { useAuth } from '@/hooks/useAuth';
+import { useSession } from '@/hooks/useSession';
 
 /**
  * Syncs the active theme name to the server with 1-second debounce.
  * Uses sendBeacon on page unload to flush any pending sync.
  *
  * Must be called inside a component that has access to the shared session/query providers
- * (for useAuth) and the current theme name as a parameter.
+ * (for useSession) and the current theme name as a parameter.
  */
 export function useThemeSync(themeName: string): void {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated } = useSession();
   const userId = user?.id;
 
   const pendingThemeRef = useRef<string | null>(null);

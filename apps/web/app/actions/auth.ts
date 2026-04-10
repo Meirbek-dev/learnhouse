@@ -6,7 +6,7 @@ import { revalidatePath } from 'next/cache';
 import { getServerAPIUrl } from '@services/config/config';
 import { applyResponseCookies, buildCookieHeaderFromPairs } from '@/lib/auth/cookie-bridge';
 import { getPostAuthRedirect, normalizeReturnTo } from '@/lib/auth/redirect';
-import { ACCESS_TOKEN_COOKIE_NAME, REFRESH_TOKEN_COOKIE_NAME } from '@/lib/auth/constants';
+import { ACCESS_TOKEN_COOKIE_NAME, REFRESH_TOKEN_COOKIE_NAME } from '@/lib/auth/types';
 
 interface LoginActionInput {
   email: string;
@@ -128,7 +128,11 @@ export async function loginAction(input: LoginActionInput): Promise<AuthActionRe
 
 export async function signupAction(input: SignupActionInput): Promise<AuthActionResult> {
   const requestHeaders = await headers();
-  const username = `${input.firstName.toLowerCase()}.${input.lastName.toLowerCase()}`;
+  const base = `${input.firstName.toLowerCase()}.${input.lastName.toLowerCase()}`
+    .replace(/[^a-z0-9.]/g, '')
+    .slice(0, 20);
+  const suffix = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+  const username = `${base}.${suffix}`;
   let signupResponse: Response;
   try {
     signupResponse = await postAuthJson(

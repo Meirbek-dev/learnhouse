@@ -1,6 +1,6 @@
 'use client';
 
-import { apiFetcher } from '@services/utils/ts/requests';
+import { apiFetcher } from '@/lib/api-client';
 import type { Submission, SubmissionStats, SubmissionStatus, SubmissionsPage } from '@/types/grading';
 import { queryOptions } from '@tanstack/react-query';
 import { getAPIUrl } from '@services/config/config';

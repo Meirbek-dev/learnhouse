@@ -4,7 +4,7 @@ import {
   ACCESS_TOKEN_COOKIE_NAME,
   AUTH_COOKIE_NAMES,
   REFRESH_TOKEN_COOKIE_NAME,
-} from './constants';
+} from './types';
 
 interface CookieMutationOptions {
   domain?: string;

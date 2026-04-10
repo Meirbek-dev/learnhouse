@@ -4,7 +4,7 @@ import { getCourseEditorBundle } from '@services/courses/editor';
 import { getAssignmentFromActivityUUID } from '@services/courses/assignments';
 import { getCourses } from '@services/courses/courses';
 import { getAPIUrl } from '@services/config/config';
-import { apiFetcher, apiFetcherWithHeaders } from '@services/utils/ts/requests';
+import { apiFetcher, apiFetcherWithHeaders } from '@/lib/api-client';
 import { queryOptions } from '@tanstack/react-query';
 import type { CourseListKeyOptions } from '@/hooks/courses/courseKeys';
 import { courseEndpoints, courseKeys } from '@/hooks/courses/courseKeys';

@@ -29,7 +29,8 @@ import { CourseStatusBadge, courseWorkflowSummaryCardClass } from '@components/D
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import CourseThumbnail, { removeCoursePrefix } from '@components/Objects/Thumbnails/CourseThumbnail';
 import { deleteCourseFromBackend, updateCourseAccess } from '@services/courses/courses';
-import { Actions, Resources, Scopes, usePermissions } from '@/components/Security';
+import { Actions, Resources, Scopes } from '@/components/Security';
+import { useSession } from '@/hooks/useSession';
 import { useCallback, useEffect, useMemo, useState, useTransition } from 'react';
 import type { Course } from '@components/Objects/Thumbnails/CourseThumbnail';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -82,8 +83,8 @@ const CoursesHome = ({
   const searchParams = useSearchParams();
   const [searchInput, setSearchInput] = useState(searchQuery);
   const viewMode = searchParams.get('view') === 'table' ? 'table' : 'cards';
-  const { can } = usePermissions();
-  const canCreateCourse = can(Actions.CREATE, Resources.COURSE, Scopes.PLATFORM);
+  const { can } = useSession();
+  const canCreateCourse = can(Resources.COURSE, Actions.CREATE, Scopes.PLATFORM);
   const [selectedCourseUuids, setSelectedCourseUuids] = useState<string[]>([]);
   const [isBulkPending, startBulkTransition] = useTransition();
   const [pendingBulkAction, setPendingBulkAction] = useState<BulkActionKind | null>(null);
@@ -141,15 +142,15 @@ const CoursesHome = ({
 
   const canManageCourse = useCallback(
     (course: ManageableCourse) =>
-      can(Actions.MANAGE, Resources.COURSE, Scopes.PLATFORM) ||
-      Boolean(course.is_owner && can(Actions.MANAGE, Resources.COURSE, Scopes.OWN)),
+      can(Resources.COURSE, Actions.MANAGE, Scopes.PLATFORM) ||
+      Boolean(course.is_owner && can(Resources.COURSE, Actions.MANAGE, Scopes.OWN)),
     [can],
   );
 
   const canDeleteCourse = useCallback(
     (course: ManageableCourse) =>
-      can(Actions.DELETE, Resources.COURSE, Scopes.PLATFORM) ||
-      Boolean(course.is_owner && can(Actions.DELETE, Resources.COURSE, Scopes.OWN)),
+      can(Resources.COURSE, Actions.DELETE, Scopes.PLATFORM) ||
+      Boolean(course.is_owner && can(Resources.COURSE, Actions.DELETE, Scopes.OWN)),
     [can],
   );
 
@@ -725,15 +726,15 @@ const CoursesHome = ({
 function CourseRowActions({ course }: { course: ManageableCourse }) {
   const t = useTranslations('DashPage.CourseManagement.Dashboard');
   const router = useRouter();
-  const { can } = usePermissions();
+  const { can } = useSession();
   const [isPending, startTransition] = useTransition();
 
   const canManageCourse =
-    can(Actions.MANAGE, Resources.COURSE, Scopes.PLATFORM) ||
-    Boolean(course.is_owner && can(Actions.MANAGE, Resources.COURSE, Scopes.OWN));
+    can(Resources.COURSE, Actions.MANAGE, Scopes.PLATFORM) ||
+    Boolean(course.is_owner && can(Resources.COURSE, Actions.MANAGE, Scopes.OWN));
   const canDeleteCourse =
-    can(Actions.DELETE, Resources.COURSE, Scopes.PLATFORM) ||
-    Boolean(course.is_owner && can(Actions.DELETE, Resources.COURSE, Scopes.OWN));
+    can(Resources.COURSE, Actions.DELETE, Scopes.PLATFORM) ||
+    Boolean(course.is_owner && can(Resources.COURSE, Actions.DELETE, Scopes.OWN));
 
   const handleDelete = () => {
     if (!canDeleteCourse) return;
