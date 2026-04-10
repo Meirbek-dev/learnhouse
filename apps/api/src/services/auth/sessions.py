@@ -103,6 +103,27 @@ def _user_sessions_key(user_id: int) -> str:
     return USER_SESSIONS_PREFIX + str(user_id)
 
 
+def _redis_key_type_name(key_type: bytes | str) -> str:
+    if isinstance(key_type, bytes):
+        return key_type.decode("utf-8", errors="ignore")
+    return key_type
+
+
+async def _ensure_user_sessions_index(r, user_id: int) -> str:
+    """Normalize the per-user session index to a sorted set.
+
+    Older deployments may have written a non-zset value under the same key.
+    Delete those stale keys before issuing zset commands so auth flows recover
+    automatically instead of failing with WRONGTYPE.
+    """
+    user_key = _user_sessions_key(user_id)
+    key_type = _redis_key_type_name(await r.type(user_key))
+    if key_type not in {"zset", "none"}:
+        logger.warning("Deleting stale Redis key %s with type %s", user_key, key_type)
+        await r.delete(user_key)
+    return user_key
+
+
 def _session_data_to_dict(data: SessionData) -> dict:
     return {
         "session_id": data.session_id,
@@ -143,13 +164,7 @@ async def _write_session_to_redis(data: SessionData, ttl: int) -> None:
         return
     now = _now_ts()
     payload = json.dumps(_session_data_to_dict(data))
-    user_key = _user_sessions_key(data.user_id)
-    # Migrate stale keys: a previous implementation may have stored a non-zset
-    # value under this key. Delete it so ZADD doesn't raise WRONGTYPE.
-    key_type = await r.type(user_key)
-    if key_type not in (b"zset", b"none", "zset", "none"):
-        logger.warning("Deleting stale Redis key %s with type %s", user_key, key_type)
-        await r.delete(user_key)
+    user_key = await _ensure_user_sessions_index(r, data.user_id)
     async with r.pipeline(transaction=False) as pipe:
         # Session data with sliding-window TTL
         await pipe.set(_session_key(data.session_id), payload, ex=ttl)
@@ -183,9 +198,10 @@ async def _delete_session_from_redis(session_id: str, user_id: int) -> None:
     r = get_async_redis_client()
     if not r:
         return
+    user_key = await _ensure_user_sessions_index(r, user_id)
     async with r.pipeline(transaction=False) as pipe:
         await pipe.delete(_session_key(session_id))
-        await pipe.zrem(_user_sessions_key(user_id), session_id)
+        await pipe.zrem(user_key, session_id)
         await pipe.execute()
 
 
@@ -207,7 +223,8 @@ async def _get_active_session_ids(user_id: int) -> list[str]:
     if not r:
         return []
     now = _now_ts()
-    members = await r.zrangebyscore(_user_sessions_key(user_id), now, "+inf")
+    user_key = await _ensure_user_sessions_index(r, user_id)
+    members = await r.zrangebyscore(user_key, now, "+inf")
     return [m.decode() if isinstance(m, bytes) else m for m in members]
 
 
@@ -529,6 +546,7 @@ async def revoke_all_user_sessions(user_id: int) -> int:
     r = get_async_redis_client()
     if not r:
         return 0
+    user_key = await _ensure_user_sessions_index(r, user_id)
     active_ids = await _get_active_session_ids(user_id)
     if not active_ids:
         return 0
@@ -538,7 +556,7 @@ async def revoke_all_user_sessions(user_id: int) -> int:
         for key in session_keys:
             await pipe.delete(key)
         # Remove all members from the sorted set and delete the set
-        await pipe.delete(_user_sessions_key(user_id))
+        await pipe.delete(user_key)
         await pipe.execute()
 
     for sid in active_ids:

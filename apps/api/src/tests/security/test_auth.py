@@ -31,6 +31,7 @@ from src.security.keys import get_private_key, get_public_key, reload_key_cache
 from config.config import reload_platform_config_cache
 from src.services.auth.sessions import (
     SessionData,
+    create_auth_session,
     hash_refresh_token,
     inspect_refresh_session,
 )
@@ -298,6 +299,52 @@ class TestRefreshSessionInspection:
         assert inspection.session_id == "sess_old"
         assert inspection.token_family_id == "fam_123"
         assert inspection.user_id == 10
+
+
+class TestAuthSessionRedisIndexRepair:
+    @pytest.mark.asyncio
+    async def test_create_auth_session_repairs_legacy_user_session_key(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        pipe = AsyncMock()
+        pipe.__aenter__.return_value = pipe
+        pipe.__aexit__.return_value = None
+        pipe.set.return_value = None
+        pipe.zadd.return_value = None
+        pipe.zremrangebyscore.return_value = None
+        pipe.expireat.return_value = None
+        pipe.execute.return_value = [True, True, True, True]
+
+        redis = Mock()
+        redis.type = AsyncMock(side_effect=["string", "none"])
+        redis.delete = AsyncMock(return_value=1)
+        redis.zrangebyscore = AsyncMock(return_value=[])
+        redis.pipeline.return_value = pipe
+
+        user = Mock()
+        user.id = 42
+        user.user_uuid = "user_123"
+
+        monkeypatch.setattr(
+            "src.services.auth.sessions.get_async_redis_client",
+            lambda: redis,
+        )
+        monkeypatch.setattr(
+            "src.services.auth.sessions._fire_audit_create",
+            lambda _data: None,
+        )
+
+        session_data, refresh_token = await create_auth_session(
+            user=user,
+            ip_address="127.0.0.1",
+            user_agent="pytest",
+        )
+
+        assert session_data.user_id == 42
+        assert refresh_token.startswith(session_data.session_id + ".")
+        redis.delete.assert_awaited_once_with("user_sessions:42")
+        redis.zrangebyscore.assert_awaited_once_with("user_sessions:42", pytest.approx(session_data.created_at, abs=5), "+inf")
 
 
 class TestAuthCookies:
