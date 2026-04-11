@@ -15,7 +15,7 @@ from typing import Annotated, Any
 from fastapi import APIRouter, Body, Depends, HTTPException, Query
 from sqlmodel import Session
 
-from src.core.events.database import get_db_session
+from src.infra.db.session import get_db_session
 from src.db.gamification import (
     DashboardRead,
     GamificationProfile,

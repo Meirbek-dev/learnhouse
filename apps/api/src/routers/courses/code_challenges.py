@@ -14,7 +14,7 @@ from pydantic import ValidationError, field_validator
 from sqlmodel import Session, func, select
 from ulid import ULID
 
-from src.core.events.database import get_db_session
+from src.infra.db.session import get_db_session
 from src.db.courses.activities import (
     Activity,
     ActivityCreate,
@@ -393,9 +393,9 @@ async def process_submission(
     settings: CodeChallengeSettings,
 ):
     """Background task to process a submission"""
-    from src.core.events.database import get_db_session_sync
+    from src.infra.db.session import open_db_session
 
-    db_session = get_db_session_sync()
+    db_session = open_db_session()
 
     try:
         submission = db_session.get(CodeSubmission, submission_id)
@@ -452,7 +452,7 @@ async def process_submission(
 
         # Award XP if challenge completed
         if passed_tests == len(test_cases) and len(test_cases) > 0:
-            await award_challenge_xp(submission, db_session)
+            award_challenge_xp(submission, db_session)
 
         logger.info(f"Submission {submission_id} completed with score {score}")
 
@@ -478,7 +478,7 @@ async def process_submission(
         db_session.close()
 
 
-async def award_challenge_xp(submission: CodeSubmission, db_session: Session):
+def award_challenge_xp(submission: CodeSubmission, db_session: Session):
     """Award XP for completing a code challenge"""
     try:
         from src.db.gamification import XPSource

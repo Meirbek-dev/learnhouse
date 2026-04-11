@@ -14,7 +14,7 @@ from fastapi import APIRouter, Depends, Query
 from fastapi.responses import StreamingResponse
 from sqlmodel import Session
 
-from src.core.events.database import get_db_session
+from src.infra.db.session import get_db_session
 from src.db.grading.schemas import BatchGradeRequest, BatchGradeResponse
 from src.db.grading.submissions import (
     SubmissionListResponse,

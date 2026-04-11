@@ -37,7 +37,7 @@ def install_create_platform(platform_object: PlatformCreate, db_session: Session
     return platform_record
 
 
-async def install_create_platform_user(user_object: UserCreate, db_session: Session):
+def install_create_platform_user(user_object: UserCreate, db_session: Session):
     user = User.model_validate(user_object)
 
     # Complete the user object

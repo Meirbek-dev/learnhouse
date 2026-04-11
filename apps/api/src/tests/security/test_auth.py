@@ -251,6 +251,10 @@ class TestAuth:
                 "src.security.auth.is_jti_blocklisted",
                 new=AsyncMock(return_value=False),
             ),
+            patch(
+                "src.security.auth._is_roles_stale",
+                new=AsyncMock(return_value=False),
+            ),
             patch("src.security.auth._get_user_by_uuid", return_value=user),
         ):
             result = await get_current_user_from_token(

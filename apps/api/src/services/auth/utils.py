@@ -79,5 +79,5 @@ async def find_or_create_google_user(
 
         return user_read
 
-    await ensure_user_has_default_role(db_session, user.id)
+    ensure_user_has_default_role(db_session, user.id)
     return UserRead.model_validate(user)

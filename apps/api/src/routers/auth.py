@@ -17,7 +17,7 @@ from fastapi.responses import JSONResponse, RedirectResponse
 from sqlmodel import Session, select
 
 from config.config import get_settings
-from src.core.events.database import get_db_session
+from src.infra.db.session import get_db_session
 from src.db.permission_enums import RoleSlug
 from src.db.strict_base_model import PydanticStrictBaseModel
 from src.db.users import AnonymousUser, PublicUser, User, UserSession
@@ -303,7 +303,7 @@ async def login(
             status_code=423, detail="Account temporarily locked. Try again later."
         )
 
-    user = await security_get_user(request, db_session, body.email)
+    user = security_get_user(request, db_session, body.email)
     if not user or not security_verify_password(body.password, user.password):
         await record_login_failure(body.email)
         enqueue_audit_event(
@@ -348,7 +348,7 @@ async def login(
     logger.info("Login success user=%s ip=%s", user.email, ip)
 
     user_pub = PublicUser.model_validate(user)
-    return await get_user_session(request, db_session, user_pub)
+    return get_user_session(request, db_session, user_pub)
 
 
 @router.post("/refresh", response_model=TokensResponse)
@@ -550,7 +550,7 @@ async def get_me(
     that need the full user profile (bio, details, theme, role objects, etc.).
     The frontend calls this once on app load and caches the result.
     """
-    return await get_user_session(request, db_session, current_user)
+    return get_user_session(request, db_session, current_user)
 
 
 @router.get("/sessions")

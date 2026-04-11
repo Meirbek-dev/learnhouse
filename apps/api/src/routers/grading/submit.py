@@ -14,7 +14,7 @@ from fastapi import status as http_status
 from sqlalchemy import desc
 from sqlmodel import Session, select
 
-from src.core.events.database import get_db_session
+from src.infra.db.session import get_db_session
 from src.db.grading.submissions import AssessmentType, Submission, SubmissionRead
 from src.db.users import PublicUser
 from src.security.auth import get_current_user

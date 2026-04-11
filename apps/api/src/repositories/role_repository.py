@@ -14,7 +14,7 @@ from fastapi import Depends, HTTPException
 from sqlalchemy import func
 from sqlmodel import Session, select
 
-from src.core.events.database import get_db_session
+from src.infra.db.session import get_db_session
 from src.db.permissions import (
     Permission,
     Role,

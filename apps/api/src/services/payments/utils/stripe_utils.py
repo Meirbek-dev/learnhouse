@@ -10,7 +10,7 @@ from src.db.users import User
 logger = logging.getLogger(__name__)
 
 
-async def get_user_from_customer(customer_id: str, db_session: Session) -> User:
+def get_user_from_customer(customer_id: str, db_session: Session) -> User:
     """Helper function to get user from Stripe customer ID"""
     try:
         customer = stripe.Customer.retrieve(customer_id)
@@ -28,7 +28,7 @@ async def get_user_from_customer(customer_id: str, db_session: Session) -> User:
         )
 
 
-async def get_product_from_stripe_id(
+def get_product_from_stripe_id(
     product_id: str, db_session: Session
 ) -> PaymentsProduct:
     """Helper function to get product from Stripe product ID"""

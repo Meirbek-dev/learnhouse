@@ -234,7 +234,7 @@ async def _get_active_session_ids(user_id: int) -> list[str]:
 def _audit_create_sync(session_data_dict: dict) -> None:
     """Write a session-created audit record using its own short-lived DB session."""
     try:
-        from src.core.events.database import get_database_engine
+        from src.infra.db.engine import get_database_engine
 
         engine = get_database_engine()
         with Session(engine) as db:
@@ -261,7 +261,7 @@ def _audit_create_sync(session_data_dict: dict) -> None:
 def _audit_revoke_sync(session_id: str) -> None:
     """Mark a session as revoked using its own short-lived DB session."""
     try:
-        from src.core.events.database import get_database_engine
+        from src.infra.db.engine import get_database_engine
 
         engine = get_database_engine()
         with Session(engine) as db:
@@ -281,7 +281,7 @@ def _audit_rotate_sync(
 ) -> None:
     """Mark old session as rotated and create new session record, in one DB session."""
     try:
-        from src.core.events.database import get_database_engine
+        from src.infra.db.engine import get_database_engine
 
         engine = get_database_engine()
         with Session(engine) as db:

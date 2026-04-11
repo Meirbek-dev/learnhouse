@@ -3,7 +3,7 @@ from typing import Annotated, Literal
 from fastapi import APIRouter, Depends, Query, Request
 from sqlmodel import Session
 
-from src.core.events.database import get_db_session
+from src.infra.db.session import get_db_session
 from src.db.courses.courses import CourseRead
 from src.db.payments.payments import (
     PaymentsConfig,

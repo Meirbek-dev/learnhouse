@@ -8,8 +8,7 @@ from sqlmodel import Session
 from src.services.users.users import get_user_session
 
 
-@pytest.mark.asyncio
-async def test_get_user_session_includes_access_expiry_and_session_version(
+def test_get_user_session_includes_access_expiry_and_session_version(
     monkeypatch: pytest.MonkeyPatch,
 ):
     request = Mock(spec=Request)
@@ -36,7 +35,7 @@ async def test_get_user_session_includes_access_expiry_and_session_version(
     checker.get_user_roles.return_value = []
     checker.get_expanded_permissions.return_value = {"course:create:platform"}
 
-    async def fake_get_user(_db_session, _field, _value, use_cache: bool = True):
+    def fake_get_user(_db_session, _field, _value, use_cache: bool = True):
         return user
 
     monkeypatch.setattr("src.services.users.users._get_user_by_field", fake_get_user)
@@ -54,7 +53,7 @@ async def test_get_user_session_includes_access_expiry_and_session_version(
         ),
     )
 
-    session = await get_user_session(request, db_session, current_user)
+    session = get_user_session(request, db_session, current_user)
 
     assert session.user.user_uuid == "user_123"
     assert session.permissions == ["course:create:platform"]

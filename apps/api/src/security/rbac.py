@@ -17,7 +17,7 @@ from typing import Annotated
 from fastapi import Depends, HTTPException, Request, status
 from sqlmodel import Session, select
 
-from src.core.events.database import get_db_session
+from src.infra.db.session import get_db_session
 
 logger = logging.getLogger(__name__)
 

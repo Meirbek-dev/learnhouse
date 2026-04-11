@@ -68,7 +68,7 @@ def _audit_background_task(
     lifetime is scoped to this function and closed immediately after the write.
     """
     try:
-        from src.core.events.database import get_database_engine
+        from src.infra.db.engine import get_database_engine
 
         engine = get_database_engine()
         with Session(engine) as session:

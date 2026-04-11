@@ -10,7 +10,7 @@ from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlmodel import Session, select
 
-from src.core.events.database import get_db_session
+from src.infra.db.session import get_db_session
 from src.db.strict_base_model import PydanticStrictBaseModel
 from src.db.users import AnonymousUser, PublicUser, User, UserRead
 from src.security.auth_cookies import ACCESS_COOKIE_KEY
@@ -329,7 +329,7 @@ async def authenticate_user(
         security_verify_password as verify,
     )
 
-    user = await security_get_user(request, db_session, email)
+    user = security_get_user(request, db_session, email)
     if not user:
         return None
     if not verify(password, user.password):

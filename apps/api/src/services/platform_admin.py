@@ -57,7 +57,7 @@ async def upload_platform_landing_content(file: UploadFile) -> str:
     )
 
 
-async def update_platform(
+def update_platform(
     request: Request,
     platform_object: PlatformUpdate,
     current_user: PublicUser | AnonymousUser,
@@ -128,7 +128,7 @@ async def update_platform_preview(
     return {"name_in_disk": filename}
 
 
-async def update_platform_landing(
+def update_platform_landing(
     request: Request,
     landing_object: dict,
     current_user: PublicUser | AnonymousUser,

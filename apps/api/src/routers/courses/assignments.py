@@ -2,7 +2,7 @@ from typing import Annotated
 
 from fastapi import APIRouter, Body, Depends, Request, UploadFile
 
-from src.core.events.database import get_db_session
+from src.infra.db.session import get_db_session
 from src.db.courses.assignments import (
     AssignmentCreate,
     AssignmentCreateWithActivity,

@@ -13,10 +13,7 @@ interface RootProvidersProps {
   initialSession?: Session | null;
 }
 
-export default function RootProviders({
-  children,
-  initialSession,
-}: RootProvidersProps) {
+function ThemedRootChrome({ children }: { children: ReactNode }) {
   const { theme: currentTheme } = useTheme();
 
   const topLoaderProps = {
@@ -32,12 +29,23 @@ export default function RootProviders({
   };
 
   return (
+    <>
+      <NextTopLoader {...topLoaderProps} />
+      {children}
+      <Toaster />
+    </>
+  );
+}
+
+export default function RootProviders({
+  children,
+  initialSession,
+}: RootProvidersProps) {
+  return (
     <ReactQueryProvider>
       <SessionProvider initialSession={initialSession}>
         <ThemeProvider>
-          <NextTopLoader {...topLoaderProps} />
-          {children}
-          <Toaster />
+          <ThemedRootChrome>{children}</ThemedRootChrome>
         </ThemeProvider>
       </SessionProvider>
     </ReactQueryProvider>

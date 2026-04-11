@@ -1,5 +1,4 @@
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING
 
 import uuid as uuid_lib
 from pydantic import ConfigDict, EmailStr
@@ -128,9 +127,3 @@ class User(UserBase, table=True):
             onupdate=func.now(),
         ),
     )
-
-
-def rebuild_user_models() -> None:
-    """Rebuild user models to resolve forward references"""
-    UserSessionRole.model_rebuild()
-    UserSession.model_rebuild()

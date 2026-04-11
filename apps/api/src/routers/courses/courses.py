@@ -4,7 +4,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, Form, Request, Response, UploadFile
 from sqlmodel import Session
 
-from src.core.events.database import get_db_session
+from src.infra.db.session import get_db_session
 from src.db.courses.course_updates import (
     CourseUpdateCreate,
     CourseUpdateRead,

@@ -38,7 +38,7 @@ def _caller_max_priority(checker: PermissionChecker, user_id: int) -> int:
 
 
 @router.get("/permissions/all", response_model=list[PermissionRead])
-async def list_all_permissions(
+def list_all_permissions(
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     checker: PermissionCheckerDep,
     repo: RoleRepositoryDep,
@@ -49,7 +49,7 @@ async def list_all_permissions(
 
 
 @router.get("", response_model=list[RoleRead])
-async def list_roles(
+def list_roles(
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     checker: PermissionCheckerDep,
     repo: RoleRepositoryDep,
@@ -71,7 +71,7 @@ async def list_roles(
 
 
 @router.get("/audit-log", response_model=RoleAuditListResponse)
-async def get_role_audit_log(
+def get_role_audit_log(
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     checker: PermissionCheckerDep,
     page: Annotated[int, Query(ge=1)] = 1,
@@ -90,7 +90,7 @@ async def get_role_audit_log(
 
 
 @router.get("/{role_id}", response_model=RoleRead)
-async def get_role(
+def get_role(
     role_id: int,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     checker: PermissionCheckerDep,
@@ -109,7 +109,7 @@ async def get_role(
 
 
 @router.post("", response_model=RoleRead)
-async def create_role(
+def create_role(
     body: RoleCreate,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     checker: PermissionCheckerDep,
@@ -136,7 +136,7 @@ async def create_role(
 
 
 @router.put("/{role_id}", response_model=RoleRead)
-async def update_role(
+def update_role(
     role_id: int,
     body: RoleUpdate,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
@@ -176,7 +176,7 @@ async def update_role(
 
 
 @router.delete("/{role_id}")
-async def delete_role(
+def delete_role(
     role_id: int,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     checker: PermissionCheckerDep,
@@ -207,7 +207,7 @@ async def delete_role(
 
 
 @router.get("/{role_id}/users/count")
-async def get_role_users_count(
+def get_role_users_count(
     role_id: int,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     checker: PermissionCheckerDep,
@@ -222,7 +222,7 @@ async def get_role_users_count(
 
 
 @router.get("/{role_id}/permissions", response_model=list[PermissionRead])
-async def get_role_permissions(
+def get_role_permissions(
     role_id: int,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     checker: PermissionCheckerDep,
@@ -237,7 +237,7 @@ async def get_role_permissions(
 
 
 @router.post("/{role_id}/permissions")
-async def add_permission_to_role(
+def add_permission_to_role(
     role_id: int,
     body: AddPermissionBody,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
@@ -279,7 +279,7 @@ async def add_permission_to_role(
 
 
 @router.delete("/{role_id}/permissions/{permission_id}")
-async def remove_permission_from_role(
+def remove_permission_from_role(
     role_id: int,
     permission_id: int,
     current_user: Annotated[PublicUser, Depends(get_current_user)],

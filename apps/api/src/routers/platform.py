@@ -3,7 +3,7 @@ from typing import Annotated, Any
 from fastapi import APIRouter, Depends, Request, UploadFile
 from sqlmodel import Session
 
-from src.core.events.database import get_db_session
+from src.infra.db.session import get_db_session
 from src.db.platform import (
     PaginatedPlatformUsers,
     PlatformRead,
@@ -45,7 +45,7 @@ class PlatformLandingUploadResponse(PydanticStrictBaseModel):
 
 
 @router.get("/platform")
-async def api_get_platform(
+def api_get_platform(
     db_session: Annotated[Session, Depends(get_db_session)],
 ) -> PlatformRead:
     """
@@ -60,7 +60,7 @@ async def api_get_platform(
 
 
 @router.get("/members")
-async def api_get_platform_users(
+def api_get_platform_users(
     request: Request,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session: Annotated[Session, Depends(get_db_session)],
@@ -68,7 +68,7 @@ async def api_get_platform_users(
     page: int = 1,
     per_page: int = 20,
 ) -> PaginatedPlatformUsers:
-    return await get_platform_users(
+    return get_platform_users(
         request,
         db_session,
         current_user,
@@ -82,7 +82,7 @@ async def api_get_platform_users(
     "/members/{user_id}/role/{role_id}",
     response_model=PlatformDetailResponse,
 )
-async def api_update_platform_user_role(
+def api_update_platform_user_role(
     request: Request,
     user_id: int,
     role_id: int,
@@ -97,7 +97,7 @@ async def api_update_platform_user_role(
 
     **Required Permission**: `platform:update`
     """
-    return await update_platform_user_role(
+    return update_platform_user_role(
         request,
         user_id,
         role_id,
@@ -108,7 +108,7 @@ async def api_update_platform_user_role(
 
 
 @router.delete("/members/{user_id}", response_model=PlatformDetailResponse)
-async def api_remove_user_from_platform(
+def api_remove_user_from_platform(
     request: Request,
     user_id: int,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
@@ -118,7 +118,7 @@ async def api_remove_user_from_platform(
     """
     Remove a user from the platform.
     """
-    return await remove_platform_user(
+    return remove_platform_user(
         request,
         user_id,
         db_session,
@@ -194,7 +194,7 @@ async def api_update_platform_preview(
 
 
 @router.put("/platform")
-async def api_update_platform(
+def api_update_platform(
     request: Request,
     platform_object: PlatformUpdate,
     current_user: Annotated[PublicUser, Depends(get_current_user)],
@@ -207,11 +207,11 @@ async def api_update_platform(
     **Required Permission**: `platform:update`
     """
     checker.require(current_user.id, "platform:update")
-    return await update_platform(request, platform_object, current_user, db_session)
+    return update_platform(request, platform_object, current_user, db_session)
 
 
 @router.put("/landing", response_model=PlatformDetailResponse)
-async def api_update_platform_landing(
+def api_update_platform_landing(
     request: Request,
     landing_object: dict[str, Any],
     current_user: Annotated[PublicUser, Depends(get_current_user)],
@@ -224,7 +224,7 @@ async def api_update_platform_landing(
     **Required Permission**: `platform:update`
     """
     checker.require(current_user.id, "platform:update")
-    return await update_platform_landing(
+    return update_platform_landing(
         request, landing_object, current_user, db_session
     )
 

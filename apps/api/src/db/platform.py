@@ -1,14 +1,10 @@
-from typing import TYPE_CHECKING
-
 from pydantic import ConfigDict
 from sqlalchemy import JSON, Column
 from sqlmodel import Field
 
 from src.db.permissions import RoleRead
 from src.db.strict_base_model import PydanticStrictBaseModel, SQLModelStrictBaseModel
-
-if TYPE_CHECKING:
-    from src.db.users import UserRead
+from src.db.users import UserRead
 
 
 class PlatformBase(SQLModelStrictBaseModel):
@@ -67,7 +63,7 @@ class PlatformUser(PydanticStrictBaseModel):
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
-    user: "UserRead"  # noqa: UP037
+    user: UserRead
     role: RoleRead
 
 
@@ -81,10 +77,3 @@ class PaginatedPlatformUsers(PydanticStrictBaseModel):
     page: int
     per_page: int
     total_pages: int
-
-
-def rebuild_platform_models() -> None:
-    """Rebuild platform models to resolve forward references."""
-    from src.db.users import UserRead
-
-    PlatformUser.model_rebuild()

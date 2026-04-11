@@ -1,14 +1,27 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
-from sqlmodel import Session
+from fastapi import APIRouter
+from fastapi.responses import JSONResponse
 
-from src.core.events.database import get_db_session
-from src.services.health.health import check_health
+from src.infra.health import get_liveness_status, get_readiness_status
 
 router = APIRouter()
 
 
 @router.get("")
-async def health(db_session: Annotated[Session, Depends(get_db_session)]):
-    return await check_health(db_session)
+def health() -> JSONResponse:
+    payload = get_readiness_status()
+    status_code = 200 if payload["status"] == "ready" else 503
+    return JSONResponse(status_code=status_code, content=payload)
+
+
+@router.get("/live")
+def health_live() -> dict[str, object]:
+    return get_liveness_status()
+
+
+@router.get("/ready")
+def health_ready() -> JSONResponse:
+    payload = get_readiness_status()
+    status_code = 200 if payload["status"] == "ready" else 503
+    return JSONResponse(status_code=status_code, content=payload)
