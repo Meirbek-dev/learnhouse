@@ -1,69 +1,18 @@
 'use client';
 
 import { ActivityAIChatProvider } from '@components/Contexts/AI/ActivityAIChatContext';
-import MathEquationBlock from './Extensions/MathEquation/MathEquationBlock';
-import WarningCallout from './Extensions/Callout/Warning/WarningCallout';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
-import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
 import DividerVerticalIcon from '@components/svg/DividerVerticalIcon';
 import ToolTip from '@/components/Objects/Elements/Tooltip/Tooltip';
 import { CourseProvider } from '@components/Contexts/CourseContext';
-import EmbedObjects from './Extensions/EmbedObjects/EmbedObjects';
-import InfoCallout from './Extensions/Callout/Info/InfoCallout';
 import platformLogoLight from '@public/platform_logo_light.svg';
-import WebPreview from './Extensions/WebPreview/WebPreview';
 import { ToolbarButtons } from './Toolbar/ToolbarButtons';
-import Scenarios from './Extensions/Scenarios/Scenarios';
-import TableHeader from '@tiptap/extension-table-header';
 import { EditorContent, useEditor } from '@tiptap/react';
-import ts from 'highlight.js/lib/languages/typescript';
-import js from 'highlight.js/lib/languages/javascript';
-import python from 'highlight.js/lib/languages/python';
-import VideoBlock from './Extensions/Video/VideoBlock';
-import ImageBlock from './Extensions/Image/ImageBlock';
-import Flipcard from './Extensions/Flipcard/Flipcard';
-import TableCell from '@tiptap/extension-table-cell';
-import UserBlock from './Extensions/Users/UserBlock';
 import platformLogo from '@public/platform_logo.svg';
-// Extensions
-import QuizBlock from './Extensions/Quiz/QuizBlock';
-import java from 'highlight.js/lib/languages/java';
-import Buttons from './Extensions/Buttons/Buttons';
-import TableRow from '@tiptap/extension-table-row';
 import AIEditorToolkit from './AI/AIEditorToolkit';
-import html from 'highlight.js/lib/languages/xml';
-import { common, createLowlight } from 'lowlight';
-import css from 'highlight.js/lib/languages/css';
-import PDFBlock from './Extensions/PDF/PDFBlock';
 import { useIsMobile } from '@/hooks/use-mobile';
-import Badges from './Extensions/Badges/Badges';
-import Youtube from '@tiptap/extension-youtube';
-import { Table } from '@tiptap/extension-table';
-import { getLinkExtension } from './EditorConf';
-import StarterKit from '@tiptap/starter-kit';
 import { Eye, Monitor } from 'lucide-react';
-
-// Initialize lowlight once at module load
-const LOWLIGHT = (() => {
-  const lowlight = createLowlight(common);
-  lowlight.register('html', html);
-  lowlight.register('css', css);
-  lowlight.register('js', js);
-  lowlight.register('ts', ts);
-  lowlight.register('python', python);
-  lowlight.register('java', java);
-  return lowlight;
-})();
-
-// Editor extensions static configuration
-const EDITOR_EXTENSIONS = [
-  StarterKit.configure({
-    codeBlock: false,
-    bulletList: { HTMLAttributes: { class: 'bullet-list' } },
-    orderedList: { HTMLAttributes: { class: 'ordered-list' } },
-  }),
-  // other extensions can be added here if needed
-];
+import { createAuthoringEditorExtensions, normalizeTiptapJsonContent } from '@components/Objects/Editor/core';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
 import styles from './Editor.module.css';
@@ -75,7 +24,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 
 interface EditorProps {
-  content: string | object;
+  content: unknown;
   activity: any;
   course: any;
   platform: any;
@@ -91,50 +40,12 @@ const Editor = (props: EditorProps) => {
 
   const courseUuid = props.course.course_uuid.slice(7);
   const activityUuid = props.activity.activity_uuid.slice(9);
+  const extensions = createAuthoringEditorExtensions(props.activity);
 
-  const lowlightConfig = LOWLIGHT;
-  const extensions = [
-    ...EDITOR_EXTENSIONS,
-    InfoCallout.configure({ editable: true }),
-    WarningCallout.configure({ editable: true }),
-    ImageBlock.configure({ editable: true, activity: props.activity }),
-    VideoBlock.configure({ editable: true, activity: props.activity }),
-    MathEquationBlock.configure({ editable: true, activity: props.activity }),
-    PDFBlock.configure({ editable: true, activity: props.activity }),
-    QuizBlock.configure({ editable: true, activity: props.activity }),
-    Youtube.configure({ controls: true, modestBranding: true }),
-    CodeBlockLowlight.configure({ lowlight: lowlightConfig }),
-    EmbedObjects.configure({ editable: true, activity: props.activity }),
-    Badges.configure({ editable: true, activity: props.activity }),
-    Buttons.configure({ editable: true, activity: props.activity }),
-    UserBlock.configure({ editable: true, activity: props.activity }),
-    Table.configure({ resizable: true }),
-    TableRow,
-    TableHeader,
-    TableCell,
-    getLinkExtension(),
-    WebPreview.configure({ editable: true, activity: props.activity }),
-    Flipcard.configure({ editable: true, activity: props.activity }),
-    Scenarios.configure({ editable: true, activity: props.activity }),
-  ];
-
-  const EMPTY_DOC = { type: 'doc', content: [{ type: 'paragraph' }] };
-
-  function isValidEditorContent(content: any) {
-    if (!content) return false;
-    if (typeof content === 'string') return true;
-    if (typeof content !== 'object') return false;
-    if (content.type === 'doc') return true;
-    if (Array.isArray(content.content)) return true;
-    return false;
-  }
-
-  const initialContent = isValidEditorContent(props.content) ? props.content : EMPTY_DOC;
-
-  const editor: any = useEditor({
+  const editor = useEditor({
     editable: true,
     extensions,
-    content: initialContent,
+    content: normalizeTiptapJsonContent(props.content),
     immediatelyRender: false,
     onUpdate: ({ editor: currentEditor }) => {
       props.onContentChange(currentEditor.getJSON());
@@ -314,12 +225,14 @@ const Editor = (props: EditorProps) => {
             exit={{ opacity: 0 }}
           >
             <div className={styles.editorContentWrapper}>
-              <AIEditorToolkit
-                activity={props.activity}
-                editor={editor}
-                isOpen={isAIOpen}
-                onClose={() => setIsAIOpen(false)}
-              />
+              {editor ? (
+                <AIEditorToolkit
+                  activity={props.activity}
+                  editor={editor}
+                  isOpen={isAIOpen}
+                  onClose={() => setIsAIOpen(false)}
+                />
+              ) : null}
               <EditorContent editor={editor} />
             </div>
           </motion.div>

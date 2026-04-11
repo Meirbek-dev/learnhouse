@@ -1,48 +1,20 @@
 import type { Editor } from '@tiptap/react';
 import { useEffect, useState } from 'react';
 import { Check } from 'lucide-react';
+import { extractHeadingOutline } from '@components/Objects/Editor/core';
 
 interface TableOfContentsProps {
   editor: Editor | null;
 }
 
-interface HeadingItem {
-  level: number;
-  text: string;
-  id: string;
-}
-
 const TableOfContents = ({ editor }: TableOfContentsProps) => {
-  const [headings, setHeadings] = useState<HeadingItem[]>([]);
+  const [headings, setHeadings] = useState<ReturnType<typeof extractHeadingOutline>>([]);
 
   useEffect(() => {
     if (!editor) return;
 
     const updateHeadings = () => {
-      const items: HeadingItem[] = [];
-      editor.state.doc.descendants((node) => {
-        if (node.type.name.startsWith('heading')) {
-          const level = node.attrs.level || 1;
-          const headingText = node.textContent || '';
-
-          // Create slug from heading text (same logic as CustomHeading in DynamicCanva)
-          const slug = headingText
-            .toLowerCase()
-            .trim()
-            .replaceAll(/[^\s\w-]/g, '') // Remove special characters
-            .replaceAll(/[\s_-]+/g, '-') // Replace spaces and underscores with hyphens
-            .replaceAll(/^-+|-+$/g, ''); // Remove leading/trailing hyphens
-
-          const id = slug ? `heading-${slug}` : `heading-${Math.random().toString(36).slice(2, 9)}`;
-
-          items.push({
-            level,
-            text: node.textContent,
-            id,
-          });
-        }
-      });
-      setHeadings(items);
+      setHeadings(extractHeadingOutline(editor.state.doc));
     };
 
     editor.on('update', updateHeadings);

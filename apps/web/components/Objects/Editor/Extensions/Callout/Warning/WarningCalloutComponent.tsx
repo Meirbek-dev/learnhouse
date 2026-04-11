@@ -3,6 +3,7 @@ import { NodeViewContent, NodeViewWrapper } from '@tiptap/react';
 import { AlertTriangle, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
+import type { TypedNodeViewProps } from '@components/Objects/Editor/core';
 
 interface CalloutOptions {
   dismissible?: boolean;
@@ -10,7 +11,9 @@ interface CalloutOptions {
   size?: 'sm' | 'md' | 'lg';
 }
 
-const WarningCalloutComponent = (props: any) => {
+type WarningCalloutAttrs = CalloutOptions;
+
+const WarningCalloutComponent = (props: TypedNodeViewProps<WarningCalloutAttrs>) => {
   const editorState = useEditorProvider();
   const { isEditable } = editorState;
   const [dismissed, setDismissed] = useState(false);

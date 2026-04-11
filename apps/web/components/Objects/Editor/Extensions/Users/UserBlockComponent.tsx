@@ -30,6 +30,7 @@ import { Badge } from '@components/ui/badge';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
+import type { TypedNodeViewProps } from '@components/Objects/Editor/core';
 
 type UserData = components['schemas']['UserRead'];
 interface UserDetail {
@@ -60,7 +61,11 @@ const IconComponent = ({ iconName }: { iconName: string }) => {
   return <IconElement className="h-4 w-4 text-gray-600" />;
 };
 
-const UserBlockComponent = (props: any) => {
+interface UserNodeAttrs {
+  user_id: string | number | null;
+}
+
+const UserBlockComponent = (props: TypedNodeViewProps<UserNodeAttrs>) => {
   const t = useTranslations('DashPage.Editor.UserBlock');
   const editorState = useEditorProvider();
   const { isEditable } = editorState;

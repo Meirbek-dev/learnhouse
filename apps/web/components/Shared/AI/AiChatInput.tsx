@@ -82,7 +82,7 @@ export function AiChatInput({
           disabled={disabled || !value.trim()}
           aria-label="Send message"
           type="button"
-          className="h-9 w-9 shrink-0 text-zinc-500 hover:text-zinc-300 disabled:opacity-40"
+          className="h-9 w-9 shrink-0 text-zinc-500 hover:text-black disabled:opacity-40"
         >
           <Send className="h-4 w-4" />
         </Button>

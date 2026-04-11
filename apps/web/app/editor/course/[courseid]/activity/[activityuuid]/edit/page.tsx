@@ -37,7 +37,7 @@ const EditActivity = async (props: { params: Promise<{ courseid: string; activit
 
   return (
     <div className={jetBrainsMono.variable}>
-      <EditorOptionsProvider options={{ isEditable: true }}>
+      <EditorOptionsProvider options={{ isEditable: true, mode: 'authoring' }}>
         <EditorWrapper
           platform={platform}
           course={courseInfo}

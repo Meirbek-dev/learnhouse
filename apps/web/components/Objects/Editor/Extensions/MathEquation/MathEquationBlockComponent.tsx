@@ -10,6 +10,7 @@ import type { ChangeEvent } from 'react';
 import { renderToString } from 'katex';
 import { motion } from 'motion/react';
 import 'katex/dist/katex.min.css';
+import type { TypedNodeViewProps } from '@components/Objects/Editor/core';
 
 // Predefined LaTeX templates
 const mathTemplates = [
@@ -84,7 +85,11 @@ const mathSymbols = [
   { symbol: '\\approx', display: '≈' },
 ];
 
-const MathEquationBlockComponent = (props: any) => {
+interface MathEquationNodeAttrs {
+  math_equation: string;
+}
+
+const MathEquationBlockComponent = (props: TypedNodeViewProps<MathEquationNodeAttrs>) => {
   const t = useTranslations('DashPage.Editor.MathEquationBlock');
   const [equation, setEquation] = useState(props.node.attrs.math_equation);
   const [isEditing, _setIsEditing] = useState(true);

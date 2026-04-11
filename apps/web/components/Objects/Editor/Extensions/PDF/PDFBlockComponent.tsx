@@ -9,10 +9,27 @@ import { constructAcceptValue } from '@/lib/constants';
 import { NodeViewWrapper } from '@tiptap/react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
+import type { TypedNodeViewProps } from '@components/Objects/Editor/core';
 
 const SUPPORTED_FILES = constructAcceptValue(['pdf']);
 
-const PDFBlockComponent = (props: any) => {
+interface PdfBlockObject {
+  block_uuid: string;
+  content: {
+    file_id: string;
+    file_format: string;
+  };
+}
+
+interface PdfNodeAttrs {
+  blockObject: PdfBlockObject | null;
+}
+
+interface PdfExtensionOptions {
+  activity: { activity_uuid: string };
+}
+
+const PDFBlockComponent = (props: TypedNodeViewProps<PdfNodeAttrs, PdfExtensionOptions>) => {
   const t = useTranslations('DashPage.Editor.PDFBlock');
   const course = useCourse();
   const [pdf, setPDF] = useState(null);
@@ -40,7 +57,7 @@ const PDFBlockComponent = (props: any) => {
   };
 
   const handleDownload = () => {
-    if (!fileId) return;
+    if (!(fileId && blockObject)) return;
 
     const pdfUrl = getActivityBlockMediaDirectory({
       courseId: course?.courseStructure.course_uuid || '',

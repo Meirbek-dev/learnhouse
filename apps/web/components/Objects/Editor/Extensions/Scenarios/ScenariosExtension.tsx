@@ -5,6 +5,7 @@ import { NodeViewWrapper } from '@tiptap/react';
 import ScenariosModal from './ScenariosModal';
 import { useTranslations } from 'next-intl';
 import React, { useState } from 'react';
+import type { TypedNodeViewProps } from '@components/Objects/Editor/core';
 
 interface ScenarioOption {
   id: string;
@@ -19,7 +20,13 @@ interface Scenario {
   options: ScenarioOption[];
 }
 
-const ScenariosExtension: React.FC = (props: any) => {
+interface ScenarioNodeAttrs {
+  title: string;
+  scenarios: Scenario[];
+  currentScenarioId: string;
+}
+
+const ScenariosExtension: React.FC<TypedNodeViewProps<ScenarioNodeAttrs>> = (props) => {
   // use translations for any UI text or fallbacks
   const t = useTranslations('DashPage.Editor.Scenarios');
 

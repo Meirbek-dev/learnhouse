@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react';
 import { generateUUID } from '@/lib/utils';
 import { twMerge } from 'tailwind-merge';
 import confetti from 'canvas-confetti';
+import type { TypedNodeViewProps } from '@components/Objects/Editor/core';
 
 interface Answer {
   answer_id: string;
@@ -21,7 +22,11 @@ interface Question {
   answers: Answer[];
 }
 
-const QuizBlockComponent = (props: any) => {
+interface QuizNodeAttrs {
+  questions: Question[];
+}
+
+const QuizBlockComponent = (props: TypedNodeViewProps<QuizNodeAttrs>) => {
   const t = useTranslations('DashPage.Editor.QuizBlock');
   const [questions, setQuestions] = useState(props.node.attrs.questions) as [Question[], any];
   const [userAnswers, setUserAnswers] = useState([]) as [any[], any];

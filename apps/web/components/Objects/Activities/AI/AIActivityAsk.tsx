@@ -136,19 +136,19 @@ const ActivityChatPanel = () => {
             initial={{ y: 16, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 12, opacity: 0 }}
-            transition={{ duration: 0.18, ease: 'easeOut' }}
+            transition={{ duration: 0.18, ease: "easeOut" }}
             className={cn(
-              'fixed z-50 flex flex-col overflow-hidden',
-              'border border-zinc-700/60 bg-zinc-900 shadow-2xl',
-              'inset-x-0 bottom-0 rounded-t-2xl',
-              'h-[62dvh]',
+              "fixed z-50 flex flex-col overflow-hidden",
+              "border border-zinc-700/60 bg-zinc-900 shadow-2xl",
+              "inset-x-0 bottom-0 rounded-t-2xl",
+              "h-[62dvh]",
               // Definite height (not h-auto + max-h) so that the inner flex-1
               // messages container and ScrollArea h-full resolve correctly.
-              'md:bottom-4 md:left-1/2 md:h-[min(620px,85dvh)] md:min-h-[380px] md:w-[min(680px,95vw)] md:-translate-x-1/2 md:rounded-xl',
+              "md:bottom-4 md:left-1/2 md:h-[min(620px,85dvh)] md:min-h-[380px] md:w-[min(680px,95vw)] md:-translate-x-1/2 md:rounded-xl",
             )}
-            style={{ pointerEvents: 'auto' }}
+            style={{ pointerEvents: "auto" }}
             role="dialog"
-            aria-label={t('AI')}
+            aria-label={t("AI")}
             aria-modal="true"
           >
             {/* Mobile drag-handle pill */}
@@ -166,10 +166,14 @@ const ActivityChatPanel = () => {
                     width={20}
                     height={20}
                     src={platformLogoLight}
-                    alt={t('logoAlt')}
+                    alt={t("logoAlt")}
                   />
-                  <span className="text-sm font-semibold text-zinc-100">{t('AI')}</span>
-                  {isLoading && <Spinner className="h-3.5 w-3.5 text-zinc-400" />}
+                  <span className="text-sm font-semibold text-zinc-100">
+                    {t("AI")}
+                  </span>
+                  {isLoading && (
+                    <Spinner className="h-3.5 w-3.5 text-zinc-400" />
+                  )}
                 </div>
                 <div className="flex items-center gap-1">
                   {/* Stop button — shown while streaming so user can cancel */}
@@ -178,7 +182,7 @@ const ActivityChatPanel = () => {
                       variant="ghost"
                       size="icon"
                       onClick={stop}
-                      aria-label={t('stopGeneration')}
+                      aria-label={t("stopGeneration")}
                       className="h-7 w-7 text-zinc-500 hover:text-red-400"
                     >
                       <span className="flex h-3 w-3 items-center justify-center rounded-sm bg-current" />
@@ -188,8 +192,8 @@ const ActivityChatPanel = () => {
                     variant="ghost"
                     size="icon"
                     onClick={closePanel}
-                    aria-label={t('closePanel')}
-                    className="h-7 w-7 text-zinc-500 hover:text-zinc-300"
+                    aria-label={t("closePanel")}
+                    className="h-7 w-7 text-zinc-500 hover:text-black"
                   >
                     <X className="h-4 w-4" />
                   </Button>
@@ -197,7 +201,11 @@ const ActivityChatPanel = () => {
               </div>
 
               {/* Status hint */}
-              {statusMessage && <p className="mb-2 flex-shrink-0 text-xs text-zinc-500">{statusMessage}</p>}
+              {statusMessage && (
+                <p className="mb-2 flex-shrink-0 text-xs text-zinc-500">
+                  {statusMessage}
+                </p>
+              )}
 
               {/* Messages area */}
               <div className="mb-3 min-h-0 flex-1 overflow-hidden">
@@ -206,15 +214,16 @@ const ActivityChatPanel = () => {
                     <div className="space-y-3 pb-2">
                       {messages.map((message, index) => {
                         const text = message.parts
-                          .filter((p): p is TextPart => p.type === 'text')
+                          .filter((p): p is TextPart => p.type === "text")
                           .map((p) => p.content)
-                          .join('');
+                          .join("");
                         const isLast = index === messages.length - 1;
-                        const isStreamingThis = isLast && isLoading && message.role === 'assistant';
+                        const isStreamingThis =
+                          isLast && isLoading && message.role === "assistant";
                         return (
                           <AiMessageBubble
                             key={message.id ?? index}
-                            role={message.role as 'user' | 'assistant'}
+                            role={message.role as "user" | "assistant"}
                             content={text}
                             isStreaming={isStreamingThis}
                           />
@@ -249,7 +258,7 @@ const ActivityChatPanel = () => {
                   onSend={handleSend}
                   onStop={stop}
                   disabled={isLoading}
-                  placeholder={t('placeholder')}
+                  placeholder={t("placeholder")}
                   showAvatar
                 />
               </div>

@@ -25,14 +25,12 @@ import {
 import { SiYoutube } from '@icons-pack/react-simple-icons';
 import { useEffect, useState, useTransition } from 'react';
 import { EditorContent, useEditor } from '@tiptap/react';
-import Youtube from '@tiptap/extension-youtube';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import StarterKit from '@tiptap/starter-kit';
-import Image from '@tiptap/extension-image';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
+import { createDiscussionEditorExtensions } from '@components/Objects/Editor/core';
 
 interface RichTextEditorProps {
   content: string;
@@ -59,64 +57,7 @@ export default function RichTextEditor({
   const [isUploading, setIsUploading] = useState(false);
 
   const editor = useEditor({
-    extensions: [
-      StarterKit.configure({
-        bulletList: {
-          HTMLAttributes: {
-            class: 'list-disc list-outside ml-4 space-y-1',
-          },
-        },
-        orderedList: {
-          HTMLAttributes: {
-            class: 'list-decimal list-outside ml-4 space-y-1',
-          },
-        },
-        listItem: {
-          HTMLAttributes: {
-            class: 'ml-0',
-          },
-        },
-        heading: {
-          levels: [1, 2, 3, 4, 5, 6],
-          HTMLAttributes: {
-            class: 'font-semibold text-gray-900 mt-4 mb-2',
-          },
-        },
-        blockquote: {
-          HTMLAttributes: {
-            class: 'border-l-4 border-gray-300 pl-4 italic',
-          },
-        },
-        code: {
-          HTMLAttributes: {
-            class: 'bg-gray-100 px-1 py-0.5 rounded text-sm font-mono',
-          },
-        },
-        codeBlock: {
-          HTMLAttributes: {
-            class: 'bg-gray-100 p-3 rounded-md overflow-x-auto',
-          },
-        },
-        link: {
-          openOnClick: false,
-          HTMLAttributes: {
-            class: 'text-blue-600 hover:text-blue-800 underline',
-          },
-        },
-      }),
-      Image.configure({
-        HTMLAttributes: {
-          class: 'max-w-full h-auto rounded-lg',
-        },
-      }),
-      Youtube.configure({
-        controls: true,
-        modestBranding: true,
-        HTMLAttributes: {
-          class: 'w-full aspect-video rounded-lg',
-        },
-      }),
-    ],
+    extensions: createDiscussionEditorExtensions(),
     content,
     immediatelyRender: false,
     onUpdate: ({ editor }) => {

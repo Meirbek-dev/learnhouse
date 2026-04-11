@@ -31,6 +31,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { NodeViewWrapper } from '@tiptap/react';
 import { useTranslations } from 'next-intl';
 import DOMPurify from 'dompurify';
+import type { TypedNodeViewProps } from '@components/Objects/Editor/core';
 
 // ============================================================================
 // TYPES & CONSTANTS
@@ -50,6 +51,15 @@ interface SupportedProduct {
   icon: any;
   color: string;
   guide: string;
+}
+
+interface EmbedNodeAttrs {
+  embedUrl: string | null;
+  embedCode: string | null;
+  embedType: EmbedType | null;
+  embedHeight: number;
+  embedWidth: string;
+  alignment: Alignment;
 }
 
 const SCRIPT_BASED_EMBEDS: Record<string, ScriptEmbedConfig> = {
@@ -533,7 +543,7 @@ const EmptyState = ({
 // MAIN COMPONENT
 // ============================================================================
 
-const EmbedObjectsComponent = (props: any) => {
+const EmbedObjectsComponent = (props: TypedNodeViewProps<EmbedNodeAttrs>) => {
   const t = useTranslations('DashPage.Editor.EmbedObjects');
   const { updateAttributes } = props;
   const isMobile = useIsMobile();
