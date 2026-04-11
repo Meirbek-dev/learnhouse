@@ -23,7 +23,6 @@ import GeneralWrapper from '@/components/Objects/Elements/Wrappers/GeneralWrappe
 import ActivityIndicators from '@components/Pages/Courses/ActivityIndicators';
 import CourseBreadcrumbs from '@components/Pages/Courses/CourseBreadcrumbs';
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
-import { CourseProvider } from '@components/Contexts/CourseContext';
 import { useSession } from '@/hooks/useSession';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import { useQueryClient } from '@tanstack/react-query';
@@ -378,9 +377,10 @@ const CourseClient = (props: any) => {
                 {/* Authors & Updates Box */}
                 <Card className="p-0">
                   <CardContent className="p-4">
-                    <CourseProvider courseuuid={course.course_uuid}>
-                      <CourseAuthors authors={course.authors} />
-                    </CourseProvider>
+                    <CourseAuthors
+                      authors={course.authors}
+                      courseUuid={course.course_uuid}
+                    />
                   </CardContent>
                 </Card>
               </div>

@@ -17,7 +17,6 @@ import { getUserAvatarMediaDirectory } from '@services/media/media';
 import { queryKeys } from '@/lib/react-query/queryKeys';
 import { Actions, Resources, Scopes } from '@/types/permissions';
 import { useCourseUpdates } from '@/features/courses/hooks/useCourseQueries';
-import { useCourse } from '@components/Contexts/CourseContext';
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { useDateFnsLocale } from '@/hooks/useDateFnsLocale';
 import { useQueryClient } from '@tanstack/react-query';
@@ -54,6 +53,7 @@ interface Author {
 
 interface CourseAuthorsProps {
   authors: Author[];
+  courseUuid: string;
 }
 
 const MultipleAuthors = ({ authors, isMobile }: { authors: Author[]; isMobile: boolean }) => {
@@ -153,13 +153,12 @@ const MultipleAuthors = ({ authors, isMobile }: { authors: Author[]; isMobile: b
   );
 };
 
-const UpdatesSection = () => {
+const UpdatesSection = ({ courseUuid }: { courseUuid: string }) => {
   const [selectedView, setSelectedView] = useState('list');
   const { can } = useSession();
   const canManageCourse =
     can(Resources.COURSE, Actions.MANAGE, Scopes.OWN) || can(Resources.COURSE, Actions.MANAGE, Scopes.PLATFORM);
-  const course = useCourse();
-  const { data: updates } = useCourseUpdates(course?.courseStructure?.course_uuid);
+  const { data: updates } = useCourseUpdates(courseUuid);
   const t = useTranslations('Courses.CourseAuthors');
 
   return (
@@ -203,7 +202,14 @@ const UpdatesSection = () => {
         className="relative"
       >
         <div className="-mr-1 max-h-[300px] overflow-y-auto pr-1">
-          {selectedView === 'list' ? <UpdatesListView /> : <NewUpdateForm setSelectedView={setSelectedView} />}
+          {selectedView === 'list' ? (
+            <UpdatesListView courseUuid={courseUuid} />
+          ) : (
+            <NewUpdateForm
+              courseUuid={courseUuid}
+              setSelectedView={setSelectedView}
+            />
+          )}
         </div>
       </motion.div>
     </div>
@@ -219,8 +225,13 @@ const createUpdateFormSchema = (t: (key: string) => string) =>
 type UpdateFormValues = v.InferOutput<ReturnType<typeof createUpdateFormSchema>>;
 type UpdateFormInputValues = v.InferInput<ReturnType<typeof createUpdateFormSchema>>;
 
-const NewUpdateForm = ({ setSelectedView }: { setSelectedView: (view: string) => void }) => {
-  const course = useCourse();
+const NewUpdateForm = ({
+  courseUuid,
+  setSelectedView,
+}: {
+  courseUuid: string;
+  setSelectedView: (view: string) => void;
+}) => {
   const queryClient = useQueryClient();
   const t = useTranslations('Courses.CourseAuthors');
   const validationSchema = createUpdateFormSchema(t);
@@ -237,7 +248,7 @@ const NewUpdateForm = ({ setSelectedView }: { setSelectedView: (view: string) =>
     const body = {
       title: values.title,
       content: values.content,
-      course_uuid: course.courseStructure.course_uuid,
+      course_uuid: courseUuid,
     };
     const res = await createCourseUpdate(body);
     if (res.status === 200) {
@@ -245,7 +256,7 @@ const NewUpdateForm = ({ setSelectedView }: { setSelectedView: (view: string) =>
       setSelectedView('list');
       form.reset();
       void queryClient.invalidateQueries({
-        queryKey: getCourseUpdatesQueryKey(course?.courseStructure.course_uuid),
+        queryKey: getCourseUpdatesQueryKey(courseUuid),
       });
     } else {
       toast.error(t('updateAddFailed'));
@@ -309,12 +320,11 @@ const NewUpdateForm = ({ setSelectedView }: { setSelectedView: (view: string) =>
   );
 };
 
-const UpdatesListView = () => {
-  const course = useCourse();
+const UpdatesListView = ({ courseUuid }: { courseUuid: string }) => {
   const { can } = useSession();
   const canManageCourse =
     can(Resources.COURSE, Actions.MANAGE, Scopes.OWN) || can(Resources.COURSE, Actions.MANAGE, Scopes.PLATFORM);
-  const { data: updates } = useCourseUpdates(course?.courseStructure?.course_uuid);
+  const { data: updates } = useCourseUpdates(courseUuid);
   const t = useTranslations('Courses.CourseAuthors');
   const locale = useDateFnsLocale();
 
@@ -356,7 +366,10 @@ const UpdatesListView = () => {
             </div>
             {canManageCourse ? (
               <div className="ml-4 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                <DeleteUpdateButton update={update} />
+                <DeleteUpdateButton
+                  courseUuid={courseUuid}
+                  update={update}
+                />
               </div>
             ) : null}
           </div>
@@ -366,8 +379,7 @@ const UpdatesListView = () => {
   );
 };
 
-const DeleteUpdateButton = ({ update }: any) => {
-  const course = useCourse();
+const DeleteUpdateButton = ({ courseUuid, update }: { courseUuid: string; update: any }) => {
   const queryClient = useQueryClient();
   const t = useTranslations('Courses.CourseAuthors');
   const [isOpen, setIsOpen] = useState(false);
@@ -376,13 +388,13 @@ const DeleteUpdateButton = ({ update }: any) => {
   function handleDelete() {
     startTransition(async () => {
       const toast_loading = toast.loading(t('deletingUpdate'));
-      const res = await deleteCourseUpdate(course.courseStructure.course_uuid, update.courseupdate_uuid);
+      const res = await deleteCourseUpdate(courseUuid, update.courseupdate_uuid);
 
       if (res.status === 200) {
         toast.dismiss(toast_loading);
         toast.success(t('updateDeletedSuccess'));
         void queryClient.invalidateQueries({
-          queryKey: getCourseUpdatesQueryKey(course?.courseStructure.course_uuid),
+          queryKey: getCourseUpdatesQueryKey(courseUuid),
         });
         setIsOpen(false);
       } else {
@@ -449,7 +461,7 @@ const DeleteUpdateButton = ({ update }: any) => {
   );
 };
 
-const CourseAuthors = ({ authors }: CourseAuthorsProps) => {
+const CourseAuthors = ({ authors, courseUuid }: CourseAuthorsProps) => {
   const isMobile = useIsMobile();
 
   // Filter active authors and sort by role priority
@@ -473,7 +485,7 @@ const CourseAuthors = ({ authors }: CourseAuthorsProps) => {
         authors={sortedAuthors}
         isMobile={isMobile}
       />
-      <UpdatesSection />
+      <UpdatesSection courseUuid={courseUuid} />
     </div>
   );
 };
