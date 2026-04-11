@@ -5992,7 +5992,7 @@
             "type": "boolean"
           },
           "creation_date": {
-            "default": "2026-04-10T21:57:51.358223",
+            "default": "2026-04-11T17:23:01.681476",
             "format": "date-time",
             "title": "Creation Date",
             "type": "string"
@@ -6034,7 +6034,7 @@
             "title": "Provider Specific Id"
           },
           "update_date": {
-            "default": "2026-04-10T21:57:51.358269",
+            "default": "2026-04-11T17:23:01.681500",
             "format": "date-time",
             "title": "Update Date",
             "type": "string"
@@ -10701,19 +10701,6 @@
         "title": "ValidationError",
         "type": "object"
       },
-      "VerifyEmailRequest": {
-        "properties": {
-          "token": {
-            "title": "Token",
-            "type": "string"
-          }
-        },
-        "required": [
-          "token"
-        ],
-        "title": "VerifyEmailRequest",
-        "type": "object"
-      },
       "XPAwardRequest": {
         "description": "Request to award XP.",
         "properties": {
@@ -10868,7 +10855,13 @@
           "200": {
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "title": "Response Root  Get",
+                  "type": "object"
+                }
               }
             },
             "description": "Successful Response"
@@ -15369,31 +15362,6 @@
         ]
       }
     },
-    "/api/v1/auth/resend-verification": {
-      "post": {
-        "description": "Resend the verification email for the currently authenticated user.",
-        "operationId": "resend_verification_api_v1_auth_resend_verification_post",
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            },
-            "description": "Successful Response"
-          }
-        },
-        "security": [
-          {
-            "OAuth2PasswordBearer": []
-          }
-        ],
-        "summary": "Resend Verification",
-        "tags": [
-          "auth"
-        ]
-      }
-    },
     "/api/v1/auth/reset-password": {
       "post": {
         "operationId": "reset_password_api_v1_auth_reset_password_post",
@@ -15452,46 +15420,6 @@
           }
         ],
         "summary": "List Sessions",
-        "tags": [
-          "auth"
-        ]
-      }
-    },
-    "/api/v1/auth/verify-email": {
-      "post": {
-        "description": "Verify email using the token from the verification link.",
-        "operationId": "verify_email_api_v1_auth_verify_email_post",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/VerifyEmailRequest"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            },
-            "description": "Successful Response"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
-          }
-        },
-        "summary": "Verify Email",
         "tags": [
           "auth"
         ]
@@ -21312,6 +21240,48 @@
           }
         },
         "summary": "Health",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/api/v1/health/live": {
+      "get": {
+        "operationId": "health_live_api_v1_health_live_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Health Live Api V1 Health Live Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Health Live",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/api/v1/health/ready": {
+      "get": {
+        "operationId": "health_ready_api_v1_health_ready_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Health Ready",
         "tags": [
           "health"
         ]

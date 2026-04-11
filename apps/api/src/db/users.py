@@ -103,11 +103,6 @@ class User(UserBase, table=True):
     user_uuid: str = Field(
         default_factory=lambda: f"user_{uuid_lib.uuid4().hex[:26]}",
     )
-    email_verified: bool = False
-    email_verified_at: datetime | None = Field(
-        default=None,
-        sa_column=Column(DateTime(timezone=True), nullable=True),
-    )
     auth_provider: str = Field(default="local")
     google_sub: str | None = Field(default=None)
     created_at: datetime = Field(

@@ -562,52 +562,6 @@ async def list_sessions(
     return await get_user_active_sessions(user.id)
 
 
-# ── Email verification ────────────────────────────────────────────────────────
-
-
-class ResendVerificationRequest(PydanticStrictBaseModel):
-    email: str
-
-
-class VerifyEmailRequest(PydanticStrictBaseModel):
-    token: str
-
-
-@router.post("/verify-email")
-async def verify_email(
-    request: Request,
-    body: VerifyEmailRequest,
-    db_session: Annotated[Session, Depends(get_db_session)],
-):
-    """Verify email using the token from the verification link."""
-    from src.services.users.email_verification import verify_email_with_token
-
-    msg = await verify_email_with_token(db_session, body.token)
-    return {"msg": msg}
-
-
-@router.post("/resend-verification")
-async def resend_verification(
-    request: Request,
-    db_session: Annotated[Session, Depends(get_db_session)],
-    current_user: Annotated[PublicUser, Depends(get_current_user)],
-):
-    """Resend the verification email for the currently authenticated user."""
-    from src.services.users.email_verification import send_verification_email
-
-    user = db_session.exec(
-        select(User).where(User.user_uuid == current_user.user_uuid)
-    ).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-
-    if user.email_verified:
-        return {"msg": "Email already verified"}
-
-    msg = await send_verification_email(db_session, user)
-    return {"msg": msg}
-
-
 # ── Password reset ────────────────────────────────────────────────────────────
 
 

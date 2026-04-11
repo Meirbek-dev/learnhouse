@@ -77,26 +77,3 @@ def send_lockout_notification_email(email: str) -> None:
 </html>
 """,
     )
-
-
-def send_email_verification_email(
-    user: UserRead,
-    email: str,
-    verification_token: str,
-) -> None:
-    """Send an email verification link to the user."""
-    verify_link = f"{_get_public_web_origin()}/verify-email?token={verification_token}"
-    return send_email(
-        to=email,
-        subject=f"Verify your email — {PLATFORM_BRAND_NAME}",
-        body=f"""
-<html>
-    <body>
-        <p>Hello {user.username},</p>
-        <p>Please verify your email address by clicking the link below:</p>
-        <p><a href="{verify_link}">Verify Email</a></p>
-        <p>This link expires in 24 hours.</p>
-    </body>
-</html>
-""",
-    )

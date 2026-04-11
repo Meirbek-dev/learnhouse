@@ -70,10 +70,6 @@ async def find_or_create_google_user(
         if created_user:
             created_user.auth_provider = "google"
             created_user.google_sub = google_sub or None
-            created_user.email_verified = True
-            from datetime import UTC, datetime
-
-            created_user.email_verified_at = datetime.now(UTC)
             db_session.add(created_user)
             db_session.commit()
 

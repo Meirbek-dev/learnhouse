@@ -999,26 +999,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/auth/resend-verification": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Resend Verification
-         * @description Resend the verification email for the currently authenticated user.
-         */
-        post: operations["resend_verification_api_v1_auth_resend_verification_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/v1/auth/reset-password": {
         parameters: {
             query?: never;
@@ -1047,26 +1027,6 @@ export interface paths {
         get: operations["list_sessions_api_v1_auth_sessions_get"];
         put?: never;
         post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/v1/auth/verify-email": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Verify Email
-         * @description Verify email using the token from the verification link.
-         */
-        post: operations["verify_email_api_v1_auth_verify_email_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2919,6 +2879,40 @@ export interface paths {
         };
         /** Health */
         get: operations["health_api_v1_health_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/health/live": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Health Live */
+        get: operations["health_live_api_v1_health_live_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/health/ready": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Health Ready */
+        get: operations["health_ready_api_v1_health_ready_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -6761,7 +6755,7 @@ export interface components {
             /**
              * Creation Date
              * Format: date-time
-             * @default 2026-04-10T21:57:51.358223
+             * @default 2026-04-11T17:23:01.681476
              */
             creation_date: string;
             /**
@@ -6782,7 +6776,7 @@ export interface components {
             /**
              * Update Date
              * Format: date-time
-             * @default 2026-04-10T21:57:51.358269
+             * @default 2026-04-11T17:23:01.681500
              */
             update_date: string;
         };
@@ -8525,11 +8519,6 @@ export interface components {
             /** Error Type */
             type: string;
         };
-        /** VerifyEmailRequest */
-        VerifyEmailRequest: {
-            /** Token */
-            token: string;
-        };
         /**
          * XPAwardRequest
          * @description Request to award XP.
@@ -8599,7 +8588,9 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": unknown;
+                    "application/json": {
+                        [key: string]: string;
+                    };
                 };
             };
         };
@@ -10502,26 +10493,6 @@ export interface operations {
             };
         };
     };
-    resend_verification_api_v1_auth_resend_verification_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": unknown;
-                };
-            };
-        };
-    };
     reset_password_api_v1_auth_reset_password_post: {
         parameters: {
             query?: never;
@@ -10571,39 +10542,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": unknown;
-                };
-            };
-        };
-    };
-    verify_email_api_v1_auth_verify_email_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["VerifyEmailRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": unknown;
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };
@@ -14111,6 +14049,48 @@ export interface operations {
         };
     };
     health_api_v1_health_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+        };
+    };
+    health_live_api_v1_health_live_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    health_ready_api_v1_health_ready_get: {
         parameters: {
             query?: never;
             header?: never;

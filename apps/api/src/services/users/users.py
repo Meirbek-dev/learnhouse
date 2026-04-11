@@ -423,23 +423,12 @@ async def _create_and_validate_user(
     user.password = (
         security_hash_password(user_object.password) if user_object.password else None
     )
-    user.email_verified = False
     user.auth_provider = "local"
 
     # Add user to database
     db_session.add(user)
     db_session.commit()
     db_session.refresh(user)
-
-    # Send verification email (best-effort, non-blocking)
-    try:
-        import asyncio
-
-        from src.services.users.email_verification import send_verification_email
-
-        asyncio.create_task(send_verification_email(db_session, user))
-    except Exception:
-        _logger.warning("Failed to enqueue verification email for user %s", user.email)
 
     return user
 
