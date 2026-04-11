@@ -146,9 +146,9 @@ export default function CourseCreationWizard() {
         await createOutlineFromSource(createdCourse);
       }
 
+      const destination = buildCourseWorkspacePath(createdCourse.course_uuid, 'curriculum');
       toast.success(t('toasts.created'));
-      router.replace(buildCourseWorkspacePath(createdCourse.course_uuid, 'curriculum'));
-      router.refresh();
+      router.replace(destination);
     } catch (error: any) {
       toast.error(error?.message || t('errors.createWorkspace'));
     }
