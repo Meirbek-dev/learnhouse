@@ -7,7 +7,6 @@ import { GlowingLevelBadge, getLevelInfo } from '@/lib/gamification';
 import type { UserGamificationProfile } from '@/types/gamification';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
 import { useLocale, useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 
@@ -149,10 +148,16 @@ export function HeroSection({ profile, userRank, className }: HeroSectionProps) 
                   })}
                 </span>
               </div>
-              <Progress
-                value={xpProgress}
-                className="h-2"
-              />
+              <div className="bg-muted h-1.5 w-full overflow-hidden rounded-full">
+                <div
+                  className="bg-primary h-full rounded-full transition-all duration-500 ease-out"
+                  style={{ width: `${xpProgress}%` }}
+                  role="progressbar"
+                  aria-valuenow={xpProgress}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                />
+              </div>
               <div className="text-muted-foreground flex justify-between text-xs">
                 <span className="tabular-nums">
                   {formatNumber(profile.xp_in_current_level || 0)} {t('progress.xpAbbreviation')}
@@ -177,10 +182,16 @@ export function HeroSection({ profile, userRank, className }: HeroSectionProps) 
                   )}
                 </span>
               </div>
-              <Progress
-                value={Math.min(dailyXpProgress, 100)}
-                className="h-1.5"
-              />
+              <div className="bg-muted h-1 w-full overflow-hidden rounded-full">
+                <div
+                  className="h-full rounded-full bg-amber-500 transition-all duration-500 ease-out"
+                  style={{ width: `${Math.min(dailyXpProgress, 100)}%` }}
+                  role="progressbar"
+                  aria-valuenow={Math.min(dailyXpProgress, 100)}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                />
+              </div>
             </div>
 
             {/* Quick Stats Grid */}
