@@ -84,11 +84,12 @@ const CoursesActions = ({ courseuuid, course, trailData }: CourseActionsProps) =
 
   const linkedProductsQuery = useCourseProducts(course.id);
   const linkedProducts = linkedProductsQuery.data?.data ?? [];
+  const shouldCheckPaidAccess = Boolean(userId && linkedProducts.length > 0);
   const paidAccessQuery = useCoursePaidAccess(course.id, {
-    enabled: Boolean(userId && linkedProducts.length > 0),
+    enabled: shouldCheckPaidAccess,
   });
   const hasAccess = linkedProducts.length === 0 ? true : (paidAccessQuery.data?.has_access ?? false);
-  const isLoading = linkedProductsQuery.isPending || paidAccessQuery.isPending;
+  const isLoading = linkedProductsQuery.isPending || (shouldCheckPaidAccess && paidAccessQuery.isPending);
 
   const isStarted =
     trailData?.runs?.find((run: any) => {
@@ -97,11 +98,11 @@ const CoursesActions = ({ courseuuid, course, trailData }: CourseActionsProps) =
     }) ?? false;
 
   useEffect(() => {
-    if (paidAccessQuery.error && linkedProducts.length > 0) {
+    if (shouldCheckPaidAccess && paidAccessQuery.error) {
       console.error('Failed to check course access', paidAccessQuery.error);
       toast.error(t('errorCheckingCourseAccess'));
     }
-  }, [linkedProducts.length, paidAccessQuery.error, t]);
+  }, [paidAccessQuery.error, shouldCheckPaidAccess, t]);
 
   const handleCourseAction = async () => {
     if (!currentUser) {

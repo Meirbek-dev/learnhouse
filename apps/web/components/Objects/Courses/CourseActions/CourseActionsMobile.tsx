@@ -152,11 +152,12 @@ const CourseActionsMobile = ({ courseuuid, course, trailData }: CourseActionsMob
 
   const linkedProductsQuery = useCourseProducts(course.id);
   const linkedProducts = linkedProductsQuery.data?.data ?? [];
+  const shouldCheckPaidAccess = Boolean(userId && linkedProducts.length > 0);
   const paidAccessQuery = useCoursePaidAccess(course.id, {
-    enabled: Boolean(userId && linkedProducts.length > 0),
+    enabled: shouldCheckPaidAccess,
   });
   const hasAccess = linkedProducts.length === 0 ? true : (paidAccessQuery.data?.has_access ?? false);
-  const isLoading = linkedProductsQuery.isPending || paidAccessQuery.isPending;
+  const isLoading = linkedProductsQuery.isPending || (shouldCheckPaidAccess && paidAccessQuery.isPending);
 
   const isStarted =
     trailData?.runs?.find((run: any) => {
