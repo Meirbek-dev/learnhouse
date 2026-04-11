@@ -1380,9 +1380,6 @@
       "step8Button": "Тапсырма жасау",
       "step8Desc": "Студенттерді тапсырмаларды орындауға тарту, олардың үлгерімін бақылау және интуитивті бағалау жүйесі арқылы кері байланыс беру.",
       "step8Title": "Тапсырмаларды жасау және бағалау",
-      "step9Button": "Төлем параметрлері",
-      "step9Desc": "Төлем жоспарларын реттеңіз, курстарды сатыңыз және біріктірілген төлем жүйесі арқылы жазылымдарды басқарыңыз.",
-      "step9Title": "Мазмұныңызды ақшаға айналдырыңыз",
       "triggerText": "Онбординг"
     },
     "NavMenu": {
@@ -2385,12 +2382,7 @@
       "authors": "Авторлар",
       "leaveCourse": "Курстан шығу",
       "loading": "Жүктелуде...",
-      "modalDescription": "Бұл курсқа қол жеткізу үшін төлем әдісін таңдаңыз",
-      "modalTitle": "Курсты сатып алу",
       "moreAuthors": "& тағы {count}",
-      "ownCourse": "Сіз бұл курсты сатып алдыңыз",
-      "paidCourse": "Ақылы курс",
-      "purchaseCourse": "Курсты сатып алу",
       "signIn": "Кіру",
       "startCourse": "Курсты бастау"
     },
@@ -2437,25 +2429,6 @@
       "updates": "жаңартулар",
       "updatesAppearHere": "Бұл курс бойынша жаңартулар осы жерде пайда болады"
     },
-    "CoursePaidOptions": {
-      "benefits": "Артықшылықтары:",
-      "checkoutError": "Кассалық процесті бастау мүмкін болмады",
-      "choosePrice": "Бағаны таңдаңыз",
-      "failedToLoad": "Өнім нұсқаларын жүктеу мүмкін болмады",
-      "loading": "Жүктелуде...",
-      "minimumPrice": "Минималды баға:",
-      "oneTimePayment": "Бір реттік төлем",
-      "perMonth": "(айына)",
-      "perMonthSuffix": "/ай",
-      "price": "Бағасы:",
-      "processing": "Өңделуде...",
-      "purchaseNow": "Қазір сатып алу",
-      "requestError": "Сұранысыңызды өңдеу кезінде қате орын алды",
-      "showLess": "Аз көрсету",
-      "showMore": "Көбірек көрсету",
-      "subscribeNow": "Қазір жазылу",
-      "subscription": "Жазылым"
-    },
     "CourseUpdates": {
       "addNewCourseUpdate": "Жаңа курс жаңартуын қосу",
       "addNewUpdateTitle": "Жаңа курс жаңартуын қосу",
@@ -2494,7 +2467,6 @@
       "updates": "Жаңартулар"
     },
     "CoursesActions": {
-      "accessCheckError": "Курсқа кіруді тексеру мүмкін болмады. Кейінірек қайталап көріңіз.",
       "activitiesCompleted": "{completed}/{total} әрекеті аяқталды",
       "applicationPending": "Автор ретінде қатысуға өтінім қаралуда",
       "applyToContribute": "Қатысуға өтінім беру",
@@ -2518,21 +2490,13 @@
       "contributorApplicationSuccess": "Қатысуға өтініміңіз сәтті жіберілді",
       "courseCompleted": "Курс аяқталды!",
       "courseProgress": "Курс үлгерімі",
-      "courseRequiresPurchase": "Бұл курстың мазмұнына қол жеткізу үшін сатып алу қажет.",
       "leaveCourse": "Курстан шығу",
       "leaveCourseError": "Курстан шығу мүмкін болмады. Кейінірек қайталап көріңіз.",
       "leaveError": "Курстан шығу мүмкін болмады. Кейінірек қайталап көріңіз.",
       "leaveSuccess": "Курстан сәтті шықтыңыз",
       "leavingCourse": "Курстан шығу...",
       "leftCourseSuccess": "Курстан сәтті шықтыңыз",
-      "modalDescription": "Бұл курсқа қол жеткізу үшін төлем әдісін таңдаңыз",
-      "modalTitle": "Курсты сатып алу",
       "moreAuthors": "& тағы {count}",
-      "ownCourseDescription": "Сіз бұл курсты сатып алдыңыз және барлық мазмұнға толық қол жеткізе аласыз.",
-      "ownCourseTitle": "Сіз бұл курстың иесісіз",
-      "paidCourse": "Ақылы курс",
-      "paidCourseDescription": "Бұл курстың мазмұнына қол жеткізу үшін сатып алу қажет.",
-      "paidCourseTitle": "Ақылы курс",
       "progressCard": {
         "activitiesCompletedLabel": "тапсырма орындалды",
         "chapterActivitiesCount": "{completed}/{total} тапсырма",
@@ -2540,9 +2504,7 @@
         "completedAllActivities": "Тамаша! Сіз барлық тапсырмаларды орындадыңыз.",
         "courseCompleted": "Курс аяқталды!"
       },
-      "purchaseCourse": "Курсты сатып алу",
       "readyToBegin": "Бастауға дайынсыз ба?",
-      "selectPaymentOption": "Бұл курсқа қол жеткізу үшін төлем әдісін таңдаңыз",
       "startCourse": "Курсты бастау",
       "startCourseError": "Курсты бастау мүмкін болмады. Кейінірек қайталап көріңіз.",
       "startError": "Курсты бастау мүмкін болмады. Кейінірек қайталап көріңіз.",
@@ -2552,13 +2514,7 @@
       "startingCourse": "Курс басталуда...",
       "submittingContributorApplication": "Қатысуға өтінім жіберілуде...",
       "youAreAContributor": "Сіз авторсыз",
-      "youAreContributor": "Сіз авторсыз",
-      "youHavePurchasedThisCourse": "Сіз бұл курсты сатып алдыңыз және барлық мазмұнға толық қол жеткізе аласыз.",
-      "youOwnThisCourse": "Сіз бұл курстың иесісіз"
-    },
-    "PaidCourseActivityDisclaimer": {
-      "message": "Мазмұнға қол жеткізу үшін курсты сатып алу қажет.",
-      "paidContent": "Ақылы мазмұн"
+      "youAreContributor": "Сіз авторсыз"
     },
     "access": "Қолжетімділік",
     "content": "Мазмұны",
@@ -3310,10 +3266,6 @@
         "description": "Ұйым әкімшілігі мен жүйелік параметрлер",
         "title": "Әкімші",
         "badge": "Жүйелік"
-      },
-      "Payments": {
-        "description": "Төлем параметрлерін, жазылымдарды және шот-фактураларды басқару",
-        "title": "Төлемдер"
       },
       "noAccess": "Сізде әлі бақылау тақтасының функцияларына рұқсат жоқ.",
       "platformLogo": "Ashyq Bilim логотипі",
@@ -4888,183 +4840,6 @@
       "socialsDescription": "Ұйымыңыздың әлеуметтік желі сілтемелерін басқару",
       "socialsTitle": "Әлеуметтік желілер"
     },
-    "Payments": {
-      "Configuration": {
-        "aboutStripe": {
-          "acceptPayments": "Курстар мен жазылымдар үшін төлемдерді қабылдау",
-          "accessAnalytics": "Толық төлем аналитикасына қол жеткізу",
-          "handleCurrencies": "Бірнеше валюталар мен төлем әдістерін басқару",
-          "learnMore": "Stripe туралы көбірек білу",
-          "manageSubscriptions": "Қайталанатын шоттар мен жазылымдарды басқару",
-          "title": "Stripe интеграциясы туралы"
-        },
-        "accountNotConfigured": "Stripe шоты конфигурацияланбаған",
-        "configUpdatedSuccess": "Конфигурация сәтті жаңартылды",
-        "connectButton": "Stripe шотын қосу",
-        "connectedStatus": "Қосылған",
-        "connectingButton": "Stripe-ке қосылуда...",
-        "deletingStripeConfig": "Stripe конфигурациясын жою...",
-        "editModalDescription": "Stripe тіркелгі деректеріңізді жаңартыңыз",
-        "editModalTitle": "Stripe конфигурациясын өңдеу",
-        "enableButton": "Stripe төлемдерін қосу",
-        "enablingStripe": "Stripe қосылуда...",
-        "errorLoading": "Төлем конфигурациясын жүктеу қатесі",
-        "errors": {
-          "deleteStripeConfigFailed": "Stripe конфигурациясын жою сәтсіз аяқталды",
-          "enableStripeFailed": "Stripe қосу сәтсіз аяқталды",
-          "loadStripeConfigFailed": "Бар конфигурацияны жүктеу сәтсіз аяқталды",
-          "startStripeOnboardingFailed": "Stripe тіркелуін бастау сәтсіз аяқталды",
-          "updateConfigFailed": "Конфигурацияны жаңарту сәтсіз аяқталды"
-        },
-        "linkedAccountLabel": "Байланыстырылған тіркелгі ID",
-        "loading": "Жүктелуде...",
-        "notConnectedStatus": "Қосылмаған",
-        "pageDescription": "Ұйымыңыздың төлем конфигурациясын басқарыңыз",
-        "pageTitle": "Төлем конфигурациясы",
-        "removeConnectionButton": "Қосылымды жою",
-        "removeConnectionConfirmation": "Stripe қосылымын жойғыңыз келетініне сенімдісіз бе? Бұл төлемдерді өшіреді.",
-        "removeConnectionTitle": "Stripe қосылымын жою",
-        "saveButton": "Сақтау",
-        "startingStripeOnboarding": "Stripe тіркелуін бастау",
-        "stripeAccountIdLabel": "Stripe тіркелгі ID",
-        "stripeAccountIdPlaceholder": "acct_...",
-        "stripeConfigDeletedSuccess": "Stripe конфигурациясы сәтті жойылды",
-        "stripeEnabledSuccess": "Stripe сәтті қосылды",
-        "updatingConfig": "Конфигурация жаңартылуда..."
-      },
-      "CustomersPage": {
-        "amountHeader": "Сома",
-        "description": "Тұтынушы ақпаратыңызды қараңыз және басқарыңыз",
-        "errors": {
-          "loadCustomersFailed": "Клиенттерді жүктеу қатесі"
-        },
-        "noCustomerData": "Клиент деректері жоқ",
-        "noCustomers": "Клиенттер табылмады",
-        "oneTimeType": "Бір реттік",
-        "productHeader": "Өнім",
-        "purchaseDateHeader": "Сатып алу күні",
-        "statusHeader": "Мәртебе",
-        "subscriptionType": "Жазылым",
-        "title": "Клиенттер",
-        "typeHeader": "Түрі",
-        "userHeader": "Пайдаланушы"
-      },
-      "LinkCourseModal": {
-        "alreadyLinked": "Бұрыннан байланыстырылған",
-        "linkCourseButton": "Курсты байланыстыру",
-        "noCoursesFound": "Курстар табылмады",
-        "searchPlaceholder": "Курстарды іздеу..."
-      },
-      "LinkedCourses": {
-        "linkCourseButton": "Курсты байланыстыру",
-        "linkModalDescription": "Бұл өнімге байланыстыру үшін курстарды таңдаңыз",
-        "linkModalTitle": "Курстарды өнімге байланыстыру",
-        "noCoursesLinked": "Бұл өнімге әлі курстар байланыстырылмаған.",
-        "title": "Байланыстырылған курстар"
-      },
-      "ProductForm": {
-        "benefitsLabel": "Артықшылықтар (міндетті емес)",
-        "benefitsPlaceholder": "Артықшылықтарды тізімдеңіз, әр жолда бір-бірден",
-        "currencyLabel": "Валюта",
-        "currencyPlaceholder": "Валютаны таңдаңыз",
-        "descriptionLabel": "Сипаттамасы",
-        "descriptionPlaceholder": "Өнімді сипаттаңыз",
-        "errors": {
-          "amountMin": "Сома кемінде 1 болуы керек",
-          "amountRequired": "Сома қажет",
-          "currencyRequired": "Валюта қажет",
-          "descriptionRequired": "Сипаттама қажет",
-          "nameRequired": "Өнім атауы қажет",
-          "priceTypeRequired": "Баға түрі қажет",
-          "productTypeRequired": "Өнім түрі қажет"
-        },
-        "minAmountLabel": "Минималды сома",
-        "nameLabel": "Өнім атауы",
-        "namePlaceholder": "Өнім атауын енгізіңіз",
-        "priceLabel": "Бағасы",
-        "priceTypeLabel": "Баға түрі",
-        "priceTypePlaceholder": "Баға түрін таңдаңыз",
-        "priceTypes": {
-          "customer_choice": "Клиент таңдауы (мин. баға)",
-          "fixed_price": "Тұрақты баға"
-        },
-        "productTypeLabel": "Өнім түрі",
-        "productTypePlaceholder": "Өнім түрін таңдаңыз",
-        "productTypes": {
-          "one_time": "Бір реттік төлем",
-          "subscription": "Жазылым"
-        },
-        "submitButton": "Өнім жасау",
-        "submittingButton": "Жасалуда..."
-      },
-      "ProductPage": {
-        "archiveButton": "Мұрағаттау",
-        "archiveConfirmButton": "Өнімді мұрағаттау",
-        "archiveConfirmationMessage": "Бұл өнімді мұрағаттағыңыз келетініне сенімдісіз бе?",
-        "archiveConfirmationTitle": "{productName} мұрағаттау керек пе?",
-        "benefitsLabel": "Артықшылықтары:",
-        "createModalDescription": "Ұйымыңызға жаңа өнім қосыңыз",
-        "createModalTitle": "Жаңа өнім жасау",
-        "createProductButton": "Жаңа өнім жасау",
-        "editButton": "Өңдеу",
-        "editForm": {
-          "benefitsLabel": "Артықшылықтар",
-          "benefitsPlaceholder": "Өнім артықшылықтары",
-          "cancelButton": "Бас тарту",
-          "currencyLabel": "Валюта",
-          "currencyPlaceholder": "Валюта",
-          "descriptionLabel": "Сипаттамасы",
-          "descriptionPlaceholder": "Өнім сипаттамасы",
-          "nameLabel": "Өнім атауы",
-          "namePlaceholder": "Өнім атауы",
-          "priceLabel": "Бағасы",
-          "pricePlaceholder": "Бағасы",
-          "productUpdatedSuccess": "Өнім сәтті жаңартылды",
-          "saveButton": "Сақтау",
-          "savingButton": "Сақталуда...",
-          "updateProductFailed": "Өнімді жаңарту мүмкін болмады"
-        },
-        "errors": {
-          "archiveProductFailed": "Деректерді мұрағаттау мүмкін болмады: {error}"
-        },
-        "loadError": "Өнімдерді жүктеу мүмкін болмады",
-        "loading": "Жүктелуде...",
-        "noProducts": "Өнімдер жоқ. Бастау үшін жаңа өнім жасаңыз.",
-        "oneTimeType": "Бір реттік",
-        "priceLabel": "Бағасы:",
-        "productArchivedSuccess": "Өнім сәтті мұрағатталды",
-        "showLess": "Аз көрсету",
-        "showMore": "Көбірек көрсету",
-        "subscriptionType": "Жазылым"
-      },
-      "configuration": "Төлем параметрлері",
-      "configurationInfo": "Төлем шлюзіңізді реттеңіз және басқарыңыз",
-      "configureStripe": "Stripe тіркелгіңізді конфигурациялаңыз.",
-      "contactAdmin": "Төлемдерді қосу үшін әкімшімен байланысыңыз.",
-      "createProducts": "Өнімдер немесе жазылымдар жасаңыз.",
-      "customerInfo": "Клиент ақпаратын қарау және басқару",
-      "customers": "Клиенттер",
-      "goToConfiguration": "Конфигурацияға өту",
-      "notAvailable": "Төлемдер қолжетімсіз",
-      "notEnabledMessage": "Бұл ұйым үшін төлем функциясы қосылмаған.",
-      "overview": "Шолу",
-      "paidProducts": "Ақылы өнімдер",
-      "paidProductsInfo": "Ақылы өнімдер мен бағаларды басқару",
-      "productsSubscriptions": "Өнімдер мен жазылымдар",
-      "startSelling": "Курстарыңызды сата бастаңыз!",
-      "title": "Төлемдер",
-      "unconfiguredAlertTitle": "Төлем конфигурациясы қажет"
-    },
-    "Stripe": {
-      "completing": "Қосылым аяқталуда...",
-      "connectError": "Stripe тіркелгісін қосу қатесі",
-      "connectionFailed": "Қосылым сәтсіз аяқталды.",
-      "connectionSuccess": "Қосылым сәтті!",
-      "missingParameters": "Stripe қосылымын тексеру үшін параметрлер жетіспейді.",
-      "pleaseWait": "Stripe тіркелгіңізді қосып жатқанда күте тұрыңыз.",
-      "returnToDashboard": "Енді басқару тақтасына оралуға болады.",
-      "tryAgainOrContact": "Қайталап көріңіз немесе мәселе шешілмесе, қолдау қызметіне хабарласыңыз."
-    },
     "UserAccountSettings": {
       "Gamification": {
         "accessibility": {
@@ -6542,7 +6317,6 @@
       "manageAnalytics": "Оқытушы аналитикасын ашу",
       "manageAssignments": "Тапсырмаларды басқару",
       "manageCourses": "Курстарды басқару",
-      "managePayments": "Төлемдер мен шоттарды басқару",
       "manageUsers": "Пайдаланушыларды басқару",
       "platformSettings": "Платформа параметрлері",
       "platformLogo": "Ashyq Bilim логотипі",
@@ -6567,7 +6341,6 @@
       "courses": "Курстар",
       "home": "Басты бет",
       "platform": "Платформа",
-      "payments": "Төлемдер",
       "settings": "Параметрлер",
       "users": "Пайдаланушылар"
     },
@@ -6581,7 +6354,6 @@
       "logout": "Шығу",
       "metrics": "Метрикалар",
       "platform": "Платформа параметрлері",
-      "payments": "Төлемдер",
       "userSettings": "@{username} параметрлері",
       "users": "Пайдаланушылар"
     }

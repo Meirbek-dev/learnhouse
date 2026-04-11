@@ -19,7 +19,6 @@ class TestSecurityComprehensive:
             "courses",
             "discussions",
             "members",
-            "payments",
             "storage",
             "usergroups",
         ]
@@ -35,7 +34,6 @@ class TestSecurityComprehensive:
                 "courses",
                 "discussions",
                 "members",
-                "payments",
                 "storage",
                 "usergroups",
             ]

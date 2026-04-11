@@ -2,7 +2,6 @@
 
 import {
   Backpack,
-  BadgeDollarSign,
   BarChart3,
   BookCopy,
   Home,
@@ -27,7 +26,6 @@ const DashMobileMenu = () => {
     canSeeAnalytics,
     canSeeUsers,
     canSeeAdmin,
-    canSeePayments,
   } = useNavigationPermissions();
 
   return (
@@ -96,23 +94,6 @@ const DashMobileMenu = () => {
             >
               <BarChart3 size={20} />
               <span className="mt-1 text-xs">{t('mobile.analytics')}</span>
-            </AppLink>
-          </ToolTip>
-        ) : null}
-        {canSeePayments ? (
-          <ToolTip
-            content={t('tooltips.payments')}
-            slateBlack
-            sideOffset={8}
-            side="top"
-          >
-            <AppLink
-              href="/dash/payments/customers"
-              className="flex flex-col items-center p-2"
-              aria-label={t('ariaLabels.managePayments')}
-            >
-              <BadgeDollarSign size={20} />
-              <span className="mt-1 text-xs">{t('mobile.payments')}</span>
             </AppLink>
           </ToolTip>
         ) : null}

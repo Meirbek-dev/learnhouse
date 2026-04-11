@@ -1,12 +1,10 @@
 import {
-  AlertCircle,
   ArrowRight,
   BookOpen,
   CheckCircle2,
   Clock,
   Loader2,
   PlayCircle,
-  ShoppingCart,
   Sparkles,
   Trophy,
   UserPen,
@@ -15,17 +13,14 @@ import { useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/react-query/queryKeys';
 import { useSession } from '@/hooks/useSession';
 import { useContributorStatus } from '@/hooks/useContributorStatus';
-import { useCoursePaidAccess, useCourseProducts } from '@/features/payments/hooks/usePayments';
 import { applyForContributor } from '@services/courses/courses';
-import Modal from '@/components/Objects/Elements/Modal/Modal';
 import CourseProgress from '../CourseProgress/CourseProgress';
 import { revalidateTags } from '@/lib/api-client';
 import { startCourse } from '@services/courses/activity';
 import { getAbsoluteUrl } from '@services/config/config';
 import { Card, CardContent } from '@/components/ui/card';
 import UserAvatar from '@components/Objects/UserAvatar';
-import CoursePaidOptions from './CoursePaidOptions';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useRouter } from 'next/navigation';
@@ -72,37 +67,18 @@ const CoursesActions = ({ courseuuid, course, trailData }: CourseActionsProps) =
   const { user: currentUser } = useSession();
   const [isActionLoading, setIsActionLoading] = useState(false);
   const [isContributeLoading, setIsContributeLoading] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const { contributorStatus, refetch } = useContributorStatus(courseuuid);
   const [isProgressOpen, setIsProgressOpen] = useState(false);
   const t = useTranslations('Courses.CoursesActions');
 
-  const userId = currentUser?.id;
-
   // Clean up course UUID by removing 'course_' prefix if it exists
   const cleanCourseUuid = course.course_uuid?.replace('course_', '');
-
-  const linkedProductsQuery = useCourseProducts(course.id);
-  const linkedProducts = linkedProductsQuery.data?.data ?? [];
-  const shouldCheckPaidAccess = Boolean(userId && linkedProducts.length > 0);
-  const paidAccessQuery = useCoursePaidAccess(course.id, {
-    enabled: shouldCheckPaidAccess,
-  });
-  const hasAccess = linkedProducts.length === 0 ? true : (paidAccessQuery.data?.has_access ?? false);
-  const isLoading = linkedProductsQuery.isPending || (shouldCheckPaidAccess && paidAccessQuery.isPending);
 
   const isStarted =
     trailData?.runs?.find((run: any) => {
       const cleanRunCourseUuid = run.course?.course_uuid?.replace('course_', '');
       return cleanRunCourseUuid === cleanCourseUuid;
     }) ?? false;
-
-  useEffect(() => {
-    if (shouldCheckPaidAccess && paidAccessQuery.error) {
-      console.error('Failed to check course access', paidAccessQuery.error);
-      toast.error(t('errorCheckingCourseAccess'));
-    }
-  }, [paidAccessQuery.error, shouldCheckPaidAccess, t]);
 
   const handleCourseAction = async () => {
     if (!currentUser) {
@@ -395,92 +371,6 @@ const CoursesActions = ({ courseuuid, course, trailData }: CourseActionsProps) =
       </button>
     );
   };
-
-  if (isLoading) {
-    return (
-      <Card
-        size="sm"
-        className="animate-pulse"
-      >
-        <CardContent className="flex items-center justify-center py-8">
-          <Loader2 className="size-6 animate-spin text-neutral-400" />
-        </CardContent>
-      </Card>
-    );
-  }
-
-  if (linkedProducts.length > 0) {
-    return (
-      <Card size="sm">
-        <CardContent className="space-y-4">
-          {hasAccess ? (
-            <>
-              {/* Access granted banner */}
-              <div className="flex items-start gap-3 rounded-xl border border-green-200 bg-gradient-to-br from-green-50 to-emerald-50/50 p-4">
-                <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-green-100">
-                  <CheckCircle2 className="size-4 text-green-600" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-semibold text-green-800">{t('youOwnThisCourse')}</h3>
-                  <p className="mt-0.5 text-sm text-green-700">{t('youHavePurchasedThisCourse')}</p>
-                </div>
-              </div>
-
-              {/* Progress section for paid courses */}
-              {renderProgressSection()}
-
-              {/* Action button */}
-              <Button
-                onClick={handleCourseAction}
-                disabled={isActionLoading}
-                className="h-12 w-full gap-2 text-base"
-              >
-                {isActionLoading ? (
-                  <Loader2 className="size-5 animate-spin" />
-                ) : (
-                  renderActionButton(isStarted ? 'continue' : 'start')
-                )}
-              </Button>
-
-              {renderContributorButton()}
-            </>
-          ) : (
-            <>
-              {/* Payment required banner */}
-              <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50/50 p-4">
-                <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-amber-100">
-                  <AlertCircle className="size-4 text-amber-600" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-semibold text-amber-800">{t('paidCourse')}</h3>
-                  <p className="mt-0.5 text-sm text-amber-700">{t('courseRequiresPurchase')}</p>
-                </div>
-              </div>
-
-              <Modal
-                isDialogOpen={isModalOpen}
-                onOpenChange={setIsModalOpen}
-                dialogContent={<CoursePaidOptions course={course} />}
-                dialogTitle={t('purchaseCourse')}
-                dialogDescription={t('selectPaymentOption')}
-                minWidth="sm"
-              />
-
-              <Button
-                onClick={() => setIsModalOpen(true)}
-                className="h-12 w-full gap-2 text-base"
-              >
-                <ShoppingCart className="size-5" />
-                {t('purchaseCourse')}
-              </Button>
-
-              {renderContributorButton()}
-            </>
-          )}
-        </CardContent>
-      </Card>
-    );
-  }
 
   return (
     <Card size="sm">

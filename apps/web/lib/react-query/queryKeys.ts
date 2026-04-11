@@ -58,16 +58,6 @@ export const queryKeys = {
   landing: {
     courses: (page: number, limit: number) => ['landing', 'courses', { page, limit }] as const,
   },
-  payments: {
-    config: () => ['payments', 'config'] as const,
-    courseAccess: (courseId: number | string) => ['payments', 'course-access', courseId] as const,
-    courseProducts: (courseId: number | string) => ['payments', 'course-products', courseId] as const,
-    customers: () => ['payments', 'customers'] as const,
-    ownedCourses: () => ['payments', 'owned-courses'] as const,
-    productCourses: (productId: number | string) => ['payments', 'product-courses', productId] as const,
-    products: () => ['payments', 'products'] as const,
-    stripeConnection: (code: string) => ['payments', 'stripe-connection', code] as const,
-  },
   search: {
     content: (query: string, page: number, limit: number) => ['search', 'content', { query, page, limit }] as const,
   },

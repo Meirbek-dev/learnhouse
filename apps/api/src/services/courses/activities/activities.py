@@ -18,7 +18,6 @@ from src.db.users import AnonymousUser, PublicUser
 from src.security.rbac import PermissionChecker
 from src.services.courses._auth import require_course_permission
 from src.services.courses._utils import _next_activity_order
-from src.services.payments.payments_access import check_activity_paid_access
 
 logger = logging.getLogger(__name__)
 
@@ -109,18 +108,7 @@ async def get_activity(
     checker.require(
         current_user.id, "activity:read", resource_owner_id=activity.creator_id
     )
-
-    has_paid_access = await check_activity_paid_access(
-        request=request,
-        activity_id=activity.id or 0,
-        user=current_user,
-        db_session=db_session,
-    )
-
     activity_read = ActivityRead.model_validate(activity)
-    activity_read.content = (
-        activity_read.content if has_paid_access else {"paid_access": False}
-    )
 
     can_update = checker.check(
         current_user.id, "activity:update", resource_owner_id=activity.creator_id

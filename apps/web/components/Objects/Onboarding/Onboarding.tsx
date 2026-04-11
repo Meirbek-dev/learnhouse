@@ -3,7 +3,6 @@ import {
   ArrowRight,
   Book,
   Check,
-  CreditCard,
   Globe,
   Info,
   PictureInPicture,
@@ -13,7 +12,6 @@ import {
 } from 'lucide-react';
 import OnBoardAssignments from '@public/onboarding/OnBoardAssignments.png';
 import OnBoardActivities from '@public/onboarding/OnBoardActivities.png';
-import OnBoardPayments from '@public/onboarding/OnBoardPayments.png';
 import OnBoardWelcome from '@public/onboarding/OnBoardWelcome.png';
 import OnBoardCourses from '@public/onboarding/OnBoardCourses.png';
 import OnBoardEditor from '@public/onboarding/OnBoardEditor.png';
@@ -186,20 +184,6 @@ const Onboarding: FC = () => {
             router.push(getAbsoluteUrl('/dash/assignments?new=true'));
           },
           icon: <Book size={16} />,
-        },
-      ],
-    },
-    {
-      imageSrc: OnBoardPayments,
-      title: t('step9Title'),
-      description: t('step9Desc'),
-      buttons: [
-        {
-          label: t('step9Button'),
-          action: () => {
-            router.push(getAbsoluteUrl('/dash/payments/customers'));
-          },
-          icon: <CreditCard size={16} />,
         },
       ],
     },

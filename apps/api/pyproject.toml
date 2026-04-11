@@ -14,7 +14,6 @@ dependencies = [
   "typer>=0.24.1",
   "alembic>=1.18.4",
   "alembic-postgresql-enum>=1.10.0",
-  "stripe>=15.0.1",
   "logfire[fastapi,sqlalchemy]>=4.32.0",
   "python-ulid>=3.1.0",
   "argon2-cffi>=25.1.0",

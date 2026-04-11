@@ -60,10 +60,6 @@ export function canSeeAdmin(can: CanCheck): boolean {
   );
 }
 
-export function canSeePayments(can: CanCheck): boolean {
-  return can(Resources.PAYMENT, Actions.MANAGE, Scopes.PLATFORM) || can(Resources.PLATFORM, Actions.MANAGE, Scopes.OWN);
-}
-
 export function canAccessDashboard(can: CanCheck): boolean {
   return (
     canSeePlatform(can) ||
@@ -71,7 +67,6 @@ export function canAccessDashboard(can: CanCheck): boolean {
     canSeeAssignments(can) ||
     canSeeAnalytics(can) ||
     canSeeUsers(can) ||
-    canSeeAdmin(can) ||
-    canSeePayments(can)
+    canSeeAdmin(can)
   );
 }

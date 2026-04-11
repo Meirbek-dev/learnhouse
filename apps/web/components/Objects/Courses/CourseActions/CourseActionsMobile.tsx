@@ -1,11 +1,9 @@
 'use client';
 
-import { AlertCircle, BookOpen, Loader2, LogIn, ShoppingCart } from 'lucide-react';
-import { useCoursePaidAccess, useCourseProducts } from '@/features/payments/hooks/usePayments';
+import { BookOpen, Loader2, LogIn } from 'lucide-react';
 import { useSession } from '@/hooks/useSession';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
 import { useState, useTransition } from 'react';
-import Modal from '@/components/Objects/Elements/Modal/Modal';
 import { revalidateTags } from '@/lib/api-client';
 import { startCourse } from '@services/courses/activity';
 import { getAbsoluteUrl } from '@services/config/config';
@@ -13,8 +11,6 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 
 import UserAvatar from '../../UserAvatar';
-
-import CoursePaidOptions from './CoursePaidOptions';
 
 interface Author {
   user: {
@@ -142,22 +138,11 @@ const CourseActionsMobile = ({ courseuuid, course, trailData }: CourseActionsMob
   const t = useTranslations('Courses.CourseActionsMobile');
   const router = useRouter();
   const { user: currentUser } = useSession();
-  const userId = currentUser?.id;
   const [isActionLoading, setIsActionLoading] = useState(false);
   const [isPending, startTransition] = useTransition();
-  const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Clean up course UUID by removing 'course_' prefix if it exists
   const cleanCourseUuid = course.course_uuid?.replace('course_', '');
-
-  const linkedProductsQuery = useCourseProducts(course.id);
-  const linkedProducts = linkedProductsQuery.data?.data ?? [];
-  const shouldCheckPaidAccess = Boolean(userId && linkedProducts.length > 0);
-  const paidAccessQuery = useCoursePaidAccess(course.id, {
-    enabled: shouldCheckPaidAccess,
-  });
-  const hasAccess = linkedProducts.length === 0 ? true : (paidAccessQuery.data?.has_access ?? false);
-  const isLoading = linkedProductsQuery.isPending || (shouldCheckPaidAccess && paidAccessQuery.isPending);
 
   const isStarted =
     trailData?.runs?.find((run: any) => {
@@ -231,14 +216,6 @@ const CourseActionsMobile = ({ courseuuid, course, trailData }: CourseActionsMob
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="mt-4 mb-8 flex h-16 items-center justify-center rounded-lg bg-gray-100">
-        <Loader2 className="h-6 w-6 animate-spin text-gray-500" />
-      </div>
-    );
-  }
-
   // Filter active authors and sort by role priority
   const sortedAuthors = [...course.authors]
     .filter((author) => author.authorship_status === 'ACTIVE')
@@ -259,99 +236,30 @@ const CourseActionsMobile = ({ courseuuid, course, trailData }: CourseActionsMob
       <div className="flex flex-col space-y-4">
         <MultipleAuthors authors={sortedAuthors} />
 
-        {linkedProducts.length > 0 ? (
-          <div className="space-y-3">
-            {hasAccess ? (
-              <div className="rounded-lg border border-green-200 bg-green-50 p-3">
-                <div className="flex items-center gap-2">
-                  <div className="h-2 w-2 animate-pulse rounded-full bg-green-500" />
-                  <span className="text-sm font-semibold text-green-800">{t('ownCourse')}</span>
-                </div>
-              </div>
-            ) : (
-              <div className="rounded-lg border border-amber-200 bg-amber-50 p-3">
-                <div className="flex items-center gap-2">
-                  <AlertCircle className="h-4 w-4 text-amber-800" />
-                  <span className="text-sm font-semibold text-amber-800">{t('paidCourse')}</span>
-                </div>
-              </div>
-            )}
-
-            {hasAccess ? (
-              <button
-                onClick={handleCourseAction}
-                disabled={isActionLoading || isPending}
-                className="bg-primary hover:bg-primary/90 flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-white transition-colors disabled:bg-neutral-700"
-              >
-                {isActionLoading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : isStarted ? (
-                  <>
-                    <BookOpen className="h-4 w-4" />
-                    {t('continueLearning')}
-                  </>
-                ) : (
-                  <>
-                    <LogIn className="h-4 w-4" />
-                    {t('startCourse')}
-                  </>
-                )}
-              </button>
-            ) : (
-              <>
-                <Modal
-                  isDialogOpen={isModalOpen}
-                  onOpenChange={setIsModalOpen}
-                  dialogContent={<CoursePaidOptions course={course} />}
-                  dialogTitle={t('modalTitle')}
-                  dialogDescription={t('modalDescription')}
-                  minWidth="sm"
-                />
-                <button
-                  onClick={() => {
-                    setIsModalOpen(true);
-                  }}
-                  disabled={isActionLoading || isPending}
-                  className="bg-primary hover:bg-primary/90 flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-white transition-colors disabled:bg-neutral-700"
-                >
-                  {isActionLoading ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <>
-                      <ShoppingCart className="h-4 w-4" />
-                      {t('purchaseCourse')}
-                    </>
-                  )}
-                </button>
-              </>
-            )}
-          </div>
-        ) : (
-          <button
-            onClick={handleCourseAction}
-            disabled={isActionLoading || isPending}
-            className="bg-primary hover:bg-primary/90 flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-white transition-colors disabled:bg-neutral-700"
-          >
-            {isActionLoading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : !currentUser ? (
-              <>
-                <LogIn className="h-4 w-4" />
-                {t('signIn')}
-              </>
-            ) : isStarted ? (
-              <>
-                <BookOpen className="h-4 w-4" />
-                {t('continueLearning')}
-              </>
-            ) : (
-              <>
-                <LogIn className="h-4 w-4" />
-                {t('startCourse')}
-              </>
-            )}
-          </button>
-        )}
+        <button
+          onClick={handleCourseAction}
+          disabled={isActionLoading || isPending}
+          className="bg-primary hover:bg-primary/90 flex w-full items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-white transition-colors disabled:bg-neutral-700"
+        >
+          {isActionLoading ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : !currentUser ? (
+            <>
+              <LogIn className="h-4 w-4" />
+              {t('signIn')}
+            </>
+          ) : isStarted ? (
+            <>
+              <BookOpen className="h-4 w-4" />
+              {t('continueLearning')}
+            </>
+          ) : (
+            <>
+              <LogIn className="h-4 w-4" />
+              {t('startCourse')}
+            </>
+          )}
+        </button>
       </div>
     </div>
   );

@@ -15,7 +15,6 @@ import {
 } from '@/components/ui/sidebar';
 import {
   Backpack,
-  BadgeDollarSign,
   BarChart3,
   BookCopy,
   Home,
@@ -104,7 +103,6 @@ const useNavigationItems = () => {
     canSeeAnalytics,
     canSeeUsers,
     canSeeAdmin,
-    canSeePayments,
   } = useNavigationPermissions();
 
   return [
@@ -156,17 +154,6 @@ const useNavigationItems = () => {
             icon: Users,
             tooltip: t('tooltips.users'),
             isActive: pathname.startsWith('/dash/users'),
-          },
-        ]
-      : []),
-    ...(canSeePayments
-      ? [
-          {
-            title: t('tooltips.payments'),
-            href: '/dash/payments/customers',
-            icon: BadgeDollarSign,
-            tooltip: t('tooltips.payments'),
-            isActive: pathname.startsWith('/dash/payments'),
           },
         ]
       : []),

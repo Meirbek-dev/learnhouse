@@ -1380,9 +1380,6 @@
       "step8Button": "Create an Assignment",
       "step8Desc": "Engage students with assignments, track their progress, and provide feedback through our intuitive grading system.",
       "step8Title": "Create and Grade Assignments",
-      "step9Button": "Payment Settings",
-      "step9Desc": "Set up payment plans, sell courses, and manage subscriptions with our integrated payment system.",
-      "step9Title": "Monetize your content",
       "triggerText": "Onboarding"
     },
     "NavMenu": {
@@ -2369,12 +2366,7 @@
       "authors": "Authors",
       "leaveCourse": "Leave Course",
       "loading": "Loading...",
-      "modalDescription": "Select a payment option to access this course",
-      "modalTitle": "Purchase Course",
       "moreAuthors": "& {count} more",
-      "ownCourse": "You Own This Course",
-      "paidCourse": "Paid Course",
-      "purchaseCourse": "Purchase Course",
       "signIn": "Sign In",
       "startCourse": "Start Course"
     },
@@ -2405,25 +2397,6 @@
       "updateTitlePlaceholder": "What's new in this update?",
       "updates": "updates",
       "updatesAppearHere": "Updates about this course will appear here"
-    },
-    "CoursePaidOptions": {
-      "benefits": "Benefits:",
-      "checkoutError": "Failed to initiate checkout process",
-      "choosePrice": "Choose your price",
-      "failedToLoad": "Failed to load product options",
-      "loading": "Loading...",
-      "minimumPrice": "Minimum Price:",
-      "oneTimePayment": "One-time payment",
-      "perMonth": "(per month)",
-      "perMonthSuffix": "/month",
-      "price": "Price:",
-      "processing": "Processing...",
-      "purchaseNow": "Purchase Now",
-      "requestError": "An error occurred while processing your request",
-      "showLess": "Show less",
-      "showMore": "Show more",
-      "subscribeNow": "Subscribe Now",
-      "subscription": "Subscription"
     },
     "CourseUpdates": {
       "addNewCourseUpdate": "Add new Course Update",
@@ -2463,7 +2436,6 @@
       "updates": "Updates"
     },
     "CoursesActions": {
-      "accessCheckError": "Failed to check course access. Please try again later.",
       "activitiesCompleted": "{completed} of {total} activities completed",
       "applicationPending": "Contributor application pending",
       "applyToContribute": "Apply to contribute",
@@ -2487,21 +2459,13 @@
       "contributorApplicationSuccess": "Your application to contribute has been submitted successfully",
       "courseCompleted": "Course Completed!",
       "courseProgress": "Course Progress",
-      "courseRequiresPurchase": "This course requires purchase to access its content.",
       "leaveCourse": "Leave Course",
       "leaveCourseError": "Failed to leave the course. Please try again later.",
       "leaveError": "Failed to leave the course. Please try again later.",
       "leaveSuccess": "Successfully left the course",
       "leavingCourse": "Leaving course...",
       "leftCourseSuccess": "Successfully left the course",
-      "modalDescription": "Select a payment option to access this course",
-      "modalTitle": "Purchase Course",
       "moreAuthors": "& {count} more",
-      "ownCourseDescription": "You have purchased this course and have full access to all content.",
-      "ownCourseTitle": "You Own This Course",
-      "paidCourse": "Paid Course",
-      "paidCourseDescription": "This course requires purchase to access its content.",
-      "paidCourseTitle": "Paid Course",
       "progressCard": {
         "activitiesCompletedLabel": "activities completed",
         "chapterActivitiesCount": "{completed}/{total} activities",
@@ -2509,9 +2473,7 @@
         "completedAllActivities": "Great job! You have completed all activities.",
         "courseCompleted": "Course Completed!"
       },
-      "purchaseCourse": "Purchase Course",
       "readyToBegin": "Ready to Begin?",
-      "selectPaymentOption": "Select a payment option to access this course",
       "startCourse": "Start Course",
       "startCourseError": "Failed to start the course. Please try again later.",
       "startError": "Failed to start the course. Please try again later.",
@@ -2521,13 +2483,7 @@
       "startingCourse": "Starting course...",
       "submittingContributorApplication": "Submitting contributor application...",
       "youAreAContributor": "You are a contributor",
-      "youAreContributor": "You are a contributor",
-      "youHavePurchasedThisCourse": "You have purchased this course and have full access to all content.",
-      "youOwnThisCourse": "You Own This Course"
-    },
-    "PaidCourseActivityDisclaimer": {
-      "message": "This content requires a course purchase to access.",
-      "paidContent": "Paid Content"
+      "youAreContributor": "You are a contributor"
     },
     "access": "Access",
     "content": "Content",
@@ -3279,10 +3235,6 @@
         "description": "Organization administration and system settings",
         "title": "Admin",
         "badge": "System"
-      },
-      "Payments": {
-        "description": "Manage payment settings, subscriptions, and invoices",
-        "title": "Payments"
       },
       "noAccess": "You don’t have access to dashboard features yet.",
       "platformLogo": "Ashyq Bilim Logo",
@@ -4862,183 +4814,6 @@
       "socialsDescription": "Manage your organization social media links",
       "socialsTitle": "Socials"
     },
-    "Payments": {
-      "Configuration": {
-        "aboutStripe": {
-          "acceptPayments": "Accept payments for courses and subscriptions",
-          "accessAnalytics": "Access detailed payment analytics",
-          "handleCurrencies": "Handle multiple currencies and payment methods",
-          "learnMore": "Learn more about Stripe",
-          "manageSubscriptions": "Manage recurring billing and subscriptions",
-          "title": "About the Stripe Integration"
-        },
-        "accountNotConfigured": "Stripe account not configured",
-        "configUpdatedSuccess": "Configuration updated successfully",
-        "connectButton": "Connect Stripe Account",
-        "connectedStatus": "Connected",
-        "connectingButton": "Connecting to Stripe...",
-        "deletingStripeConfig": "Deleting Stripe configuration...",
-        "editModalDescription": "Update your Stripe account details",
-        "editModalTitle": "Edit Stripe Configuration",
-        "enableButton": "Enable Stripe Payments",
-        "enablingStripe": "Enabling Stripe...",
-        "errorLoading": "Error loading payment configuration",
-        "errors": {
-          "deleteStripeConfigFailed": "Failed to delete Stripe configuration",
-          "enableStripeFailed": "Failed to enable Stripe",
-          "loadStripeConfigFailed": "Failed to load existing configuration",
-          "startStripeOnboardingFailed": "Failed to start Stripe onboarding",
-          "updateConfigFailed": "Failed to update configuration"
-        },
-        "linkedAccountLabel": "Linked Account ID",
-        "loading": "Loading...",
-        "notConnectedStatus": "Not Connected",
-        "pageDescription": "Manage your organization payments configuration",
-        "pageTitle": "Payments Configuration",
-        "removeConnectionButton": "Remove Connection",
-        "removeConnectionConfirmation": "Are you sure you want to remove the Stripe connection? This will disable payments.",
-        "removeConnectionTitle": "Remove Stripe Connection",
-        "saveButton": "Save",
-        "startingStripeOnboarding": "Starting Stripe onboarding",
-        "stripeAccountIdLabel": "Stripe Account ID",
-        "stripeAccountIdPlaceholder": "acct_...",
-        "stripeConfigDeletedSuccess": "Stripe configuration deleted successfully",
-        "stripeEnabledSuccess": "Stripe enabled successfully",
-        "updatingConfig": "Updating configuration..."
-      },
-      "CustomersPage": {
-        "amountHeader": "Amount",
-        "description": "View and manage your customer information",
-        "errors": {
-          "loadCustomersFailed": "Error loading customers"
-        },
-        "noCustomerData": "No customer data available",
-        "noCustomers": "No customers found",
-        "oneTimeType": "One-time",
-        "productHeader": "Product",
-        "purchaseDateHeader": "Purchase Date",
-        "statusHeader": "Status",
-        "subscriptionType": "Subscription",
-        "title": "Customers",
-        "typeHeader": "Type",
-        "userHeader": "User"
-      },
-      "LinkCourseModal": {
-        "alreadyLinked": "Already Linked",
-        "linkCourseButton": "Link Course",
-        "noCoursesFound": "No courses found",
-        "searchPlaceholder": "Search for courses..."
-      },
-      "LinkedCourses": {
-        "linkCourseButton": "Link Course",
-        "linkModalDescription": "Select courses to associate with this product",
-        "linkModalTitle": "Link Courses to Product",
-        "noCoursesLinked": "No courses linked to this product yet.",
-        "title": "Linked Courses"
-      },
-      "ProductForm": {
-        "benefitsLabel": "Benefits (Optional)",
-        "benefitsPlaceholder": "List the benefits, one per line",
-        "currencyLabel": "Currency",
-        "currencyPlaceholder": "Select currency",
-        "descriptionLabel": "Description",
-        "descriptionPlaceholder": "Describe your product",
-        "errors": {
-          "amountMin": "Amount must be at least 1",
-          "amountRequired": "Amount is required",
-          "currencyRequired": "Currency is required",
-          "descriptionRequired": "Description is required",
-          "nameRequired": "Product name is required",
-          "priceTypeRequired": "Price type is required",
-          "productTypeRequired": "Product type is required"
-        },
-        "minAmountLabel": "Minimum Amount",
-        "nameLabel": "Product Name",
-        "namePlaceholder": "Enter product name",
-        "priceLabel": "Price",
-        "priceTypeLabel": "Price Type",
-        "priceTypePlaceholder": "Select price type",
-        "priceTypes": {
-          "customer_choice": "Customer Choice (Min Price)",
-          "fixed_price": "Fixed Price"
-        },
-        "productTypeLabel": "Product Type",
-        "productTypePlaceholder": "Select product type",
-        "productTypes": {
-          "one_time": "One-time Payment",
-          "subscription": "Subscription"
-        },
-        "submitButton": "Create Product",
-        "submittingButton": "Creating..."
-      },
-      "ProductPage": {
-        "archiveButton": "Archive",
-        "archiveConfirmButton": "Archive Product",
-        "archiveConfirmationMessage": "Are you sure you want to archive this product?",
-        "archiveConfirmationTitle": "Archive {productName}?",
-        "benefitsLabel": "Benefits:",
-        "createModalDescription": "Add a new product to your organization",
-        "createModalTitle": "Create New Product",
-        "createProductButton": "Create New Product",
-        "editButton": "Edit",
-        "editForm": {
-          "benefitsLabel": "Benefits",
-          "benefitsPlaceholder": "Product Benefits",
-          "cancelButton": "Cancel",
-          "currencyLabel": "Currency",
-          "currencyPlaceholder": "Currency",
-          "descriptionLabel": "Description",
-          "descriptionPlaceholder": "Product Description",
-          "nameLabel": "Product Name",
-          "namePlaceholder": "Product Name",
-          "priceLabel": "Price",
-          "pricePlaceholder": "Price",
-          "productUpdatedSuccess": "Product updated successfully",
-          "saveButton": "Save",
-          "savingButton": "Saving...",
-          "updateProductFailed": "Failed to update product"
-        },
-        "errors": {
-          "archiveProductFailed": "Failed to archive data: {error}"
-        },
-        "loadError": "Failed to load products",
-        "loading": "Loading...",
-        "noProducts": "No products available. Create a new product to get started.",
-        "oneTimeType": "One-Time",
-        "priceLabel": "Price:",
-        "productArchivedSuccess": "Product archived successfully",
-        "showLess": "Show less",
-        "showMore": "Show more",
-        "subscriptionType": "Subscription"
-      },
-      "configuration": "Payment Configuration",
-      "configurationInfo": "Set up and manage your payment gateway",
-      "configureStripe": "Configure your Stripe account.",
-      "contactAdmin": "Please contact an administrator to enable payments.",
-      "createProducts": "Create products or subscriptions.",
-      "customerInfo": "View and manage customer information",
-      "customers": "Customers",
-      "goToConfiguration": "Go to Configuration",
-      "notAvailable": "Payments not available",
-      "notEnabledMessage": "The payments feature is not enabled for this organization.",
-      "overview": "Overview",
-      "paidProducts": "Paid Products",
-      "paidProductsInfo": "Manage paid products and pricing",
-      "productsSubscriptions": "Products and Subscriptions",
-      "startSelling": "Start selling your courses!",
-      "title": "Payments",
-      "unconfiguredAlertTitle": "Payment Configuration Required"
-    },
-    "Stripe": {
-      "completing": "Completing Connection...",
-      "connectError": "Error connecting Stripe account",
-      "connectionFailed": "Connection Failed.",
-      "connectionSuccess": "Connection Successful!",
-      "missingParameters": "Missing parameters to verify Stripe connection.",
-      "pleaseWait": "Please wait while we securely connect your Stripe account.",
-      "returnToDashboard": "You can now return to the dashboard.",
-      "tryAgainOrContact": "Please try again or contact support if the issue persists."
-    },
     "UserAccountSettings": {
       "Gamification": {
         "accessibility": {
@@ -6512,7 +6287,6 @@
       "manageAnalytics": "Open teacher analytics dashboard",
       "manageAssignments": "Manage assignments",
       "manageCourses": "Manage courses",
-      "managePayments": "Manage payments and billing",
       "manageUsers": "Manage users",
       "platformSettings": "Platform settings",
       "platformLogo": "Ashyq Bilim logo",
@@ -6537,7 +6311,6 @@
       "courses": "Courses",
       "home": "Home",
       "platform": "Platform",
-      "payments": "Payments",
       "settings": "Settings",
       "users": "Users"
     },
@@ -6551,7 +6324,6 @@
       "logout": "Logout",
       "metrics": "Metrics",
       "platform": "Platform Settings",
-      "payments": "Payments",
       "userSettings": "@{username}'s Settings",
       "users": "Users"
     }

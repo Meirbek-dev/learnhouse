@@ -1380,9 +1380,6 @@
       "step8Button": "Создать задание",
       "step8Desc": "Вовлекайте студентов в выполнение заданий, отслеживайте их прогресс и предоставляйте обратную связь с помощью интуитивно понятной системы оценивания.",
       "step8Title": "Создание и оценка заданий",
-      "step9Button": "Настройки оплаты",
-      "step9Desc": "Настройте планы оплаты, продавайте курсы и управляйте подписками с помощью интегрированной системы оплаты.",
-      "step9Title": "Монетизируйте свой контент",
       "triggerText": "Онбординг"
     },
     "NavMenu": {
@@ -2385,12 +2382,7 @@
       "authors": "Авторы",
       "leaveCourse": "Покинуть курс",
       "loading": "Загрузка...",
-      "modalDescription": "Выберите способ оплаты, чтобы получить доступ к этому курсу",
-      "modalTitle": "Купить курс",
       "moreAuthors": "& еще {count}",
-      "ownCourse": "Вы приобрели этот курсом",
-      "paidCourse": "Платный курс",
-      "purchaseCourse": "Купить курс",
       "signIn": "Войти",
       "startCourse": "Начать курс"
     },
@@ -2437,25 +2429,6 @@
       "updates": "обновления",
       "updatesAppearHere": "Обновления по этому курсу появятся здесь"
     },
-    "CoursePaidOptions": {
-      "benefits": "Преимущества:",
-      "checkoutError": "Не удалось начать процесс оформления заказа",
-      "choosePrice": "Выберите цену",
-      "failedToLoad": "Не удалось загрузить варианты продукта",
-      "loading": "Загрузка...",
-      "minimumPrice": "Минимальная цена:",
-      "oneTimePayment": "Единовременный платеж",
-      "perMonth": "(в месяц)",
-      "perMonthSuffix": "/месяц",
-      "price": "Цена:",
-      "processing": "Обработка...",
-      "purchaseNow": "Купить сейчас",
-      "requestError": "Произошла ошибка при обработке запроса",
-      "showLess": "Показать меньше",
-      "showMore": "Показать больше",
-      "subscribeNow": "Подписаться сейчас",
-      "subscription": "Подписка"
-    },
     "CourseUpdates": {
       "addNewCourseUpdate": "Добавить новое обновление курса",
       "addNewUpdateTitle": "Добавить новое обновление курса",
@@ -2494,7 +2467,6 @@
       "updates": "Обновления"
     },
     "CoursesActions": {
-      "accessCheckError": "Не удалось проверить доступ к курсу. Пожалуйста, повторите попытку позже.",
       "activitiesCompleted": "{completed} из {total} активностей завершено",
       "applicationPending": "Заявка на участие в качестве автора на рассмотрении",
       "applyToContribute": "Подать заявку на участие",
@@ -2518,21 +2490,13 @@
       "contributorApplicationSuccess": "Ваша заявка на участие успешно отправлена",
       "courseCompleted": "Курс завершён!",
       "courseProgress": "Прогресс курса",
-      "courseRequiresPurchase": "Для доступа к содержимому этого курса требуется покупка.",
       "leaveCourse": "Покинуть курс",
       "leaveCourseError": "Не удалось покинуть курс. Пожалуйста, повторите попытку позже.",
       "leaveError": "Не удалось покинуть курс. Пожалуйста, повторите попытку позже.",
       "leaveSuccess": "Успешно покинули курс",
       "leavingCourse": "Покидаем курс...",
       "leftCourseSuccess": "Успешно покинули курс",
-      "modalDescription": "Выберите способ оплаты, чтобы получить доступ к этому курсу",
-      "modalTitle": "Купить курс",
       "moreAuthors": "& еще {count}",
-      "ownCourseDescription": "Вы приобрели этот курс и имеете полный доступ ко всему содержимому.",
-      "ownCourseTitle": "Вы являетесь владельцем этого курса",
-      "paidCourse": "Платный курс",
-      "paidCourseDescription": "Для доступа к содержимому этого курса требуется покупка.",
-      "paidCourseTitle": "Платный курс",
       "progressCard": {
         "activitiesCompletedLabel": "активностей завершено",
         "chapterActivitiesCount": "{completed}/{total} активностей",
@@ -2540,9 +2504,7 @@
         "completedAllActivities": "Отличная работа! Вы завершили все активности.",
         "courseCompleted": "Курс завершён!"
       },
-      "purchaseCourse": "Купить курс",
       "readyToBegin": "Готовы начать?",
-      "selectPaymentOption": "Выберите способ оплаты, чтобы получить доступ к этому курсу",
       "startCourse": "Начать курс",
       "startCourseError": "Не удалось начать курс. Пожалуйста, повторите попытку позже.",
       "startError": "Не удалось начать курс. Пожалуйста, повторите попытку позже.",
@@ -2552,13 +2514,7 @@
       "startingCourse": "Начинаем курс...",
       "submittingContributorApplication": "Отправка заявки на участие...",
       "youAreAContributor": "Вы являетесь автором",
-      "youAreContributor": "Вы являетесь автором",
-      "youHavePurchasedThisCourse": "Вы приобрели этот курс и имеете полный доступ ко всему содержимому.",
-      "youOwnThisCourse": "Вы являетесь владельцем этого курса"
-    },
-    "PaidCourseActivityDisclaimer": {
-      "message": "Для доступа содержимому требуется покупка курса.",
-      "paidContent": "Платный контент"
+      "youAreContributor": "Вы являетесь автором"
     },
     "access": "Доступ",
     "content": "Содержимое",
@@ -3310,10 +3266,6 @@
         "description": "Администрирование организации и системные настройки",
         "title": "Администрирование",
         "badge": "Системно"
-      },
-      "Payments": {
-        "description": "Управляйте настройками оплат, подписками и счетами",
-        "title": "Платежи"
       },
       "noAccess": "У вас пока нет доступа к функциям панели управления.",
       "platformLogo": "Логотип Ashyq Bilim",
@@ -4888,183 +4840,6 @@
       "socialsDescription": "Управление ссылками на социальные сети",
       "socialsTitle": "Социальные сети"
     },
-    "Payments": {
-      "Configuration": {
-        "aboutStripe": {
-          "acceptPayments": "Принимайте платежи за курсы и подписки",
-          "accessAnalytics": "Получайте доступ к подробной аналитике платежей",
-          "handleCurrencies": "Работайте с несколькими валютами и способами оплаты",
-          "learnMore": "Узнать больше о Stripe",
-          "manageSubscriptions": "Управляйте регулярными платежами и подписками",
-          "title": "О интеграции со Stripe"
-        },
-        "accountNotConfigured": "Аккаунт Stripe не настроен",
-        "configUpdatedSuccess": "Конфигурация успешно обновлена",
-        "connectButton": "Подключить аккаунт Stripe",
-        "connectedStatus": "Подключено",
-        "connectingButton": "Подключение к Stripe...",
-        "deletingStripeConfig": "Удаление конфигурации Stripe...",
-        "editModalDescription": "Обновите данные аккаунта Stripe",
-        "editModalTitle": "Редактировать конфигурацию Stripe",
-        "enableButton": "Включить платежи Stripe",
-        "enablingStripe": "Включение Stripe...",
-        "errorLoading": "Ошибка загрузки конфигурации платежей",
-        "errors": {
-          "deleteStripeConfigFailed": "Не удалось удалить конфигурацию Stripe",
-          "enableStripeFailed": "Не удалось включить Stripe",
-          "loadStripeConfigFailed": "Не удалось загрузить существующую конфигурацию",
-          "startStripeOnboardingFailed": "Не удалось начать регистрацию в Stripe",
-          "updateConfigFailed": "Не удалось обновить конфигурацию"
-        },
-        "linkedAccountLabel": "ID связанного аккаунта",
-        "loading": "Загрузка...",
-        "notConnectedStatus": "Не подключено",
-        "pageDescription": "Управляйте конфигурацией платежей",
-        "pageTitle": "Конфигурация платежей",
-        "removeConnectionButton": "Удалить подключение",
-        "removeConnectionConfirmation": "Вы уверены, что хотите удалить подключение Stripe? Это отключит платежи.",
-        "removeConnectionTitle": "Удалить подключение Stripe",
-        "saveButton": "Сохранить",
-        "startingStripeOnboarding": "Запуск регистрации в Stripe",
-        "stripeAccountIdLabel": "ID аккаунта Stripe",
-        "stripeAccountIdPlaceholder": "acct_...",
-        "stripeConfigDeletedSuccess": "Конфигурация Stripe успешно удалена",
-        "stripeEnabledSuccess": "Stripe успешно включен",
-        "updatingConfig": "Обновление конфигурации..."
-      },
-      "CustomersPage": {
-        "amountHeader": "Сумма",
-        "description": "Просматривайте и управляйте информацией о ваших клиентах",
-        "errors": {
-          "loadCustomersFailed": "Ошибка загрузки клиентов"
-        },
-        "noCustomerData": "Нет данных о клиентах",
-        "noCustomers": "Клиенты не найдены",
-        "oneTimeType": "Единовременный",
-        "productHeader": "Продукт",
-        "purchaseDateHeader": "Дата покупки",
-        "statusHeader": "Статус",
-        "subscriptionType": "Подписка",
-        "title": "Клиенты",
-        "typeHeader": "Тип",
-        "userHeader": "Пользователь"
-      },
-      "LinkCourseModal": {
-        "alreadyLinked": "Уже связано",
-        "linkCourseButton": "Связать курс",
-        "noCoursesFound": "Курсы не найдены",
-        "searchPlaceholder": "Поиск курсов..."
-      },
-      "LinkedCourses": {
-        "linkCourseButton": "Связать курс",
-        "linkModalDescription": "Выберите курсы для привязки к этому продукту",
-        "linkModalTitle": "Привязать курсы к продукту",
-        "noCoursesLinked": "К этому продукту еще не привязаны курсы.",
-        "title": "Связанные курсы"
-      },
-      "ProductForm": {
-        "benefitsLabel": "Преимущества (необязательно)",
-        "benefitsPlaceholder": "Перечислите преимущества, по одному на строку",
-        "currencyLabel": "Валюта",
-        "currencyPlaceholder": "Выберите валюту",
-        "descriptionLabel": "Описание",
-        "descriptionPlaceholder": "Опишите продукт",
-        "errors": {
-          "amountMin": "Сумма должна быть не менее 1",
-          "amountRequired": "Требуется сумма",
-          "currencyRequired": "Требуется валюта",
-          "descriptionRequired": "Требуется описание",
-          "nameRequired": "Требуется название продукта",
-          "priceTypeRequired": "Требуется тип цены",
-          "productTypeRequired": "Требуется тип продукта"
-        },
-        "minAmountLabel": "Минимальная сумма",
-        "nameLabel": "Название продукта",
-        "namePlaceholder": "Введите название продукта",
-        "priceLabel": "Цена",
-        "priceTypeLabel": "Тип цены",
-        "priceTypePlaceholder": "Выберите тип цены",
-        "priceTypes": {
-          "customer_choice": "Выбор клиента (мин. цена)",
-          "fixed_price": "Фиксированная цена"
-        },
-        "productTypeLabel": "Тип продукта",
-        "productTypePlaceholder": "Выберите тип продукта",
-        "productTypes": {
-          "one_time": "Единовременный платеж",
-          "subscription": "Подписка"
-        },
-        "submitButton": "Создать продукт",
-        "submittingButton": "Создание..."
-      },
-      "ProductPage": {
-        "archiveButton": "Архивировать",
-        "archiveConfirmButton": "Архивировать продукт",
-        "archiveConfirmationMessage": "Вы уверены, что хотите архивировать этот продукт?",
-        "archiveConfirmationTitle": "Архивировать {productName}?",
-        "benefitsLabel": "Преимущества:",
-        "createModalDescription": "Создайте платный курс",
-        "createModalTitle": "Создать новый платный курс",
-        "createProductButton": "Создать новый платный курс",
-        "editButton": "Редактировать",
-        "editForm": {
-          "benefitsLabel": "Преимущества",
-          "benefitsPlaceholder": "Преимущества продукта",
-          "cancelButton": "Отмена",
-          "currencyLabel": "Валюта",
-          "currencyPlaceholder": "Валюта",
-          "descriptionLabel": "Описание",
-          "descriptionPlaceholder": "Описание продукта",
-          "nameLabel": "Название продукта",
-          "namePlaceholder": "Название продукта",
-          "priceLabel": "Цена",
-          "pricePlaceholder": "Цена",
-          "productUpdatedSuccess": "Продукт успешно обновлен",
-          "saveButton": "Сохранить",
-          "savingButton": "Сохранение...",
-          "updateProductFailed": "Не удалось обновить продукт"
-        },
-        "errors": {
-          "archiveProductFailed": "Не удалось архивировать данные: {error}"
-        },
-        "loadError": "Не удалось загрузить продукты",
-        "loading": "Загрузка...",
-        "noProducts": "Нет доступных продуктов. Создайте новый продукт, чтобы начать.",
-        "oneTimeType": "Единовременный",
-        "priceLabel": "Цена:",
-        "productArchivedSuccess": "Продукт успешно заархивирован",
-        "showLess": "Показать меньше",
-        "showMore": "Показать больше",
-        "subscriptionType": "Подписка"
-      },
-      "configuration": "Настройка платежей",
-      "configurationInfo": "Настройте и управляйте своим платежным шлюзом",
-      "configureStripe": "Настройте свою учетную запись Stripe.",
-      "contactAdmin": "Пожалуйста, свяжитесь с администратором, чтобы включить платежи.",
-      "createProducts": "Создавайте продукты или подписки.",
-      "customerInfo": "Просмотр и управление информацией о клиентах",
-      "customers": "Клиенты",
-      "goToConfiguration": "Перейти к конфигурации",
-      "notAvailable": "Платежи недоступны",
-      "notEnabledMessage": "Функция платежей находится в разработке.",
-      "overview": "Обзор",
-      "paidProducts": "Платные продукты",
-      "paidProductsInfo": "Управление платными продуктами и ценами",
-      "productsSubscriptions": "Продукты и подписки",
-      "startSelling": "Начните продавать свои курсы!",
-      "title": "Платежи",
-      "unconfiguredAlertTitle": "Требуется настройка платежей"
-    },
-    "Stripe": {
-      "completing": "Завершение подключения...",
-      "connectError": "Ошибка подключения учетной записи Stripe",
-      "connectionFailed": "Подключение не удалось.",
-      "connectionSuccess": "Подключение успешно!",
-      "missingParameters": "Отсутствуют параметры для проверки подключения Stripe.",
-      "pleaseWait": "Пожалуйста, подождите, пока мы подключим вашу учетную запись Stripe.",
-      "returnToDashboard": "Теперь вы можете вернуться на панель управления.",
-      "tryAgainOrContact": "Пожалуйста, попробуйте еще раз или свяжитесь со службой поддержки, если проблема не исчезнет."
-    },
     "UserAccountSettings": {
       "Gamification": {
         "accessibility": {
@@ -6543,7 +6318,6 @@
       "manageAnalytics": "Открыть панель аналитики преподавателя",
       "manageAssignments": "Управление заданиями",
       "manageCourses": "Управление курсами",
-      "managePayments": "Управление платежами и выставлением счетов",
       "manageUsers": "Управление пользователями",
       "platformSettings": "Настройки платформы",
       "platformLogo": "Логотип Ashyq Bilim",
@@ -6568,7 +6342,6 @@
       "courses": "Курсы",
       "home": "Главная",
       "platform": "Платформа",
-      "payments": "Платежи",
       "settings": "Настройки",
       "users": "Пользователи"
     },
@@ -6582,7 +6355,6 @@
       "logout": "Выйти",
       "metrics": "Метрики",
       "platform": "Настройки платформы",
-      "payments": "Платежи",
       "userSettings": "Настройки @{username}",
       "users": "Пользователи"
     }

@@ -367,45 +367,6 @@ class RedisConfig(PlatformSectionSettings):
         return stripped
 
 
-class InternalStripeConfig(PlatformSectionSettings):
-    stripe_secret_key: str | None = Field(
-        default=None,
-        validation_alias="PLATFORM_STRIPE_SECRET_KEY",
-    )
-    stripe_publishable_key: str | None = Field(
-        default=None,
-        validation_alias="PLATFORM_STRIPE_PUBLISHABLE_KEY",
-    )
-    stripe_webhook_standard_secret: str | None = Field(
-        default=None,
-        validation_alias="PLATFORM_STRIPE_WEBHOOK_STANDARD_SECRET",
-    )
-    stripe_webhook_connect_secret: str | None = Field(
-        default=None,
-        validation_alias="PLATFORM_STRIPE_WEBHOOK_CONNECT_SECRET",
-    )
-    stripe_client_id: str | None = Field(
-        default=None,
-        validation_alias="PLATFORM_STRIPE_CLIENT_ID",
-    )
-
-    @field_validator(
-        "stripe_secret_key",
-        "stripe_publishable_key",
-        "stripe_webhook_standard_secret",
-        "stripe_webhook_connect_secret",
-        "stripe_client_id",
-        mode="before",
-    )
-    @classmethod
-    def normalize_optional_secret_fields(cls, value: str | None) -> str | None:
-        return _strip_optional_string(value)
-
-
-class InternalPaymentsConfig(PydanticStrictBaseModel):
-    stripe: InternalStripeConfig = Field(default_factory=InternalStripeConfig)
-
-
 class GoogleOAuthConfig(PlatformSectionSettings):
     client_id: str | None = Field(
         default=None,
@@ -474,7 +435,6 @@ class PlatformConfig(PydanticStrictBaseModel):
     security_config: SecurityConfig
     ai_config: AIConfig
     mailing_config: MailingConfig
-    payments_config: InternalPaymentsConfig
 
     @model_validator(mode="after")
     def validate_security_posture(self) -> "PlatformConfig":
@@ -501,7 +461,6 @@ def get_settings() -> AppSettings:
         security_config=SecurityConfig(),
         ai_config=AIConfig(),
         mailing_config=MailingConfig(),
-        payments_config=InternalPaymentsConfig(stripe=InternalStripeConfig()),
         bootstrap=BootstrapConfig(),
         integrations=IntegrationsConfig(judge0=Judge0Config()),
         google_oauth=GoogleOAuthConfig(),

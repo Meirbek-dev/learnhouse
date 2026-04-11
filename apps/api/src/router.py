@@ -26,7 +26,6 @@ from src.routers.courses import (
     exams,
 )
 from src.routers.courses.activities import activities, blocks
-from src.routers.ee import payments
 from src.routers.grading.submit import router as grading_submit_router
 from src.routers.grading.teacher import router as grading_teacher_router
 from src.routers.uploads import chunked_upload
@@ -81,9 +80,6 @@ v1_router.include_router(grading_submit_router, prefix="/grading", tags=["gradin
 v1_router.include_router(grading_teacher_router, prefix="/grading", tags=["grading"])
 
 v1_router.include_router(ai.router, prefix="/ai", tags=["ai"])
-
-# Payments/EE
-v1_router.include_router(payments.router, prefix="/payments", tags=["payments"])
 
 # Dev routes
 v1_router.include_router(

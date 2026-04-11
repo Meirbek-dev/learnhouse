@@ -23,7 +23,6 @@ import {
   Minimize2,
   UserRoundPen,
 } from 'lucide-react';
-import PaidCourseActivityDisclaimer from '@components/Objects/Courses/CourseActions/PaidCourseActivityDisclaimer';
 import { getCourseThumbnailMediaDirectory, getUserAvatarMediaDirectory } from '@services/media/media';
 import { AssignmentsTaskProvider } from '@components/Contexts/Assignments/AssignmentsTaskContext';
 import { markActivityAsComplete, unmarkActivityAsComplete } from '@services/courses/activity';
@@ -174,16 +173,12 @@ const ActivityActions = ({ activity, activityid, course, assignment, showNavigat
   const t = useTranslations('ActivityPage');
   const { contributorStatus } = useContributorStatus(course.course_uuid);
   const { isAuthenticated } = useSession();
-  const isPaidAccessAllowed = activity?.content?.paid_access !== false || contributorStatus === 'ACTIVE';
 
   const { data: trailData } = useTrailCurrent();
 
   return (
     <div className="flex items-center space-x-2">
-      {activity &&
-      (activity.published === true || contributorStatus === 'ACTIVE') &&
-      isPaidAccessAllowed &&
-      isAuthenticated ? (
+      {activity && (activity.published === true || contributorStatus === 'ACTIVE') && isAuthenticated ? (
         <>
           {activity.activity_type !== 'TYPE_ASSIGNMENT' && (
             <MarkStatus
@@ -293,11 +288,8 @@ const ActivityClient = (props: ActivityClientProps) => {
       return null;
     }
 
-    // Allow teachers (ACTIVE contributors) to view content even when unpublished or paid-locked
+    // Allow teachers (ACTIVE contributors) to view content even when unpublished
     if (!activity?.published && contributorStatus !== 'ACTIVE') {
-      return null;
-    }
-    if (activity?.content?.paid_access === false && contributorStatus !== 'ACTIVE') {
       return null;
     }
 
@@ -601,27 +593,21 @@ const ActivityClient = (props: ActivityClientProps) => {
                 <div className="h-full overflow-auto pt-16 pb-20">
                   <div className="container mx-auto px-4">
                     {activity && (activity.published === true || contributorStatus === 'ACTIVE') ? (
-                      activity?.content?.paid_access === false && contributorStatus !== 'ACTIVE' ? (
-                        <PaidCourseActivityDisclaimer course={course} />
-                      ) : (
-                        <motion.div
-                          initial={isInitialRender ? false : { scale: 0.95, opacity: 0 }}
-                          animate={{ scale: 1, opacity: 1 }}
-                          transition={{ delay: 0.3 }}
-                          className={`rounded-lg p-7 ${bgColor} mt-4`}
-                        >
-                          {/* Activity Types */}
-                          <div>{activityContent}</div>
-                        </motion.div>
-                      )
+                      <motion.div
+                        initial={isInitialRender ? false : { scale: 0.95, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ delay: 0.3 }}
+                        className={`rounded-lg p-7 ${bgColor} mt-4`}
+                      >
+                        {/* Activity Types */}
+                        <div>{activityContent}</div>
+                      </motion.div>
                     ) : null}
                   </div>
                 </div>
 
                 {/* Focus Mode Bottom Bar */}
-                {activity &&
-                (activity.published === true || contributorStatus === 'ACTIVE') &&
-                (activity?.content?.paid_access !== false || contributorStatus === 'ACTIVE') ? (
+                {activity && (activity.published === true || contributorStatus === 'ACTIVE') ? (
                   <motion.div
                     initial={isInitialRender ? false : { y: 100 }}
                     animate={{ y: 0 }}
@@ -881,7 +867,6 @@ const ActivityClient = (props: ActivityClientProps) => {
                         <div className="flex items-center space-x-2">
                           {activity &&
                           (activity.published === true || contributorStatus === 'ACTIVE') &&
-                          (activity?.content?.paid_access !== false || contributorStatus === 'ACTIVE') &&
                           isAuthenticated ? (
                             <>
                               {activity.activity_type !== 'TYPE_ASSIGNMENT' && (
@@ -923,38 +908,32 @@ const ActivityClient = (props: ActivityClientProps) => {
                     ) : null}
 
                     {activity && (activity.published === true || contributorStatus === 'ACTIVE') ? (
-                      activity?.content?.paid_access === false ? (
-                        <PaidCourseActivityDisclaimer course={course} />
-                      ) : (
-                        <div className={`rounded-lg p-7 drop-shadow-xs ${bgColor} relative`}>
-                          {!isAutoFocusInitiated && (
-                            <button
-                              onClick={() => {
-                                setIsFocusMode(true);
-                              }}
-                              className="soft-shadow group pointer-events-auto absolute top-4 right-4 z-50 cursor-pointer overflow-hidden rounded-full bg-white/80 p-2 transition-all duration-200 hover:bg-white"
-                              title={t('enterFocusMode')}
-                            >
-                              <div className="flex items-center">
-                                <Maximize2
-                                  size={16}
-                                  className="text-gray-700"
-                                />
-                                <span className="w-0 text-xs font-bold whitespace-nowrap text-gray-700 opacity-0 transition-all duration-200 group-hover:ml-2 group-hover:w-auto group-hover:opacity-100">
-                                  {t('focusMode')}
-                                </span>
-                              </div>
-                            </button>
-                          )}
-                          {activityContent}
-                        </div>
-                      )
+                      <div className={`rounded-lg p-7 drop-shadow-xs ${bgColor} relative`}>
+                        {!isAutoFocusInitiated && (
+                          <button
+                            onClick={() => {
+                              setIsFocusMode(true);
+                            }}
+                            className="soft-shadow group pointer-events-auto absolute top-4 right-4 z-50 cursor-pointer overflow-hidden rounded-full bg-white/80 p-2 transition-all duration-200 hover:bg-white"
+                            title={t('enterFocusMode')}
+                          >
+                            <div className="flex items-center">
+                              <Maximize2
+                                size={16}
+                                className="text-gray-700"
+                              />
+                              <span className="w-0 text-xs font-bold whitespace-nowrap text-gray-700 opacity-0 transition-all duration-200 group-hover:ml-2 group-hover:w-auto group-hover:opacity-100">
+                                {t('focusMode')}
+                              </span>
+                            </div>
+                          </button>
+                        )}
+                        {activityContent}
+                      </div>
                     ) : null}
 
                     {/* Activity Actions below the content box */}
-                    {activity &&
-                    (activity.published === true || contributorStatus === 'ACTIVE') &&
-                    (activity?.content?.paid_access !== false || contributorStatus === 'ACTIVE') ? (
+                    {activity && (activity.published === true || contributorStatus === 'ACTIVE') ? (
                       <div className="mt-4 flex w-full items-center justify-between">
                         <div>
                           <PreviousActivityButton
@@ -979,9 +958,7 @@ const ActivityClient = (props: ActivityClientProps) => {
                     ) : null}
 
                     {/* Fixed Activity Secondary Bar */}
-                    {activity &&
-                    (activity.published === true || contributorStatus === 'ACTIVE') &&
-                    (activity?.content?.paid_access !== false || contributorStatus === 'ACTIVE') ? (
+                    {activity && (activity.published === true || contributorStatus === 'ACTIVE') ? (
                       <FixedActivitySecondaryBar
                         course={course}
                         currentActivityId={activityid}

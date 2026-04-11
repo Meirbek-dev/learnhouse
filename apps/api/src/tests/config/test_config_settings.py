@@ -9,7 +9,6 @@ from config.config import (
     DatabaseConfig,
     GeneralConfig,
     HostingConfig,
-    InternalPaymentsConfig,
     MailingConfig,
     PlatformConfig,
     RedisConfig,
@@ -90,7 +89,6 @@ def test_platform_config_accepts_public_key_only_security_config() -> None:
             resend_api_key=None,
             system_email_address=None,
         ),
-        payments_config=InternalPaymentsConfig(),
     )
 
 

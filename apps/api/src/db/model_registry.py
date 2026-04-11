@@ -27,10 +27,6 @@ def import_orm_models() -> None:
     import src.db.gamification
     import src.db.grading.schemas
     import src.db.grading.submissions
-    import src.db.payments.payments
-    import src.db.payments.payments_courses
-    import src.db.payments.payments_products
-    import src.db.payments.payments_users
     import src.db.permissions
     import src.db.platform
     import src.db.resource_authors
