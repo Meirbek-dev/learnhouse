@@ -1,8 +1,8 @@
 from datetime import UTC, datetime
 from enum import StrEnum
-from typing import Any, Literal
+from typing import Annotated, Any, Literal
 
-from pydantic import Field
+from pydantic import Field, StringConstraints
 from pydantic_ai.messages import (
     ModelMessage,
     ModelRequest,
@@ -112,7 +112,9 @@ class StatusEvent(PydanticStrictBaseModel):
 class DeltaEvent(PydanticStrictBaseModel):
     version: Literal[1] = 1
     type: Literal["delta"] = "delta"
-    content: str = Field(min_length=1)
+    # strip_whitespace=False overrides the model-level str_strip_whitespace=True so
+    # that leading/trailing spaces within streaming chunks are preserved verbatim.
+    content: Annotated[str, StringConstraints(min_length=1, strip_whitespace=False)]
     chunk_id: int
 
 
