@@ -137,7 +137,7 @@ class AIConfig(PlatformSectionSettings):
         validation_alias="PLATFORM_OPENAI_API_KEY",
     )
     chat_model: str = Field(
-        default="gpt-5.4-nano",
+        default="gpt-5.4-mini",
         validation_alias="PLATFORM_AI_CHAT_MODEL",
     )
     embedding_model: str = Field(

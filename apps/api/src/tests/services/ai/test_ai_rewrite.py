@@ -137,7 +137,7 @@ def test_get_model_uses_platform_openai_api_key(
     fake_ai_config = type(
         "AIConfig",
         (),
-        {"chat_model": "gpt-5.4-nano", "openai_api_key": "test-key"},
+        {"chat_model": "gpt-5.4-mini", "openai_api_key": "test-key"},
     )()
     fake_settings = type("Settings", (), {"ai_config": fake_ai_config})()
 
@@ -152,7 +152,7 @@ def test_get_model_uses_platform_openai_api_key(
 
 @dataclass
 class _FakeResponseMessage:
-    model_name: str | None = "openai:gpt-5.4-nano"
+    model_name: str | None = "openai:gpt-5.4-mini"
     finish_reason: str | None = "stop"
 
 
