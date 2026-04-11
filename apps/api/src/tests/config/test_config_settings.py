@@ -1,6 +1,7 @@
 import pytest
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+from pydantic import ValidationError
 
 from config.config import (
     AIConfig,
@@ -102,4 +103,19 @@ def test_security_config_requires_key_material() -> None:
                 "PLATFORM_AUTH_ED25519_PRIVATE_KEY": None,
                 "PLATFORM_AUTH_ED25519_PUBLIC_KEY": None,
             }
+        )
+
+
+def test_database_config_accepts_sqlite_for_test_engine() -> None:
+    cfg = DatabaseConfig.model_validate(
+        {"PLATFORM_SQL_CONNECTION_STRING": "sqlite://"}
+    )
+
+    assert cfg.sql_connection_string == "sqlite://"
+
+
+def test_database_config_rejects_unsupported_sql_schemes() -> None:
+    with pytest.raises(ValidationError, match="URL scheme should be"):
+        DatabaseConfig.model_validate(
+            {"PLATFORM_SQL_CONNECTION_STRING": "mysql://user:pass@db/app"}
         )

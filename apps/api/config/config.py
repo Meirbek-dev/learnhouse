@@ -341,6 +341,9 @@ class DatabaseConfig(PlatformSectionSettings):
         if not stripped:
             raise ValueError("PLATFORM_SQL_CONNECTION_STRING must not be empty")
 
+        if stripped.startswith("sqlite"):
+            return stripped
+
         _POSTGRES_DSN.validate_python(stripped)
         return stripped
 
