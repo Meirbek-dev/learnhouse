@@ -1,6 +1,9 @@
 'use client';
 
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import TaskFileObject from '@/app/_shared/dash/assignments/[assignmentuuid]/_components/TaskEditor/Subs/TaskTypes/TaskFileObject';
+import { useAssignmentTaskSubmission } from '@/features/assignments/hooks/useAssignments';
+import { queryKeys } from '@/lib/react-query/queryKeys';
 import { getAssignmentTaskSubmissionsMe, handleAssignmentTaskSubmission } from '@services/courses/assignments';
 import { AlertCircle, Backpack, Calendar, CheckCircle2, Download, Info, Loader2 } from 'lucide-react';
 import { useAssignments } from '@components/Contexts/Assignments/AssignmentContext';
@@ -447,18 +450,38 @@ interface InteractiveQuizTaskProps {
 
 const InteractiveQuizTask = ({ task, questions, t }: InteractiveQuizTaskProps) => {
   const assignments = useAssignments();
+  const queryClient = useQueryClient();
+  const assignmentUUID = assignments.assignment_object?.assignment_uuid;
   const normalizedQuestions = Array.isArray(questions) ? questions : [];
   const [submissionUUID, setSubmissionUUID] = useState<string | undefined>();
   const [answers, setAnswers] = useState<Record<string, string[]>>({});
   const [initialAnswers, setInitialAnswers] = useState<Record<string, string[]>>({});
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const submissionQuery = useAssignmentTaskSubmission<TaskSubmissionRead>(assignmentUUID, task.assignment_task_uuid);
+  const saveSubmissionMutation = useMutation({
+    mutationFn: async (taskSubmission: Record<string, unknown>) => {
+      if (!assignmentUUID) {
+        throw new Error('missing_assignment_uuid');
+      }
+
+      return saveTaskSubmission({
+        assignmentTaskUUID: task.assignment_task_uuid,
+        assignmentUUID,
+        submissionUUID,
+        taskSubmission,
+      });
+    },
+    onSuccess: (saved) => {
+      if (!assignmentUUID || !saved) return;
+
+      queryClient.setQueryData<TaskSubmissionRead | null>(
+        queryKeys.assignments.taskSubmission(assignmentUUID, task.assignment_task_uuid),
+        saved,
+      );
+    },
+  });
 
   useEffect(() => {
-    let cancelled = false;
-
-    const assignmentUUID = assignments.assignment_object?.assignment_uuid;
     if (!assignmentUUID || !task.assignment_task_uuid) {
       setSubmissionUUID(undefined);
       setAnswers({});
@@ -466,41 +489,20 @@ const InteractiveQuizTask = ({ task, questions, t }: InteractiveQuizTaskProps) =
       return;
     }
 
-    const run = async () => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const submission = await loadTaskSubmission({
-          assignmentTaskUUID: task.assignment_task_uuid,
-          assignmentUUID,
-        });
-        if (cancelled) return;
-        const normalized = normalizeQuizSubmission(submission?.task_submission);
-        setSubmissionUUID(submission?.assignment_task_submission_uuid);
-        setAnswers(normalized.answers);
-        setInitialAnswers(normalized.answers);
-      } catch (loadError) {
-        if (!cancelled) {
-          setError(t('loadSubmissionError'));
-          console.error(loadError);
-        }
-      } finally {
-        if (!cancelled) setIsLoading(false);
-      }
-    };
-
-    void run();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [assignments.assignment_object?.assignment_uuid, task.assignment_task_uuid, t]);
+    const normalized = normalizeQuizSubmission(submissionQuery.data?.task_submission);
+    setSubmissionUUID(submissionQuery.data?.assignment_task_submission_uuid);
+    setAnswers(normalized.answers);
+    setInitialAnswers(normalized.answers);
+  }, [assignmentUUID, submissionQuery.data, task.assignment_task_uuid]);
 
   if (normalizedQuestions.length === 0) {
     return <TaskPlaceholder message={t('taskContentUnavailable')} />;
   }
 
   const isDirty = JSON.stringify(answers) !== JSON.stringify(initialAnswers);
+  const isLoading = submissionQuery.isPending;
+  const isSaving = saveSubmissionMutation.isPending;
+  const effectiveError = error ?? (submissionQuery.error ? t('loadSubmissionError') : null);
 
   const toggleOption = (questionId: string, optionId: string) => {
     setAnswers((current) => {
@@ -517,20 +519,13 @@ const InteractiveQuizTask = ({ task, questions, t }: InteractiveQuizTaskProps) =
   };
 
   const handleSave = async () => {
-    const assignmentUUID = assignments.assignment_object?.assignment_uuid;
     if (!assignmentUUID) {
       return;
     }
 
-    setIsSaving(true);
     setError(null);
     try {
-      const saved = await saveTaskSubmission({
-        assignmentTaskUUID: task.assignment_task_uuid,
-        assignmentUUID,
-        submissionUUID,
-        taskSubmission: { answers },
-      });
+      const saved = await saveSubmissionMutation.mutateAsync({ answers });
       const normalized = normalizeQuizSubmission(saved?.task_submission);
       setSubmissionUUID(saved?.assignment_task_submission_uuid);
       setAnswers(normalized.answers);
@@ -539,17 +534,15 @@ const InteractiveQuizTask = ({ task, questions, t }: InteractiveQuizTaskProps) =
     } catch (saveError) {
       setError(t('saveSubmissionError'));
       console.error(saveError);
-    } finally {
-      setIsSaving(false);
     }
   };
 
   return (
     <div className="space-y-4">
-      {error ? (
+      {effectiveError ? (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{error}</AlertDescription>
+          <AlertDescription>{effectiveError}</AlertDescription>
         </Alert>
       ) : null}
 
@@ -620,18 +613,38 @@ interface InteractiveFormTaskProps {
 
 const InteractiveFormTask = ({ task, questions, t }: InteractiveFormTaskProps) => {
   const assignments = useAssignments();
+  const queryClient = useQueryClient();
+  const assignmentUUID = assignments.assignment_object?.assignment_uuid;
   const normalizedQuestions = Array.isArray(questions) ? questions : [];
   const [submissionUUID, setSubmissionUUID] = useState<string | undefined>();
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [initialAnswers, setInitialAnswers] = useState<Record<string, string>>({});
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const submissionQuery = useAssignmentTaskSubmission<TaskSubmissionRead>(assignmentUUID, task.assignment_task_uuid);
+  const saveSubmissionMutation = useMutation({
+    mutationFn: async (taskSubmission: Record<string, unknown>) => {
+      if (!assignmentUUID) {
+        throw new Error('missing_assignment_uuid');
+      }
+
+      return saveTaskSubmission({
+        assignmentTaskUUID: task.assignment_task_uuid,
+        assignmentUUID,
+        submissionUUID,
+        taskSubmission,
+      });
+    },
+    onSuccess: (saved) => {
+      if (!assignmentUUID || !saved) return;
+
+      queryClient.setQueryData<TaskSubmissionRead | null>(
+        queryKeys.assignments.taskSubmission(assignmentUUID, task.assignment_task_uuid),
+        saved,
+      );
+    },
+  });
 
   useEffect(() => {
-    let cancelled = false;
-
-    const assignmentUUID = assignments.assignment_object?.assignment_uuid;
     if (!assignmentUUID || !task.assignment_task_uuid) {
       setSubmissionUUID(undefined);
       setAnswers({});
@@ -639,41 +652,20 @@ const InteractiveFormTask = ({ task, questions, t }: InteractiveFormTaskProps) =
       return;
     }
 
-    const run = async () => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const submission = await loadTaskSubmission({
-          assignmentTaskUUID: task.assignment_task_uuid,
-          assignmentUUID,
-        });
-        if (cancelled) return;
-        const normalized = normalizeFormSubmission(submission?.task_submission);
-        setSubmissionUUID(submission?.assignment_task_submission_uuid);
-        setAnswers(normalized.answers);
-        setInitialAnswers(normalized.answers);
-      } catch (loadError) {
-        if (!cancelled) {
-          setError(t('loadSubmissionError'));
-          console.error(loadError);
-        }
-      } finally {
-        if (!cancelled) setIsLoading(false);
-      }
-    };
-
-    void run();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [assignments.assignment_object?.assignment_uuid, task.assignment_task_uuid, t]);
+    const normalized = normalizeFormSubmission(submissionQuery.data?.task_submission);
+    setSubmissionUUID(submissionQuery.data?.assignment_task_submission_uuid);
+    setAnswers(normalized.answers);
+    setInitialAnswers(normalized.answers);
+  }, [assignmentUUID, submissionQuery.data, task.assignment_task_uuid]);
 
   if (normalizedQuestions.length === 0) {
     return <TaskPlaceholder message={t('taskContentUnavailable')} />;
   }
 
   const isDirty = JSON.stringify(answers) !== JSON.stringify(initialAnswers);
+  const isLoading = submissionQuery.isPending;
+  const isSaving = saveSubmissionMutation.isPending;
+  const effectiveError = error ?? (submissionQuery.error ? t('loadSubmissionError') : null);
 
   const handleInputChange = (blankId: string, value: string) => {
     setAnswers((current) => ({
@@ -683,20 +675,13 @@ const InteractiveFormTask = ({ task, questions, t }: InteractiveFormTaskProps) =
   };
 
   const handleSave = async () => {
-    const assignmentUUID = assignments.assignment_object?.assignment_uuid;
     if (!assignmentUUID) {
       return;
     }
 
-    setIsSaving(true);
     setError(null);
     try {
-      const saved = await saveTaskSubmission({
-        assignmentTaskUUID: task.assignment_task_uuid,
-        assignmentUUID,
-        submissionUUID,
-        taskSubmission: { answers },
-      });
+      const saved = await saveSubmissionMutation.mutateAsync({ answers });
       const normalized = normalizeFormSubmission(saved?.task_submission);
       setSubmissionUUID(saved?.assignment_task_submission_uuid);
       setAnswers(normalized.answers);
@@ -705,17 +690,15 @@ const InteractiveFormTask = ({ task, questions, t }: InteractiveFormTaskProps) =
     } catch (saveError) {
       setError(t('saveSubmissionError'));
       console.error(saveError);
-    } finally {
-      setIsSaving(false);
     }
   };
 
   return (
     <div className="space-y-4">
-      {error ? (
+      {effectiveError ? (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{error}</AlertDescription>
+          <AlertDescription>{effectiveError}</AlertDescription>
         </Alert>
       ) : null}
 

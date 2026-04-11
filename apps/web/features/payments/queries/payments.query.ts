@@ -1,6 +1,12 @@
 'use client';
 
-import { getCustomers, getOwnedCourses, getPaymentConfigs, verifyStripeConnection } from '@services/payments/payments';
+import {
+  checkPaidAccess,
+  getCustomers,
+  getOwnedCourses,
+  getPaymentConfigs,
+  verifyStripeConnection,
+} from '@services/payments/payments';
 import { getCoursesLinkedToProduct, getProducts, getProductsByCourse } from '@services/payments/products';
 import { queryOptions } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/react-query/queryKeys';
@@ -37,6 +43,13 @@ export function courseProductsQueryOptions(courseId: number) {
   return queryOptions({
     queryKey: queryKeys.payments.courseProducts(courseId),
     queryFn: () => getProductsByCourse(courseId),
+  });
+}
+
+export function courseAccessQueryOptions(courseId: number) {
+  return queryOptions({
+    queryKey: queryKeys.payments.courseAccess(courseId),
+    queryFn: () => checkPaidAccess(courseId),
   });
 }
 

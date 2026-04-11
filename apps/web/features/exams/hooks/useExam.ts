@@ -1,7 +1,7 @@
 'use client';
 
 import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { updateExamSettingsMutationOptions } from '../mutations/exams.mutation';
+import { createExamWithActivityMutationOptions, updateExamSettingsMutationOptions } from '../mutations/exams.mutation';
 import {
   examActivityQueryOptions,
   examAllAttemptsQueryOptions,
@@ -83,4 +83,15 @@ export function useExamConfig() {
 export function useUpdateExamSettings(examUuid: string) {
   const queryClient = useQueryClient();
   return useMutation(updateExamSettingsMutationOptions(examUuid, queryClient));
+}
+
+export function useCreateExamWithActivity(
+  courseUuid?: string | null,
+  options?: { withUnpublishedActivities?: boolean },
+) {
+  const queryClient = useQueryClient();
+
+  return useMutation(
+    createExamWithActivityMutationOptions(queryClient, courseUuid, options?.withUnpublishedActivities ?? false),
+  );
 }

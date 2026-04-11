@@ -99,3 +99,18 @@ export function getAnalyticsExportUrl(
 ) {
   return `${getAPIUrl()}analytics/teacher/exports/${exportName}.csv${buildQueryString(query)}`;
 }
+
+export async function downloadAnalyticsExport(exportUrl: string): Promise<{ blob: Blob; filename: string }> {
+  const response = await apiFetch(exportUrl);
+
+  if (!response.ok) {
+    throw new Error(`Analytics export failed (${response.status})`);
+  }
+
+  const pathWithoutQuery = exportUrl.split('?').shift() ?? exportUrl;
+
+  return {
+    blob: await response.blob(),
+    filename: pathWithoutQuery.split('/').pop() ?? 'export.csv',
+  };
+}

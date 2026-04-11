@@ -5,6 +5,7 @@ import {
   activityDetailQueryOptions,
   assignmentDetailQueryOptions,
   assignmentSubmissionsQueryOptions,
+  assignmentTaskSubmissionQueryOptions,
   assignmentTasksQueryOptions,
 } from '../queries/assignments.query';
 
@@ -53,6 +54,21 @@ function activityDetailHookOptions(activityUuid: string | null | undefined) {
   });
 }
 
+function assignmentTaskSubmissionHookOptions<TTaskSubmission = unknown>(
+  assignmentUuid: string | null | undefined,
+  assignmentTaskUuid: string | null | undefined,
+) {
+  const normalizedAssignmentUuid =
+    typeof assignmentUuid === 'string' && assignmentUuid !== 'undefined' ? assignmentUuid : '';
+  const normalizedAssignmentTaskUuid =
+    typeof assignmentTaskUuid === 'string' && assignmentTaskUuid !== 'undefined' ? assignmentTaskUuid : '';
+
+  return queryOptions({
+    ...assignmentTaskSubmissionQueryOptions<TTaskSubmission>(normalizedAssignmentUuid, normalizedAssignmentTaskUuid),
+    enabled: Boolean(normalizedAssignmentUuid && normalizedAssignmentTaskUuid),
+  });
+}
+
 export function useAssignmentDetail(assignmentUuid: string | null | undefined) {
   return useQuery(assignmentDetailHookOptions(assignmentUuid));
 }
@@ -65,6 +81,13 @@ export function useAssignmentSubmissions<TAssignmentSubmissionRow = unknown>(
   assignmentUuid: string | null | undefined,
 ) {
   return useQuery(assignmentSubmissionsHookOptions<TAssignmentSubmissionRow>(assignmentUuid));
+}
+
+export function useAssignmentTaskSubmission<TTaskSubmission = unknown>(
+  assignmentUuid: string | null | undefined,
+  assignmentTaskUuid: string | null | undefined,
+) {
+  return useQuery(assignmentTaskSubmissionHookOptions<TTaskSubmission>(assignmentUuid, assignmentTaskUuid));
 }
 
 export function useAssignmentActivity(activityUuid: string | null | undefined) {

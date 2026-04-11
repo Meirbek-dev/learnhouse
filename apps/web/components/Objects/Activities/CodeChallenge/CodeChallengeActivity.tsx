@@ -35,16 +35,7 @@ interface CodeChallengeActivitySettings {
   starter_code?: Record<string, string>;
 }
 
-const fetcher = async (url: string) => {
-  const res = await fetch(url, { credentials: 'include' });
-  if (!res.ok) {
-    if (res.status === 404) return null;
-    throw new Error('Failed to fetch');
-  }
-  return res.json();
-};
-
-export default function CodeChallengeActivity({ activity, course }: CodeChallengeActivityProps) {
+export default function CodeChallengeActivity({ activity }: CodeChallengeActivityProps) {
   const t = useTranslations('Activities.CodeChallenges');
   const activityUuid = activity?.activity_uuid?.replace('activity_', '') || '';
 

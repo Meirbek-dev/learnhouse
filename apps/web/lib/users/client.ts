@@ -93,6 +93,15 @@ export async function updateUserAvatar(userId: number, avatarFile: File): Promis
   };
 }
 
+export async function updateUserTheme(userId: number, theme: string): Promise<void> {
+  const response = await apiFetch(`users/preferences/theme/${userId}?theme=${encodeURIComponent(theme)}`, {
+    method: 'PUT',
+  });
+
+  await requireOkJson<unknown>(response);
+  await getQueryClient().invalidateQueries({ queryKey: userKeys.byId(userId) });
+}
+
 export async function updateUserLocale(userId: number, locale: string): Promise<UserRead> {
   const response = await apiFetch(`users/preferences/locale/${userId}?locale=${encodeURIComponent(locale)}`, {
     method: 'PUT',

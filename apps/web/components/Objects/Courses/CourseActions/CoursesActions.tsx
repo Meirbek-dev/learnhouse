@@ -15,27 +15,23 @@ import { useQueryClient } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/react-query/queryKeys';
 import { useSession } from '@/hooks/useSession';
 import { useContributorStatus } from '@/hooks/useContributorStatus';
-import { getProductsByCourse } from '@services/payments/products';
+import { useCoursePaidAccess, useCourseProducts } from '@/features/payments/hooks/usePayments';
 import { applyForContributor } from '@services/courses/courses';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
 import CourseProgress from '../CourseProgress/CourseProgress';
-import { checkPaidAccess } from '@services/payments/payments';
 import { revalidateTags } from '@/lib/api-client';
 import { startCourse } from '@services/courses/activity';
 import { getAbsoluteUrl } from '@services/config/config';
 import { Card, CardContent } from '@/components/ui/card';
 import UserAvatar from '@components/Objects/UserAvatar';
-import type { components } from '@/lib/api/generated';
 import CoursePaidOptions from './CoursePaidOptions';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
-
-type PaymentsProductRead = components['schemas']['PaymentsProductRead'];
 
 interface CourseRun {
   status: string;
@@ -74,24 +70,25 @@ const CoursesActions = ({ courseuuid, course, trailData }: CourseActionsProps) =
   const queryClient = useQueryClient();
   const router = useRouter();
   const { user: currentUser } = useSession();
-  const [linkedProducts, setLinkedProducts] = useState<PaymentsProductRead[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [isActionLoading, setIsActionLoading] = useState(false);
   const [isContributeLoading, setIsContributeLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [hasAccess, setHasAccess] = useState<boolean | null>(null);
   const { contributorStatus, refetch } = useContributorStatus(courseuuid);
   const [isProgressOpen, setIsProgressOpen] = useState(false);
   const t = useTranslations('Courses.CoursesActions');
 
   const userId = currentUser?.id;
 
-  // one-shot guards to avoid repeated requests when context identity changes
-  const fetchedLinkedProductsRef = useRef<Record<string, boolean>>({});
-  const checkedAccessRef = useRef<Record<string, boolean>>({});
-
   // Clean up course UUID by removing 'course_' prefix if it exists
   const cleanCourseUuid = course.course_uuid?.replace('course_', '');
+
+  const linkedProductsQuery = useCourseProducts(course.id);
+  const linkedProducts = linkedProductsQuery.data?.data ?? [];
+  const paidAccessQuery = useCoursePaidAccess(course.id, {
+    enabled: Boolean(userId && linkedProducts.length > 0),
+  });
+  const hasAccess = linkedProducts.length === 0 ? true : (paidAccessQuery.data?.has_access ?? false);
+  const isLoading = linkedProductsQuery.isPending || paidAccessQuery.isPending;
 
   const isStarted =
     trailData?.runs?.find((run: any) => {
@@ -100,43 +97,11 @@ const CoursesActions = ({ courseuuid, course, trailData }: CourseActionsProps) =
     }) ?? false;
 
   useEffect(() => {
-    const fetchLinkedProducts = async () => {
-      try {
-        const response = await getProductsByCourse(course.id);
-        setLinkedProducts(response.data || []);
-      } catch {
-        console.error('Failed to fetch linked products');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    // run once per course id to avoid loops caused by unstable session/context identity
-    if (fetchedLinkedProductsRef.current[course.id]) return;
-    fetchedLinkedProductsRef.current[course.id] = true;
-    fetchLinkedProducts();
-  }, [course.id]);
-
-  useEffect(() => {
-    const checkAccess = async () => {
-      if (!userId) return;
-      try {
-        const response = await checkPaidAccess(course.id);
-        setHasAccess(response.has_access);
-      } catch {
-        console.error('Failed to check course access');
-        toast.error(t('errorCheckingCourseAccess'));
-        setHasAccess(false);
-      }
-    };
-
-    // Only run when there are linked products and avoid rerunning repeatedly
-    if (linkedProducts.length === 0) return;
-    const checkKey = `${course.id}`;
-    if (checkedAccessRef.current[checkKey]) return;
-    checkedAccessRef.current[checkKey] = true;
-    checkAccess();
-  }, [course.id, userId, linkedProducts, t]);
+    if (paidAccessQuery.error && linkedProducts.length > 0) {
+      console.error('Failed to check course access', paidAccessQuery.error);
+      toast.error(t('errorCheckingCourseAccess'));
+    }
+  }, [linkedProducts.length, paidAccessQuery.error, t]);
 
   const handleCourseAction = async () => {
     if (!currentUser) {

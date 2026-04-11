@@ -2,6 +2,7 @@
 
 import { queryOptions, useQuery } from '@tanstack/react-query';
 import {
+  courseAccessQueryOptions,
   courseProductsQueryOptions,
   ownedCoursesQueryOptions,
   paymentConfigsQueryOptions,
@@ -36,6 +37,15 @@ function courseProductsHookOptions(courseId: number | null | undefined) {
   });
 }
 
+function courseAccessHookOptions(courseId: number | null | undefined, enabled = true) {
+  const normalizedCourseId = courseId ?? 0;
+
+  return queryOptions({
+    ...courseAccessQueryOptions(normalizedCourseId),
+    enabled: enabled && Boolean(courseId),
+  });
+}
+
 function stripeConnectionHookOptions(code: string | null | undefined, enabled = true) {
   const normalizedCode = code?.trim() ?? '';
 
@@ -63,6 +73,10 @@ export function useProductCourses(productId: number | string | null | undefined)
 
 export function useCourseProducts(courseId: number | null | undefined) {
   return useQuery(courseProductsHookOptions(courseId));
+}
+
+export function useCoursePaidAccess(courseId: number | null | undefined, options?: { enabled?: boolean }) {
+  return useQuery(courseAccessHookOptions(courseId, options?.enabled ?? true));
 }
 
 export function useOwnedCourses() {

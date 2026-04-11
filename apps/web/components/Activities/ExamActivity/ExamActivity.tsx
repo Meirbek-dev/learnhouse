@@ -17,6 +17,7 @@ import {
   useExamMyAttempts,
   useExamQuestions,
 } from '@/features/exams/hooks/useExam';
+import { examMyAttemptsQueryOptions } from '@/features/exams/queries/exams.query';
 import PageLoading from '@components/Objects/Loaders/PageLoading';
 import type { AttemptData } from './state/examFlowReducer';
 import { examFlowReducer } from './state/examFlowReducer';
@@ -164,8 +165,9 @@ export default function ExamActivity({ activity, course }: ExamActivityProps) {
       console.warn('Failed to revalidate course meta after exam completion', error);
     }
 
-    // Fetch the completed attempt
-    const completedAttempt = await apiFetch(`exams/${examUuid}/attempts/me`).then((res) => res.json());
+    const completedAttempt = examUuid
+      ? await queryClient.fetchQuery(examMyAttemptsQueryOptions(examUuid))
+      : [];
 
     const lastAttempt = completedAttempt[0];
     dispatch(examActions.submitExam(lastAttempt));

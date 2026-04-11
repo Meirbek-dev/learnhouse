@@ -1,11 +1,14 @@
 export const queryKeys = {
   activities: {
     detail: (activityUuid: string) => ['activities', 'detail', activityUuid] as const,
+    linkPreview: (url: string) => ['activities', 'link-preview', url] as const,
   },
   assignments: {
     activity: (activityUuid: string) => ['assignments', 'activity', activityUuid] as const,
     detail: (assignmentUuid: string) => ['assignments', 'detail', assignmentUuid] as const,
     submissions: (assignmentUuid: string) => ['assignments', 'submissions', assignmentUuid] as const,
+    taskSubmission: (assignmentUuid: string, assignmentTaskUuid: string) =>
+      ['assignments', 'task-submission', assignmentUuid, assignmentTaskUuid] as const,
     tasks: (assignmentUuid: string) => ['assignments', 'tasks', assignmentUuid] as const,
   },
   codeChallenges: {
@@ -57,6 +60,7 @@ export const queryKeys = {
   },
   payments: {
     config: () => ['payments', 'config'] as const,
+    courseAccess: (courseId: number | string) => ['payments', 'course-access', courseId] as const,
     courseProducts: (courseId: number | string) => ['payments', 'course-products', courseId] as const,
     customers: () => ['payments', 'customers'] as const,
     ownedCourses: () => ['payments', 'owned-courses'] as const,

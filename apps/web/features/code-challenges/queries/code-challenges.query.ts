@@ -1,11 +1,12 @@
 'use client';
 
+import { apiFetch } from '@/lib/api-client';
 import { getAPIUrl } from '@services/config/config';
 import { queryOptions } from '@tanstack/react-query';
 import { queryKeys } from '@/lib/react-query/queryKeys';
 
 async function fetchCodeChallengeJson<T>(url: string): Promise<T | null> {
-  const response = await fetch(url, { credentials: 'include' });
+  const response = await apiFetch(url);
   if (!response.ok) {
     if (response.status === 404) return null;
     throw new Error('Failed to fetch');

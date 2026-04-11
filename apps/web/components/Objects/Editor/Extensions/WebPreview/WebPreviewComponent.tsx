@@ -1,6 +1,8 @@
+import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AlignCenter, AlignLeft, AlignRight, Edit2, Save, Trash, X } from 'lucide-react';
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
-import { useEffect, useEffectEvent, useRef, useState } from 'react';
+import { queryKeys } from '@/lib/react-query/queryKeys';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
 import { getUrlPreview } from '@services/courses/activities';
 import { Checkbox } from '@components/ui/checkbox';
@@ -64,6 +66,15 @@ const getAlignmentClass = (alignment: string) => {
   return 'justify-start';
 };
 
+function urlPreviewQueryOptions(url: string) {
+  return queryOptions({
+    queryKey: queryKeys.activities.linkPreview(url),
+    queryFn: () => getUrlPreview(url),
+    refetchOnWindowFocus: false,
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
 const AlignmentControls = ({
   alignment,
   onAlignmentChange,
@@ -106,10 +117,10 @@ const AlignmentControls = ({
 const WebPreviewComponent = ({ node, updateAttributes, deleteNode }: WebPreviewProps) => {
   const t = useTranslations('Components.WebPreview');
   const [inputUrl, setInputUrl] = useState(node.attrs.url || '');
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [editing, setEditing] = useState(!node.attrs.url);
   const inputRef = useRef<HTMLInputElement>(null);
+  const queryClient = useQueryClient();
   const editorContext = useEditorProvider();
   const isEditable = editorContext?.isEditable ?? true;
 
@@ -131,42 +142,54 @@ const WebPreviewComponent = ({ node, updateAttributes, deleteNode }: WebPreviewP
   const [openInPopup, setOpenInPopup] = useState(node.attrs.openInPopup);
   const [popupOpen, setPopupOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(!node.attrs.url);
-
-  async function fetchPreview(url: string) {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await getUrlPreview(url);
-      if (!res) throw new Error(t('errorFetchingPreview'));
-      const data = res;
-
-      // Check if metadata is insufficient (only has basic fields like favicon/url but no title/description)
-      const hasMinimalMetadata = !(data.title || data.description || data.og_image);
-
-      if (hasMinimalMetadata) {
-        toast.error(t('metadataIncomplete'), {
-          duration: 4000,
-        });
-      }
-
-      updateAttributes({ ...data, url });
-      setEditing(false);
-    } catch (error: any) {
-      setError(error.message || t('errorFetchingPreview'));
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  const fetchPreviewEvent = useEffectEvent((url: string) => {
-    fetchPreview(url);
+  const shouldAutoFetchPreview = Boolean(node.attrs.url && !hasPreview);
+  const previewQuery = useQuery({
+    ...urlPreviewQueryOptions(node.attrs.url || ''),
+    enabled: shouldAutoFetchPreview,
   });
 
-  useEffect(() => {
-    if (node.attrs.url && !hasPreview) {
-      fetchPreviewEvent(node.attrs.url);
+  const applyPreviewData = useCallback((url: string, data: any) => {
+    const hasMinimalMetadata = !(data.title || data.description || data.og_image);
+
+    if (hasMinimalMetadata) {
+      toast.error(t('metadataIncomplete'), {
+        duration: 4000,
+      });
     }
-  }, [node.attrs.url, hasPreview]);
+
+    updateAttributes({ ...data, url });
+    setEditing(false);
+    setError(null);
+  }, [t, updateAttributes]);
+
+  const fetchPreviewMutation = useMutation({
+    mutationFn: async (url: string) => queryClient.fetchQuery(urlPreviewQueryOptions(url)),
+    onSuccess: (data, url) => {
+      if (!data) {
+        throw new Error(t('errorFetchingPreview'));
+      }
+
+      applyPreviewData(url, data);
+    },
+    onError: (fetchError: unknown) => {
+      setError(fetchError instanceof Error ? fetchError.message : t('errorFetchingPreview'));
+    },
+  });
+
+  const loading = previewQuery.isPending || fetchPreviewMutation.isPending;
+
+  useEffect(() => {
+    if (!shouldAutoFetchPreview) return;
+
+    if (previewQuery.data) {
+      applyPreviewData(node.attrs.url, previewQuery.data);
+      return;
+    }
+
+    if (previewQuery.error) {
+      setError(previewQuery.error instanceof Error ? previewQuery.error.message : t('errorFetchingPreview'));
+    }
+  }, [applyPreviewData, node.attrs.url, previewQuery.data, previewQuery.error, shouldAutoFetchPreview, t]);
 
   useEffect(() => {
     if (editing && inputRef.current) {
@@ -198,7 +221,8 @@ const WebPreviewComponent = ({ node, updateAttributes, deleteNode }: WebPreviewP
 
   const handleSaveEdit = () => {
     if (inputUrl && inputUrl !== node.attrs.url) {
-      fetchPreview(inputUrl);
+      setError(null);
+      void fetchPreviewMutation.mutateAsync(inputUrl);
     } else {
       setEditing(false);
       setModalOpen(false);

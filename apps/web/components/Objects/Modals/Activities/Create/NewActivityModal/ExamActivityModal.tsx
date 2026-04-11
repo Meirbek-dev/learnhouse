@@ -2,14 +2,13 @@
 
 import { valibotResolver } from '@hookform/resolvers/valibot';
 import { Controller, useForm, useWatch } from 'react-hook-form';
-import { useExamConfig } from '@/features/exams/hooks/useExam';
+import { useCreateExamWithActivity, useExamConfig } from '@/features/exams/hooks/useExam';
 import { useTranslations } from 'next-intl';
 import { useEffect } from 'react';
 import { toast } from 'sonner';
 import * as v from 'valibot';
 
 import { Field, FieldDescription, FieldError, FieldLabel } from '@components/ui/field';
-import { getAPIUrl } from '@/services/config/config';
 import { Textarea } from '@components/ui/textarea';
 import { Switch } from '@components/ui/switch';
 import { Button } from '@components/ui/button';
@@ -49,6 +48,9 @@ const NewExam = ({ submitActivity, chapterId, course, closeModal }: any) => {
   const { data: limits } = useExamConfig();
   const validationSchema = createValidationSchema(validationT, limits);
   const withUnpublishedActivities = course ? course.withUnpublishedActivities : false;
+  const createExamMutation = useCreateExamWithActivity(course?.course_uuid, {
+    withUnpublishedActivities,
+  });
 
   const form = useForm<FormValues, any, SubmitValues>({
     resolver: valibotResolver(validationSchema),
@@ -98,25 +100,13 @@ const NewExam = ({ submitActivity, chapterId, course, closeModal }: any) => {
         violation_threshold: 3,
       };
 
-      const response = await fetch(`${getAPIUrl()}exams/with-activity`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          activity_name: values.activity_name,
-          chapter_id: chapterId,
-          exam_title: values.exam_title,
-          exam_description: values.exam_description,
-          settings,
-        }),
+      const data = await createExamMutation.mutateAsync({
+        activityName: values.activity_name,
+        chapterId,
+        examTitle: values.exam_title,
+        examDescription: values.exam_description,
+        settings,
       });
-
-      if (!response.ok) {
-        throw new Error('Failed to create exam');
-      }
-
-      const data = await response.json();
 
       toast.dismiss(toastLoading);
       toast.success(t('examCreatedSuccessfully'));

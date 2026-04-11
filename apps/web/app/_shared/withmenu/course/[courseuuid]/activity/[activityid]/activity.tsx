@@ -37,11 +37,11 @@ import GeneralWrapper from '@/components/Objects/Elements/Wrappers/GeneralWrappe
 import { Suspense, lazy, useEffect, useRef, useState, useTransition } from 'react';
 import ActivityBreadcrumbs from '@components/Pages/Activity/ActivityBreadcrumbs';
 import ActivityIndicators from '@components/Pages/Courses/ActivityIndicators';
-import { getAssignmentFromActivityUUID } from '@services/courses/assignments';
 import CourseEndView from '@components/Pages/Activity/CourseEndView';
 import { useFormatter, useLocale, useTranslations } from 'next-intl';
 import ToolTip from '@/components/Objects/Elements/Tooltip/Tooltip';
 import { CourseProvider } from '@components/Contexts/CourseContext';
+import { useActivityAssignmentUuid } from '@/features/courses/hooks/useCourseQueries';
 import { useContributorStatus } from '@/hooks/useContributorStatus';
 import { submitAssessment } from '@services/grading/grading';
 import { useGamificationStore } from '@/stores/gamification';
@@ -236,7 +236,6 @@ const ActivityClient = (props: ActivityClientProps) => {
   const { activity } = props;
   const { course } = props;
   const { isAuthenticated } = useSession();
-  const [assignment, setAssignment] = useState(null) as any;
   const [isFocusMode, setIsFocusMode] = useState(() => {
     if (typeof globalThis.window !== 'undefined') {
       const saved = localStorage.getItem('globalFocusMode');
@@ -277,6 +276,10 @@ const ActivityClient = (props: ActivityClientProps) => {
   };
 
   const { data: trailData } = useTrailCurrent();
+  const { data: assignmentUuid, isPending: isAssignmentLoading } = useActivityAssignmentUuid(activity?.activity_uuid, {
+    enabled: activity?.activity_type === 'TYPE_ASSIGNMENT',
+  });
+  const assignment = assignmentUuid ? { assignment_uuid: assignmentUuid } : null;
 
   const { allActivities, currentIndex } = useActivityPosition(course, activityid);
 
@@ -330,6 +333,10 @@ const ActivityClient = (props: ActivityClientProps) => {
         );
       }
       case 'TYPE_ASSIGNMENT': {
+        if (isAssignmentLoading) {
+          return <LoadingFallback />;
+        }
+
         return assignment?.assignment_uuid ? (
           <Suspense fallback={<LoadingFallback />}>
             <AssignmentProvider assignment_uuid={assignment.assignment_uuid}>
@@ -431,19 +438,6 @@ const ActivityClient = (props: ActivityClientProps) => {
     }
     return null;
   };
-
-  // Load assignment data when activity changes
-  useEffect(() => {
-    const loadAssignment = async () => {
-      if (!activity?.activity_uuid) return;
-      const res = await getAssignmentFromActivityUUID(activity.activity_uuid);
-      setAssignment(res.data);
-    };
-
-    if (activity?.activity_type === 'TYPE_ASSIGNMENT') {
-      loadAssignment();
-    }
-  }, [activity?.activity_uuid, activity?.activity_type, setAssignment]);
 
   return (
     <CourseProvider courseuuid={course?.course_uuid}>

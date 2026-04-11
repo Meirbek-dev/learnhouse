@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import { useSyncUserTheme } from '@/features/users/hooks/useUserPreferences';
 import { useSession } from '@/hooks/useSession';
 
 /**
@@ -13,6 +14,7 @@ import { useSession } from '@/hooks/useSession';
 export function useThemeSync(themeName: string): void {
   const { user, isAuthenticated } = useSession();
   const userId = user?.id;
+  const { mutateAsync: syncTheme } = useSyncUserTheme(userId);
 
   const pendingThemeRef = useRef<string | null>(null);
   const syncedThemeRef = useRef(user?.theme ?? null);
@@ -46,16 +48,8 @@ export function useThemeSync(themeName: string): void {
       const nextTheme = pendingThemeRef.current;
       if (!nextTheme) return;
 
-      void fetch('/api/user/theme', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ theme: nextTheme }),
-        keepalive: true,
-      })
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error(`Theme sync failed with status ${response.status}`);
-          }
+      void syncTheme(nextTheme)
+        .then(() => {
           syncedThemeRef.current = nextTheme;
           pendingThemeRef.current = null;
         })
@@ -70,7 +64,7 @@ export function useThemeSync(themeName: string): void {
         timeoutRef.current = null;
       }
     };
-  }, [isAuthenticated, themeName, userId]);
+  }, [isAuthenticated, syncTheme, themeName, userId]);
 
   // Flush pending theme via sendBeacon on page unload.
   useEffect(() => {

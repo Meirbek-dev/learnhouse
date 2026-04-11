@@ -1,6 +1,7 @@
 'use client';
 
 import { Download, Loader2 } from 'lucide-react';
+import { downloadAnalyticsExport } from '@services/analytics/teacher';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 
@@ -15,21 +16,15 @@ export default function AnalyticsExportButton({ href, label }: AnalyticsExportBu
   const handleDownload = async () => {
     setLoading(true);
     try {
-      const response = await fetch(href, { credentials: 'include' });
-      if (!response.ok) {
-        console.error(`Export failed: ${response.status} ${response.statusText}`);
-        return;
-      }
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
+      const { blob, filename } = await downloadAnalyticsExport(href);
+      const url = globalThis.URL.createObjectURL(blob);
       const anchor = document.createElement('a');
-      // Infer filename from the URL path
-      const pathWithoutQuery = href.split('?').shift() ?? href;
-      const pathParts = pathWithoutQuery.split('/');
-      anchor.download = pathParts[pathParts.length - 1] ?? 'export.csv';
+      anchor.download = filename;
       anchor.href = url;
       anchor.click();
-      URL.revokeObjectURL(url);
+      globalThis.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Export failed:', error);
     } finally {
       setLoading(false);
     }

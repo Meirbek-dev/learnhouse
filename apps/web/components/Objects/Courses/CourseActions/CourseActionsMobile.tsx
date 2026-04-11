@@ -1,14 +1,11 @@
 'use client';
 
-import type { components } from '@/lib/api/generated';
-
 import { AlertCircle, BookOpen, Loader2, LogIn, ShoppingCart } from 'lucide-react';
+import { useCoursePaidAccess, useCourseProducts } from '@/features/payments/hooks/usePayments';
 import { useSession } from '@/hooks/useSession';
 import { getUserAvatarMediaDirectory } from '@services/media/media';
-import { useEffect, useRef, useState, useTransition } from 'react';
-import { getProductsByCourse } from '@services/payments/products';
+import { useState, useTransition } from 'react';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
-import { checkPaidAccess } from '@services/payments/payments';
 import { revalidateTags } from '@/lib/api-client';
 import { startCourse } from '@services/courses/activity';
 import { getAbsoluteUrl } from '@services/config/config';
@@ -18,8 +15,6 @@ import { useTranslations } from 'next-intl';
 import UserAvatar from '../../UserAvatar';
 
 import CoursePaidOptions from './CoursePaidOptions';
-
-type PaymentsProductRead = components['schemas']['PaymentsProductRead'];
 
 interface Author {
   user: {
@@ -148,62 +143,26 @@ const CourseActionsMobile = ({ courseuuid, course, trailData }: CourseActionsMob
   const router = useRouter();
   const { user: currentUser } = useSession();
   const userId = currentUser?.id;
-
-  // one-shot guards to avoid repeated requests when context identity changes
-  const fetchedLinkedProductsRef = useRef<Record<string, boolean>>({});
-  const checkedAccessRef = useRef<Record<string, boolean>>({});
-  const [linkedProducts, setLinkedProducts] = useState<PaymentsProductRead[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [isActionLoading, setIsActionLoading] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [hasAccess, setHasAccess] = useState<boolean | null>(null);
 
   // Clean up course UUID by removing 'course_' prefix if it exists
   const cleanCourseUuid = course.course_uuid?.replace('course_', '');
+
+  const linkedProductsQuery = useCourseProducts(course.id);
+  const linkedProducts = linkedProductsQuery.data?.data ?? [];
+  const paidAccessQuery = useCoursePaidAccess(course.id, {
+    enabled: Boolean(userId && linkedProducts.length > 0),
+  });
+  const hasAccess = linkedProducts.length === 0 ? true : (paidAccessQuery.data?.has_access ?? false);
+  const isLoading = linkedProductsQuery.isPending || paidAccessQuery.isPending;
 
   const isStarted =
     trailData?.runs?.find((run: any) => {
       const cleanRunCourseUuid = run.course?.course_uuid?.replace('course_', '');
       return cleanRunCourseUuid === cleanCourseUuid;
     }) ?? false;
-
-  useEffect(() => {
-    const fetchLinkedProducts = async () => {
-      try {
-        const response = await getProductsByCourse(course.id);
-        setLinkedProducts(response.data || []);
-      } catch {
-        console.error('Failed to fetch linked products');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    // run once per course id to avoid loops caused by unstable session/context identity
-    if (fetchedLinkedProductsRef.current[course.id]) return;
-    fetchedLinkedProductsRef.current[course.id] = true;
-    fetchLinkedProducts();
-  }, [course.id]);
-
-  useEffect(() => {
-    const checkAccess = async () => {
-      if (!userId) return;
-      try {
-        const response = await checkPaidAccess(course.id);
-        setHasAccess(response.has_access);
-      } catch {
-        console.error('Failed to check course access');
-        setHasAccess(false);
-      }
-    };
-
-    if (linkedProducts.length === 0) return;
-    const checkKey = `${course.id}`;
-    if (checkedAccessRef.current[checkKey]) return;
-    checkedAccessRef.current[checkKey] = true;
-    checkAccess();
-  }, [course.id, userId, linkedProducts]);
 
   const handleCourseAction = async () => {
     if (!currentUser) {

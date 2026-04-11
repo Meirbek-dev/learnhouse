@@ -2,6 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 import { useEffect } from 'react';
+import { reportClientError } from '@/services/telemetry/client';
 
 export default function Error({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
   const t = useTranslations('Errors');
@@ -17,23 +18,16 @@ export default function Error({ error, reset }: { error: Error & { digest?: stri
       userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'unknown',
     });
 
-    void fetch('/api/log-error', {
-      body: JSON.stringify({
-        digest: error.digest,
-        error: {
-          cause: error.cause,
-          message: error.message,
-          name: error.name,
-          stack: error.stack,
-        },
-        page: typeof globalThis.window !== 'undefined' ? globalThis.location.pathname : 'unknown',
-        url: typeof globalThis.window !== 'undefined' ? globalThis.location.href : 'unknown',
-      }),
-      headers: {
-        'Content-Type': 'application/json',
+    void reportClientError({
+      digest: error.digest,
+      error: {
+        cause: error.cause,
+        message: error.message,
+        name: error.name,
+        stack: error.stack,
       },
-      keepalive: true,
-      method: 'POST',
+      page: typeof globalThis.window !== 'undefined' ? globalThis.location.pathname : 'unknown',
+      url: typeof globalThis.window !== 'undefined' ? globalThis.location.href : 'unknown',
     }).catch((loggingError: unknown) => {
       console.error('Failed to report root error boundary event:', loggingError);
     });
