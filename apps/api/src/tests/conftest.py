@@ -6,17 +6,14 @@ from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
 # Ensure src/ is on the Python path for all tests
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
-
-# Set testing environment variable to use SQLite
-os.environ["TESTING"] = "true"
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))  # noqa: E402
 
 # Provide an explicit settings baseline so tests do not rely on a local backend .env file.
 os.environ.setdefault("PLATFORM_DOMAIN", "example.test")
 os.environ.setdefault("PLATFORM_ALLOWED_REGEXP", r"^https?://example\.test(:\d+)?$")
 os.environ.setdefault(
     "PLATFORM_SQL_CONNECTION_STRING",
-    "postgresql+psycopg://openu:openu@localhost:5432/openu_test",
+    "sqlite://",  # build_engine() detects sqlite:// prefix → in-memory StaticPool
 )
 os.environ.setdefault(
     "PLATFORM_REDIS_CONNECTION_STRING",

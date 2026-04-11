@@ -33,5 +33,6 @@ def register_exception_handlers(app: FastAPI) -> None:
             content={
                 "error_code": "VALIDATION_ERROR",
                 "message": "Request validation failed",
+                "detail": exc.errors(include_url=False),
             },
         )

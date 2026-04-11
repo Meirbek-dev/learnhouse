@@ -9,7 +9,7 @@ from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlmodel import Session
 
 from config.config import get_settings
-from src.infra.db.engine import get_database_engine
+from src.infra.db.engine import get_bg_engine
 from src.services.ai.cache_manager import get_ai_cache_manager
 from src.services.ai.chunking import chunk_documents
 from src.services.ai.embeddings import embed_texts
@@ -72,7 +72,7 @@ def _sync_upsert_collection(
     embeddings: list[list[float]],
 ) -> None:
     """Replace all chunks for *collection_name* with the given data."""
-    engine = get_database_engine()
+    engine = get_bg_engine()
     with Session(engine) as session:
         # Delete stale rows first so a full replacement is always clean.
         session.execute(
@@ -119,7 +119,7 @@ def _sync_query_collection(
     top_k: int,
 ) -> list[RetrievedChunk]:
     """Return the top-k chunks ordered by cosine distance (ascending)."""
-    engine = get_database_engine()
+    engine = get_bg_engine()
     distance = _document_chunks.c.embedding.cosine_distance(query_embedding).label(
         "distance"
     )
@@ -156,7 +156,7 @@ def delete_expired_chunks(retention_seconds: int) -> int:
     """
     import sqlalchemy.exc
 
-    engine = get_database_engine()
+    engine = get_bg_engine()
     with Session(engine) as session:
         try:
             result = session.execute(

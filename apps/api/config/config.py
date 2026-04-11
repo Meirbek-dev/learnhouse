@@ -18,7 +18,6 @@ from src.db.strict_base_model import PydanticStrictBaseModel
 
 _POSTGRES_DSN = TypeAdapter(PostgresDsn)
 _REDIS_DSN = TypeAdapter(RedisDsn)
-_INSECURE_DEFAULT_SECRETS = {"", "changeme", "secret"}
 
 
 def _normalize_cookie_domain(raw_domain: str | None) -> str | None:

@@ -1,72 +1,79 @@
-import os
-
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 from sqlmodel import Session, create_engine
 
 from src.db.model_registry import import_orm_models
-from src.infra.settings import AppSettings, get_settings
+from src.infra.settings import AppSettings
 
-_engine: Engine | None = None
-_session_factory: sessionmaker | None = None
+# Set once from lifespan.  Provides engine access to background tasks (audit
+# writes, fire-and-forget session tracking) that execute outside a request
+# context and therefore cannot reach app.state.  This is not a pool — it is
+# a reference to the single engine the process already owns.
+_bg_engine: Engine | None = None
 
 
-def _is_testing() -> bool:
-    return os.getenv("TESTING", "false").lower() == "true"
+def build_engine(settings: AppSettings) -> Engine:
+    """Create a new database engine.
 
+    Called exactly once per process from lifespan startup (or once per CLI
+    invocation).  Callers are responsible for calling ``engine.dispose()``
+    when the process exits.
 
-def initialize_database(settings: AppSettings | None = None) -> None:
-    global _engine, _session_factory
-
-    if _engine is not None and _session_factory is not None:
-        return
-
+    SQLite is detected by URL prefix and gets the StaticPool + thread-safety
+    overrides required for in-memory test databases.
+    """
     import_orm_models()
-    resolved_settings = settings or get_settings()
-
-    if _is_testing():
-        _engine = create_engine(
-            "sqlite://",
+    url = settings.database_config.sql_connection_string
+    if url.startswith("sqlite"):
+        return create_engine(
+            url,
             echo=False,
             connect_args={"check_same_thread": False},
             poolclass=StaticPool,
         )
-    else:
-        _engine = create_engine(
-            resolved_settings.database_config.sql_connection_string,
-            echo=False,
-            pool_pre_ping=True,
-            pool_reset_on_return="rollback",
-            pool_use_lifo=True,
-        )
+    return create_engine(
+        url,
+        echo=False,
+        pool_pre_ping=True,
+        pool_reset_on_return="rollback",
+        pool_size=10,
+        max_overflow=20,
+    )
 
-    _session_factory = sessionmaker(
-        bind=_engine,
+
+def build_session_factory(engine: Engine) -> sessionmaker[Session]:
+    """Create a session factory bound to *engine*."""
+    return sessionmaker(
+        bind=engine,
         class_=Session,
         autoflush=False,
         expire_on_commit=False,
     )
 
 
-def get_database_engine() -> Engine:
-    if _engine is None:
-        msg = "Database runtime has not been initialized"
-        raise RuntimeError(msg)
-    return _engine
+def register_engine(engine: Engine) -> None:
+    """Register the app engine so background tasks can reach it.
+
+    Called once from lifespan after ``build_engine()``.
+    """
+    global _bg_engine
+    _bg_engine = engine
 
 
-def get_session_factory() -> sessionmaker:
-    if _session_factory is None:
-        msg = "Database session factory has not been initialized"
-        raise RuntimeError(msg)
-    return _session_factory
+def unregister_engine() -> None:
+    """Clear the background-task engine reference on shutdown."""
+    global _bg_engine
+    _bg_engine = None
 
 
-def dispose_database() -> None:
-    global _engine, _session_factory
+def get_bg_engine() -> Engine:
+    """Return the registered engine for background / fire-and-forget tasks.
 
-    if _engine is not None:
-        _engine.dispose()
-    _engine = None
-    _session_factory = None
+    Raises ``RuntimeError`` if called before ``register_engine()``.
+    """
+    if _bg_engine is None:
+        raise RuntimeError(
+            "No engine registered. Ensure register_engine() is called during lifespan startup."
+        )
+    return _bg_engine

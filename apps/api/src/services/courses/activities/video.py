@@ -2,7 +2,7 @@ import asyncio
 from datetime import datetime
 from typing import Literal
 
-import orjson
+import json
 from fastapi import HTTPException, Request, UploadFile, status
 from sqlmodel import Session, select
 from ulid import ULID
@@ -92,7 +92,7 @@ async def create_video_activity(
         current_user.id, "activity:create", resource_owner_id=course.creator_id
     )
 
-    details_dict = orjson.loads(details) if isinstance(details, str) else details
+    details_dict = json.loads(details) if isinstance(details, str) else details
 
     activity_uuid = f"activity_{ULID()}"
 
@@ -116,7 +116,7 @@ async def create_video_activity(
         content={"filename": f"video.{video_format}", "activity_uuid": activity_uuid},
         details=details_dict
         if isinstance(details_dict, dict)
-        else orjson.loads(details_dict),
+        else json.loads(details_dict),
         creation_date=str(datetime.now()),
         update_date=str(datetime.now()),
         order=_next_activity_order(chapter_id, db_session),
@@ -233,7 +233,7 @@ async def create_external_video_activity(
     )
 
     activity_uuid = f"activity_{ULID()}"
-    details = orjson.loads(data.details)
+    details = json.loads(data.details)
 
     activity = Activity(
         name=data.name,

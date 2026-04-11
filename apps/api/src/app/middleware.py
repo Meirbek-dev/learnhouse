@@ -1,3 +1,4 @@
+import uuid
 from collections.abc import Awaitable, Callable
 
 from fastapi import FastAPI, Request
@@ -33,6 +34,16 @@ def add_application_middleware(app: FastAPI, settings: AppSettings) -> None:
         allow_headers=["*"],
     )
     app.add_middleware(GZipMiddleware, minimum_size=1000)
+
+    @app.middleware("http")
+    async def add_correlation_id(
+        request: Request,
+        call_next: Callable[[Request], Awaitable],
+    ):
+        req_id = request.headers.get("X-Request-ID") or str(uuid.uuid4())
+        response = await call_next(request)
+        response.headers["X-Request-ID"] = req_id
+        return response
 
     @app.middleware("http")
     async def enforce_sec_fetch_site(

@@ -7,7 +7,7 @@ Redis data model for user sessions:
                                   pruned on every write so the set never grows
                                   unboundedly.
 
-Audit writes use their own short-lived DB session (via get_database_engine())
+Audit writes use their own short-lived DB session (via get_bg_engine())
 and are fire-and-forget via asyncio.create_task + asyncio.to_thread, so they
 never block the event-loop.
 """
@@ -234,9 +234,9 @@ async def _get_active_session_ids(user_id: int) -> list[str]:
 def _audit_create_sync(session_data_dict: dict) -> None:
     """Write a session-created audit record using its own short-lived DB session."""
     try:
-        from src.infra.db.engine import get_database_engine
+        from src.infra.db.engine import get_bg_engine
 
-        engine = get_database_engine()
+        engine = get_bg_engine()
         with Session(engine) as db:
             now = datetime.now(UTC)
             record = AuthSession(
@@ -261,9 +261,9 @@ def _audit_create_sync(session_data_dict: dict) -> None:
 def _audit_revoke_sync(session_id: str) -> None:
     """Mark a session as revoked using its own short-lived DB session."""
     try:
-        from src.infra.db.engine import get_database_engine
+        from src.infra.db.engine import get_bg_engine
 
-        engine = get_database_engine()
+        engine = get_bg_engine()
         with Session(engine) as db:
             record = db.exec(
                 select(AuthSession).where(AuthSession.session_id == session_id)
@@ -281,9 +281,9 @@ def _audit_rotate_sync(
 ) -> None:
     """Mark old session as rotated and create new session record, in one DB session."""
     try:
-        from src.infra.db.engine import get_database_engine
+        from src.infra.db.engine import get_bg_engine
 
-        engine = get_database_engine()
+        engine = get_bg_engine()
         with Session(engine) as db:
             now = datetime.now(UTC)
             # Mark old session as rotated

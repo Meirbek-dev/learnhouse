@@ -8,11 +8,12 @@ from pathlib import Path
 from fastapi import FastAPI
 
 from src.app.observability import configure_observability
+from src.infra import redis as redis_infra
 from src.infra.db.engine import (
-    dispose_database,
-    get_database_engine,
-    get_session_factory,
-    initialize_database,
+    build_engine,
+    build_session_factory,
+    register_engine,
+    unregister_engine,
 )
 from src.infra.logging import configure_logging
 from src.infra.settings import AppSettings
@@ -47,10 +48,15 @@ def create_lifespan(settings: AppSettings) -> Callable[[FastAPI], AsyncIterator[
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         configure_logging(settings)
         ensure_runtime_directories()
-        initialize_database(settings)
 
-        engine = get_database_engine()
-        session_factory = get_session_factory()
+        engine = build_engine(settings)
+        session_factory = build_session_factory(engine)
+        register_engine(engine)
+
+        redis_url = settings.redis_config.redis_connection_string
+        if redis_url:
+            redis_infra.configure(redis_url)
+
         app.state.settings = settings
         app.state.engine = engine
         app.state.session_factory = session_factory
@@ -61,7 +67,6 @@ def create_lifespan(settings: AppSettings) -> Callable[[FastAPI], AsyncIterator[
             _ttl_sweep_loop(settings.ai_config.collection_retention),
             name="vector_ttl_sweep",
         )
-        app.state.ttl_sweep_task = ttl_sweep_task
 
         try:
             yield
@@ -70,6 +75,8 @@ def create_lifespan(settings: AppSettings) -> Callable[[FastAPI], AsyncIterator[
                 ttl_sweep_task.cancel()
                 with contextlib.suppress(asyncio.CancelledError):
                     await ttl_sweep_task
-            dispose_database()
+            await redis_infra.close()
+            unregister_engine()
+            engine.dispose()
 
     return lifespan
