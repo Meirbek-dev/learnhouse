@@ -10,9 +10,9 @@ from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlmodel import Session, select
 
-from src.infra.db.session import get_db_session
 from src.db.strict_base_model import PydanticStrictBaseModel
 from src.db.users import AnonymousUser, PublicUser, User, UserRead
+from src.infra.db.session import get_db_session
 from src.security.auth_cookies import ACCESS_COOKIE_KEY
 from src.security.auth_lifetimes import ACCESS_TOKEN_EXPIRE, REFRESH_TOKEN_EXPIRE
 from src.security.keys import get_private_key, get_public_key
@@ -220,7 +220,7 @@ async def _is_roles_stale(user_uuid: str, roles_version: int) -> bool:
     try:
         roles_updated_at = int(raw)
         return roles_updated_at > roles_version
-    except (ValueError, TypeError):
+    except ValueError, TypeError:
         return False
 
 

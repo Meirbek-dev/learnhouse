@@ -7,9 +7,9 @@ from fastapi.responses import StreamingResponse
 from sqlalchemy import select as sa_select
 from sqlmodel import Session
 
-from src.infra.db.session import get_db_session
 from src.db.courses.courses import Course
 from src.db.users import AnonymousUser, PublicUser
+from src.infra.db.session import get_db_session
 from src.security.auth import get_current_user
 from src.security.rbac import PermissionChecker
 from src.services.analytics import (

@@ -1,6 +1,6 @@
+import uuid as uuid_lib
 from datetime import UTC, datetime
 
-import uuid as uuid_lib
 from pydantic import ConfigDict, EmailStr
 from sqlalchemy import JSON, Column, DateTime, UniqueConstraint, func
 from sqlmodel import Field

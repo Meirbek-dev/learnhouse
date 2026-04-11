@@ -18,7 +18,7 @@ def _normalize_due_date_value(value: str | None) -> str | None:
 
     try:
         if "T" in normalized:
-            datetime.fromisoformat(normalized.replace("Z", "+00:00"))
+            datetime.fromisoformat(normalized)
         else:
             date.fromisoformat(normalized)
     except ValueError as exc:

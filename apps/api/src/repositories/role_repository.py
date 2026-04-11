@@ -14,7 +14,6 @@ from fastapi import Depends, HTTPException
 from sqlalchemy import func
 from sqlmodel import Session, select
 
-from src.infra.db.session import get_db_session
 from src.db.permissions import (
     Permission,
     Role,
@@ -23,6 +22,7 @@ from src.db.permissions import (
     RoleUpdate,
     UserRole,
 )
+from src.infra.db.session import get_db_session
 
 
 class RoleRepository:

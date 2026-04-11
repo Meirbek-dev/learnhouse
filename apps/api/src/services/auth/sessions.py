@@ -388,7 +388,7 @@ async def create_auth_session(
     try:
         await _write_session_to_redis(data, REFRESH_SESSION_TTL)
     except Exception as exc:
-        logger.error("Redis unavailable — cannot persist session: %s", exc)
+        logger.exception("Redis unavailable — cannot persist session: %s", exc)
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Authentication service temporarily unavailable",

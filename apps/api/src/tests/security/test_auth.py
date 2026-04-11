@@ -10,7 +10,9 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from fastapi import HTTPException, Request, Response
 from sqlmodel import Session
 
+from config.config import reload_platform_config_cache
 from src.db.users import AnonymousUser, User
+from src.routers.auth import _compact_permissions_for_token
 from src.security.auth import (
     ACCESS_TOKEN_EXPIRE,
     AUTH_TOKEN_AUDIENCE,
@@ -21,14 +23,12 @@ from src.security.auth import (
     get_current_user_from_token,
     get_current_user_optional,
 )
-from src.routers.auth import _compact_permissions_for_token
 from src.security.auth_cookies import (
     ACCESS_COOKIE_TTL_SECONDS,
     set_access_cookie,
     set_refresh_cookie,
 )
 from src.security.keys import get_private_key, get_public_key, reload_key_cache
-from config.config import reload_platform_config_cache
 from src.services.auth.sessions import (
     SessionData,
     create_auth_session,
@@ -348,7 +348,9 @@ class TestAuthSessionRedisIndexRepair:
         assert session_data.user_id == 42
         assert refresh_token.startswith(session_data.session_id + ".")
         redis.delete.assert_awaited_once_with("user_sessions:42")
-        redis.zrangebyscore.assert_awaited_once_with("user_sessions:42", pytest.approx(session_data.created_at, abs=5), "+inf")
+        redis.zrangebyscore.assert_awaited_once_with(
+            "user_sessions:42", pytest.approx(session_data.created_at, abs=5), "+inf"
+        )
 
 
 class TestAuthCookies:

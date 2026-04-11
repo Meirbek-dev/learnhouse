@@ -17,10 +17,10 @@ from fastapi.responses import JSONResponse, RedirectResponse
 from sqlmodel import Session, select
 
 from config.config import get_settings
-from src.infra.db.session import get_db_session
 from src.db.permission_enums import RoleSlug
 from src.db.strict_base_model import PydanticStrictBaseModel
 from src.db.users import AnonymousUser, PublicUser, User, UserSession
+from src.infra.db.session import get_db_session
 from src.security.auth import (
     ACCESS_TOKEN_EXPIRE,
     TokenData,
@@ -331,9 +331,7 @@ async def login(
         ip_address=ip,
         user_agent=ua,
     )
-    access_token = _issue_access_token(
-        session_data, role_slugs, expanded_perms, user
-    )
+    access_token = _issue_access_token(session_data, role_slugs, expanded_perms, user)
     set_access_cookie(response, access_token)
     set_refresh_cookie(response, refresh_token)
 
@@ -404,9 +402,7 @@ async def refresh(
 
     user = db_session.exec(select(User).where(User.id == old_session.user_id)).first()
     if user is None:
-        await revoke_token_family(
-            old_session.token_family_id, old_session.user_id
-        )
+        await revoke_token_family(old_session.token_family_id, old_session.user_id)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="User not found",
@@ -716,7 +712,11 @@ async def google_callback(
             state=state,
         )
     except HTTPException as exc:
-        error_code = "oauth_state_invalid" if "state" in str(exc.detail).lower() else "oauth_provider_error"
+        error_code = (
+            "oauth_state_invalid"
+            if "state" in str(exc.detail).lower()
+            else "oauth_provider_error"
+        )
         return RedirectResponse(f"{frontend_callback}?error={error_code}")
 
     frontend_callback = _sanitize_callback_target(
@@ -729,7 +729,11 @@ async def google_callback(
             request, google_user, current_user, db_session
         )
     except HTTPException as exc:
-        error_code = "oauth_email_conflict" if "exist" in str(exc.detail).lower() else "oauth_account_disabled"
+        error_code = (
+            "oauth_email_conflict"
+            if "exist" in str(exc.detail).lower()
+            else "oauth_account_disabled"
+        )
         return RedirectResponse(f"{frontend_callback}?error={error_code}")
 
     role_slugs, expanded_perms = await asyncio.to_thread(
@@ -740,9 +744,7 @@ async def google_callback(
         ip_address=ip,
         user_agent=_user_agent(request),
     )
-    access_token = _issue_access_token(
-        session_data, role_slugs, expanded_perms, user
-    )
+    access_token = _issue_access_token(session_data, role_slugs, expanded_perms, user)
 
     redirect_response = RedirectResponse(frontend_callback)
     set_access_cookie(redirect_response, access_token)

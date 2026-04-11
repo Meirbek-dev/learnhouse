@@ -2,7 +2,6 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Form, Request, UploadFile
 
-from src.infra.db.session import get_db_session
 from src.db.courses.activities import (
     ActivityCreate,
     ActivityRead,
@@ -11,6 +10,7 @@ from src.db.courses.activities import (
 )
 from src.db.strict_base_model import PydanticStrictBaseModel
 from src.db.users import PublicUser
+from src.infra.db.session import get_db_session
 from src.security.auth import get_current_user
 from src.services.courses.activities.activities import (
     create_activity,

@@ -3,7 +3,6 @@ from typing import Annotated, Literal
 from fastapi import APIRouter, Depends, Query, Request
 from sqlmodel import Session
 
-from src.infra.db.session import get_db_session
 from src.db.courses.courses import CourseRead
 from src.db.payments.payments import (
     PaymentsConfig,
@@ -18,6 +17,7 @@ from src.db.payments.payments_products import (
 from src.db.payments.payments_users import PaymentStatusEnum
 from src.db.strict_base_model import PydanticStrictBaseModel
 from src.db.users import PublicUser, UserRead
+from src.infra.db.session import get_db_session
 from src.security.auth import get_current_user
 from src.security.rbac import PermissionCheckerDep
 from src.services.payments.payments_access import check_course_paid_access

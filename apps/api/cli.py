@@ -16,6 +16,8 @@ from src.core.platform import (
 )
 from src.db.platform import Platform, PlatformCreate
 from src.db.users import User, UserCreate
+from src.infra.db.engine import initialize_database
+from src.infra.db.session import session_scope
 from src.services.analytics.rollups import refresh_teacher_analytics_rollups
 from src.services.platform import get_platform
 from src.services.setup.setup import (
@@ -23,8 +25,6 @@ from src.services.setup.setup import (
     install_create_platform_user,
     install_default_elements,
 )
-from src.infra.db.engine import initialize_database
-from src.infra.db.session import session_scope
 
 cli = typer.Typer()
 
@@ -104,9 +104,7 @@ def install(
             print()
             print("Login with the following credentials:")
             print("email: " + str(admin_email))
-            print(
-                "password: (the password you set in PLATFORM_INITIAL_ADMIN_PASSWORD)"
-            )
+            print("password: (the password you set in PLATFORM_INITIAL_ADMIN_PASSWORD)")
             print("⚠️ Remember to change the password after logging in ⚠️")
 
         else:
@@ -125,7 +123,9 @@ def install(
             print("Creating your admin user...")
             username = typer.prompt("What's the username for the user?")
             email = typer.prompt("What's the email for the user?")
-            password = typer.prompt("What's the password for the user?", hide_input=True)
+            password = typer.prompt(
+                "What's the password for the user?", hide_input=True
+            )
             user = UserCreate(username=username, email=email, password=password)
             install_create_platform_user(user, db_session)
             print(username + " user created ✅")

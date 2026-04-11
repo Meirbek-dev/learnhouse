@@ -3,7 +3,6 @@ from typing import Annotated, Any
 from fastapi import APIRouter, Depends, Request, UploadFile
 from sqlmodel import Session
 
-from src.infra.db.session import get_db_session
 from src.db.platform import (
     PaginatedPlatformUsers,
     PlatformRead,
@@ -11,6 +10,7 @@ from src.db.platform import (
 )
 from src.db.strict_base_model import PydanticStrictBaseModel
 from src.db.users import PublicUser
+from src.infra.db.session import get_db_session
 from src.security.auth import get_current_user
 from src.security.rbac import PermissionCheckerDep
 from src.services.platform import get_platform
@@ -224,9 +224,7 @@ def api_update_platform_landing(
     **Required Permission**: `platform:update`
     """
     checker.require(current_user.id, "platform:update")
-    return update_platform_landing(
-        request, landing_object, current_user, db_session
-    )
+    return update_platform_landing(request, landing_object, current_user, db_session)
 
 
 @router.post("/landing/content", response_model=PlatformLandingUploadResponse)

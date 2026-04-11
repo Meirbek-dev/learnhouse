@@ -14,7 +14,6 @@ from fastapi import APIRouter, Depends, Query
 from fastapi.responses import StreamingResponse
 from sqlmodel import Session
 
-from src.infra.db.session import get_db_session
 from src.db.grading.schemas import BatchGradeRequest, BatchGradeResponse
 from src.db.grading.submissions import (
     SubmissionListResponse,
@@ -23,6 +22,7 @@ from src.db.grading.submissions import (
     TeacherGradeInput,
 )
 from src.db.users import PublicUser
+from src.infra.db.session import get_db_session
 from src.security.auth import get_current_user
 from src.services.grading.teacher import (
     batch_grade_submissions,

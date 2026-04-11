@@ -28,9 +28,7 @@ def get_user_from_customer(customer_id: str, db_session: Session) -> User:
         )
 
 
-def get_product_from_stripe_id(
-    product_id: str, db_session: Session
-) -> PaymentsProduct:
+def get_product_from_stripe_id(product_id: str, db_session: Session) -> PaymentsProduct:
     """Helper function to get product from Stripe product ID"""
     statement = select(PaymentsProduct).where(
         PaymentsProduct.provider_product_id == product_id

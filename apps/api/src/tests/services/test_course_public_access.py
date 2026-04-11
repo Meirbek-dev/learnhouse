@@ -141,7 +141,9 @@ async def test_get_course_falls_back_to_raw_uuid_when_prefixed_lookup_misses():
 
 
 @pytest.mark.asyncio
-async def test_get_course_meta_falls_back_to_raw_uuid_when_prefixed_lookup_misses(monkeypatch: pytest.MonkeyPatch):
+async def test_get_course_meta_falls_back_to_raw_uuid_when_prefixed_lookup_misses(
+    monkeypatch: pytest.MonkeyPatch,
+):
     session = _FakeSession(
         [
             _ExecResult(first_value=None),
@@ -149,7 +151,9 @@ async def test_get_course_meta_falls_back_to_raw_uuid_when_prefixed_lookup_misse
             _ExecResult(all_value=[(_raw_public_course(), None, None)]),
         ]
     )
-    monkeypatch.setattr(chapter_service, "get_course_chapters", AsyncMock(return_value=[]))
+    monkeypatch.setattr(
+        chapter_service, "get_course_chapters", AsyncMock(return_value=[])
+    )
 
     result = await get_course_meta(
         request=None,  # type: ignore[arg-type]

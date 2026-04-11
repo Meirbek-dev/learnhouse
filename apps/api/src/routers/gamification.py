@@ -15,7 +15,6 @@ from typing import Annotated, Any
 from fastapi import APIRouter, Body, Depends, HTTPException, Query
 from sqlmodel import Session
 
-from src.infra.db.session import get_db_session
 from src.db.gamification import (
     DashboardRead,
     GamificationProfile,
@@ -33,6 +32,7 @@ from src.db.gamification import (
 )
 from src.db.strict_base_model import PydanticStrictBaseModel
 from src.db.users import PublicUser
+from src.infra.db.session import get_db_session
 from src.security.auth import get_current_user
 from src.security.rbac import PermissionCheckerDep
 from src.services.gamification import service

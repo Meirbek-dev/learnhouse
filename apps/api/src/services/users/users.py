@@ -29,7 +29,6 @@ from src.services.users.avatars import upload_avatar
 from src.services.users.emails import send_account_creation_email
 from src.services.users.usergroups import add_users_to_usergroup
 
-
 _logger = logging.getLogger(__name__)
 
 # Cache TTL for user lookups (seconds)
@@ -421,7 +420,9 @@ async def _create_and_validate_user(
     # Create user with completed fields
     user = User.model_validate(user_object)
     user.user_uuid = f"user_{ULID()}"
-    user.password = security_hash_password(user_object.password) if user_object.password else None
+    user.password = (
+        security_hash_password(user_object.password) if user_object.password else None
+    )
     user.email_verified = False
     user.auth_provider = "local"
 
@@ -432,9 +433,9 @@ async def _create_and_validate_user(
 
     # Send verification email (best-effort, non-blocking)
     try:
-        from src.services.users.email_verification import send_verification_email
-
         import asyncio
+
+        from src.services.users.email_verification import send_verification_email
 
         asyncio.create_task(send_verification_email(db_session, user))
     except Exception:

@@ -4,7 +4,6 @@ from fastapi import APIRouter, Depends, Request, Response, UploadFile
 from pydantic import EmailStr
 from sqlmodel import Session
 
-from src.infra.db.session import get_db_session
 from src.db.courses.courses import CourseRead
 from src.db.users import (
     PublicUser,
@@ -14,6 +13,7 @@ from src.db.users import (
     UserUpdate,
     UserUpdatePassword,
 )
+from src.infra.db.session import get_db_session
 from src.security.auth import get_current_user
 from src.security.rbac import (
     PermissionCheckerDep,

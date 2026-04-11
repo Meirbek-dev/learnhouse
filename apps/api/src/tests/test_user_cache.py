@@ -14,6 +14,7 @@ def test_get_user_by_field_returns_from_cache():
         assert user.id == 1
         assert user.username == "alice"
 
+
 def test_get_user_by_field_sets_cache_after_db_fetch(monkeypatch):
     # Mock DB to return a User-like object
     mock_user = SimpleNamespace(

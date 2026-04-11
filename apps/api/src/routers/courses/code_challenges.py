@@ -14,7 +14,6 @@ from pydantic import ValidationError, field_validator
 from sqlmodel import Session, func, select
 from ulid import ULID
 
-from src.infra.db.session import get_db_session
 from src.db.courses.activities import (
     Activity,
     ActivityCreate,
@@ -46,6 +45,7 @@ from src.db.courses.code_challenges import (
 from src.db.courses.courses import Course
 from src.db.strict_base_model import PydanticStrictBaseModel
 from src.db.users import AnonymousUser, PublicUser, User
+from src.infra.db.session import get_db_session
 from src.security.auth import get_current_user
 from src.security.rbac import (
     AuthenticationRequired,

@@ -2,7 +2,6 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Request
 
-from src.infra.db.session import get_db_session
 from src.db.courses.chapters import (
     ActivityOrderPayload,
     ChapterCreateRequest,
@@ -11,6 +10,7 @@ from src.db.courses.chapters import (
     ChapterUpdate,
     ChapterUpdateOrder,
 )
+from src.infra.db.session import get_db_session
 from src.security.auth import get_current_user
 from src.services.courses.chapters import (
     create_chapter,

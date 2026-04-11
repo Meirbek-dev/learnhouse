@@ -2,7 +2,6 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Form, Request, UploadFile
 
-from src.infra.db.session import get_db_session
 from src.db.courses.blocks import BlockRead
 from src.db.courses.quiz import (
     QuizAttemptRead,
@@ -10,6 +9,7 @@ from src.db.courses.quiz import (
     QuizSubmissionRequest,
     QuizSubmissionResponse,
 )
+from src.infra.db.session import get_db_session
 from src.security.auth import get_current_user
 from src.services.blocks.block_types.imageBlock.imageBlock import (
     create_image_block,

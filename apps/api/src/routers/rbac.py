@@ -17,10 +17,10 @@ from slowapi import Limiter
 from slowapi.util import get_remote_address
 from sqlmodel import Session, select
 
-from src.infra.db.session import get_db_session
 from src.db.permissions import Role, UserRole
 from src.db.users import AnonymousUser, PublicUser
 from src.db.users import User as UserModel
+from src.infra.db.session import get_db_session
 from src.security.auth import get_current_user
 from src.security.rbac import PermissionCheckerDep
 

@@ -14,9 +14,9 @@ from fastapi import status as http_status
 from sqlalchemy import desc
 from sqlmodel import Session, select
 
-from src.infra.db.session import get_db_session
 from src.db.grading.submissions import AssessmentType, Submission, SubmissionRead
 from src.db.users import PublicUser
+from src.infra.db.session import get_db_session
 from src.security.auth import get_current_user
 from src.services.grading.settings_loader import load_activity_settings
 from src.services.grading.submit import start_submission, submit_assessment

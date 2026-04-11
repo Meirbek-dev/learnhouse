@@ -111,7 +111,8 @@ async def verify_email_with_token(
     jti_key = f"{VERIFICATION_JTI_PREFIX}{jti}"
     if not await r.exists(jti_key):
         raise HTTPException(
-            status_code=400, detail="Verification token has already been used or expired"
+            status_code=400,
+            detail="Verification token has already been used or expired",
         )
 
     user = db_session.exec(select(User).where(User.user_uuid == user_uuid)).first()
@@ -155,7 +156,7 @@ def is_within_grace_period(user: User) -> bool:
         # Assume UTC for naive datetimes
         from datetime import timezone
 
-        created = created.replace(tzinfo=timezone.utc)
+        created = created.replace(tzinfo=UTC)
 
     hours_since_creation = (now - created).total_seconds() / 3600
     return hours_since_creation < VERIFICATION_GRACE_PERIOD_HOURS

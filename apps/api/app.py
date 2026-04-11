@@ -3,7 +3,6 @@ import uvicorn
 from config.config import get_settings
 from src.app.factory import create_app
 
-
 app = create_app()
 
 
