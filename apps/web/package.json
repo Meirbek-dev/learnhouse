@@ -14,7 +14,7 @@
     "oxlint": "oxlint --type-aware --fix --fix-suggestions --fix-dangerously",
     "format": "oxfmt --write",
     "start": "next start",
-    "check-types": "next typegen && tsc --noEmit",
+    "check-types": "next typegen && tsgo --noEmit",
     "bundle:analyze": "next experimental-analyze",
     "knip": "knip"
   },

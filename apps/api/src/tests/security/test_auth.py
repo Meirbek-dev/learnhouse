@@ -12,7 +12,7 @@ from sqlmodel import Session
 
 from config.config import reload_platform_config_cache
 from src.db.users import AnonymousUser, User
-from src.routers.auth import _compact_permissions_for_token
+from src.routers.auth import _compact_permissions_for_token, _sanitize_callback_target
 from src.security.auth import (
     ACCESS_TOKEN_EXPIRE,
     AUTH_TOKEN_AUDIENCE,
@@ -303,6 +303,42 @@ class TestRefreshSessionInspection:
         assert inspection.session_id == "sess_old"
         assert inspection.token_family_id == "fam_123"
         assert inspection.user_id == 10
+
+
+class TestOAuthCallbackSanitization:
+    def test_sanitize_callback_target_keeps_relative_paths(self) -> None:
+        result = _sanitize_callback_target("/redirect_from_auth?foo=bar")
+
+        assert result == "/redirect_from_auth?foo=bar"
+
+    def test_sanitize_callback_target_keeps_trusted_absolute_origin(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        monkeypatch.setenv(
+            "PLATFORM_ALLOWED_ORIGINS",
+            "http://localhost:3000,http://localhost:3001",
+        )
+        reload_platform_config_cache()
+
+        result = _sanitize_callback_target(
+            "http://localhost:3000/redirect_from_auth?foo=bar#ignored"
+        )
+
+        assert result == "http://localhost:3000/redirect_from_auth?foo=bar"
+
+    def test_sanitize_callback_target_rejects_untrusted_absolute_origin(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        monkeypatch.setenv("PLATFORM_ALLOWED_ORIGINS", "http://localhost:3000")
+        reload_platform_config_cache()
+
+        with pytest.raises(HTTPException) as exc_info:
+            _sanitize_callback_target("http://localhost:4000/redirect_from_auth")
+
+        assert exc_info.value.status_code == 400
+        assert exc_info.value.detail == "Untrusted callback origin"
 
 
 class TestAuthSessionRedisIndexRepair:

@@ -235,8 +235,8 @@ def _sanitize_callback_target(callback: str) -> str:
     """Validate and normalise an OAuth callback URL.
 
     If the URL is absolute, its origin must be in PLATFORM_ALLOWED_ORIGINS.
-    The returned value is always a path-only string (scheme and host stripped)
-    so the backend redirect never bounces users to an untrusted external domain.
+    Relative targets stay path-only. Absolute targets keep their trusted origin
+    so OAuth callbacks can return to a separate frontend host/port.
     """
     if not isinstance(callback, str) or not callback.strip():
         raise HTTPException(status_code=400, detail="Invalid callback target")
@@ -259,7 +259,9 @@ def _sanitize_callback_target(callback: str) -> str:
         raise HTTPException(status_code=400, detail="Untrusted callback origin")
 
     query = urlencode(parse_qsl(parsed.query, keep_blank_values=True))
-    return urlunsplit(("", "", parsed.path or "/", query, "")) or "/"
+    return urlunsplit(
+        (parsed.scheme, parsed.netloc, parsed.path or "/", query, "")
+    )
 
 
 # ── Endpoints ─────────────────────────────────────────────────────────────────
