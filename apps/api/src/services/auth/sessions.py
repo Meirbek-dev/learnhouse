@@ -27,12 +27,16 @@ from sqlmodel import Session, select
 
 from src.db.auth_sessions import AuthSession
 from src.db.users import User
+from src.security.auth_lifetimes import (
+    REFRESH_TOKEN_EXPIRE,
+    REFRESH_TOKEN_HARD_CAP_EXPIRE,
+)
 from src.services.cache.redis_client import get_async_redis_client
 
 logger = logging.getLogger(__name__)
 
-REFRESH_SESSION_TTL = int(timedelta(days=7).total_seconds())
-REFRESH_SESSION_HARD_CAP = int(timedelta(days=30).total_seconds())
+REFRESH_SESSION_TTL = int(REFRESH_TOKEN_EXPIRE.total_seconds())
+REFRESH_SESSION_HARD_CAP = int(REFRESH_TOKEN_HARD_CAP_EXPIRE.total_seconds())
 MAX_SESSIONS_PER_USER = 10
 SESSION_PREFIX = "session:"
 USER_SESSIONS_PREFIX = "user_sessions:"

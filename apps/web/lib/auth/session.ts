@@ -88,7 +88,7 @@ function sessionFromPayload(payload: AccessTokenPayload): Session {
  * FastAPI on every authenticated API call.  Local verification intentionally
  * skips the blocklist to avoid a Redis round-trip on every page render.
  * The maximum window for a blocklisted-but-locally-valid token is the access
- * token TTL (30 minutes).
+ * token TTL.
  */
 export const getSession = cache(async (): Promise<Session | null> => {
   const cookieStore = await cookies();
