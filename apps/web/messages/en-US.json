@@ -4124,6 +4124,7 @@
         "calloutWarning": "Callout (Warning)",
         "clickMe": "Click me",
         "codeBlock": "Code Block",
+        "codeBlockLanguage": "Code Language",
         "codeInline": "Code Inline",
         "defaultInfoCalloutText": "Info",
         "defaultScenario": {
@@ -4186,6 +4187,7 @@
           "orderedList": "Ordered List"
         },
         "mathEquation": "Math Equation (LaTeX)",
+        "plainText": "Plain text",
         "slashBlocks": "Blocks",
         "slashEmbedDescription": "Embed {label}",
         "slashInsertDescription": "Insert {label} block",

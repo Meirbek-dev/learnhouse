@@ -9,9 +9,13 @@ interface MetadataProps {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
+async function fetchCourseMetadata(courseuuid: string) {
+  return await getCourseMetadata(courseuuid, undefined, true);
+}
+
 export async function generateMetadata(props: MetadataProps): Promise<Metadata> {
   const params = await props.params;
-  const course_meta = await getCourseMetadata(params.courseuuid);
+  const course_meta = await fetchCourseMetadata(params.courseuuid);
 
   // SEO
   return {
@@ -50,7 +54,7 @@ const CoursePage = async (params: any) => {
   const { courseuuid } = await params.params;
 
   // Fetch course metadata once
-  const course_meta = await getCourseMetadata(courseuuid);
+  const course_meta = await fetchCourseMetadata(courseuuid);
 
   return (
     <CourseClient

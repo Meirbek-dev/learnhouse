@@ -10,6 +10,7 @@ import { Separator } from '@/components/ui/separator';
 import { UndoRedoGroup } from './UndoRedoGroup';
 import { TextFormatGroup } from './TextFormatGroup';
 import { HeadingDropdown } from './HeadingDropdown';
+import { CodeBlockLanguageDropdown } from './CodeBlockLanguageDropdown';
 import { LinkToggle } from './LinkToggle';
 import { ListDropdown } from './ListDropdown';
 import { TableDropdown } from './TableDropdown';
@@ -36,6 +37,7 @@ export function EditorToolbar({ editor, onAIToggle }: EditorToolbarProps) {
       isItalic: ctx.editor?.isActive('italic') ?? false,
       isStrike: ctx.editor?.isActive('strike') ?? false,
       isBulletList: ctx.editor?.isActive('bulletList') ?? false,
+      isCodeBlock: ctx.editor?.isActive('codeBlock') ?? false,
       isOrderedList: ctx.editor?.isActive('orderedList') ?? false,
       isLink: ctx.editor?.isActive('link') ?? false,
       headingLevel: ctx.editor?.isActive('heading', { level: 1 })
@@ -53,6 +55,7 @@ export function EditorToolbar({ editor, onAIToggle }: EditorToolbarProps) {
                   : 0,
       canUndo: ctx.editor?.can().undo() ?? false,
       canRedo: ctx.editor?.can().redo() ?? false,
+      codeBlockLanguage: ctx.editor?.getAttributes('codeBlock').language ?? null,
       linkHref: ctx.editor?.getAttributes('link').href ?? '',
     }),
   });
@@ -94,6 +97,12 @@ export function EditorToolbar({ editor, onAIToggle }: EditorToolbarProps) {
         isBulletList={editorState.isBulletList}
         isOrderedList={editorState.isOrderedList}
       />
+      {editorState.isCodeBlock ? (
+        <CodeBlockLanguageDropdown
+          editor={editor}
+          language={editorState.codeBlockLanguage}
+        />
+      ) : null}
       <TableDropdown editor={editor} />
       <ToolbarSeparator />
       <InsertButtons editor={editor} />

@@ -4150,6 +4150,7 @@
         "calloutWarning": "Выноска (Предупреждение)",
         "clickMe": "Нажми меня",
         "codeBlock": "Блок кода",
+        "codeBlockLanguage": "Язык кода",
         "codeInline": "Встроенный код",
         "defaultInfoCalloutText": "Информация",
         "defaultScenario": {
@@ -4212,6 +4213,7 @@
           "orderedList": "Нумерованный список"
         },
         "mathEquation": "Математическое уравнение (LaTeX)",
+        "plainText": "Обычный текст",
         "slashBlocks": "Блоки",
         "slashEmbedDescription": "Встроить {label}",
         "slashInsertDescription": "Вставить блок {label}",

@@ -5,6 +5,7 @@ import java from 'highlight.js/lib/languages/java';
 import js from 'highlight.js/lib/languages/javascript';
 import python from 'highlight.js/lib/languages/python';
 import ts from 'highlight.js/lib/languages/typescript';
+import kotlin from 'highlight.js/lib/languages/kotlin';
 
 export const SHARED_LOWLIGHT = (() => {
   const lowlight = createLowlight(common);
@@ -15,6 +16,7 @@ export const SHARED_LOWLIGHT = (() => {
   lowlight.register('ts', ts);
   lowlight.register('python', python);
   lowlight.register('java', java);
+  lowlight.register('kotlin', kotlin);
 
   return lowlight;
 })();

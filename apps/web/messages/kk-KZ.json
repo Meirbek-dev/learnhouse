@@ -4150,6 +4150,7 @@
         "calloutWarning": "Шығару (Ескерту)",
         "clickMe": "Мені бас",
         "codeBlock": "Код блогы",
+        "codeBlockLanguage": "Код тілі",
         "codeInline": "Желілік код",
         "defaultInfoCalloutText": "Ақпарат",
         "defaultScenario": {
@@ -4212,6 +4213,7 @@
           "orderedList": "Нөмірленген тізім"
         },
         "mathEquation": "Математикалық теңдеу (LaTeX)",
+        "plainText": "Қарапайым мәтін",
         "slashBlocks": "Блоктар",
         "slashEmbedDescription": "{label} енгізу",
         "slashInsertDescription": "{label} блогын кірістіру",
