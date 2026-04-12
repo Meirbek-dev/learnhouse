@@ -14,7 +14,7 @@ interface MetadataProps {
 
 // Add this function at the top level to avoid duplicate fetches
 async function fetchCourseMetadata(courseuuid: string) {
-  return await getCourseMetadata(courseuuid);
+  return await getCourseMetadata(courseuuid, undefined, true);
 }
 
 export async function generateMetadata(props: MetadataProps): Promise<Metadata> {

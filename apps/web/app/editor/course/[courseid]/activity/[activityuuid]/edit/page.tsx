@@ -18,7 +18,7 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
   const params = await props.params;
   const t = await getTranslations('DashPage.Editor');
 
-  const course_meta = await getCourseMetadata(params.courseid);
+  const course_meta = await getCourseMetadata(params.courseid, undefined, true);
 
   return {
     title: t('metaTitleEdit', { activityName: course_meta.name }),
@@ -31,7 +31,10 @@ const EditActivity = async (props: { params: Promise<{ courseid: string; activit
   const params = await props.params;
   const { activityuuid, courseid } = params;
 
-  const [courseInfo, activity] = await Promise.all([getCourseMetadata(courseid), getActivity(activityuuid)]);
+  const [courseInfo, activity] = await Promise.all([
+    getCourseMetadata(courseid, undefined, true),
+    getActivity(activityuuid),
+  ]);
 
   const platform = await getPlatform();
 
