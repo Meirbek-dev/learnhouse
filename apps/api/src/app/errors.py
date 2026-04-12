@@ -3,6 +3,20 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
 
+def _serialize_validation_errors(exc: RequestValidationError) -> list[dict]:
+    try:
+        return exc.errors(include_url=False)
+    except TypeError:
+        errors = exc.errors()
+        sanitized_errors: list[dict] = []
+        for error in errors:
+            if isinstance(error, dict) and "url" in error:
+                sanitized_errors.append({k: v for k, v in error.items() if k != "url"})
+            else:
+                sanitized_errors.append(error)
+        return sanitized_errors
+
+
 def register_exception_handlers(app: FastAPI) -> None:
     @app.exception_handler(HTTPException)
     def http_exception_handler(request: Request, exc: HTTPException) -> JSONResponse:
@@ -33,6 +47,6 @@ def register_exception_handlers(app: FastAPI) -> None:
             content={
                 "error_code": "VALIDATION_ERROR",
                 "message": "Request validation failed",
-                "detail": exc.errors(include_url=False),
+                "detail": _serialize_validation_errors(exc),
             },
         )
