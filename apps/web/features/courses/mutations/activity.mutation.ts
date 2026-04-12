@@ -5,10 +5,10 @@ import type { QueryClient } from '@tanstack/react-query';
 import {
   createActivity,
   createExternalVideoActivity,
-  createFileActivity,
   deleteActivity,
   updateActivity,
 } from '@services/courses/activities';
+import { createFileActivity } from '@services/courses/activity-uploads';
 import type { ActivityCreateValues, ActivityUpdateValues } from '@/schemas/activitySchemas';
 import { courseKeys } from '@/hooks/courses/courseKeys';
 import { assertSuccess } from '@/lib/api/assertSuccess';

@@ -12,6 +12,10 @@ interface FloatingPlusButtonProps {
 
 export function FloatingPlusButton({ editor }: FloatingPlusButtonProps) {
   const shouldShow = useCallback(() => {
+    if (editor.isEmpty) {
+      return false;
+    }
+
     // Show only when cursor is on an empty paragraph
     const { selection } = editor.state;
     const { $from } = selection;
