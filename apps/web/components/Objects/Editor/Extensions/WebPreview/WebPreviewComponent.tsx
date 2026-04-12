@@ -174,7 +174,7 @@ const WebPreviewComponent = ({ node, updateAttributes, deleteNode }: WebPreviewP
     },
   });
 
-  const loading = previewQuery.isPending || fetchPreviewMutation.isPending;
+  const loading = previewQuery.isFetching || fetchPreviewMutation.isPending;
 
   useEffect(() => {
     if (!shouldAutoFetchPreview) return;

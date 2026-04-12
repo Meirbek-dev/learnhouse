@@ -82,7 +82,7 @@ const UserBlockComponent = (props: TypedNodeViewProps<UserNodeAttrs>) => {
   const userByUsernameQuery = useUserByUsernameQuery(submittedUsername, {
     enabled: Boolean(submittedUsername && submittedUsername.trim().length > 0),
   });
-  const isLoading = userByIdQuery.isPending || userByUsernameQuery.isPending;
+  const isLoading = userByIdQuery.isFetching || userByUsernameQuery.isFetching;
 
   useEffect(() => {
     if (!userId) return;
