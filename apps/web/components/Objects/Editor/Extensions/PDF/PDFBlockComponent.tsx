@@ -1,5 +1,6 @@
 import { FileUploadBlock, FileUploadBlockButton, FileUploadBlockInput } from '../../FileUploadBlock';
 import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { AlertTriangle, Download, Expand, FileText } from 'lucide-react';
 import { getActivityBlockMediaDirectory } from '@services/media/media';
 import { useCourse } from '@components/Contexts/CourseContext';
@@ -8,10 +9,16 @@ import { uploadNewPDFFile } from '@services/blocks/Pdf/pdf';
 import { constructAcceptValue } from '@/lib/constants';
 import { NodeViewWrapper } from '@tiptap/react';
 import { useTranslations } from 'next-intl';
-import { useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import type { PanelImperativeHandle, PanelSize } from 'react-resizable-panels';
 import type { TypedNodeViewProps } from '@components/Objects/Editor/core';
 
 const SUPPORTED_FILES = constructAcceptValue(['pdf']);
+const DEFAULT_SIZE = { width: 720, height: 540 };
+const MIN_WIDTH = 320;
+const MAX_WIDTH = 1400;
+const MIN_HEIGHT = 240;
+const MAX_HEIGHT = 1200;
 
 interface PdfBlockObject {
   block_uuid: string;
@@ -21,12 +28,25 @@ interface PdfBlockObject {
   };
 }
 
+interface PdfBlockSize {
+  width: number;
+  height: number;
+}
+
 interface PdfNodeAttrs {
   blockObject: PdfBlockObject | null;
+  size?: PdfBlockSize;
 }
 
 interface PdfExtensionOptions {
   activity: { activity_uuid: string };
+}
+
+function normalizeSize(size?: Partial<PdfBlockSize> | null): PdfBlockSize {
+  return {
+    width: typeof size?.width === 'number' && size.width > 0 ? size.width : DEFAULT_SIZE.width,
+    height: typeof size?.height === 'number' && size.height > 0 ? size.height : DEFAULT_SIZE.height,
+  };
 }
 
 const PDFBlockComponent = (props: TypedNodeViewProps<PdfNodeAttrs, PdfExtensionOptions>) => {
@@ -36,9 +56,56 @@ const PDFBlockComponent = (props: TypedNodeViewProps<PdfNodeAttrs, PdfExtensionO
   const [isLoading, setIsLoading] = useState(false);
   const [blockObject, setblockObject] = useState(props.node.attrs.blockObject);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [size, setSize] = useState(() => normalizeSize(props.node.attrs.size));
+  const [availableWidth, setAvailableWidth] = useState<number | null>(null);
+  const nodeSize = props.node.attrs.size;
   const fileId = blockObject ? `${blockObject.content.file_id}.${blockObject.content.file_format}` : null;
   const editorState = useEditorProvider();
   const { isEditable } = editorState;
+  const sizeRef = useRef(size);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const widthPanelRef = useRef<PanelImperativeHandle | null>(null);
+  const heightPanelRef = useRef<PanelImperativeHandle | null>(null);
+  const isSyncingPanelsRef = useRef(false);
+  const syncPanelsRafRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    const nextSize = normalizeSize(nodeSize);
+    sizeRef.current = nextSize;
+    setSize(nextSize);
+  }, [nodeSize]);
+
+  useEffect(() => {
+    setblockObject(props.node.attrs.blockObject);
+  }, [props.node.attrs.blockObject]);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const updateAvailableWidth = () => {
+      const nextWidth = Math.round(containerRef.current?.getBoundingClientRect().width ?? 0);
+      setAvailableWidth(nextWidth > 0 ? nextWidth : null);
+    };
+
+    updateAvailableWidth();
+    const resizeObserver = new ResizeObserver(updateAvailableWidth);
+    resizeObserver.observe(containerRef.current);
+
+    return () => resizeObserver.disconnect();
+  }, []);
+
+  const updateLocalSize = useCallback((updater: (current: PdfBlockSize) => PdfBlockSize) => {
+    setSize((current) => {
+      const next = updater(current);
+      sizeRef.current = next;
+      return next;
+    });
+  }, []);
+
+  const persistSize = useCallback(() => {
+    if (isSyncingPanelsRef.current) return;
+    props.updateAttributes({ size: sizeRef.current });
+  }, [props]);
 
   const handlePDFChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setPDF(event.target.files?.[0] ?? null);
@@ -81,6 +148,58 @@ const PDFBlockComponent = (props: TypedNodeViewProps<PdfNodeAttrs, PdfExtensionO
     setIsModalOpen(true);
   };
 
+  const handleWidthResize = useCallback(
+    (panelSize: PanelSize) => {
+      if (isSyncingPanelsRef.current) return;
+      updateLocalSize((current) => ({
+        ...current,
+        width: Math.round(panelSize.inPixels),
+      }));
+    },
+    [updateLocalSize],
+  );
+
+  const handleHeightResize = useCallback(
+    (panelSize: PanelSize) => {
+      if (isSyncingPanelsRef.current) return;
+      updateLocalSize((current) => ({
+        ...current,
+        height: Math.round(panelSize.inPixels),
+      }));
+    },
+    [updateLocalSize],
+  );
+
+  const maxVisibleWidth = availableWidth ? Math.min(MAX_WIDTH, availableWidth) : MAX_WIDTH;
+  const visibleWidth = Math.min(size.width, maxVisibleWidth);
+  const visibleHeight = Math.min(size.height, MAX_HEIGHT);
+  const minVisibleWidth = Math.min(MIN_WIDTH, maxVisibleWidth);
+
+  useEffect(() => {
+    if (!widthPanelRef.current || !heightPanelRef.current) return;
+
+    isSyncingPanelsRef.current = true;
+    widthPanelRef.current.resize(visibleWidth);
+    heightPanelRef.current.resize(visibleHeight);
+
+    if (syncPanelsRafRef.current !== null) {
+      cancelAnimationFrame(syncPanelsRafRef.current);
+    }
+
+    syncPanelsRafRef.current = requestAnimationFrame(() => {
+      isSyncingPanelsRef.current = false;
+      syncPanelsRafRef.current = null;
+    });
+
+    return () => {
+      if (syncPanelsRafRef.current !== null) {
+        cancelAnimationFrame(syncPanelsRafRef.current);
+        syncPanelsRafRef.current = null;
+      }
+      isSyncingPanelsRef.current = false;
+    };
+  }, [visibleHeight, visibleWidth]);
+
   const pdfUrl = blockObject
     ? getActivityBlockMediaDirectory({
         courseId: course?.courseStructure.course_uuid || '',
@@ -91,9 +210,14 @@ const PDFBlockComponent = (props: TypedNodeViewProps<PdfNodeAttrs, PdfExtensionO
       })
     : null;
 
+  const viewerStyle = {
+    width: `${visibleWidth}px`,
+    height: `${visibleHeight}px`,
+  };
+
   return (
     <>
-      <NodeViewWrapper className="block-pdf">
+      <NodeViewWrapper className="block-pdf w-full py-2">
         <FileUploadBlock
           isEditable={isEditable}
           isLoading={isLoading}
@@ -110,15 +234,70 @@ const PDFBlockComponent = (props: TypedNodeViewProps<PdfNodeAttrs, PdfExtensionO
           />
         </FileUploadBlock>
         {blockObject ? (
-          <div className="flex flex-col">
-            <div className="relative">
-              <iframe
-                className="h-96 w-full rounded-lg bg-black object-scale-down shadow-sm"
-                src={pdfUrl || ''}
-                title={t('pdfViewer')}
-              />
+          <div
+            ref={containerRef}
+            className="flex w-full flex-col"
+          >
+            <div
+              className="group relative mx-auto max-w-full overflow-hidden rounded-lg border bg-black shadow-sm"
+              style={viewerStyle}
+            >
+              <ResizablePanelGroup
+                orientation="horizontal"
+                className="absolute inset-0"
+                onLayoutChanged={persistSize}
+                style={{ width: `${Math.max(maxVisibleWidth, visibleWidth)}px` }}
+              >
+                <ResizablePanel
+                  id="pdf-width-panel"
+                  panelRef={widthPanelRef}
+                  defaultSize={visibleWidth}
+                  minSize={minVisibleWidth}
+                  maxSize={maxVisibleWidth}
+                  groupResizeBehavior="preserve-pixel-size"
+                  onResize={handleWidthResize}
+                >
+                  <ResizablePanelGroup
+                    orientation="vertical"
+                    className="h-full"
+                    onLayoutChanged={persistSize}
+                    style={{ height: `${MAX_HEIGHT}px` }}
+                  >
+                    <ResizablePanel
+                      id="pdf-height-panel"
+                      panelRef={heightPanelRef}
+                      defaultSize={visibleHeight}
+                      minSize={MIN_HEIGHT}
+                      maxSize={MAX_HEIGHT}
+                      groupResizeBehavior="preserve-pixel-size"
+                      onResize={handleHeightResize}
+                    >
+                      <iframe
+                        className="h-full w-full rounded-lg bg-black shadow-sm"
+                        src={pdfUrl || ''}
+                        title={t('pdfViewer')}
+                      />
+                    </ResizablePanel>
+                    {isEditable && (
+                      <ResizableHandle
+                        withHandle
+                        className="bg-white/70 hover:bg-white/90"
+                      />
+                    )}
+                    <ResizablePanel minSize={0} />
+                  </ResizablePanelGroup>
+                </ResizablePanel>
+                {isEditable && maxVisibleWidth > minVisibleWidth && (
+                  <ResizableHandle
+                    withHandle
+                    className="bg-white/70 hover:bg-white/90"
+                  />
+                )}
+                <ResizablePanel minSize={0} />
+              </ResizablePanelGroup>
               <div className="absolute top-2 right-2 flex gap-1">
                 <button
+                  type="button"
                   onClick={handleExpand}
                   className="rounded-full bg-black/50 p-2 transition-colors hover:bg-black/70"
                   title={t('expand')}
@@ -127,6 +306,7 @@ const PDFBlockComponent = (props: TypedNodeViewProps<PdfNodeAttrs, PdfExtensionO
                 </button>
                 {!isEditable && (
                   <button
+                    type="button"
                     onClick={handleDownload}
                     className="rounded-full bg-black/50 p-2 transition-colors hover:bg-black/70"
                     title={t('download')}

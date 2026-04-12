@@ -13,6 +13,10 @@ export interface PdfBlockObject {
 
 export interface PdfBlockAttrs {
   blockObject: PdfBlockObject | null;
+  size: {
+    width: number;
+    height: number;
+  };
 }
 
 declare module '@tiptap/core' {
@@ -33,6 +37,12 @@ export default Node.create({
     return {
       blockObject: {
         default: null,
+      },
+      size: {
+        default: {
+          width: 720,
+          height: 540,
+        },
       },
     };
   },

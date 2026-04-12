@@ -1,6 +1,6 @@
 import { type CommandProps, Node, mergeAttributes } from '@tiptap/core';
 
-import BadgesExtension from '@/components/Objects/Editor/Extensions/Badges/BadgesExtension';
+import BadgesExtension from './BadgesExtension';
 import { nodeView } from '@components/Objects/Editor/core';
 
 export interface BadgeAttrs {

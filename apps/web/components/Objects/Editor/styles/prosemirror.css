@@ -351,6 +351,18 @@
   margin: 1.5rem 0;
 }
 
+/* Resizable embed blocks manage their own dimensions. */
+.ProseMirror .embed-block iframe,
+.ProseMirror block-embed iframe,
+.ProseMirror .block-pdf iframe,
+.ProseMirror block-pdf iframe {
+  height: 100%;
+  min-height: 100%;
+  margin: 0;
+  border: 0;
+  border-radius: inherit;
+}
+
 /* ── Images ────────────────────────────────────────────────────── */
 
 .ProseMirror img {

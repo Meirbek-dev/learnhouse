@@ -141,6 +141,10 @@ const serializationCases: Array<{ title: string; doc: object }> = [
               block_uuid: 'pdf-1',
               content: { file_id: 'handout', file_format: 'pdf' },
             },
+            size: {
+              width: 840,
+              height: 640,
+            },
           },
         },
       ],
