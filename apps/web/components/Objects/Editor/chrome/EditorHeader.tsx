@@ -39,6 +39,7 @@ export function EditorHeader({
             height={22}
             src={platformLogoDark}
             alt="Ashyq Bilim logo"
+            style={{ height: 'auto' }}
           />
         </Link>
         <Separator

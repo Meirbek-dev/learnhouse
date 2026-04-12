@@ -110,6 +110,7 @@ export function EditorToolbar({ editor, onAIToggle }: EditorToolbarProps) {
             height={14}
             src={platformLogoLight}
             alt=""
+            style={{ height: 'auto' }}
           />
           <span>{t('aiEditor')}</span>
         </button>

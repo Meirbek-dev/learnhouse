@@ -268,14 +268,16 @@ const DashSidebar = ({ className }: SidebarProps) => {
             aria-label={t('ariaLabels.goToHomepage')}
           >
             <div className="bg-primary/80 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-linear-to-br p-1.5 shadow-sm">
-              <Image
-                alt={t('ariaLabels.platformLogo')}
-                width={24}
-                height={24}
-                src={platformLogoLight}
-                className="h-full w-full object-contain"
-                priority
-              />
+              <div className="relative h-full w-full">
+                <Image
+                  alt={t('ariaLabels.platformLogo')}
+                  src={platformLogoLight}
+                  fill
+                  sizes="28px"
+                  className="object-contain"
+                  priority
+                />
+              </div>
             </div>
             <div
               className={`overflow-hidden transition-all duration-300 ${

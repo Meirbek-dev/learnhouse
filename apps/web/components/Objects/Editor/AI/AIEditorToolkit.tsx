@@ -557,6 +557,7 @@ function UserFeedbackModal({
               src={platformLogoLight}
               alt={t('platformLogoAlt')}
               className="rounded-sm"
+              style={{ height: 'auto' }}
             />
             <span className="text-sm font-semibold text-zinc-100">{t('aiEditorTitle')}</span>
           </div>
@@ -747,6 +748,7 @@ export default function AIEditorToolkit({ editor, activity, isOpen, onClose }: A
                   src={platformLogoLight}
                   alt={t('aiIconAlt')}
                   className="rounded-sm"
+                  style={{ height: 'auto' }}
                 />
                 <span className="hidden text-xs font-semibold text-zinc-300 sm:block">{t('aiEditorTitle')}</span>
               </div>

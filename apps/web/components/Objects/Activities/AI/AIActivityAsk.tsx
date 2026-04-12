@@ -68,6 +68,7 @@ const AIActivityAsk = ({ activity: _activity }: AIActivityAskProps) => {
           height={16}
           src={platformLogoLight}
           alt={t('askAI')}
+          style={{ height: 'auto' }}
         />
         <span className="text-xs font-semibold">{t('askAI')}</span>
       </Button>
@@ -167,6 +168,7 @@ const ActivityChatPanel = () => {
                     height={20}
                     src={platformLogoLight}
                     alt={t('logoAlt')}
+                    style={{ height: 'auto' }}
                   />
                   <span className="text-sm font-semibold text-zinc-100">{t('AI')}</span>
                   {isLoading && <Spinner className="h-3.5 w-3.5 text-zinc-400" />}
