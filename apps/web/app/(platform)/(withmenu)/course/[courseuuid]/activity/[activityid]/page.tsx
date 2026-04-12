@@ -1,5 +1,8 @@
 import { getActivity } from '@services/courses/activities';
 import { getCourseMetadata } from '@services/courses/courses';
+import { getSession } from '@/lib/auth/session';
+import { SessionProvider } from '@/components/providers/session-provider';
+import { connection } from 'next/server';
 import { jetBrainsMono } from '@/lib/fonts';
 import type { Metadata } from 'next';
 
@@ -15,6 +18,7 @@ async function fetchCourseMetadata(courseuuid: string) {
 }
 
 export async function generateMetadata(props: MetadataProps): Promise<Metadata> {
+  await connection();
   const { courseuuid, activityid } = await props.params;
   const course_meta = await fetchCourseMetadata(courseuuid);
   const isCourseEnd = activityid === 'end';
@@ -48,21 +52,25 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
 export default async function PlatformActivityPage(props: {
   params: Promise<{ courseuuid: string; activityid: string }>;
 }) {
+  await connection();
   const { courseuuid, activityid } = await props.params;
   const isCourseEnd = activityid === 'end';
-  const [course_meta, activity] = await Promise.all([
+  const [course_meta, activity, initialSession] = await Promise.all([
     fetchCourseMetadata(courseuuid),
     isCourseEnd ? Promise.resolve(null) : getActivity(activityid),
+    getSession(),
   ]);
 
   return (
     <div className={jetBrainsMono.variable}>
-      <ActivityClient
-        activityid={activityid}
-        courseuuid={courseuuid}
-        activity={activity}
-        course={course_meta}
-      />
+      <SessionProvider initialSession={initialSession}>
+        <ActivityClient
+          activityid={activityid}
+          courseuuid={courseuuid}
+          activity={activity}
+          course={course_meta}
+        />
+      </SessionProvider>
     </div>
   );
 }

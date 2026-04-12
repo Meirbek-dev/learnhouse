@@ -3975,7 +3975,10 @@
         "dropOrClick": "Кескінді осы жерге сүйреңіз немесе таңдау үшін басыңыз",
         "expand": "Кеңейту",
         "imageViewer": "Суретті қарау құралы",
+        "invalidImageFile": "Жарамды сурет файлын таңдаңыз",
+        "previewImageAlt": "Алдын ала қарау",
         "supportedFormats": "Қолдау көрсетілетін пішімдері: JPG, PNG, WebP, GIF",
+        "uploadFailed": "Кескінді жүктеу мүмкін болмады",
         "upload": "Жүктеп алу",
         "uploading": "Жүктеп салынуда..."
       },
@@ -4127,6 +4130,7 @@
       "Toolbar": {
         "addColumnRight": "Оң жаққа баған қосу",
         "addRowBelow": "Төменге жол қосу",
+        "aiEditor": "ЖИ редакторы",
         "aria": {
           "insertInteractiveScenarios": "Интерактивті сценарийлерді енгізу"
         },
@@ -4186,22 +4190,36 @@
         "headingLevel": "{level} тақырыбы",
         "image": "Сурет",
         "infoCallout": "Ақпараттық шығару",
+        "insert": "Кірістіру",
+        "insertGroups": {
+          "callouts": "Ескертпелер",
+          "interactive": "Интерактивті",
+          "media": "Медиа",
+          "text": "Мәтін"
+        },
         "insertTable": "Жаңа кесте енгізу (3×3)",
         "interactiveQuiz": "Интерактивті тест",
         "interactiveScenarios": "Интерактивті сценарийлер",
         "italic": "Курсив",
         "link": "Байланыс",
+        "lists": "Тізімдер",
         "listOptions": {
           "bulletList": "Нүктелі тізім",
           "orderedList": "Нөмірленген тізім"
         },
         "mathEquation": "Математикалық теңдеу (LaTeX)",
+        "slashBlocks": "Блоктар",
+        "slashEmbedDescription": "{label} енгізу",
+        "slashInsertDescription": "{label} блогын кірістіру",
+        "slashNoResults": "Нәтиже табылмады.",
+        "slashSearchPlaceholder": "Блоктарды іздеу...",
         "orderedList": "Нөмірленген тізім",
         "paragraph": "Параграф",
         "pdfDocument": "PDF Құжаты",
         "redo": "Қайталау",
         "strike": "Сызылған",
         "table": "Кесте",
+        "tableOfContents": "Мазмұны",
         "undo": "Болдырмау",
         "user": "Пайдаланушы",
         "video": "Бейне",

@@ -11,6 +11,15 @@ type ActivityRead = components['schemas']['ActivityRead'];
 type ActivityReadWithPermissions = components['schemas']['ActivityReadWithPermissions'];
 type ActivityDetailResponse = components['schemas']['ActivityDetailResponse'];
 
+export interface UrlPreviewResponse {
+  title?: string | null;
+  description?: string | null;
+  og_image?: string | null;
+  favicon?: string | null;
+  og_type?: string | null;
+  og_url?: string | null;
+}
+
 type ResponseMetadata<T> = Omit<CustomResponseTyping, 'data'> & {
   data: T | null;
 };
@@ -320,7 +329,7 @@ export async function updateActivity(data: any, activity_uuid: string) {
   return getTypedResponseMetadata<ActivityRead>(result);
 }
 
-export async function getUrlPreview(url: string) {
+export async function getUrlPreview(url: string): Promise<UrlPreviewResponse> {
   const result = await apiFetch(`utils/link-preview?url=${url}`);
-  return await result.json();
+  return (await result.json()) as UrlPreviewResponse;
 }

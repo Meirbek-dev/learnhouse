@@ -96,6 +96,8 @@ _STATUS_MESSAGES = {
     },
 }
 _DEFAULT_LOCALE = "ru-RU"
+_REQUEST_LOCALE_HEADER = "x-locale"
+_LOCALE_COOKIE_NAME = "NEXT_LOCALE"
 
 
 class RequestMode(StrEnum):
@@ -135,9 +137,16 @@ def _documents_are_small(documents: list[str]) -> bool:
 
 
 def _normalize_locale(locale: str | None) -> str:
+    matched_locale = _match_locale(locale)
+    if matched_locale:
+        return matched_locale
+    return _DEFAULT_LOCALE
+
+
+def _match_locale(locale: str | None) -> str | None:
     normalized = (locale or "").strip().replace("_", "-")
     if not normalized:
-        return _DEFAULT_LOCALE
+        return None
 
     lowered = normalized.lower()
     if lowered.startswith("en"):
@@ -146,7 +155,25 @@ def _normalize_locale(locale: str | None) -> str:
         return "ru-RU"
     if lowered.startswith(("kk", "kz")):
         return "kk-KZ"
-    return _DEFAULT_LOCALE
+    return None
+
+
+def _extract_request_locale(request: Request | None) -> str | None:
+    if request is None:
+        return None
+
+    candidates = (
+        request.headers.get(_REQUEST_LOCALE_HEADER),
+        request.cookies.get(_LOCALE_COOKIE_NAME),
+        request.headers.get("accept-language"),
+    )
+    for candidate in candidates:
+        first_token = (candidate or "").split(",", 1)[0].split(";", 1)[0].strip()
+        matched_locale = _match_locale(first_token)
+        if matched_locale:
+            return matched_locale
+
+    return None
 
 
 def _detect_request_mode(question: str, *, has_session_history: bool) -> RequestMode:
@@ -242,12 +269,22 @@ async def _retrieve_chunks_for_policy(
         return [], 0.0
 
     started_at = time.perf_counter()
-    retrieved_chunks = await retrieve_chunks(
-        query=question.strip(),
-        documents=ctx.documents,
-        embedding_model_name=embedding_model_name,
-        collection_name=f"activity_{ctx.activity.activity_uuid}",
-    )
+    try:
+        retrieved_chunks = await retrieve_chunks(
+            query=question.strip(),
+            documents=ctx.documents,
+            embedding_model_name=embedding_model_name,
+            collection_name=f"activity_{ctx.activity.activity_uuid}",
+        )
+    except RetrievalError as exc:
+        logger.warning(
+            "AI retrieval unavailable for activity %s; continuing without retrieved context: %s",
+            ctx.activity.activity_uuid,
+            exc.message,
+            exc_info=exc,
+        )
+        return [], (time.perf_counter() - started_at) * 1000
+
     return retrieved_chunks, (time.perf_counter() - started_at) * 1000
 
 
@@ -327,6 +364,9 @@ async def build_chat_context(
     documents = await _get_documents(activity_uuid, activity, course)
     session_window = await asyncio.to_thread(load_chat_session, aichat_uuid, user_id)
     request_id = request.headers.get("x-request-id") if request else None
+    resolved_locale = (
+        _extract_request_locale(request) or _match_locale(locale) or _DEFAULT_LOCALE
+    )
 
     return _ChatContext(
         activity=activity,
@@ -337,7 +377,7 @@ async def build_chat_context(
         conversation_summary=session_window.conversation_summary,
         user_id=user_id,
         request_id=request_id,
-        locale=_normalize_locale(locale),
+        locale=resolved_locale,
     )
 
 

@@ -22,6 +22,9 @@ const MAX_BUFFER_BYTES = 65_536;
 /** Request timeout in milliseconds. */
 const REQUEST_TIMEOUT_MS = 30_000;
 
+/** Cookie carrying the active app locale. */
+const LOCALE_COOKIE_NAME = 'NEXT_LOCALE';
+
 /** Supported SSE protocol version. */
 export const ACTIVITY_CHAT_PROTOCOL_VERSION = 1;
 
@@ -45,6 +48,27 @@ export function reconcileFinalMessageDelta(streamedText: string, finalContent: s
     return finalContent.slice(streamedText.length);
   }
   return '';
+}
+
+function readActiveLocale(): string | null {
+  if (typeof document === 'undefined') return null;
+
+  const prefix = `${LOCALE_COOKIE_NAME}=`;
+  for (const rawCookie of document.cookie.split(';')) {
+    const cookie = rawCookie.trim();
+    if (!cookie.startsWith(prefix)) continue;
+
+    const value = cookie.slice(prefix.length).trim();
+    if (!value) return null;
+
+    try {
+      return decodeURIComponent(value);
+    } catch {
+      return value;
+    }
+  }
+
+  return null;
 }
 
 interface ActivityChatAdapterOptions {
@@ -125,10 +149,15 @@ export function createActivityChatAdapter({
     currentController = new AbortController();
     const timeoutSignal = AbortSignal.timeout(REQUEST_TIMEOUT_MS);
     const signal = AbortSignal.any([currentController.signal, timeoutSignal]);
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    const activeLocale = readActiveLocale();
+    if (activeLocale) {
+      headers['X-Locale'] = activeLocale;
+    }
 
     const response = await fetch(url, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify(body),
       credentials: 'include',
       signal,
@@ -185,10 +214,10 @@ export function createActivityChatAdapter({
             case 'status': {
               if (event.aichat_uuid) writeUuid(event.aichat_uuid as string);
               const message =
-                typeof event.message === 'string' && event.message.trim().length > 0
-                  ? event.message
-                  : typeof event.status === 'string'
-                    ? getStatusMessage(event.status)
+                typeof event.status === 'string'
+                  ? getStatusMessage(event.status)
+                  : typeof event.message === 'string' && event.message.trim().length > 0
+                    ? event.message
                     : null;
               if (message) {
                 yield {

@@ -76,9 +76,10 @@ const ALIGNMENT_CONFIG = {
 interface UseImageUploadOptions {
   activityUuid: string;
   onSuccess: (blockObject: BlockObject) => void;
+  t: ReturnType<typeof useTranslations>;
 }
 
-function useImageUpload({ activityUuid, onSuccess }: UseImageUploadOptions) {
+function useImageUpload({ activityUuid, onSuccess, t }: UseImageUploadOptions) {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -95,13 +96,13 @@ function useImageUpload({ activityUuid, onSuccess }: UseImageUploadOptions) {
 
     // Validate file type
     if (!selectedFile.type.startsWith('image/')) {
-      setError('Please select a valid image file');
+      setError(t('invalidImageFile'));
       return;
     }
 
     setFile(selectedFile);
     setPreview(URL.createObjectURL(selectedFile));
-  }, []);
+  }, [t]);
 
   const handleUpload = useCallback(async () => {
     if (!file) return;
@@ -115,11 +116,11 @@ function useImageUpload({ activityUuid, onSuccess }: UseImageUploadOptions) {
       setFile(null);
       setPreview(null);
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'Upload failed');
+      setError(error instanceof Error ? error.message : t('uploadFailed'));
     } finally {
       setIsUploading(false);
     }
-  }, [file, activityUuid, onSuccess]);
+  }, [file, activityUuid, onSuccess, t]);
 
   const reset = useCallback(() => {
     setFile(null);
@@ -249,7 +250,7 @@ function DropZone({ onFileSelect, preview, isUploading, error, onUpload, onReset
         <div className="mx-auto h-48 w-full overflow-hidden rounded-md">
           <NextImage
             src={preview}
-            alt="Preview"
+            alt={t('previewImageAlt')}
             fill
             className="object-contain"
             sizes="100vw"
@@ -445,6 +446,7 @@ export default function ImageBlockComponent({ node, updateAttributes, extension 
       setBlockObject(newBlockObject);
       updateAttributes({ blockObject: newBlockObject });
     },
+    t,
   });
 
   // Resize handling

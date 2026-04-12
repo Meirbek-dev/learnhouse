@@ -3975,7 +3975,10 @@
         "dropOrClick": "Перетащите изображение сюда или кликните, чтобы выбрать",
         "expand": "Развернуть",
         "imageViewer": "Просмотр изображения",
+        "invalidImageFile": "Пожалуйста, выберите допустимый файл изображения",
+        "previewImageAlt": "Предпросмотр",
         "supportedFormats": "Поддерживаемые форматы: JPG, PNG, WebP, GIF",
+        "uploadFailed": "Не удалось загрузить изображение",
         "upload": "Загрузить",
         "uploading": "Загрузка..."
       },
@@ -4127,6 +4130,7 @@
       "Toolbar": {
         "addColumnRight": "Добавить столбец справа",
         "addRowBelow": "Добавить строку ниже",
+        "aiEditor": "ИИ-редактор",
         "aria": {
           "insertInteractiveScenarios": "Вставить интерактивные сценарии"
         },
@@ -4186,22 +4190,36 @@
         "headingLevel": "Заголовок {level}",
         "image": "Изображение",
         "infoCallout": "Информационная выноска",
+        "insert": "Вставить",
+        "insertGroups": {
+          "callouts": "Выноски",
+          "interactive": "Интерактивные",
+          "media": "Медиа",
+          "text": "Текст"
+        },
         "insertTable": "Вставить новую таблицу (3×3)",
         "interactiveQuiz": "Интерактивный тест",
         "interactiveScenarios": "Интерактивные сценарии",
         "italic": "Курсив",
         "link": "Ссылка",
+        "lists": "Списки",
         "listOptions": {
           "bulletList": "Маркированный список",
           "orderedList": "Нумерованный список"
         },
         "mathEquation": "Математическое уравнение (LaTeX)",
+        "slashBlocks": "Блоки",
+        "slashEmbedDescription": "Встроить {label}",
+        "slashInsertDescription": "Вставить блок {label}",
+        "slashNoResults": "Ничего не найдено.",
+        "slashSearchPlaceholder": "Поиск блоков...",
         "orderedList": "Нумерованный список",
         "paragraph": "Параграф",
         "pdfDocument": "PDF Документ",
         "redo": "Повторить",
         "strike": "Зачеркнутый",
         "table": "Таблица",
+        "tableOfContents": "Содержание",
         "undo": "Отменить",
         "user": "Пользователь",
         "video": "Видео",

@@ -1,6 +1,7 @@
 import { getActivity } from '@services/courses/activities';
 import { getCourseMetadata } from '@services/courses/courses';
 import { getTranslations } from 'next-intl/server';
+import { connection } from 'next/server';
 import { jetBrainsMono } from '@/lib/fonts';
 import type { Metadata } from 'next';
 
@@ -17,6 +18,7 @@ async function fetchCourseMetadata(courseuuid: string) {
 }
 
 export async function generateMetadata(props: MetadataProps): Promise<Metadata> {
+  await connection();
   const { courseuuid, activityid } = await props.params;
   const t = await getTranslations('General');
 
@@ -56,6 +58,7 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
 }
 
 const ActivityPage = async (params: any) => {
+  await connection();
   const { courseuuid, activityid } = await params.params;
 
   // Don't fetch activity if it's the end page

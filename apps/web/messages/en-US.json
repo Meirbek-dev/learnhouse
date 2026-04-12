@@ -3949,7 +3949,10 @@
         "dropOrClick": "Drop an image here or click to select",
         "expand": "Expand",
         "imageViewer": "Image Viewer",
+        "invalidImageFile": "Please select a valid image file",
+        "previewImageAlt": "Preview",
         "supportedFormats": "Supported formats: JPG, PNG, WebP, GIF",
+        "uploadFailed": "Upload failed",
         "upload": "Upload",
         "uploading": "Uploading..."
       },
@@ -4101,6 +4104,7 @@
       "Toolbar": {
         "addColumnRight": "Add column right",
         "addRowBelow": "Add row below",
+        "aiEditor": "AI Editor",
         "aria": {
           "insertInteractiveScenarios": "Insert interactive scenarios"
         },
@@ -4160,7 +4164,15 @@
         "headingLevel": "Heading {level}",
         "image": "Image",
         "infoCallout": "Info Callout",
+        "insert": "Insert",
+        "insertGroups": {
+          "callouts": "Callouts",
+          "interactive": "Interactive",
+          "media": "Media",
+          "text": "Text"
+        },
         "insertTable": "Insert new table (3×3)",
+        "lists": "Lists",
         "interactiveQuiz": "Interactive Quiz",
         "interactiveScenarios": "Interactive Scenarios",
         "italic": "Italic",
@@ -4170,12 +4182,18 @@
           "orderedList": "Ordered List"
         },
         "mathEquation": "Math Equation (LaTeX)",
+        "slashBlocks": "Blocks",
+        "slashEmbedDescription": "Embed {label}",
+        "slashInsertDescription": "Insert {label} block",
+        "slashNoResults": "No results found.",
+        "slashSearchPlaceholder": "Search blocks...",
         "orderedList": "Ordered List",
         "paragraph": "Paragraph",
         "pdfDocument": "PDF Document",
         "redo": "Redo",
         "strike": "Strikethrough",
         "table": "Table",
+        "tableOfContents": "Table of contents",
         "undo": "Undo",
         "user": "User",
         "video": "Video",

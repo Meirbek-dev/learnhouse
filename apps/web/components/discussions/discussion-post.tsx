@@ -15,10 +15,13 @@ import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import { hasMeaningfulText } from './text';
 
-const RichTextEditor = dynamic(() => import('./rich-text-editor'), {
-  ssr: false,
-  loading: () => <div className="bg-muted/40 h-[120px] w-full animate-pulse rounded-lg border" />,
-});
+const RichTextEditor = dynamic(
+  () => import('@components/Objects/Editor/views/DiscussionEditor').then(m => ({ default: m.DiscussionEditor })),
+  {
+    ssr: false,
+    loading: () => <div className="bg-muted/40 h-[120px] w-full animate-pulse rounded-lg border" />,
+  },
+);
 
 interface DiscussionPostData {
   id: string;

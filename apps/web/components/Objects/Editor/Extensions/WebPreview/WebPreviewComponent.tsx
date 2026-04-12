@@ -4,7 +4,7 @@ import { useEditorProvider } from '@components/Contexts/Editor/EditorContext';
 import { queryKeys } from '@/lib/react-query/queryKeys';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Modal from '@/components/Objects/Elements/Modal/Modal';
-import { getUrlPreview } from '@services/courses/activities';
+import { getUrlPreview, type UrlPreviewResponse } from '@services/courses/activities';
 import { Checkbox } from '@components/ui/checkbox';
 import NextImage from '@components/ui/NextImage';
 import { NodeViewWrapper } from '@tiptap/react';
@@ -13,18 +13,12 @@ import { Label } from '@components/ui/label';
 import { Input } from '@components/ui/input';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
+import type { TypedNodeViewProps } from '@components/Objects/Editor/core';
+import type { WebPreviewAttrs } from './WebPreview';
 
-interface EditorContext {
-  isEditable: boolean;
-  [key: string]: any;
-}
-
-interface WebPreviewProps {
-  node: any;
-  updateAttributes: (attrs: any) => void;
-  extension: any;
+type WebPreviewProps = TypedNodeViewProps<WebPreviewAttrs> & {
   deleteNode?: () => void;
-}
+};
 
 const ALIGNMENTS = [
   { value: 'left', label: <AlignLeft size={16} /> },
@@ -84,7 +78,7 @@ const AlignmentControls = ({
   alignment: string;
   onAlignmentChange: (value: string) => void;
   alignments: typeof ALIGNMENTS;
-  t: any;
+  t: (key: string, values?: Record<string, string>) => string;
 }) => (
   <div className="mt-4 flex flex-col items-center">
     <div className="flex items-center gap-1">
@@ -133,6 +127,7 @@ const WebPreviewComponent = ({ node, updateAttributes, deleteNode }: WebPreviewP
     og_url: node.attrs.og_url,
     url: node.attrs.url,
   };
+  const previewUrl = previewData.url ?? undefined;
 
   const alignment = node.attrs.alignment || 'left';
   const hasPreview = Boolean(previewData.title);
@@ -148,7 +143,7 @@ const WebPreviewComponent = ({ node, updateAttributes, deleteNode }: WebPreviewP
     enabled: shouldAutoFetchPreview,
   });
 
-  const applyPreviewData = useCallback((url: string, data: any) => {
+  const applyPreviewData = useCallback((url: string, data: UrlPreviewResponse) => {
     const hasMinimalMetadata = !(data.title || data.description || data.og_image);
 
     if (hasMinimalMetadata) {
@@ -181,7 +176,7 @@ const WebPreviewComponent = ({ node, updateAttributes, deleteNode }: WebPreviewP
   useEffect(() => {
     if (!shouldAutoFetchPreview) return;
 
-    if (previewQuery.data) {
+    if (previewQuery.data && node.attrs.url) {
       applyPreviewData(node.attrs.url, previewQuery.data);
       return;
     }
@@ -266,13 +261,15 @@ const WebPreviewComponent = ({ node, updateAttributes, deleteNode }: WebPreviewP
         minWidth="xl"
         minHeight="xl"
         dialogContent={
-          <iframe
-            src={previewData.url}
-            title={t('embeddedWebsitePreview')}
-            className="h-full w-full border-0 bg-white"
-            style={{ display: 'block', borderRadius: 0 }}
-            allowFullScreen
-          />
+          previewUrl ? (
+            <iframe
+              src={previewUrl}
+              title={t('embeddedWebsitePreview')}
+              className="h-full w-full border-0 bg-white"
+              style={{ display: 'block', borderRadius: 0 }}
+              allowFullScreen
+            />
+          ) : null
         }
       />
       <div className={`flex w-full ${alignmentClass}`}>
@@ -444,7 +441,7 @@ const WebPreviewComponent = ({ node, updateAttributes, deleteNode }: WebPreviewP
           {hasPreview && !editing ? (
             <>
               <a
-                href={previewData.url}
+                href={previewUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="no-underline hover:no-underline focus:no-underline active:no-underline"
@@ -472,8 +469,8 @@ const WebPreviewComponent = ({ node, updateAttributes, deleteNode }: WebPreviewP
                 </div>
               </a>
               <FaviconDisplay
-                favicon={previewData.favicon}
-                url={previewData.url}
+                favicon={previewData.favicon ?? undefined}
+                url={previewUrl ?? ''}
                 faviconAlt={t('faviconAlt')}
               />
               {showButton && previewData.url ? (

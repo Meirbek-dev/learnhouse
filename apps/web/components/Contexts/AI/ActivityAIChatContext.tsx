@@ -15,7 +15,7 @@ import type { UseChatReturn } from '@tanstack/ai-react';
 import type { TextPart } from '@tanstack/ai-client';
 import type { PropsWithChildren } from 'react';
 import { useChat } from '@tanstack/ai-react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -46,6 +46,7 @@ const ActivityAIChatContext = createContext<ActivityAIChatContextValue | null>(n
 
 export function ActivityAIChatProvider({ activityUuid, children }: PropsWithChildren<{ activityUuid: string }>) {
   const tStatus = useTranslations('Activities.AIStatus');
+  const locale = useLocale();
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
@@ -92,7 +93,7 @@ export function ActivityAIChatProvider({ activityUuid, children }: PropsWithChil
     // Recreate adapter only when the activity changes — access token and
     // session UUID changes are handled inside the factory via getter/setter.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [activityUuid],
+    [activityUuid, locale],
   );
 
   // Keep the abort ref in sync whenever the adapter is recreated.

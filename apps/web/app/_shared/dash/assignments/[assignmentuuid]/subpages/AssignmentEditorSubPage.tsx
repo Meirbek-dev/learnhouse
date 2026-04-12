@@ -17,7 +17,7 @@ const AssignmentEditorSubPage = ({ assignmentuuid }: { assignmentuuid: string })
 
   return (
     <AssignmentsTaskProvider>
-      <div className="custom-dots-bg flex h-full w-[350px] shrink-0 flex-col">
+      <div className="flex h-full w-[350px] shrink-0 flex-col">
         <div className="mx-auto my-5 flex items-center space-x-2 rounded-full bg-neutral-600/80 px-3.5 py-1 text-sm font-bold text-white">
           <LayoutList size={18} />
           <p>{t('tasks')}</p>

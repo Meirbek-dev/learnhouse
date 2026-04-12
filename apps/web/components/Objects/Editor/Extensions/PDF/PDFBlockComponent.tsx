@@ -32,7 +32,7 @@ interface PdfExtensionOptions {
 const PDFBlockComponent = (props: TypedNodeViewProps<PdfNodeAttrs, PdfExtensionOptions>) => {
   const t = useTranslations('DashPage.Editor.PDFBlock');
   const course = useCourse();
-  const [pdf, setPDF] = useState(null);
+  const [pdf, setPDF] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [blockObject, setblockObject] = useState(props.node.attrs.blockObject);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -40,12 +40,11 @@ const PDFBlockComponent = (props: TypedNodeViewProps<PdfNodeAttrs, PdfExtensionO
   const editorState = useEditorProvider();
   const { isEditable } = editorState;
 
-  const handlePDFChange = (event: React.ChangeEvent<any>) => {
-    setPDF(event.target.files[0]);
+  const handlePDFChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setPDF(event.target.files?.[0] ?? null);
   };
 
-  const handleSubmit = async (e: any) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
     if (!pdf) return; // Guard: only proceed if pdf is not null
     setIsLoading(true);
     const object = await uploadNewPDFFile(pdf, props.extension.options.activity.activity_uuid);

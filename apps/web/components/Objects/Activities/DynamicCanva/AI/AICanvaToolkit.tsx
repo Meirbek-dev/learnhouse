@@ -37,7 +37,7 @@ const AICanvaToolkit = (props: AICanvaToolkitProps) => {
         return !editor.state.selection.empty;
       }}
     >
-      <div className="flex h-auto w-max items-center gap-2 rounded-lg border border-zinc-700/60 bg-zinc-900/95 px-3 py-1.5 shadow-lg backdrop-blur-sm">
+      <div className="flex h-auto w-max items-center gap-2 rounded-lg border border-border bg-popover px-3 py-1.5 shadow-md">
         <div className="flex items-center gap-1.5">
           <Image
             className="rounded-sm"
@@ -46,10 +46,10 @@ const AICanvaToolkit = (props: AICanvaToolkitProps) => {
             alt={t('aiIconAlt')}
             style={{ height: 'auto' }}
           />
-          <span className="text-xs font-semibold text-zinc-300">{t('aiTitle')}</span>
+          <span className="text-xs font-semibold text-foreground">{t('aiTitle')}</span>
         </div>
         <div
-          className="h-4 w-px bg-zinc-700"
+          className="h-4 w-px bg-border"
           aria-hidden="true"
         />
         <div className="flex items-center gap-0.5">
@@ -186,7 +186,7 @@ const AIActionButton = (props: { editor: Editor; label: ActionLabel }) => {
         onClick={() => handleAction(props.label)}
         aria-label={getButtonLabel(props.label)}
         disabled={isLoading}
-        className="h-7 gap-1.5 rounded-md px-2 text-xs font-medium text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 disabled:opacity-60"
+        className="h-7 gap-1.5 rounded-md px-2 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground disabled:opacity-60"
         type="button"
       >
         {isLoading ? (

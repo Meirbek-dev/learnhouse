@@ -11,14 +11,12 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 }
 
 export function slugifyHeadingText(text: string): string {
-  const normalized = text.normalize('NFKD').replace(/[\u0300-\u036f]/g, '');
-
-  return normalized
+  return text
     .toLowerCase()
     .trim()
-    .replaceAll(/[^\s\w-]/g, '')
-    .replaceAll(/[\s_-]+/g, '-')
-    .replaceAll(/^-+|-+$/g, '');
+    .replace(/[^\p{L}\p{N}\s_-]/gu, '')
+    .replace(/[\s_]+/g, '-')
+    .replace(/^-+|-+$/g, '');
 }
 
 export function buildHeadingId(text: string, occurrence: number): string {

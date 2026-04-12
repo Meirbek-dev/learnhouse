@@ -21,6 +21,7 @@ from src.services.ai.models import (
 )
 from src.services.ai.service import (
     _ChatContext,
+    _extract_request_locale,
     generate_chat_answer,
     stream_chat_answer,
 )
@@ -208,6 +209,32 @@ def _chat_context(locale: str = "ru-RU") -> _ChatContext:
         request_id="req-1",
         locale=locale,
     )
+
+
+def test_extract_request_locale_prefers_explicit_header() -> None:
+    request = type(
+        "Request",
+        (),
+        {
+            "headers": {"x-locale": "kk-KZ", "accept-language": "en-US,en;q=0.9"},
+            "cookies": {"NEXT_LOCALE": "ru-RU"},
+        },
+    )()
+
+    assert _extract_request_locale(request) == "kk-KZ"
+
+
+def test_extract_request_locale_ignores_invalid_header() -> None:
+    request = type(
+        "Request",
+        (),
+        {
+            "headers": {"x-locale": "de-DE", "accept-language": "kk-KZ,kk;q=0.9"},
+            "cookies": {},
+        },
+    )()
+
+    assert _extract_request_locale(request) == "kk-KZ"
 
 
 @pytest.mark.asyncio

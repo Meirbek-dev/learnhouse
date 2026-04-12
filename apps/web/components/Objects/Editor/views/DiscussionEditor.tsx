@@ -24,15 +24,16 @@ import {
 } from '@/components/ui/dialog';
 import { SiYoutube } from '@icons-pack/react-simple-icons';
 import { useEffect, useState, useTransition } from 'react';
-import { EditorContent, useEditor } from '@tiptap/react';
+import { EditorContent } from '@tiptap/react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
-import { createDiscussionEditorExtensions } from '@components/Objects/Editor/core';
+import { useEditorInstance } from '@components/Objects/Editor/core';
+import '@components/Objects/Editor/styles/prosemirror.css';
 
-interface RichTextEditorProps {
+interface DiscussionEditorProps {
   content: string;
   onChange: (content: string) => void;
   placeholder?: string;
@@ -40,13 +41,13 @@ interface RichTextEditorProps {
   minHeight?: string;
 }
 
-export default function RichTextEditor({
+export function DiscussionEditor({
   content,
   onChange,
   placeholder = '',
   className = '',
   minHeight = '150px',
-}: RichTextEditorProps) {
+}: DiscussionEditorProps) {
   const t = useTranslations('RichTextEditor');
   const [linkUrl, setLinkUrl] = useState('');
   const [imageUrl, setImageUrl] = useState('');
@@ -56,40 +57,35 @@ export default function RichTextEditor({
   const [isVideoDialogOpen, setIsVideoDialogOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
 
-  const editor = useEditor({
-    extensions: createDiscussionEditorExtensions(),
+  const editor = useEditorInstance({
+    preset: 'discussion',
     content,
-    immediatelyRender: false,
-    onUpdate: ({ editor }) => {
-      onChange(editor.getHTML());
-    },
-    editorProps: {
-      attributes: {
-        class: cn(
-          'prose prose-sm max-w-none focus:outline-none p-3',
-          'overflow-wrap-anywhere break-words word-break-break-word',
-          'prose-headings:font-semibold prose-headings:text-gray-900 prose-headings:mt-4 prose-headings:mb-2',
-          'prose-p:text-gray-700 prose-p:leading-relaxed prose-p:break-words',
-          'prose-strong:text-gray-900 prose-em:text-gray-700',
-          'prose-code:text-gray-900 prose-code:bg-gray-100 prose-code:break-all',
-          'prose-pre:bg-gray-100 prose-pre:text-gray-900 prose-pre:overflow-x-auto prose-pre:whitespace-pre-wrap',
-          'prose-blockquote:text-gray-700 prose-blockquote:border-gray-300',
-          'prose-ul:text-gray-700 prose-ul:list-disc prose-ul:list-outside prose-ul:ml-4',
-          'prose-ol:text-gray-700 prose-ol:list-decimal prose-ol:list-outside prose-ol:ml-4',
-          'prose-li:text-gray-700 prose-li:ml-0 prose-li:break-words',
-          'prose-a:break-all',
-          className,
-        ),
-        style: `min-height: ${minHeight}`,
+    onUpdate: (json) => onChange(JSON.stringify(json)),
+    overrides: {
+      editorProps: {
+        attributes: {
+          class: cn('prosemirror-discussion', className),
+          style: `min-height: ${minHeight}`,
+        },
       },
     },
   });
+
   const [isPending, startTransition] = useTransition();
 
   // Sync content prop changes with editor
   useEffect(() => {
-    if (editor && editor.getHTML() !== content) {
-      editor.commands.setContent(content);
+    if (!editor) return;
+    const currentJson = JSON.stringify(editor.getJSON());
+    if (currentJson !== content) {
+      let parsedContent: string | object = content;
+      try {
+        const parsed = JSON.parse(content) as unknown;
+        if (parsed && typeof parsed === 'object') parsedContent = parsed;
+      } catch {
+        // treat as HTML string
+      }
+      editor.commands.setContent(parsedContent as Parameters<typeof editor.commands.setContent>[0]);
     }
   }, [editor, content]);
 
@@ -102,7 +98,11 @@ export default function RichTextEditor({
     if (selectedText) {
       editor.chain().focus().setLink({ href: linkUrl }).run();
     } else {
-      editor.chain().focus().insertContent(`<a href="${linkUrl}">${linkUrl}</a>`).run();
+      editor.chain().focus().insertContent({
+        type: 'text',
+        text: linkUrl,
+        marks: [{ type: 'link', attrs: { href: linkUrl, target: '_blank', rel: 'noopener noreferrer' } }],
+      }).run();
     }
 
     setLinkUrl('');
@@ -111,9 +111,7 @@ export default function RichTextEditor({
 
   const addImage = () => {
     if (!(editor && imageUrl)) return;
-
     editor.chain().focus().setImage({ src: imageUrl, alt: 'Uploaded image' }).run();
-
     setImageUrl('');
     setIsImageDialogOpen(false);
   };
@@ -121,15 +119,17 @@ export default function RichTextEditor({
   const addVideo = () => {
     if (!(editor && videoUrl)) return;
 
-    // Extract YouTube video ID from URL
     const youtubeRegex = /(?:youtube\.com\/(?:[^/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[&?]v=)|youtu\.be\/)([^\s"&/?]{11})/;
     const match = youtubeRegex.exec(videoUrl);
 
     if (match) {
       editor.chain().focus().setYoutubeVideo({ src: videoUrl }).run();
     } else {
-      // For other video URLs, insert as a link
-      editor.chain().focus().insertContent(`<a href="${videoUrl}" target="_blank">${videoUrl}</a>`).run();
+      editor.chain().focus().insertContent({
+        type: 'text',
+        text: videoUrl,
+        marks: [{ type: 'link', attrs: { href: videoUrl, target: '_blank', rel: 'noopener noreferrer' } }],
+      }).run();
     }
 
     setVideoUrl('');
@@ -143,20 +143,21 @@ export default function RichTextEditor({
     startTransition(() => setIsUploading(true));
 
     try {
-      // Create a temporary URL for the file
       const tempUrl = URL.createObjectURL(file);
 
       if (file.type.startsWith('image/')) {
         editor.chain().focus().setImage({ src: tempUrl, alt: file.name }).run();
       } else {
-        // For non-image files, insert as a link
-        editor.chain().focus().insertContent(`<a href="${tempUrl}" target="_blank">${file.name}</a>`).run();
+        editor.chain().focus().insertContent({
+          type: 'text',
+          text: file.name,
+          marks: [{ type: 'link', attrs: { href: tempUrl, target: '_blank', rel: 'noopener noreferrer' } }],
+        }).run();
       }
     } catch (error) {
       console.error('Error uploading file:', error);
     } finally {
       startTransition(() => setIsUploading(false));
-      // Clear the input
       e.target.value = '';
     }
   };
@@ -165,21 +166,17 @@ export default function RichTextEditor({
     return null;
   }
 
-  // TipTap v3 doesn't expose extension commands on ChainedCommands without generic editor typing
-
-  const ed = editor;
-
   return (
     <div className="overflow-hidden rounded-lg border">
       {/* Toolbar */}
-      <div className="flex flex-wrap items-center gap-1 border-b bg-gray-50 p-2">
+      <div className="flex flex-wrap items-center gap-1 border-b bg-muted/50 p-2">
         {/* Text formatting */}
         <Button
           type="button"
           variant="ghost"
           size="sm"
-          onClick={() => ed.chain().focus().toggleBold().run()}
-          className={cn('h-8 w-8 p-0', editor.isActive('bold') && 'bg-gray-200')}
+          onClick={() => editor.chain().focus().toggleBold().run()}
+          className={cn('h-8 w-8 p-0', editor.isActive('bold') && 'bg-muted')}
         >
           <Bold size={16} />
         </Button>
@@ -187,8 +184,8 @@ export default function RichTextEditor({
           type="button"
           variant="ghost"
           size="sm"
-          onClick={() => ed.chain().focus().toggleItalic().run()}
-          className={cn('h-8 w-8 p-0', editor.isActive('italic') && 'bg-gray-200')}
+          onClick={() => editor.chain().focus().toggleItalic().run()}
+          className={cn('h-8 w-8 p-0', editor.isActive('italic') && 'bg-muted')}
         >
           <Italic size={16} />
         </Button>
@@ -196,21 +193,21 @@ export default function RichTextEditor({
           type="button"
           variant="ghost"
           size="sm"
-          onClick={() => ed.chain().focus().toggleCode().run()}
-          className={cn('h-8 w-8 p-0', editor.isActive('code') && 'bg-gray-200')}
+          onClick={() => editor.chain().focus().toggleCode().run()}
+          className={cn('h-8 w-8 p-0', editor.isActive('code') && 'bg-muted')}
         >
           <Code size={16} />
         </Button>
 
-        <div className="mx-1 h-6 w-px bg-gray-300" />
+        <div className="mx-1 h-6 w-px bg-border" />
 
         {/* Lists */}
         <Button
           type="button"
           variant="ghost"
           size="sm"
-          onClick={() => ed.chain().focus().toggleBulletList().run()}
-          className={cn('h-8 w-8 p-0', editor.isActive('bulletList') && 'bg-gray-200')}
+          onClick={() => editor.chain().focus().toggleBulletList().run()}
+          className={cn('h-8 w-8 p-0', editor.isActive('bulletList') && 'bg-muted')}
         >
           <List size={16} />
         </Button>
@@ -218,8 +215,8 @@ export default function RichTextEditor({
           type="button"
           variant="ghost"
           size="sm"
-          onClick={() => ed.chain().focus().toggleOrderedList().run()}
-          className={cn('h-8 w-8 p-0', editor.isActive('orderedList') && 'bg-gray-200')}
+          onClick={() => editor.chain().focus().toggleOrderedList().run()}
+          className={cn('h-8 w-8 p-0', editor.isActive('orderedList') && 'bg-muted')}
         >
           <ListOrdered size={16} />
         </Button>
@@ -227,13 +224,13 @@ export default function RichTextEditor({
           type="button"
           variant="ghost"
           size="sm"
-          onClick={() => ed.chain().focus().toggleBlockquote().run()}
-          className={cn('h-8 w-8 p-0', editor.isActive('blockquote') && 'bg-gray-200')}
+          onClick={() => editor.chain().focus().toggleBlockquote().run()}
+          className={cn('h-8 w-8 p-0', editor.isActive('blockquote') && 'bg-muted')}
         >
           <Quote size={16} />
         </Button>
 
-        <div className="mx-1 h-6 w-px bg-gray-300" />
+        <div className="mx-1 h-6 w-px bg-border" />
 
         {/* Headings */}
         <Button
@@ -241,7 +238,7 @@ export default function RichTextEditor({
           variant="ghost"
           size="sm"
           onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-          className={cn('h-8 px-2 text-sm', editor.isActive('heading', { level: 2 }) && 'bg-gray-200')}
+          className={cn('h-8 px-2 text-sm', editor.isActive('heading', { level: 2 }) && 'bg-muted')}
         >
           H2
         </Button>
@@ -250,26 +247,18 @@ export default function RichTextEditor({
           variant="ghost"
           size="sm"
           onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-          className={cn('h-8 px-2 text-sm', editor.isActive('heading', { level: 3 }) && 'bg-gray-200')}
+          className={cn('h-8 px-2 text-sm', editor.isActive('heading', { level: 3 }) && 'bg-muted')}
         >
           H3
         </Button>
 
-        <div className="mx-1 h-6 w-px bg-gray-300" />
+        <div className="mx-1 h-6 w-px bg-border" />
 
         {/* Media */}
-        <Dialog
-          open={isLinkDialogOpen}
-          onOpenChange={setIsLinkDialogOpen}
-        >
+        <Dialog open={isLinkDialogOpen} onOpenChange={setIsLinkDialogOpen}>
           <DialogTrigger
             render={
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="h-8 w-8 p-0"
-              />
+              <Button type="button" variant="ghost" size="sm" className="h-8 w-8 p-0" />
             }
           >
             <LinkIcon size={16} />
@@ -284,44 +273,25 @@ export default function RichTextEditor({
               <Input
                 id="link-url"
                 value={linkUrl}
-                onChange={(e) => {
-                  setLinkUrl(e.target.value);
-                }}
+                onChange={(e) => setLinkUrl(e.target.value)}
                 placeholder={t('urlPlaceholder')}
               />
             </div>
             <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => {
-                  setIsLinkDialogOpen(false);
-                }}
-              >
+              <Button type="button" variant="outline" onClick={() => setIsLinkDialogOpen(false)}>
                 {t('cancel')}
               </Button>
-              <Button
-                type="button"
-                onClick={addLink}
-              >
+              <Button type="button" onClick={addLink}>
                 {t('addLink')}
               </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
 
-        <Dialog
-          open={isImageDialogOpen}
-          onOpenChange={setIsImageDialogOpen}
-        >
+        <Dialog open={isImageDialogOpen} onOpenChange={setIsImageDialogOpen}>
           <DialogTrigger
             render={
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="h-8 w-8 p-0"
-              />
+              <Button type="button" variant="ghost" size="sm" className="h-8 w-8 p-0" />
             }
           >
             <ImageIcon size={16} />
@@ -336,44 +306,25 @@ export default function RichTextEditor({
               <Input
                 id="image-url"
                 value={imageUrl}
-                onChange={(e) => {
-                  setImageUrl(e.target.value);
-                }}
+                onChange={(e) => setImageUrl(e.target.value)}
                 placeholder={t('imagePlaceholder')}
               />
             </div>
             <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => {
-                  setIsImageDialogOpen(false);
-                }}
-              >
+              <Button type="button" variant="outline" onClick={() => setIsImageDialogOpen(false)}>
                 {t('cancel')}
               </Button>
-              <Button
-                type="button"
-                onClick={addImage}
-              >
+              <Button type="button" onClick={addImage}>
                 {t('addImage')}
               </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
 
-        <Dialog
-          open={isVideoDialogOpen}
-          onOpenChange={setIsVideoDialogOpen}
-        >
+        <Dialog open={isVideoDialogOpen} onOpenChange={setIsVideoDialogOpen}>
           <DialogTrigger
             render={
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="h-8 w-8 p-0"
-              />
+              <Button type="button" variant="ghost" size="sm" className="h-8 w-8 p-0" />
             }
           >
             <SiYoutube size={16} />
@@ -388,26 +339,15 @@ export default function RichTextEditor({
               <Input
                 id="video-url"
                 value={videoUrl}
-                onChange={(e) => {
-                  setVideoUrl(e.target.value);
-                }}
+                onChange={(e) => setVideoUrl(e.target.value)}
                 placeholder={t('videoPlaceholder')}
               />
             </div>
             <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => {
-                  setIsVideoDialogOpen(false);
-                }}
-              >
+              <Button type="button" variant="outline" onClick={() => setIsVideoDialogOpen(false)}>
                 {t('cancel')}
               </Button>
-              <Button
-                type="button"
-                onClick={addVideo}
-              >
+              <Button type="button" onClick={addVideo}>
                 {t('addVideo')}
               </Button>
             </DialogFooter>
@@ -436,15 +376,15 @@ export default function RichTextEditor({
           </Button>
         </div>
 
-        <div className="mx-1 h-6 w-px bg-gray-300" />
+        <div className="mx-1 h-6 w-px bg-border" />
 
         {/* Undo/Redo */}
         <Button
           type="button"
           variant="ghost"
           size="sm"
-          onClick={() => ed.chain().focus().undo().run()}
-          disabled={!ed.can().undo()}
+          onClick={() => editor.chain().focus().undo().run()}
+          disabled={!editor.can().undo()}
           className="h-8 w-8 p-0"
         >
           <Undo size={16} />
@@ -453,8 +393,8 @@ export default function RichTextEditor({
           type="button"
           variant="ghost"
           size="sm"
-          onClick={() => ed.chain().focus().redo().run()}
-          disabled={!ed.can().redo()}
+          onClick={() => editor.chain().focus().redo().run()}
+          disabled={!editor.can().redo()}
           className="h-8 w-8 p-0"
         >
           <Redo size={16} />
@@ -464,7 +404,7 @@ export default function RichTextEditor({
       {/* Editor Content */}
       <EditorContent
         editor={editor}
-        className="prose-editor overflow-hidden"
+        className="prosemirror-discussion overflow-hidden"
         placeholder={placeholder}
       />
     </div>

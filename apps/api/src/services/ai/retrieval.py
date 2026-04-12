@@ -6,6 +6,7 @@ from pgvector.sqlalchemy import Vector
 from sqlalchemy import Column, MetaData, Table, Text, delete, select, text
 from sqlalchemy.dialects.postgresql import JSONB, TIMESTAMP
 from sqlalchemy.dialects.postgresql import insert as pg_insert
+import sqlalchemy.exc
 from sqlmodel import Session
 
 from config.config import get_settings
@@ -61,6 +62,10 @@ def _collection_name(name: str | None, content_hash: str) -> str:
     return f"doc_collection_{content_hash[:16]}"
 
 
+def _is_missing_document_chunks_table_error(exc: Exception) -> bool:
+    return "document_chunks" in str(getattr(exc, "orig", exc))
+
+
 # ---------------------------------------------------------------------------
 # Sync DB operations (run via asyncio.to_thread)
 # ---------------------------------------------------------------------------
@@ -74,37 +79,46 @@ def _sync_upsert_collection(
     """Replace all chunks for *collection_name* with the given data."""
     engine = get_bg_engine()
     with Session(engine) as session:
-        # Delete stale rows first so a full replacement is always clean.
-        session.execute(
-            delete(_document_chunks).where(
-                _document_chunks.c.collection_name == collection_name
+        try:
+            # Delete stale rows first so a full replacement is always clean.
+            session.execute(
+                delete(_document_chunks).where(
+                    _document_chunks.c.collection_name == collection_name
+                )
             )
-        )
 
-        rows = [
-            {
-                "id": chunk.id,
-                "collection_name": collection_name,
-                "document": chunk.document,
-                "embedding": embedding,
-                "metadata": chunk.metadata,
-            }
-            for chunk, embedding in zip(chunks, embeddings, strict=True)
-        ]
+            rows = [
+                {
+                    "id": chunk.id,
+                    "collection_name": collection_name,
+                    "document": chunk.document,
+                    "embedding": embedding,
+                    "metadata": chunk.metadata,
+                }
+                for chunk, embedding in zip(chunks, embeddings, strict=True)
+            ]
 
-        stmt = pg_insert(_document_chunks).values(rows)
-        stmt = stmt.on_conflict_do_update(
-            index_elements=["id"],
-            set_={
-                "collection_name": stmt.excluded.collection_name,
-                "document": stmt.excluded.document,
-                "embedding": stmt.excluded.embedding,
-                "metadata": stmt.excluded.metadata,
-                "inserted_at": text("now()"),
-            },
-        )
-        session.execute(stmt)
-        session.commit()
+            stmt = pg_insert(_document_chunks).values(rows)
+            stmt = stmt.on_conflict_do_update(
+                index_elements=["id"],
+                set_={
+                    "collection_name": stmt.excluded.collection_name,
+                    "document": stmt.excluded.document,
+                    "embedding": stmt.excluded.embedding,
+                    "metadata": stmt.excluded.metadata,
+                    "inserted_at": text("now()"),
+                },
+            )
+            session.execute(stmt)
+            session.commit()
+        except sqlalchemy.exc.ProgrammingError as exc:
+            session.rollback()
+            if _is_missing_document_chunks_table_error(exc):
+                raise RetrievalError(
+                    "Vector retrieval storage unavailable",
+                    details={"reason": "document_chunks_table_missing"},
+                ) from exc
+            raise
 
     logger.info(
         "Upserted %d chunks into pgvector collection %s",
@@ -135,7 +149,16 @@ def _sync_query_collection(
         .limit(top_k)
     )
     with Session(engine) as session:
-        rows = session.execute(stmt).fetchall()
+        try:
+            rows = session.execute(stmt).fetchall()
+        except sqlalchemy.exc.ProgrammingError as exc:
+            session.rollback()
+            if _is_missing_document_chunks_table_error(exc):
+                raise RetrievalError(
+                    "Vector retrieval storage unavailable",
+                    details={"reason": "document_chunks_table_missing"},
+                ) from exc
+            raise
 
     return [
         RetrievedChunk(
@@ -154,8 +177,6 @@ def delete_expired_chunks(retention_seconds: int) -> int:
     Returns the row count removed, or -1 if the table does not exist yet
     (migration pending).
     """
-    import sqlalchemy.exc
-
     engine = get_bg_engine()
     with Session(engine) as session:
         try:
@@ -170,7 +191,7 @@ def delete_expired_chunks(retention_seconds: int) -> int:
         except sqlalchemy.exc.ProgrammingError as exc:
             # Table doesn't exist yet — migration not yet applied.
             session.rollback()
-            if "document_chunks" in str(exc.orig):
+            if _is_missing_document_chunks_table_error(exc):
                 return -1
             raise
 

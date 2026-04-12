@@ -209,7 +209,7 @@ const VideoBlockComponent = (props: ExtendedNodeViewProps) => {
         setUploadProgress(0);
       }, 1000);
     } catch (error: any) {
-      console.error('Upload failed', error);
+      console.error(t('errorUpload'), error);
       setError(error?.message || t('errorUpload'));
     } finally {
       if (progressIntervalRef.current) {

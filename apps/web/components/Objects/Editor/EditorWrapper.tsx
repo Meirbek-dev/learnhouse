@@ -3,17 +3,22 @@
 import { useActivityAutosave } from '@/hooks/useActivityAutosave';
 
 import { PlatformContextProvider } from '@/components/Contexts/PlatformContext';
+import type { ActivityRef } from '@components/Objects/Editor/core';
 import { useTranslations } from 'next-intl';
 import type { JSX } from 'react';
 import { toast } from 'sonner';
 
-import Editor from './Editor';
+import { AuthoringEditor } from './views';
 
 interface EditorWrapperProps {
-  content: string | object;
-  activity: any;
-  course: any;
-  platform: any;
+  content: unknown;
+  activity: ActivityRef;
+  course: {
+    course_uuid: string;
+    name: string;
+    thumbnail_image?: string | null;
+  };
+  platform: unknown;
 }
 
 const EditorWrapper = (props: EditorWrapperProps): JSX.Element => {
@@ -23,7 +28,7 @@ const EditorWrapper = (props: EditorWrapperProps): JSX.Element => {
     courseUuid: props.course.course_uuid,
   });
 
-  async function setContent(content: any) {
+  async function setContent(content: unknown) {
     const { activity } = props;
 
     const plainContent = structuredClone(content);
@@ -42,7 +47,7 @@ const EditorWrapper = (props: EditorWrapperProps): JSX.Element => {
 
   return (
     <PlatformContextProvider initialPlatform={props.platform}>
-      <Editor
+      <AuthoringEditor
         platform={props.platform}
         course={props.course}
         activity={props.activity}
