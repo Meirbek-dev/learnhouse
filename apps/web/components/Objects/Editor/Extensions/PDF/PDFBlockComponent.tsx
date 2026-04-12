@@ -174,13 +174,15 @@ const PDFBlockComponent = (props: TypedNodeViewProps<PdfNodeAttrs, PdfExtensionO
   const visibleWidth = Math.min(size.width, maxVisibleWidth);
   const visibleHeight = Math.min(size.height, MAX_HEIGHT);
   const minVisibleWidth = Math.min(MIN_WIDTH, maxVisibleWidth);
+  const targetWidth = Math.min(normalizeSize(nodeSize).width, maxVisibleWidth);
+  const targetHeight = Math.min(normalizeSize(nodeSize).height, MAX_HEIGHT);
 
   useEffect(() => {
     if (!widthPanelRef.current || !heightPanelRef.current) return;
 
     isSyncingPanelsRef.current = true;
-    widthPanelRef.current.resize(visibleWidth);
-    heightPanelRef.current.resize(visibleHeight);
+    widthPanelRef.current.resize(targetWidth);
+    heightPanelRef.current.resize(targetHeight);
 
     if (syncPanelsRafRef.current !== null) {
       cancelAnimationFrame(syncPanelsRafRef.current);
@@ -198,7 +200,7 @@ const PDFBlockComponent = (props: TypedNodeViewProps<PdfNodeAttrs, PdfExtensionO
       }
       isSyncingPanelsRef.current = false;
     };
-  }, [visibleHeight, visibleWidth]);
+  }, [targetHeight, targetWidth]);
 
   const pdfUrl = blockObject
     ? getActivityBlockMediaDirectory({

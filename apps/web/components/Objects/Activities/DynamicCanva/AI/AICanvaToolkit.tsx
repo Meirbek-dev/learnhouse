@@ -33,8 +33,8 @@ const AICanvaToolkit = (props: AICanvaToolkitProps) => {
     <BubbleMenu
       className="w-fit"
       editor={props.editor}
-      shouldShow={({ editor }: { editor: Editor }) => {
-        return !editor.state.selection.empty;
+      shouldShow={({ state }: { editor: Editor; state: Editor['state'] }) => {
+        return !state.selection.empty && !('node' in state.selection);
       }}
     >
       <div className="border-border bg-popover flex h-auto w-max items-center gap-2 rounded-lg border px-3 py-1.5 shadow-md">
