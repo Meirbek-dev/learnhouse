@@ -5,6 +5,17 @@ import {
   getCourseWorkflowToneClass,
 } from '@components/Dashboard/Courses/courseWorkflowUi';
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -193,6 +204,7 @@ const EditCourseContributors = () => {
   const [searchResultsOverride, setSearchResultsOverride] = useState<SearchUser[] | null>(null);
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [isAdding, setIsAdding] = useState(false);
+  const [isRemoveConfirmOpen, setIsRemoveConfirmOpen] = useState(false);
   const debouncedSearch = useDebouncedValue(searchQuery, 300);
   const [selectedContributors, setSelectedContributors] = useState<number[]>([]);
   const hasSearchQuery = debouncedSearch.trim().length > 0;
@@ -401,6 +413,11 @@ const EditCourseContributors = () => {
     }
   };
 
+  const handleConfirmBulkRemove = async () => {
+    setIsRemoveConfirmOpen(false);
+    await handleBulkRemove();
+  };
+
   const handleContributorAccessSave = async () => {
     if (isOpenToContributors === undefined || !isDirty) return;
     await save(async () =>
@@ -603,7 +620,7 @@ const EditCourseContributors = () => {
                     {t('clearButton')}
                   </Button>
                   <Button
-                    onClick={handleBulkRemove}
+                    onClick={() => setIsRemoveConfirmOpen(true)}
                     variant="destructive"
                     size="sm"
                   >
@@ -612,6 +629,32 @@ const EditCourseContributors = () => {
                 </div>
               </div>
             )}
+
+            <AlertDialog
+              open={isRemoveConfirmOpen}
+              onOpenChange={setIsRemoveConfirmOpen}
+            >
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogMedia className="bg-muted text-foreground">
+                    <Users className="size-8" />
+                  </AlertDialogMedia>
+                  <AlertDialogTitle>{t('removeSelectedConfirmTitle', { count: selectedContributors.length })}</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    {t('removeSelectedConfirmMessage', { count: selectedContributors.length })}
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel />
+                  <AlertDialogAction
+                    variant="destructive"
+                    onClick={handleConfirmBulkRemove}
+                  >
+                    {t('removeSelectedButton')}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
 
             {isContributorsLoading ? (
               <div className="text-muted-foreground px-4 py-6 text-center text-sm">{t('loadingContributors')}</div>

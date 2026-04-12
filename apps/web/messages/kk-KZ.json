@@ -3828,6 +3828,8 @@
       "failedToRemoveContributor": "{username} жою сәтсіз аяқталды: {reason}",
       "failedToRemoveContributorsGeneral": "Қатысушыларды жою сәтсіз аяқталды",
       "failedToRemoveSelectedContributors": "Таңдалған қатысушыларды жою сәтсіз аяқталды",
+      "removeSelectedConfirmMessage": "Бұл курстан {count, plural, one {# қатысушыны} other {# қатысушыларды}} жояды.",
+      "removeSelectedConfirmTitle": "{count, plural, one {# қатысушыны} other {# қатысушыларды}} жою керек пе?",
       "failedToUpdateContributor": "Қатысушыны жаңарту сәтсіз аяқталды",
       "inactive": "Белсенді емес",
       "maintainer": "Қолдаушы",

@@ -3828,6 +3828,8 @@
       "failedToRemoveContributor": "Не удалось удалить {username}: {reason}",
       "failedToRemoveContributorsGeneral": "Не удалось удалить соавторов",
       "failedToRemoveSelectedContributors": "Не удалось удалить выбранных соавторов",
+      "removeSelectedConfirmMessage": "Это удалит {count, plural, one {# соавтора} few {# соавторов} many {# соавторов} other {# соавторов}} из курса.",
+      "removeSelectedConfirmTitle": "Удалить {count, plural, one {# соавтора} few {# соавторов} many {# соавторов} other {# соавторов}}?",
       "failedToUpdateContributor": "Не удалось обновить соавтора",
       "inactive": "Неактивный",
       "maintainer": "Модератор",

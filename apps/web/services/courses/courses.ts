@@ -482,7 +482,7 @@ export async function bulkRemoveContributors(
   options?: Pick<CourseWriteOptions, 'includeEditableList' | 'includePublicList'>,
 ) {
   const result = await apiFetch(`courses/${course_uuid}/bulk-remove-contributors`, {
-    method: 'PUT',
+    method: 'DELETE',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
