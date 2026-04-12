@@ -62,7 +62,7 @@ const NewActivityButton = (props: NewActivityButtonProps) => {
     chapterId: number;
   }) => {
     const toast_loading = toast.loading(tNotify('uploadingAndCreating'));
-    const courseUuid = course?.courseStructure?.course_uuid ?? course?.course_uuid;
+    const courseUuid = course.courseStructure.course_uuid;
     const activityPayload = courseUuid ? { ...activity, course_uuid: activity?.course_uuid ?? courseUuid } : activity;
 
     try {
