@@ -28,6 +28,7 @@ import { getLinkExtension } from '../EditorConf';
 import { normalizeTiptapJsonContent } from './editor-content';
 import { HeadingWithIds } from './heading-with-ids';
 import { SHARED_LOWLIGHT } from './lowlight';
+import { ImagePasteHandler } from './image-paste';
 import { SlashCommand } from './slash-command';
 import { getEditorPresetDefinition, type EditorPresetDefinition, type EditorPresetName } from './editor-presets';
 import type { ActivityRef } from './editor-types';
@@ -170,6 +171,7 @@ export function createEditorExtensions(options: EditorKernelOptions): EditorExte
       return [
         ...createBaseEditorExtensions(),
         SlashCommand,
+        ImagePasteHandler.configure({ activity }),
         Placeholder.configure({
           placeholder: 'Начните писать или введите `/` для команд…',
         }),

@@ -6,6 +6,7 @@ export * from './editor-presets';
 export * from './editor-types';
 export * from './heading-ids';
 export * from './heading-with-ids';
+export * from './image-paste';
 export * from './nodeview-types';
 export * from './lowlight';
 export * from './slash-command';
