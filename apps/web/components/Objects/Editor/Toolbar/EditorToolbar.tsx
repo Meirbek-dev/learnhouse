@@ -16,7 +16,10 @@ import { TableDropdown } from './TableDropdown';
 import { InsertButtons } from './InsertButtons';
 
 const ToolbarSeparator = () => (
-  <Separator orientation="vertical" className="mx-1 h-4 self-center" />
+  <Separator
+    orientation="vertical"
+    className="mx-1 h-4 self-center"
+  />
 );
 
 interface EditorToolbarProps {
@@ -75,7 +78,10 @@ export function EditorToolbar({ editor, onAIToggle }: EditorToolbarProps) {
         isStrike={editorState.isStrike}
       />
       <ToolbarSeparator />
-      <HeadingDropdown editor={editor} headingLevel={editorState.headingLevel} />
+      <HeadingDropdown
+        editor={editor}
+        headingLevel={editorState.headingLevel}
+      />
       <ToolbarSeparator />
       <LinkToggle
         editor={editor}
@@ -95,11 +101,16 @@ export function EditorToolbar({ editor, onAIToggle }: EditorToolbarProps) {
         <button
           type="button"
           onClick={onAIToggle}
-          className="flex items-center gap-2 rounded-md border border-border bg-foreground px-3 py-1.5 text-sm font-medium text-background transition-colors hover:bg-foreground/90"
+          className="border-border bg-foreground text-background hover:bg-foreground/90 flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm font-medium transition-colors"
           title={t('aiEditor')}
           aria-label={t('aiEditor')}
         >
-          <Image width={14} height={14} src={platformLogoLight} alt="" />
+          <Image
+            width={14}
+            height={14}
+            src={platformLogoLight}
+            alt=""
+          />
           <span>{t('aiEditor')}</span>
         </button>
       </div>

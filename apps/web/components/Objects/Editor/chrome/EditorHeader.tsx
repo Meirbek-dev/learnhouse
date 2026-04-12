@@ -4,7 +4,7 @@ import { useTranslations } from 'next-intl';
 import { Eye } from 'lucide-react';
 import Link from '@components/ui/AppLink';
 import Image from 'next/image';
-import platformLogoDark from "@public/platform_logo.svg";
+import platformLogoDark from '@public/platform_logo.svg';
 import UserAvatar from '../../UserAvatar';
 import { Separator } from '@/components/ui/separator';
 import { EditorSaveIndicator } from './EditorSaveIndicator';
@@ -29,9 +29,9 @@ export function EditorHeader({
   const t = useTranslations('DashPage.Editor.Editor');
 
   return (
-    <div className="flex h-12 items-center justify-between border-b border-border bg-background px-3">
+    <div className="border-border bg-background flex h-12 items-center justify-between border-b px-3">
       {/* Left: breadcrumb */}
-      <div className="flex items-center gap-2 min-w-0">
+      <div className="flex min-w-0 items-center gap-2">
         <Link href="/">
           <Image
             className="rounded-md"
@@ -41,17 +41,20 @@ export function EditorHeader({
             alt="Ashyq Bilim logo"
           />
         </Link>
-        <Separator orientation="vertical" className="h-4" />
-        <nav className="flex items-center gap-1 text-sm min-w-0 truncate">
+        <Separator
+          orientation="vertical"
+          className="h-4"
+        />
+        <nav className="flex min-w-0 items-center gap-1 truncate text-sm">
           <Link
             target="_blank"
             href={`/course/${courseUuid}`}
-            className="font-medium text-muted-foreground transition-colors hover:text-foreground"
+            className="text-muted-foreground hover:text-foreground font-medium transition-colors"
           >
             {courseName}
           </Link>
           <span className="text-muted-foreground/60">/</span>
-          <span className="text-foreground font-medium truncate">{activityName}</span>
+          <span className="text-foreground truncate font-medium">{activityName}</span>
         </nav>
       </div>
 
@@ -61,24 +64,31 @@ export function EditorHeader({
 
         <button
           type="button"
-          className="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+          className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-md px-3 py-1.5 text-sm font-medium transition-colors"
           onClick={onSave}
         >
-          {t("save")}
+          {t('save')}
         </button>
 
         <Link
           target="_blank"
           href={`/course/${courseUuid}/activity/${activityUuid}`}
-          className="flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
-          title={t("preview")}
+          className="text-muted-foreground hover:bg-accent hover:text-accent-foreground flex size-8 items-center justify-center rounded-md transition-colors"
+          title={t('preview')}
         >
           <Eye className="size-4" />
         </Link>
 
-        <Separator orientation="vertical" className="mx-0.5 h-4" />
+        <Separator
+          orientation="vertical"
+          className="mx-0.5 h-4"
+        />
 
-        <UserAvatar size="lg" variant="outline" use_with_session />
+        <UserAvatar
+          size="lg"
+          variant="outline"
+          use_with_session
+        />
       </div>
     </div>
   );

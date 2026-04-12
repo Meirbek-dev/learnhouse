@@ -13,7 +13,7 @@ export function EditorSaveIndicator({ saveState }: EditorSaveIndicatorProps) {
   if (saveState === 'idle') return null;
 
   return (
-    <span className="flex items-center gap-1.5 rounded-md px-2 py-0.5 text-xs text-muted-foreground">
+    <span className="text-muted-foreground flex items-center gap-1.5 rounded-md px-2 py-0.5 text-xs">
       {saveState === 'saving' ? (
         <>
           <Loader2 className="size-3 animate-spin" />
@@ -25,7 +25,7 @@ export function EditorSaveIndicator({ saveState }: EditorSaveIndicatorProps) {
           <span>{t('saveSuccess')}</span>
         </>
       ) : (
-        <span className="font-medium text-destructive">{t('saveError')}</span>
+        <span className="text-destructive font-medium">{t('saveError')}</span>
       )}
     </span>
   );

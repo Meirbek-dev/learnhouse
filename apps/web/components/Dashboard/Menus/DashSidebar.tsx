@@ -13,17 +13,7 @@ import {
   SidebarTrigger,
   useSidebar,
 } from '@/components/ui/sidebar';
-import {
-  Backpack,
-  BarChart3,
-  BookCopy,
-  Home,
-  LogOut,
-  School,
-  Settings,
-  ShieldCheck,
-  Users,
-} from 'lucide-react';
+import { Backpack, BarChart3, BookCopy, Home, LogOut, School, Settings, ShieldCheck, Users } from 'lucide-react';
 import { useNavigationPermissions } from '@/hooks/useNavigationPermissions';
 import { useSession } from '@/hooks/useSession';
 import platformLogoLight from '@public/platform_logo_light.svg';
@@ -96,14 +86,8 @@ const SidebarSkeleton = () => (
 const useNavigationItems = () => {
   const pathname = usePathname();
   const t = useTranslations('SidebarMenu');
-  const {
-    canSeePlatform,
-    canSeeCourses,
-    canSeeAssignments,
-    canSeeAnalytics,
-    canSeeUsers,
-    canSeeAdmin,
-  } = useNavigationPermissions();
+  const { canSeePlatform, canSeeCourses, canSeeAssignments, canSeeAnalytics, canSeeUsers, canSeeAdmin } =
+    useNavigationPermissions();
 
   return [
     {

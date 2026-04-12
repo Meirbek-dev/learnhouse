@@ -38,7 +38,7 @@ export function useGradingPanel(submissionUuid: string | null): UseGradingPanelR
   return {
     submission: query.data ?? null,
     isLoading: query.isPending,
-    error: (query.error) ?? null,
+    error: query.error ?? null,
     mutate: async () => {
       if (!submissionUuid) return undefined;
       await queryClient.invalidateQueries({ queryKey: queryKeys.grading.detail(submissionUuid) });

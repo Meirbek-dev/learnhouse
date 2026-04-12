@@ -138,7 +138,9 @@ export default function CourseCreationWizard() {
 
       if (!result.success || !createdCourse || !('course_uuid' in createdCourse)) {
         const detail =
-          createdCourse && typeof createdCourse === 'object' && 'detail' in createdCourse ? createdCourse.detail : undefined;
+          createdCourse && typeof createdCourse === 'object' && 'detail' in createdCourse
+            ? createdCourse.detail
+            : undefined;
         throw new Error((typeof detail === 'string' ? detail : undefined) || t('errors.creationFailed'));
       }
 
@@ -408,7 +410,11 @@ export default function CourseCreationWizard() {
                 onClick={handleCreate}
                 disabled={!canCreate || form.formState.isSubmitting}
               >
-                {form.formState.isSubmitting ? <Loader2 className="size-4 animate-spin" /> : <CheckCircle2 className="size-4" />}
+                {form.formState.isSubmitting ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  <CheckCircle2 className="size-4" />
+                )}
                 {t('actions.createWorkspace')}
               </Button>
             </div>

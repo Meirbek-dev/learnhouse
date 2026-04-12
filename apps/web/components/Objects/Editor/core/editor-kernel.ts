@@ -203,7 +203,10 @@ export function resolveEditorContent(content: unknown): Content {
   return normalizeTiptapJsonContent(content);
 }
 
-export function renderEditorHtml(content: unknown, options: Omit<EditorKernelOptions, 'preset'> & { preset: 'viewing' | 'discussion' }): string {
+export function renderEditorHtml(
+  content: unknown,
+  options: Omit<EditorKernelOptions, 'preset'> & { preset: 'viewing' | 'discussion' },
+): string {
   const normalized = resolveEditorContent(content);
 
   if (typeof normalized === 'string') {

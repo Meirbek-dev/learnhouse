@@ -77,7 +77,7 @@ export async function apiFetch(path: string, init: ApiFetchInit = {}): Promise<R
   const response = await fetch(url, options);
 
   if (!isServer && response.status === 401) {
-    const {pathname} = globalThis.location;
+    const { pathname } = globalThis.location;
     if (!isAuthRoute(pathname)) {
       globalThis.location.assign(buildLoginRedirect());
     }

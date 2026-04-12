@@ -17,11 +17,7 @@ export function FloatingPlusButton({ editor }: FloatingPlusButtonProps) {
     const { $from } = selection;
     const node = $from.parent;
 
-    return (
-      node.type.name === 'paragraph' &&
-      node.content.size === 0 &&
-      selection.empty
-    );
+    return node.type.name === 'paragraph' && node.content.size === 0 && selection.empty;
   }, [editor]);
 
   const handleClick = () => {
@@ -39,7 +35,7 @@ export function FloatingPlusButton({ editor }: FloatingPlusButtonProps) {
       <button
         type="button"
         onClick={handleClick}
-        className="flex size-7 items-center justify-center rounded-md border border-border text-muted-foreground transition-all hover:border-primary/30 hover:bg-accent hover:text-foreground"
+        className="border-border text-muted-foreground hover:border-primary/30 hover:bg-accent hover:text-foreground flex size-7 items-center justify-center rounded-md border transition-all"
         aria-label="Insert block"
         title="Click to insert block, or type /"
       >

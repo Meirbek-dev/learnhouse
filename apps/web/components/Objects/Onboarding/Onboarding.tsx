@@ -1,15 +1,5 @@
 'use client';
-import {
-  ArrowRight,
-  Book,
-  Check,
-  Globe,
-  Info,
-  PictureInPicture,
-  Sparkle,
-  Sprout,
-  SquareUser,
-} from 'lucide-react';
+import { ArrowRight, Book, Check, Globe, Info, PictureInPicture, Sparkle, Sprout, SquareUser } from 'lucide-react';
 import OnBoardAssignments from '@public/onboarding/OnBoardAssignments.png';
 import OnBoardActivities from '@public/onboarding/OnBoardActivities.png';
 import OnBoardWelcome from '@public/onboarding/OnBoardWelcome.png';

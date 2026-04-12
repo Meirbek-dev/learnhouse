@@ -29,19 +29,14 @@ export function LinkToggle({ editor, isLink, linkHref }: LinkToggleProps) {
   const handleLinkClick = () => {
     const { from, to } = editor.state.selection;
     setShowLinkInput(true);
-    if (linkSelectionRafRef.current)
-      cancelAnimationFrame(linkSelectionRafRef.current);
+    if (linkSelectionRafRef.current) cancelAnimationFrame(linkSelectionRafRef.current);
     linkSelectionRafRef.current = requestAnimationFrame(() => {
       editor.commands.setTextSelection({ from, to });
     });
   };
 
   const handleLinkSave = (url: string) => {
-    editor
-      .chain()
-      .focus()
-      .setLink({ href: url, target: '_blank', rel: 'noopener noreferrer' })
-      .run();
+    editor.chain().focus().setLink({ href: url, target: '_blank', rel: 'noopener noreferrer' }).run();
     setShowLinkInput(false);
   };
 

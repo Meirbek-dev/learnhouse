@@ -14,7 +14,7 @@ import { cn } from '@/lib/utils';
 import { hasMeaningfulText } from './text';
 
 const RichTextEditor = dynamic(
-  () => import('@components/Objects/Editor/views/DiscussionEditor').then(m => ({ default: m.DiscussionEditor })),
+  () => import('@components/Objects/Editor/views/DiscussionEditor').then((m) => ({ default: m.DiscussionEditor })),
   {
     ssr: false,
     loading: () => <div className="bg-muted/40 h-[80px] w-full animate-pulse rounded-lg border" />,

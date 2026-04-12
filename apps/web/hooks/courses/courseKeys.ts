@@ -67,11 +67,8 @@ export const courseKeys = {
 
   list: (options: CourseListKeyOptions = {}) => ['courses', 'list', normalizeCourseListOptions(options)] as const,
 
-  editable: (options: CourseListKeyOptions = {}) => [
-    'courses',
-    'editable',
-    normalizeCourseListOptions({ ...options, sortBy: options.sortBy ?? 'updated' }),
-  ] as const,
+  editable: (options: CourseListKeyOptions = {}) =>
+    ['courses', 'editable', normalizeCourseListOptions({ ...options, sortBy: options.sortBy ?? 'updated' })] as const,
 
   detail: (courseUuid: string) => ['courses', 'detail', normalizeCourseUuid(courseUuid)] as const,
 

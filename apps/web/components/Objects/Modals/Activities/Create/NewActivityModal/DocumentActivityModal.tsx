@@ -99,7 +99,9 @@ const DocumentPdfModal = ({ submitFileActivity, chapterId, course }: any) => {
                   >
                     {t('selectFile')}
                   </Button>
-                  <span className="text-muted-foreground truncate pl-3">{value ? value.name : t('noFileSelected')}</span>
+                  <span className="text-muted-foreground truncate pl-3">
+                    {value ? value.name : t('noFileSelected')}
+                  </span>
                 </div>
               </div>
             </FieldContent>

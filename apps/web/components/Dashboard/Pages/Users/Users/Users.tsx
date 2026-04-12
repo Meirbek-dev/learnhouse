@@ -140,11 +140,7 @@ const Users = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const queryClient = useQueryClient();
 
-  const {
-    data: usersData,
-    error,
-    isLoading,
-  } = useMembers(currentPage, USERS_PER_PAGE);
+  const { data: usersData, error, isLoading } = useMembers(currentPage, USERS_PER_PAGE);
 
   const totalUsers = usersData?.total ?? 0;
   const totalPages = usersData?.total_pages ?? 1;

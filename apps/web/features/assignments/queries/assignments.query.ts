@@ -14,10 +14,7 @@ async function fetchAssignmentTaskSubmission<TTaskSubmission = unknown>(
   assignmentUuid: string,
   assignmentTaskUuid: string,
 ): Promise<TTaskSubmission | null> {
-  const response = await getAssignmentTaskSubmissionsMe(
-    assignmentTaskUuid,
-    normalizeAssignmentUuid(assignmentUuid),
-  );
+  const response = await getAssignmentTaskSubmissionsMe(assignmentTaskUuid, normalizeAssignmentUuid(assignmentUuid));
 
   if (!response.success || !response.data) {
     return null;

@@ -39,7 +39,8 @@ export function gradingDetailQueryOptions(submissionUuid: string) {
 export function mySubmissionQueryOptions(activityId: number) {
   return queryOptions({
     queryKey: queryKeys.grading.mine(activityId),
-    queryFn: () => apiFetcher(`${getAPIUrl()}grading/submissions/me?activity_id=${activityId}`) as Promise<Submission[]>,
+    queryFn: () =>
+      apiFetcher(`${getAPIUrl()}grading/submissions/me?activity_id=${activityId}`) as Promise<Submission[]>,
   });
 }
 
@@ -55,6 +56,9 @@ export function submissionStatsQueryOptions(activityId: number) {
 export function submissionsQueryOptions(params: SubmissionListQueryParams) {
   return queryOptions({
     queryKey: queryKeys.grading.submissions(params),
-    queryFn: () => apiFetcher(`${getAPIUrl()}grading/submissions?${buildSubmissionsSearchParams(params)}`) as Promise<SubmissionsPage>,
+    queryFn: () =>
+      apiFetcher(
+        `${getAPIUrl()}grading/submissions?${buildSubmissionsSearchParams(params)}`,
+      ) as Promise<SubmissionsPage>,
   });
 }

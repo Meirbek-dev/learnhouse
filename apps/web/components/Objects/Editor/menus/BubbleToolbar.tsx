@@ -3,14 +3,7 @@
 import type { Editor } from '@tiptap/react';
 import { BubbleMenu } from '@tiptap/react/menus';
 import { useTranslations } from 'next-intl';
-import {
-  Bold,
-  Code,
-  Italic,
-  Link2,
-  Strikethrough,
-  ChevronDown,
-} from 'lucide-react';
+import { Bold, Code, Italic, Link2, Strikethrough, ChevronDown } from 'lucide-react';
 import { Toggle } from '@/components/ui/toggle';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
@@ -39,11 +32,7 @@ export function BubbleToolbar({ editor }: BubbleToolbarProps) {
   }, [editor]);
 
   const handleLinkSave = (url: string) => {
-    editor
-      .chain()
-      .focus()
-      .setLink({ href: url, target: '_blank', rel: 'noopener noreferrer' })
-      .run();
+    editor.chain().focus().setLink({ href: url, target: '_blank', rel: 'noopener noreferrer' }).run();
     setShowLinkInput(false);
   };
 
@@ -51,7 +40,7 @@ export function BubbleToolbar({ editor }: BubbleToolbarProps) {
     <BubbleMenu
       editor={editor}
       shouldShow={shouldShow}
-      className="flex items-center gap-0.5 rounded-lg border border-border bg-popover px-1 py-0.5 shadow-md"
+      className="border-border bg-popover flex items-center gap-0.5 rounded-lg border px-1 py-0.5 shadow-md"
     >
       {/* Turn-into dropdown */}
       <DropdownMenu>
@@ -68,10 +57,11 @@ export function BubbleToolbar({ editor }: BubbleToolbarProps) {
             </Button>
           }
         />
-        <DropdownMenuContent side="bottom" align="start">
-          <DropdownMenuItem
-            onClick={() => editor.chain().focus().setParagraph().run()}
-          >
+        <DropdownMenuContent
+          side="bottom"
+          align="start"
+        >
+          <DropdownMenuItem onClick={() => editor.chain().focus().setParagraph().run()}>
             {t('paragraph')}
           </DropdownMenuItem>
           {([1, 2, 3] as const).map((level) => (
@@ -82,25 +72,22 @@ export function BubbleToolbar({ editor }: BubbleToolbarProps) {
               <span className="font-semibold">{t('headingLevel', { level })}</span>
             </DropdownMenuItem>
           ))}
-          <DropdownMenuItem
-            onClick={() => editor.chain().focus().toggleBulletList().run()}
-          >
+          <DropdownMenuItem onClick={() => editor.chain().focus().toggleBulletList().run()}>
             {t('listOptions.bulletList')}
           </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() => editor.chain().focus().toggleOrderedList().run()}
-          >
+          <DropdownMenuItem onClick={() => editor.chain().focus().toggleOrderedList().run()}>
             {t('listOptions.orderedList')}
           </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() => editor.chain().focus().toggleCodeBlock().run()}
-          >
+          <DropdownMenuItem onClick={() => editor.chain().focus().toggleCodeBlock().run()}>
             {t('codeBlock')}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <Separator orientation="vertical" className="mx-0.5 h-4" />
+      <Separator
+        orientation="vertical"
+        className="mx-0.5 h-4"
+      />
 
       {/* Inline marks */}
       <Toggle
@@ -140,7 +127,10 @@ export function BubbleToolbar({ editor }: BubbleToolbarProps) {
         <Code className="size-3.5" />
       </Toggle>
 
-      <Separator orientation="vertical" className="mx-0.5 h-4" />
+      <Separator
+        orientation="vertical"
+        className="mx-0.5 h-4"
+      />
 
       {/* Link */}
       <div className="relative">
@@ -172,10 +162,7 @@ export function BubbleToolbar({ editor }: BubbleToolbarProps) {
   );
 }
 
-function getActiveBlockLabel(
-  editor: Editor,
-  t: ReturnType<typeof useTranslations>,
-): string {
+function getActiveBlockLabel(editor: Editor, t: ReturnType<typeof useTranslations>): string {
   if (editor.isActive('heading', { level: 1 })) return t('headingLevel', { level: 1 });
   if (editor.isActive('heading', { level: 2 })) return t('headingLevel', { level: 2 });
   if (editor.isActive('heading', { level: 3 })) return t('headingLevel', { level: 3 });

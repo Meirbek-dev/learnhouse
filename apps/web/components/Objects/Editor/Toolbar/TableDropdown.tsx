@@ -33,34 +33,25 @@ export function TableDropdown({ editor }: TableDropdownProps) {
           </Button>
         }
       />
-      <DropdownMenuContent side="bottom" align="start">
+      <DropdownMenuContent
+        side="bottom"
+        align="start"
+      >
         <DropdownMenuItem
-          onClick={() =>
-            editor
-              .chain()
-              .focus()
-              .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
-              .run()
-          }
+          onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()}
         >
           <Table className="size-4" />
           <span>{t('insertTable')}</span>
         </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => editor.chain().focus().addRowAfter().run()}
-        >
+        <DropdownMenuItem onClick={() => editor.chain().focus().addRowAfter().run()}>
           <Plus className="size-4" />
           <span>{t('addRowBelow')}</span>
         </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => editor.chain().focus().addColumnAfter().run()}
-        >
+        <DropdownMenuItem onClick={() => editor.chain().focus().addColumnAfter().run()}>
           <Columns className="size-4" />
           <span>{t('addColumnRight')}</span>
         </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => editor.chain().focus().deleteRow().run()}
-        >
+        <DropdownMenuItem onClick={() => editor.chain().focus().deleteRow().run()}>
           <Minus className="size-4" />
           <span>{t('deleteRow')}</span>
         </DropdownMenuItem>

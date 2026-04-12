@@ -98,11 +98,15 @@ export function DiscussionEditor({
     if (selectedText) {
       editor.chain().focus().setLink({ href: linkUrl }).run();
     } else {
-      editor.chain().focus().insertContent({
-        type: 'text',
-        text: linkUrl,
-        marks: [{ type: 'link', attrs: { href: linkUrl, target: '_blank', rel: 'noopener noreferrer' } }],
-      }).run();
+      editor
+        .chain()
+        .focus()
+        .insertContent({
+          type: 'text',
+          text: linkUrl,
+          marks: [{ type: 'link', attrs: { href: linkUrl, target: '_blank', rel: 'noopener noreferrer' } }],
+        })
+        .run();
     }
 
     setLinkUrl('');
@@ -125,11 +129,15 @@ export function DiscussionEditor({
     if (match) {
       editor.chain().focus().setYoutubeVideo({ src: videoUrl }).run();
     } else {
-      editor.chain().focus().insertContent({
-        type: 'text',
-        text: videoUrl,
-        marks: [{ type: 'link', attrs: { href: videoUrl, target: '_blank', rel: 'noopener noreferrer' } }],
-      }).run();
+      editor
+        .chain()
+        .focus()
+        .insertContent({
+          type: 'text',
+          text: videoUrl,
+          marks: [{ type: 'link', attrs: { href: videoUrl, target: '_blank', rel: 'noopener noreferrer' } }],
+        })
+        .run();
     }
 
     setVideoUrl('');
@@ -148,11 +156,15 @@ export function DiscussionEditor({
       if (file.type.startsWith('image/')) {
         editor.chain().focus().setImage({ src: tempUrl, alt: file.name }).run();
       } else {
-        editor.chain().focus().insertContent({
-          type: 'text',
-          text: file.name,
-          marks: [{ type: 'link', attrs: { href: tempUrl, target: '_blank', rel: 'noopener noreferrer' } }],
-        }).run();
+        editor
+          .chain()
+          .focus()
+          .insertContent({
+            type: 'text',
+            text: file.name,
+            marks: [{ type: 'link', attrs: { href: tempUrl, target: '_blank', rel: 'noopener noreferrer' } }],
+          })
+          .run();
       }
     } catch (error) {
       console.error('Error uploading file:', error);
@@ -169,7 +181,7 @@ export function DiscussionEditor({
   return (
     <div className="overflow-hidden rounded-lg border">
       {/* Toolbar */}
-      <div className="flex flex-wrap items-center gap-1 border-b bg-muted/50 p-2">
+      <div className="bg-muted/50 flex flex-wrap items-center gap-1 border-b p-2">
         {/* Text formatting */}
         <Button
           type="button"
@@ -199,7 +211,7 @@ export function DiscussionEditor({
           <Code size={16} />
         </Button>
 
-        <div className="mx-1 h-6 w-px bg-border" />
+        <div className="bg-border mx-1 h-6 w-px" />
 
         {/* Lists */}
         <Button
@@ -230,7 +242,7 @@ export function DiscussionEditor({
           <Quote size={16} />
         </Button>
 
-        <div className="mx-1 h-6 w-px bg-border" />
+        <div className="bg-border mx-1 h-6 w-px" />
 
         {/* Headings */}
         <Button
@@ -252,13 +264,21 @@ export function DiscussionEditor({
           H3
         </Button>
 
-        <div className="mx-1 h-6 w-px bg-border" />
+        <div className="bg-border mx-1 h-6 w-px" />
 
         {/* Media */}
-        <Dialog open={isLinkDialogOpen} onOpenChange={setIsLinkDialogOpen}>
+        <Dialog
+          open={isLinkDialogOpen}
+          onOpenChange={setIsLinkDialogOpen}
+        >
           <DialogTrigger
             render={
-              <Button type="button" variant="ghost" size="sm" className="h-8 w-8 p-0" />
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-0"
+              />
             }
           >
             <LinkIcon size={16} />
@@ -278,20 +298,35 @@ export function DiscussionEditor({
               />
             </div>
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setIsLinkDialogOpen(false)}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsLinkDialogOpen(false)}
+              >
                 {t('cancel')}
               </Button>
-              <Button type="button" onClick={addLink}>
+              <Button
+                type="button"
+                onClick={addLink}
+              >
                 {t('addLink')}
               </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
 
-        <Dialog open={isImageDialogOpen} onOpenChange={setIsImageDialogOpen}>
+        <Dialog
+          open={isImageDialogOpen}
+          onOpenChange={setIsImageDialogOpen}
+        >
           <DialogTrigger
             render={
-              <Button type="button" variant="ghost" size="sm" className="h-8 w-8 p-0" />
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-0"
+              />
             }
           >
             <ImageIcon size={16} />
@@ -311,20 +346,35 @@ export function DiscussionEditor({
               />
             </div>
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setIsImageDialogOpen(false)}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsImageDialogOpen(false)}
+              >
                 {t('cancel')}
               </Button>
-              <Button type="button" onClick={addImage}>
+              <Button
+                type="button"
+                onClick={addImage}
+              >
                 {t('addImage')}
               </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
 
-        <Dialog open={isVideoDialogOpen} onOpenChange={setIsVideoDialogOpen}>
+        <Dialog
+          open={isVideoDialogOpen}
+          onOpenChange={setIsVideoDialogOpen}
+        >
           <DialogTrigger
             render={
-              <Button type="button" variant="ghost" size="sm" className="h-8 w-8 p-0" />
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-8 w-8 p-0"
+              />
             }
           >
             <SiYoutube size={16} />
@@ -344,10 +394,17 @@ export function DiscussionEditor({
               />
             </div>
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setIsVideoDialogOpen(false)}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsVideoDialogOpen(false)}
+              >
                 {t('cancel')}
               </Button>
-              <Button type="button" onClick={addVideo}>
+              <Button
+                type="button"
+                onClick={addVideo}
+              >
                 {t('addVideo')}
               </Button>
             </DialogFooter>
@@ -376,7 +433,7 @@ export function DiscussionEditor({
           </Button>
         </div>
 
-        <div className="mx-1 h-6 w-px bg-border" />
+        <div className="bg-border mx-1 h-6 w-px" />
 
         {/* Undo/Redo */}
         <Button

@@ -95,21 +95,19 @@ export default function AssignmentSubmissionsSubPage({ assignment_uuid }: Assign
   // activity_object is fetched by AssignmentProvider and contains the numeric id
   const activityId: number | null = assignments?.activity_object?.id ?? null;
 
-  const {
-    data: assignmentSubmissionRows,
-    error: assignmentSubmissionRowsError,
-  } = useAssignmentSubmissions<AssignmentSubmissionRow>(canonicalAssignmentUuid);
+  const { data: assignmentSubmissionRows, error: assignmentSubmissionRowsError } =
+    useAssignmentSubmissions<AssignmentSubmissionRow>(canonicalAssignmentUuid);
 
   if (!activityId) {
     return <PageLoading />;
   }
 
-  const gradedCount = assignmentSubmissionRows?.filter((row: AssignmentSubmissionRow) => row.submission_status === 'GRADED').length ?? 0;
+  const gradedCount =
+    assignmentSubmissionRows?.filter((row: AssignmentSubmissionRow) => row.submission_status === 'GRADED').length ?? 0;
   const submittedCount =
     assignmentSubmissionRows?.filter(
       (row: AssignmentSubmissionRow) => row.submission_status === 'SUBMITTED' || row.submission_status === 'LATE',
-    )
-      .length ?? 0;
+    ).length ?? 0;
 
   return (
     <div className="w-full px-10 py-6">

@@ -1,8 +1,4 @@
-import {
-  ReactNodeViewRenderer,
-  type ReactNodeViewRendererOptions,
-  type NodeViewProps,
-} from '@tiptap/react';
+import { ReactNodeViewRenderer, type ReactNodeViewRendererOptions, type NodeViewProps } from '@tiptap/react';
 import type { FC } from 'react';
 
 export type TypedNodeViewProps<TAttrs, TExtensionOptions = Record<string, unknown>> = Omit<
@@ -24,7 +20,7 @@ export type TypedNodeViewProps<TAttrs, TExtensionOptions = Record<string, unknow
  */
 export function nodeView<T>(
   component: FC<TypedNodeViewProps<T, any>>,
-  options?: Partial<ReactNodeViewRendererOptions>
+  options?: Partial<ReactNodeViewRendererOptions>,
 ) {
   // TypedNodeViewProps only narrows NodeViewProps, so this is safe at runtime.
   return ReactNodeViewRenderer(component as any, options);

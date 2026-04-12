@@ -51,46 +51,46 @@ const NewChapterModal = ({ submitChapter, closeModal, course }: any) => {
       onSubmit={form.handleSubmit(onSubmit)}
       className="space-y-4"
     >
-        <Field>
-          <FieldLabel htmlFor="name">{t('chapterName')}</FieldLabel>
-          <FieldContent>
-            <Input
-              id="name"
-              type="text"
-              {...form.register('name')}
-            />
-          </FieldContent>
-          <FieldError errors={[form.formState.errors.name]} />
-        </Field>
+      <Field>
+        <FieldLabel htmlFor="name">{t('chapterName')}</FieldLabel>
+        <FieldContent>
+          <Input
+            id="name"
+            type="text"
+            {...form.register('name')}
+          />
+        </FieldContent>
+        <FieldError errors={[form.formState.errors.name]} />
+      </Field>
 
-        <Field>
-          <FieldLabel htmlFor="description">{t('chapterDescription')}</FieldLabel>
-          <FieldContent>
-            <Textarea
-              id="description"
-              {...form.register('description')}
-            />
-          </FieldContent>
-          <FieldError errors={[form.formState.errors.description]} />
-        </Field>
+      <Field>
+        <FieldLabel htmlFor="description">{t('chapterDescription')}</FieldLabel>
+        <FieldContent>
+          <Textarea
+            id="description"
+            {...form.register('description')}
+          />
+        </FieldContent>
+        <FieldError errors={[form.formState.errors.description]} />
+      </Field>
 
-        <div className="mt-6 flex justify-end">
-          <Button
-            type="submit"
-            className="mt-2.5"
-            disabled={form.formState.isSubmitting}
-          >
-            {form.formState.isSubmitting ? (
-              <BarLoader
-                cssOverride={{ borderRadius: 60 }}
-                width={60}
-                color="#ffffff"
-              />
-            ) : (
-              t('createChapter')
-            )}
-          </Button>
-        </div>
+      <div className="mt-6 flex justify-end">
+        <Button
+          type="submit"
+          className="mt-2.5"
+          disabled={form.formState.isSubmitting}
+        >
+          {form.formState.isSubmitting ? (
+            <BarLoader
+              cssOverride={{ borderRadius: 60 }}
+              width={60}
+              color="#ffffff"
+            />
+          ) : (
+            t('createChapter')
+          )}
+        </Button>
+      </div>
     </form>
   );
 };

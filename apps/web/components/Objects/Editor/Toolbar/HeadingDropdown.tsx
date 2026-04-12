@@ -19,10 +19,7 @@ interface HeadingDropdownProps {
 export function HeadingDropdown({ editor, headingLevel }: HeadingDropdownProps) {
   const t = useTranslations('DashPage.Editor.Toolbar');
 
-  const headingLabel =
-    headingLevel === 0
-      ? t('paragraph')
-      : t('headingLevel', { level: headingLevel });
+  const headingLabel = headingLevel === 0 ? t('paragraph') : t('headingLevel', { level: headingLevel });
 
   return (
     <DropdownMenu>
@@ -41,10 +38,11 @@ export function HeadingDropdown({ editor, headingLevel }: HeadingDropdownProps) 
           </Button>
         }
       />
-      <DropdownMenuContent side="bottom" align="start">
-        <DropdownMenuItem
-          onClick={() => editor.chain().focus().setParagraph().run()}
-        >
+      <DropdownMenuContent
+        side="bottom"
+        align="start"
+      >
+        <DropdownMenuItem onClick={() => editor.chain().focus().setParagraph().run()}>
           <span className="text-sm">{t('paragraph')}</span>
         </DropdownMenuItem>
         {([1, 2, 3, 4, 5, 6] as const).map((level) => (

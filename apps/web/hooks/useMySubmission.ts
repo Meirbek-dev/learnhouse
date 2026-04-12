@@ -39,7 +39,7 @@ export function useMySubmission(activityId: number | null): UseMySubmissionResul
   return {
     submission,
     isLoading: query.isPending,
-    error: (query.error) ?? null,
+    error: query.error ?? null,
     mutate: async () => {
       if (activityId === null) return undefined;
       await queryClient.invalidateQueries({ queryKey: queryKeys.grading.mine(activityId) });

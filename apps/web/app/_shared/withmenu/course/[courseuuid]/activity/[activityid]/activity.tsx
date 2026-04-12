@@ -57,7 +57,9 @@ import Link from '@components/ui/AppLink';
 import { toast } from 'sonner';
 
 // Lazy load heavy components
-const Canva = lazy(() => import('@components/Objects/Editor/views/InteractiveViewer').then(m => ({ default: m.InteractiveViewer })));
+const Canva = lazy(() =>
+  import('@components/Objects/Editor/views/InteractiveViewer').then((m) => ({ default: m.InteractiveViewer })),
+);
 const VideoActivity = lazy(() => import('@components/Objects/Activities/Video/Video'));
 const DocumentPdfActivity = lazy(() => import('@components/Objects/Activities/DocumentPdf/DocumentPdf'));
 const AssignmentStudentActivity = lazy(
@@ -1024,7 +1026,7 @@ export const MarkStatus = (props: {
 
       await markActivityAsComplete(props.activity.activity_uuid);
 
-  await queryClient.invalidateQueries({ queryKey: queryKeys.trail.current() });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.trail.current() });
 
       // Show XP feedback and update profile
       if (useGamificationStore.getState().profile) {

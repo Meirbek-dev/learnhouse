@@ -124,155 +124,155 @@ const EditAssignmentForm: FC<EditAssignmentFormProps> = ({ onClose, assignment }
   ];
 
   return (
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-4"
-      >
-        <Controller
-          control={form.control}
-          name="title"
-          render={({ field, fieldState }) => (
-            <Field>
-              <FieldLabel htmlFor={field.name}>{t('assignmentTitle')}</FieldLabel>
-              <FieldContent>
-                <Input
-                  id={field.name}
-                  type="text"
-                  {...field}
-                />
-              </FieldContent>
-              <FieldError errors={[fieldState.error]} />
-            </Field>
-          )}
-        />
-
-        <Controller
-          control={form.control}
-          name="description"
-          render={({ field, fieldState }) => (
-            <Field>
-              <FieldLabel htmlFor={field.name}>{t('assignmentDescription')}</FieldLabel>
-              <FieldContent>
-                <Textarea
-                  id={field.name}
-                  {...field}
-                />
-              </FieldContent>
-              <FieldError errors={[fieldState.error]} />
-            </Field>
-          )}
-        />
-
-        <Controller
-          control={form.control}
-          name="due_date"
-          render={({ field, fieldState }) => (
-            <Field>
-              <FieldLabel>{t('dueDate')}</FieldLabel>
-              <Popover>
-                <PopoverTrigger
-                  render={
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        'w-full justify-start text-left font-normal',
-                        !field.value && 'text-muted-foreground',
-                      )}
-                    />
-                  }
-                >
-                  {field.value ? (
-                    format(new Date(field.value), 'PPP', { locale: dateFnsLocale })
-                  ) : (
-                    <span>{t('selectDeadline')}</span>
-                  )}
-                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                </PopoverTrigger>
-                <PopoverContent
-                  className="w-auto p-0"
-                  align="start"
-                >
-                  <Calendar
-                    mode="single"
-                    captionLayout="dropdown"
-                    selected={field.value ? new Date(field.value) : undefined}
-                    onSelect={(date) => {
-                      if (date) {
-                        const year = date.getFullYear();
-                        const month = String(date.getMonth() + 1).padStart(2, '0');
-                        const day = String(date.getDate()).padStart(2, '0');
-                        const isoDate = `${year}-${month}-${day}`;
-                        field.onChange(isoDate);
-                      } else {
-                        field.onChange('');
-                      }
-                    }}
-                    disabled={{ before: today }}
-                    locale={dateFnsLocale}
-                  />
-                </PopoverContent>
-              </Popover>
-              <FieldError errors={[fieldState.error]} />
-            </Field>
-          )}
-        />
-
-        <Controller
-          control={form.control}
-          name="grading_type"
-          render={({ field, fieldState }) => (
-            <Field>
-              <FieldLabel>{t('gradingType')}</FieldLabel>
-              <Select
-                onValueChange={field.onChange}
-                value={field.value}
-                items={gradingTypes}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={validationT('selectGradingType')} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectGroup>
-                    {gradingTypes.map((item) => (
-                      <SelectItem
-                        key={item.value}
-                        value={item.value}
-                      >
-                        {item.label}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-              <FieldError errors={[fieldState.error]} />
-            </Field>
-          )}
-        />
-
-        <div className="mt-6 flex justify-end space-x-3">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onClose}
-          >
-            {t('cancel')}
-          </Button>
-          <Button
-            type="submit"
-            disabled={form.formState.isSubmitting}
-          >
-            {form.formState.isSubmitting ? (
-              <BarLoader
-                cssOverride={{ borderRadius: 60 }}
-                width={30}
-                color="#ffffff"
+    <form
+      onSubmit={form.handleSubmit(onSubmit)}
+      className="space-y-4"
+    >
+      <Controller
+        control={form.control}
+        name="title"
+        render={({ field, fieldState }) => (
+          <Field>
+            <FieldLabel htmlFor={field.name}>{t('assignmentTitle')}</FieldLabel>
+            <FieldContent>
+              <Input
+                id={field.name}
+                type="text"
+                {...field}
               />
-            ) : (
-              t('saveChanges')
-            )}
-          </Button>
-        </div>
-      </form>
+            </FieldContent>
+            <FieldError errors={[fieldState.error]} />
+          </Field>
+        )}
+      />
+
+      <Controller
+        control={form.control}
+        name="description"
+        render={({ field, fieldState }) => (
+          <Field>
+            <FieldLabel htmlFor={field.name}>{t('assignmentDescription')}</FieldLabel>
+            <FieldContent>
+              <Textarea
+                id={field.name}
+                {...field}
+              />
+            </FieldContent>
+            <FieldError errors={[fieldState.error]} />
+          </Field>
+        )}
+      />
+
+      <Controller
+        control={form.control}
+        name="due_date"
+        render={({ field, fieldState }) => (
+          <Field>
+            <FieldLabel>{t('dueDate')}</FieldLabel>
+            <Popover>
+              <PopoverTrigger
+                render={
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      'w-full justify-start text-left font-normal',
+                      !field.value && 'text-muted-foreground',
+                    )}
+                  />
+                }
+              >
+                {field.value ? (
+                  format(new Date(field.value), 'PPP', { locale: dateFnsLocale })
+                ) : (
+                  <span>{t('selectDeadline')}</span>
+                )}
+                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+              </PopoverTrigger>
+              <PopoverContent
+                className="w-auto p-0"
+                align="start"
+              >
+                <Calendar
+                  mode="single"
+                  captionLayout="dropdown"
+                  selected={field.value ? new Date(field.value) : undefined}
+                  onSelect={(date) => {
+                    if (date) {
+                      const year = date.getFullYear();
+                      const month = String(date.getMonth() + 1).padStart(2, '0');
+                      const day = String(date.getDate()).padStart(2, '0');
+                      const isoDate = `${year}-${month}-${day}`;
+                      field.onChange(isoDate);
+                    } else {
+                      field.onChange('');
+                    }
+                  }}
+                  disabled={{ before: today }}
+                  locale={dateFnsLocale}
+                />
+              </PopoverContent>
+            </Popover>
+            <FieldError errors={[fieldState.error]} />
+          </Field>
+        )}
+      />
+
+      <Controller
+        control={form.control}
+        name="grading_type"
+        render={({ field, fieldState }) => (
+          <Field>
+            <FieldLabel>{t('gradingType')}</FieldLabel>
+            <Select
+              onValueChange={field.onChange}
+              value={field.value}
+              items={gradingTypes}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder={validationT('selectGradingType')} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  {gradingTypes.map((item) => (
+                    <SelectItem
+                      key={item.value}
+                      value={item.value}
+                    >
+                      {item.label}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+            <FieldError errors={[fieldState.error]} />
+          </Field>
+        )}
+      />
+
+      <div className="mt-6 flex justify-end space-x-3">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onClose}
+        >
+          {t('cancel')}
+        </Button>
+        <Button
+          type="submit"
+          disabled={form.formState.isSubmitting}
+        >
+          {form.formState.isSubmitting ? (
+            <BarLoader
+              cssOverride={{ borderRadius: 60 }}
+              width={30}
+              color="#ffffff"
+            />
+          ) : (
+            t('saveChanges')
+          )}
+        </Button>
+      </div>
+    </form>
   );
 };
 

@@ -20,7 +20,11 @@ const CertificateVerificationPage: React.FC<CertificateVerificationPageProps> = 
   const certificateQuery = useCertificateByUuid(certificateUuid);
   const certificateData = certificateQuery.data?.data ?? null;
   const isLoading = certificateQuery.isPending;
-  const error = certificateQuery.error ? t('verificationFailed') : !isLoading && !certificateData ? t('certificateNotFound') : null;
+  const error = certificateQuery.error
+    ? t('verificationFailed')
+    : !isLoading && !certificateData
+      ? t('certificateNotFound')
+      : null;
   const verificationStatus: 'valid' | 'invalid' | 'loading' = isLoading
     ? 'loading'
     : certificateData

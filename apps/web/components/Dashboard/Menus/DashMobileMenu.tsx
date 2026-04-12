@@ -1,15 +1,6 @@
 'use client';
 
-import {
-  Backpack,
-  BarChart3,
-  BookCopy,
-  Home,
-  School,
-  Settings,
-  ShieldCheck,
-  Users,
-} from 'lucide-react';
+import { Backpack, BarChart3, BookCopy, Home, School, Settings, ShieldCheck, Users } from 'lucide-react';
 import { useNavigationPermissions } from '@/hooks/useNavigationPermissions';
 import { useSession } from '@/hooks/useSession';
 import ToolTip from '@/components/Objects/Elements/Tooltip/Tooltip';
@@ -19,14 +10,8 @@ import { useTranslations } from 'next-intl';
 const DashMobileMenu = () => {
   const { user: currentUser } = useSession();
   const t = useTranslations('SidebarMenu');
-  const {
-    canSeePlatform,
-    canSeeCourses,
-    canSeeAssignments,
-    canSeeAnalytics,
-    canSeeUsers,
-    canSeeAdmin,
-  } = useNavigationPermissions();
+  const { canSeePlatform, canSeeCourses, canSeeAssignments, canSeeAnalytics, canSeeUsers, canSeeAdmin } =
+    useNavigationPermissions();
 
   return (
     <div className="border-sidebar-border bg-sidebar text-sidebar-foreground supports-[backdrop-filter]:bg-sidebar/90 fixed right-0 bottom-0 left-0 z-50 border-t shadow-lg supports-[backdrop-filter]:backdrop-blur-md">

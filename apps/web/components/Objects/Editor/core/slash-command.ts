@@ -18,9 +18,11 @@ const DEFAULT_SLASH_COMMAND_STATE: SlashCommandState = {
 export const slashCommandKey = new PluginKey<{ type: string }>('slashCommand');
 
 export function getSlashCommandState(editor: Editor | null | undefined): SlashCommandState {
-  return (editor?.storage as unknown as Record<string, SlashCommandState | undefined>)?.['slashCommand'] ?? {
-    ...DEFAULT_SLASH_COMMAND_STATE,
-  };
+  return (
+    (editor?.storage as unknown as Record<string, SlashCommandState | undefined>)?.['slashCommand'] ?? {
+      ...DEFAULT_SLASH_COMMAND_STATE,
+    }
+  );
 }
 
 export function setSlashCommandState(

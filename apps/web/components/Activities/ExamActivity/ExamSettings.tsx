@@ -168,7 +168,11 @@ export default function ExamSettings({ exam, courseUuid, onSettingsUpdated }: Ex
   const timeLimit = useWatch({ control: form.control, name: 'time_limit' });
   const attemptLimit = useWatch({ control: form.control, name: 'attempt_limit' });
   const questionLimit = useWatch({ control: form.control, name: 'question_limit' });
-  const accessMode = useWatch({ control: form.control, name: 'access_mode', defaultValue: settings.access_mode || 'NO_ACCESS' });
+  const accessMode = useWatch({
+    control: form.control,
+    name: 'access_mode',
+    defaultValue: settings.access_mode || 'NO_ACCESS',
+  });
   const allowResultReview = useWatch({
     control: form.control,
     name: 'allow_result_review',
@@ -227,448 +231,456 @@ export default function ExamSettings({ exam, courseUuid, onSettingsUpdated }: Ex
           onSubmit={form.handleSubmit(onSubmit)}
           className="space-y-8"
         >
-            {/* Time & Attempts */}
-            <div className="space-y-4">
-              <div>
-                <h3 className="text-lg font-semibold">{t('timeAndAttempts')}</h3>
-                <p className="text-muted-foreground text-sm">{t('timeAndAttemptsDescription')}</p>
-              </div>
-
-              <div className="space-y-4">
-                <div className="flex items-center justify-between rounded-lg border p-4">
-                  <div className="space-y-0.5">
-                    <FieldLabel>{t('enableTimeLimit')}</FieldLabel>
-                    <FieldDescription>{t('timeLimitDescription')}</FieldDescription>
-                  </div>
-                  <Switch
-                    checked={hasTimeLimit}
-                    onCheckedChange={(checked) => {
-                      form.setValue('time_limit', checked ? 60 : null);
-                    }}
-                  />
-                </div>
-
-                {hasTimeLimit && (
-                  <Controller
-                    control={form.control}
-                    name="time_limit"
-                    render={({ field, fieldState }) => (
-                      <Field>
-                        <FieldLabel htmlFor={field.name}>{t('timeLimitMinutes')}</FieldLabel>
-                        <Input
-                          id={field.name}
-                          type="number"
-                          min={limits?.time_limit?.min ?? 1}
-                          max={limits?.time_limit?.max ?? 180}
-                          {...field}
-                          value={field.value ?? ''}
-                          onChange={(e) => field.onChange(e.target.value === '' ? null : Number.parseInt(e.target.value, 10))}
-                        />
-                        <FieldDescription>{t('timeLimitMinutesDescription')}</FieldDescription>
-                        <FieldError errors={[fieldState.error]} />
-                      </Field>
-                    )}
-                  />
-                )}
-
-                <div className="flex items-center justify-between rounded-lg border p-4">
-                  <div className="space-y-0.5">
-                    <FieldLabel>{t('enableAttemptLimit')}</FieldLabel>
-                    <FieldDescription>{t('attemptLimitDescription')}</FieldDescription>
-                  </div>
-                  <Switch
-                    checked={hasAttemptLimit}
-                    onCheckedChange={(checked) => {
-                      form.setValue('attempt_limit', checked ? 1 : null);
-                    }}
-                  />
-                </div>
-
-                {hasAttemptLimit && (
-                  <Controller
-                    control={form.control}
-                    name="attempt_limit"
-                    render={({ field, fieldState }) => (
-                      <Field>
-                        <FieldLabel htmlFor={field.name}>{t('attemptLimit')}</FieldLabel>
-                        <Input
-                          id={field.name}
-                          type="number"
-                          min={limits?.attempt_limit?.min ?? 1}
-                          max={limits?.attempt_limit?.max ?? 5}
-                          {...field}
-                          value={field.value ?? ''}
-                          onChange={(e) => field.onChange(e.target.value === '' ? null : Number.parseInt(e.target.value, 10))}
-                        />
-                        <FieldDescription>{t('attemptLimitInputDescription')}</FieldDescription>
-                        <FieldError errors={[fieldState.error]} />
-                      </Field>
-                    )}
-                  />
-                )}
-              </div>
+          {/* Time & Attempts */}
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-lg font-semibold">{t('timeAndAttempts')}</h3>
+              <p className="text-muted-foreground text-sm">{t('timeAndAttemptsDescription')}</p>
             </div>
 
-            <Separator />
-
-            {/* Question Behavior */}
             <div className="space-y-4">
-              <div>
-                <h3 className="text-lg font-semibold">{t('questionBehavior')}</h3>
-                <p className="text-muted-foreground text-sm">{t('questionBehaviorDescription')}</p>
+              <div className="flex items-center justify-between rounded-lg border p-4">
+                <div className="space-y-0.5">
+                  <FieldLabel>{t('enableTimeLimit')}</FieldLabel>
+                  <FieldDescription>{t('timeLimitDescription')}</FieldDescription>
+                </div>
+                <Switch
+                  checked={hasTimeLimit}
+                  onCheckedChange={(checked) => {
+                    form.setValue('time_limit', checked ? 60 : null);
+                  }}
+                />
               </div>
 
-              <div className="space-y-4">
+              {hasTimeLimit && (
                 <Controller
                   control={form.control}
-                  name="shuffle_questions"
-                  render={({ field }) => (
-                    <Field
-                      orientation="horizontal"
-                      className="justify-between rounded-lg border p-4"
-                    >
-                      <div className="space-y-0.5">
-                        <FieldLabel>{t('shuffleQuestions')}</FieldLabel>
-                        <FieldDescription>{t('shuffleQuestionsDescription')}</FieldDescription>
-                      </div>
-                      <Switch
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
+                  name="time_limit"
+                  render={({ field, fieldState }) => (
+                    <Field>
+                      <FieldLabel htmlFor={field.name}>{t('timeLimitMinutes')}</FieldLabel>
+                      <Input
+                        id={field.name}
+                        type="number"
+                        min={limits?.time_limit?.min ?? 1}
+                        max={limits?.time_limit?.max ?? 180}
+                        {...field}
+                        value={field.value ?? ''}
+                        onChange={(e) =>
+                          field.onChange(e.target.value === '' ? null : Number.parseInt(e.target.value, 10))
+                        }
                       />
+                      <FieldDescription>{t('timeLimitMinutesDescription')}</FieldDescription>
+                      <FieldError errors={[fieldState.error]} />
                     </Field>
                   )}
                 />
+              )}
 
-                <div className="flex items-center justify-between rounded-lg border p-4 opacity-50">
-                  <div className="space-y-0.5">
-                    <FieldLabel>{t('shuffleAnswers')}</FieldLabel>
-                    <FieldDescription>{t('shuffleAnswersDescription')}</FieldDescription>
-                  </div>
-                  <Switch
-                    checked
-                    disabled
-                  />
+              <div className="flex items-center justify-between rounded-lg border p-4">
+                <div className="space-y-0.5">
+                  <FieldLabel>{t('enableAttemptLimit')}</FieldLabel>
+                  <FieldDescription>{t('attemptLimitDescription')}</FieldDescription>
                 </div>
-
-                <div className="flex items-center justify-between rounded-lg border p-4">
-                  <div className="space-y-0.5">
-                    <FieldLabel>{t('enableQuestionLimit')}</FieldLabel>
-                    <FieldDescription>{t('questionLimitDescription')}</FieldDescription>
-                  </div>
-                  <Switch
-                    checked={hasQuestionLimit}
-                    onCheckedChange={(checked) => {
-                      form.setValue('question_limit', checked ? 10 : null);
-                    }}
-                  />
-                </div>
-
-                {hasQuestionLimit && (
-                  <Controller
-                    control={form.control}
-                    name="question_limit"
-                    render={({ field, fieldState }) => (
-                      <Field>
-                        <FieldLabel htmlFor={field.name}>{t('questionLimit')}</FieldLabel>
-                        <Input
-                          id={field.name}
-                          type="number"
-                          min={limits?.question_limit?.min ?? 1}
-                          {...field}
-                          value={field.value ?? ''}
-                          onChange={(e) => field.onChange(e.target.value === '' ? null : Number.parseInt(e.target.value, 10))}
-                        />
-                        <FieldDescription>{t('questionLimitInputDescription')}</FieldDescription>
-                        <FieldError errors={[fieldState.error]} />
-                      </Field>
-                    )}
-                  />
-                )}
+                <Switch
+                  checked={hasAttemptLimit}
+                  onCheckedChange={(checked) => {
+                    form.setValue('attempt_limit', checked ? 1 : null);
+                  }}
+                />
               </div>
+
+              {hasAttemptLimit && (
+                <Controller
+                  control={form.control}
+                  name="attempt_limit"
+                  render={({ field, fieldState }) => (
+                    <Field>
+                      <FieldLabel htmlFor={field.name}>{t('attemptLimit')}</FieldLabel>
+                      <Input
+                        id={field.name}
+                        type="number"
+                        min={limits?.attempt_limit?.min ?? 1}
+                        max={limits?.attempt_limit?.max ?? 5}
+                        {...field}
+                        value={field.value ?? ''}
+                        onChange={(e) =>
+                          field.onChange(e.target.value === '' ? null : Number.parseInt(e.target.value, 10))
+                        }
+                      />
+                      <FieldDescription>{t('attemptLimitInputDescription')}</FieldDescription>
+                      <FieldError errors={[fieldState.error]} />
+                    </Field>
+                  )}
+                />
+              )}
+            </div>
+          </div>
+
+          <Separator />
+
+          {/* Question Behavior */}
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-lg font-semibold">{t('questionBehavior')}</h3>
+              <p className="text-muted-foreground text-sm">{t('questionBehaviorDescription')}</p>
             </div>
 
-            <Separator />
-
-            {/* Access Control */}
             <div className="space-y-4">
-              <div>
-                <h3 className="text-lg font-semibold">{t('accessControl')}</h3>
-                <p className="text-muted-foreground text-sm">{t('accessControlDescription')}</p>
-              </div>
-
               <Controller
                 control={form.control}
-                name="access_mode"
+                name="shuffle_questions"
                 render={({ field }) => (
-                  <Field>
-                    <FieldLabel>{t('accessMode')}</FieldLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      value={field.value ?? 'NO_ACCESS'}
-                      items={accessModes}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder={t('selectAccessMode')} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          {accessModes.map((item) => (
-                            <SelectItem
-                              key={item.value}
-                              value={item.value}
-                            >
-                              {item.label}
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                    <FieldDescription>{t('accessModeDescription')}</FieldDescription>
-                    <FieldError errors={[form.formState.errors.access_mode]} />
+                  <Field
+                    orientation="horizontal"
+                    className="justify-between rounded-lg border p-4"
+                  >
+                    <div className="space-y-0.5">
+                      <FieldLabel>{t('shuffleQuestions')}</FieldLabel>
+                      <FieldDescription>{t('shuffleQuestionsDescription')}</FieldDescription>
+                    </div>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
                   </Field>
                 )}
               />
 
-              {/* Warning if switching away from whitelist - stored list will remain but be ignored */}
-              {initialAccessMode === 'WHITELIST' && accessMode !== 'WHITELIST' && (
-                <Alert>
-                  <AlertTitle>{t('whitelistWillBeIgnored')}</AlertTitle>
-                  <AlertDescription>{t('whitelistWillBeIgnoredDescription')}</AlertDescription>
-                </Alert>
-              )}
+              <div className="flex items-center justify-between rounded-lg border p-4 opacity-50">
+                <div className="space-y-0.5">
+                  <FieldLabel>{t('shuffleAnswers')}</FieldLabel>
+                  <FieldDescription>{t('shuffleAnswersDescription')}</FieldDescription>
+                </div>
+                <Switch
+                  checked
+                  disabled
+                />
+              </div>
 
-              {/* Whitelist Management - Only show when access mode is WHITELIST */}
-              {accessMode === 'WHITELIST' && (
-                <WhitelistManagement
-                  examUuid={exam.exam_uuid}
-                  courseUuid={courseUuid}
-                  currentWhitelist={settings.whitelist_user_ids || []}
-                  onWhitelistUpdated={onSettingsUpdated}
+              <div className="flex items-center justify-between rounded-lg border p-4">
+                <div className="space-y-0.5">
+                  <FieldLabel>{t('enableQuestionLimit')}</FieldLabel>
+                  <FieldDescription>{t('questionLimitDescription')}</FieldDescription>
+                </div>
+                <Switch
+                  checked={hasQuestionLimit}
+                  onCheckedChange={(checked) => {
+                    form.setValue('question_limit', checked ? 10 : null);
+                  }}
+                />
+              </div>
+
+              {hasQuestionLimit && (
+                <Controller
+                  control={form.control}
+                  name="question_limit"
+                  render={({ field, fieldState }) => (
+                    <Field>
+                      <FieldLabel htmlFor={field.name}>{t('questionLimit')}</FieldLabel>
+                      <Input
+                        id={field.name}
+                        type="number"
+                        min={limits?.question_limit?.min ?? 1}
+                        {...field}
+                        value={field.value ?? ''}
+                        onChange={(e) =>
+                          field.onChange(e.target.value === '' ? null : Number.parseInt(e.target.value, 10))
+                        }
+                      />
+                      <FieldDescription>{t('questionLimitInputDescription')}</FieldDescription>
+                      <FieldError errors={[fieldState.error]} />
+                    </Field>
+                  )}
                 />
               )}
             </div>
+          </div>
 
-            <Separator />
+          <Separator />
 
-            {/* Result Visibility */}
-            <div className="space-y-4">
-              <div>
-                <h3 className="text-lg font-semibold">{t('resultVisibility')}</h3>
-                <p className="text-muted-foreground text-sm">{t('resultVisibilityDescription')}</p>
-              </div>
-
-              <div className="space-y-4">
-                <Controller
-                  control={form.control}
-                  name="allow_result_review"
-                  render={({ field }) => (
-                    <Field
-                      orientation="horizontal"
-                      className="justify-between rounded-lg border p-4"
-                    >
-                      <div className="space-y-0.5">
-                        <FieldLabel>{t('allowResultReview')}</FieldLabel>
-                        <FieldDescription>{t('allowResultReviewDescription')}</FieldDescription>
-                      </div>
-                      <Switch
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </Field>
-                  )}
-                />
-
-                {form.watch('allow_result_review') && (
-                  <Controller
-                    control={form.control}
-                    name="show_correct_answers"
-                    render={({ field }) => (
-                      <Field
-                        orientation="horizontal"
-                        className="ml-6 justify-between rounded-lg border p-4"
-                      >
-                        <div className="space-y-0.5">
-                          <FieldLabel>{t('showCorrectAnswers')}</FieldLabel>
-                          <FieldDescription>{t('showCorrectAnswersDescription')}</FieldDescription>
-                        </div>
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </Field>
-                    )}
-                  />
-                )}
-              </div>
+          {/* Access Control */}
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-lg font-semibold">{t('accessControl')}</h3>
+              <p className="text-muted-foreground text-sm">{t('accessControlDescription')}</p>
             </div>
 
-            <Separator />
+            <Controller
+              control={form.control}
+              name="access_mode"
+              render={({ field }) => (
+                <Field>
+                  <FieldLabel>{t('accessMode')}</FieldLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    value={field.value ?? 'NO_ACCESS'}
+                    items={accessModes}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={t('selectAccessMode')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        {accessModes.map((item) => (
+                          <SelectItem
+                            key={item.value}
+                            value={item.value}
+                          >
+                            {item.label}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                  <FieldDescription>{t('accessModeDescription')}</FieldDescription>
+                  <FieldError errors={[form.formState.errors.access_mode]} />
+                </Field>
+              )}
+            />
 
-            {/* Anti-Cheating */}
+            {/* Warning if switching away from whitelist - stored list will remain but be ignored */}
+            {initialAccessMode === 'WHITELIST' && accessMode !== 'WHITELIST' && (
+              <Alert>
+                <AlertTitle>{t('whitelistWillBeIgnored')}</AlertTitle>
+                <AlertDescription>{t('whitelistWillBeIgnoredDescription')}</AlertDescription>
+              </Alert>
+            )}
+
+            {/* Whitelist Management - Only show when access mode is WHITELIST */}
+            {accessMode === 'WHITELIST' && (
+              <WhitelistManagement
+                examUuid={exam.exam_uuid}
+                courseUuid={courseUuid}
+                currentWhitelist={settings.whitelist_user_ids || []}
+                onWhitelistUpdated={onSettingsUpdated}
+              />
+            )}
+          </div>
+
+          <Separator />
+
+          {/* Result Visibility */}
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-lg font-semibold">{t('resultVisibility')}</h3>
+              <p className="text-muted-foreground text-sm">{t('resultVisibilityDescription')}</p>
+            </div>
+
             <div className="space-y-4">
-              <div>
-                <h3 className="text-lg font-semibold">{t('antiCheating')}</h3>
-                <p className="text-muted-foreground text-sm">{t('antiCheatingDescription')}</p>
-              </div>
-
-              <div className="space-y-4">
-                <Controller
-                  control={form.control}
-                  name="copy_paste_protection"
-                  render={({ field }) => (
-                    <Field
-                      orientation="horizontal"
-                      className="justify-between rounded-lg border p-4"
-                    >
-                      <div className="space-y-0.5">
-                        <FieldLabel>{t('copyPasteProtection')}</FieldLabel>
-                        <FieldDescription>{t('copyPasteProtectionDescription')}</FieldDescription>
-                      </div>
-                      <Switch
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </Field>
-                  )}
-                />
-
-                <Controller
-                  control={form.control}
-                  name="tab_switch_detection"
-                  render={({ field }) => (
-                    <Field
-                      orientation="horizontal"
-                      className="justify-between rounded-lg border p-4"
-                    >
-                      <div className="space-y-0.5">
-                        <FieldLabel>{t('tabSwitchDetection')}</FieldLabel>
-                        <FieldDescription>{t('tabSwitchDetectionDescription')}</FieldDescription>
-                      </div>
-                      <Switch
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </Field>
-                  )}
-                />
-
-                <Controller
-                  control={form.control}
-                  name="devtools_detection"
-                  render={({ field }) => (
-                    <Field
-                      orientation="horizontal"
-                      className="justify-between rounded-lg border p-4"
-                    >
-                      <div className="space-y-0.5">
-                        <FieldLabel>{t('devtoolsDetection')}</FieldLabel>
-                        <FieldDescription>{t('devtoolsDetectionDescription')}</FieldDescription>
-                      </div>
-                      <Switch
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </Field>
-                  )}
-                />
-
-                <Controller
-                  control={form.control}
-                  name="right_click_disable"
-                  render={({ field }) => (
-                    <Field
-                      orientation="horizontal"
-                      className="justify-between rounded-lg border p-4"
-                    >
-                      <div className="space-y-0.5">
-                        <FieldLabel>{t('rightClickDisable')}</FieldLabel>
-                        <FieldDescription>{t('rightClickDisableDescription')}</FieldDescription>
-                      </div>
-                      <Switch
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </Field>
-                  )}
-                />
-
-                <Controller
-                  control={form.control}
-                  name="fullscreen_enforcement"
-                  render={({ field }) => (
-                    <Field
-                      orientation="horizontal"
-                      className="justify-between rounded-lg border p-4"
-                    >
-                      <div className="space-y-0.5">
-                        <FieldLabel>{t('fullscreenEnforcement')}</FieldLabel>
-                        <FieldDescription>{t('fullscreenEnforcementDescription')}</FieldDescription>
-                      </div>
-                      <Switch
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </Field>
-                  )}
-                />
-
-                {anyAntiCheatEnabled && (
-                  <>
-                    <div className="flex items-center justify-between rounded-lg border p-4">
-                      <div className="space-y-0.5">
-                        <FieldLabel>{t('enableViolationThreshold')}</FieldLabel>
-                        <FieldDescription>{t('violationThresholdDescription')}</FieldDescription>
-                      </div>
-                      <Switch
-                        checked={hasViolationThreshold}
-                        onCheckedChange={(checked) => {
-                          form.setValue('violation_threshold', checked ? 3 : null);
-                        }}
-                      />
+              <Controller
+                control={form.control}
+                name="allow_result_review"
+                render={({ field }) => (
+                  <Field
+                    orientation="horizontal"
+                    className="justify-between rounded-lg border p-4"
+                  >
+                    <div className="space-y-0.5">
+                      <FieldLabel>{t('allowResultReview')}</FieldLabel>
+                      <FieldDescription>{t('allowResultReviewDescription')}</FieldDescription>
                     </div>
-
-                    {hasViolationThreshold && (
-                      <Controller
-                        control={form.control}
-                        name="violation_threshold"
-                        render={({ field, fieldState }) => (
-                          <Field>
-                            <FieldLabel htmlFor={field.name}>{t('violationThreshold')}</FieldLabel>
-                            <Input
-                              id={field.name}
-                              type="number"
-                              min={limits?.violation_threshold?.min ?? 1}
-                              max={limits?.violation_threshold?.max ?? 10}
-                              {...field}
-                              value={field.value ?? ''}
-                              onChange={(e) => field.onChange(e.target.value === '' ? null : Number.parseInt(e.target.value, 10))}
-                            />
-                            <FieldDescription>{t('violationThresholdInputDescription')}</FieldDescription>
-                            <FieldError errors={[fieldState.error]} />
-                          </Field>
-                        )}
-                      />
-                    )}
-                  </>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </Field>
                 )}
-              </div>
+              />
+
+              {form.watch('allow_result_review') && (
+                <Controller
+                  control={form.control}
+                  name="show_correct_answers"
+                  render={({ field }) => (
+                    <Field
+                      orientation="horizontal"
+                      className="ml-6 justify-between rounded-lg border p-4"
+                    >
+                      <div className="space-y-0.5">
+                        <FieldLabel>{t('showCorrectAnswers')}</FieldLabel>
+                        <FieldDescription>{t('showCorrectAnswersDescription')}</FieldDescription>
+                      </div>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </Field>
+                  )}
+                />
+              )}
+            </div>
+          </div>
+
+          <Separator />
+
+          {/* Anti-Cheating */}
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-lg font-semibold">{t('antiCheating')}</h3>
+              <p className="text-muted-foreground text-sm">{t('antiCheatingDescription')}</p>
             </div>
 
-            <div className="flex justify-end gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={resetToDefaults}
-              >
-                {t('resetDefaults')}
-              </Button>
-              <Button
-                type="submit"
-                disabled={form.formState.isSubmitting}
-              >
-                {form.formState.isSubmitting ? t('saving') : t('saveSettings')}
-              </Button>
+            <div className="space-y-4">
+              <Controller
+                control={form.control}
+                name="copy_paste_protection"
+                render={({ field }) => (
+                  <Field
+                    orientation="horizontal"
+                    className="justify-between rounded-lg border p-4"
+                  >
+                    <div className="space-y-0.5">
+                      <FieldLabel>{t('copyPasteProtection')}</FieldLabel>
+                      <FieldDescription>{t('copyPasteProtectionDescription')}</FieldDescription>
+                    </div>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </Field>
+                )}
+              />
+
+              <Controller
+                control={form.control}
+                name="tab_switch_detection"
+                render={({ field }) => (
+                  <Field
+                    orientation="horizontal"
+                    className="justify-between rounded-lg border p-4"
+                  >
+                    <div className="space-y-0.5">
+                      <FieldLabel>{t('tabSwitchDetection')}</FieldLabel>
+                      <FieldDescription>{t('tabSwitchDetectionDescription')}</FieldDescription>
+                    </div>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </Field>
+                )}
+              />
+
+              <Controller
+                control={form.control}
+                name="devtools_detection"
+                render={({ field }) => (
+                  <Field
+                    orientation="horizontal"
+                    className="justify-between rounded-lg border p-4"
+                  >
+                    <div className="space-y-0.5">
+                      <FieldLabel>{t('devtoolsDetection')}</FieldLabel>
+                      <FieldDescription>{t('devtoolsDetectionDescription')}</FieldDescription>
+                    </div>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </Field>
+                )}
+              />
+
+              <Controller
+                control={form.control}
+                name="right_click_disable"
+                render={({ field }) => (
+                  <Field
+                    orientation="horizontal"
+                    className="justify-between rounded-lg border p-4"
+                  >
+                    <div className="space-y-0.5">
+                      <FieldLabel>{t('rightClickDisable')}</FieldLabel>
+                      <FieldDescription>{t('rightClickDisableDescription')}</FieldDescription>
+                    </div>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </Field>
+                )}
+              />
+
+              <Controller
+                control={form.control}
+                name="fullscreen_enforcement"
+                render={({ field }) => (
+                  <Field
+                    orientation="horizontal"
+                    className="justify-between rounded-lg border p-4"
+                  >
+                    <div className="space-y-0.5">
+                      <FieldLabel>{t('fullscreenEnforcement')}</FieldLabel>
+                      <FieldDescription>{t('fullscreenEnforcementDescription')}</FieldDescription>
+                    </div>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </Field>
+                )}
+              />
+
+              {anyAntiCheatEnabled && (
+                <>
+                  <div className="flex items-center justify-between rounded-lg border p-4">
+                    <div className="space-y-0.5">
+                      <FieldLabel>{t('enableViolationThreshold')}</FieldLabel>
+                      <FieldDescription>{t('violationThresholdDescription')}</FieldDescription>
+                    </div>
+                    <Switch
+                      checked={hasViolationThreshold}
+                      onCheckedChange={(checked) => {
+                        form.setValue('violation_threshold', checked ? 3 : null);
+                      }}
+                    />
+                  </div>
+
+                  {hasViolationThreshold && (
+                    <Controller
+                      control={form.control}
+                      name="violation_threshold"
+                      render={({ field, fieldState }) => (
+                        <Field>
+                          <FieldLabel htmlFor={field.name}>{t('violationThreshold')}</FieldLabel>
+                          <Input
+                            id={field.name}
+                            type="number"
+                            min={limits?.violation_threshold?.min ?? 1}
+                            max={limits?.violation_threshold?.max ?? 10}
+                            {...field}
+                            value={field.value ?? ''}
+                            onChange={(e) =>
+                              field.onChange(e.target.value === '' ? null : Number.parseInt(e.target.value, 10))
+                            }
+                          />
+                          <FieldDescription>{t('violationThresholdInputDescription')}</FieldDescription>
+                          <FieldError errors={[fieldState.error]} />
+                        </Field>
+                      )}
+                    />
+                  )}
+                </>
+              )}
             </div>
+          </div>
+
+          <div className="flex justify-end gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={resetToDefaults}
+            >
+              {t('resetDefaults')}
+            </Button>
+            <Button
+              type="submit"
+              disabled={form.formState.isSubmitting}
+            >
+              {form.formState.isSubmitting ? t('saving') : t('saveSettings')}
+            </Button>
+          </div>
         </form>
       </CardContent>
     </Card>

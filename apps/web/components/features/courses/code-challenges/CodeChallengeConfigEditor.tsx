@@ -7,7 +7,10 @@ import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
-import { useCodeChallengeSettings, useSaveCodeChallengeSettings } from '@/features/code-challenges/hooks/useCodeChallenge';
+import {
+  useCodeChallengeSettings,
+  useSaveCodeChallengeSettings,
+} from '@/features/code-challenges/hooks/useCodeChallenge';
 import * as v from 'valibot';
 
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -101,7 +104,6 @@ export default function CodeChallengeConfigEditor({ activityUuid, courseId }: Co
 
   // Fetch existing settings
   const { data: existingSettings, isLoading } = useCodeChallengeSettings<ExistingSettings>(activityUuid);
-
 
   const schema = useMemo(() => createConfigFormSchema(t), [t]);
 
@@ -474,9 +476,7 @@ export default function CodeChallengeConfigEditor({ activityUuid, courseId }: Co
                         {t('testCase')} #{index + 1}
                       </span>
                       {visibleTests[index]?.description && (
-                        <span className="text-muted-foreground text-sm">
-                          - {visibleTests[index]?.description}
-                        </span>
+                        <span className="text-muted-foreground text-sm">- {visibleTests[index]?.description}</span>
                       )}
                     </div>
                   </AccordionTrigger>
@@ -598,10 +598,8 @@ export default function CodeChallengeConfigEditor({ activityUuid, courseId }: Co
                         <span>
                           {t('hiddenTest')} #{index + 1}
                         </span>
-                          {hiddenTests[index]?.description && (
-                          <span className="text-muted-foreground text-sm">
-                              - {hiddenTests[index]?.description}
-                          </span>
+                        {hiddenTests[index]?.description && (
+                          <span className="text-muted-foreground text-sm">- {hiddenTests[index]?.description}</span>
                         )}
                       </div>
                     </AccordionTrigger>

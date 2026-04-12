@@ -15,9 +15,7 @@ import type { AccessTokenPayload, Session } from './types';
  * (i.e. key rotation).  Network overhead is effectively zero after the first
  * request per server process.
  */
-const JWKS = createRemoteJWKSet(
-  new URL('auth/.well-known/jwks.json', getServerAPIUrl()),
-);
+const JWKS = createRemoteJWKSet(new URL('auth/.well-known/jwks.json', getServerAPIUrl()));
 
 // ── Session construction ───────────────────────────────────────────────────────
 

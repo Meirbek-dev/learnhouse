@@ -36,16 +36,15 @@ export function ListDropdown({ editor, isBulletList, isOrderedList }: ListDropdo
           </Button>
         }
       />
-      <DropdownMenuContent side="bottom" align="start">
-        <DropdownMenuItem
-          onClick={() => editor.chain().focus().toggleBulletList().run()}
-        >
+      <DropdownMenuContent
+        side="bottom"
+        align="start"
+      >
+        <DropdownMenuItem onClick={() => editor.chain().focus().toggleBulletList().run()}>
           <List className="size-4" />
           <span>{t('listOptions.bulletList')}</span>
         </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => editor.chain().focus().toggleOrderedList().run()}
-        >
+        <DropdownMenuItem onClick={() => editor.chain().focus().toggleOrderedList().run()}>
           <ListOrdered className="size-4" />
           <span>{t('listOptions.orderedList')}</span>
         </DropdownMenuItem>

@@ -48,9 +48,7 @@ export function useEditorInstance(options: UseEditorInstanceOptions) {
     content: resolvedContent,
     immediatelyRender: false,
     editable: tiptapEditable,
-    onUpdate: onUpdate
-      ? ({ editor }) => onUpdate(editor.getJSON())
-      : undefined,
+    onUpdate: onUpdate ? ({ editor }) => onUpdate(editor.getJSON()) : undefined,
     ...overrides,
   });
 }

@@ -85,24 +85,27 @@ function useImageUpload({ activityUuid, onSuccess, t }: UseImageUploadOptions) {
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleFileSelect = useCallback((selectedFile: File | null) => {
-    setError(null);
+  const handleFileSelect = useCallback(
+    (selectedFile: File | null) => {
+      setError(null);
 
-    if (!selectedFile) {
-      setFile(null);
-      setPreview(null);
-      return;
-    }
+      if (!selectedFile) {
+        setFile(null);
+        setPreview(null);
+        return;
+      }
 
-    // Validate file type
-    if (!selectedFile.type.startsWith('image/')) {
-      setError(t('invalidImageFile'));
-      return;
-    }
+      // Validate file type
+      if (!selectedFile.type.startsWith('image/')) {
+        setError(t('invalidImageFile'));
+        return;
+      }
 
-    setFile(selectedFile);
-    setPreview(URL.createObjectURL(selectedFile));
-  }, [t]);
+      setFile(selectedFile);
+      setPreview(URL.createObjectURL(selectedFile));
+    },
+    [t],
+  );
 
   const handleUpload = useCallback(async () => {
     if (!file) return;

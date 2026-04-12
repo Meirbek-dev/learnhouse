@@ -18,9 +18,7 @@ export type SessionStatus = 'loading' | 'authenticated' | 'unauthenticated' | 'e
 
 const AUTH_BROADCAST_CHANNEL = 'auth';
 
-type AuthBroadcastMessage =
-  | { type: 'logout' }
-  | { type: 'session_refresh' };
+type AuthBroadcastMessage = { type: 'logout' } | { type: 'session_refresh' };
 
 // ── Context value ─────────────────────────────────────────────────────────────
 
@@ -79,10 +77,7 @@ function useFullProfile(userId: number | null) {
 
 // ── Cross-tab broadcast listener ──────────────────────────────────────────────
 
-function useSessionBroadcastListener(
-  onLogout: () => void,
-  onSessionRefresh: () => void,
-) {
+function useSessionBroadcastListener(onLogout: () => void, onSessionRefresh: () => void) {
   useEffect(() => {
     if (typeof BroadcastChannel === 'undefined') return;
 
@@ -168,10 +163,7 @@ export function SessionProvider({ children, initialSession = null }: SessionProv
 
   // Lazily build a permission Set so lookup is O(1).  Recomputed only when
   // session.permissions reference changes.
-  const permissionsSet = useMemo(
-    () => new Set<string>(mergedSession?.permissions),
-    [mergedSession?.permissions],
-  );
+  const permissionsSet = useMemo(() => new Set<string>(mergedSession?.permissions), [mergedSession?.permissions]);
 
   const can = useCallback(
     (resource: Resource, action: Action, scope: Scope): boolean => {

@@ -213,7 +213,7 @@ export default function UserRolesClient() {
   }
 
   if (userRolesError || rolesError || usersError) {
-    return <div className="container mx-auto p-6 text-sm text-destructive">{t('loadFailed')}</div>;
+    return <div className="text-destructive container mx-auto p-6 text-sm">{t('loadFailed')}</div>;
   }
 
   return (

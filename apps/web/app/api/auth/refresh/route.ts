@@ -29,9 +29,7 @@ export async function GET(request: NextRequest) {
 
   if (!cookieHeader.includes(`${REFRESH_TOKEN_COOKIE_NAME}=`)) {
     // No refresh token available — redirect to login so the user can re-authenticate.
-    const target = isProtectedRoute(returnTo)
-      ? buildLoginRedirect(returnTo)
-      : getPostAuthRedirect(returnTo);
+    const target = isProtectedRoute(returnTo) ? buildLoginRedirect(returnTo) : getPostAuthRedirect(returnTo);
     return clearAuthCookies(NextResponse.redirect(new URL(target, request.url)));
   }
 
@@ -44,9 +42,7 @@ export async function GET(request: NextRequest) {
 
   if (!response.ok) {
     // Refresh rejected (revoked session, expired hard cap, etc.) — send to login.
-    const target = isProtectedRoute(returnTo)
-      ? buildLoginRedirect(returnTo)
-      : getPostAuthRedirect(returnTo);
+    const target = isProtectedRoute(returnTo) ? buildLoginRedirect(returnTo) : getPostAuthRedirect(returnTo);
     return clearAuthCookies(NextResponse.redirect(new URL(target, request.url)));
   }
 

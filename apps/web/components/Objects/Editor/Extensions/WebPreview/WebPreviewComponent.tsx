@@ -143,19 +143,22 @@ const WebPreviewComponent = ({ node, updateAttributes, deleteNode }: WebPreviewP
     enabled: shouldAutoFetchPreview,
   });
 
-  const applyPreviewData = useCallback((url: string, data: UrlPreviewResponse) => {
-    const hasMinimalMetadata = !(data.title || data.description || data.og_image);
+  const applyPreviewData = useCallback(
+    (url: string, data: UrlPreviewResponse) => {
+      const hasMinimalMetadata = !(data.title || data.description || data.og_image);
 
-    if (hasMinimalMetadata) {
-      toast.error(t('metadataIncomplete'), {
-        duration: 4000,
-      });
-    }
+      if (hasMinimalMetadata) {
+        toast.error(t('metadataIncomplete'), {
+          duration: 4000,
+        });
+      }
 
-    updateAttributes({ ...data, url });
-    setEditing(false);
-    setError(null);
-  }, [t, updateAttributes]);
+      updateAttributes({ ...data, url });
+      setEditing(false);
+      setError(null);
+    },
+    [t, updateAttributes],
+  );
 
   const fetchPreviewMutation = useMutation({
     mutationFn: async (url: string) => queryClient.fetchQuery(urlPreviewQueryOptions(url)),

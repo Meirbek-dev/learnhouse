@@ -209,14 +209,14 @@ const NewUpdateForm = ({ setSelectedView }: any) => {
                 >
                   {t('title')}
                 </FieldLabel>
-                  <FieldContent>
-                    <Input
-                      {...field}
-                      id={field.name}
-                      style={{ backgroundColor: 'white' }}
-                      type="text"
-                    />
-                  </FieldContent>
+                <FieldContent>
+                  <Input
+                    {...field}
+                    id={field.name}
+                    style={{ backgroundColor: 'white' }}
+                    type="text"
+                  />
+                </FieldContent>
                 <FieldError errors={[fieldState.error]} />
               </Field>
             )}
@@ -232,13 +232,13 @@ const NewUpdateForm = ({ setSelectedView }: any) => {
                 >
                   {t('content')}
                 </FieldLabel>
-                  <FieldContent>
-                    <Textarea
-                      {...field}
-                      id={field.name}
-                      style={{ backgroundColor: 'white', height: '100px' }}
-                    />
-                  </FieldContent>
+                <FieldContent>
+                  <Textarea
+                    {...field}
+                    id={field.name}
+                    style={{ backgroundColor: 'white', height: '100px' }}
+                  />
+                </FieldContent>
                 <FieldError errors={[fieldState.error]} />
               </Field>
             )}

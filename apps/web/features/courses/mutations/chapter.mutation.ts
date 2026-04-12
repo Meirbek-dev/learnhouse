@@ -83,9 +83,7 @@ export function deleteChapterMutationOptions(queryClient: QueryClient, structure
         current
           ? {
               ...current,
-              chapters: (current.chapters ?? []).filter(
-                (chapter: any) => chapter.chapter_uuid !== chapterUuid,
-              ),
+              chapters: (current.chapters ?? []).filter((chapter: any) => chapter.chapter_uuid !== chapterUuid),
             }
           : current,
       );

@@ -89,146 +89,146 @@ export default function CodeChallengeActivityModal({
         onSubmit={form.handleSubmit(handleSubmit)}
         className="space-y-4"
       >
+        <Controller
+          control={form.control}
+          name="name"
+          render={({ field, fieldState }) => (
+            <Field>
+              <FieldLabel htmlFor={field.name}>{t('name')}</FieldLabel>
+              <FieldContent>
+                <Input
+                  id={field.name}
+                  placeholder={t('namePlaceholder')}
+                  {...field}
+                />
+              </FieldContent>
+              <FieldError errors={[fieldState.error]} />
+            </Field>
+          )}
+        />
+
+        <Controller
+          control={form.control}
+          name="description"
+          render={({ field, fieldState }) => (
+            <Field>
+              <FieldLabel htmlFor={field.name}>{t('description')}</FieldLabel>
+              <FieldContent>
+                <Textarea
+                  id={field.name}
+                  placeholder={t('descriptionPlaceholder')}
+                  className="min-h-24"
+                  {...field}
+                />
+              </FieldContent>
+              <FieldDescription>{t('descriptionHint')}</FieldDescription>
+              <FieldError errors={[fieldState.error]} />
+            </Field>
+          )}
+        />
+
+        <div className="grid gap-4 md:grid-cols-2">
           <Controller
             control={form.control}
-            name="name"
-            render={({ field, fieldState }) => (
-              <Field>
-                <FieldLabel htmlFor={field.name}>{t('name')}</FieldLabel>
-                <FieldContent>
-                  <Input
-                    id={field.name}
-                    placeholder={t('namePlaceholder')}
-                    {...field}
-                  />
-                </FieldContent>
-                <FieldError errors={[fieldState.error]} />
-              </Field>
-            )}
+            name="difficulty"
+            render={({ field, fieldState }) => {
+              const difficultyItems = [
+                { value: 'easy', label: t('difficultyEasy') },
+                { value: 'medium', label: t('difficultyMedium') },
+                { value: 'hard', label: t('difficultyHard') },
+              ];
+
+              return (
+                <Field>
+                  <FieldLabel>{t('difficulty')}</FieldLabel>
+                  <Select
+                    items={difficultyItems}
+                    value={field.value}
+                    onValueChange={field.onChange}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={t('selectDifficulty')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        {difficultyItems.map((item) => (
+                          <SelectItem
+                            key={item.value}
+                            value={item.value}
+                          >
+                            {item.label}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                  <FieldError errors={[fieldState.error]} />
+                </Field>
+              );
+            }}
           />
 
           <Controller
             control={form.control}
-            name="description"
-            render={({ field, fieldState }) => (
-              <Field>
-                <FieldLabel htmlFor={field.name}>{t('description')}</FieldLabel>
-                <FieldContent>
-                  <Textarea
-                    id={field.name}
-                    placeholder={t('descriptionPlaceholder')}
-                    className="min-h-24"
-                    {...field}
-                  />
-                </FieldContent>
-                <FieldDescription>{t('descriptionHint')}</FieldDescription>
-                <FieldError errors={[fieldState.error]} />
-              </Field>
-            )}
+            name="subtype"
+            render={({ field, fieldState }) => {
+              const subtypeItems = [
+                { value: 'general', label: t('typeGeneral') },
+                { value: 'competitive', label: t('typeCompetitive') },
+              ];
+
+              return (
+                <Field>
+                  <FieldLabel>{t('type')}</FieldLabel>
+                  <Select
+                    items={subtypeItems}
+                    value={field.value}
+                    onValueChange={field.onChange}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={t('selectType')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        {subtypeItems.map((item) => (
+                          <SelectItem
+                            key={item.value}
+                            value={item.value}
+                          >
+                            {item.label}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                  <FieldDescription>
+                    {field.value === 'competitive' ? t('typeCompetitiveHint') : t('typeGeneralHint')}
+                  </FieldDescription>
+                  <FieldError errors={[fieldState.error]} />
+                </Field>
+              );
+            }}
           />
+        </div>
 
-          <div className="grid gap-4 md:grid-cols-2">
-            <Controller
-              control={form.control}
-              name="difficulty"
-              render={({ field, fieldState }) => {
-                const difficultyItems = [
-                  { value: 'easy', label: t('difficultyEasy') },
-                  { value: 'medium', label: t('difficultyMedium') },
-                  { value: 'hard', label: t('difficultyHard') },
-                ];
-
-                return (
-                  <Field>
-                    <FieldLabel>{t('difficulty')}</FieldLabel>
-                    <Select
-                      items={difficultyItems}
-                      value={field.value}
-                      onValueChange={field.onChange}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder={t('selectDifficulty')} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          {difficultyItems.map((item) => (
-                            <SelectItem
-                              key={item.value}
-                              value={item.value}
-                            >
-                              {item.label}
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                    <FieldError errors={[fieldState.error]} />
-                  </Field>
-                );
-              }}
-            />
-
-            <Controller
-              control={form.control}
-              name="subtype"
-              render={({ field, fieldState }) => {
-                const subtypeItems = [
-                  { value: 'general', label: t('typeGeneral') },
-                  { value: 'competitive', label: t('typeCompetitive') },
-                ];
-
-                return (
-                  <Field>
-                    <FieldLabel>{t('type')}</FieldLabel>
-                    <Select
-                      items={subtypeItems}
-                      value={field.value}
-                      onValueChange={field.onChange}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder={t('selectType')} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          {subtypeItems.map((item) => (
-                            <SelectItem
-                              key={item.value}
-                              value={item.value}
-                            >
-                              {item.label}
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                    <FieldDescription>
-                      {field.value === 'competitive' ? t('typeCompetitiveHint') : t('typeGeneralHint')}
-                    </FieldDescription>
-                    <FieldError errors={[fieldState.error]} />
-                  </Field>
-                );
-              }}
-            />
-          </div>
-
-          <div className="flex justify-end gap-2 pt-4">
-            {closeModal && (
-              <Button
-                type="button"
-                variant="outline"
-                onClick={closeModal}
-              >
-                {t('cancel')}
-              </Button>
-            )}
+        <div className="flex justify-end gap-2 pt-4">
+          {closeModal && (
             <Button
-              type="submit"
-              disabled={form.formState.isSubmitting}
+              type="button"
+              variant="outline"
+              onClick={closeModal}
             >
-              {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {t('create')}
+              {t('cancel')}
             </Button>
-          </div>
+          )}
+          <Button
+            type="submit"
+            disabled={form.formState.isSubmitting}
+          >
+            {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {t('create')}
+          </Button>
+        </div>
       </form>
     </div>
   );

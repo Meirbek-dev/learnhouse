@@ -114,7 +114,9 @@
   text-underline-offset: 3px;
   text-decoration-thickness: 1px;
   cursor: pointer;
-  transition: text-decoration-color 0.15s ease, color 0.15s ease;
+  transition:
+    text-decoration-color 0.15s ease,
+    color 0.15s ease;
 }
 
 .ProseMirror a:hover {
@@ -143,11 +145,11 @@
   margin-bottom: 0.35rem;
 }
 
-.ProseMirror li>p {
+.ProseMirror li > p {
   margin-bottom: 0.35rem;
 }
 
-.ProseMirror li>p:last-child {
+.ProseMirror li > p:last-child {
   margin-bottom: 0;
 }
 
@@ -307,8 +309,8 @@
   color: var(--muted-foreground);
 }
 
-.ProseMirror td>*,
-.ProseMirror th>* {
+.ProseMirror td > *,
+.ProseMirror th > * {
   margin-bottom: 0;
 }
 
@@ -414,7 +416,7 @@
   align-items: start;
 }
 
-.prosemirror-interactive-layout> :first-child:not(:empty) {
+.prosemirror-interactive-layout > :first-child:not(:empty) {
   position: sticky;
   top: 2rem;
   align-self: flex-start;
@@ -423,15 +425,15 @@
   padding-right: 0.25rem;
 }
 
-.prosemirror-interactive-layout> :last-child {
+.prosemirror-interactive-layout > :last-child {
   min-width: 0;
 }
 
-.prosemirror-interactive-layout> :first-child:empty {
+.prosemirror-interactive-layout > :first-child:empty {
   display: none;
 }
 
-.prosemirror-interactive-layout> :first-child:empty+* {
+.prosemirror-interactive-layout > :first-child:empty + * {
   width: 100%;
 }
 

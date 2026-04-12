@@ -1,21 +1,11 @@
 'use client';
 
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from '@/components/ui/command';
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { useTranslations } from 'next-intl';
 import { useEditorState } from '@tiptap/react';
 import type { Editor } from '@tiptap/react';
 import { useEffect, useMemo, useRef } from 'react';
-import {
-  closeSlashCommand,
-  type SlashCommandState,
-} from '../core/slash-command';
+import { closeSlashCommand, type SlashCommandState } from '../core/slash-command';
 import { createInsertItems, INSERT_CATEGORY_LABELS } from './insert-items';
 
 type SlashItem = ReturnType<typeof createInsertItems>[number];
@@ -64,9 +54,7 @@ export function SlashCommandMenu({ editor }: SlashCommandMenuProps) {
   const query = slashState.query.toLowerCase();
   const filteredItems = query
     ? slashItems.filter(
-        (item) =>
-          item.label.toLowerCase().includes(query) ||
-          item.description.toLowerCase().includes(query),
+        (item) => item.label.toLowerCase().includes(query) || item.description.toLowerCase().includes(query),
       )
     : slashItems;
 
@@ -89,9 +77,7 @@ export function SlashCommandMenu({ editor }: SlashCommandMenuProps) {
   // Clamp position to viewport
   const viewportHeight = typeof window !== 'undefined' ? window.innerHeight : 800;
   const menuHeight = 360;
-  const top = coords.bottom + menuHeight > viewportHeight
-    ? coords.top - menuHeight - 4
-    : coords.bottom + 4;
+  const top = coords.bottom + menuHeight > viewportHeight ? coords.top - menuHeight - 4 : coords.bottom + 4;
 
   return (
     <div
@@ -103,7 +89,7 @@ export function SlashCommandMenu({ editor }: SlashCommandMenuProps) {
         zIndex: 50,
       }}
     >
-      <Command className="w-80 rounded-lg border border-border bg-popover shadow-lg">
+      <Command className="border-border bg-popover w-80 rounded-lg border shadow-lg">
         <CommandInput
           placeholder={t('slashSearchPlaceholder')}
           value={slashState.query}
@@ -112,19 +98,22 @@ export function SlashCommandMenu({ editor }: SlashCommandMenuProps) {
         <CommandList className="max-h-[320px]">
           <CommandEmpty>{t('slashNoResults')}</CommandEmpty>
           {groups.map((group) => (
-            <CommandGroup key={group.category} heading={t(INSERT_CATEGORY_LABELS[group.category])}>
+            <CommandGroup
+              key={group.category}
+              heading={t(INSERT_CATEGORY_LABELS[group.category])}
+            >
               {group.items.map((item) => (
                 <CommandItem
                   key={item.id}
                   onSelect={() => runCommand(item)}
-                  className="flex cursor-pointer items-center gap-2.5 rounded-xl border border-transparent px-2 py-1.5 transition-colors hover:border-border/70 hover:bg-accent/70 hover:text-foreground data-selected:border-border/70 data-selected:bg-accent data-selected:text-foreground"
+                  className="hover:border-border/70 hover:bg-accent/70 hover:text-foreground data-selected:border-border/70 data-selected:bg-accent data-selected:text-foreground flex cursor-pointer items-center gap-2.5 rounded-xl border border-transparent px-2 py-1.5 transition-colors"
                 >
-                  <span className="flex size-8 shrink-0 items-center justify-center rounded-lg border border-border/70 bg-muted/70 text-muted-foreground transition-colors group-hover/command-item:border-primary/20 group-hover/command-item:bg-background group-hover/command-item:text-foreground group-data-selected/command-item:border-primary/25 group-data-selected/command-item:bg-background group-data-selected/command-item:text-foreground">
+                  <span className="border-border/70 bg-muted/70 text-muted-foreground group-hover/command-item:border-primary/20 group-hover/command-item:bg-background group-hover/command-item:text-foreground group-data-selected/command-item:border-primary/25 group-data-selected/command-item:bg-background group-data-selected/command-item:text-foreground flex size-8 shrink-0 items-center justify-center rounded-lg border transition-colors">
                     {item.icon}
                   </span>
-                  <div className="flex flex-col gap-0.5 min-w-0">
+                  <div className="flex min-w-0 flex-col gap-0.5">
                     <span className="text-sm font-medium">{item.label}</span>
-                    <span className="text-xs text-muted-foreground truncate">{item.description}</span>
+                    <span className="text-muted-foreground truncate text-xs">{item.description}</span>
                   </div>
                 </CommandItem>
               ))}

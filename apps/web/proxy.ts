@@ -15,8 +15,7 @@ import { generateUUID } from './lib/utils';
  * If neither env var is set, JWKS_URL is null and the proxy falls back to
  * expiry-only checking (no signature verification).
  */
-const _rawApiUrl: string =
-  process.env.INTERNAL_API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? '';
+const _rawApiUrl: string = process.env.INTERNAL_API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? '';
 
 const JWKS_URL: URL | null = _rawApiUrl
   ? new URL('auth/.well-known/jwks.json', _rawApiUrl.endsWith('/') ? _rawApiUrl : `${_rawApiUrl}/`)
@@ -96,12 +95,7 @@ function rewriteWithHeaders(req: NextRequest, requestId: string, pathname: strin
   );
 }
 
-function redirectToRefresh(
-  req: NextRequest,
-  requestId: string,
-  pathname: string,
-  search: string,
-) {
+function redirectToRefresh(req: NextRequest, requestId: string, pathname: string, search: string) {
   const refreshUrl = new URL(AUTH_REFRESH_BRIDGE_PATH, req.url);
   refreshUrl.searchParams.set('returnTo', pathname + search);
   return withRequestId(NextResponse.redirect(refreshUrl), requestId);
@@ -170,9 +164,7 @@ export default async function proxy(req: NextRequest) {
     return rewriteWithHeaders(req, requestId, `${authRewrite}${search}`);
   }
 
-  const isProtected =
-    PROTECTED_PREFIXES.some((prefix) => pathname.startsWith(prefix)) ||
-    EDITOR_PATH_RE.test(pathname);
+  const isProtected = PROTECTED_PREFIXES.some((prefix) => pathname.startsWith(prefix)) || EDITOR_PATH_RE.test(pathname);
   if (isProtected) {
     // No token at all → go to refresh bridge
     if (!accessToken) {

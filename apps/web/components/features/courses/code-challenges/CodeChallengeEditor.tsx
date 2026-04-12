@@ -99,16 +99,12 @@ export function CodeChallengeEditor({
   const isRunning = runCustomTestMutation.isPending || runCodeChallengeTestsMutation.isPending;
 
   // Fetch submissions history
-  const {
-    data: submissions,
-    refetch: refreshSubmissions,
-  } = useCodeChallengeSubmissions<Submission>(activityUuid);
+  const { data: submissions, refetch: refreshSubmissions } = useCodeChallengeSubmissions<Submission>(activityUuid);
 
   // Poll for active submission status
-  const { data: activeSubmission } = useCodeChallengeSubmission<Submission>(
-    activeSubmissionId,
-    { refetchInterval: activeSubmissionId ? 1000 : false },
-  );
+  const { data: activeSubmission } = useCodeChallengeSubmission<Submission>(activeSubmissionId, {
+    refetchInterval: activeSubmissionId ? 1000 : false,
+  });
 
   // Handle submission completion
   useEffect(() => {

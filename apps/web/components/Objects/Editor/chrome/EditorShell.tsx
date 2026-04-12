@@ -7,9 +7,5 @@ interface EditorShellProps {
 }
 
 export function EditorShell({ children }: EditorShellProps) {
-  return (
-    <div className="flex h-screen w-full flex-col bg-background">
-      {children}
-    </div>
-  );
+  return <div className="bg-background flex h-screen w-full flex-col">{children}</div>;
 }

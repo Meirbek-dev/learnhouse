@@ -69,28 +69,16 @@ export default function ExamActivity({ activity, course }: ExamActivityProps) {
   const isTeacher = contributorStatus === 'ACTIVE';
 
   // Fetch exam data
-  const {
-    data: exam,
-    error: examError,
-    refetch: mutateExam,
-  } = useExamActivity(activity.activity_uuid);
+  const { data: exam, error: examError, refetch: mutateExam } = useExamActivity(activity.activity_uuid);
 
   // Safe exam uuid reference to avoid accessing property on undefined
   const examUuid = exam?.exam_uuid ?? null;
 
   // Fetch questions
-  const {
-    data: questions,
-    error: questionsError,
-    refetch: mutateQuestions,
-  } = useExamQuestions(examUuid);
+  const { data: questions, error: questionsError, refetch: mutateQuestions } = useExamQuestions(examUuid);
 
   // Fetch user's attempts (fetch for both students and teachers now)
-  const {
-    data: userAttempts,
-    error: attemptsError,
-    refetch: mutateAttempts,
-  } = useExamMyAttempts(examUuid);
+  const { data: userAttempts, error: attemptsError, refetch: mutateAttempts } = useExamMyAttempts(examUuid);
 
   // Fetch all attempts for teachers
   const { data: allAttempts } = useExamAllAttempts(examUuid, { enabled: isTeacher });
@@ -165,9 +153,7 @@ export default function ExamActivity({ activity, course }: ExamActivityProps) {
       console.warn('Failed to revalidate course meta after exam completion', error);
     }
 
-    const completedAttempt = examUuid
-      ? await queryClient.fetchQuery(examMyAttemptsQueryOptions(examUuid))
-      : [];
+    const completedAttempt = examUuid ? await queryClient.fetchQuery(examMyAttemptsQueryOptions(examUuid)) : [];
 
     const lastAttempt = completedAttempt[0];
     dispatch(examActions.submitExam(lastAttempt));

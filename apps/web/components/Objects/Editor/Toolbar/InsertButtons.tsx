@@ -4,12 +4,7 @@ import type { Editor } from '@tiptap/react';
 import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { createInsertItems, INSERT_CATEGORY_LABELS } from './insert-items';
 
 interface InsertButtonsProps {
@@ -31,9 +26,12 @@ export function InsertButtons({ editor }: InsertButtonsProps) {
     <TooltipProvider delay={150}>
       <div className="flex flex-wrap items-center gap-1">
         {groups.map((group, index) => (
-          <div key={group.category} className="flex items-center gap-1">
+          <div
+            key={group.category}
+            className="flex items-center gap-1"
+          >
             <div
-              className="flex flex-wrap items-center gap-1 rounded-xl border border-border/70 bg-muted/30 px-1 py-1"
+              className="border-border/70 bg-muted/30 flex flex-wrap items-center gap-1 rounded-xl border px-1 py-1"
               role="group"
               aria-label={t(INSERT_CATEGORY_LABELS[group.category])}
             >
@@ -63,7 +61,12 @@ export function InsertButtons({ editor }: InsertButtonsProps) {
                 </Tooltip>
               ))}
             </div>
-            {index < groups.length - 1 ? <Separator orientation="vertical" className="mx-1 h-6" /> : null}
+            {index < groups.length - 1 ? (
+              <Separator
+                orientation="vertical"
+                className="mx-1 h-6"
+              />
+            ) : null}
           </div>
         ))}
       </div>

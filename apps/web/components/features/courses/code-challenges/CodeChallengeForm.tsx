@@ -412,7 +412,9 @@ export function CodeChallengeForm({ activityUuid, initialData, onSubmit, onCance
                         max={30_000}
                         {...field}
                         value={field.value ?? ''}
-                        onChange={(e) => field.onChange(e.target.value === '' ? undefined : Number.parseInt(e.target.value, 10))}
+                        onChange={(e) =>
+                          field.onChange(e.target.value === '' ? undefined : Number.parseInt(e.target.value, 10))
+                        }
                       />
                     </FieldContent>
                     <FieldDescription>{t('form.timeLimitHint')}</FieldDescription>
@@ -434,7 +436,9 @@ export function CodeChallengeForm({ activityUuid, initialData, onSubmit, onCance
                         max={2_097_152}
                         {...field}
                         value={field.value ?? ''}
-                        onChange={(e) => field.onChange(e.target.value === '' ? undefined : Number.parseInt(e.target.value, 10))}
+                        onChange={(e) =>
+                          field.onChange(e.target.value === '' ? undefined : Number.parseInt(e.target.value, 10))
+                        }
                       />
                     </FieldContent>
                     <FieldDescription>{t('form.memoryLimitHint')}</FieldDescription>
@@ -575,7 +579,11 @@ export function CodeChallengeForm({ activityUuid, initialData, onSubmit, onCance
                                 max={10_000}
                                 {...field}
                                 value={field.value ?? ''}
-                                onChange={(e) => field.onChange(e.target.value === '' ? undefined : Number.parseInt(e.target.value, 10))}
+                                onChange={(e) =>
+                                  field.onChange(
+                                    e.target.value === '' ? undefined : Number.parseInt(e.target.value, 10),
+                                  )
+                                }
                               />
                             </FieldContent>
                             <FieldError errors={[fieldState.error]} />
@@ -826,7 +834,11 @@ export function CodeChallengeForm({ activityUuid, initialData, onSubmit, onCance
                                     max={100}
                                     {...field}
                                     value={field.value ?? ''}
-                                    onChange={(e) => field.onChange(e.target.value === '' ? undefined : Number.parseInt(e.target.value, 10))}
+                                    onChange={(e) =>
+                                      field.onChange(
+                                        e.target.value === '' ? undefined : Number.parseInt(e.target.value, 10),
+                                      )
+                                    }
                                   />
                                 </FieldContent>
                                 <FieldDescription>%</FieldDescription>

@@ -77,7 +77,7 @@ function getSignupCode(payload: unknown): string | undefined {
     return undefined;
   }
 
-  const {detail} = payload;
+  const { detail } = payload;
   if (typeof detail !== 'object' || detail === null || !('code' in detail)) {
     return undefined;
   }
@@ -108,10 +108,14 @@ export async function loginAction(input: LoginActionInput): Promise<AuthActionRe
   const requestHeaders = await headers();
   let response: Response;
   try {
-    response = await postAuthJson('auth/login', {
-      email: input.email.trim().toLowerCase(),
-      password: input.password,
-    }, requestHeaders);
+    response = await postAuthJson(
+      'auth/login',
+      {
+        email: input.email.trim().toLowerCase(),
+        password: input.password,
+      },
+      requestHeaders,
+    );
   } catch {
     return { ok: false, reason: 'service_unavailable' };
   }
@@ -131,7 +135,9 @@ export async function signupAction(input: SignupActionInput): Promise<AuthAction
   const base = `${input.firstName.toLowerCase()}.${input.lastName.toLowerCase()}`
     .replace(/[^a-z0-9.]/g, '')
     .slice(0, 20);
-  const suffix = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
+  const suffix = Math.floor(Math.random() * 10000)
+    .toString()
+    .padStart(4, '0');
   const username = `${base}.${suffix}`;
   let signupResponse: Response;
   try {

@@ -59,7 +59,10 @@ export function AuthoringEditor(props: AuthoringEditorProps) {
       <div className="bg-muted flex h-screen w-full items-center justify-center p-4">
         <div className="rounded-lg bg-white p-6 text-center shadow-md">
           <h2 className="mb-4 text-xl font-bold">{t('mobileTitle')}</h2>
-          <Monitor className="mx-auto my-5" size={60} />
+          <Monitor
+            className="mx-auto my-5"
+            size={60}
+          />
           <p>{t('mobileMessage1')}</p>
           <p>{t('mobileMessage2')}</p>
         </div>
@@ -82,14 +85,17 @@ export function AuthoringEditor(props: AuthoringEditorProps) {
           />
 
           {/* Sticky toolbar */}
-          <div className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+          <div className="border-border bg-background/95 supports-[backdrop-filter]:bg-background/80 sticky top-0 z-40 border-b backdrop-blur">
             <div className="px-3">
-              <EditorToolbar editor={editor} onAIToggle={() => setIsAIOpen((prev) => !prev)} />
+              <EditorToolbar
+                editor={editor}
+                onAIToggle={() => setIsAIOpen((prev) => !prev)}
+              />
             </div>
           </div>
 
           {/* Content area */}
-          <div className="prosemirror-authoring flex-1 overflow-y-auto bg-background">
+          <div className="prosemirror-authoring bg-background flex-1 overflow-y-auto">
             <div className="py-6">
               {editor ? (
                 <>

@@ -25,7 +25,11 @@ const CertificatePage: React.FC<CertificatePageProps> = ({ courseid, qrCodeLink 
   const certificateQuery = useUserCertificateByCourse(normalizedCourseId);
   const userCertificate = certificateQuery.data?.data?.[0] ?? null;
   const isLoading = certificateQuery.isPending;
-  const certificateError = certificateQuery.error ? t('error') : !isLoading && !userCertificate ? t('noCertificate') : null;
+  const certificateError = certificateQuery.error
+    ? t('error')
+    : !isLoading && !userCertificate
+      ? t('noCertificate')
+      : null;
 
   // Certificate type translation helper
   const getCertificationTypeLabel = (type: string): string => {

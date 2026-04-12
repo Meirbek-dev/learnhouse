@@ -207,7 +207,7 @@ const EditCourseContributors = () => {
           avatar_url: user.avatar_image ? getUserAvatarMediaDirectory(user.user_uuid, user.avatar_image) : '',
         }))
       : [];
-  const searchResults: SearchUser[] = hasSearchQuery ? searchResultsOverride ?? fetchedSearchResults : [];
+  const searchResults: SearchUser[] = hasSearchQuery ? (searchResultsOverride ?? fetchedSearchResults) : [];
 
   const isDirtyRef = useRef(false);
   isDirtyRef.current =

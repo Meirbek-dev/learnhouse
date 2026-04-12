@@ -11,11 +11,7 @@ const UserCertificates: React.FC = () => {
   const format = useFormatter();
   const t = useTranslations('Certificates.UserCertificates');
 
-  const {
-    data: certificates,
-    error,
-    isLoading,
-  } = useUserCertificates();
+  const { data: certificates, error, isLoading } = useUserCertificates();
 
   if (isLoading) {
     return (

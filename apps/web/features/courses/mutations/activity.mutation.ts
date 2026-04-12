@@ -15,13 +15,8 @@ import { assertSuccess } from '@/lib/api/assertSuccess';
 
 export function updateActivityMutationOptions(queryClient: QueryClient, structureKey: readonly unknown[]) {
   return mutationOptions({
-    mutationFn: async ({
-      activityUuid,
-      payload,
-    }: {
-      activityUuid: string;
-      payload: Partial<ActivityUpdateValues>;
-    }) => assertSuccess(await updateActivity(payload, activityUuid)),
+    mutationFn: async ({ activityUuid, payload }: { activityUuid: string; payload: Partial<ActivityUpdateValues> }) =>
+      assertSuccess(await updateActivity(payload, activityUuid)),
     onMutate: async ({ activityUuid, payload }) => {
       const activityKey = courseKeys.activity(activityUuid);
 
@@ -57,7 +52,11 @@ export function updateActivityMutationOptions(queryClient: QueryClient, structur
       queryClient.setQueryData(structureKey, context.previousStructure);
       queryClient.setQueryData(context.activityKey, context.previousActivity);
     },
-    onSettled: async (_data: unknown, _error: unknown, variables: { activityUuid: string; payload: Partial<ActivityUpdateValues> }) => {
+    onSettled: async (
+      _data: unknown,
+      _error: unknown,
+      variables: { activityUuid: string; payload: Partial<ActivityUpdateValues> },
+    ) => {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: structureKey }),
         queryClient.invalidateQueries({ queryKey: courseKeys.activity(variables.activityUuid) }),

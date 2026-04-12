@@ -149,4 +149,7 @@ export async function updatePassword(userId: number, data: unknown): Promise<Res
   };
 }
 
-export { useUserByIdQuery as useUserById, useUserByUsernameQuery as useUserByUsername } from '@/features/users/hooks/useUsers';
+export {
+  useUserByIdQuery as useUserById,
+  useUserByUsernameQuery as useUserByUsername,
+} from '@/features/users/hooks/useUsers';

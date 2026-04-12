@@ -89,7 +89,9 @@ export default function WhitelistManagement({
 
   const handleSaveWhitelist = async () => {
     try {
-      const latestExamData = (examData ?? (await refetchExam()).data) as { settings?: Record<string, unknown> } | undefined;
+      const latestExamData = (examData ?? (await refetchExam()).data) as
+        | { settings?: Record<string, unknown> }
+        | undefined;
 
       if (!latestExamData) throw new Error('Failed to fetch exam settings');
       const existingSettings = latestExamData.settings || {};

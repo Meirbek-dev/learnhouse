@@ -87,15 +87,11 @@ describe('Schema JSON round-trip', () => {
           content: [
             {
               type: 'listItem',
-              content: [
-                { type: 'paragraph', content: [{ type: 'text', text: 'Item one' }] },
-              ],
+              content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Item one' }] }],
             },
             {
               type: 'listItem',
-              content: [
-                { type: 'paragraph', content: [{ type: 'text', text: 'Item two' }] },
-              ],
+              content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Item two' }] }],
             },
           ],
         },
@@ -123,9 +119,7 @@ describe('Schema JSON round-trip', () => {
     const result = roundTrip(doc) as typeof doc;
     // Marks may be reordered by ProseMirror; just check both are present
     type DocShape = { content?: Array<{ content?: Array<{ marks?: Array<{ type: string }> }> }> };
-    const marks = ((result as DocShape).content?.[0]?.content?.[0]?.marks ?? []).map(
-      (m) => m.type,
-    );
+    const marks = ((result as DocShape).content?.[0]?.content?.[0]?.marks ?? []).map((m) => m.type);
     expect(marks).toContain('bold');
     expect(marks).toContain('italic');
   });

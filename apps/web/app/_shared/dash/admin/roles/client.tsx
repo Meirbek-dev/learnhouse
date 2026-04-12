@@ -101,11 +101,7 @@ export default function RBACAdminClient() {
     );
   }, [session.session?.roles]);
 
-  const {
-    data: permissions = [],
-    isLoading: permissionsLoading,
-    error: permissionsError,
-  } = usePlatformPermissions();
+  const { data: permissions = [], isLoading: permissionsLoading, error: permissionsError } = usePlatformPermissions();
   const { data: fetchedRoles = [], isLoading: loadingRoles, error: rolesError, refetch: refetchRoles } = useRoles();
   const auditLogQuery = useRoleAuditLog(auditPage, 20, {
     enabled: activeTab === 'audit',
@@ -168,7 +164,7 @@ export default function RBACAdminClient() {
   };
 
   useEffect(() => {
-     const sortedRoles = fetchedRoles
+    const sortedRoles = fetchedRoles
       .toSorted((a, b) => {
         const aSystem = a.is_system ? 0 : 1;
         const bSystem = b.is_system ? 0 : 1;

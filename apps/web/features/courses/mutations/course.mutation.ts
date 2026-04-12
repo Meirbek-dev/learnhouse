@@ -64,13 +64,7 @@ export function updateCourseMetadataMutationOptions(
   detailKey: readonly unknown[],
 ) {
   return mutationOptions({
-    mutationFn: async ({
-      options,
-      payload,
-    }: {
-      options: MutationOptions;
-      payload: Partial<CourseGeneralValues>;
-    }) =>
+    mutationFn: async ({ options, payload }: { options: MutationOptions; payload: Partial<CourseGeneralValues> }) =>
       assertSuccess(
         await updateCourseMetadata(courseUuid, payload, {
           lastKnownUpdateDate: options.lastKnownUpdateDate,
@@ -178,9 +172,7 @@ export function addCourseContributorsMutationOptions(courseUuid: string, queryCl
         queryClient.setQueryData(editorBundleKey, (current: CourseEditorBundle | undefined) => {
           if (!current) return current;
           const existingContributors = current.contributors.data ?? [];
-          const existingUsernames = new Set(
-            existingContributors.map((contributor: any) => contributor.user?.username),
-          );
+          const existingUsernames = new Set(existingContributors.map((contributor: any) => contributor.user?.username));
           const optimisticContributors = users
             .filter((user) => !existingUsernames.has(user.username))
             .map((user) => buildOptimisticContributor(user));
@@ -277,21 +269,9 @@ export function updateCourseContributorMutationOptions(courseUuid: string, query
 
 export function removeCourseContributorsMutationOptions(courseUuid: string, queryClient: QueryClient) {
   return mutationOptions({
-    mutationFn: async ({
-      usernames,
-    }: {
-      options: MutationOptions;
-      userIds: number[];
-      usernames: string[];
-    }) => assertSuccess(await bulkRemoveContributors(courseUuid, usernames)),
-    onMutate: async ({
-      userIds,
-      usernames,
-    }: {
-      options: MutationOptions;
-      userIds: number[];
-      usernames: string[];
-    }) => {
+    mutationFn: async ({ usernames }: { options: MutationOptions; userIds: number[]; usernames: string[] }) =>
+      assertSuccess(await bulkRemoveContributors(courseUuid, usernames)),
+    onMutate: async ({ userIds, usernames }: { options: MutationOptions; userIds: number[]; usernames: string[] }) => {
       const editorBundleKey = courseKeys.editorBundle(courseUuid);
       if (!editorBundleKey) {
         return { editorBundleKey: null, previousEditorBundle: undefined };
@@ -309,8 +289,7 @@ export function removeCourseContributorsMutationOptions(courseUuid: string, quer
           contributors: {
             ...current.contributors,
             data: (current.contributors.data ?? []).filter(
-              (contributor: any) =>
-                !userIdSet.has(contributor.user_id) && !usernameSet.has(contributor.user?.username),
+              (contributor: any) => !userIdSet.has(contributor.user_id) && !usernameSet.has(contributor.user?.username),
             ),
           },
         };
