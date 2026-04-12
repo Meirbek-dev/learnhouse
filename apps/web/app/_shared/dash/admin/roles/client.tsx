@@ -66,6 +66,9 @@ import { toast } from 'sonner';
 
 type RoleDialogMode = 'create' | 'edit' | 'clone';
 
+const EMPTY_ROLES: RoleWithPermissions[] = [];
+const EMPTY_PERMISSIONS: Permission[] = [];
+
 export default function RBACAdminClient() {
   const session = useSession();
   const { can } = session;
@@ -101,8 +104,10 @@ export default function RBACAdminClient() {
     );
   }, [session.session?.roles]);
 
-  const { data: permissions = [], isLoading: permissionsLoading, error: permissionsError } = usePlatformPermissions();
-  const { data: fetchedRoles = [], isLoading: loadingRoles, error: rolesError, refetch: refetchRoles } = useRoles();
+  const { data: permissions = EMPTY_PERMISSIONS, isLoading: permissionsLoading, error: permissionsError } =
+    usePlatformPermissions();
+  const { data: fetchedRoles = EMPTY_ROLES, isLoading: loadingRoles, error: rolesError, refetch: refetchRoles } =
+    useRoles();
   const auditLogQuery = useRoleAuditLog(auditPage, 20, {
     enabled: activeTab === 'audit',
   });
