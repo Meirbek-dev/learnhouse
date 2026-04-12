@@ -127,6 +127,7 @@ async def api_create_documentpdf_activity(
     current_user: Annotated[PublicUser, Depends(get_current_user)],
     db_session=Depends(get_db_session),
     pdf_file: UploadFile | None = None,
+    pdf_uploaded_path: Annotated[str | None, Form()] = None,
 ) -> ActivityRead:
     return await create_documentpdf_activity(
         request,
@@ -135,4 +136,5 @@ async def api_create_documentpdf_activity(
         current_user,
         db_session,
         pdf_file,
+        pdf_uploaded_path=pdf_uploaded_path,
     )

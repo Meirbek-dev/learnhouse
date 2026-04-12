@@ -172,7 +172,7 @@ async function createVideoActivityChunked(
   return (await result.json()) as ActivityRead;
 }
 
-async function createPdfActivity(
+async function createPdfActivityStandard(
   file: File,
   data: any,
   chapterId: number,
@@ -185,6 +185,47 @@ async function createPdfActivity(
   formData.append('chapter_id', chapterId.toString());
   formData.append('pdf_file', file);
   formData.append('name', data.name);
+
+  return uploadFormData('activities/documentpdf', formData, onProgress);
+}
+
+async function createPdfActivityChunked(
+  file: File,
+  data: any,
+  chapterId: number,
+  options?: ActivityInvalidationOptions,
+  onProgress?: (progress: UploadProgress) => void,
+): Promise<ActivityRead> {
+  void options;
+
+  const courseUuid = data.course_uuid;
+
+  if (!courseUuid) {
+    throw new Error('Missing course_uuid for chunked upload');
+  }
+
+  const tempActivityUuid = `activity_temp_${Date.now()}`;
+  const pdfFormat = file.name.split('.').pop()?.toLowerCase() || 'pdf';
+  const uploadedPath = `courses/${courseUuid}/activities/${tempActivityUuid}/documentpdf/documentpdf.${pdfFormat}`;
+
+  await uploadFileChunked({
+    file,
+    directory: `courses/${courseUuid}/activities/${tempActivityUuid}/documentpdf`,
+    typeOfDir: 'platform',
+    filename: `documentpdf.${pdfFormat}`,
+    onProgress: (progress) => {
+      onProgress?.({
+        percentage: progress.percentage,
+        currentChunk: progress.currentChunk,
+        totalChunks: progress.totalChunks,
+      });
+    },
+  });
+
+  const formData = new FormData();
+  formData.append('chapter_id', chapterId.toString());
+  formData.append('name', data.name);
+  formData.append('pdf_uploaded_path', uploadedPath);
 
   return uploadFormData('activities/documentpdf', formData, onProgress);
 }
@@ -206,7 +247,11 @@ export async function createFileActivity(
   }
 
   if (type === 'documentpdf') {
-    return createPdfActivity(file, data, chapterId, options, onProgress);
+    if (shouldUseChunkedUpload(file.size)) {
+      return createPdfActivityChunked(file, data, chapterId, options, onProgress);
+    }
+
+    return createPdfActivityStandard(file, data, chapterId, options, onProgress);
   }
 
   throw new Error(`Unsupported file activity type: ${type}`);

@@ -1,4 +1,6 @@
+import shutil
 from datetime import datetime
+from pathlib import Path
 
 from fastapi import HTTPException, Request, UploadFile, status
 from sqlmodel import Session, select
@@ -13,8 +15,70 @@ from src.db.courses.activities import (
 from src.db.courses.chapters import Chapter
 from src.db.courses.courses import Course
 from src.db.users import AnonymousUser, PublicUser
+from src.security.file_validation import validate_upload
 from src.security.rbac import PermissionChecker
 from src.services.courses.activities.uploads.pdfs import upload_pdf
+
+MAX_DOCUMENT_PDF_SIZE = 100 * 1024 * 1024
+
+
+def validate_pdf_file(pdf_file: UploadFile | None) -> str:
+    if not pdf_file or not pdf_file.filename:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Pdf : No pdf file provided",
+        )
+
+    if "." not in pdf_file.filename:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Pdf : No pdf file provided",
+        )
+
+    validate_upload(pdf_file, ["document"], max_size=MAX_DOCUMENT_PDF_SIZE)
+    return pdf_file.filename.rsplit(".", 1)[-1].lower()
+
+
+def validate_uploaded_pdf_path(pdf_uploaded_path: str) -> tuple[str, Path]:
+    storage_root = Path("content/platform").resolve()
+    uploaded_path = (storage_root / pdf_uploaded_path).resolve()
+
+    try:
+        uploaded_path.relative_to(storage_root)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Pdf : Invalid upload path",
+        ) from exc
+
+    if not uploaded_path.exists():
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Pdf : Uploaded pdf not found",
+        )
+
+    pdf_format = uploaded_path.suffix.lstrip(".").lower()
+    if pdf_format != "pdf":
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Pdf : Wrong pdf format",
+        )
+
+    file_size = uploaded_path.stat().st_size
+    if file_size > MAX_DOCUMENT_PDF_SIZE:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail=f"File too large ({file_size / 1024 / 1024:.1f}MB > {MAX_DOCUMENT_PDF_SIZE / 1024 / 1024:.1f}MB)",
+        )
+
+    with uploaded_path.open("rb") as uploaded_pdf:
+        if uploaded_pdf.read(5) != b"%PDF-":
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Pdf : Wrong pdf format",
+            )
+
+    return pdf_format, uploaded_path
 
 
 def _next_activity_order(chapter_id: int, db_session: Session) -> int:
@@ -33,6 +97,7 @@ async def create_documentpdf_activity(
     current_user: PublicUser | AnonymousUser,
     db_session: Session,
     pdf_file: UploadFile | None = None,
+    pdf_uploaded_path: str | None = None,
 ):
     chapter = db_session.exec(select(Chapter).where(Chapter.id == chapter_id)).first()
     if not chapter:
@@ -49,22 +114,17 @@ async def create_documentpdf_activity(
         current_user.id, "activity:create", resource_owner_id=course.creator_id
     )
 
-    if not pdf_file:
+    temp_path: Path | None = None
+
+    if pdf_file:
+        pdf_format = validate_pdf_file(pdf_file)
+    elif pdf_uploaded_path:
+        pdf_format, temp_path = validate_uploaded_pdf_path(pdf_uploaded_path)
+    else:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT, detail="Pdf : No pdf file provided"
         )
 
-    if pdf_file.content_type != "application/pdf":
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT, detail="Pdf : Wrong pdf format"
-        )
-
-    if not pdf_file.filename:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT, detail="Pdf : No pdf file provided"
-        )
-
-    pdf_format = pdf_file.filename.split(".")[-1]
     activity_uuid = f"activity_{ULID()}"
 
     activity = Activity(
@@ -88,6 +148,15 @@ async def create_documentpdf_activity(
     db_session.commit()
     db_session.refresh(activity)
 
-    await upload_pdf(pdf_file, activity.activity_uuid, course.course_uuid)
+    if pdf_file:
+        await upload_pdf(pdf_file, activity.activity_uuid, course.course_uuid)
+    elif temp_path:
+        final_path = Path(
+            f"content/platform/courses/{course.course_uuid}/activities/{activity.activity_uuid}/documentpdf/documentpdf.{pdf_format}"
+        )
+        final_path.parent.mkdir(parents=True, exist_ok=True)
+        shutil.move(str(temp_path), str(final_path))
+        if temp_path.parent.exists():
+            shutil.rmtree(temp_path.parent, ignore_errors=True)
 
     return ActivityRead.model_validate(activity)

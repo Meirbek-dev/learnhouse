@@ -1039,11 +1039,12 @@
     "DocumentPdfModal": {
       "ariaLabel": "Choose PDF document file to upload",
       "createActivity": "Create Activity",
+      "fileTooLarge": "File size exceeds the 100MB limit",
       "noFileSelected": "No file selected",
       "pdfDocumentFile": "PDF Document File",
       "pdfDocumentName": "PDF Document Name",
       "selectFile": "Select PDF File",
-      "supportedFormats": "Supported format: PDF",
+      "supportedFormats": "Supported format: PDF • Max size: 100MB",
       "valueMissingFile": "Please provide a PDF document for your activity",
       "valueMissingName": "Please provide a name for your PDF activity"
     },

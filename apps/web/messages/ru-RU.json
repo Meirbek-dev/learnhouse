@@ -1039,11 +1039,12 @@
     "DocumentPdfModal": {
       "ariaLabel": "Выбрать PDF-документ для загрузки",
       "createActivity": "Создать активность",
+      "fileTooLarge": "Размер файла превышает лимит 100 МБ",
       "noFileSelected": "Файл не выбран",
       "pdfDocumentFile": "Файл PDF документа",
       "pdfDocumentName": "Название PDF документа",
       "selectFile": "Выбрать PDF файл",
-      "supportedFormats": "Поддерживаемый формат: PDF",
+      "supportedFormats": "Поддерживаемый формат: PDF • Максимальный размер: 100 МБ",
       "valueMissingFile": "Пожалуйста, предоставьте PDF-документ для активности",
       "valueMissingName": "Пожалуйста, укажите название для PDF-активности"
     },

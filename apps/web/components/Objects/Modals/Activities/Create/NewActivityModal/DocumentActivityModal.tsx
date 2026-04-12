@@ -11,6 +11,7 @@ import { useRef } from 'react';
 import * as v from 'valibot';
 
 const SUPPORTED_FILES = constructAcceptValue(['pdf']);
+const MAX_PDF_FILE_SIZE = 100 * 1024 * 1024;
 
 const createValidationSchema = (t: (key: string) => string) =>
   v.object({
@@ -84,7 +85,25 @@ const DocumentPdfModal = ({ submitFileActivity, chapterId, course }: any) => {
                   type="file"
                   accept={SUPPORTED_FILES}
                   onChange={(e) => {
-                    onChange(e.target.files?.[0]);
+                    const nextFile = e.target.files?.[0];
+
+                    if (!nextFile) {
+                      onChange(undefined);
+                      return;
+                    }
+
+                    if (nextFile.size > MAX_PDF_FILE_SIZE) {
+                      form.setError('file', {
+                        type: 'manual',
+                        message: t('fileTooLarge'),
+                      });
+                      e.target.value = '';
+                      onChange(undefined);
+                      return;
+                    }
+
+                    form.clearErrors('file');
+                    onChange(nextFile);
                   }}
                   className="sr-only"
                   aria-label={t('ariaLabel')}
@@ -103,6 +122,7 @@ const DocumentPdfModal = ({ submitFileActivity, chapterId, course }: any) => {
                     {value ? value.name : t('noFileSelected')}
                   </span>
                 </div>
+                <p className="text-muted-foreground mt-2 text-xs">{t('supportedFormats')}</p>
               </div>
             </FieldContent>
             <FieldError errors={[fieldState.error]} />

@@ -1039,11 +1039,12 @@
     "DocumentPdfModal": {
       "ariaLabel": "Жүктеу үшін PDF құжат файлын таңдаңыз",
       "createActivity": "Белсенділік жасау",
+      "fileTooLarge": "Файл өлшемі 100 МБ шегінен асады",
       "noFileSelected": "Ешқандай файл таңдалмады",
       "pdfDocumentFile": "PDF құжатының файлы",
       "pdfDocumentName": "PDF құжатының атауы",
       "selectFile": "PDF файлын таңдаңыз",
-      "supportedFormats": "Қолдау көрсетілетін формат: PDF",
+      "supportedFormats": "Қолдау көрсетілетін формат: PDF • Максималды өлшемі: 100 МБ",
       "valueMissingFile": "Белсенділігіңіз үшін PDF құжатын беріңіз",
       "valueMissingName": "PDF белсенділігіңіз үшін атауды көрсетіңіз"
     },
