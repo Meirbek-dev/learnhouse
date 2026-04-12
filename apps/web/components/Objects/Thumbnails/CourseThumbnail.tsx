@@ -81,6 +81,7 @@ export interface Course {
 export interface CourseThumbnailProps {
   course: Course;
   customLink?: string;
+  actionLink?: string;
   trailData?: any;
   trailLoading?: boolean;
   /** Set to true for above-the-fold cards to eager-load the thumbnail (fixes LCP) */
@@ -483,6 +484,7 @@ const AdminMenu: FC<AdminMenuProps> = ({ course, onDelete }) => {
 const CourseThumbnail: FC<CourseThumbnailProps> = ({
   course,
   customLink,
+  actionLink,
   trailData,
   trailLoading = false,
   priority = false,
@@ -531,6 +533,8 @@ const CourseThumbnail: FC<CourseThumbnailProps> = ({
     () => customLink || getAbsoluteUrl(`/course/${cleanCourseUuid}`),
     [customLink, cleanCourseUuid],
   );
+
+  const actionUrl = useMemo(() => actionLink || courseUrl, [actionLink, courseUrl]);
 
   const isEnrolled = Boolean(courseRun);
   const titleId = `course-title-${cleanCourseUuid}`;
@@ -606,7 +610,7 @@ const CourseThumbnail: FC<CourseThumbnailProps> = ({
           isEnrolled={isEnrolled}
           isLoading={effectiveTrailLoading}
           progressPercentage={progressPercentage}
-          courseUrl={courseUrl}
+          courseUrl={actionUrl}
           courseName={course.name}
           t={t}
         />

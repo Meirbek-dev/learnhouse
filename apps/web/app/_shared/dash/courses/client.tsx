@@ -29,6 +29,7 @@ import { CourseStatusBadge, courseWorkflowSummaryCardClass } from '@components/D
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import CourseThumbnail, { removeCoursePrefix } from '@components/Objects/Thumbnails/CourseThumbnail';
 import { deleteCourseFromBackend, updateCourseAccess } from '@services/courses/courses';
+import { useTrailCurrent } from '@/features/trail/hooks/useTrail';
 import { Actions, Resources, Scopes } from '@/components/Security';
 import { useSession } from '@/hooks/useSession';
 import { useCallback, useEffect, useMemo, useState, useTransition } from 'react';
@@ -44,6 +45,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
+import { getAbsoluteUrl } from '@services/config/config';
 
 interface ManageableCourse extends Course {
   public?: boolean;
@@ -83,11 +85,14 @@ const CoursesHome = ({
   const searchParams = useSearchParams();
   const [searchInput, setSearchInput] = useState(searchQuery);
   const viewMode = searchParams.get('view') === 'table' ? 'table' : 'cards';
-  const { can } = useSession();
+  const { can, isAuthenticated } = useSession();
   const canCreateCourse = can(Resources.COURSE, Actions.CREATE, Scopes.PLATFORM);
   const [selectedCourseUuids, setSelectedCourseUuids] = useState<string[]>([]);
   const [isBulkPending, startBulkTransition] = useTransition();
   const [pendingBulkAction, setPendingBulkAction] = useState<BulkActionKind | null>(null);
+  const { data: trailData } = useTrailCurrent({ enabled: isAuthenticated });
+
+  const isTrailLoading = isAuthenticated && !trailData;
 
   const totalPages = Math.max(1, Math.ceil(totalCourses / pageSize));
   const hasPagination = totalPages > 1;
@@ -640,7 +645,10 @@ const CoursesHome = ({
             >
               <CourseThumbnail
                 customLink={buildCourseWorkspacePath(removeCoursePrefix(course.course_uuid))}
+                actionLink={getAbsoluteUrl(`/course/${removeCoursePrefix(course.course_uuid)}`)}
                 course={course}
+                trailData={trailData}
+                trailLoading={isTrailLoading}
               />
             </div>
           ))}
