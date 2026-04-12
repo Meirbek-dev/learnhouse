@@ -10,7 +10,6 @@ import {
   File,
   ImageIcon,
   Layers,
-  Square,
   StickyNote,
   Video,
 } from 'lucide-react';
@@ -33,12 +32,10 @@ import CourseDiscussions from '@/components/discussions';
 import { getAbsoluteUrl } from '@services/config/config';
 // Import UI components
 import { Card, CardContent } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
 import { useEffect, useMemo, useState } from 'react';
 // Import existing components and utilities
 import NextImage from '@components/ui/NextImage';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useTranslations } from 'next-intl';
 import Link from '@components/ui/AppLink';
@@ -203,13 +200,17 @@ const CourseClient = (props: any) => {
         <>
           <GeneralWrapper>
             <CourseBreadcrumbs course={course} />
-            <div className="flex flex-col items-start justify-between pt-3 pb-2 md:flex-row md:items-center">
-              <div>
-                <h1 className="text-3xl font-bold md:text-3xl">{course.name}</h1>
-              </div>
+
+            {/* Page header */}
+            <div className="pb-8 pt-5">
+              <h1 className="text-3xl font-bold tracking-tight md:text-4xl">{course.name}</h1>
             </div>
-            <div className="flex flex-col gap-8 pt-2 md:flex-row">
-              <div className="w-full space-y-4 md:w-3/4">
+
+            {/* Two-column layout */}
+            <div className="flex flex-col gap-10 md:flex-row md:items-start">
+              {/* Main content */}
+              <div className="w-full min-w-0 space-y-10 md:w-3/4">
+                {/* Thumbnail */}
                 {(() => {
                   const showVideo =
                     course.thumbnail_type === 'video' ||
@@ -218,56 +219,48 @@ const CourseClient = (props: any) => {
                     course.thumbnail_type === 'image' ||
                     (course.thumbnail_type === 'both' && activeThumbnailType === 'image') ||
                     !course.thumbnail_type;
+
+                  const mediaSwitcher = (
+                    <div className="absolute top-3 right-3 z-10">
+                      <div className="flex overflow-hidden rounded-lg border border-border bg-card shadow-sm">
+                        <button
+                          type="button"
+                          onClick={() => setActiveThumbnailType('image')}
+                          className={cn(
+                            'flex cursor-pointer items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-colors',
+                            activeThumbnailType === 'image'
+                              ? 'bg-muted text-foreground'
+                              : 'text-muted-foreground hover:text-foreground',
+                          )}
+                        >
+                          <ImageIcon size={11} />
+                          {t('thumbnailTypeImage')}
+                        </button>
+                        <div className="w-px bg-border" />
+                        <button
+                          type="button"
+                          onClick={() => setActiveThumbnailType('video')}
+                          className={cn(
+                            'flex cursor-pointer items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-colors',
+                            activeThumbnailType === 'video'
+                              ? 'bg-muted text-foreground'
+                              : 'text-muted-foreground hover:text-foreground',
+                          )}
+                        >
+                          <Video size={11} />
+                          {t('thumbnailTypeVideo')}
+                        </button>
+                      </div>
+                    </div>
+                  );
+
                   if (showVideo && course.thumbnail_video) {
                     return (
-                      <div className="focus:ring-primary/20/10 relative w-full overflow-hidden rounded-lg shadow-xl ring-1 ring-inset">
-                        {course.thumbnail_type === 'both' && (
-                          <div className="absolute top-3 right-3 z-10">
-                            <div className="bg-muted/20 flex space-x-1 rounded-lg p-1 backdrop-blur-sm">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => {
-                                  setActiveThumbnailType('image');
-                                }}
-                                className={cn(
-                                  'h-8 px-2 text-xs',
-                                  activeThumbnailType === 'image'
-                                    ? 'bg-card/90 text-foreground shadow-sm'
-                                    : 'text-white/80 hover:bg-muted/20 hover:text-white',
-                                )}
-                              >
-                                <ImageIcon
-                                  size={12}
-                                  className="mr-1"
-                                />
-                                {t('thumbnailTypeImage')}
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => {
-                                  setActiveThumbnailType('video');
-                                }}
-                                className={cn(
-                                  'h-8 px-2 text-xs',
-                                  activeThumbnailType === 'video'
-                                    ? 'bg-card/90 text-foreground shadow-sm'
-                                    : 'text-white/80 hover:bg-muted/20 hover:text-white',
-                                )}
-                              >
-                                <Video
-                                  size={12}
-                                  className="mr-1"
-                                />
-                                {t('thumbnailTypeVideo')}
-                              </Button>
-                            </div>
-                          </div>
-                        )}
+                      <div className="relative w-full overflow-hidden rounded-xl border border-border">
+                        {course.thumbnail_type === 'both' && mediaSwitcher}
                         <video
                           src={getCourseThumbnailMediaDirectory(course?.course_uuid, course?.thumbnail_video)}
-                          className="h-auto w-full rounded-lg bg-black object-contain"
+                          className="h-auto w-full bg-black object-contain"
                           controls
                           autoPlay
                           muted
@@ -277,75 +270,36 @@ const CourseClient = (props: any) => {
                       </div>
                     );
                   }
+
                   if (showImage && course.thumbnail_image) {
                     return (
-                      <div className="focus:ring-primary/20/10 relative max-h-192 w-full overflow-hidden rounded-lg shadow-xl ring-1 ring-inset">
-                        <div className="relative h-full w-full">
-                          <NextImage
-                            src={getCourseThumbnailMediaDirectory(course?.course_uuid, course?.thumbnail_image)}
-                            alt={t('courseThumbnailAlt')}
-                            fill
-                            className="object-contain"
-                            sizes="100vw"
-                          />
-                        </div>
-                        {course.thumbnail_type === 'both' && (
-                          <div className="absolute top-3 right-3 z-10">
-                            <div className="bg-muted/20 flex space-x-1 rounded-lg p-1 backdrop-blur-sm">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => {
-                                  setActiveThumbnailType('image');
-                                }}
-                                className={cn(
-                                  'h-8 px-2 text-xs',
-                                  activeThumbnailType === 'image'
-                                    ? 'bg-card/90 text-foreground shadow-sm'
-                                    : 'text-white/80 hover:bg-muted/20 hover:text-white',
-                                )}
-                              >
-                                <ImageIcon
-                                  size={12}
-                                  className="mr-1"
-                                />
-                                {t('thumbnailTypeImage')}
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => {
-                                  setActiveThumbnailType('video');
-                                }}
-                                className={cn(
-                                  'h-8 px-2 text-xs',
-                                  activeThumbnailType === 'video'
-                                    ? 'bg-card/90 text-foreground shadow-sm'
-                                    : 'text-white/80 hover:bg-muted/20 hover:text-white',
-                                )}
-                              >
-                                <Video
-                                  size={12}
-                                  className="mr-1"
-                                />
-                                {t('thumbnailTypeVideo')}
-                              </Button>
-                            </div>
-                          </div>
-                        )}
+                      <div className="relative aspect-video w-full overflow-hidden rounded-xl border border-border bg-muted">
+                        <NextImage
+                          src={getCourseThumbnailMediaDirectory(course?.course_uuid, course?.thumbnail_image)}
+                          alt={t('courseThumbnailAlt')}
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 768px) 100vw, 75vw"
+                        />
+                        {course.thumbnail_type === 'both' && mediaSwitcher}
                       </div>
                     );
                   }
+
                   return (
-                    <div
-                      className="focus:ring-primary/20/10 relative h-auto w-full overflow-hidden rounded-lg bg-cover bg-center shadow-xl ring-1 ring-inset"
-                      style={{
-                        backgroundImage: `url('../empty_thumbnail.webp')`,
-                        backgroundSize: 'auto',
-                      }}
-                    />
+                    <div className="relative aspect-video w-full overflow-hidden rounded-xl border border-border bg-muted">
+                      <NextImage
+                        src="/empty_thumbnail.webp"
+                        alt=""
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 100vw, 75vw"
+                      />
+                    </div>
                   );
                 })()}
+
+                {/* Progress indicators */}
                 {(() => {
                   const cleanCourseUuid = course.course_uuid?.replace('course_', '');
                   return trailData?.runs?.find((run: any) => {
@@ -359,22 +313,204 @@ const CourseClient = (props: any) => {
                     trailData={trailData}
                   />
                 )}
-                <div className="course_metadata_left space-y-2">
+
+                {/* Course description */}
+                {course.about && (
+                  <p className="text-muted-foreground leading-relaxed text-pretty hyphens-auto whitespace-pre-line">
+                    {course.about}
+                  </p>
+                )}
+
+                {/* What you will learn */}
+                {learnings.length > 0 && learnings[0]?.text !== 'null' && (
                   <div>
-                    <p className="w-full py-5 leading-relaxed tracking-normal text-pretty wrap-break-word hyphens-auto whitespace-pre-line">
-                      {course.about}
-                    </p>
+                    <h2 className="mb-4 text-lg font-semibold tracking-tight">{t('whatYouWillLearn')}</h2>
+                    <div className="rounded-xl border border-border p-5">
+                      <ul
+                        className={cn(
+                          'grid gap-x-8 gap-y-3',
+                          learnings.length > 4 ? 'sm:grid-cols-2' : 'grid-cols-1',
+                        )}
+                      >
+                        {learnings.map((learning: any) => {
+                          const learningText = typeof learning === 'string' ? learning : learning.text;
+                          const learningEmoji = typeof learning === 'string' ? null : learning.emoji;
+                          const learningId = typeof learning === 'string' ? learning : learning.id || learning.text;
+                          const rawHref = typeof learning === 'object' && learning ? learning.link : undefined;
+                          const href = typeof rawHref === 'string' ? rawHref.trim() : '';
+                          const hasValidHref = Boolean(href && /^(?:[a-z][a-z0-9+.-]*:|\/|\.\/|\.\.\/|#)/i.test(href));
+                          if (!learningText) return null;
+                          return (
+                            <li
+                              key={learningId}
+                              className="flex items-start gap-3"
+                            >
+                              <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10">
+                                {learningEmoji ? (
+                                  <span className="text-xs leading-none">{learningEmoji}</span>
+                                ) : (
+                                  <Check
+                                    size={11}
+                                    className="stroke-[2.5] text-primary"
+                                  />
+                                )}
+                              </span>
+                              <span className="flex-1 text-sm leading-relaxed">{learningText}</span>
+                              {hasValidHref && (
+                                <a
+                                  href={href}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="ml-1 mt-0.5 shrink-0 text-muted-foreground transition-colors hover:text-foreground"
+                                  aria-label={t('linkTo', { learningText })}
+                                >
+                                  <ArrowRight size={13} />
+                                </a>
+                              )}
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </div>
+                  </div>
+                )}
+
+                {/* Course chapters */}
+                <div>
+                  <h2 className="mb-4 text-lg font-semibold tracking-tight">{t('courseLessons')}</h2>
+                  <div className="overflow-hidden rounded-xl border border-border">
+                    {course.chapters.map((chapter: any, idx: number) => {
+                      const isExpanded = expandedChapters[chapter.chapter_uuid] ?? idx === 0;
+                      return (
+                        <Collapsible
+                          key={chapter.chapter_uuid || `chapter-${chapter.name}`}
+                          open={isExpanded}
+                          onOpenChange={(open) => {
+                            setExpandedChapters((prev) => ({
+                              ...prev,
+                              [chapter.chapter_uuid]: open,
+                            }));
+                          }}
+                        >
+                          <CollapsibleTrigger
+                            nativeButton={false}
+                            render={
+                              <div
+                                className={cn(
+                                  'flex w-full cursor-pointer items-center px-5 py-4 transition-colors hover:bg-muted/40',
+                                  idx > 0 && 'border-t border-border',
+                                )}
+                              />
+                            }
+                          >
+                            <span className="mr-4 w-5 shrink-0 text-center font-mono text-xs tabular-nums text-muted-foreground">
+                              {idx + 1}
+                            </span>
+                            <div className="flex min-w-0 flex-1 flex-col">
+                              <h3 className="truncate text-sm font-semibold">{chapter.name}</h3>
+                              <span className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
+                                <Layers size={11} />
+                                {t('activitiesCount', { count: chapter.activities.length })}
+                              </span>
+                            </div>
+                            <ChevronDown
+                              size={16}
+                              className={cn(
+                                'ml-3 shrink-0 text-muted-foreground transition-transform duration-200',
+                                isExpanded && 'rotate-180',
+                              )}
+                            />
+                          </CollapsibleTrigger>
+                          <CollapsibleContent>
+                            <div className="border-t border-border">
+                              {chapter.activities.map((activity: any, actIdx: number) => {
+                                const done = isActivityDone(activity);
+                                const current = isActivityCurrent(activity);
+                                return (
+                                  <Link
+                                    key={activity.activity_uuid}
+                                    href={`${getAbsoluteUrl('')}/course/${courseuuid}/activity/${activity.activity_uuid.replace('activity_', '')}`}
+                                    rel="noopener noreferrer"
+                                    prefetch={false}
+                                    className={cn(
+                                      'group flex items-center gap-4 px-5 py-3.5 transition-colors hover:bg-muted/30',
+                                      actIdx > 0 && 'border-t border-border/60',
+                                    )}
+                                  >
+                                    {/* Completion indicator */}
+                                    <div className="shrink-0">
+                                      {done ? (
+                                        <div className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500/15">
+                                          <Check
+                                            size={10}
+                                            className="stroke-[3] text-emerald-600"
+                                          />
+                                        </div>
+                                      ) : (
+                                        <div className="h-5 w-5 rounded-full border-2 border-border" />
+                                      )}
+                                    </div>
+                                    {/* Activity info */}
+                                    <div className="flex min-w-0 flex-1 flex-col">
+                                      <div className="flex items-center gap-2">
+                                        <span
+                                          className={cn(
+                                            'truncate text-sm font-medium',
+                                            done ? 'text-muted-foreground' : 'text-foreground',
+                                          )}
+                                        >
+                                          {activity.name}
+                                        </span>
+                                        {current && (
+                                          <Badge
+                                            variant="secondary"
+                                            className="shrink-0 animate-pulse bg-primary/10 text-xs text-primary"
+                                          >
+                                            {t('current')}
+                                          </Badge>
+                                        )}
+                                      </div>
+                                      <div className="mt-0.5 flex items-center gap-1 text-muted-foreground">
+                                        {activity.activity_type === 'TYPE_DYNAMIC' && <StickyNote size={11} />}
+                                        {activity.activity_type === 'TYPE_VIDEO' && <Video size={11} />}
+                                        {activity.activity_type === 'TYPE_DOCUMENT' && <File size={11} />}
+                                        {activity.activity_type === 'TYPE_ASSIGNMENT' && <Backpack size={11} />}
+                                        {activity.activity_type === 'TYPE_EXAM' && <ClipboardList size={11} />}
+                                        <span className="text-xs">{getActivityTypeLabel(activity.activity_type)}</span>
+                                      </div>
+                                    </div>
+                                    {/* Arrow */}
+                                    <ArrowRight
+                                      size={13}
+                                      className="shrink-0 text-transparent transition-all duration-150 group-hover:translate-x-0.5 group-hover:text-muted-foreground"
+                                    />
+                                  </Link>
+                                );
+                              })}
+                            </div>
+                          </CollapsibleContent>
+                        </Collapsible>
+                      );
+                    })}
                   </div>
                 </div>
+
+                {/* Discussions */}
+                <CourseDiscussions
+                  initialPosts={discussionPosts}
+                  currentUser={currentUser}
+                  courseUuid={course?.course_uuid}
+                  onMutate={mutateDiscussions}
+                />
               </div>
-              <div className="course_metadata_right w-full space-y-4 md:w-1/4">
-                {/* Actions Box */}
+
+              {/* Sidebar */}
+              <div className="w-full shrink-0 space-y-4 md:w-1/4">
                 <CoursesActions
                   courseuuid={courseuuid}
                   course={course}
                   trailData={trailData}
                 />
-                {/* Authors & Updates Box */}
                 <Card className="p-0">
                   <CardContent className="p-4">
                     <CourseAuthors
@@ -385,192 +521,15 @@ const CourseClient = (props: any) => {
                 </Card>
               </div>
             </div>
-            {learnings.length > 0 && learnings[0]?.text !== 'null' && (
-              <div className="w-full">
-                <h2 className="py-5 text-xl font-semibold md:text-2xl">{t('whatYouWillLearn')}</h2>
-                <Card className="p-0">
-                  <CardContent className="space-y-2 p-5">
-                    {learnings.map((learning: any) => {
-                      const learningText = typeof learning === 'string' ? learning : learning.text;
-                      const learningEmoji = typeof learning === 'string' ? null : learning.emoji;
-                      const learningId = typeof learning === 'string' ? learning : learning.id || learning.text;
-                      // Sanitize href: only allow strings that look like URLs or absolute/relative paths
-                      const rawHref = typeof learning === 'object' && learning ? learning.link : undefined;
-                      const href = typeof rawHref === 'string' ? rawHref.trim() : '';
-                      const hasValidHref = Boolean(href && /^(?:[a-z][a-z0-9+.-]*:|\/|\.\/|\.\.\/|#)/i.test(href));
-                      if (!learningText) return null;
-                      return (
-                        <div
-                          key={learningId}
-                          className="text-muted-foreground flex items-center space-x-2 font-semibold"
-                        >
-                          <div className="rounded-full px-2 py-2">
-                            {learningEmoji ? (
-                              <span>{learningEmoji}</span>
-                            ) : (
-                              <Check
-                                className="text-gray-400"
-                                size={15}
-                              />
-                            )}
-                          </div>
-                          <p>{learningText}</p>
-                          {hasValidHref ? (
-                            <Button
-                              variant="link"
-                              size="sm"
-                              render={
-                                <a
-                                  href={href}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-sm"
-                                />
-                              }
-                            >
-                              <span className="sr-only">{t('linkTo', { learningText })}</span>
-                              <ArrowRight size={14} />
-                            </Button>
-                          ) : null}
-                        </div>
-                      );
-                    })}
-                  </CardContent>
-                </Card>
-              </div>
-            )}
-            <div className="my-5 mb-10 w-full">
-              <h2 className="pb-5 text-xl font-semibold md:text-2xl">{t('courseLessons')}</h2>
-              <Card className="p-0">
-                {course.chapters.map((chapter: any, idx: number) => {
-                  const isExpanded = expandedChapters[chapter.chapter_uuid] ?? idx === 0;
-                  return (
-                    <Collapsible
-                      key={chapter.chapter_uuid || `chapter-${chapter.name}`}
-                      open={isExpanded}
-                      onOpenChange={(open) => {
-                        setExpandedChapters((prev) => ({
-                          ...prev,
-                          [chapter.chapter_uuid]: open,
-                        }));
-                      }}
-                    >
-                      <CollapsibleTrigger
-                        nativeButton={false}
-                        render={
-                          <div className="flex cursor-pointer items-start bg-neutral-50 px-4 py-4 font-semibold text-neutral-600 transition-colors hover:bg-neutral-100" />
-                        }
-                      >
-                        <div className="mr-3 flex flex-col justify-center pt-1">
-                          <ChevronDown className={cn('h-5 w-5 transition-transform', isExpanded ? 'rotate-180' : '')} />
-                        </div>
-                        <div className="flex w-full flex-col items-start">
-                          <div className="mb-1 flex w-full min-w-0 flex-wrap items-center">
-                            <Badge
-                              variant="secondary"
-                              className="mr-2 h-5 w-5 rounded-full p-0 text-xs"
-                            >
-                              {idx + 1}
-                            </Badge>
-                            <h3 className="min-w-0 truncate text-lg leading-tight font-semibold">{chapter.name}</h3>
-                          </div>
-                          <div className="flex items-center space-x-1 text-sm font-normal text-neutral-400">
-                            <Layers
-                              size={16}
-                              className="mr-1"
-                            />
-                            <span>{t('activitiesCount', { count: chapter.activities.length })}</span>
-                          </div>
-                        </div>
-                      </CollapsibleTrigger>
-                      <CollapsibleContent>
-                        <div>
-                          {chapter.activities.map((activity: any) => {
-                            return (
-                              <Link
-                                key={activity.activity_uuid}
-                                href={`${getAbsoluteUrl('')}/course/${courseuuid}/activity/${activity.activity_uuid.replace('activity_', '')}`}
-                                rel="noopener noreferrer"
-                                prefetch={false}
-                                className="activity-container group hover:bg-muted block px-4 py-4 transition-all duration-200"
-                              >
-                                <div className="flex items-center space-x-3">
-                                  <div className="flex items-center">
-                                    {isActivityDone(activity) ? (
-                                      <div className="relative">
-                                        <Square
-                                          size={16}
-                                          className="stroke-2 text-teal-600"
-                                        />
-                                        <Check
-                                          size={16}
-                                          className="absolute top-0 left-0 stroke-[2.5] text-teal-600"
-                                        />
-                                      </div>
-                                    ) : (
-                                      <Square
-                                        size={16}
-                                        className="stroke-2 text-neutral-300"
-                                      />
-                                    )}
-                                  </div>
-                                  <div className="flex grow flex-col">
-                                    <div className="flex w-full items-center space-x-2">
-                                      <p className="font-semibold text-neutral-600 transition-colors group-hover:text-neutral-800">
-                                        {activity.name}
-                                      </p>
-                                      {isActivityCurrent(activity) && (
-                                        <Badge
-                                          variant="secondary"
-                                          className="text-primary-foreground bg-primary/10 animate-pulse"
-                                        >
-                                          {t('current')}
-                                        </Badge>
-                                      )}
-                                    </div>
-                                    <div className="mt-0.5 flex items-center space-x-1.5 text-neutral-400">
-                                      {activity.activity_type === 'TYPE_DYNAMIC' && <StickyNote size={10} />}
-                                      {activity.activity_type === 'TYPE_VIDEO' && <Video size={10} />}
-                                      {activity.activity_type === 'TYPE_DOCUMENT' && <File size={10} />}
-                                      {activity.activity_type === 'TYPE_ASSIGNMENT' && <Backpack size={10} />}
-                                      {activity.activity_type === 'TYPE_EXAM' && <ClipboardList size={10} />}
-                                      <span className="text-xs font-medium">
-                                        {getActivityTypeLabel(activity.activity_type)}
-                                      </span>
-                                    </div>
-                                  </div>
-                                  <div className="text-neutral-300 transition-colors group-hover:text-neutral-400">
-                                    <ArrowRight size={14} />
-                                  </div>
-                                </div>
-                              </Link>
-                            );
-                          })}
-                        </div>
-                      </CollapsibleContent>
-                      {idx < course.chapters.length - 1 && <Separator />}
-                    </Collapsible>
-                  );
-                })}
-              </Card>
-            </div>
-
-            {/* Course Discussions - Using the new component */}
-            <CourseDiscussions
-              initialPosts={discussionPosts}
-              currentUser={currentUser}
-              courseUuid={course?.course_uuid}
-              onMutate={mutateDiscussions}
-            />
           </GeneralWrapper>
-          {/* Mobile Actions Box */}
-          {isMobile ? (
+
+          {isMobile && (
             <CourseActionsMobile
               courseuuid={courseuuid}
               course={course}
               trailData={trailData}
             />
-          ) : null}
+          )}
         </>
       )}
     </>
