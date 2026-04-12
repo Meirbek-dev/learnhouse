@@ -35,8 +35,12 @@ export function InteractiveViewer(props: InteractiveViewerProps) {
           ) : null}
         </div>
         <div className="prosemirror-interactive-layout">
-          {!isMobile && <TableOfContents editor={editor} />}
-          <div className="min-w-0">
+          {!isMobile && (
+            <div className="prosemirror-interactive-layout-toc">
+              <TableOfContents editor={editor} />
+            </div>
+          )}
+          <div className="prosemirror-interactive-layout-content">
             <EditorContent editor={editor} />
           </div>
         </div>

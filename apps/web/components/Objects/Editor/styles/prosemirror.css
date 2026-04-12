@@ -440,8 +440,12 @@
 
 @media (max-width: 1023px) {
   .prosemirror-interactive-layout {
-    grid-template-columns: minmax(0, 1fr);
+    flex-wrap: wrap;
     gap: 1rem;
+  }
+
+  .prosemirror-interactive-layout-toc {
+    display: none;
   }
 }
 
