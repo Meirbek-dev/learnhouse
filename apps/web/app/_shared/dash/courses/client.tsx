@@ -496,9 +496,6 @@ const CoursesHome = ({
         <div className="bg-card mt-4 rounded-xl border p-6 shadow-sm">
           <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
             <div className="max-w-3xl">
-              <div className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
-                {t('header.label')}
-              </div>
               <h1 className="text-foreground mt-2 text-4xl font-semibold tracking-tight">{t('header.title')}</h1>
               <p className="text-muted-foreground mt-3 text-sm leading-6">{t('header.description')}</p>
             </div>
