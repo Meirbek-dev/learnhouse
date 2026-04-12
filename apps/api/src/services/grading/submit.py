@@ -25,6 +25,7 @@ from src.db.grading.submissions import (
 from src.db.users import PublicUser
 from src.security.rbac import PermissionChecker
 from src.services.gamification.service import award_xp as _gamification_award_xp
+from src.services.grading.assignment_breakdown import build_effective_grading_breakdown
 from src.services.grading.grader import grade_submission
 from src.services.grading.settings_loader import AssessmentSettings
 
@@ -360,6 +361,7 @@ def _persist_submission(
 ) -> None:
     draft.answers_json = answers_payload
     draft.grading_json = result.breakdown.model_dump()
+    draft.grading_json = build_effective_grading_breakdown(draft, db_session).model_dump()
     draft.auto_score = auto_score
     draft.final_score = auto_score if not result.needs_manual_review else None
     draft.status = status
