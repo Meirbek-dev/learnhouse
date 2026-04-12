@@ -6929,6 +6929,7 @@
     "loadingCertificate": "Loading...",
     "noCertificateAvailable": "No certificate available",
     "quitCourseButton": "Quit Course",
+    "stepsLabel": "steps",
     "viewCertificate": "View Certificate"
   },
   "TrailPage": {

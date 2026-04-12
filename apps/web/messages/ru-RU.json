@@ -6966,6 +6966,7 @@
     "loadingCertificate": "Загрузка...",
     "noCertificateAvailable": "Сертификат недоступен",
     "quitCourseButton": "Покинуть курс",
+    "stepsLabel": "шагов",
     "viewCertificate": "Просмотреть сертификат"
   },
   "TrailPage": {

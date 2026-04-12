@@ -6969,6 +6969,7 @@
     "loadingCertificate": "Жүктелуде...",
     "noCertificateAvailable": "Сертификат қолжетімді емес",
     "quitCourseButton": "Курстан шығу",
+    "stepsLabel": "қадам",
     "viewCertificate": "Сертификатты қарау"
   },
   "TrailPage": {
