@@ -108,6 +108,8 @@ const ACTIVITY_CONFIG = {
   },
 } as const;
 
+const ACTION_ICON_BUTTON_CLASS = 'text-muted-foreground shadow-sm';
+
 const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityElementProps) => {
   const { deleteActivity, updateActivity } = useActivityMutations(course_uuid, true);
   const t = useTranslations('CourseEdit.ActivityElement');
@@ -248,9 +250,9 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
                   side="top"
                 >
                   <Button
-                    size="sm"
-                    variant="ghost"
-                    className="h-8 w-8 flex-shrink-0 p-0 text-emerald-600 hover:text-emerald-700"
+                    size="icon-sm"
+                    variant="outline"
+                    className="flex-shrink-0 border-emerald-200 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 hover:text-emerald-700 dark:border-emerald-900/60 dark:bg-emerald-950/40 dark:text-emerald-300 dark:hover:bg-emerald-950/70"
                     onClick={() => void handleSaveEdit()}
                     disabled={isSavingEdit}
                   >
@@ -262,9 +264,9 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
                   side="top"
                 >
                   <Button
-                    size="sm"
-                    variant="ghost"
-                    className="h-8 w-8 flex-shrink-0 p-0"
+                    size="icon-sm"
+                    variant="outline"
+                    className="flex-shrink-0"
                     onClick={handleCancelEdit}
                     disabled={isSavingEdit}
                   >
@@ -295,9 +297,9 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
                     side="top"
                   >
                     <Button
-                      size="sm"
-                      variant="ghost"
-                      className="text-muted-foreground hover:text-foreground h-7 w-7 flex-shrink-0 p-0"
+                      size="icon-sm"
+                      variant="outline"
+                      className="flex-shrink-0"
                       onClick={handleStartEdit}
                     >
                       <Pencil className="h-3.5 w-3.5" />
@@ -326,9 +328,9 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
                 side="top"
               >
                 <Button
-                  size="sm"
-                  variant="ghost"
-                  className="text-muted-foreground hover:text-foreground h-8 w-8 p-0"
+                  size="icon"
+                  variant="outline"
+                  className={ACTION_ICON_BUTTON_CLASS}
                   onClick={() =>
                     window.open(
                       `${getAbsoluteUrl('')}/course/${cleanCourseUuid(course_uuid)}/activity/${cleanActivityUuid(activity.activity_uuid)}`,
@@ -348,9 +350,9 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
                   side="top"
                 >
                   <Button
-                    size="sm"
-                    variant="ghost"
-                    className="text-muted-foreground hover:text-foreground h-8 w-8 p-0"
+                    size="icon"
+                    variant="outline"
+                    className={ACTION_ICON_BUTTON_CLASS}
                     onClick={handleTogglePublish}
                     disabled={isUpdatingPublish}
                   >
@@ -372,9 +374,9 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
                   side="top"
                 >
                   <Button
-                    size="sm"
-                    variant="ghost"
-                    className="text-muted-foreground hover:text-destructive h-8 w-8 p-0"
+                    size="icon"
+                    variant="outline"
+                    className="text-muted-foreground shadow-sm hover:text-destructive"
                     onClick={() => setIsDeleteDialogOpen(true)}
                   >
                     <Trash2 className="h-4 w-4" />
@@ -458,9 +460,9 @@ const ActivityEditButton = ({
         side="top"
       >
         <Button
-          size="sm"
-          variant="ghost"
-          className="text-muted-foreground hover:text-foreground h-8 w-8 p-0"
+          size="icon"
+          variant="outline"
+          className={ACTION_ICON_BUTTON_CLASS}
           nativeButton={false}
           render={
             <a
@@ -468,12 +470,11 @@ const ActivityEditButton = ({
               target="_blank"
               rel="noopener noreferrer"
             >
+              <FilePenLine className="h-4 w-4" />
               <span className="sr-only">{t('openEditPage')}</span>
             </a>
           }
-        >
-          <FilePenLine className="h-4 w-4" />
-        </Button>
+        />
       </ToolTip>
     );
   }
@@ -482,9 +483,9 @@ const ActivityEditButton = ({
     if (isAssignmentLoading) {
       return (
         <Button
-          size="sm"
-          variant="ghost"
-          className="h-8 w-8 p-0"
+          size="icon"
+          variant="outline"
+          className={ACTION_ICON_BUTTON_CLASS}
           disabled
         >
           <Loader2 className="h-4 w-4 animate-spin" />
@@ -498,9 +499,9 @@ const ActivityEditButton = ({
           side="top"
         >
           <Button
-            size="sm"
-            variant="ghost"
-            className="text-muted-foreground hover:text-foreground h-8 w-8 p-0"
+            size="icon"
+            variant="outline"
+            className={ACTION_ICON_BUTTON_CLASS}
             onMouseEnter={onRequestAssignment}
             onClick={onRequestAssignment}
           >
@@ -516,9 +517,9 @@ const ActivityEditButton = ({
         side="top"
       >
         <Button
-          size="sm"
-          variant="ghost"
-          className="text-muted-foreground hover:text-foreground h-8 w-8 p-0"
+          size="icon"
+          variant="outline"
+          className={ACTION_ICON_BUTTON_CLASS}
           nativeButton={false}
           render={
             <a
@@ -526,12 +527,11 @@ const ActivityEditButton = ({
               target="_blank"
               rel="noopener noreferrer"
             >
+              <FilePenLine className="h-4 w-4" />
               <span className="sr-only">{t('openEditPage')}</span>
             </a>
           }
-        >
-          <FilePenLine className="h-4 w-4" />
-        </Button>
+        />
       </ToolTip>
     );
   }
@@ -544,9 +544,9 @@ const ActivityEditButton = ({
         side="top"
       >
         <Button
-          size="sm"
-          variant="ghost"
-          className="text-muted-foreground hover:text-foreground h-8 w-8 p-0"
+          size="icon"
+          variant="outline"
+          className={ACTION_ICON_BUTTON_CLASS}
           nativeButton={false}
           render={
             <a
@@ -554,12 +554,11 @@ const ActivityEditButton = ({
               target="_blank"
               rel="noopener noreferrer"
             >
+              <FilePenLine className="h-4 w-4" />
               <span className="sr-only">{t('openEditPage')}</span>
             </a>
           }
-        >
-          <FilePenLine className="h-4 w-4" />
-        </Button>
+        />
       </ToolTip>
     );
   }

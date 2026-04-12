@@ -171,7 +171,7 @@ export function createEditorExtensions(options: EditorKernelOptions): EditorExte
         ...createBaseEditorExtensions(),
         SlashCommand,
         Placeholder.configure({
-          placeholder: 'Start writing, or type / for commands…',
+          placeholder: 'Начните писать или введите `/` для команд…',
         }),
         ...createActivityBlockExtensions(activity, true),
       ];
