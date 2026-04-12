@@ -408,15 +408,22 @@
 
 /* TOC sidebar layout */
 .prosemirror-interactive-layout {
-  display: grid;
-  grid-template-columns: minmax(15rem, 24rem) minmax(0, 1fr);
+  display: flex;
+  flex-wrap: nowrap;
   gap: clamp(0.75rem, 1.5vw, 1.5rem);
   width: 100%;
   max-width: 100%;
   align-items: start;
 }
 
-.prosemirror-interactive-layout > :first-child:not(:empty) {
+/* TOC sidebar — collapses entirely when empty */
+.prosemirror-interactive-layout-toc:empty {
+  display: none;
+}
+
+.prosemirror-interactive-layout-toc {
+  flex: 0 0 auto;
+  width: clamp(15rem, 20vw, 24rem);
   position: sticky;
   top: 2rem;
   align-self: flex-start;
@@ -425,16 +432,10 @@
   padding-right: 0.25rem;
 }
 
-.prosemirror-interactive-layout > :last-child {
+/* Main content always fills remaining space */
+.prosemirror-interactive-layout-content {
+  flex: 1 1 0;
   min-width: 0;
-}
-
-.prosemirror-interactive-layout > :first-child:empty {
-  display: none;
-}
-
-.prosemirror-interactive-layout > :first-child:empty + * {
-  width: 100%;
 }
 
 @media (max-width: 1023px) {

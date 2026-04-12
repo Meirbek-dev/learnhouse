@@ -25,7 +25,7 @@ const TableOfContents = ({ editor }: TableOfContentsProps) => {
     };
   }, [editor]);
 
-  if (headings.length === 0) return <div style={{ display: 'none' }} />;
+  if (headings.length === 0) return null;
 
   return (
     <div className="m-0 flex h-fit w-full flex-col items-stretch border-0 bg-transparent p-0 shadow-none">
