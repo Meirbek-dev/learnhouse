@@ -2151,6 +2151,8 @@
         "currentThumbnailAlt": "Курстың ағымдағы нобайы",
         "errors": {
           "fileTooLarge": "Файл өлшемі ({fileSize}МБ) 8МБ шегінен асады",
+          "imageReadFailed": "Таңдалған кескінді оқу мүмкін болмады",
+          "invalidAspectRatio": "Кескін 16:9 арақатынасында болуы керек. Таңдалған файл өлшемі: {width}x{height}",
           "invalidMimeType": "Жарамсыз файл түрі: {fileType}. Тек PNG немесе JPG/JPEG кескіндерін жүктеңіз",
           "invalidVideoMimeType": "Жарамсыз файл түрі: {fileType}. Тек MP4, MKV немесе WebM бейнелерін жүктеңіз",
           "pleaseSelectAFile": "Файлды таңдаңыз",
@@ -2165,7 +2167,7 @@
         "pleaseSelectAFile": "Файлды таңдаңыз",
         "selectImageFile": "Сурет файлын таңдаңыз",
         "selectVideoFile": "Бейне файлын таңдаңыз",
-        "supportedFormats": "Қолдау көрсетілетін пішімдер: JPG, PNG (макс. 8МБ)",
+        "supportedFormats": "Қолдау көрсетілетін пішімдер: JPG, PNG (макс. 8МБ, 16:9)",
         "supportedVideoFormats": "Қолдау көрсетілетін пішімдер: MP4, MKV, WebM (макс. 100МБ)",
         "thumbnailPreviewAlt": "Курс нобайының алдын ала қарауы",
         "thumbnailUpdatedSuccessfully": "Нобай сәтті жаңартылды",

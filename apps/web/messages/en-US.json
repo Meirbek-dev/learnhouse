@@ -2135,6 +2135,8 @@
         "currentThumbnailAlt": "Current course thumbnail",
         "errors": {
           "fileTooLarge": "File size ({fileSize}MB) exceeds the 8MB limit",
+          "imageReadFailed": "Could not read the selected image",
+          "invalidAspectRatio": "Image must use a 16:9 ratio. Selected image is {width}x{height}",
           "invalidMimeType": "Invalid file type: {fileType}. Please upload only PNG or JPG/JPEG images",
           "invalidVideoMimeType": "Invalid file type: {fileType}. Please upload only MP4, MKV or WebM videos",
           "pleaseSelectAFile": "Please select a file",
@@ -2149,7 +2151,7 @@
         "pleaseSelectAFile": "Please select a file",
         "selectImageFile": "Select Image File",
         "selectVideoFile": "Select Video File",
-        "supportedFormats": "Supported formats: JPG, PNG (max 8MB)",
+        "supportedFormats": "Supported formats: JPG, PNG (max 8MB, 16:9)",
         "supportedVideoFormats": "Supported formats: MP4, MKV, WebM (max 100MB)",
         "thumbnailPreviewAlt": "Course thumbnail preview",
         "thumbnailUpdatedSuccessfully": "Thumbnail updated successfully",

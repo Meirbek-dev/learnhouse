@@ -2151,6 +2151,8 @@
         "currentThumbnailAlt": "Текущая миниатюра курса",
         "errors": {
           "fileTooLarge": "Размер файла ({fileSize}МБ) превышает лимит в 8МБ",
+          "imageReadFailed": "Не удалось прочитать выбранное изображение",
+          "invalidAspectRatio": "Изображение должно быть в соотношении 16:9. Выбранный файл: {width}x{height}",
           "invalidMimeType": "Недопустимый тип файла: {fileType}. Пожалуйста, загружайте изображения PNG или JPG/JPEG",
           "invalidVideoMimeType": "Недопустимый тип файла: {fileType}. Пожалуйста, загружайте видео MP4, MKV или WebM",
           "pleaseSelectAFile": "Пожалуйста, выберите файл",
@@ -2165,7 +2167,7 @@
         "pleaseSelectAFile": "Пожалуйста, выберите файл",
         "selectImageFile": "Выберите файл изображения",
         "selectVideoFile": "Выберите видеофайл",
-        "supportedFormats": "Поддерживаемые форматы: JPG, PNG (макс. 8МБ)",
+        "supportedFormats": "Поддерживаемые форматы: JPG, PNG (макс. 8МБ, 16:9)",
         "supportedVideoFormats": "Поддерживаемые форматы: MP4, MKV, WebM (макс. 100МБ)",
         "thumbnailPreviewAlt": "Предварительный просмотр миниатюры курса",
         "thumbnailUpdatedSuccessfully": "Миниатюра успешно обновлена",

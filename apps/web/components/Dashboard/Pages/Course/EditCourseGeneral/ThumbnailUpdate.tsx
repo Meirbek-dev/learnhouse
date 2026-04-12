@@ -17,6 +17,8 @@ import type React from 'react';
 
 const MAX_FILE_SIZE = 8_000_000; // 8MB for images
 const MAX_VIDEO_FILE_SIZE = 100_000_000; // 100MB for videos
+const REQUIRED_IMAGE_ASPECT_RATIO = 16 / 9;
+const IMAGE_ASPECT_RATIO_TOLERANCE = 0.01;
 const VALID_IMAGE_MIME_TYPES = ['image/jpeg', 'image/jpg', 'image/png'] as const;
 const VALID_VIDEO_MIME_TYPES = ['video/mp4', 'video/webm', 'video/x-matroska'] as const;
 
@@ -105,6 +107,44 @@ const ThumbnailUpdate = ({ thumbnailType, disabled = false, disabledReason }: Th
     [showError, t],
   );
 
+  const validateImageAspectRatio = useCallback(
+    async (blobUrl: string): Promise<boolean> => {
+      try {
+        const dimensions = await new Promise<{ width: number; height: number }>((resolve, reject) => {
+          const image = new globalThis.Image();
+
+          image.onload = () => {
+            resolve({ width: image.naturalWidth, height: image.naturalHeight });
+          };
+
+          image.onerror = () => {
+            reject(new Error('Failed to read image dimensions'));
+          };
+
+          image.src = blobUrl;
+        });
+
+        const actualAspectRatio = dimensions.width / dimensions.height;
+
+        if (Math.abs(actualAspectRatio - REQUIRED_IMAGE_ASPECT_RATIO) > IMAGE_ASPECT_RATIO_TOLERANCE) {
+          showError(
+            t('errors.invalidAspectRatio', {
+              height: dimensions.height,
+              width: dimensions.width,
+            }),
+          );
+          return false;
+        }
+
+        return true;
+      } catch {
+        showError(t('errors.imageReadFailed'));
+        return false;
+      }
+    },
+    [showError, t],
+  );
+
   const updateThumbnail = useCallback(
     async (file: File, type: 'image' | 'video') => {
       const formData = new FormData();
@@ -140,11 +180,22 @@ const ThumbnailUpdate = ({ thumbnailType, disabled = false, disabledReason }: Th
       }
 
       const blobUrl = URL.createObjectURL(file);
+
+      if (type === 'image') {
+        const hasValidAspectRatio = await validateImageAspectRatio(blobUrl);
+
+        if (!hasValidAspectRatio) {
+          URL.revokeObjectURL(blobUrl);
+          event.target.value = '';
+          return;
+        }
+      }
+
       setLocalThumbnail({ file, url: blobUrl, type });
       await updateThumbnail(file, type);
       event.target.value = '';
     },
-    [showError, validateFile, updateThumbnail, t],
+    [showError, validateFile, validateImageAspectRatio, updateThumbnail, t],
   );
 
   const getThumbnailUrl = useCallback(
