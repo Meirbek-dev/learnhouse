@@ -503,7 +503,7 @@ const CoursesHome = ({
             <div className="flex flex-wrap gap-3">
               <Button
                 variant="outline"
-                onClick={() => updateRoute({ view: viewMode === 'table' ? 'cards' : null })}
+                onClick={() => updateRoute({ view: viewMode === 'table' ? null : 'table' })}
               >
                 {viewMode === 'table' ? <LayoutGrid className="size-4" /> : <List className="size-4" />}
                 {viewMode === 'table' ? t('viewMode.cards') : t('viewMode.table')}

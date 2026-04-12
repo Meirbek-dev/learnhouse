@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { apiFetch } from '@/lib/api-client';
 import {
   AlertDialog,
@@ -220,21 +221,36 @@ export default function ExamResultsDashboard({
   const [selectedAttemptUuid, setSelectedAttemptUuid] = useState<string | null>(null);
   const [selectedAttempt, setSelectedAttempt] = useState<any | null>(null);
   const [isAttemptLoading, setIsAttemptLoading] = useState(false);
+  // Cache questions keyed by examUuid so we only fetch once
+  const [questionsMap, setQuestionsMap] = useState<Record<number, any>>({});
 
-  const handleOpenAttempt = async (attemptUuid: string) => {
-    setSelectedAttemptUuid(attemptUuid);
-    setSelectedAttempt(null);
+  const handleOpenAttempt = async (row: AttemptData) => {
+    setSelectedAttemptUuid(row.attempt_uuid);
+    setSelectedAttempt(row);
     setIsAttemptLoading(true);
 
     try {
-      const res = await apiFetch(`exams/${examUuid}/attempts/${attemptUuid}`);
-      if (!res.ok) throw new Error('Failed to fetch attempt');
-      const data = await res.json();
-      setSelectedAttempt(data);
+      const [attemptRes, questionsRes] = await Promise.all([
+        apiFetch(`exams/attempts/${row.attempt_uuid}`),
+        Object.keys(questionsMap).length === 0
+          ? apiFetch(`exams/${examUuid}/questions`)
+          : Promise.resolve(null),
+      ]);
+
+      if (!attemptRes.ok) throw new Error('Failed to fetch attempt');
+      const data = await attemptRes.json();
+      setSelectedAttempt({ ...row, ...data, user_name: row.user_name, percentage: row.percentage, violation_count: row.violation_count });
+
+      if (questionsRes && questionsRes.ok) {
+        const qs: any[] = await questionsRes.json();
+        const map: Record<number, any> = {};
+        for (const q of qs) map[q.id] = q;
+        setQuestionsMap(map);
+      }
     } catch (error) {
       console.error('Failed to load attempt detail', error);
       toast.error(t('errorLoadingAttempt'));
-      setSelectedAttempt(null);
+      setSelectedAttempt(row);
     } finally {
       setIsAttemptLoading(false);
     }
@@ -405,10 +421,10 @@ export default function ExamResultsDashboard({
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault();
-                        handleOpenAttempt(attempt.attempt_uuid);
+                        handleOpenAttempt(attempt);
                       }
                     }}
-                    onClick={() => handleOpenAttempt(attempt.attempt_uuid)}
+                    onClick={() => handleOpenAttempt(attempt)}
                     aria-label={t('openAttemptCard', { name: attempt.user_name })}
                   >
                     <div className="flex items-start justify-between">
@@ -443,7 +459,7 @@ export default function ExamResultsDashboard({
                           variant="ghost"
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleOpenAttempt(attempt.attempt_uuid);
+                            handleOpenAttempt(attempt);
                           }}
                           aria-label={t('viewAttemptAria', { name: attempt.user_name })}
                         >
@@ -551,7 +567,7 @@ export default function ExamResultsDashboard({
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => handleOpenAttempt(attempt.attempt_uuid)}
+                                onClick={() => handleOpenAttempt(attempt)}
                                 aria-label={t('viewAttemptAria', { name: attempt.user_name })}
                               >
                                 <Eye className="mr-2 h-4 w-4" />
@@ -586,7 +602,7 @@ export default function ExamResultsDashboard({
         open={Boolean(selectedAttemptUuid)}
         onOpenChange={(open) => !open && handleCloseAttempt()}
       >
-        <AlertDialogContent className="max-w-3xl">
+        <AlertDialogContent className="min-w-fit max-w-3xl">
           <AlertDialogHeader>
             <AlertDialogTitle>
               {selectedAttempt ? `${selectedAttempt.user_name} - ${selectedAttempt.percentage}%` : t('loadingAttempt')}
@@ -641,11 +657,56 @@ export default function ExamResultsDashboard({
               )}
 
               {selectedAttempt.answers && (
-                <div>
+                <div className="space-y-2">
                   <div className="text-sm font-semibold text-gray-600">{t('answersPreview')}</div>
-                  <pre className="mt-2 max-h-40 overflow-auto rounded bg-gray-50 p-3 text-xs">
-                    {JSON.stringify(selectedAttempt.answers, null, 2)}
-                  </pre>
+                  {isAttemptLoading || Object.keys(questionsMap).length === 0 ? (
+                    <pre className="mt-2 max-h-40 overflow-auto rounded bg-gray-50 p-3 text-xs">
+                      {JSON.stringify(selectedAttempt.answers, null, 2)}
+                    </pre>
+                  ) : (
+                    <div className="mt-2 max-h-64 space-y-2 overflow-auto">
+                      {Object.entries(selectedAttempt.answers as Record<string, any>).map(([qid, userAnswer]) => {
+                        const question = questionsMap[Number(qid)];
+                        if (!question) return null;
+                        const opts: any[] = question.answer_options || [];
+
+                        let answerDisplay: React.ReactNode;
+                        switch (question.question_type) {
+                          case 'SINGLE_CHOICE':
+                          case 'TRUE_FALSE':
+                            answerDisplay = (
+                              <span>{opts[userAnswer as number]?.text ?? String(userAnswer)}</span>
+                            );
+                            break;
+                          case 'MULTIPLE_CHOICE':
+                            answerDisplay = (
+                              <span>
+                                {(Array.isArray(userAnswer) ? userAnswer : []).map((idx: number) => opts[idx]?.text ?? String(idx)).join(', ')}
+                              </span>
+                            );
+                            break;
+                          case 'MATCHING':
+                            answerDisplay = (
+                              <div className="space-y-0.5">
+                                {Object.entries(userAnswer as Record<string, string>).map(([left, right]) => (
+                                  <div key={left} className="text-xs">{left} → {right}</div>
+                                ))}
+                              </div>
+                            );
+                            break;
+                          default:
+                            answerDisplay = <span>{String(userAnswer)}</span>;
+                        }
+
+                        return (
+                          <div key={qid} className="rounded border bg-gray-50 px-3 py-2 text-sm">
+                            <div className="mb-1 font-medium text-gray-700">{question.question_text}</div>
+                            <div className="text-gray-600">{answerDisplay}</div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
