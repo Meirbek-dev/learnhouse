@@ -641,7 +641,7 @@ const ActivityClient = (props: ActivityClientProps) => {
                         </div>
 
                         {/* Action buttons */}
-                          <div className="ml-auto flex items-center gap-2">
+                        <div className="ml-auto flex items-center gap-2">
                           {activity &&
                           (activity.published === true || contributorStatus === 'ACTIVE') &&
                           isAuthenticated ? (
@@ -676,7 +676,7 @@ const ActivityClient = (props: ActivityClientProps) => {
                       </div>
 
                       {/* Authors and dates row */}
-                      {((course.authors && course.authors.length > 0) || course.creation_date) ? (
+                      {(course.authors && course.authors.length > 0) || course.creation_date ? (
                         <div className="flex flex-wrap items-center gap-3">
                           {course.authors && course.authors.length > 0 ? (
                             <>
@@ -980,11 +980,7 @@ export const MarkStatus = (props: {
           disabled={isLoading}
           className="inline-flex cursor-pointer items-center gap-2 rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {isLoading ? (
-            <Loader2 className="size-3.5 animate-spin" />
-          ) : (
-            <CheckCircle size={14} />
-          )}
+          {isLoading ? <Loader2 className="size-3.5 animate-spin" /> : <CheckCircle size={14} />}
           {isLoading ? t('marking') : t('statusComplete')}
         </button>
       ) : (
@@ -994,11 +990,7 @@ export const MarkStatus = (props: {
           disabled={isLoading}
           className="border-border bg-background text-foreground hover:bg-muted inline-flex cursor-pointer items-center gap-2 rounded-md border px-4 py-2 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {isLoading ? (
-            <Loader2 className="size-3.5 animate-spin" />
-          ) : (
-            <Circle size={14} />
-          )}
+          {isLoading ? <Loader2 className="size-3.5 animate-spin" /> : <Circle size={14} />}
           {isLoading ? t('marking') : t('markAsComplete')}
         </button>
       )}

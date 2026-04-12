@@ -118,7 +118,6 @@ else:
     run_migrations_online()
 
 
-
 def include_object(object_, name: str | None, type_: str, reflected: bool, compare_to):
     if not name:
         return True

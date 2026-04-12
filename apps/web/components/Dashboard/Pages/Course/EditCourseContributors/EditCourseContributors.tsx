@@ -639,7 +639,9 @@ const EditCourseContributors = () => {
                   <AlertDialogMedia className="bg-muted text-foreground">
                     <Users className="size-8" />
                   </AlertDialogMedia>
-                  <AlertDialogTitle>{t('removeSelectedConfirmTitle', { count: selectedContributors.length })}</AlertDialogTitle>
+                  <AlertDialogTitle>
+                    {t('removeSelectedConfirmTitle', { count: selectedContributors.length })}
+                  </AlertDialogTitle>
                   <AlertDialogDescription>
                     {t('removeSelectedConfirmMessage', { count: selectedContributors.length })}
                   </AlertDialogDescription>

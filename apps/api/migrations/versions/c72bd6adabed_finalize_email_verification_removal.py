@@ -5,14 +5,15 @@ Revises: b84feb892d7a
 Create Date: 2026-04-11 17:22:14.454786
 
 """
+
 import sqlalchemy as sa
 from alembic import op
 from typing import Sequence, Union
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'c72bd6adabed'
-down_revision: Union[str, None] = 'b84feb892d7a'
+revision: str = "c72bd6adabed"
+down_revision: Union[str, None] = "b84feb892d7a"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -48,5 +49,7 @@ def downgrade() -> None:
             )
         if "email_verified_at" not in column_names:
             batch_op.add_column(
-                sa.Column("email_verified_at", sa.DateTime(timezone=True), nullable=True)
+                sa.Column(
+                    "email_verified_at", sa.DateTime(timezone=True), nullable=True
+                )
             )

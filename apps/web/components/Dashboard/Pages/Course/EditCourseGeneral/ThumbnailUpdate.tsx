@@ -1,11 +1,13 @@
 import { ArrowBigUpDash, Image as ImageIcon, UploadCloud, Video } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@components/ui/tabs';
 import { useCoursesMutations } from '@/hooks/mutations/useCoursesMutations';
+import { useSaveSection } from '@/hooks/useSaveSection';
 import { Alert, AlertDescription, AlertTitle } from '@components/ui/alert';
 
 import { getCourseThumbnailMediaDirectory } from '@services/media/media';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useCourse } from '@components/Contexts/CourseContext';
+import { useCourseEditorStore } from '@/stores/courses';
 import { Card, CardContent } from '@components/ui/card';
 import { Button } from '@components/ui/button';
 import { useTranslations } from 'next-intl';
@@ -41,11 +43,15 @@ const ThumbnailUpdate = ({ thumbnailType, disabled = false, disabledReason }: Th
 
   const course = useCourse();
   const { updateThumbnail: updateThumbnailMutation } = useCoursesMutations(course.courseStructure.course_uuid, true);
+  const lastKnownUpdateDate = useCourseEditorStore((state) => state.lastKnownUpdateDate);
   const t = useTranslations('CourseEdit.General.Thumbnail');
 
   const [localThumbnail, setLocalThumbnail] = useState<LocalThumbnail | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>(thumbnailType === 'video' ? 'video' : 'image');
+  const { isSaving, saveWithoutRefresh } = useSaveSection({
+    section: 'general',
+    errorMessage: t('errors.updateFailed'),
+  });
 
   // Cleanup blob URLs
   useEffect(() => {
@@ -101,27 +107,22 @@ const ThumbnailUpdate = ({ thumbnailType, disabled = false, disabledReason }: Th
 
   const updateThumbnail = useCallback(
     async (file: File, type: 'image' | 'video') => {
-      setIsLoading(true);
-      try {
-        const formData = new FormData();
-        formData.append('thumbnail', file);
-        formData.append('thumbnail_type', type);
+      const formData = new FormData();
+      formData.append('thumbnail', file);
+      formData.append('thumbnail_type', type);
 
-        await updateThumbnailMutation(formData, {
-          lastKnownUpdateDate: course.courseStructure.update_date,
-        });
-        setLocalThumbnail(null);
-        toast.success(t('thumbnailUpdatedSuccessfully'), {
-          duration: 3000,
-          position: 'top-center',
-        });
-      } catch {
-        showError(t('errors.updateFailed'));
-      } finally {
-        setIsLoading(false);
-      }
+      await saveWithoutRefresh(
+        async () =>
+          updateThumbnailMutation(formData, {
+            lastKnownUpdateDate: lastKnownUpdateDate ?? course.courseStructure.update_date ?? null,
+          }),
+        {
+          onSuccess: () => setLocalThumbnail(null),
+          successMessage: t('thumbnailUpdatedSuccessfully'),
+        },
+      );
     },
-    [course, showError, t, updateThumbnailMutation],
+    [course.courseStructure.update_date, lastKnownUpdateDate, saveWithoutRefresh, t, updateThumbnailMutation],
   );
 
   const handleFileChange = useCallback(
@@ -141,6 +142,7 @@ const ThumbnailUpdate = ({ thumbnailType, disabled = false, disabledReason }: Th
       const blobUrl = URL.createObjectURL(file);
       setLocalThumbnail({ file, url: blobUrl, type });
       await updateThumbnail(file, type);
+      event.target.value = '';
     },
     [showError, validateFile, updateThumbnail, t],
   );
@@ -184,7 +186,7 @@ const ThumbnailUpdate = ({ thumbnailType, disabled = false, disabledReason }: Th
           <video
             src={thumbnailToShow.url}
             className={`border-border aspect-video w-full rounded-lg border object-cover shadow-sm ${
-              isLoading ? 'animate-pulse' : ''
+              isSaving ? 'animate-pulse' : ''
             }`}
             controls
           >
@@ -205,7 +207,7 @@ const ThumbnailUpdate = ({ thumbnailType, disabled = false, disabledReason }: Th
           src={thumbnailToShow.url}
           alt={localThumbnail ? t('thumbnailPreviewAlt') : t('currentThumbnailAlt')}
           className={`border-border aspect-video w-full rounded-lg border object-cover shadow-sm ${
-            isLoading ? 'animate-pulse' : ''
+            isSaving ? 'animate-pulse' : ''
           }`}
           width={480}
           height={270}
@@ -213,7 +215,7 @@ const ThumbnailUpdate = ({ thumbnailType, disabled = false, disabledReason }: Th
         />
       </div>
     );
-  }, [localThumbnail, activeTab, getThumbnailUrl, isLoading, t]);
+  }, [localThumbnail, activeTab, getThumbnailUrl, isSaving, t]);
 
   const renderImageControls = () => (
     <>
@@ -224,13 +226,13 @@ const ThumbnailUpdate = ({ thumbnailType, disabled = false, disabledReason }: Th
         accept=".jpg,.jpeg,.png"
         onChange={(e) => handleFileChange(e, 'image')}
         aria-label={t('ariaLabelImage')}
-        disabled={isLoading || disabled}
+        disabled={isSaving || disabled}
       />
       <Button
         type="button"
         variant="outline"
         size="default"
-        disabled={isLoading || disabled}
+        disabled={isSaving || disabled}
         onClick={() => imageInputRef.current?.click()}
         className="flex-1"
       >
@@ -249,13 +251,13 @@ const ThumbnailUpdate = ({ thumbnailType, disabled = false, disabledReason }: Th
         accept=".mp4,.webm,.mkv"
         onChange={(e) => handleFileChange(e, 'video')}
         aria-label={t('ariaLabelVideo')}
-        disabled={isLoading || disabled}
+        disabled={isSaving || disabled}
       />
       <Button
         type="button"
         variant="outline"
         size="default"
-        disabled={isLoading || disabled}
+        disabled={isSaving || disabled}
         onClick={() => videoInputRef.current?.click()}
         className="flex-1"
       >
@@ -276,14 +278,14 @@ const ThumbnailUpdate = ({ thumbnailType, disabled = false, disabledReason }: Th
             <TabsList className="mb-6 grid w-full grid-cols-2">
               <TabsTrigger
                 value="image"
-                disabled={isLoading || disabled}
+                disabled={isSaving || disabled}
               >
                 <ImageIcon className="mr-2 h-4 w-4" />
                 {t('image')}
               </TabsTrigger>
               <TabsTrigger
                 value="video"
-                disabled={isLoading || disabled}
+                disabled={isSaving || disabled}
               >
                 <Video className="mr-2 h-4 w-4" />
                 {t('video')}
@@ -296,7 +298,7 @@ const ThumbnailUpdate = ({ thumbnailType, disabled = false, disabledReason }: Th
             >
               {renderThumbnailPreview()}
 
-              {isLoading ? (
+              {isSaving ? (
                 <div className="flex items-center justify-center">
                   <div className="text-muted-foreground bg-muted flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium">
                     <ArrowBigUpDash className="h-4 w-4 animate-bounce" />
@@ -322,7 +324,7 @@ const ThumbnailUpdate = ({ thumbnailType, disabled = false, disabledReason }: Th
             >
               {renderThumbnailPreview()}
 
-              {isLoading ? (
+              {isSaving ? (
                 <div className="flex items-center justify-center">
                   <div className="text-muted-foreground bg-muted flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium">
                     <ArrowBigUpDash className="h-4 w-4 animate-bounce" />
@@ -353,7 +355,7 @@ const ThumbnailUpdate = ({ thumbnailType, disabled = false, disabledReason }: Th
       <CardContent className="space-y-6 p-6">
         {renderThumbnailPreview()}
 
-        {isLoading ? (
+        {isSaving ? (
           <div className="flex items-center justify-center">
             <div className="text-muted-foreground bg-muted flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium">
               <ArrowBigUpDash className="h-4 w-4 animate-bounce" />

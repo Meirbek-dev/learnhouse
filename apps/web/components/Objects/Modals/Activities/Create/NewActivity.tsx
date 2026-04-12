@@ -115,7 +115,7 @@ export default function NewActivityModal({
   if (selectedView === 'home') {
     return (
       <div className="w-full space-y-3">
-        <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-400">{t('chooseType')}</p>
+        <p className="text-[11px] font-semibold tracking-widest text-gray-400 uppercase">{t('chooseType')}</p>
         <div className="overflow-hidden rounded-xl border border-gray-200">
           {ACTIVITY_TYPES.map((activity, index) => (
             <ActivityTypeRow
@@ -138,7 +138,7 @@ export default function NewActivityModal({
       <button
         type="button"
         onClick={handleBack}
-        className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-sm font-medium text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-200"
+        className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-sm font-medium text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 focus-visible:ring-2 focus-visible:ring-gray-200 focus-visible:outline-none"
       >
         <ArrowLeft className="h-3.5 w-3.5" />
         {t('backToActivities')}
@@ -196,7 +196,14 @@ interface ActivityTypeRowProps {
   isLast?: boolean;
 }
 
-function ActivityTypeRow({ config, label, description, onClick, isLoading = false, isLast = false }: ActivityTypeRowProps) {
+function ActivityTypeRow({
+  config,
+  label,
+  description,
+  onClick,
+  isLoading = false,
+  isLast = false,
+}: ActivityTypeRowProps) {
   const Icon = config.icon;
 
   return (

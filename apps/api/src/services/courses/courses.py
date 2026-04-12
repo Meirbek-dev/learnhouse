@@ -1000,9 +1000,7 @@ async def update_course_thumbnail(
     # Upload thumbnail
     name_in_disk = None
     if thumbnail_file and thumbnail_file.filename:
-        name_in_disk = (
-            f"{course.course_uuid}_thumbnail_{ULID()}.{thumbnail_file.filename.split('.')[-1]}"
-        )
+        name_in_disk = f"{course.course_uuid}_thumbnail_{ULID()}.{thumbnail_file.filename.split('.')[-1]}"
         await upload_thumbnail(
             thumbnail_file,
             name_in_disk,

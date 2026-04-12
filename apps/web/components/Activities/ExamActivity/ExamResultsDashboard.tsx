@@ -232,14 +232,18 @@ export default function ExamResultsDashboard({
     try {
       const [attemptRes, questionsRes] = await Promise.all([
         apiFetch(`exams/attempts/${row.attempt_uuid}`),
-        Object.keys(questionsMap).length === 0
-          ? apiFetch(`exams/${examUuid}/questions`)
-          : Promise.resolve(null),
+        Object.keys(questionsMap).length === 0 ? apiFetch(`exams/${examUuid}/questions`) : Promise.resolve(null),
       ]);
 
       if (!attemptRes.ok) throw new Error('Failed to fetch attempt');
       const data = await attemptRes.json();
-      setSelectedAttempt({ ...row, ...data, user_name: row.user_name, percentage: row.percentage, violation_count: row.violation_count });
+      setSelectedAttempt({
+        ...row,
+        ...data,
+        user_name: row.user_name,
+        percentage: row.percentage,
+        violation_count: row.violation_count,
+      });
 
       if (questionsRes && questionsRes.ok) {
         const qs: any[] = await questionsRes.json();
@@ -602,7 +606,7 @@ export default function ExamResultsDashboard({
         open={Boolean(selectedAttemptUuid)}
         onOpenChange={(open) => !open && handleCloseAttempt()}
       >
-        <AlertDialogContent className="min-w-fit max-w-3xl">
+        <AlertDialogContent className="max-w-3xl min-w-fit">
           <AlertDialogHeader>
             <AlertDialogTitle>
               {selectedAttempt ? `${selectedAttempt.user_name} - ${selectedAttempt.percentage}%` : t('loadingAttempt')}
@@ -674,14 +678,14 @@ export default function ExamResultsDashboard({
                         switch (question.question_type) {
                           case 'SINGLE_CHOICE':
                           case 'TRUE_FALSE':
-                            answerDisplay = (
-                              <span>{opts[userAnswer as number]?.text ?? String(userAnswer)}</span>
-                            );
+                            answerDisplay = <span>{opts[userAnswer as number]?.text ?? String(userAnswer)}</span>;
                             break;
                           case 'MULTIPLE_CHOICE':
                             answerDisplay = (
                               <span>
-                                {(Array.isArray(userAnswer) ? userAnswer : []).map((idx: number) => opts[idx]?.text ?? String(idx)).join(', ')}
+                                {(Array.isArray(userAnswer) ? userAnswer : [])
+                                  .map((idx: number) => opts[idx]?.text ?? String(idx))
+                                  .join(', ')}
                               </span>
                             );
                             break;
@@ -689,7 +693,12 @@ export default function ExamResultsDashboard({
                             answerDisplay = (
                               <div className="space-y-0.5">
                                 {Object.entries(userAnswer as Record<string, string>).map(([left, right]) => (
-                                  <div key={left} className="text-xs">{left} → {right}</div>
+                                  <div
+                                    key={left}
+                                    className="text-xs"
+                                  >
+                                    {left} → {right}
+                                  </div>
                                 ))}
                               </div>
                             );
@@ -699,7 +708,10 @@ export default function ExamResultsDashboard({
                         }
 
                         return (
-                          <div key={qid} className="rounded border bg-gray-50 px-3 py-2 text-sm">
+                          <div
+                            key={qid}
+                            className="rounded border bg-gray-50 px-3 py-2 text-sm"
+                          >
                             <div className="mb-1 font-medium text-gray-700">{question.question_text}</div>
                             <div className="text-gray-600">{answerDisplay}</div>
                           </div>

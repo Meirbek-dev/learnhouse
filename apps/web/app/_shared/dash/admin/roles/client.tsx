@@ -104,10 +104,17 @@ export default function RBACAdminClient() {
     );
   }, [session.session?.roles]);
 
-  const { data: permissions = EMPTY_PERMISSIONS, isLoading: permissionsLoading, error: permissionsError } =
-    usePlatformPermissions();
-  const { data: fetchedRoles = EMPTY_ROLES, isLoading: loadingRoles, error: rolesError, refetch: refetchRoles } =
-    useRoles();
+  const {
+    data: permissions = EMPTY_PERMISSIONS,
+    isLoading: permissionsLoading,
+    error: permissionsError,
+  } = usePlatformPermissions();
+  const {
+    data: fetchedRoles = EMPTY_ROLES,
+    isLoading: loadingRoles,
+    error: rolesError,
+    refetch: refetchRoles,
+  } = useRoles();
   const auditLogQuery = useRoleAuditLog(auditPage, 20, {
     enabled: activeTab === 'audit',
   });

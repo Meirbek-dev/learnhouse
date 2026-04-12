@@ -50,7 +50,17 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    op.drop_index("document_chunks_collection_name_idx", table_name="document_chunks", if_exists=True)
-    op.drop_index("document_chunks_embedding_hnsw_idx", table_name="document_chunks", if_exists=True)
-    op.drop_index("document_chunks_inserted_at_idx", table_name="document_chunks", if_exists=True)
+    op.drop_index(
+        "document_chunks_collection_name_idx",
+        table_name="document_chunks",
+        if_exists=True,
+    )
+    op.drop_index(
+        "document_chunks_embedding_hnsw_idx",
+        table_name="document_chunks",
+        if_exists=True,
+    )
+    op.drop_index(
+        "document_chunks_inserted_at_idx", table_name="document_chunks", if_exists=True
+    )
     op.execute("DROP TABLE IF EXISTS document_chunks")

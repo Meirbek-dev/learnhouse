@@ -68,7 +68,8 @@ export default function TeacherKpiCards({ cards }: TeacherKpiCardsProps) {
   return (
     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
       {cards.map(({ metric, sparkline, definition }) => {
-        const displayValue = metric.unit === '%' ? `${numberFormatter.format(metric.value)}%` : numberFormatter.format(metric.value);
+        const displayValue =
+          metric.unit === '%' ? `${numberFormatter.format(metric.value)}%` : numberFormatter.format(metric.value);
 
         let deltaLabel: string;
         if (metric.delta_pct === null && metric.delta_value === null) {
@@ -103,7 +104,10 @@ export default function TeacherKpiCards({ cards }: TeacherKpiCardsProps) {
                 <CardTitle className="text-foreground mt-3 text-3xl font-semibold">{displayValue}</CardTitle>
                 {metric.benchmark !== null && metric.benchmark !== undefined && (
                   <div className="text-muted-foreground mt-1 text-xs">
-                    {metric.benchmark_label}: {metric.unit === '%' ? `${numberFormatter.format(metric.benchmark)}%` : numberFormatter.format(metric.benchmark)}
+                    {metric.benchmark_label}:{' '}
+                    {metric.unit === '%'
+                      ? `${numberFormatter.format(metric.benchmark)}%`
+                      : numberFormatter.format(metric.benchmark)}
                   </div>
                 )}
                 <Sparkline

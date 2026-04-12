@@ -279,7 +279,7 @@ function EditCourseGeneral() {
                 <FieldError errors={[form.formState.errors.description]} />
               </Field>
 
-            {/*<Field>
+              {/*<Field>
                 <FieldLabel
                   className="text-base font-semibold"
                   htmlFor="about"

@@ -376,7 +376,7 @@ const ActivityElement = ({ activity, activityIndex, course_uuid }: ActivityEleme
                   <Button
                     size="icon"
                     variant="outline"
-                    className="text-muted-foreground shadow-sm hover:text-destructive"
+                    className="text-muted-foreground hover:text-destructive shadow-sm"
                     onClick={() => setIsDeleteDialogOpen(true)}
                   >
                     <Trash2 className="h-4 w-4" />

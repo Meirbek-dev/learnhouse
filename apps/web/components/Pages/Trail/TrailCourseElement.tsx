@@ -38,7 +38,7 @@ const TrailCourseElement = ({ course, run }: TrailCourseElementProps) => {
   }
 
   return (
-    <div className="flex gap-4 rounded-xl border border-border bg-card p-4 transition-shadow hover:shadow-md">
+    <div className="border-border bg-card flex gap-4 rounded-xl border p-4 transition-shadow hover:shadow-md">
       {/* Thumbnail */}
       <Link
         prefetch={false}
@@ -46,7 +46,7 @@ const TrailCourseElement = ({ course, run }: TrailCourseElementProps) => {
         className="shrink-0"
       >
         <div
-          className="h-[76px] w-[108px] rounded-lg bg-cover bg-center ring-1 ring-inset ring-border"
+          className="ring-border h-[76px] w-[108px] rounded-lg bg-cover bg-center ring-1 ring-inset"
           style={{
             backgroundImage: course.thumbnail_image
               ? `url(${getCourseThumbnailMediaDirectory(course.course_uuid, course.thumbnail_image)})`
@@ -60,21 +60,21 @@ const TrailCourseElement = ({ course, run }: TrailCourseElementProps) => {
         {/* Title row */}
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="mb-0.5 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+            <p className="text-muted-foreground mb-0.5 text-[11px] font-medium tracking-wider uppercase">
               {t('courseLabel')}
             </p>
             <Link
               prefetch={false}
               href={getAbsoluteUrl(`/course/${courseid}`)}
             >
-              <h3 className="truncate text-base font-semibold leading-snug text-foreground transition-colors hover:text-primary">
+              <h3 className="text-foreground hover:text-primary truncate text-base leading-snug font-semibold transition-colors">
                 {course.name}
               </h3>
             </Link>
           </div>
           <button
             onClick={() => quitCourse(course.course_uuid)}
-            className="mt-0.5 inline-flex shrink-0 items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+            className="text-muted-foreground hover:bg-destructive/10 hover:text-destructive mt-0.5 inline-flex shrink-0 items-center gap-1 rounded-md px-2 py-1 text-xs font-medium transition-colors"
           >
             <X className="h-3 w-3" />
             {t('quitCourseButton')}
@@ -83,7 +83,7 @@ const TrailCourseElement = ({ course, run }: TrailCourseElementProps) => {
 
         {/* Progress */}
         <div className="space-y-1.5">
-          <div className="flex items-center justify-between text-xs text-muted-foreground">
+          <div className="text-muted-foreground flex items-center justify-between text-xs">
             <span className="tabular-nums">
               {course_completed_steps}&thinsp;/&thinsp;{course_total_steps} {t('stepsLabel')}
             </span>
@@ -91,9 +91,9 @@ const TrailCourseElement = ({ course, run }: TrailCourseElementProps) => {
               {course_progress}%
             </span>
           </div>
-          <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+          <div className="bg-muted h-1.5 w-full overflow-hidden rounded-full">
             <div
-              className="h-full rounded-full bg-primary transition-all duration-300"
+              className="bg-primary h-full rounded-full transition-all duration-300"
               style={{ width: `${course_progress}%` }}
             />
           </div>
@@ -103,7 +103,7 @@ const TrailCourseElement = ({ course, run }: TrailCourseElementProps) => {
         {isCompleted && (
           <div className="flex items-center gap-1.5">
             {isLoadingCertificate ? (
-              <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
+              <span className="text-muted-foreground inline-flex items-center gap-1.5 text-xs">
                 <Loader2 className="h-3 w-3 animate-spin" />
                 {t('loadingCertificate')}
               </span>
@@ -115,15 +115,15 @@ const TrailCourseElement = ({ course, run }: TrailCourseElementProps) => {
                 )}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1 text-xs font-medium text-foreground transition-colors hover:bg-muted/60"
+                className="border-border text-foreground hover:bg-muted/60 inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-medium transition-colors"
               >
-                <Award className="h-3.5 w-3.5 text-primary" />
+                <Award className="text-primary h-3.5 w-3.5" />
                 {t('downloadCertificate')}
-                <ExternalLink className="h-3 w-3 text-muted-foreground" />
+                <ExternalLink className="text-muted-foreground h-3 w-3" />
               </Link>
             ) : (
-              <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-                <Award className="h-3 w-3 text-muted-foreground/40" />
+              <span className="text-muted-foreground inline-flex items-center gap-1.5 text-xs">
+                <Award className="text-muted-foreground/40 h-3 w-3" />
                 {t('noCertificateAvailable')}
               </span>
             )}

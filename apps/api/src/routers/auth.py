@@ -259,9 +259,7 @@ def _sanitize_callback_target(callback: str) -> str:
         raise HTTPException(status_code=400, detail="Untrusted callback origin")
 
     query = urlencode(parse_qsl(parsed.query, keep_blank_values=True))
-    return urlunsplit(
-        (parsed.scheme, parsed.netloc, parsed.path or "/", query, "")
-    )
+    return urlunsplit((parsed.scheme, parsed.netloc, parsed.path or "/", query, ""))
 
 
 # ── Endpoints ─────────────────────────────────────────────────────────────────

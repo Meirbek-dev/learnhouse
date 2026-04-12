@@ -244,7 +244,7 @@ const ChapterTooltipContent = ({
           )}
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-muted-foreground text-[10px] font-medium uppercase tracking-wide">
+          <p className="text-muted-foreground text-[10px] font-medium tracking-wide uppercase">
             {t('chapter')} {chapterNumber}
           </p>
           <p className="text-popover-foreground truncate text-sm font-medium">{chapter.name}</p>

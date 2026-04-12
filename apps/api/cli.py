@@ -104,7 +104,9 @@ def install(
                 print()
                 print("Login with the following credentials:")
                 print("email: " + str(admin_email))
-                print("password: (the password you set in PLATFORM_INITIAL_ADMIN_PASSWORD)")
+                print(
+                    "password: (the password you set in PLATFORM_INITIAL_ADMIN_PASSWORD)"
+                )
                 print("⚠️ Remember to change the password after logging in ⚠️")
 
             else:
@@ -154,7 +156,9 @@ def refresh_analytics(
     factory = build_session_factory(engine)
     try:
         with session_scope(factory) as db_session:
-            parsed_snapshot = date.fromisoformat(snapshot_date) if snapshot_date else None
+            parsed_snapshot = (
+                date.fromisoformat(snapshot_date) if snapshot_date else None
+            )
             result = refresh_teacher_analytics_rollups(
                 db_session, snapshot_date=parsed_snapshot
             )
@@ -201,9 +205,13 @@ def migrate_users_to_platform() -> None:
             all_users = db_session.exec(select(User)).all()
             print(f"\n📊 Found {len(all_users)} total users in database")
 
-            users_with_roles = db_session.exec(select(UserRole.user_id).distinct()).all()
+            users_with_roles = db_session.exec(
+                select(UserRole.user_id).distinct()
+            ).all()
             user_ids_with_roles = {user_id for (user_id,) in users_with_roles}
-            print(f"📊 {len(user_ids_with_roles)} users already have platform memberships")
+            print(
+                f"📊 {len(user_ids_with_roles)} users already have platform memberships"
+            )
 
             users_without_platform = [
                 u for u in all_users if u.id not in user_ids_with_roles

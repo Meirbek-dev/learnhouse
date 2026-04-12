@@ -66,4 +66,3 @@ def delete_keys(*keys: str) -> None:
             r.delete(*keys)
     except Exception:
         _logger.exception("redis delete_keys failed: %s", keys)
-

@@ -98,8 +98,11 @@ const TimeInput = ({
   t: any;
 }) => (
   <div className="space-y-2">
-    <Label className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-gray-400">
-      <Icon size={13} className="text-gray-400" />
+    <Label className="flex items-center gap-1.5 text-xs font-semibold tracking-wide text-gray-400 uppercase">
+      <Icon
+        size={13}
+        className="text-gray-400"
+      />
       {label}
     </Label>
     <div className="flex items-center gap-2">
@@ -130,7 +133,7 @@ const TimeInput = ({
         <span className="mt-1 block text-center text-xs text-gray-400">{t('seconds')}</span>
       </div>
     </div>
-    <p className="text-xs tabular-nums text-gray-400">{formatTime(minutes * 60 + seconds)}</p>
+    <p className="text-xs text-gray-400 tabular-nums">{formatTime(minutes * 60 + seconds)}</p>
   </div>
 );
 
@@ -313,7 +316,10 @@ const SubtitleManager = ({
 
         {subtitles.length === 0 ? (
           <div className="flex flex-col items-center gap-2 text-center">
-            <UploadCloud size={20} className="text-gray-300" />
+            <UploadCloud
+              size={20}
+              className="text-gray-300"
+            />
             <p className="text-sm text-gray-500">{t('noSubtitlesYet')}</p>
             <p className="text-xs text-gray-400">{t('dragDropSubtitlesInstruction')}</p>
             <div className="mt-1 flex items-center gap-3 text-xs text-gray-400">
@@ -367,7 +373,10 @@ const SubtitleManager = ({
                 exit={{ opacity: 0 }}
                 className="group flex items-center gap-3 px-3 py-2.5"
               >
-                <Languages size={14} className="shrink-0 text-gray-300" />
+                <Languages
+                  size={14}
+                  className="shrink-0 text-gray-300"
+                />
                 <span
                   className="min-w-0 flex-1 truncate text-sm text-gray-700"
                   title={subtitle.file.name}
@@ -415,7 +424,7 @@ const SubtitleManager = ({
                     ))}
                   </DropdownMenuContent>
                 </DropdownMenu>
-                <span className="tabular-nums text-xs text-gray-400">{(subtitle.file.size / 1024).toFixed(0)} KB</span>
+                <span className="text-xs text-gray-400 tabular-nums">{(subtitle.file.size / 1024).toFixed(0)} KB</span>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -524,7 +533,7 @@ const VideoSettingsForm = ({
         <div className="mt-2 space-y-5 rounded-lg border border-gray-200 bg-white p-5">
           {/* Timing Controls */}
           <div className="space-y-3">
-            <h4 className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
+            <h4 className="flex items-center gap-2 text-xs font-semibold tracking-wide text-gray-400 uppercase">
               <Clock size={13} />
               {t('timingControls')}
             </h4>
@@ -575,7 +584,7 @@ const VideoSettingsForm = ({
 
           {/* Playback Options */}
           <div className="space-y-3">
-            <h4 className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
+            <h4 className="flex items-center gap-2 text-xs font-semibold tracking-wide text-gray-400 uppercase">
               <Play size={13} />
               {t('playbackOptions')}
             </h4>
@@ -619,7 +628,7 @@ const VideoSettingsForm = ({
 
           {/* Subtitles */}
           <div className="space-y-3">
-            <h4 className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-gray-400">
+            <h4 className="flex items-center gap-2 text-xs font-semibold tracking-wide text-gray-400 uppercase">
               <Languages size={13} />
               {t('subtitlesAndCaptions')}
             </h4>

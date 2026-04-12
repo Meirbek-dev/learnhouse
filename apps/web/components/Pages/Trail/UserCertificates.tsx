@@ -1,16 +1,16 @@
-"use client";
+'use client';
 
-import { Award, Building, Calendar, ExternalLink, Hash } from "lucide-react";
-import { getAbsoluteUrl } from "@services/config/config";
-import { useFormatter, useTranslations } from "next-intl";
-import { useUserCertificates } from "@/features/certifications/hooks/useCertifications";
-import Link from "@components/ui/AppLink";
-import type React from "react";
-import { Separator } from "react-resizable-panels";
+import { Award, Building, Calendar, ExternalLink, Hash } from 'lucide-react';
+import { getAbsoluteUrl } from '@services/config/config';
+import { useFormatter, useTranslations } from 'next-intl';
+import { useUserCertificates } from '@/features/certifications/hooks/useCertifications';
+import Link from '@components/ui/AppLink';
+import type React from 'react';
+import { Separator } from 'react-resizable-panels';
 
 const UserCertificates: React.FC = () => {
   const format = useFormatter();
-  const t = useTranslations("Certificates.UserCertificates");
+  const t = useTranslations('Certificates.UserCertificates');
 
   const { data: certificates, error, isLoading } = useUserCertificates();
 
@@ -19,13 +19,14 @@ const UserCertificates: React.FC = () => {
       <div className="border-border bg-card text-card-foreground rounded-xl border p-6 shadow-sm">
         <div className="mb-4 flex items-center gap-3">
           <Award className="text-primary h-6 w-6" />
-          <h2 className="text-foreground text-xl font-semibold">
-            {t("myCertificates")}
-          </h2>
+          <h2 className="text-foreground text-xl font-semibold">{t('myCertificates')}</h2>
         </div>
         <div className="animate-pulse space-y-4">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="bg-muted h-20 rounded-lg" />
+            <div
+              key={i}
+              className="bg-muted h-20 rounded-lg"
+            />
           ))}
         </div>
       </div>
@@ -37,39 +38,29 @@ const UserCertificates: React.FC = () => {
       <div className="border-border bg-card text-card-foreground rounded-xl border p-6 shadow-sm">
         <div className="mb-4 flex items-center gap-3">
           <Award className="text-primary h-6 w-6" />
-          <h2 className="text-foreground text-xl font-semibold">
-            {t("myCertificates")}
-          </h2>
+          <h2 className="text-foreground text-xl font-semibold">{t('myCertificates')}</h2>
         </div>
         <div className="py-8 text-center">
-          <p className="text-muted-foreground">
-            {t("failedToLoadCertificates")}
-          </p>
+          <p className="text-muted-foreground">{t('failedToLoadCertificates')}</p>
         </div>
       </div>
     );
   }
 
   // Handle the actual API response structure - certificates are returned as an array directly
-  const certificatesData = Array.isArray(certificates)
-    ? certificates
-    : certificates?.data || [];
+  const certificatesData = Array.isArray(certificates) ? certificates : certificates?.data || [];
 
   if (!certificatesData || certificatesData.length === 0) {
     return (
       <div className="border-border bg-card text-card-foreground rounded-xl border p-6 shadow-sm">
         <div className="mb-4 flex items-center gap-3">
           <Award className="text-primary h-6 w-6" />
-          <h2 className="text-foreground text-xl font-semibold">
-            {t("myCertificates")}
-          </h2>
+          <h2 className="text-foreground text-xl font-semibold">{t('myCertificates')}</h2>
         </div>
         <div className="py-8 text-center">
           <Award className="text-muted-foreground/40 mx-auto mb-3 h-12 w-12" />
-          <p className="text-muted-foreground">{t("noCertificatesEarned")}</p>
-          <p className="text-muted-foreground mt-1 text-sm">
-            {t("completeCoursesToEarn")}
-          </p>
+          <p className="text-muted-foreground">{t('noCertificatesEarned')}</p>
+          <p className="text-muted-foreground mt-1 text-sm">{t('completeCoursesToEarn')}</p>
         </div>
       </div>
     );
@@ -79,9 +70,7 @@ const UserCertificates: React.FC = () => {
     <div className="p-2">
       <div className="mb-6 flex items-center gap-3">
         <Award className="text-primary h-6 w-6" />
-        <h2 className="text-foreground text-xl font-semibold">
-          {t("myCertificates")}
-        </h2>
+        <h2 className="text-foreground text-xl font-semibold">{t('myCertificates')}</h2>
         <span className="bg-secondary text-secondary-foreground rounded-full px-2.5 py-0.5 text-xs font-medium">
           {certificatesData.length}
         </span>
@@ -92,16 +81,13 @@ const UserCertificates: React.FC = () => {
           const verificationLink = getAbsoluteUrl(
             `/certificates/${certificate.certificate_user.user_certification_uuid}/verify`,
           );
-          const awardedDate = format.dateTime(
-            new Date(certificate.certificate_user.created_at),
-            {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-              // Use Almaty timezone to avoid ENVIRONMENT_FALLBACK errors and match the platform locale
-              timeZone: "Asia/Almaty",
-            },
-          );
+          const awardedDate = format.dateTime(new Date(certificate.certificate_user.created_at), {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            // Use Almaty timezone to avoid ENVIRONMENT_FALLBACK errors and match the platform locale
+            timeZone: 'Asia/Almaty',
+          });
 
           return (
             <div
@@ -125,7 +111,7 @@ const UserCertificates: React.FC = () => {
                   <div className="flex items-center gap-2">
                     <Calendar className="h-3 w-3" />
                     <span>
-                      {t("awardedOn")} {awardedDate}
+                      {t('awardedOn')} {awardedDate}
                     </span>
                   </div>
 
@@ -139,10 +125,7 @@ const UserCertificates: React.FC = () => {
 
                 <div className="border-border flex items-center justify-between border-t pt-2">
                   <div className="text-muted-foreground text-xs capitalize">
-                    {certificate.certification.config.certification_type.replace(
-                      "_",
-                      " ",
-                    )}
+                    {certificate.certification.config.certification_type.replace('_', ' ')}
                   </div>
                   <Link
                     prefetch={false}
@@ -151,7 +134,7 @@ const UserCertificates: React.FC = () => {
                     rel="noopener noreferrer"
                     className="text-primary hover:text-primary/80 inline-flex items-center gap-1 text-xs font-medium"
                   >
-                    <span>{t("verifyCertificate")}</span>
+                    <span>{t('verifyCertificate')}</span>
                     <ExternalLink className="h-3 w-3" />
                   </Link>
                 </div>

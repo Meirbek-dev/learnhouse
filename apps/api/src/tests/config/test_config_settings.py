@@ -105,9 +105,7 @@ def test_security_config_requires_key_material() -> None:
 
 
 def test_database_config_accepts_sqlite_for_test_engine() -> None:
-    cfg = DatabaseConfig.model_validate(
-        {"PLATFORM_SQL_CONNECTION_STRING": "sqlite://"}
-    )
+    cfg = DatabaseConfig.model_validate({"PLATFORM_SQL_CONNECTION_STRING": "sqlite://"})
 
     assert cfg.sql_connection_string == "sqlite://"
 

@@ -57,7 +57,7 @@ const NavigationButtons = ({
       </div>
     </button>
 
-    <span className="text-muted-foreground select-none px-2 text-xs font-medium tabular-nums">
+    <span className="text-muted-foreground px-2 text-xs font-medium tabular-nums select-none">
       {currentIndex + 1} / {allActivities.length}
     </span>
 
