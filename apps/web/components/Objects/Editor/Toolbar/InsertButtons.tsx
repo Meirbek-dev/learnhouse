@@ -46,7 +46,7 @@ export function InsertButtons({ editor }: InsertButtonsProps) {
                         onClick={() => item.run(editor)}
                         aria-label={item.label}
                         title={item.label}
-                        className="text-muted-foreground hover:text-foreground"
+                        className=""
                       >
                         {item.icon}
                       </Button>

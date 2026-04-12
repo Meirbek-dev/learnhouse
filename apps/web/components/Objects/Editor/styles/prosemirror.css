@@ -423,7 +423,7 @@
 
 .prosemirror-interactive-layout-toc {
   flex: 0 0 auto;
-  width: clamp(15rem, 20vw, 24rem);
+  width: clamp(15rem, 20vw, 22rem);
   position: sticky;
   top: 2rem;
   align-self: flex-start;
