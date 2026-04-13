@@ -2,6 +2,8 @@
 
 import { HydrationBoundary, QueryClientProvider } from '@tanstack/react-query';
 import type { DehydratedState } from '@tanstack/react-query';
+import { TanStackDevtools } from '@tanstack/react-devtools';
+import { aiDevtoolsPlugin } from '@tanstack/react-ai-devtools';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { getQueryClient } from './queryClient';
 import { useState } from 'react';
@@ -19,6 +21,10 @@ export function ReactQueryProvider({ children, dehydratedState }: ReactQueryProv
     <QueryClientProvider client={queryClient}>
       <HydrationBoundary state={dehydratedState}>{children}</HydrationBoundary>
       <ReactQueryDevtools initialIsOpen={false} />
+      <TanStackDevtools
+        plugins={[aiDevtoolsPlugin()]}
+        eventBusConfig={{ connectToServerBus: true }}
+      />
     </QueryClientProvider>
   );
 }
