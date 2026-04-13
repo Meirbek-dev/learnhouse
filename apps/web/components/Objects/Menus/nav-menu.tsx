@@ -202,25 +202,14 @@ export default function NavBar() {
               href={getAbsoluteUrl('/')}
               className="hover:bg-accent/60 flex items-center justify-center rounded-md p-2 transition-colors"
             >
-              {theme === 'dark' ? (
-                <Image
-                  src={platformLogoLightFull}
-                  alt={t('logoAlt')}
-                  width={100}
-                  style={{ height: 'auto' }}
-                  priority
-                  loading="eager"
-                />
-              ) : (
-                <Image
-                  src={platformLogoFull}
-                  alt={t('logoAlt')}
-                  width={100}
-                  style={{ height: 'auto' }}
-                  priority
-                  loading="eager"
-                />
-              )}{' '}
+              <Image
+                src={platformLogoFull}
+                alt={t('logoAlt')}
+                width={100}
+                style={{ height: 'auto' }}
+                priority
+                loading="eager"
+              />
             </Link>
 
             {/* Desktop Navigation */}
