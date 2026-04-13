@@ -7,6 +7,7 @@ import { BookCopy, Menu, Signpost, SquareLibrary, X } from 'lucide-react';
 import { LocaleSwitcher } from '@/components/Utils/LocaleSwitcher';
 import { SearchBar } from '@/components/Objects/Search/SearchBar';
 import platformLogoFull from '@public/platform_logo_full.svg';
+import platformLogoLightFull from '@public/platform_logo_light_full.svg';
 import { NAVBAR_HEIGHT } from '@/lib/constants';
 import { getAbsoluteUrl } from '@/services/config/config';
 import { Button } from '@/components/ui/button';
@@ -16,6 +17,7 @@ import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import Link from '@components/ui/AppLink';
 import Image from 'next/image';
+import { useTheme } from 'next-themes';
 
 interface NavigationLinkProps {
   href: string;
@@ -56,6 +58,7 @@ const NavigationLinkItem = ({ href, type }: NavigationLinkProps) => {
 };
 
 export default function NavBar() {
+  const { theme } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();
@@ -199,14 +202,25 @@ export default function NavBar() {
               href={getAbsoluteUrl('/')}
               className="hover:bg-accent/60 flex items-center justify-center rounded-md p-2 transition-colors"
             >
-              <Image
-                src={platformLogoFull}
-                alt={t('logoAlt')}
-                width={100}
-                style={{ height: 'auto' }}
-                priority
-                loading="eager"
-              />
+              {theme === 'dark' ? (
+                <Image
+                  src={platformLogoFull}
+                  alt={t('logoAlt')}
+                  width={100}
+                  style={{ height: 'auto' }}
+                  priority
+                  loading="eager"
+                />
+              ) : (
+                <Image
+                  src={platformLogoLightFull}
+                  alt={t('logoAlt')}
+                  width={100}
+                  style={{ height: 'auto' }}
+                  priority
+                  loading="eager"
+                />
+              )}{' '}
             </Link>
 
             {/* Desktop Navigation */}

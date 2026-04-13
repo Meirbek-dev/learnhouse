@@ -5,6 +5,7 @@ import { Eye } from 'lucide-react';
 import Link from '@components/ui/AppLink';
 import Image from 'next/image';
 import platformLogoDark from '@public/platform_logo.svg';
+import platformLogoLight from '@public/platform_logo_light.svg';
 import UserAvatar from '../../UserAvatar';
 import { Separator } from '@/components/ui/separator';
 import { EditorSaveIndicator } from './EditorSaveIndicator';
@@ -34,10 +35,18 @@ export function EditorHeader({
       <div className="flex min-w-0 items-center gap-2">
         <Link href="/">
           <Image
-            className="rounded-md"
+            className="hidden rounded-md dark:block"
             width={22}
             height={22}
             src={platformLogoDark}
+            alt="Ashyq Bilim logo"
+            style={{ height: 'auto' }}
+          />
+          <Image
+            className="rounded-md dark:hidden"
+            width={22}
+            height={22}
+            src={platformLogoLight}
             alt="Ashyq Bilim logo"
             style={{ height: 'auto' }}
           />

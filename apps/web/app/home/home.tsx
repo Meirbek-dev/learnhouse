@@ -3,6 +3,7 @@
 import { useSession } from '@/hooks/useSession';
 import { logout } from '@/services/auth/auth';
 import platformLogoFull from '@public/platform_logo_full.svg';
+import platformLogoLightFull from '@public/platform_logo_light_full.svg';
 import UserAvatar from '@components/Objects/UserAvatar';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
@@ -17,10 +18,20 @@ const HomeClient = () => {
         <Image
           quality={100}
           width={230}
+          src={platformLogoLightFull}
+          alt="Ashyq Bilim logo"
+          style={{ height: 'auto' }}
+          loading="eager"
+          className="dark:hidden"
+        />
+        <Image
+          quality={100}
+          width={230}
           src={platformLogoFull}
           alt="Ashyq Bilim logo"
           style={{ height: 'auto' }}
           loading="eager"
+          className="hidden dark:block"
         />
       </div>
 

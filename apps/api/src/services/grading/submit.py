@@ -361,7 +361,9 @@ def _persist_submission(
 ) -> None:
     draft.answers_json = answers_payload
     draft.grading_json = result.breakdown.model_dump()
-    draft.grading_json = build_effective_grading_breakdown(draft, db_session).model_dump()
+    draft.grading_json = build_effective_grading_breakdown(
+        draft, db_session
+    ).model_dump()
     draft.auto_score = auto_score
     draft.final_score = auto_score if not result.needs_manual_review else None
     draft.status = status

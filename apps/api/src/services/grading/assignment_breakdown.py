@@ -29,7 +29,9 @@ def build_effective_grading_breakdown(
         .where(AssignmentTask.activity_id == submission.activity_id)
         .order_by(AssignmentTask.id)
     ).all()
-    return build_assignment_breakdown(existing, submission.answers_json, assignment_tasks)
+    return build_assignment_breakdown(
+        existing, submission.answers_json, assignment_tasks
+    )
 
 
 def build_assignment_breakdown(
@@ -49,16 +51,20 @@ def build_assignment_breakdown(
     for task in assignment_tasks:
         task_uuid = task.assignment_task_uuid
         persisted_item = existing_items.pop(task_uuid, None)
-        normalized_answer = _normalize_assignment_answer(answers_by_task_uuid.get(task_uuid))
+        normalized_answer = _normalize_assignment_answer(
+            answers_by_task_uuid.get(task_uuid)
+        )
         max_score = float(task.max_grade_value or 0)
 
         if persisted_item is not None:
             merged_items.append(
                 persisted_item.model_copy(
                     update={
-                        'item_text': persisted_item.item_text or task.title,
-                        'max_score': persisted_item.max_score or max_score,
-                        'user_answer': persisted_item.user_answer if persisted_item.user_answer is not None else normalized_answer,
+                        "item_text": persisted_item.item_text or task.title,
+                        "max_score": persisted_item.max_score or max_score,
+                        "user_answer": persisted_item.user_answer
+                        if persisted_item.user_answer is not None
+                        else normalized_answer,
                     }
                 )
             )
@@ -71,7 +77,7 @@ def build_assignment_breakdown(
                 score=0.0,
                 max_score=max_score,
                 correct=None,
-                feedback='',
+                feedback="",
                 needs_manual_review=True,
                 user_answer=normalized_answer,
                 correct_answer=None,
@@ -82,7 +88,9 @@ def build_assignment_breakdown(
 
     return GradingBreakdown(
         items=merged_items,
-        needs_manual_review=any(item.needs_manual_review and not item.feedback for item in merged_items),
+        needs_manual_review=any(
+            item.needs_manual_review and not item.feedback for item in merged_items
+        ),
         auto_graded=False,
         feedback=existing.feedback,
     )
@@ -92,7 +100,7 @@ def _extract_assignment_answers(answers_json: object) -> dict[str, dict[str, Any
     if not isinstance(answers_json, dict):
         return {}
 
-    raw_tasks = answers_json.get('tasks', [])
+    raw_tasks = answers_json.get("tasks", [])
     if not isinstance(raw_tasks, list):
         return {}
 
@@ -100,29 +108,31 @@ def _extract_assignment_answers(answers_json: object) -> dict[str, dict[str, Any
     for raw_task in raw_tasks:
         if not isinstance(raw_task, dict):
             continue
-        task_uuid = raw_task.get('task_uuid')
+        task_uuid = raw_task.get("task_uuid")
         if isinstance(task_uuid, str) and task_uuid:
             answers[task_uuid] = raw_task
     return answers
 
 
-def _normalize_assignment_answer(raw_task_answer: dict[str, Any] | None) -> dict[str, Any] | None:
+def _normalize_assignment_answer(
+    raw_task_answer: dict[str, Any] | None,
+) -> dict[str, Any] | None:
     if raw_task_answer is None:
         return None
 
     normalized: dict[str, Any] = {}
 
-    content_type = raw_task_answer.get('content_type')
+    content_type = raw_task_answer.get("content_type")
     if isinstance(content_type, str) and content_type:
-        normalized['content_type'] = content_type
+        normalized["content_type"] = content_type
 
-    if 'file_key' in raw_task_answer:
-        normalized['file_key'] = raw_task_answer.get('file_key')
-    if 'text_content' in raw_task_answer:
-        normalized['text_content'] = raw_task_answer.get('text_content')
+    if "file_key" in raw_task_answer:
+        normalized["file_key"] = raw_task_answer.get("file_key")
+    if "text_content" in raw_task_answer:
+        normalized["text_content"] = raw_task_answer.get("text_content")
 
-    form_data = raw_task_answer.get('form_data')
+    form_data = raw_task_answer.get("form_data")
     if isinstance(form_data, dict):
-        normalized['form_data'] = form_data
+        normalized["form_data"] = form_data
 
     return normalized or raw_task_answer
