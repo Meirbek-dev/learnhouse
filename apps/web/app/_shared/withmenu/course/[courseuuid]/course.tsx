@@ -202,7 +202,7 @@ const CourseClient = (props: any) => {
             <CourseBreadcrumbs course={course} />
 
             {/* Page header */}
-            <div className="pb-8 pt-5">
+            <div className="pt-5 pb-8">
               <h1 className="text-3xl font-bold tracking-tight md:text-4xl">{course.name}</h1>
             </div>
 
@@ -222,7 +222,7 @@ const CourseClient = (props: any) => {
 
                   const mediaSwitcher = (
                     <div className="absolute top-3 right-3 z-10">
-                      <div className="flex overflow-hidden rounded-lg border border-border bg-card shadow-sm">
+                      <div className="border-border bg-card flex overflow-hidden rounded-lg border shadow-sm">
                         <button
                           type="button"
                           onClick={() => setActiveThumbnailType('image')}
@@ -236,7 +236,7 @@ const CourseClient = (props: any) => {
                           <ImageIcon size={11} />
                           {t('thumbnailTypeImage')}
                         </button>
-                        <div className="w-px bg-border" />
+                        <div className="bg-border w-px" />
                         <button
                           type="button"
                           onClick={() => setActiveThumbnailType('video')}
@@ -256,7 +256,7 @@ const CourseClient = (props: any) => {
 
                   if (showVideo && course.thumbnail_video) {
                     return (
-                      <div className="relative w-full overflow-hidden rounded-xl border border-border">
+                      <div className="border-border relative w-full overflow-hidden rounded-xl border">
                         {course.thumbnail_type === 'both' && mediaSwitcher}
                         <video
                           src={getCourseThumbnailMediaDirectory(course?.course_uuid, course?.thumbnail_video)}
@@ -273,7 +273,7 @@ const CourseClient = (props: any) => {
 
                   if (showImage && course.thumbnail_image) {
                     return (
-                      <div className="relative aspect-video w-full overflow-hidden rounded-xl border border-border bg-muted">
+                      <div className="border-border bg-muted relative aspect-video w-full overflow-hidden rounded-xl border">
                         <NextImage
                           src={getCourseThumbnailMediaDirectory(course?.course_uuid, course?.thumbnail_image)}
                           alt={t('courseThumbnailAlt')}
@@ -287,7 +287,7 @@ const CourseClient = (props: any) => {
                   }
 
                   return (
-                    <div className="relative aspect-video w-full overflow-hidden rounded-xl border border-border bg-muted">
+                    <div className="border-border bg-muted relative aspect-video w-full overflow-hidden rounded-xl border">
                       <NextImage
                         src="/empty_thumbnail.webp"
                         alt=""
@@ -325,12 +325,9 @@ const CourseClient = (props: any) => {
                 {learnings.length > 0 && learnings[0]?.text !== 'null' && (
                   <div>
                     <h2 className="mb-4 text-lg font-semibold tracking-tight">{t('whatYouWillLearn')}</h2>
-                    <div className="rounded-xl border border-border p-5">
+                    <div className="border-border rounded-xl border p-5">
                       <ul
-                        className={cn(
-                          'grid gap-x-8 gap-y-3',
-                          learnings.length > 4 ? 'sm:grid-cols-2' : 'grid-cols-1',
-                        )}
+                        className={cn('grid gap-x-8 gap-y-3', learnings.length > 4 ? 'sm:grid-cols-2' : 'grid-cols-1')}
                       >
                         {learnings.map((learning: any) => {
                           const learningText = typeof learning === 'string' ? learning : learning.text;
@@ -345,13 +342,13 @@ const CourseClient = (props: any) => {
                               key={learningId}
                               className="flex items-start gap-3"
                             >
-                              <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10">
+                              <span className="bg-primary/10 mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full">
                                 {learningEmoji ? (
                                   <span className="text-xs leading-none">{learningEmoji}</span>
                                 ) : (
                                   <Check
                                     size={11}
-                                    className="stroke-[2.5] text-primary"
+                                    className="text-primary stroke-[2.5]"
                                   />
                                 )}
                               </span>
@@ -361,7 +358,7 @@ const CourseClient = (props: any) => {
                                   href={href}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="ml-1 mt-0.5 shrink-0 text-muted-foreground transition-colors hover:text-foreground"
+                                  className="text-muted-foreground hover:text-foreground mt-0.5 ml-1 shrink-0 transition-colors"
                                   aria-label={t('linkTo', { learningText })}
                                 >
                                   <ArrowRight size={13} />
@@ -378,7 +375,7 @@ const CourseClient = (props: any) => {
                 {/* Course chapters */}
                 <div>
                   <h2 className="mb-4 text-lg font-semibold tracking-tight">{t('courseLessons')}</h2>
-                  <div className="overflow-hidden rounded-xl border border-border">
+                  <div className="border-border overflow-hidden rounded-xl border">
                     {course.chapters.map((chapter: any, idx: number) => {
                       const isExpanded = expandedChapters[chapter.chapter_uuid] ?? idx === 0;
                       return (
@@ -403,12 +400,12 @@ const CourseClient = (props: any) => {
                               />
                             }
                           >
-                            <span className="mr-4 w-5 shrink-0 text-center font-mono text-xs tabular-nums text-muted-foreground">
+                            <span className="text-muted-foreground mr-4 w-5 shrink-0 text-center font-mono text-xs tabular-nums">
                               {idx + 1}
                             </span>
                             <div className="flex min-w-0 flex-1 flex-col">
                               <h3 className="truncate text-sm font-semibold">{chapter.name}</h3>
-                              <span className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
+                              <span className="text-muted-foreground mt-0.5 flex items-center gap-1 text-xs">
                                 <Layers size={11} />
                                 {t('activitiesCount', { count: chapter.activities.length })}
                               </span>
@@ -422,7 +419,7 @@ const CourseClient = (props: any) => {
                             />
                           </CollapsibleTrigger>
                           <CollapsibleContent>
-                            <div className="border-t border-border">
+                            <div className="border-border border-t">
                               {chapter.activities.map((activity: any, actIdx: number) => {
                                 const done = isActivityDone(activity);
                                 const current = isActivityCurrent(activity);
@@ -447,7 +444,7 @@ const CourseClient = (props: any) => {
                                           />
                                         </div>
                                       ) : (
-                                        <div className="h-5 w-5 rounded-full border-2 border-border" />
+                                        <div className="border-border h-5 w-5 rounded-full border-2" />
                                       )}
                                     </div>
                                     {/* Activity info */}
@@ -464,13 +461,13 @@ const CourseClient = (props: any) => {
                                         {current && (
                                           <Badge
                                             variant="secondary"
-                                            className="shrink-0 animate-pulse bg-primary/10 text-xs text-primary"
+                                            className="bg-primary/10 text-primary shrink-0 animate-pulse text-xs"
                                           >
                                             {t('current')}
                                           </Badge>
                                         )}
                                       </div>
-                                      <div className="mt-0.5 flex items-center gap-1 text-muted-foreground">
+                                      <div className="text-muted-foreground mt-0.5 flex items-center gap-1">
                                         {activity.activity_type === 'TYPE_DYNAMIC' && <StickyNote size={11} />}
                                         {activity.activity_type === 'TYPE_VIDEO' && <Video size={11} />}
                                         {activity.activity_type === 'TYPE_DOCUMENT' && <File size={11} />}
@@ -482,7 +479,7 @@ const CourseClient = (props: any) => {
                                     {/* Arrow */}
                                     <ArrowRight
                                       size={13}
-                                      className="shrink-0 text-transparent transition-all duration-150 group-hover:translate-x-0.5 group-hover:text-muted-foreground"
+                                      className="group-hover:text-muted-foreground shrink-0 text-transparent transition-all duration-150 group-hover:translate-x-0.5"
                                     />
                                   </Link>
                                 );

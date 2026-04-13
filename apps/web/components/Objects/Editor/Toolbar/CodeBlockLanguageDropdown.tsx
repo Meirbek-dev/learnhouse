@@ -47,15 +47,15 @@ export function CodeBlockLanguageDropdown({ editor, language }: CodeBlockLanguag
     const nextLanguage = toCodeBlockLanguageAttribute(value);
 
     if (editor.isActive('codeBlock')) {
-      editor
-        .chain()
-        .focus()
-        .updateAttributes('codeBlock', { language: nextLanguage })
-        .run();
+      editor.chain().focus().updateAttributes('codeBlock', { language: nextLanguage }).run();
       return;
     }
 
-    editor.chain().focus().setCodeBlock(nextLanguage ? { language: nextLanguage } : undefined).run();
+    editor
+      .chain()
+      .focus()
+      .setCodeBlock(nextLanguage ? { language: nextLanguage } : undefined)
+      .run();
   };
 
   return (
@@ -89,9 +89,7 @@ export function CodeBlockLanguageDropdown({ editor, language }: CodeBlockLanguag
           value={activeLanguage}
           onValueChange={handleValueChange}
         >
-          <DropdownMenuRadioItem value={PLAIN_TEXT_CODE_BLOCK_LANGUAGE}>
-            {t('plainText')}
-          </DropdownMenuRadioItem>
+          <DropdownMenuRadioItem value={PLAIN_TEXT_CODE_BLOCK_LANGUAGE}>{t('plainText')}</DropdownMenuRadioItem>
           {CODE_BLOCK_LANGUAGE_VALUES.map((option) => (
             <DropdownMenuRadioItem
               key={option}

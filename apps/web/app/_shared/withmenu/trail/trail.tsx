@@ -10,7 +10,6 @@ import { useGamificationStore } from '@/stores/gamification';
 import { useTrailCurrent, useTrailLeaderboard } from '@/features/trail/hooks/useTrail';
 import { useTranslations } from 'next-intl';
 import { BookOpen } from 'lucide-react';
-import { Separator } from '@/components/ui/separator';
 
 const EMPTY_RECENT_TRANSACTIONS: any[] = [];
 

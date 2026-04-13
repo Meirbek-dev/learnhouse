@@ -6,7 +6,6 @@ import { useFormatter, useTranslations } from 'next-intl';
 import { useUserCertificates } from '@/features/certifications/hooks/useCertifications';
 import Link from '@components/ui/AppLink';
 import type React from 'react';
-import { Separator } from 'react-resizable-panels';
 
 const UserCertificates: React.FC = () => {
   const format = useFormatter();
