@@ -204,7 +204,7 @@ export default function NavBar() {
             >
               {theme === 'dark' ? (
                 <Image
-                  src={platformLogoFull}
+                  src={platformLogoLightFull}
                   alt={t('logoAlt')}
                   width={100}
                   style={{ height: 'auto' }}
@@ -213,7 +213,7 @@ export default function NavBar() {
                 />
               ) : (
                 <Image
-                  src={platformLogoLightFull}
+                  src={platformLogoFull}
                   alt={t('logoAlt')}
                   width={100}
                   style={{ height: 'auto' }}
